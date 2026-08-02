@@ -55,7 +55,8 @@
     "register": "Sign up",
     "inbox": "Inbox",
     "myRequests": "My requests",
-    "chat": "Chat"
+    "chat": "Chat",
+    "admin": "Admin"
   },
   "catalog": {
     "title": "Product catalog",
@@ -108,7 +109,7 @@
     "category": "Category",
     "unit": "Unit",
     "noUnit": "No unit",
-    "publish": "Publish in catalog",
+    "publish": "Submit for moderation",
     "createSubmit": "Create product",
     "saveSubmit": "Save changes",
     "pleaseWait": "Please wait…",
@@ -128,6 +129,14 @@
       "liter": "Liter",
       "bottle": "Bottle",
       "piece": "Piece"
+    },
+    "submitForReview": "Submit for moderation",
+    "moderationLabel": "Moderation",
+    "moderation": {
+      "draft": "Draft",
+      "pending": "Pending review",
+      "approved": "Approved",
+      "rejected": "Rejected"
     }
   },
   "rfq": {
@@ -190,6 +199,31 @@
       "completed": "Translated",
       "failed": "Translation failed",
       "none": "Original"
+    }
+  },
+  "admin": {
+    "title": "Moderation desk",
+    "subtitle": "Review product listings before they appear in the public catalog.",
+    "empty": "No products in this queue.",
+    "note": "Note",
+    "rejectNote": "Rejection note",
+    "rejectNotePlaceholder": "Missing origin details, unclear photos…",
+    "approve": "Approve",
+    "reject": "Reject",
+    "pleaseWait": "Please wait…",
+    "genericError": "Action failed. Please try again.",
+    "stats": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "farms": "Farms",
+      "users": "Users"
+    },
+    "tabs": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "draft": "Drafts"
     }
   }
 }

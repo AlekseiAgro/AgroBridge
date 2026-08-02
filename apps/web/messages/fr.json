@@ -55,7 +55,8 @@
     "register": "Inscription",
     "inbox": "Boîte de réception",
     "myRequests": "Mes demandes",
-    "chat": "Chat"
+    "chat": "Chat",
+    "admin": "Admin"
   },
   "catalog": {
     "title": "Catalogue de produits",
@@ -108,7 +109,7 @@
     "category": "Catégorie",
     "unit": "Unité",
     "noUnit": "Sans unité",
-    "publish": "Publier dans le catalogue",
+    "publish": "Soumettre à la modération",
     "createSubmit": "Créer",
     "saveSubmit": "Enregistrer",
     "pleaseWait": "Veuillez patienter…",
@@ -128,6 +129,14 @@
       "liter": "Litre",
       "bottle": "Bouteille",
       "piece": "Pièce"
+    },
+    "submitForReview": "Soumettre à la modération",
+    "moderationLabel": "Modération",
+    "moderation": {
+      "draft": "Brouillon",
+      "pending": "En revue",
+      "approved": "Approuvé",
+      "rejected": "Refusé"
     }
   },
   "rfq": {
@@ -190,6 +199,31 @@
       "completed": "Traduit",
       "failed": "Échec de traduction",
       "none": "Original"
+    }
+  },
+  "admin": {
+    "title": "Modération",
+    "subtitle": "Vérifiez les annonces avant publication dans le catalogue.",
+    "empty": "Aucun produit dans cette file.",
+    "note": "Note",
+    "rejectNote": "Motif du refus",
+    "rejectNotePlaceholder": "Informations manquantes…",
+    "approve": "Approuver",
+    "reject": "Refuser",
+    "pleaseWait": "Veuillez patienter…",
+    "genericError": "Action impossible.",
+    "stats": {
+      "pending": "En attente",
+      "approved": "Approuvés",
+      "rejected": "Refusés",
+      "farms": "Fermes",
+      "users": "Utilisateurs"
+    },
+    "tabs": {
+      "pending": "En attente",
+      "approved": "Approuvés",
+      "rejected": "Refusés",
+      "draft": "Brouillons"
     }
   }
 }

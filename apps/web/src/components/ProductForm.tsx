@@ -92,8 +92,14 @@ export function ProductForm({ mode, initial }: Props) {
       </label>
       <label className="role-option">
         <input name="isPublished" type="checkbox" defaultChecked={initial?.isPublished ?? false} />
-        <span>{t('publish')}</span>
+        <span>{t('submitForReview')}</span>
       </label>
+      {initial?.moderationStatus ? (
+        <p className="product-list__meta">
+          {t('moderationLabel')}: {t(`moderation.${initial.moderationStatus}`)}
+          {initial.moderationNote ? ` — ${initial.moderationNote}` : ''}
+        </p>
+      ) : null}
       {error ? <p className="form-error">{error}</p> : null}
       <button className="button button--primary" type="submit" disabled={pending}>
         {pending ? t('pleaseWait') : mode === 'create' ? t('createSubmit') : t('saveSubmit')}

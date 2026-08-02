@@ -55,7 +55,8 @@
     "register": "Registrarse",
     "inbox": "Bandeja de entrada",
     "myRequests": "Mis solicitudes",
-    "chat": "Chat"
+    "chat": "Chat",
+    "admin": "Admin"
   },
   "catalog": {
     "title": "Catálogo de productos",
@@ -108,7 +109,7 @@
     "category": "Categoría",
     "unit": "Unidad",
     "noUnit": "Sin unidad",
-    "publish": "Publicar en el catálogo",
+    "publish": "Enviar a moderación",
     "createSubmit": "Crear",
     "saveSubmit": "Guardar",
     "pleaseWait": "Espera…",
@@ -128,6 +129,14 @@
       "liter": "Litro",
       "bottle": "Botella",
       "piece": "Pieza"
+    },
+    "submitForReview": "Enviar a moderación",
+    "moderationLabel": "Moderación",
+    "moderation": {
+      "draft": "Borrador",
+      "pending": "En revisión",
+      "approved": "Aprobado",
+      "rejected": "Rechazado"
     }
   },
   "rfq": {
@@ -190,6 +199,31 @@
       "completed": "Traducido",
       "failed": "Error de traducción",
       "none": "Original"
+    }
+  },
+  "admin": {
+    "title": "Moderación",
+    "subtitle": "Revisa los anuncios antes de publicarlos en el catálogo.",
+    "empty": "No hay productos en esta cola.",
+    "note": "Nota",
+    "rejectNote": "Motivo del rechazo",
+    "rejectNotePlaceholder": "Faltan datos…",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "pleaseWait": "Espera…",
+    "genericError": "La acción falló.",
+    "stats": {
+      "pending": "Pendientes",
+      "approved": "Aprobados",
+      "rejected": "Rechazados",
+      "farms": "Granjas",
+      "users": "Usuarios"
+    },
+    "tabs": {
+      "pending": "Pendientes",
+      "approved": "Aprobados",
+      "rejected": "Rechazados",
+      "draft": "Borradores"
     }
   }
 }

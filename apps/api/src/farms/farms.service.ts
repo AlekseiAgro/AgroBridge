@@ -4,11 +4,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { FarmDetail, FarmSummary } from '@agrobridge/shared';
+import type { FarmDetail, FarmSummary, ModerationStatus } from '@agrobridge/shared';
+import { ModerationStatus as PrismaModerationStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
+
+const publicProductWhere = {
+  isPublished: true,
+  moderationStatus: PrismaModerationStatus.approved,
+};
 
 @Injectable()
 export class FarmsService {
@@ -20,7 +26,7 @@ export class FarmsService {
       include: {
         owner: { select: { id: true, displayName: true } },
         _count: {
-          select: { products: { where: { isPublished: true } } },
+          select: { products: { where: publicProductWhere } },
         },
       },
     });
@@ -34,7 +40,7 @@ export class FarmsService {
       include: {
         owner: { select: { id: true, displayName: true } },
         products: {
-          where: { isPublished: true },
+          where: publicProductWhere,
           orderBy: { updatedAt: 'desc' },
           select: {
             id: true,
@@ -43,11 +49,13 @@ export class FarmsService {
             category: true,
             unit: true,
             isPublished: true,
+            moderationStatus: true,
+            moderationNote: true,
             farmId: true,
           },
         },
         _count: {
-          select: { products: { where: { isPublished: true } } },
+          select: { products: { where: publicProductWhere } },
         },
       },
     });
@@ -66,6 +74,8 @@ export class FarmsService {
         category: product.category,
         unit: product.unit,
         isPublished: product.isPublished,
+        moderationStatus: product.moderationStatus as ModerationStatus,
+        moderationNote: product.moderationNote,
         farm: {
           id: farm.id,
           name: farm.name,
@@ -91,6 +101,8 @@ export class FarmsService {
             category: true,
             unit: true,
             isPublished: true,
+            moderationStatus: true,
+            moderationNote: true,
           },
         },
         _count: { select: { products: true } },
@@ -111,6 +123,8 @@ export class FarmsService {
         category: product.category,
         unit: product.unit,
         isPublished: product.isPublished,
+        moderationStatus: product.moderationStatus as ModerationStatus,
+        moderationNote: product.moderationNote,
         farm: {
           id: farm.id,
           name: farm.name,

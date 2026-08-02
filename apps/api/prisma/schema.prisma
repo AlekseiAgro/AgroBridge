@@ -43,6 +43,13 @@ enum CurrencyCode {
   USD
 }
 
+enum ModerationStatus {
+  draft
+  pending
+  approved
+  rejected
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -58,6 +65,7 @@ model User {
   conversationsAsBuyer  Conversation[] @relation("BuyerConversations")
   messages              Message[]
   rfqsAsBuyer           Rfq[]           @relation("BuyerRfqs")
+  moderatedProducts     Product[]       @relation("ProductModerator")
 }
 
 model Farm {
@@ -75,21 +83,28 @@ model Farm {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  farmId      String
-  title       String
-  description String?
-  category    String?
-  unit        String?
-  isPublished Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               String           @id @default(cuid())
+  farmId           String
+  title            String
+  description      String?
+  category         String?
+  unit             String?
+  isPublished      Boolean          @default(false)
+  moderationStatus ModerationStatus @default(draft)
+  moderationNote   String?
+  moderatedAt      DateTime?
+  moderatedById    String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
-  farm Farm  @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  rfqs Rfq[]
+  farm        Farm   @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  moderatedBy User?  @relation("ProductModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  rfqs        Rfq[]
 
   @@index([farmId])
   @@index([isPublished])
+  @@index([moderationStatus])
+  @@index([isPublished, moderationStatus])
 }
 
 model Rfq {

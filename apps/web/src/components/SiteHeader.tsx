@@ -25,6 +25,7 @@ export async function SiteHeader() {
           <Link href="/dashboard/rfqs">{t('myRequests')}</Link>
         ) : null}
         {user ? <Link href="/dashboard/chat">{t('chat')}</Link> : null}
+        {user?.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
         {user ? (
           <Link href="/account">{t('account')}</Link>
         ) : (

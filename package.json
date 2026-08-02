@@ -9,6 +9,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "db:generate": "pnpm --filter @agrobridge/api db:generate",
     "db:migrate": "pnpm --filter @agrobridge/api db:migrate",
+    "db:seed": "pnpm --filter @agrobridge/api db:seed",
     "db:studio": "pnpm --filter @agrobridge/api db:studio"
   },
   "devDependencies": {

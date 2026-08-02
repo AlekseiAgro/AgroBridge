@@ -508,6 +508,59 @@ body {
   gap: 0.75rem;
 }
 
+.admin-stats {
+  margin: 0 0 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-stats div {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  background: var(--surface);
+}
+
+.admin-stats dt {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.admin-stats dd {
+  margin: 0.25rem 0 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-tab {
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.55rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--brand-deep);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.admin-tab--active {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+}
+
+.moderation-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
 @media (max-width: 640px) {
   .home__hero {
     margin-top: 8vh;
@@ -539,5 +592,9 @@ body {
   .site-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

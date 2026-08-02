@@ -62,10 +62,11 @@ export default async function DashboardProductsPage({ params }: Props) {
                 <div>
                   <p className="product-list__title">{product.title}</p>
                   <p className="product-list__meta">
-                    {product.isPublished ? t('published') : t('draft')}
+                    {t(`moderation.${product.moderationStatus}`)}
                     {product.category
                       ? ` · ${tc(`categories.${product.category as 'fruits'}`)}`
                       : ''}
+                    {product.moderationNote ? ` · ${product.moderationNote}` : ''}
                   </p>
                 </div>
                 <div className="product-list__actions">

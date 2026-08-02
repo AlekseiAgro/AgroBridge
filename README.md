@@ -105,8 +105,20 @@ Statuses: `pending` → `offered` → `accepted` | `declined` (or `cancelled` wh
 - Providers: `TRANSLATION_PROVIDER=mock` (default) or `openai` (+ `OPENAI_API_KEY`)
 - UI shows translation by default with “Show original”
 
+## Admin moderation (current step)
+
+- Farmer submits a product for review (`Submit for moderation`)
+- Statuses: `draft` → `pending` → `approved` | `rejected`
+- Public catalog shows only **approved + published** products
+- Admin desk: `/dashboard/admin`
+- Seed admin user:
+
+```bash
+pnpm --filter @agrobridge/api db:seed
+# default: admin@agrobridge.local / ChangeMeAdmin1
+```
+
 ## Next implementation steps
 
-1. Admin moderation
-2. Product photos / object storage
-3. Email notifications
+1. Product photos / object storage
+2. Email notifications

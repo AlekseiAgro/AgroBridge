@@ -40,6 +40,8 @@ export type FarmDetail = FarmSummary & {
   products: ProductSummary[];
 };
 
+import type { ModerationStatus } from './moderation';
+
 export type ProductSummary = {
   id: string;
   title: string;
@@ -47,6 +49,8 @@ export type ProductSummary = {
   category: string | null;
   unit: string | null;
   isPublished: boolean;
+  moderationStatus: ModerationStatus;
+  moderationNote: string | null;
   farm: {
     id: string;
     name: string;

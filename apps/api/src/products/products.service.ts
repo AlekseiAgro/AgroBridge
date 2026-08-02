@@ -3,13 +3,18 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { ProductDetail, ProductSummary } from '@agrobridge/shared';
-import { Prisma } from '@prisma/client';
+import type { ModerationStatus, ProductDetail, ProductSummary } from '@agrobridge/shared';
+import { ModerationStatus as PrismaModerationStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CatalogQueryDto } from './dto/catalog-query.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+
+const publicProductWhere: Prisma.ProductWhereInput = {
+  isPublished: true,
+  moderationStatus: PrismaModerationStatus.approved,
+};
 
 @Injectable()
 export class ProductsService {
@@ -17,7 +22,7 @@ export class ProductsService {
 
   async catalog(query: CatalogQueryDto): Promise<ProductSummary[]> {
     const where: Prisma.ProductWhereInput = {
-      isPublished: true,
+      ...publicProductWhere,
     };
 
     if (query.category) {
@@ -76,7 +81,10 @@ export class ProductsService {
       viewer &&
       (viewer.role === 'admin' || product.farm.ownerId === viewer.id);
 
-    if (!product.isPublished && !isOwner) {
+    const isPublic =
+      product.isPublished && product.moderationStatus === PrismaModerationStatus.approved;
+
+    if (!isPublic && !isOwner) {
       throw new NotFoundException('Product not found');
     }
 
@@ -103,6 +111,7 @@ export class ProductsService {
   async create(user: AuthenticatedUser, dto: CreateProductDto): Promise<ProductDetail> {
     this.assertFarmer(user);
     const farm = await this.requireFarm(user.id);
+    const isPublished = dto.isPublished ?? false;
 
     const product = await this.prisma.product.create({
       data: {
@@ -111,7 +120,11 @@ export class ProductsService {
         description: dto.description?.trim() || null,
         category: dto.category || null,
         unit: dto.unit || null,
-        isPublished: dto.isPublished ?? false,
+        isPublished,
+        moderationStatus: isPublished
+          ? PrismaModerationStatus.pending
+          : PrismaModerationStatus.draft,
+        moderationNote: null,
       },
       include: {
         farm: {
@@ -131,6 +144,36 @@ export class ProductsService {
     this.assertFarmer(user);
     const product = await this.requireOwnedProduct(user.id, id);
 
+    const nextPublished = dto.isPublished ?? product.isPublished;
+    const contentChanged =
+      (dto.title !== undefined && dto.title.trim() !== product.title) ||
+      (dto.description !== undefined &&
+        (dto.description.trim() || null) !== product.description) ||
+      (dto.category !== undefined && (dto.category || null) !== product.category) ||
+      (dto.unit !== undefined && (dto.unit || null) !== product.unit);
+
+    let moderationStatus = product.moderationStatus;
+    let moderationNote = product.moderationNote;
+    let moderatedAt = product.moderatedAt;
+    let moderatedById = product.moderatedById;
+
+    if (!nextPublished) {
+      moderationStatus = PrismaModerationStatus.draft;
+      moderationNote = null;
+      moderatedAt = null;
+      moderatedById = null;
+    } else if (
+      !product.isPublished ||
+      contentChanged ||
+      product.moderationStatus === PrismaModerationStatus.rejected ||
+      product.moderationStatus === PrismaModerationStatus.draft
+    ) {
+      moderationStatus = PrismaModerationStatus.pending;
+      moderationNote = null;
+      moderatedAt = null;
+      moderatedById = null;
+    }
+
     const updated = await this.prisma.product.update({
       where: { id: product.id },
       data: {
@@ -139,7 +182,11 @@ export class ProductsService {
           dto.description === undefined ? undefined : dto.description.trim() || null,
         category: dto.category === undefined ? undefined : dto.category || null,
         unit: dto.unit === undefined ? undefined : dto.unit || null,
-        isPublished: dto.isPublished,
+        isPublished: nextPublished,
+        moderationStatus,
+        moderationNote,
+        moderatedAt,
+        moderatedById,
       },
       include: {
         farm: {
@@ -192,6 +239,8 @@ export class ProductsService {
     category: string | null;
     unit: string | null;
     isPublished: boolean;
+    moderationStatus: PrismaModerationStatus;
+    moderationNote: string | null;
     farm: { id: string; name: string; region: string | null };
   }): ProductSummary {
     return {
@@ -201,6 +250,8 @@ export class ProductsService {
       category: product.category,
       unit: product.unit,
       isPublished: product.isPublished,
+      moderationStatus: product.moderationStatus as ModerationStatus,
+      moderationNote: product.moderationNote,
       farm: product.farm,
     };
   }
@@ -212,6 +263,8 @@ export class ProductsService {
     category: string | null;
     unit: string | null;
     isPublished: boolean;
+    moderationStatus: PrismaModerationStatus;
+    moderationNote: string | null;
     createdAt: Date;
     updatedAt: Date;
     farm: { id: string; name: string; region: string | null };

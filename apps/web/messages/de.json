@@ -55,7 +55,8 @@
     "register": "Registrieren",
     "inbox": "Posteingang",
     "myRequests": "Meine Anfragen",
-    "chat": "Chat"
+    "chat": "Chat",
+    "admin": "Admin"
   },
   "catalog": {
     "title": "Produktkatalog",
@@ -108,7 +109,7 @@
     "category": "Kategorie",
     "unit": "Einheit",
     "noUnit": "Keine Einheit",
-    "publish": "Im Katalog veröffentlichen",
+    "publish": "Zur Moderation einreichen",
     "createSubmit": "Erstellen",
     "saveSubmit": "Speichern",
     "pleaseWait": "Bitte warten…",
@@ -128,6 +129,14 @@
       "liter": "Liter",
       "bottle": "Flasche",
       "piece": "Stück"
+    },
+    "submitForReview": "Zur Moderation einreichen",
+    "moderationLabel": "Moderation",
+    "moderation": {
+      "draft": "Entwurf",
+      "pending": "In Prüfung",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt"
     }
   },
   "rfq": {
@@ -190,6 +199,31 @@
       "completed": "Übersetzt",
       "failed": "Übersetzung fehlgeschlagen",
       "none": "Original"
+    }
+  },
+  "admin": {
+    "title": "Moderation",
+    "subtitle": "Prüfen Sie Angebote, bevor sie im Katalog erscheinen.",
+    "empty": "Keine Produkte in dieser Warteschlange.",
+    "note": "Hinweis",
+    "rejectNote": "Ablehnungsgrund",
+    "rejectNotePlaceholder": "Angaben unvollständig…",
+    "approve": "Genehmigen",
+    "reject": "Ablehnen",
+    "pleaseWait": "Bitte warten…",
+    "genericError": "Aktion fehlgeschlagen.",
+    "stats": {
+      "pending": "Offen",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "farms": "Betriebe",
+      "users": "Nutzer"
+    },
+    "tabs": {
+      "pending": "Offen",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "draft": "Entwürfe"
     }
   }
 }

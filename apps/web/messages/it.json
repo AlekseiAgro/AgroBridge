@@ -55,7 +55,8 @@
     "register": "Registrati",
     "inbox": "Posta in arrivo",
     "myRequests": "Le mie richieste",
-    "chat": "Chat"
+    "chat": "Chat",
+    "admin": "Admin"
   },
   "catalog": {
     "title": "Catalogo prodotti",
@@ -108,7 +109,7 @@
     "category": "Categoria",
     "unit": "Unità",
     "noUnit": "Nessuna unità",
-    "publish": "Pubblica nel catalogo",
+    "publish": "Invia alla moderazione",
     "createSubmit": "Crea",
     "saveSubmit": "Salva",
     "pleaseWait": "Attendere…",
@@ -128,6 +129,14 @@
       "liter": "Litro",
       "bottle": "Bottiglia",
       "piece": "Pezzo"
+    },
+    "submitForReview": "Invia alla moderazione",
+    "moderationLabel": "Moderazione",
+    "moderation": {
+      "draft": "Bozza",
+      "pending": "In revisione",
+      "approved": "Approvato",
+      "rejected": "Rifiutato"
     }
   },
   "rfq": {
@@ -190,6 +199,31 @@
       "completed": "Tradotto",
       "failed": "Traduzione non riuscita",
       "none": "Originale"
+    }
+  },
+  "admin": {
+    "title": "Moderazione",
+    "subtitle": "Controlla gli annunci prima della pubblicazione nel catalogo.",
+    "empty": "Nessun prodotto in questa coda.",
+    "note": "Nota",
+    "rejectNote": "Motivo del rifiuto",
+    "rejectNotePlaceholder": "Dettagli mancanti…",
+    "approve": "Approva",
+    "reject": "Rifiuta",
+    "pleaseWait": "Attendere…",
+    "genericError": "Azione non riuscita.",
+    "stats": {
+      "pending": "In attesa",
+      "approved": "Approvati",
+      "rejected": "Rifiutati",
+      "farms": "Aziende",
+      "users": "Utenti"
+    },
+    "tabs": {
+      "pending": "In attesa",
+      "approved": "Approvati",
+      "rejected": "Rifiutati",
+      "draft": "Bozze"
     }
   }
 }

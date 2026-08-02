@@ -32,6 +32,14 @@
 - **Conversation / Message** — 1:1 chat.
 - **MessageTranslation** — cached AI translation per target locale; original text remains source of truth.
 
+## Admin moderation
+
+- `Product.moderationStatus`: `draft | pending | approved | rejected`
+- Submitting for publication sets `pending`; catalog requires `approved`
+- Content changes on a published listing return it to `pending`
+- Admin API under `/api/admin/*` (role `admin` only)
+- Admin account is seeded via `prisma/seed.ts` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`)
+
 ## RFQ / offer flow
 
 - Buyer creates an `Rfq` against a published product.
