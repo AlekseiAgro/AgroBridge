@@ -1,4 +1,4 @@
-export const SUPPORT_EMAIL = 'support@agrobgid.ge';
+export const SUPPORT_EMAIL = 'support@agrobrid.ge';
 
 export type SupportRequestPayload = {
   name: string;
