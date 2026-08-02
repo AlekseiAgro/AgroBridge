@@ -119,8 +119,7 @@
     "filtersHint": "Die Suche gilt für alle Kategorien und Regionen. Kategorie und Region sind optionale Filter.",
     "searchPlaceholder": "Produktname oder Beschreibung",
     "availableQuantity": "Verfügbare Menge",
-    "sellerRating": "Verkäuferbewertung",
-    "seller": "Verkäufer"
+    "sellerRating": "Verkäuferbewertung"
   },
   "farm": {
     "createTitle": "Betriebsprofil erstellen",

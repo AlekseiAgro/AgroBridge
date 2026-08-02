@@ -229,12 +229,7 @@ export class FarmsService {
         isPrimary: boolean;
       }>;
     },
-    farm: {
-      id: string;
-      name: string;
-      region: string | null;
-      owner: { id: string; displayName: string | null };
-    },
+    farm: { id: string; name: string; region: string | null },
     sellerRating?: RatingSummary | null,
   ) {
     return {
@@ -264,10 +259,6 @@ export class FarmsService {
         name: farm.name,
         region: farm.region,
         sellerRating: sellerRating ?? { average: null, count: 0 },
-        owner: {
-          id: farm.owner.id,
-          displayName: farm.owner.displayName,
-        },
       },
     };
   }

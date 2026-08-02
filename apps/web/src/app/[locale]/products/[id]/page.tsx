@@ -51,34 +51,20 @@ export default async function ProductDetailPage({ params }: Props) {
           <Link href="/catalog">{tc('title')}</Link>
         </p>
         <h1>{product.title}</h1>
-        <div className="product-list__seller product-list__seller--detail">
-          <div className="product-list__seller-main">
-            <span className="product-list__seller-label">{tc('seller')}</span>
-            <Link href={`/farms/${product.farm.id}`} className="product-list__seller-name">
-              {product.farm.name}
-            </Link>
-            {product.farm.owner?.displayName ? (
-              <Link
-                href={`/users/${product.farm.owner.id}`}
-                className="product-list__seller-person"
-              >
-                {product.farm.owner.displayName}
-              </Link>
-            ) : null}
-          </div>
-          <div className="product-list__seller-rating">
-            <RatingStars
-              value={product.farm.sellerRating?.average ?? null}
-              count={product.farm.sellerRating?.count ?? 0}
-              size="sm"
-            />
-          </div>
+        <p className="page__subtitle">
+          <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
+          {product.farm.region
+            ? ` · ${formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region}`
+            : ''}
+        </p>
+        <div className="product-list__rating product-list__rating--detail">
+          <span className="product-list__rating-label">{tc('sellerRating')}</span>
+          <RatingStars
+            value={product.farm.sellerRating?.average ?? null}
+            count={product.farm.sellerRating?.count ?? 0}
+            size="sm"
+          />
         </div>
-        {product.farm.region ? (
-          <p className="page__subtitle">
-            {formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region}
-          </p>
-        ) : null}
 
         {product.images.length > 0 ? (
           <div className="product-gallery">

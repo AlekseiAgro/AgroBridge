@@ -119,8 +119,7 @@
     "filtersHint": "La recherche porte sur toutes les catégories et régions. La catégorie et la région sont facultatives.",
     "searchPlaceholder": "Nom ou description du produit",
     "availableQuantity": "Quantité disponible",
-    "sellerRating": "Note du vendeur",
-    "seller": "Vendeur"
+    "sellerRating": "Note du vendeur"
   },
   "farm": {
     "createTitle": "Créer le profil de ferme",
