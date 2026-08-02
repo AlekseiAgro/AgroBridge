@@ -42,6 +42,27 @@ export type FarmDetail = FarmSummary & {
 
 import type { ModerationStatus } from './moderation';
 
+export const PRODUCT_IMAGE_MAX_COUNT = 8;
+export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+export const PRODUCT_IMAGE_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+] as const;
+
+export type ProductImageMimeType = (typeof PRODUCT_IMAGE_MIME_TYPES)[number];
+
+export function isProductImageMimeType(value: string): value is ProductImageMimeType {
+  return (PRODUCT_IMAGE_MIME_TYPES as readonly string[]).includes(value);
+}
+
+export type ProductImage = {
+  id: string;
+  url: string;
+  sortOrder: number;
+  isPrimary: boolean;
+};
+
 export type ProductSummary = {
   id: string;
   title: string;
@@ -51,6 +72,7 @@ export type ProductSummary = {
   isPublished: boolean;
   moderationStatus: ModerationStatus;
   moderationNote: string | null;
+  images: ProductImage[];
   farm: {
     id: string;
     name: string;

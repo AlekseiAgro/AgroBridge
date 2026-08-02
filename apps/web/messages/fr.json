@@ -137,6 +137,20 @@
       "pending": "En revue",
       "approved": "Approuvé",
       "rejected": "Refusé"
+    },
+    "images": {
+      "title": "Photos",
+      "subtitle": "Ajoutez jusqu’à {max} photos (JPEG, PNG ou WebP, 5 Mo max).",
+      "upload": "Téléverser une photo",
+      "empty": "Aucune photo pour le moment.",
+      "primary": "Principale",
+      "setPrimary": "Définir comme principale",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer cette photo ?",
+      "uploadError": "Impossible de téléverser la photo.",
+      "deleteError": "Impossible de supprimer la photo.",
+      "primaryError": "Impossible de mettre à jour la photo principale.",
+      "maxReached": "Limite de {max} photos atteinte."
     }
   },
   "rfq": {

@@ -137,6 +137,20 @@
       "pending": "In Prüfung",
       "approved": "Genehmigt",
       "rejected": "Abgelehnt"
+    },
+    "images": {
+      "title": "Fotos",
+      "subtitle": "Fügen Sie bis zu {max} Fotos hinzu (JPEG, PNG oder WebP, max. 5 MB).",
+      "upload": "Foto hochladen",
+      "empty": "Noch keine Fotos.",
+      "primary": "Hauptfoto",
+      "setPrimary": "Als Hauptfoto setzen",
+      "delete": "Löschen",
+      "deleteConfirm": "Dieses Foto löschen?",
+      "uploadError": "Foto konnte nicht hochgeladen werden.",
+      "deleteError": "Foto konnte nicht gelöscht werden.",
+      "primaryError": "Hauptfoto konnte nicht aktualisiert werden.",
+      "maxReached": "Maximal {max} Fotos erreicht."
     }
   },
   "rfq": {

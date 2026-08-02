@@ -70,6 +70,15 @@
 5. Recipient sees translation by default and can toggle the original.
 6. Web polls the conversation every few seconds for new messages (WebSockets later).
 
+## Product images
+
+- `ProductImage` rows store `url`, storage `key`, `sortOrder`, and `isPrimary`.
+- Upload is multipart (`file`); allowed types: JPEG, PNG, WebP; max 5MB; max 8 images per product.
+- `StorageService` abstracts drivers:
+  - `local` — writes under `STORAGE_LOCAL_DIR` and serves via `/api/uploads/...`
+  - `s3` — AWS S3 / R2 (`S3_*` env vars); public URLs from `STORAGE_PUBLIC_BASE_URL`
+- Image changes on a published product reset moderation to `pending`.
+
 ## Out of scope for early MVP
 
 - Native mobile apps

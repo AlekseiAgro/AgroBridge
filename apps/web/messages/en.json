@@ -137,6 +137,20 @@
       "pending": "Pending review",
       "approved": "Approved",
       "rejected": "Rejected"
+    },
+    "images": {
+      "title": "Photos",
+      "subtitle": "Add up to {max} photos (JPEG, PNG, or WebP, max 5MB each).",
+      "upload": "Upload photo",
+      "empty": "No photos yet.",
+      "primary": "Primary",
+      "setPrimary": "Set as primary",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this photo?",
+      "uploadError": "Could not upload the photo.",
+      "deleteError": "Could not delete the photo.",
+      "primaryError": "Could not update the primary photo.",
+      "maxReached": "Maximum of {max} photos reached."
     }
   },
   "rfq": {

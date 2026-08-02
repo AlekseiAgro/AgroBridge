@@ -1,4 +1,4 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 
 describe('ProductsService', () => {
@@ -13,13 +13,28 @@ describe('ProductsService', () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    productImage: {
+      count: jest.fn(),
+      findMany: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+    },
+    $transaction: jest.fn(),
+  };
+
+  const storage = {
+    upload: jest.fn(),
+    delete: jest.fn(),
   };
 
   let service: ProductsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new ProductsService(prisma as never);
+    service = new ProductsService(prisma as never, storage as never);
   });
 
   it('requires a farm before creating products', async () => {
@@ -49,5 +64,33 @@ describe('ProductsService', () => {
         displayName: null,
       }),
     ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('rejects unsupported image types', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      farm: { ownerId: 'u1' },
+      isPublished: false,
+      moderationStatus: 'draft',
+    });
+
+    await expect(
+      service.addImage(
+        {
+          id: 'u1',
+          email: 'f@example.com',
+          role: 'farmer',
+          locale: 'en',
+          displayName: null,
+        },
+        'p1',
+        {
+          mimetype: 'image/gif',
+          size: 1000,
+          buffer: Buffer.from('x'),
+          originalname: 'x.gif',
+        } as Express.Multer.File,
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

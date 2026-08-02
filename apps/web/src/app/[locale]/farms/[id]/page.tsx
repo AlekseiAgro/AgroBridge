@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
+import { getPrimaryProductImage } from '@/lib/product-image';
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
@@ -41,18 +42,29 @@ export default async function FarmDetailPage({ params }: Props) {
           <p className="empty-state">{t('noProducts')}</p>
         ) : (
           <ul className="product-list">
-            {farm.products.map((product) => (
-              <li key={product.id} className="product-list__item">
-                <Link href={`/products/${product.id}`} className="product-list__title">
-                  {product.title}
-                </Link>
-                <p className="product-list__meta">
-                  {product.category
-                    ? tc(`categories.${product.category as 'fruits'}`)
-                    : tc('allCategories')}
-                </p>
+            {farm.products.map((product) => {
+              const image = getPrimaryProductImage(product.images);
+              return (
+              <li key={product.id} className="product-list__item product-list__item--with-media">
+                {image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={image.url} alt="" className="product-list__media" />
+                ) : (
+                  <div className="product-list__media product-list__media--empty" aria-hidden />
+                )}
+                <div>
+                  <Link href={`/products/${product.id}`} className="product-list__title">
+                    {product.title}
+                  </Link>
+                  <p className="product-list__meta">
+                    {product.category
+                      ? tc(`categories.${product.category as 'fruits'}`)
+                      : tc('allCategories')}
+                  </p>
+                </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </main>

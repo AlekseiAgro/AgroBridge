@@ -52,6 +52,15 @@ export class FarmsService {
             moderationStatus: true,
             moderationNote: true,
             farmId: true,
+            images: {
+              orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
+              select: {
+                id: true,
+                url: true,
+                sortOrder: true,
+                isPrimary: true,
+              },
+            },
           },
         },
         _count: {
@@ -76,6 +85,7 @@ export class FarmsService {
         isPublished: product.isPublished,
         moderationStatus: product.moderationStatus as ModerationStatus,
         moderationNote: product.moderationNote,
+        images: product.images,
         farm: {
           id: farm.id,
           name: farm.name,
@@ -103,6 +113,15 @@ export class FarmsService {
             isPublished: true,
             moderationStatus: true,
             moderationNote: true,
+            images: {
+              orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
+              select: {
+                id: true,
+                url: true,
+                sortOrder: true,
+                isPrimary: true,
+              },
+            },
           },
         },
         _count: { select: { products: true } },
@@ -125,6 +144,7 @@ export class FarmsService {
         isPublished: product.isPublished,
         moderationStatus: product.moderationStatus as ModerationStatus,
         moderationNote: product.moderationNote,
+        images: product.images,
         farm: {
           id: farm.id,
           name: farm.name,

@@ -49,7 +49,11 @@ export function ProductForm({ mode, initial }: Props) {
         setError(data.message ?? t('genericError'));
         return;
       }
-      router.replace('/dashboard/products');
+      if (mode === 'create' && data.id) {
+        router.replace(`/dashboard/products/${data.id}/edit`);
+      } else {
+        router.replace('/dashboard/products');
+      }
       router.refresh();
     } catch {
       setError(t('genericError'));

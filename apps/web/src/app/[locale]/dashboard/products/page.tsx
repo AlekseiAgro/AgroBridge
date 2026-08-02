@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { DeleteProductButton } from '@/components/DeleteProductButton';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link, redirect } from '@/i18n/navigation';
+import { getPrimaryProductImage } from '@/lib/product-image';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
@@ -57,17 +58,30 @@ export default async function DashboardProductsPage({ params }: Props) {
           <p className="empty-state">{t('emptyMine')}</p>
         ) : (
           <ul className="product-list">
-            {products.map((product) => (
+            {products.map((product) => {
+              const image = getPrimaryProductImage(product.images);
+              return (
               <li key={product.id} className="product-list__item product-list__item--row">
-                <div>
-                  <p className="product-list__title">{product.title}</p>
-                  <p className="product-list__meta">
-                    {t(`moderation.${product.moderationStatus}`)}
-                    {product.category
-                      ? ` · ${tc(`categories.${product.category as 'fruits'}`)}`
-                      : ''}
-                    {product.moderationNote ? ` · ${product.moderationNote}` : ''}
-                  </p>
+                <div className="product-list__item-main">
+                  {image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={image.url} alt="" className="product-list__media product-list__media--sm" />
+                  ) : (
+                    <div
+                      className="product-list__media product-list__media--sm product-list__media--empty"
+                      aria-hidden
+                    />
+                  )}
+                  <div>
+                    <p className="product-list__title">{product.title}</p>
+                    <p className="product-list__meta">
+                      {t(`moderation.${product.moderationStatus}`)}
+                      {product.category
+                        ? ` · ${tc(`categories.${product.category as 'fruits'}`)}`
+                        : ''}
+                      {product.moderationNote ? ` · ${product.moderationNote}` : ''}
+                    </p>
+                  </div>
                 </div>
                 <div className="product-list__actions">
                   <Link className="button button--ghost" href={`/dashboard/products/${product.id}/edit`}>
@@ -76,7 +90,8 @@ export default async function DashboardProductsPage({ params }: Props) {
                   <DeleteProductButton productId={product.id} />
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </main>

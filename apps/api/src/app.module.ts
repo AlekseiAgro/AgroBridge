@@ -8,6 +8,7 @@ import { HealthModule } from './health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
 import { RfqsModule } from './rfqs/rfqs.module';
+import { StorageModule } from './storage/storage.module';
 import { TranslationModule } from './translation/translation.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { TranslationModule } from './translation/translation.module';
       isGlobal: true,
     }),
     PrismaModule,
+    StorageModule,
     HealthModule,
     AuthModule,
     FarmsModule,

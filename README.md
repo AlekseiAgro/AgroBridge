@@ -118,7 +118,21 @@ pnpm --filter @agrobridge/api db:seed
 # default: admin@agrobridge.local / ChangeMeAdmin1
 ```
 
+## Product photos (current step)
+
+- Farmers upload up to **8** product photos (JPEG / PNG / WebP, max **5MB** each) on the product edit page
+- First photo becomes primary; primary can be changed later
+- Catalog, farm pages, and product detail show images
+- Storage: `STORAGE_DRIVER=local` (dev, files under `apps/api/uploads`) or `s3` (AWS S3 / Cloudflare R2)
+- Changing photos on a published listing returns it to moderation (`pending`)
+
+API:
+
+- `POST /api/products/:id/images` (multipart field `file`)
+- `DELETE /api/products/:id/images/:imageId`
+- `PATCH /api/products/:id/images/:imageId/primary`
+- Local files served at `GET /api/uploads/products/:productId/:filename`
+
 ## Next implementation steps
 
-1. Product photos / object storage
-2. Email notifications
+1. Email notifications

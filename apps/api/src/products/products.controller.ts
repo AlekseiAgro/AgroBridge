@@ -8,9 +8,14 @@ import {
   Post,
   Query,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import type { Request } from 'express';
+import { PRODUCT_IMAGE_MAX_BYTES } from '@agrobridge/shared';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
@@ -67,5 +72,44 @@ export class ProductsController {
   @Roles('farmer', 'admin')
   remove(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.productsService.remove(user, id);
+  }
+
+  @Post(':id/images')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('farmer', 'admin')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: PRODUCT_IMAGE_MAX_BYTES },
+    }),
+  )
+  addImage(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.productsService.addImage(user, id, file);
+  }
+
+  @Delete(':id/images/:imageId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('farmer', 'admin')
+  removeImage(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+  ) {
+    return this.productsService.removeImage(user, id, imageId);
+  }
+
+  @Patch(':id/images/:imageId/primary')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('farmer', 'admin')
+  setPrimaryImage(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+  ) {
+    return this.productsService.setPrimaryImage(user, id, imageId);
   }
 }

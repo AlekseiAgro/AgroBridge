@@ -4,6 +4,7 @@ import { CatalogFilters } from '@/components/CatalogFilters';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
+import { getPrimaryProductImage } from '@/lib/product-image';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -48,8 +49,16 @@ export default async function CatalogPage({ params, searchParams }: Props) {
           <p className="empty-state">{t('empty')}</p>
         ) : (
           <ul className="product-list">
-            {products.map((product) => (
-              <li key={product.id} className="product-list__item">
+            {products.map((product) => {
+              const image = getPrimaryProductImage(product.images);
+              return (
+              <li key={product.id} className="product-list__item product-list__item--with-media">
+                {image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={image.url} alt="" className="product-list__media" />
+                ) : (
+                  <div className="product-list__media product-list__media--empty" aria-hidden />
+                )}
                 <div>
                   <Link href={`/products/${product.id}`} className="product-list__title">
                     {product.title}
@@ -64,7 +73,8 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                   ) : null}
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </main>

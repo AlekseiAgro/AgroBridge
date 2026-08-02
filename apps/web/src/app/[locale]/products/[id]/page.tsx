@@ -44,6 +44,24 @@ export default async function ProductDetailPage({ params }: Props) {
           {product.farm.region ? ` · ${product.farm.region}` : ''}
         </p>
 
+        {product.images.length > 0 ? (
+          <div className="product-gallery">
+            {product.images.map((image) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={image.id}
+                src={image.url}
+                alt={product.title}
+                className={
+                  image.isPrimary
+                    ? 'product-gallery__image product-gallery__image--primary'
+                    : 'product-gallery__image'
+                }
+              />
+            ))}
+          </div>
+        ) : null}
+
         <dl className="account-details">
           {product.category ? (
             <div>

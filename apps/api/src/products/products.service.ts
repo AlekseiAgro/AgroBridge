@@ -1,11 +1,21 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { ModerationStatus, ProductDetail, ProductSummary } from '@agrobridge/shared';
+import {
+  PRODUCT_IMAGE_MAX_BYTES,
+  PRODUCT_IMAGE_MAX_COUNT,
+  isProductImageMimeType,
+  type ModerationStatus,
+  type ProductDetail,
+  type ProductImage,
+  type ProductSummary,
+} from '@agrobridge/shared';
 import { ModerationStatus as PrismaModerationStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CatalogQueryDto } from './dto/catalog-query.dto';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -16,9 +26,49 @@ const publicProductWhere: Prisma.ProductWhereInput = {
   moderationStatus: PrismaModerationStatus.approved,
 };
 
+const imageOrderBy: Prisma.ProductImageOrderByWithRelationInput[] = [
+  { isPrimary: 'desc' },
+  { sortOrder: 'asc' },
+  { createdAt: 'asc' },
+];
+
+const productListInclude = {
+  farm: {
+    select: { id: true, name: true, region: true },
+  },
+  images: {
+    orderBy: imageOrderBy,
+  },
+} satisfies Prisma.ProductInclude;
+
+const productDetailInclude = {
+  farm: {
+    select: {
+      id: true,
+      name: true,
+      region: true,
+      ownerId: true,
+    },
+  },
+  images: {
+    orderBy: imageOrderBy,
+  },
+} satisfies Prisma.ProductInclude;
+
+type ProductWithFarmAndImages = Prisma.ProductGetPayload<{
+  include: typeof productListInclude;
+}>;
+
+type ProductWithOwnerAndImages = Prisma.ProductGetPayload<{
+  include: typeof productDetailInclude;
+}>;
+
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async catalog(query: CatalogQueryDto): Promise<ProductSummary[]> {
     const where: Prisma.ProductWhereInput = {
@@ -48,11 +98,7 @@ export class ProductsService {
     const products = await this.prisma.product.findMany({
       where,
       orderBy: { updatedAt: 'desc' },
-      include: {
-        farm: {
-          select: { id: true, name: true, region: true },
-        },
-      },
+      include: productListInclude,
     });
 
     return products.map((product) => this.toSummary(product));
@@ -61,16 +107,7 @@ export class ProductsService {
   async getById(id: string, viewer?: AuthenticatedUser | null): Promise<ProductDetail> {
     const product = await this.prisma.product.findUnique({
       where: { id },
-      include: {
-        farm: {
-          select: {
-            id: true,
-            name: true,
-            region: true,
-            ownerId: true,
-          },
-        },
-      },
+      include: productDetailInclude,
     });
 
     if (!product) {
@@ -98,11 +135,7 @@ export class ProductsService {
     const products = await this.prisma.product.findMany({
       where: { farmId: farm.id },
       orderBy: { updatedAt: 'desc' },
-      include: {
-        farm: {
-          select: { id: true, name: true, region: true },
-        },
-      },
+      include: productListInclude,
     });
 
     return products.map((product) => this.toSummary(product));
@@ -126,11 +159,7 @@ export class ProductsService {
           : PrismaModerationStatus.draft,
         moderationNote: null,
       },
-      include: {
-        farm: {
-          select: { id: true, name: true, region: true, ownerId: true },
-        },
-      },
+      include: productDetailInclude,
     });
 
     return this.toDetail(product);
@@ -188,11 +217,7 @@ export class ProductsService {
         moderatedAt,
         moderatedById,
       },
-      include: {
-        farm: {
-          select: { id: true, name: true, region: true, ownerId: true },
-        },
-      },
+      include: productDetailInclude,
     });
 
     return this.toDetail(updated);
@@ -201,8 +226,184 @@ export class ProductsService {
   async remove(user: AuthenticatedUser, id: string): Promise<{ ok: true }> {
     this.assertFarmer(user);
     const product = await this.requireOwnedProduct(user.id, id);
+    const images = await this.prisma.productImage.findMany({
+      where: { productId: product.id },
+      select: { key: true },
+    });
+
     await this.prisma.product.delete({ where: { id: product.id } });
+
+    await Promise.all(
+      images.map(async (image) => {
+        try {
+          await this.storage.delete(image.key);
+        } catch {
+          // Best-effort cleanup; DB row is already gone.
+        }
+      }),
+    );
+
     return { ok: true };
+  }
+
+  async addImage(
+    user: AuthenticatedUser,
+    productId: string,
+    file?: Express.Multer.File,
+  ): Promise<ProductDetail> {
+    this.assertFarmer(user);
+    const product = await this.requireOwnedProduct(user.id, productId);
+
+    if (!file) {
+      throw new BadRequestException('Image file is required');
+    }
+
+    if (!isProductImageMimeType(file.mimetype)) {
+      throw new BadRequestException('Only JPEG, PNG, and WebP images are allowed');
+    }
+
+    if (file.size > PRODUCT_IMAGE_MAX_BYTES) {
+      throw new BadRequestException('Image must be 5MB or smaller');
+    }
+
+    const existingCount = await this.prisma.productImage.count({
+      where: { productId: product.id },
+    });
+
+    if (existingCount >= PRODUCT_IMAGE_MAX_COUNT) {
+      throw new BadRequestException(
+        `A product can have at most ${PRODUCT_IMAGE_MAX_COUNT} images`,
+      );
+    }
+
+    const stored = await this.storage.upload({
+      buffer: file.buffer,
+      mimeType: file.mimetype,
+      originalName: file.originalname || 'image',
+      folder: `products/${product.id}`,
+    });
+
+    const isPrimary = existingCount === 0;
+
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.productImage.create({
+          data: {
+            productId: product.id,
+            url: stored.url,
+            key: stored.key,
+            sortOrder: existingCount,
+            isPrimary,
+          },
+        });
+
+        await this.markPendingForImageChange(tx, product);
+      });
+    } catch (error) {
+      await this.storage.delete(stored.key).catch(() => undefined);
+      throw error;
+    }
+
+    return this.getById(product.id, user);
+  }
+
+  async removeImage(
+    user: AuthenticatedUser,
+    productId: string,
+    imageId: string,
+  ): Promise<ProductDetail> {
+    this.assertFarmer(user);
+    const product = await this.requireOwnedProduct(user.id, productId);
+
+    const image = await this.prisma.productImage.findFirst({
+      where: { id: imageId, productId: product.id },
+    });
+
+    if (!image) {
+      throw new NotFoundException('Image not found');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.productImage.delete({ where: { id: image.id } });
+
+      if (image.isPrimary) {
+        const next = await tx.productImage.findFirst({
+          where: { productId: product.id },
+          orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        });
+        if (next) {
+          await tx.productImage.update({
+            where: { id: next.id },
+            data: { isPrimary: true },
+          });
+        }
+      }
+
+      await this.markPendingForImageChange(tx, product);
+    });
+
+    try {
+      await this.storage.delete(image.key);
+    } catch {
+      // Best-effort cleanup.
+    }
+
+    return this.getById(product.id, user);
+  }
+
+  async setPrimaryImage(
+    user: AuthenticatedUser,
+    productId: string,
+    imageId: string,
+  ): Promise<ProductDetail> {
+    this.assertFarmer(user);
+    const product = await this.requireOwnedProduct(user.id, productId);
+
+    const image = await this.prisma.productImage.findFirst({
+      where: { id: imageId, productId: product.id },
+    });
+
+    if (!image) {
+      throw new NotFoundException('Image not found');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.productImage.updateMany({
+        where: { productId: product.id, isPrimary: true },
+        data: { isPrimary: false },
+      });
+      await tx.productImage.update({
+        where: { id: image.id },
+        data: { isPrimary: true },
+      });
+      await this.markPendingForImageChange(tx, product);
+    });
+
+    return this.getById(product.id, user);
+  }
+
+  private async markPendingForImageChange(
+    tx: Prisma.TransactionClient,
+    product: { id: string; isPublished: boolean; moderationStatus: PrismaModerationStatus },
+  ) {
+    if (!product.isPublished) {
+      return;
+    }
+
+    if (
+      product.moderationStatus === PrismaModerationStatus.approved ||
+      product.moderationStatus === PrismaModerationStatus.rejected
+    ) {
+      await tx.product.update({
+        where: { id: product.id },
+        data: {
+          moderationStatus: PrismaModerationStatus.pending,
+          moderationNote: null,
+          moderatedAt: null,
+          moderatedById: null,
+        },
+      });
+    }
   }
 
   private async requireFarm(ownerId: string) {
@@ -232,17 +433,25 @@ export class ProductsService {
     }
   }
 
-  private toSummary(product: {
-    id: string;
-    title: string;
-    description: string | null;
-    category: string | null;
-    unit: string | null;
-    isPublished: boolean;
-    moderationStatus: PrismaModerationStatus;
-    moderationNote: string | null;
-    farm: { id: string; name: string; region: string | null };
-  }): ProductSummary {
+  private toImages(
+    images: Array<{
+      id: string;
+      url: string;
+      sortOrder: number;
+      isPrimary: boolean;
+    }>,
+  ): ProductImage[] {
+    return images.map((image) => ({
+      id: image.id,
+      url: image.url,
+      sortOrder: image.sortOrder,
+      isPrimary: image.isPrimary,
+    }));
+  }
+
+  private toSummary(
+    product: ProductWithFarmAndImages | ProductWithOwnerAndImages,
+  ): ProductSummary {
     return {
       id: product.id,
       title: product.title,
@@ -252,23 +461,16 @@ export class ProductsService {
       isPublished: product.isPublished,
       moderationStatus: product.moderationStatus as ModerationStatus,
       moderationNote: product.moderationNote,
-      farm: product.farm,
+      images: this.toImages(product.images),
+      farm: {
+        id: product.farm.id,
+        name: product.farm.name,
+        region: product.farm.region,
+      },
     };
   }
 
-  private toDetail(product: {
-    id: string;
-    title: string;
-    description: string | null;
-    category: string | null;
-    unit: string | null;
-    isPublished: boolean;
-    moderationStatus: PrismaModerationStatus;
-    moderationNote: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-    farm: { id: string; name: string; region: string | null };
-  }): ProductDetail {
+  private toDetail(product: ProductWithOwnerAndImages): ProductDetail {
     return {
       ...this.toSummary(product),
       createdAt: product.createdAt.toISOString(),
