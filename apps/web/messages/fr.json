@@ -13,7 +13,9 @@
     "login": "Connexion",
     "register": "Inscription",
     "account": "Mon compte",
-    "ctaFarm": "Gérer ma ferme"
+    "ctaFarm": "Gérer ma ferme",
+    "categoriesTitle": "Groupes de produits",
+    "categoriesLead": "Fruits, légumes, noix, vin, produits laitiers, miel et herbes des producteurs géorgiens."
   },
   "auth": {
     "loginTitle": "Bon retour",

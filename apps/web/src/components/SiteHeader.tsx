@@ -3,12 +3,16 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link } from '@/i18n/navigation';
 import { getCurrentUser } from '@/lib/session';
 
-export async function SiteHeader() {
+type Props = {
+  tone?: 'default' | 'light';
+};
+
+export async function SiteHeader({ tone = 'default' }: Props) {
   const t = await getTranslations('nav');
   const user = await getCurrentUser();
 
   return (
-    <header className="site-header">
+    <header className={tone === 'light' ? 'site-header site-header--light' : 'site-header'}>
       <Link href="/" className="auth-brand">
         AgroBridge
       </Link>

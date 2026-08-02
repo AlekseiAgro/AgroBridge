@@ -13,7 +13,9 @@
     "login": "Log in",
     "register": "Sign up",
     "account": "My account",
-    "ctaFarm": "Manage my farm"
+    "ctaFarm": "Manage my farm",
+    "categoriesTitle": "Product groups",
+    "categoriesLead": "Explore fruits, vegetables, nuts, wine, dairy, honey, and herbs from Georgian producers."
   },
   "auth": {
     "loginTitle": "Welcome back",

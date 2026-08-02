@@ -13,7 +13,9 @@
     "login": "Iniciar sesión",
     "register": "Registrarse",
     "account": "Mi cuenta",
-    "ctaFarm": "Gestionar mi granja"
+    "ctaFarm": "Gestionar mi granja",
+    "categoriesTitle": "Grupos de productos",
+    "categoriesLead": "Frutas, verduras, frutos secos, vino, lácteos, miel y hierbas de productores georgianos."
   },
   "auth": {
     "loginTitle": "Bienvenido de nuevo",

@@ -13,7 +13,9 @@
     "login": "Anmelden",
     "register": "Registrieren",
     "account": "Mein Konto",
-    "ctaFarm": "Betrieb verwalten"
+    "ctaFarm": "Betrieb verwalten",
+    "categoriesTitle": "Produktgruppen",
+    "categoriesLead": "Obst, Gemüse, Nüsse, Wein, Milchprodukte, Honig und Kräuter von georgischen Erzeugern entdecken."
   },
   "auth": {
     "loginTitle": "Willkommen zurück",

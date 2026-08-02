@@ -13,7 +13,9 @@
     "login": "Accedi",
     "register": "Registrati",
     "account": "Il mio account",
-    "ctaFarm": "Gestisci l’azienda"
+    "ctaFarm": "Gestisci l’azienda",
+    "categoriesTitle": "Gruppi di prodotti",
+    "categoriesLead": "Frutta, verdura, noci, vino, latticini, miele ed erbe dai produttori georgiani."
   },
   "auth": {
     "loginTitle": "Bentornato",

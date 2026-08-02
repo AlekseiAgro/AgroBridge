@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { CategoryShowcase } from '@/components/CategoryShowcase';
 import { HowItWorksSection } from '@/components/HowItWorksSection';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
@@ -16,36 +17,52 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <div className="home">
-      <SiteHeader />
+      <section className="home-hero">
+        <div className="home-hero__media" aria-hidden>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/hero/farm-landscape.jpg"
+            alt=""
+            className="home-hero__image"
+          />
+        </div>
+        <div className="home-hero__veil" aria-hidden />
 
-      <main>
-        <section className="home__hero">
-          <p className="home__brand">AgroBridge</p>
-          <h1 className="home__headline">{t('headline')}</h1>
-          <p className="home__subtitle">{t('subtitle')}</p>
+        <div className="home-hero__shell">
+          <SiteHeader tone="light" />
+          <div className="home-hero__content">
+            <p className="home__brand">AgroBridge</p>
+            <h1 className="home__headline">{t('headline')}</h1>
+            <p className="home__subtitle">{t('subtitle')}</p>
 
-          <div className="home__actions">
-            <Link className="button button--primary" href="/catalog">
-              {t('ctaPrimary')}
-            </Link>
-            {user?.role === 'farmer' || user?.role === 'admin' ? (
-              <Link className="button button--ghost" href="/dashboard/farm">
-                {t('ctaFarm')}
+            <div className="home__actions">
+              <Link className="button button--primary" href="/catalog">
+                {t('ctaPrimary')}
               </Link>
-            ) : user ? (
-              <Link className="button button--ghost" href="/account">
-                {t('ctaAccount')}
-              </Link>
-            ) : (
-              <Link className="button button--ghost" href="/register">
-                {t('ctaSecondary')}
-              </Link>
-            )}
+              {user?.role === 'farmer' || user?.role === 'admin' ? (
+                <Link className="button button--ghost-light" href="/dashboard/farm">
+                  {t('ctaFarm')}
+                </Link>
+              ) : user ? (
+                <Link className="button button--ghost-light" href="/account">
+                  {t('ctaAccount')}
+                </Link>
+              ) : (
+                <Link className="button button--ghost-light" href="/register">
+                  {t('ctaSecondary')}
+                </Link>
+              )}
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <HowItWorksSection />
-      </main>
+      <div className="home-body">
+        <CategoryShowcase />
+        <div className="home-panel">
+          <HowItWorksSection />
+        </div>
+      </div>
     </div>
   );
 }
