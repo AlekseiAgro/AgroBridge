@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { BrandLogo } from '@/components/BrandLogo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link } from '@/i18n/navigation';
 import { getCurrentUser } from '@/lib/session';
@@ -13,8 +14,8 @@ export async function SiteHeader({ tone = 'default' }: Props) {
 
   return (
     <header className={tone === 'light' ? 'site-header site-header--light' : 'site-header'}>
-      <Link href="/" className="auth-brand">
-        AgroBridge
+      <Link href="/" className="auth-brand brand-logo-link" aria-label="AgroBridge">
+        <BrandLogo variant="horizontal" tone={tone} />
       </Link>
       <nav className="site-header__nav">
         <Link href="/catalog">{t('catalog')}</Link>

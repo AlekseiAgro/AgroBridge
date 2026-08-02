@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { BrandLogo } from '@/components/BrandLogo';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LogoutButton } from '@/components/LogoutButton';
 import { Link } from '@/i18n/navigation';
@@ -21,8 +22,8 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
   return (
     <div className="cabinet">
       <aside className="cabinet__sidebar">
-        <Link href="/" className="cabinet__brand">
-          AgroBridge
+        <Link href="/" className="cabinet__brand" aria-label="AgroBridge">
+          <BrandLogo variant="horizontal" />
         </Link>
         <p className="cabinet__eyebrow">{tc('shellLabel')}</p>
         <nav className="cabinet__nav">

@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { BrandLogo } from '@/components/BrandLogo';
 import { Link } from '@/i18n/navigation';
 import { getCurrentUser } from '@/lib/session';
 
@@ -12,8 +13,8 @@ export async function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer__inner">
         <div className="site-footer__brand">
-          <Link href="/" className="site-footer__logo">
-            AgroBridge
+          <Link href="/" className="site-footer__logo" aria-label="AgroBridge">
+            <BrandLogo variant="horizontal" />
           </Link>
           <p className="site-footer__tagline">{t('tagline')}</p>
           <Link href="/support" className="button button--primary site-footer__support">
