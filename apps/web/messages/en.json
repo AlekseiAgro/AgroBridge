@@ -66,7 +66,7 @@
     "category": "Category",
     "region": "Region",
     "allCategories": "All categories",
-    "applyFilters": "Apply",
+    "applyFilters": "Search",
     "empty": "No products match your filters yet.",
     "loadError": "Could not load the catalog. Is the API running?",
     "categories": {
@@ -79,7 +79,10 @@
       "herbs": "Herbs",
       "other": "Other"
     },
-    "allRegions": "All regions"
+    "allRegions": "All regions",
+    "optional": "(optional)",
+    "filtersHint": "Search works across all categories and regions. Category and region are optional filters.",
+    "searchPlaceholder": "Product name or description"
   },
   "farm": {
     "createTitle": "Create farm profile",

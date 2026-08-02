@@ -71,29 +71,34 @@ export class ProductsService {
   ) {}
 
   async catalog(query: CatalogQueryDto): Promise<ProductSummary[]> {
+    const q = query.q?.trim() || undefined;
+    const category = query.category?.trim() || undefined;
+    const region = query.region?.trim() || undefined;
+
+    // Search works with q alone; category/region are optional refinements.
     const where: Prisma.ProductWhereInput = {
       ...publicProductWhere,
+      ...(category ? { category } : {}),
+      ...(region
+        ? {
+            farm: {
+              region: {
+                equals: region,
+                mode: 'insensitive',
+              },
+            },
+          }
+        : {}),
+      ...(q
+        ? {
+            OR: [
+              { title: { contains: q, mode: 'insensitive' } },
+              { description: { contains: q, mode: 'insensitive' } },
+              { farm: { name: { contains: q, mode: 'insensitive' } } },
+            ],
+          }
+        : {}),
     };
-
-    if (query.category) {
-      where.category = query.category;
-    }
-
-    if (query.region) {
-      where.farm = {
-        region: {
-          contains: query.region,
-          mode: 'insensitive',
-        },
-      };
-    }
-
-    if (query.q) {
-      where.OR = [
-        { title: { contains: query.q, mode: 'insensitive' } },
-        { description: { contains: query.q, mode: 'insensitive' } },
-      ];
-    }
 
     const products = await this.prisma.product.findMany({
       where,

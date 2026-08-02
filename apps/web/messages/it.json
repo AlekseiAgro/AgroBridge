@@ -66,7 +66,7 @@
     "category": "Categoria",
     "region": "Regione",
     "allCategories": "Tutte le categorie",
-    "applyFilters": "Applica",
+    "applyFilters": "Cerca",
     "empty": "Nessun prodotto corrisponde ai filtri.",
     "loadError": "Impossibile caricare il catalogo. L’API è attiva?",
     "categories": {
@@ -79,7 +79,10 @@
       "herbs": "Erbe",
       "other": "Altro"
     },
-    "allRegions": "Tutte le regioni"
+    "allRegions": "Tutte le regioni",
+    "optional": "(facoltativo)",
+    "filtersHint": "La ricerca include tutte le categorie e regioni. Categoria e regione sono filtri facoltativi.",
+    "searchPlaceholder": "Nome o descrizione del prodotto"
   },
   "farm": {
     "createTitle": "Crea profilo azienda",

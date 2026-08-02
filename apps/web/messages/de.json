@@ -66,7 +66,7 @@
     "category": "Kategorie",
     "region": "Region",
     "allCategories": "Alle Kategorien",
-    "applyFilters": "Anwenden",
+    "applyFilters": "Suchen",
     "empty": "Keine Produkte passen zu Ihren Filtern.",
     "loadError": "Katalog konnte nicht geladen werden. Läuft die API?",
     "categories": {
@@ -79,7 +79,10 @@
       "herbs": "Kräuter",
       "other": "Sonstiges"
     },
-    "allRegions": "Alle Regionen"
+    "allRegions": "Alle Regionen",
+    "optional": "(optional)",
+    "filtersHint": "Die Suche gilt für alle Kategorien und Regionen. Kategorie und Region sind optionale Filter.",
+    "searchPlaceholder": "Produktname oder Beschreibung"
   },
   "farm": {
     "createTitle": "Betriebsprofil erstellen",

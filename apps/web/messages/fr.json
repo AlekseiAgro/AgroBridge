@@ -66,7 +66,7 @@
     "category": "Catégorie",
     "region": "Région",
     "allCategories": "Toutes les catégories",
-    "applyFilters": "Appliquer",
+    "applyFilters": "Rechercher",
     "empty": "Aucun produit ne correspond à vos filtres.",
     "loadError": "Impossible de charger le catalogue. L’API tourne-t-elle ?",
     "categories": {
@@ -79,7 +79,10 @@
       "herbs": "Herbes",
       "other": "Autre"
     },
-    "allRegions": "Toutes les régions"
+    "allRegions": "Toutes les régions",
+    "optional": "(facultatif)",
+    "filtersHint": "La recherche porte sur toutes les catégories et régions. La catégorie et la région sont facultatives.",
+    "searchPlaceholder": "Nom ou description du produit"
   },
   "farm": {
     "createTitle": "Créer le profil de ferme",
