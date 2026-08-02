@@ -13,7 +13,6 @@
     "login": "Log in",
     "register": "Sign up",
     "account": "My account",
-    "languagesHint": "Available in 7 languages · AI chat translation",
     "ctaFarm": "Manage my farm"
   },
   "auth": {

@@ -13,7 +13,6 @@
     "login": "Connexion",
     "register": "Inscription",
     "account": "Mon compte",
-    "languagesHint": "7 langues · Traduction IA dans le chat",
     "ctaFarm": "Gérer ma ferme"
   },
   "auth": {
