@@ -6,6 +6,8 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
+import { getProductCardImage, toPublicMediaUrl } from '@/lib/product-image';
+import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatRegionLabel } from '@/lib/region';
 import { getCurrentUser } from '@/lib/session';
 
@@ -33,6 +35,12 @@ export default async function ProductDetailPage({ params }: Props) {
     throw error;
   }
 
+  const fallbackImage = product.images.length === 0 ? getProductCardImage(product) : null;
+  const quantityLabel = formatProductQuantityRange(
+    product,
+    product.unit ? t(`units.${product.unit as 'kg'}`) : null,
+  );
+
   return (
     <div className="page">
       <SiteHeader />
@@ -54,7 +62,7 @@ export default async function ProductDetailPage({ params }: Props) {
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={image.id}
-                src={image.url}
+                src={toPublicMediaUrl(image.url)}
                 alt={product.title}
                 className={
                   image.isPrimary
@@ -63,6 +71,15 @@ export default async function ProductDetailPage({ params }: Props) {
                 }
               />
             ))}
+          </div>
+        ) : fallbackImage ? (
+          <div className="product-gallery">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={fallbackImage.url}
+              alt={product.title}
+              className="product-gallery__image product-gallery__image--primary"
+            />
           </div>
         ) : null}
 
@@ -77,6 +94,12 @@ export default async function ProductDetailPage({ params }: Props) {
             <div>
               <dt>{t('unit')}</dt>
               <dd>{t(`units.${product.unit as 'kg'}`)}</dd>
+            </div>
+          ) : null}
+          {quantityLabel ? (
+            <div>
+              <dt>{t('availableQuantity')}</dt>
+              <dd>{quantityLabel}</dd>
             </div>
           ) : null}
         </dl>

@@ -4,7 +4,8 @@ import { notFound } from 'next/navigation';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
-import { getPrimaryProductImage } from '@/lib/product-image';
+import { getProductCardImage } from '@/lib/product-image';
+import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatRegionLabel } from '@/lib/region';
 
 type Props = {
@@ -16,6 +17,7 @@ export default async function FarmDetailPage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations('farm');
   const tc = await getTranslations('catalog');
+  const tp = await getTranslations('product');
   const tr = await getTranslations();
 
   let farm: FarmDetail;
@@ -45,7 +47,11 @@ export default async function FarmDetailPage({ params }: Props) {
         ) : (
           <ul className="product-list">
             {farm.products.map((product) => {
-              const image = getPrimaryProductImage(product.images);
+              const image = getProductCardImage(product);
+              const quantity = formatProductQuantityRange(
+                product,
+                product.unit ? tp(`units.${product.unit as 'kg'}`) : null,
+              );
               return (
               <li key={product.id} className="product-list__item product-list__item--with-media">
                 {image ? (
@@ -62,6 +68,7 @@ export default async function FarmDetailPage({ params }: Props) {
                     {product.category
                       ? tc(`categories.${product.category as 'fruits'}`)
                       : tc('allCategories')}
+                    {quantity ? ` · ${quantity}` : ''}
                   </p>
                 </div>
               </li>

@@ -84,7 +84,8 @@
     "allRegions": "Tutte le regioni",
     "optional": "(facoltativo)",
     "filtersHint": "La ricerca include tutte le categorie e regioni. Categoria e regione sono filtri facoltativi.",
-    "searchPlaceholder": "Nome o descrizione del prodotto"
+    "searchPlaceholder": "Nome o descrizione del prodotto",
+    "availableQuantity": "Quantità disponibile"
   },
   "farm": {
     "createTitle": "Crea profilo azienda",
@@ -159,7 +160,16 @@
       "deleteError": "Impossibile eliminare la foto.",
       "primaryError": "Impossibile aggiornare la foto principale.",
       "maxReached": "Raggiunto il massimo di {max} foto."
-    }
+    },
+    "minQuantity": "Quantità minima",
+    "maxQuantity": "Quantità massima",
+    "minQuantityPlaceholder": "es. 50",
+    "maxQuantityPlaceholder": "es. 1000",
+    "quantityHint": "Intervallo vendibile nell’unità selezionata ({unit}).",
+    "unitSuggested": "consigliata",
+    "quantityInvalid": "Inserisci quantità valide maggiori di zero.",
+    "quantityRangeInvalid": "La quantità minima non può superare la massima.",
+    "availableQuantity": "Quantità disponibile"
   },
   "rfq": {
     "requestTitle": "Richiedi un preventivo",

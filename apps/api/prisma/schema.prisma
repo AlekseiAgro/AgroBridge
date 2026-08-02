@@ -89,6 +89,8 @@ model Product {
   description      String?
   category         String?
   unit             String?
+  minQuantity      Decimal?         @db.Decimal(12, 2)
+  maxQuantity      Decimal?         @db.Decimal(12, 2)
   isPublished      Boolean          @default(false)
   moderationStatus ModerationStatus @default(draft)
   moderationNote   String?

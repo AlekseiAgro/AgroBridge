@@ -84,7 +84,8 @@
     "allRegions": "Alle Regionen",
     "optional": "(optional)",
     "filtersHint": "Die Suche gilt für alle Kategorien und Regionen. Kategorie und Region sind optionale Filter.",
-    "searchPlaceholder": "Produktname oder Beschreibung"
+    "searchPlaceholder": "Produktname oder Beschreibung",
+    "availableQuantity": "Verfügbare Menge"
   },
   "farm": {
     "createTitle": "Betriebsprofil erstellen",
@@ -159,7 +160,16 @@
       "deleteError": "Foto konnte nicht gelöscht werden.",
       "primaryError": "Hauptfoto konnte nicht aktualisiert werden.",
       "maxReached": "Maximal {max} Fotos erreicht."
-    }
+    },
+    "minQuantity": "Mindestmenge",
+    "maxQuantity": "Höchstmenge",
+    "minQuantityPlaceholder": "z. B. 50",
+    "maxQuantityPlaceholder": "z. B. 1000",
+    "quantityHint": "Verkaufsspanne in der gewählten Einheit ({unit}).",
+    "unitSuggested": "empfohlen",
+    "quantityInvalid": "Bitte gültige Mengen größer als null eingeben.",
+    "quantityRangeInvalid": "Die Mindestmenge darf nicht größer als die Höchstmenge sein.",
+    "availableQuantity": "Verfügbare Menge"
   },
   "rfq": {
     "requestTitle": "Preis anfragen",

@@ -48,6 +48,8 @@ export class FarmsService {
             description: true,
             category: true,
             unit: true,
+            minQuantity: true,
+            maxQuantity: true,
             isPublished: true,
             moderationStatus: true,
             moderationNote: true,
@@ -76,22 +78,7 @@ export class FarmsService {
     return {
       ...this.toSummary(farm),
       createdAt: farm.createdAt.toISOString(),
-      products: farm.products.map((product) => ({
-        id: product.id,
-        title: product.title,
-        description: product.description,
-        category: product.category,
-        unit: product.unit,
-        isPublished: product.isPublished,
-        moderationStatus: product.moderationStatus as ModerationStatus,
-        moderationNote: product.moderationNote,
-        images: product.images,
-        farm: {
-          id: farm.id,
-          name: farm.name,
-          region: farm.region,
-        },
-      })),
+      products: farm.products.map((product) => this.toProductSummary(product, farm)),
     };
   }
 
@@ -110,6 +97,8 @@ export class FarmsService {
             description: true,
             category: true,
             unit: true,
+            minQuantity: true,
+            maxQuantity: true,
             isPublished: true,
             moderationStatus: true,
             moderationNote: true,
@@ -135,22 +124,7 @@ export class FarmsService {
     return {
       ...this.toSummary(farm),
       createdAt: farm.createdAt.toISOString(),
-      products: farm.products.map((product) => ({
-        id: product.id,
-        title: product.title,
-        description: product.description,
-        category: product.category,
-        unit: product.unit,
-        isPublished: product.isPublished,
-        moderationStatus: product.moderationStatus as ModerationStatus,
-        moderationNote: product.moderationNote,
-        images: product.images,
-        farm: {
-          id: farm.id,
-          name: farm.name,
-          region: farm.region,
-        },
-      })),
+      products: farm.products.map((product) => this.toProductSummary(product, farm)),
     };
   }
 
@@ -216,6 +190,57 @@ export class FarmsService {
       description: farm.description,
       owner: farm.owner,
       productCount: farm._count.products,
+    };
+  }
+
+  private toProductSummary(
+    product: {
+      id: string;
+      title: string;
+      description: string | null;
+      category: string | null;
+      unit: string | null;
+      minQuantity: { toNumber(): number } | number | null;
+      maxQuantity: { toNumber(): number } | number | null;
+      isPublished: boolean;
+      moderationStatus: ModerationStatus | string;
+      moderationNote: string | null;
+      images: Array<{
+        id: string;
+        url: string;
+        sortOrder: number;
+        isPrimary: boolean;
+      }>;
+    },
+    farm: { id: string; name: string; region: string | null },
+  ) {
+    return {
+      id: product.id,
+      title: product.title,
+      description: product.description,
+      category: product.category,
+      unit: product.unit,
+      minQuantity:
+        product.minQuantity == null
+          ? null
+          : typeof product.minQuantity === 'number'
+            ? product.minQuantity
+            : product.minQuantity.toNumber(),
+      maxQuantity:
+        product.maxQuantity == null
+          ? null
+          : typeof product.maxQuantity === 'number'
+            ? product.maxQuantity
+            : product.maxQuantity.toNumber(),
+      isPublished: product.isPublished,
+      moderationStatus: product.moderationStatus as ModerationStatus,
+      moderationNote: product.moderationNote,
+      images: product.images,
+      farm: {
+        id: farm.id,
+        name: farm.name,
+        region: farm.region,
+      },
     };
   }
 }

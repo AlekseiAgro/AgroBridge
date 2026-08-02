@@ -3,7 +3,8 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { DeleteProductButton } from '@/components/DeleteProductButton';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link, redirect } from '@/i18n/navigation';
-import { getPrimaryProductImage } from '@/lib/product-image';
+import { getProductCardImage } from '@/lib/product-image';
+import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
@@ -59,7 +60,11 @@ export default async function DashboardProductsPage({ params }: Props) {
         ) : (
           <ul className="product-list">
             {products.map((product) => {
-              const image = getPrimaryProductImage(product.images);
+              const image = getProductCardImage(product);
+              const quantity = formatProductQuantityRange(
+                product,
+                product.unit ? t(`units.${product.unit as 'kg'}`) : null,
+              );
               return (
               <li key={product.id} className="product-list__item product-list__item--row">
                 <div className="product-list__item-main">
@@ -79,6 +84,7 @@ export default async function DashboardProductsPage({ params }: Props) {
                       {product.category
                         ? ` · ${tc(`categories.${product.category as 'fruits'}`)}`
                         : ''}
+                      {quantity ? ` · ${quantity}` : ''}
                       {product.moderationNote ? ` · ${product.moderationNote}` : ''}
                     </p>
                   </div>

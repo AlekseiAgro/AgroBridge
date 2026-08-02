@@ -11,9 +11,6 @@ import { dirname, join, resolve } from 'path';
 const prisma = new PrismaClient();
 
 const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? 'DemoPass123';
-const API_PUBLIC_URL = (
-  process.env.API_PUBLIC_URL ?? 'http://localhost:3001'
-).replace(/\/$/, '');
 const UPLOADS_DIR = resolve(
   process.env.STORAGE_LOCAL_DIR ?? join(process.cwd(), 'uploads'),
 );
@@ -26,7 +23,28 @@ type DemoProduct = {
   title: string;
   description: string;
   unit: string;
+  minQuantity?: number;
+  maxQuantity?: number;
 };
+
+function quantityForUnit(unit: string, index: number): { minQuantity: number; maxQuantity: number } {
+  const variance = 1 + (index % 3) * 0.35;
+  switch (unit) {
+    case 'ton':
+      return { minQuantity: 1, maxQuantity: Math.round(12 * variance) };
+    case 'box':
+      return { minQuantity: 10, maxQuantity: Math.round(180 * variance) };
+    case 'bottle':
+      return { minQuantity: 12, maxQuantity: Math.round(600 * variance) };
+    case 'liter':
+      return { minQuantity: 20, maxQuantity: Math.round(400 * variance) };
+    case 'piece':
+      return { minQuantity: 20, maxQuantity: Math.round(500 * variance) };
+    case 'kg':
+    default:
+      return { minQuantity: 50, maxQuantity: Math.round(1500 * variance) };
+  }
+}
 
 type DemoFarmer = {
   email: string;
@@ -456,7 +474,8 @@ async function seedProductImage(params: {
   await prisma.productImage.create({
     data: {
       productId: params.productId,
-      url: `${API_PUBLIC_URL}/api/uploads/${key}`,
+      // Same-origin path; Next.js proxies /api/uploads/* to the API.
+      url: `/api/uploads/${key}`,
       key,
       sortOrder: 0,
       isPrimary: true,
@@ -469,6 +488,7 @@ async function seedFarmer(
   farmer: DemoFarmer,
   passwordHash: string,
   adminId: string,
+  index: number,
 ) {
   const user = await upsertUser({
     email: farmer.email,
@@ -505,6 +525,14 @@ async function seedFarmer(
   }
   await prisma.product.deleteMany({ where: { farmId: farm.id } });
 
+  const quantity =
+    farmer.product.minQuantity != null && farmer.product.maxQuantity != null
+      ? {
+          minQuantity: farmer.product.minQuantity,
+          maxQuantity: farmer.product.maxQuantity,
+        }
+      : quantityForUnit(farmer.product.unit, index);
+
   const product = await prisma.product.create({
     data: {
       farmId: farm.id,
@@ -512,6 +540,8 @@ async function seedFarmer(
       description: farmer.product.description,
       category,
       unit: farmer.product.unit,
+      minQuantity: quantity.minQuantity,
+      maxQuantity: quantity.maxQuantity,
       isPublished: true,
       moderationStatus: ModerationStatus.approved,
       moderatedAt: new Date(),
@@ -563,8 +593,8 @@ async function main() {
   let farmerCount = 0;
   let productCount = 0;
   for (const [category, farmers] of Object.entries(FARMERS_BY_CATEGORY)) {
-    for (const farmer of farmers) {
-      await seedFarmer(category, farmer, demoPasswordHash, admin.id);
+    for (const [index, farmer] of farmers.entries()) {
+      await seedFarmer(category, farmer, demoPasswordHash, admin.id, index);
       farmerCount += 1;
       productCount += 1;
     }

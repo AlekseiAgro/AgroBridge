@@ -84,7 +84,8 @@
     "allRegions": "All regions",
     "optional": "(optional)",
     "filtersHint": "Search works across all categories and regions. Category and region are optional filters.",
-    "searchPlaceholder": "Product name or description"
+    "searchPlaceholder": "Product name or description",
+    "availableQuantity": "Available quantity"
   },
   "farm": {
     "createTitle": "Create farm profile",
@@ -159,7 +160,16 @@
       "deleteError": "Could not delete the photo.",
       "primaryError": "Could not update the primary photo.",
       "maxReached": "Maximum of {max} photos reached."
-    }
+    },
+    "minQuantity": "Minimum quantity",
+    "maxQuantity": "Maximum quantity",
+    "minQuantityPlaceholder": "e.g. 50",
+    "maxQuantityPlaceholder": "e.g. 1000",
+    "quantityHint": "Sellable range in the selected unit ({unit}).",
+    "unitSuggested": "suggested",
+    "quantityInvalid": "Enter valid quantities greater than zero.",
+    "quantityRangeInvalid": "Minimum quantity cannot be greater than maximum.",
+    "availableQuantity": "Available quantity"
   },
   "rfq": {
     "requestTitle": "Request a quote",

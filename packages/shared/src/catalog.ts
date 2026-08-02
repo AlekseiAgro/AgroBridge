@@ -15,6 +15,18 @@ export const PRODUCT_UNITS = ['kg', 'ton', 'box', 'liter', 'bottle', 'piece'] as
 
 export type ProductUnit = (typeof PRODUCT_UNITS)[number];
 
+/** Suggested sell unit for each product group (farmer can still override). */
+export const CATEGORY_DEFAULT_UNITS: Record<ProductCategory, ProductUnit> = {
+  fruits: 'kg',
+  vegetables: 'kg',
+  nuts: 'kg',
+  wine: 'bottle',
+  dairy: 'kg',
+  honey: 'kg',
+  herbs: 'kg',
+  other: 'kg',
+};
+
 /** Canonical keys for Georgia's main administrative regions (+ Tbilisi). */
 export const GEORGIA_REGIONS = [
   'tbilisi',
@@ -38,6 +50,15 @@ export function isProductCategory(value: string): value is ProductCategory {
 
 export function isProductUnit(value: string): value is ProductUnit {
   return (PRODUCT_UNITS as readonly string[]).includes(value);
+}
+
+export function defaultUnitForCategory(
+  category: string | null | undefined,
+): ProductUnit | null {
+  if (!category || !isProductCategory(category)) {
+    return null;
+  }
+  return CATEGORY_DEFAULT_UNITS[category];
 }
 
 export function isGeorgiaRegion(value: string): value is GeorgiaRegion {
@@ -90,6 +111,10 @@ export type ProductSummary = {
   description: string | null;
   category: string | null;
   unit: string | null;
+  /** Minimum quantity the farmer can sell in one deal (in `unit`). */
+  minQuantity: number | null;
+  /** Maximum quantity the farmer can sell (in `unit`). */
+  maxQuantity: number | null;
   isPublished: boolean;
   moderationStatus: ModerationStatus;
   moderationNote: string | null;

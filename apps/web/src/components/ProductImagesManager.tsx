@@ -117,7 +117,7 @@ export function ProductImagesManager({ productId, initialImages }: Props) {
           {images.map((image) => (
             <li key={image.id} className="product-images__item">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image.url} alt="" className="product-images__thumb" />
+              <img src={toPublicMediaUrl(image.url)} alt="" className="product-images__thumb" />
               <div className="product-images__meta">
                 {image.isPrimary ? (
                   <span className="product-images__badge">{t('images.primary')}</span>

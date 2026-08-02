@@ -84,7 +84,8 @@
     "allRegions": "ყველა რეგიონი",
     "optional": "(არასავალდებულო)",
     "filtersHint": "ძიება მუშაობს ყველა კატეგორიასა და რეგიონში. კატეგორია და რეგიონი არასავალდებულო ფილტრებია.",
-    "searchPlaceholder": "პროდუქტის სახელი ან აღწერა"
+    "searchPlaceholder": "პროდუქტის სახელი ან აღწერა",
+    "availableQuantity": "ხელმისაწვდომი რაოდენობა"
   },
   "farm": {
     "createTitle": "მეურნეობის პროფილის შექმნა",
@@ -159,7 +160,16 @@
       "deleteError": "ფოტოს წაშლა ვერ მოხერხდა.",
       "primaryError": "მთავარი ფოტოს განახლება ვერ მოხერხდა.",
       "maxReached": "მიღწეულია {max} ფოტო."
-    }
+    },
+    "minQuantity": "მინიმალური რაოდენობა",
+    "maxQuantity": "მაქსიმალური რაოდენობა",
+    "minQuantityPlaceholder": "მაგ. 50",
+    "maxQuantityPlaceholder": "მაგ. 1000",
+    "quantityHint": "გასაყიდი დიაპაზონი არჩეულ ერთეულში ({unit}).",
+    "unitSuggested": "რეკომენდებული",
+    "quantityInvalid": "შეიყვანეთ სწორი რაოდენობა ნულზე მეტი.",
+    "quantityRangeInvalid": "მინიმუმი არ შეიძლება აღემატებოდეს მაქსიმუმს.",
+    "availableQuantity": "ხელმისაწვდომი რაოდენობა"
   },
   "rfq": {
     "requestTitle": "ფასის მოთხოვნა",

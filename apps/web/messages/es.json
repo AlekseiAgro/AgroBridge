@@ -84,7 +84,8 @@
     "allRegions": "Todas las regiones",
     "optional": "(opcional)",
     "filtersHint": "La búsqueda abarca todas las categorías y regiones. Categoría y región son filtros opcionales.",
-    "searchPlaceholder": "Nombre o descripción del producto"
+    "searchPlaceholder": "Nombre o descripción del producto",
+    "availableQuantity": "Cantidad disponible"
   },
   "farm": {
     "createTitle": "Crear perfil de granja",
@@ -159,7 +160,16 @@
       "deleteError": "No se pudo eliminar la foto.",
       "primaryError": "No se pudo actualizar la foto principal.",
       "maxReached": "Se alcanzó el máximo de {max} fotos."
-    }
+    },
+    "minQuantity": "Cantidad mínima",
+    "maxQuantity": "Cantidad máxima",
+    "minQuantityPlaceholder": "p. ej. 50",
+    "maxQuantityPlaceholder": "p. ej. 1000",
+    "quantityHint": "Rango vendible en la unidad seleccionada ({unit}).",
+    "unitSuggested": "sugerida",
+    "quantityInvalid": "Introduce cantidades válidas mayores que cero.",
+    "quantityRangeInvalid": "La cantidad mínima no puede ser mayor que la máxima.",
+    "availableQuantity": "Cantidad disponible"
   },
   "rfq": {
     "requestTitle": "Solicitar cotización",

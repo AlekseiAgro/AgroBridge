@@ -95,7 +95,8 @@ export class StorageService implements OnModuleInit {
       const absolute = this.resolveLocalPath(key);
       await fs.mkdir(dirname(absolute), { recursive: true });
       await fs.writeFile(absolute, params.buffer);
-      return { key, url: `${this.publicBaseUrl}/${key}` };
+      // Same-origin path so the web app can proxy uploads in local/dev previews.
+      return { key, url: `/api/uploads/${key}` };
     }
 
     await this.s3Client!.send(

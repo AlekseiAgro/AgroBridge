@@ -84,7 +84,8 @@
     "allRegions": "Все регионы",
     "optional": "(необязательно)",
     "filtersHint": "Поиск работает по всем категориям и регионам. Категория и регион — необязательные фильтры.",
-    "searchPlaceholder": "Название или описание продукта"
+    "searchPlaceholder": "Название или описание продукта",
+    "availableQuantity": "Доступный объём"
   },
   "farm": {
     "createTitle": "Создать профиль хозяйства",
@@ -159,7 +160,16 @@
       "deleteError": "Не удалось удалить фото.",
       "primaryError": "Не удалось обновить главное фото.",
       "maxReached": "Достигнут лимит в {max} фото."
-    }
+    },
+    "minQuantity": "Минимальное количество",
+    "maxQuantity": "Максимальное количество",
+    "minQuantityPlaceholder": "напр. 50",
+    "maxQuantityPlaceholder": "напр. 1000",
+    "quantityHint": "Диапазон поставки в выбранных единицах ({unit}).",
+    "unitSuggested": "рекомендуется",
+    "quantityInvalid": "Укажите корректные количества больше нуля.",
+    "quantityRangeInvalid": "Минимум не может быть больше максимума.",
+    "availableQuantity": "Доступный объём"
   },
   "rfq": {
     "requestTitle": "Запросить цену",

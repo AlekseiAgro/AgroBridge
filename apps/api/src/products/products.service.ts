@@ -150,6 +150,7 @@ export class ProductsService {
     this.assertFarmer(user);
     const farm = await this.requireFarm(user.id);
     const isPublished = dto.isPublished ?? false;
+    const quantity = this.normalizeQuantityRange(dto.minQuantity, dto.maxQuantity);
 
     const product = await this.prisma.product.create({
       data: {
@@ -158,6 +159,8 @@ export class ProductsService {
         description: dto.description?.trim() || null,
         category: dto.category || null,
         unit: dto.unit || null,
+        minQuantity: quantity.minQuantity,
+        maxQuantity: quantity.maxQuantity,
         isPublished,
         moderationStatus: isPublished
           ? PrismaModerationStatus.pending
@@ -179,12 +182,26 @@ export class ProductsService {
     const product = await this.requireOwnedProduct(user.id, id);
 
     const nextPublished = dto.isPublished ?? product.isPublished;
+    const nextMin =
+      dto.minQuantity === undefined
+        ? this.toNumberOrNull(product.minQuantity)
+        : dto.minQuantity;
+    const nextMax =
+      dto.maxQuantity === undefined
+        ? this.toNumberOrNull(product.maxQuantity)
+        : dto.maxQuantity;
+    const quantity = this.normalizeQuantityRange(nextMin, nextMax);
+
     const contentChanged =
       (dto.title !== undefined && dto.title.trim() !== product.title) ||
       (dto.description !== undefined &&
         (dto.description.trim() || null) !== product.description) ||
       (dto.category !== undefined && (dto.category || null) !== product.category) ||
-      (dto.unit !== undefined && (dto.unit || null) !== product.unit);
+      (dto.unit !== undefined && (dto.unit || null) !== product.unit) ||
+      (dto.minQuantity !== undefined &&
+        quantity.minQuantity !== this.toNumberOrNull(product.minQuantity)) ||
+      (dto.maxQuantity !== undefined &&
+        quantity.maxQuantity !== this.toNumberOrNull(product.maxQuantity));
 
     let moderationStatus = product.moderationStatus;
     let moderationNote = product.moderationNote;
@@ -216,6 +233,14 @@ export class ProductsService {
           dto.description === undefined ? undefined : dto.description.trim() || null,
         category: dto.category === undefined ? undefined : dto.category || null,
         unit: dto.unit === undefined ? undefined : dto.unit || null,
+        minQuantity:
+          dto.minQuantity === undefined && dto.maxQuantity === undefined
+            ? undefined
+            : quantity.minQuantity,
+        maxQuantity:
+          dto.minQuantity === undefined && dto.maxQuantity === undefined
+            ? undefined
+            : quantity.maxQuantity,
         isPublished: nextPublished,
         moderationStatus,
         moderationNote,
@@ -438,6 +463,39 @@ export class ProductsService {
     }
   }
 
+  private toNumberOrNull(value: Prisma.Decimal | number | null | undefined): number | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    return typeof value === 'number' ? value : Number(value);
+  }
+
+  private normalizeQuantityRange(
+    minQuantity?: number | null,
+    maxQuantity?: number | null,
+  ): { minQuantity: number | null; maxQuantity: number | null } {
+    const min =
+      minQuantity === undefined || minQuantity === null || Number.isNaN(minQuantity)
+        ? null
+        : minQuantity;
+    const max =
+      maxQuantity === undefined || maxQuantity === null || Number.isNaN(maxQuantity)
+        ? null
+        : maxQuantity;
+
+    if (min !== null && min <= 0) {
+      throw new BadRequestException('minQuantity must be greater than 0');
+    }
+    if (max !== null && max <= 0) {
+      throw new BadRequestException('maxQuantity must be greater than 0');
+    }
+    if (min !== null && max !== null && min > max) {
+      throw new BadRequestException('minQuantity cannot be greater than maxQuantity');
+    }
+
+    return { minQuantity: min, maxQuantity: max };
+  }
+
   private toImages(
     images: Array<{
       id: string;
@@ -463,6 +521,8 @@ export class ProductsService {
       description: product.description,
       category: product.category,
       unit: product.unit,
+      minQuantity: this.toNumberOrNull(product.minQuantity),
+      maxQuantity: this.toNumberOrNull(product.maxQuantity),
       isPublished: product.isPublished,
       moderationStatus: product.moderationStatus as ModerationStatus,
       moderationNote: product.moderationNote,

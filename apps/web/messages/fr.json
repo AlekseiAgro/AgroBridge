@@ -84,7 +84,8 @@
     "allRegions": "Toutes les régions",
     "optional": "(facultatif)",
     "filtersHint": "La recherche porte sur toutes les catégories et régions. La catégorie et la région sont facultatives.",
-    "searchPlaceholder": "Nom ou description du produit"
+    "searchPlaceholder": "Nom ou description du produit",
+    "availableQuantity": "Quantité disponible"
   },
   "farm": {
     "createTitle": "Créer le profil de ferme",
@@ -159,7 +160,16 @@
       "deleteError": "Impossible de supprimer la photo.",
       "primaryError": "Impossible de mettre à jour la photo principale.",
       "maxReached": "Limite de {max} photos atteinte."
-    }
+    },
+    "minQuantity": "Quantité minimale",
+    "maxQuantity": "Quantité maximale",
+    "minQuantityPlaceholder": "ex. 50",
+    "maxQuantityPlaceholder": "ex. 1000",
+    "quantityHint": "Plage vendable dans l’unité sélectionnée ({unit}).",
+    "unitSuggested": "suggérée",
+    "quantityInvalid": "Saisissez des quantités valides supérieures à zéro.",
+    "quantityRangeInvalid": "La quantité minimale ne peut pas dépasser la maximale.",
+    "availableQuantity": "Quantité disponible"
   },
   "rfq": {
     "requestTitle": "Demander un devis",

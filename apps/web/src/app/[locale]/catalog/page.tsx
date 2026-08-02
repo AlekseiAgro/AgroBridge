@@ -4,7 +4,8 @@ import { CatalogFilters } from '@/components/CatalogFilters';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
-import { getPrimaryProductImage } from '@/lib/product-image';
+import { getProductCardImage } from '@/lib/product-image';
+import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatRegionLabel } from '@/lib/region';
 
 type Props = {
@@ -52,7 +53,11 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         ) : (
           <ul className="product-list">
             {products.map((product) => {
-              const image = getPrimaryProductImage(product.images);
+              const image = getProductCardImage(product);
+              const quantity = formatProductQuantityRange(
+                product,
+                product.unit ? tr(`product.units.${product.unit as 'kg'}`) : null,
+              );
               return (
               <li key={product.id} className="product-list__item product-list__item--with-media">
                 {image ? (
@@ -72,6 +77,11 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                       : ''}
                     {product.category ? ` · ${t(`categories.${product.category as 'fruits'}`)}` : ''}
                   </p>
+                  {quantity ? (
+                    <p className="product-list__meta">
+                      {t('availableQuantity')}: {quantity}
+                    </p>
+                  ) : null}
                   {product.description ? (
                     <p className="product-list__desc">{product.description}</p>
                   ) : null}
