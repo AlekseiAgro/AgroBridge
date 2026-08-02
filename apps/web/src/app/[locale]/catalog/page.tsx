@@ -65,6 +65,11 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                 product.unit ? tr(`product.units.${product.unit as 'kg'}`) : null,
               );
               const rating = product.farm.sellerRating;
+              const ownerName = product.farm.owner?.displayName?.trim() || null;
+              const showOwner =
+                Boolean(ownerName) &&
+                ownerName!.toLowerCase() !== product.farm.name.trim().toLowerCase();
+
               return (
                 <li
                   key={product.id}
@@ -80,28 +85,47 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                     <Link href={`/products/${product.id}`} className="product-list__title">
                       {product.title}
                     </Link>
-                    <p className="product-list__meta">
-                      <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
-                      {product.farm.region
-                        ? ` · ${formatRegionLabel(product.farm.region, tr) ?? product.farm.region}`
-                        : ''}
-                      {product.category
-                        ? ` · ${t(`categories.${product.category as 'fruits'}`)}`
-                        : ''}
-                    </p>
-                    <div className="product-list__rating">
-                      <span className="product-list__rating-label">{t('sellerRating')}</span>
-                      <RatingStars
-                        value={rating?.average ?? null}
-                        count={rating?.count ?? 0}
-                        size="sm"
-                      />
+
+                    <div className="product-list__seller">
+                      <div className="product-list__seller-main">
+                        <span className="product-list__seller-label">{t('seller')}</span>
+                        <Link href={`/farms/${product.farm.id}`} className="product-list__seller-name">
+                          {product.farm.name}
+                        </Link>
+                        {showOwner && product.farm.owner ? (
+                          <Link
+                            href={`/users/${product.farm.owner.id}`}
+                            className="product-list__seller-person"
+                          >
+                            {ownerName}
+                          </Link>
+                        ) : null}
+                      </div>
+                      <div className="product-list__seller-rating">
+                        <RatingStars
+                          value={rating?.average ?? null}
+                          count={rating?.count ?? 0}
+                          size="sm"
+                        />
+                      </div>
                     </div>
-                    {quantity ? (
-                      <p className="product-list__meta">
-                        {t('availableQuantity')}: {quantity}
-                      </p>
-                    ) : null}
+
+                    <p className="product-list__meta">
+                      {product.farm.region
+                        ? formatRegionLabel(product.farm.region, tr) ?? product.farm.region
+                        : null}
+                      {product.farm.region && product.category ? ' · ' : null}
+                      {product.category
+                        ? t(`categories.${product.category as 'fruits'}`)
+                        : null}
+                      {quantity ? (
+                        <>
+                          {product.farm.region || product.category ? ' · ' : null}
+                          {t('availableQuantity')}: {quantity}
+                        </>
+                      ) : null}
+                    </p>
+
                     {product.description ? (
                       <p className="product-list__desc">{product.description}</p>
                     ) : null}

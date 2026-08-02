@@ -36,7 +36,13 @@ const imageOrderBy: Prisma.ProductImageOrderByWithRelationInput[] = [
 
 const productListInclude = {
   farm: {
-    select: { id: true, name: true, region: true, ownerId: true },
+    select: {
+      id: true,
+      name: true,
+      region: true,
+      ownerId: true,
+      owner: { select: { id: true, displayName: true } },
+    },
   },
   images: {
     orderBy: imageOrderBy,
@@ -50,6 +56,7 @@ const productDetailInclude = {
       name: true,
       region: true,
       ownerId: true,
+      owner: { select: { id: true, displayName: true } },
     },
   },
   images: {
@@ -544,6 +551,10 @@ export class ProductsService {
         name: product.farm.name,
         region: product.farm.region,
         sellerRating: sellerRating ?? { average: null, count: 0 },
+        owner: {
+          id: product.farm.owner?.id ?? product.farm.ownerId,
+          displayName: product.farm.owner?.displayName ?? null,
+        },
       },
     };
   }

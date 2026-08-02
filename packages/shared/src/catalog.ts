@@ -138,6 +138,10 @@ export type ProductSummary = {
     region: string | null;
     /** Aggregate deal rating of the farm owner (seller). */
     sellerRating: RatingSummary;
+    owner: {
+      id: string;
+      displayName: string | null;
+    };
   };
 };
 
