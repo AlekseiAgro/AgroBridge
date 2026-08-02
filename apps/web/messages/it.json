@@ -61,6 +61,12 @@
     "language": "Lingua",
     "howItWorks": "Come funziona"
   },
+  "footer": {
+    "tagline": "Colleghiamo le aziende georgiane con acquirenti in tutto il mondo.",
+    "explore": "Esplora",
+    "account": "Account",
+    "copyright": "© {year} AgroBridge"
+  },
   "catalog": {
     "title": "Catalogo prodotti",
     "subtitle": "Sfoglia le offerte pubblicate delle aziende georgiane.",

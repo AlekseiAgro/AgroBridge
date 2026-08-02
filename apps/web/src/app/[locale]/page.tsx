@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CategoryShowcase } from '@/components/CategoryShowcase';
 import { HowItWorksSection } from '@/components/HowItWorksSection';
+import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { getCurrentUser } from '@/lib/session';
@@ -63,6 +64,7 @@ export default async function HomePage({ params }: Props) {
           <HowItWorksSection />
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

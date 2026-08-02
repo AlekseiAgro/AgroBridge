@@ -61,6 +61,12 @@
     "language": "Langue",
     "howItWorks": "Comment ça marche"
   },
+  "footer": {
+    "tagline": "Nous relions les fermes géorgiennes aux acheteurs du monde entier.",
+    "explore": "Explorer",
+    "account": "Compte",
+    "copyright": "© {year} AgroBridge"
+  },
   "catalog": {
     "title": "Catalogue de produits",
     "subtitle": "Parcourez les offres publiées des fermes géorgiennes.",

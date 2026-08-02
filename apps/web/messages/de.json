@@ -61,6 +61,12 @@
     "language": "Sprache",
     "howItWorks": "So funktioniert’s"
   },
+  "footer": {
+    "tagline": "Wir verbinden georgische Betriebe mit Käufern weltweit.",
+    "explore": "Entdecken",
+    "account": "Konto",
+    "copyright": "© {year} AgroBridge"
+  },
   "catalog": {
     "title": "Produktkatalog",
     "subtitle": "Entdecken Sie veröffentlichte Angebote georgischer Betriebe.",

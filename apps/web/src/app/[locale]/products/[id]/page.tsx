@@ -2,6 +2,7 @@ import type { ProductDetail } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { RfqRequestForm } from '@/components/RfqRequestForm';
+import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
@@ -116,6 +117,7 @@ export default async function ProductDetailPage({ params }: Props) {
           </p>
         ) : null}
       </main>
+      <SiteFooter />
     </div>
   );
 }

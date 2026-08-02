@@ -61,6 +61,12 @@
     "language": "Idioma",
     "howItWorks": "Cómo funciona"
   },
+  "footer": {
+    "tagline": "Conectamos granjas georgianas con compradores de todo el mundo.",
+    "explore": "Explorar",
+    "account": "Cuenta",
+    "copyright": "© {year} AgroBridge"
+  },
   "catalog": {
     "title": "Catálogo de productos",
     "subtitle": "Explora las ofertas publicadas de granjas georgianas.",

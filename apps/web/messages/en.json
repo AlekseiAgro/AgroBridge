@@ -61,6 +61,12 @@
     "language": "Language",
     "howItWorks": "How it works"
   },
+  "footer": {
+    "tagline": "Connecting Georgian farms with buyers worldwide.",
+    "explore": "Explore",
+    "account": "Account",
+    "copyright": "© {year} AgroBridge"
+  },
   "catalog": {
     "title": "Product catalog",
     "subtitle": "Browse published offers from Georgian farms.",

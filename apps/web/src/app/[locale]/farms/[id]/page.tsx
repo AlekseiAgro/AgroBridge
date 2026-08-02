@@ -2,6 +2,7 @@ import type { FarmDetail, RatingSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { RatingStars } from '@/components/RatingStars';
+import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
@@ -88,6 +89,7 @@ export default async function FarmDetailPage({ params }: Props) {
           </ul>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

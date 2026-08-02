@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { HowItWorksSection } from '@/components/HowItWorksSection';
+import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 
 type Props = {
@@ -20,6 +21,7 @@ export default async function HowItWorksPage({ params }: Props) {
           {t('pageNote')}
         </p>
       </main>
+      <SiteFooter />
     </div>
   );
 }
