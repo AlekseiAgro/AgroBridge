@@ -7,3 +7,4 @@ export * from './rfq';
 export * from './chat';
 export * from './rating';
 export * from './cabinet';
+export * from './support';

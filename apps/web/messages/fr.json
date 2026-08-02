@@ -65,7 +65,23 @@
     "tagline": "Nous relions les fermes géorgiennes aux acheteurs du monde entier.",
     "explore": "Explorer",
     "account": "Compte",
+    "support": "Assistance",
     "copyright": "© {year} AgroBridge"
+  },
+  "support": {
+    "title": "Assistance",
+    "subtitle": "Envoyez une demande — notre équipe vous répondra par e-mail.",
+    "emailLabel": "E-mail d’assistance",
+    "emailHint": "Vous pouvez aussi nous écrire directement à cette adresse.",
+    "name": "Votre nom",
+    "email": "Votre e-mail",
+    "subject": "Objet",
+    "message": "Message",
+    "messagePlaceholder": "Décrivez votre question ou problème…",
+    "submit": "Envoyer la demande",
+    "pleaseWait": "Envoi…",
+    "success": "Votre demande a été envoyée. Nous répondrons par e-mail.",
+    "genericError": "Impossible d’envoyer la demande. Réessayez."
   },
   "catalog": {
     "title": "Catalogue de produits",

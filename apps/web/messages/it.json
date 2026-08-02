@@ -65,7 +65,23 @@
     "tagline": "Colleghiamo le aziende georgiane con acquirenti in tutto il mondo.",
     "explore": "Esplora",
     "account": "Account",
+    "support": "Assistenza",
     "copyright": "© {year} AgroBridge"
+  },
+  "support": {
+    "title": "Assistenza",
+    "subtitle": "Invia una richiesta: il team ti risponderà via email.",
+    "emailLabel": "Email di assistenza",
+    "emailHint": "Puoi anche scriverci direttamente a questo indirizzo.",
+    "name": "Il tuo nome",
+    "email": "La tua email",
+    "subject": "Oggetto",
+    "message": "Messaggio",
+    "messagePlaceholder": "Descrivi la domanda o il problema…",
+    "submit": "Invia richiesta",
+    "pleaseWait": "Invio…",
+    "success": "Richiesta inviata. Ti risponderemo via email.",
+    "genericError": "Impossibile inviare la richiesta. Riprova."
   },
   "catalog": {
     "title": "Catalogo prodotti",

@@ -65,7 +65,23 @@
     "tagline": "Wir verbinden georgische Betriebe mit Käufern weltweit.",
     "explore": "Entdecken",
     "account": "Konto",
+    "support": "Support",
     "copyright": "© {year} AgroBridge"
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Senden Sie eine Anfrage — unser Team meldet sich per E-Mail.",
+    "emailLabel": "Support-E-Mail",
+    "emailHint": "Sie können uns auch direkt an diese Adresse schreiben.",
+    "name": "Ihr Name",
+    "email": "Ihre E-Mail",
+    "subject": "Betreff",
+    "message": "Nachricht",
+    "messagePlaceholder": "Beschreiben Sie Ihre Frage oder Ihr Anliegen…",
+    "submit": "Anfrage senden",
+    "pleaseWait": "Wird gesendet…",
+    "success": "Ihre Anfrage wurde gesendet. Wir antworten per E-Mail.",
+    "genericError": "Anfrage konnte nicht gesendet werden. Bitte erneut versuchen."
   },
   "catalog": {
     "title": "Produktkatalog",

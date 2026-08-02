@@ -16,6 +16,9 @@ export async function SiteFooter() {
             AgroBridge
           </Link>
           <p className="site-footer__tagline">{t('tagline')}</p>
+          <Link href="/support" className="button button--primary site-footer__support">
+            {t('support')}
+          </Link>
         </div>
 
         <div className="site-footer__columns">
@@ -23,6 +26,7 @@ export async function SiteFooter() {
             <p className="site-footer__heading">{t('explore')}</p>
             <Link href="/catalog">{tn('catalog')}</Link>
             <Link href="/how-it-works">{tn('howItWorks')}</Link>
+            <Link href="/support">{t('support')}</Link>
           </nav>
 
           <nav className="site-footer__col" aria-label={t('account')}>

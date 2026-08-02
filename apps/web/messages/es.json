@@ -65,7 +65,23 @@
     "tagline": "Conectamos granjas georgianas con compradores de todo el mundo.",
     "explore": "Explorar",
     "account": "Cuenta",
+    "support": "Soporte",
     "copyright": "© {year} AgroBridge"
+  },
+  "support": {
+    "title": "Soporte",
+    "subtitle": "Envía una solicitud y nuestro equipo te responderá por correo.",
+    "emailLabel": "Correo de soporte",
+    "emailHint": "También puedes escribirnos directamente a esta dirección.",
+    "name": "Tu nombre",
+    "email": "Tu correo",
+    "subject": "Asunto",
+    "message": "Mensaje",
+    "messagePlaceholder": "Describe tu pregunta o problema…",
+    "submit": "Enviar solicitud",
+    "pleaseWait": "Enviando…",
+    "success": "Tu solicitud se ha enviado. Responderemos por correo.",
+    "genericError": "No se pudo enviar la solicitud. Inténtalo de nuevo."
   },
   "catalog": {
     "title": "Catálogo de productos",

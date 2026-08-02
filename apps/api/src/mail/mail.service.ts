@@ -48,7 +48,7 @@ export class MailService implements OnModuleInit {
   async send(message: MailMessage): Promise<void> {
     if (!this.transporter) {
       this.logger.log(
-        `[console-mail] to=${message.to} subject=${JSON.stringify(message.subject)}\n${message.text}`,
+        `[console-mail] to=${message.to} subject=${JSON.stringify(message.subject)}${message.replyTo ? ` replyTo=${message.replyTo}` : ''}\n${message.text}`,
       );
       return;
     }
@@ -56,6 +56,7 @@ export class MailService implements OnModuleInit {
     await this.transporter.sendMail({
       from: this.from,
       to: message.to,
+      replyTo: message.replyTo,
       subject: message.subject,
       text: message.text,
       html: message.html,

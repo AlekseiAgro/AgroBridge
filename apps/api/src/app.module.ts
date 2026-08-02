@@ -12,6 +12,7 @@ import { ProductsModule } from './products/products.module';
 import { RatingsModule } from './ratings/ratings.module';
 import { RfqsModule } from './rfqs/rfqs.module';
 import { StorageModule } from './storage/storage.module';
+import { SupportModule } from './support/support.module';
 import { TranslationModule } from './translation/translation.module';
 
 @Module({
@@ -32,6 +33,8 @@ import { TranslationModule } from './translation/translation.module';
     AdminModule,
     RatingsModule,
     CabinetModule,
+    SupportModule,
   ],
 })
 export class AppModule {}
+

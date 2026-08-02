@@ -5,6 +5,7 @@ export type MailMessage = {
   subject: string;
   text: string;
   html?: string;
+  replyTo?: string;
 };
 
 export type MailRecipient = {
