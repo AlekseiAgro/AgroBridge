@@ -4,10 +4,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { FarmDetail, FarmSummary, ModerationStatus } from '@agrobridge/shared';
+import type {
+  FarmDetail,
+  FarmSummary,
+  ModerationStatus,
+  RatingSummary,
+} from '@agrobridge/shared';
 import { ModerationStatus as PrismaModerationStatus } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { PrismaService } from '../prisma/prisma.service';
+import { RatingsService } from '../ratings/ratings.service';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
 
@@ -18,7 +24,10 @@ const publicProductWhere = {
 
 @Injectable()
 export class FarmsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ratings: RatingsService,
+  ) {}
 
   async list(): Promise<FarmSummary[]> {
     const farms = await this.prisma.farm.findMany({
@@ -75,10 +84,14 @@ export class FarmsService {
       throw new NotFoundException('Farm not found');
     }
 
+    const sellerRating = await this.ratings.summaryForUser(farm.owner.id);
+
     return {
       ...this.toSummary(farm),
       createdAt: farm.createdAt.toISOString(),
-      products: farm.products.map((product) => this.toProductSummary(product, farm)),
+      products: farm.products.map((product) =>
+        this.toProductSummary(product, farm, sellerRating),
+      ),
     };
   }
 
@@ -121,10 +134,14 @@ export class FarmsService {
       return null;
     }
 
+    const sellerRating = await this.ratings.summaryForUser(farm.owner.id);
+
     return {
       ...this.toSummary(farm),
       createdAt: farm.createdAt.toISOString(),
-      products: farm.products.map((product) => this.toProductSummary(product, farm)),
+      products: farm.products.map((product) =>
+        this.toProductSummary(product, farm, sellerRating),
+      ),
     };
   }
 
@@ -213,6 +230,7 @@ export class FarmsService {
       }>;
     },
     farm: { id: string; name: string; region: string | null },
+    sellerRating?: RatingSummary | null,
   ) {
     return {
       id: product.id,
@@ -240,6 +258,7 @@ export class FarmsService {
         id: farm.id,
         name: farm.name,
         region: farm.region,
+        sellerRating: sellerRating ?? { average: null, count: 0 },
       },
     };
   }

@@ -1,6 +1,7 @@
 import type { ProductSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CatalogFilters } from '@/components/CatalogFilters';
+import { RatingStars } from '@/components/RatingStars';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
@@ -63,35 +64,49 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                 product,
                 product.unit ? tr(`product.units.${product.unit as 'kg'}`) : null,
               );
+              const rating = product.farm.sellerRating;
               return (
-              <li key={product.id} className="product-list__item product-list__item--with-media">
-                {image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={image.url} alt="" className="product-list__media" />
-                ) : (
-                  <div className="product-list__media product-list__media--empty" aria-hidden />
-                )}
-                <div>
-                  <Link href={`/products/${product.id}`} className="product-list__title">
-                    {product.title}
-                  </Link>
-                  <p className="product-list__meta">
-                    <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
-                    {product.farm.region
-                      ? ` · ${formatRegionLabel(product.farm.region, tr) ?? product.farm.region}`
-                      : ''}
-                    {product.category ? ` · ${t(`categories.${product.category as 'fruits'}`)}` : ''}
-                  </p>
-                  {quantity ? (
+                <li
+                  key={product.id}
+                  className="product-list__item product-list__item--with-media"
+                >
+                  {image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={image.url} alt="" className="product-list__media" />
+                  ) : (
+                    <div className="product-list__media product-list__media--empty" aria-hidden />
+                  )}
+                  <div>
+                    <Link href={`/products/${product.id}`} className="product-list__title">
+                      {product.title}
+                    </Link>
                     <p className="product-list__meta">
-                      {t('availableQuantity')}: {quantity}
+                      <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
+                      {product.farm.region
+                        ? ` · ${formatRegionLabel(product.farm.region, tr) ?? product.farm.region}`
+                        : ''}
+                      {product.category
+                        ? ` · ${t(`categories.${product.category as 'fruits'}`)}`
+                        : ''}
                     </p>
-                  ) : null}
-                  {product.description ? (
-                    <p className="product-list__desc">{product.description}</p>
-                  ) : null}
-                </div>
-              </li>
+                    <div className="product-list__rating">
+                      <span className="product-list__rating-label">{t('sellerRating')}</span>
+                      <RatingStars
+                        value={rating?.average ?? null}
+                        count={rating?.count ?? 0}
+                        size="sm"
+                      />
+                    </div>
+                    {quantity ? (
+                      <p className="product-list__meta">
+                        {t('availableQuantity')}: {quantity}
+                      </p>
+                    ) : null}
+                    {product.description ? (
+                      <p className="product-list__desc">{product.description}</p>
+                    ) : null}
+                  </div>
+                </li>
               );
             })}
           </ul>

@@ -12,11 +12,13 @@ import {
   type ProductDetail,
   type ProductImage,
   type ProductSummary,
+  type RatingSummary,
 } from '@agrobridge/shared';
 import { ModerationStatus as PrismaModerationStatus, Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { StorageService } from '../storage/storage.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { PrismaService } from '../prisma/prisma.service';
+import { RatingsService } from '../ratings/ratings.service';
+import { StorageService } from '../storage/storage.service';
 import { CatalogQueryDto } from './dto/catalog-query.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -34,7 +36,7 @@ const imageOrderBy: Prisma.ProductImageOrderByWithRelationInput[] = [
 
 const productListInclude = {
   farm: {
-    select: { id: true, name: true, region: true },
+    select: { id: true, name: true, region: true, ownerId: true },
   },
   images: {
     orderBy: imageOrderBy,
@@ -68,6 +70,7 @@ export class ProductsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly ratings: RatingsService,
   ) {}
 
   async catalog(query: CatalogQueryDto): Promise<ProductSummary[]> {
@@ -106,7 +109,13 @@ export class ProductsService {
       include: productListInclude,
     });
 
-    return products.map((product) => this.toSummary(product));
+    const ratings = await this.ratings.summariesForUsers(
+      products.map((product) => product.farm.ownerId),
+    );
+
+    return products.map((product) =>
+      this.toSummary(product, ratings.get(product.farm.ownerId)),
+    );
   }
 
   async getById(id: string, viewer?: AuthenticatedUser | null): Promise<ProductDetail> {
@@ -130,7 +139,8 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
-    return this.toDetail(product);
+    const sellerRating = await this.ratings.summaryForUser(product.farm.ownerId);
+    return this.toDetail(product, sellerRating);
   }
 
   async listMine(user: AuthenticatedUser): Promise<ProductSummary[]> {
@@ -142,8 +152,9 @@ export class ProductsService {
       orderBy: { updatedAt: 'desc' },
       include: productListInclude,
     });
+    const sellerRating = await this.ratings.summaryForUser(user.id);
 
-    return products.map((product) => this.toSummary(product));
+    return products.map((product) => this.toSummary(product, sellerRating));
   }
 
   async create(user: AuthenticatedUser, dto: CreateProductDto): Promise<ProductDetail> {
@@ -514,6 +525,7 @@ export class ProductsService {
 
   private toSummary(
     product: ProductWithFarmAndImages | ProductWithOwnerAndImages,
+    sellerRating?: RatingSummary | null,
   ): ProductSummary {
     return {
       id: product.id,
@@ -531,13 +543,17 @@ export class ProductsService {
         id: product.farm.id,
         name: product.farm.name,
         region: product.farm.region,
+        sellerRating: sellerRating ?? { average: null, count: 0 },
       },
     };
   }
 
-  private toDetail(product: ProductWithOwnerAndImages): ProductDetail {
+  private toDetail(
+    product: ProductWithOwnerAndImages,
+    sellerRating?: RatingSummary | null,
+  ): ProductDetail {
     return {
-      ...this.toSummary(product),
+      ...this.toSummary(product, sellerRating),
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
     };

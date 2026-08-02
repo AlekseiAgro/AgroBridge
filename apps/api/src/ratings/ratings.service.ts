@@ -63,19 +63,37 @@ export class RatingsService {
   }
 
   async summaryForUser(userId: string): Promise<RatingSummary> {
-    const aggregate = await this.prisma.rating.aggregate({
-      where: { toUserId: userId },
+    const map = await this.summariesForUsers([userId]);
+    return map.get(userId) ?? { average: null, count: 0 };
+  }
+
+  async summariesForUsers(userIds: string[]): Promise<Map<string, RatingSummary>> {
+    const uniqueIds = [...new Set(userIds.filter(Boolean))];
+    const result = new Map<string, RatingSummary>();
+    for (const id of uniqueIds) {
+      result.set(id, { average: null, count: 0 });
+    }
+    if (uniqueIds.length === 0) {
+      return result;
+    }
+
+    const groups = await this.prisma.rating.groupBy({
+      by: ['toUserId'],
+      where: { toUserId: { in: uniqueIds } },
       _avg: { score: true },
       _count: { _all: true },
     });
 
-    const count = aggregate._count._all;
-    const average =
-      count === 0 || aggregate._avg.score == null
-        ? null
-        : Math.round(aggregate._avg.score * 10) / 10;
+    for (const group of groups) {
+      const count = group._count._all;
+      const average =
+        count === 0 || group._avg.score == null
+          ? null
+          : Math.round(group._avg.score * 10) / 10;
+      result.set(group.toUserId, { average, count });
+    }
 
-    return { average, count };
+    return result;
   }
 
   private toView(rating: {

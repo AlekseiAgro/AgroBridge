@@ -30,11 +30,16 @@ describe('ProductsService', () => {
     delete: jest.fn(),
   };
 
+  const ratings = {
+    summaryForUser: jest.fn().mockResolvedValue({ average: null, count: 0 }),
+    summariesForUsers: jest.fn().mockResolvedValue(new Map()),
+  };
+
   let service: ProductsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new ProductsService(prisma as never, storage as never);
+    service = new ProductsService(prisma as never, storage as never, ratings as never);
   });
 
   it('requires a farm before creating products', async () => {

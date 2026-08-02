@@ -95,6 +95,7 @@ export type FarmDetail = FarmSummary & {
 };
 
 import type { ModerationStatus } from './moderation';
+import type { RatingSummary } from './rating';
 
 export const PRODUCT_IMAGE_MAX_COUNT = 8;
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
@@ -135,6 +136,8 @@ export type ProductSummary = {
     id: string;
     name: string;
     region: string | null;
+    /** Aggregate deal rating of the farm owner (seller). */
+    sellerRating: RatingSummary;
   };
 };
 

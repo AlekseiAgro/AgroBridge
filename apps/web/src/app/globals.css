@@ -1300,6 +1300,24 @@ body {
   color: inherit;
 }
 
+.product-list__rating {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  margin-top: 0.45rem;
+}
+
+.product-list__rating--detail {
+  margin: 0.15rem 0 1rem;
+}
+
+.product-list__rating-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .product-list__desc {
   margin: 0.55rem 0 0;
   line-height: 1.45;

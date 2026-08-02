@@ -118,7 +118,8 @@
     "optional": "(optional)",
     "filtersHint": "Search works across all categories and regions. Category and region are optional filters.",
     "searchPlaceholder": "Product name or description",
-    "availableQuantity": "Available quantity"
+    "availableQuantity": "Available quantity",
+    "sellerRating": "Seller rating"
   },
   "farm": {
     "createTitle": "Create farm profile",

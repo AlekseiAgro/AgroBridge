@@ -1,6 +1,7 @@
 import type { ProductDetail } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { RatingStars } from '@/components/RatingStars';
 import { RfqRequestForm } from '@/components/RfqRequestForm';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -56,6 +57,14 @@ export default async function ProductDetailPage({ params }: Props) {
             ? ` · ${formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region}`
             : ''}
         </p>
+        <div className="product-list__rating product-list__rating--detail">
+          <span className="product-list__rating-label">{tc('sellerRating')}</span>
+          <RatingStars
+            value={product.farm.sellerRating?.average ?? null}
+            count={product.farm.sellerRating?.count ?? 0}
+            size="sm"
+          />
+        </div>
 
         {product.images.length > 0 ? (
           <div className="product-gallery">
