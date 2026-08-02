@@ -81,6 +81,9 @@ export default async function AccountPage({ params }: Props) {
               {tn('myRequests')}
             </Link>
           ) : null}
+          <Link className="button button--ghost" href="/dashboard/chat">
+            {tn('chat')}
+          </Link>
         </div>
       </main>
     </div>

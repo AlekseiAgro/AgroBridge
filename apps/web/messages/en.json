@@ -54,7 +54,8 @@
     "login": "Log in",
     "register": "Sign up",
     "inbox": "Inbox",
-    "myRequests": "My requests"
+    "myRequests": "My requests",
+    "chat": "Chat"
   },
   "catalog": {
     "title": "Product catalog",
@@ -165,6 +166,30 @@
       "accept": "Accept offer",
       "decline": "Decline",
       "cancel": "Cancel request"
+    }
+  },
+  "chat": {
+    "listTitle": "Messages",
+    "listSubtitle": "Chat with trading partners in your own language. AI translates for them.",
+    "listEmpty": "No conversations yet. Open chat from a quote request.",
+    "noMessagesYet": "No messages yet",
+    "conversation": "Conversation",
+    "openChat": "Open chat",
+    "pleaseWait": "Please wait…",
+    "genericError": "Something went wrong. Please try again.",
+    "chattingWith": "Chat with {name}",
+    "aiHint": "AI translation enabled",
+    "emptyThread": "Say hello to start the conversation.",
+    "message": "Message",
+    "messagePlaceholder": "Write in your language…",
+    "send": "Send",
+    "showOriginal": "Show original",
+    "showTranslation": "Show translation",
+    "translation": {
+      "pending": "Translating…",
+      "completed": "Translated",
+      "failed": "Translation failed",
+      "none": "Original"
     }
   }
 }

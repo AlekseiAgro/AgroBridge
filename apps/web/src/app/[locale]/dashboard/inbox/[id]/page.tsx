@@ -1,6 +1,7 @@
 import type { RfqSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { OpenChatButton } from '@/components/OpenChatButton';
 import { RfqActionButton } from '@/components/RfqActionButton';
 import { RfqOfferForm } from '@/components/RfqOfferForm';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -84,6 +85,10 @@ export default async function FarmerInboxDetailPage({ params }: Props) {
             </div>
           </>
         ) : null}
+
+        <div className="home__actions" style={{ marginTop: '1.25rem' }}>
+          <OpenChatButton rfqId={rfq.id} />
+        </div>
       </main>
     </div>
   );

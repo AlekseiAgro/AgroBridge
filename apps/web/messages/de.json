@@ -54,7 +54,8 @@
     "login": "Anmelden",
     "register": "Registrieren",
     "inbox": "Posteingang",
-    "myRequests": "Meine Anfragen"
+    "myRequests": "Meine Anfragen",
+    "chat": "Chat"
   },
   "catalog": {
     "title": "Produktkatalog",
@@ -165,6 +166,30 @@
       "accept": "Annehmen",
       "decline": "Ablehnen",
       "cancel": "Anfrage stornieren"
+    }
+  },
+  "chat": {
+    "listTitle": "Nachrichten",
+    "listSubtitle": "Chatten Sie in Ihrer Sprache — KI übersetzt für den Partner.",
+    "listEmpty": "Noch keine Unterhaltungen. Öffnen Sie den Chat über eine Preisanfrage.",
+    "noMessagesYet": "Noch keine Nachrichten",
+    "conversation": "Unterhaltung",
+    "openChat": "Chat öffnen",
+    "pleaseWait": "Bitte warten…",
+    "genericError": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "chattingWith": "Chat mit {name}",
+    "aiHint": "KI-Übersetzung aktiv",
+    "emptyThread": "Schreiben Sie die erste Nachricht.",
+    "message": "Nachricht",
+    "messagePlaceholder": "Schreiben Sie in Ihrer Sprache…",
+    "send": "Senden",
+    "showOriginal": "Original anzeigen",
+    "showTranslation": "Übersetzung anzeigen",
+    "translation": {
+      "pending": "Wird übersetzt…",
+      "completed": "Übersetzt",
+      "failed": "Übersetzung fehlgeschlagen",
+      "none": "Original"
     }
   }
 }

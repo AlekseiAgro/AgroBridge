@@ -1,6 +1,7 @@
 import type { RfqSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { OpenChatButton } from '@/components/OpenChatButton';
 import { RfqActionButton } from '@/components/RfqActionButton';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link, redirect } from '@/i18n/navigation';
@@ -89,6 +90,7 @@ export default async function BuyerRfqDetailPage({ params }: Props) {
               <RfqActionButton rfqId={rfq.id} action="decline" />
             </>
           ) : null}
+          <OpenChatButton rfqId={rfq.id} />
         </div>
       </main>
     </div>

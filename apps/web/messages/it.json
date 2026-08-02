@@ -54,7 +54,8 @@
     "login": "Accedi",
     "register": "Registrati",
     "inbox": "Posta in arrivo",
-    "myRequests": "Le mie richieste"
+    "myRequests": "Le mie richieste",
+    "chat": "Chat"
   },
   "catalog": {
     "title": "Catalogo prodotti",
@@ -165,6 +166,30 @@
       "accept": "Accetta",
       "decline": "Rifiuta",
       "cancel": "Annulla richiesta"
+    }
+  },
+  "chat": {
+    "listTitle": "Messaggi",
+    "listSubtitle": "Scrivi nella tua lingua — l’IA traduce per l’interlocutore.",
+    "listEmpty": "Nessuna conversazione. Apri la chat da una richiesta di preventivo.",
+    "noMessagesYet": "Nessun messaggio",
+    "conversation": "Conversazione",
+    "openChat": "Apri chat",
+    "pleaseWait": "Attendere…",
+    "genericError": "Qualcosa è andato storto. Riprova.",
+    "chattingWith": "Chat con {name}",
+    "aiHint": "Traduzione IA attiva",
+    "emptyThread": "Scrivi il primo messaggio.",
+    "message": "Messaggio",
+    "messagePlaceholder": "Scrivi nella tua lingua…",
+    "send": "Invia",
+    "showOriginal": "Mostra originale",
+    "showTranslation": "Mostra traduzione",
+    "translation": {
+      "pending": "Traduzione…",
+      "completed": "Tradotto",
+      "failed": "Traduzione non riuscita",
+      "none": "Originale"
     }
   }
 }
