@@ -101,8 +101,8 @@ body {
 
 .home-hero__veil {
   background:
-    linear-gradient(180deg, rgba(12, 28, 16, 0.58) 0%, rgba(12, 28, 16, 0.42) 42%, rgba(12, 28, 16, 0.72) 100%),
-    linear-gradient(90deg, rgba(18, 40, 24, 0.35), transparent 55%);
+    linear-gradient(180deg, rgba(10, 22, 14, 0.62) 0%, rgba(10, 22, 14, 0.48) 40%, rgba(10, 22, 14, 0.78) 100%),
+    linear-gradient(90deg, rgba(14, 32, 18, 0.28), transparent 60%);
 }
 
 .home-hero__shell {
