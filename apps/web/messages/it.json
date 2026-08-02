@@ -15,7 +15,7 @@
     "account": "Il mio account",
     "ctaFarm": "Gestisci l’azienda",
     "categoriesTitle": "Gruppi di prodotti",
-    "categoriesLead": "Frutta, verdura, noci, vino, latticini, miele ed erbe dai produttori georgiani."
+    "categoriesLead": "Frutta, verdura, bacche, noci, vino, latticini, miele, acqua minerale, spezie, tè, alloro, oli essenziali e prodotti biologici dai produttori georgiani."
   },
   "auth": {
     "loginTitle": "Bentornato",
@@ -96,11 +96,17 @@
     "categories": {
       "fruits": "Frutta",
       "vegetables": "Verdura",
+      "berries": "Bacche",
       "nuts": "Noci",
       "wine": "Vino",
       "dairy": "Latticini",
       "honey": "Miele",
-      "herbs": "Erbe",
+      "mineralWater": "Acqua minerale",
+      "spices": "Spezie",
+      "tea": "Tè",
+      "bayLeaf": "Alloro",
+      "essentialOils": "Oli essenziali",
+      "organic": "Prodotti biologici",
       "other": "Altro"
     },
     "allRegions": "Tutte le regioni",

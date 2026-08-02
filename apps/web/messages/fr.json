@@ -15,7 +15,7 @@
     "account": "Mon compte",
     "ctaFarm": "Gérer ma ferme",
     "categoriesTitle": "Groupes de produits",
-    "categoriesLead": "Fruits, légumes, noix, vin, produits laitiers, miel et herbes des producteurs géorgiens."
+    "categoriesLead": "Fruits, légumes, baies, noix, vin, produits laitiers, miel, eau minérale, épices, thé, feuille de laurier, huiles essentielles et produits biologiques des producteurs géorgiens."
   },
   "auth": {
     "loginTitle": "Bon retour",
@@ -96,11 +96,17 @@
     "categories": {
       "fruits": "Fruits",
       "vegetables": "Légumes",
+      "berries": "Baies",
       "nuts": "Noix",
       "wine": "Vin",
       "dairy": "Produits laitiers",
       "honey": "Miel",
-      "herbs": "Herbes",
+      "mineralWater": "Eau minérale",
+      "spices": "Épices",
+      "tea": "Thé",
+      "bayLeaf": "Feuille de laurier",
+      "essentialOils": "Huiles essentielles",
+      "organic": "Produits biologiques",
       "other": "Autre"
     },
     "allRegions": "Toutes les régions",

@@ -1,11 +1,17 @@
 export const PRODUCT_CATEGORIES = [
   'fruits',
   'vegetables',
+  'berries',
   'nuts',
   'wine',
   'dairy',
   'honey',
-  'herbs',
+  'mineralWater',
+  'spices',
+  'tea',
+  'bayLeaf',
+  'essentialOils',
+  'organic',
   'other',
 ] as const;
 
@@ -19,11 +25,17 @@ export type ProductUnit = (typeof PRODUCT_UNITS)[number];
 export const CATEGORY_DEFAULT_UNITS: Record<ProductCategory, ProductUnit> = {
   fruits: 'kg',
   vegetables: 'kg',
+  berries: 'kg',
   nuts: 'kg',
   wine: 'bottle',
   dairy: 'kg',
   honey: 'kg',
-  herbs: 'kg',
+  mineralWater: 'liter',
+  spices: 'kg',
+  tea: 'kg',
+  bayLeaf: 'kg',
+  essentialOils: 'liter',
+  organic: 'kg',
   other: 'kg',
 };
 

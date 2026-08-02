@@ -133,12 +133,12 @@ const FARMERS_BY_CATEGORY: Record<string, DemoFarmer[]> = {
       email: 'farmer-fruits-4@agrobridge.local',
       displayName: 'Levan Maisuradze',
       locale: LocaleCode.ru,
-      farmName: 'Adjara Berry Farm',
-      region: 'adjara',
-      farmDescription: 'Blueberries and wild-style berries from Adjara.',
+      farmName: 'Kakheti Persimmon Grove',
+      region: 'kakheti',
+      farmDescription: 'Late-season persimmons and table fruit for export.',
       product: {
-        title: 'Adjara blueberries',
-        description: 'Cool-climate blueberries, IQF-ready or fresh pack.',
+        title: 'Kakheti persimmons',
+        description: 'Sweet persimmons, sorted for fresh packing and drying.',
         unit: 'kg',
       },
     },
@@ -387,14 +387,83 @@ const FARMERS_BY_CATEGORY: Record<string, DemoFarmer[]> = {
       },
     },
   ],
-  herbs: [
+  berries: [
     {
-      email: 'farmer-herbs-1@agrobridge.local',
+      email: 'farmer-berries-1@agrobridge.local',
+      displayName: 'Salome Beridze',
+      locale: LocaleCode.ka,
+      farmName: 'Adjara Berry Farm',
+      region: 'adjara',
+      farmDescription: 'Blueberries and raspberries from coastal hills.',
+      product: {
+        title: 'Adjara blueberries',
+        description: 'Firm blueberries packed for fresh retail and freezing.',
+        unit: 'kg',
+      },
+    },
+    {
+      email: 'farmer-berries-2@agrobridge.local',
+      displayName: 'Irakli Gelashvili',
+      locale: LocaleCode.en,
+      farmName: 'Kartli Raspberry Fields',
+      region: 'shidaKartli',
+      farmDescription: 'Seasonal raspberries for juice and fresh markets.',
+      product: {
+        title: 'Fresh raspberries',
+        description: 'Same-day harvest raspberries in ventilated trays.',
+        unit: 'kg',
+      },
+    },
+    {
+      email: 'farmer-berries-3@agrobridge.local',
+      displayName: 'Vera Lomidze',
+      locale: LocaleCode.ru,
+      farmName: 'Guria Strawberry Cooperative',
+      region: 'guria',
+      farmDescription: 'Greenhouse and open-field strawberries.',
+      product: {
+        title: 'Guria strawberries',
+        description: 'Sweet early strawberries for regional buyers.',
+        unit: 'box',
+      },
+    },
+  ],
+  mineralWater: [
+    {
+      email: 'farmer-mineralWater-1@agrobridge.local',
+      displayName: 'Davit Kobaladze',
+      locale: LocaleCode.ka,
+      farmName: 'Borjomi Valley Springs',
+      region: 'samtskheJavakheti',
+      farmDescription: 'Bottled mineral water from highland springs.',
+      product: {
+        title: 'Natural sparkling mineral water',
+        description: 'Naturally carbonated mineral water, 0.5–1.5 L bottles.',
+        unit: 'liter',
+      },
+    },
+    {
+      email: 'farmer-mineralWater-2@agrobridge.local',
+      displayName: 'Helen Ward',
+      locale: LocaleCode.en,
+      farmName: 'Sairme Spring Co.',
+      region: 'imereti',
+      farmDescription: 'Still mineral water for HORECA and export.',
+      product: {
+        title: 'Still mineral water',
+        description: 'Low-mineralization still water in PET and glass.',
+        unit: 'liter',
+      },
+    },
+  ],
+  spices: [
+    {
+      email: 'farmer-spices-1@agrobridge.local',
       displayName: 'Nana Metreveli',
       locale: LocaleCode.ka,
-      farmName: 'Adjara Herb Gardens',
+      farmName: 'Adjara Spice Gardens',
       region: 'adjara',
-      farmDescription: 'Culinary herbs and dried tea blends.',
+      farmDescription: 'Dried Georgian spices and seasoning blends.',
       product: {
         title: 'Dried Georgian blue fenugreek',
         description: 'Utskho suneli / blue fenugreek for spice blends.',
@@ -402,28 +471,153 @@ const FARMERS_BY_CATEGORY: Record<string, DemoFarmer[]> = {
       },
     },
     {
-      email: 'farmer-herbs-2@agrobridge.local',
+      email: 'farmer-spices-2@agrobridge.local',
+      displayName: 'Irina Dolidze',
+      locale: LocaleCode.ru,
+      farmName: 'Kakheti Spice Collective',
+      region: 'kakheti',
+      farmDescription: 'Mountain thyme, savory, and mixed spice packs.',
+      product: {
+        title: 'Dried thyme and savory mix',
+        description: 'Mountain thyme and savory for spice importers.',
+        unit: 'kg',
+      },
+    },
+    {
+      email: 'farmer-spices-3@agrobridge.local',
+      displayName: 'Giorgi Abashidze',
+      locale: LocaleCode.en,
+      farmName: 'Imereti Chili & Spice',
+      region: 'imereti',
+      farmDescription: 'Dried peppers and Georgian spice mixes.',
+      product: {
+        title: 'Dried adjika spice blend',
+        description: 'Traditional adjika dry blend for food processors.',
+        unit: 'kg',
+      },
+    },
+  ],
+  tea: [
+    {
+      email: 'farmer-tea-1@agrobridge.local',
       displayName: 'Otar Kekelidze',
       locale: LocaleCode.en,
-      farmName: 'Imereti Mint & Basil',
-      region: 'imereti',
-      farmDescription: 'Fresh culinary herbs for restaurants.',
+      farmName: 'Guria Tea Gardens',
+      region: 'guria',
+      farmDescription: 'Georgian black and green tea from coastal plantations.',
       product: {
-        title: 'Fresh basil bunches',
-        description: 'Genovese-style basil, same-day harvest packing.',
+        title: 'Guria black tea',
+        description: 'Orthodox leaf black tea, export-ready packing.',
+        unit: 'kg',
+      },
+    },
+    {
+      email: 'farmer-tea-2@agrobridge.local',
+      displayName: 'Tamar Chikovani',
+      locale: LocaleCode.ka,
+      farmName: 'Samegrelo Green Tea',
+      region: 'samegreloZemoSvaneti',
+      farmDescription: 'Small-batch green tea and herbal infusions.',
+      product: {
+        title: 'Georgian green tea',
+        description: 'Light green tea with floral notes, bulk and retail packs.',
+        unit: 'kg',
+      },
+    },
+  ],
+  bayLeaf: [
+    {
+      email: 'farmer-bayLeaf-1@agrobridge.local',
+      displayName: 'Zurab Maisuradze',
+      locale: LocaleCode.ka,
+      farmName: 'Adjara Laurel Grove',
+      region: 'adjara',
+      farmDescription: 'Dried bay leaves from coastal laurel trees.',
+      product: {
+        title: 'Dried bay leaves',
+        description: 'Whole dried bay leaves, sorted for food industry use.',
+        unit: 'kg',
+      },
+    },
+    {
+      email: 'farmer-bayLeaf-2@agrobridge.local',
+      displayName: 'Marina Kvitsiani',
+      locale: LocaleCode.ru,
+      farmName: 'Guria Laurel Co-op',
+      region: 'guria',
+      farmDescription: 'Bay leaf harvesting and sun-drying cooperative.',
+      product: {
+        title: 'Premium bay leaf grade A',
+        description: 'Large whole leaves with strong aroma, bulk bags.',
+        unit: 'kg',
+      },
+    },
+  ],
+  essentialOils: [
+    {
+      email: 'farmer-essentialOils-1@agrobridge.local',
+      displayName: 'Luka Tsiklauri',
+      locale: LocaleCode.en,
+      farmName: 'Kakheti Distillery Botanica',
+      region: 'kakheti',
+      farmDescription: 'Essential oils from local aromatic plants.',
+      product: {
+        title: 'Lavender essential oil',
+        description: 'Steam-distilled lavender oil for cosmetics and wellness.',
+        unit: 'liter',
+      },
+    },
+    {
+      email: 'farmer-essentialOils-2@agrobridge.local',
+      displayName: 'Ana Kharadze',
+      locale: LocaleCode.ka,
+      farmName: 'Adjara Citrus Oils',
+      region: 'adjara',
+      farmDescription: 'Cold-pressed citrus peel oils.',
+      product: {
+        title: 'Mandarin peel essential oil',
+        description: 'Cold-pressed mandarin oil for fragrance and food use.',
+        unit: 'liter',
+      },
+    },
+  ],
+  organic: [
+    {
+      email: 'farmer-organic-1@agrobridge.local',
+      displayName: 'Nino Javakhishvili',
+      locale: LocaleCode.ka,
+      farmName: 'Organic Kartli Fields',
+      region: 'shidaKartli',
+      farmDescription: 'Certified organic vegetables and greens.',
+      product: {
+        title: 'Organic mixed vegetables',
+        description: 'Seasonal organic crate for retailers and restaurants.',
         unit: 'box',
       },
     },
     {
-      email: 'farmer-herbs-3@agrobridge.local',
-      displayName: 'Irina Dolidze',
-      locale: LocaleCode.ru,
-      farmName: 'Kakheti Saffron & Herbs',
+      email: 'farmer-organic-2@agrobridge.local',
+      displayName: 'Peter Klein',
+      locale: LocaleCode.en,
+      farmName: 'Organic Kakheti Orchard',
       region: 'kakheti',
-      farmDescription: 'Specialty herbs and limited saffron trials.',
+      farmDescription: 'Organic fruit grown without synthetic pesticides.',
       product: {
-        title: 'Dried thyme and savory mix',
-        description: 'Mountain thyme and savory for spice importers.',
+        title: 'Organic dessert apples',
+        description: 'Certified organic apples, graded for fresh market.',
+        unit: 'kg',
+      },
+    },
+    {
+      email: 'farmer-organic-3@agrobridge.local',
+      displayName: 'Elena Sokolova',
+      locale: LocaleCode.ru,
+      farmName: 'Organic Imereti Honey & Produce',
+      region: 'imereti',
+      farmDescription: 'Organic honey and small-batch farm produce.',
+      product: {
+        title: 'Organic wildflower honey',
+        description: 'Organic-certified wildflower honey in bulk jars.',
         unit: 'kg',
       },
     },
@@ -560,12 +754,50 @@ async function seedFarmer(
   return { user, farm, product };
 }
 
+async function removeObsoleteDemoData() {
+  const obsoleteEmails = [
+    'farmer-herbs-1@agrobridge.local',
+    'farmer-herbs-2@agrobridge.local',
+    'farmer-herbs-3@agrobridge.local',
+  ];
+
+  const obsoleteUsers = await prisma.user.findMany({
+    where: { email: { in: obsoleteEmails } },
+    select: { id: true, farm: { select: { products: { select: { images: true } } } } },
+  });
+  for (const user of obsoleteUsers) {
+    for (const product of user.farm?.products ?? []) {
+      for (const image of product.images) {
+        await rm(join(UPLOADS_DIR, image.key), { force: true }).catch(() => undefined);
+      }
+    }
+  }
+  if (obsoleteUsers.length > 0) {
+    await prisma.user.deleteMany({ where: { email: { in: obsoleteEmails } } });
+  }
+
+  const leftoverHerbs = await prisma.product.findMany({
+    where: { category: 'herbs' },
+    select: { id: true, images: { select: { key: true } } },
+  });
+  for (const product of leftoverHerbs) {
+    for (const image of product.images) {
+      await rm(join(UPLOADS_DIR, image.key), { force: true }).catch(() => undefined);
+    }
+  }
+  if (leftoverHerbs.length > 0) {
+    await prisma.product.deleteMany({ where: { category: 'herbs' } });
+  }
+}
+
 async function main() {
   const adminEmail = (
     process.env.ADMIN_EMAIL ?? 'admin@agrobridge.local'
   ).toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD ?? 'ChangeMeAdmin1';
   const adminDisplayName = process.env.ADMIN_DISPLAY_NAME ?? 'AgroBridge Admin';
+
+  await removeObsoleteDemoData();
 
   const [adminPasswordHash, demoPasswordHash] = await Promise.all([
     bcrypt.hash(adminPassword, 12),

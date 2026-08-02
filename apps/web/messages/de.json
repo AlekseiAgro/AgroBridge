@@ -15,7 +15,7 @@
     "account": "Mein Konto",
     "ctaFarm": "Betrieb verwalten",
     "categoriesTitle": "Produktgruppen",
-    "categoriesLead": "Obst, Gemüse, Nüsse, Wein, Milchprodukte, Honig und Kräuter von georgischen Erzeugern entdecken."
+    "categoriesLead": "Obst, Gemüse, Beeren, Nüsse, Wein, Milchprodukte, Honig, Mineralwasser, Gewürze, Tee, Lorbeerblatt, ätherische Öle und Bioprodukte von georgischen Erzeugern."
   },
   "auth": {
     "loginTitle": "Willkommen zurück",
@@ -96,11 +96,17 @@
     "categories": {
       "fruits": "Obst",
       "vegetables": "Gemüse",
+      "berries": "Beeren",
       "nuts": "Nüsse",
       "wine": "Wein",
       "dairy": "Milchprodukte",
       "honey": "Honig",
-      "herbs": "Kräuter",
+      "mineralWater": "Mineralwasser",
+      "spices": "Gewürze",
+      "tea": "Tee",
+      "bayLeaf": "Lorbeerblatt",
+      "essentialOils": "Ätherische Öle",
+      "organic": "Bioprodukte",
       "other": "Sonstiges"
     },
     "allRegions": "Alle Regionen",

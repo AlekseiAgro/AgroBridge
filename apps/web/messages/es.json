@@ -15,7 +15,7 @@
     "account": "Mi cuenta",
     "ctaFarm": "Gestionar mi granja",
     "categoriesTitle": "Grupos de productos",
-    "categoriesLead": "Frutas, verduras, frutos secos, vino, lácteos, miel y hierbas de productores georgianos."
+    "categoriesLead": "Frutas, verduras, bayas, frutos secos, vino, lácteos, miel, agua mineral, especias, té, hoja de laurel, aceites esenciales y productos orgánicos de productores georgianos."
   },
   "auth": {
     "loginTitle": "Bienvenido de nuevo",
@@ -96,12 +96,18 @@
     "categories": {
       "fruits": "Frutas",
       "vegetables": "Verduras",
+      "berries": "Bayas",
       "nuts": "Frutos secos",
       "wine": "Vino",
       "dairy": "Lácteos",
       "honey": "Miel",
-      "herbs": "Hierbas",
-      "other": "Otros"
+      "mineralWater": "Agua mineral",
+      "spices": "Especias",
+      "tea": "Té",
+      "bayLeaf": "Hoja de laurel",
+      "essentialOils": "Aceites esenciales",
+      "organic": "Productos orgánicos",
+      "other": "Otro"
     },
     "allRegions": "Todas las regiones",
     "optional": "(opcional)",
