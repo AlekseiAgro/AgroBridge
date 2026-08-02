@@ -456,27 +456,35 @@ body {
 
 .language-switcher__button {
   list-style: none;
-  min-height: 2.4rem;
-  min-width: 8.5rem;
-  padding: 0.4rem 2rem 0.4rem 0.7rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  min-width: 2.35rem;
+  min-height: 2.35rem;
+  padding: 0;
   border: 1px solid var(--line);
-  border-radius: 0.55rem;
-  background:
-    linear-gradient(45deg, transparent 50%, var(--muted) 50%) no-repeat right 0.85rem center / 0.4rem 0.4rem,
-    linear-gradient(135deg, var(--muted) 50%, transparent 50%) no-repeat right 0.55rem center / 0.4rem 0.4rem,
-    var(--surface);
-  color: var(--foreground);
-  font: inherit;
-  text-align: left;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--brand-deep);
   cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .language-switcher__button::-webkit-details-marker {
   display: none;
 }
 
+.language-switcher__icon {
+  display: block;
+}
+
+.language-switcher__button:hover,
 .language-switcher[open] > .language-switcher__button {
   border-color: rgba(47, 107, 58, 0.35);
+  background: rgba(47, 107, 58, 0.08);
+  color: var(--brand);
 }
 
 .language-switcher__menu {
@@ -486,7 +494,7 @@ body {
   z-index: 20;
   list-style: none;
   margin: 0;
-  min-width: 100%;
+  min-width: 9.5rem;
   padding: 0.3rem;
   border: 1px solid var(--line);
   border-radius: 0.55rem;
@@ -717,12 +725,16 @@ body {
 }
 
 .site-header--light .language-switcher__button {
-  background:
-    linear-gradient(45deg, transparent 50%, rgba(244, 248, 242, 0.9) 50%) no-repeat right 0.85rem center / 0.4rem 0.4rem,
-    linear-gradient(135deg, rgba(244, 248, 242, 0.9) 50%, transparent 50%) no-repeat right 0.55rem center / 0.4rem 0.4rem,
-    rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.35);
   color: #f4f8f2;
+}
+
+.site-header--light .language-switcher__button:hover,
+.site-header--light .language-switcher[open] > .language-switcher__button {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
 }
 
 .site-header--light .language-switcher__menu {
