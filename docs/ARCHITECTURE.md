@@ -53,12 +53,14 @@
 - Web stores the access token in an httpOnly cookie (`agrobridge_token`) via `/api/auth/*` route handlers.
 - Protected API routes use `JwtAuthGuard` and optional `RolesGuard`.
 
-## Chat translation flow (planned)
+## Chat translation flow
 
-1. Sender writes in their language.
-2. API stores `sourceText` + `sourceLocale`.
-3. Background job translates into recipient locale.
-4. Recipient sees translation by default; can open the original.
+1. Conversation is 1:1 (`farmerId` + `buyerId`), usually opened from an RFQ.
+2. Sender writes in their language; API stores `sourceText` + `sourceLocale`.
+3. `TranslationService` translates into the recipient locale (`mock` or `openai`).
+4. `MessageTranslation` caches the result (`pending` / `completed` / `failed`).
+5. Recipient sees translation by default and can toggle the original.
+6. Web polls the conversation every few seconds for new messages (WebSockets later).
 
 ## Out of scope for early MVP
 

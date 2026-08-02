@@ -97,7 +97,16 @@ Flow:
 
 Statuses: `pending` → `offered` → `accepted` | `declined` (or `cancelled` while pending)
 
+## Chat + AI translation (current step)
+
+- Open chat from an RFQ (`Open chat`) or `/dashboard/chat`
+- Each user writes in their own language (profile locale)
+- Messages are stored as originals; translations are cached per recipient locale
+- Providers: `TRANSLATION_PROVIDER=mock` (default) or `openai` (+ `OPENAI_API_KEY`)
+- UI shows translation by default with “Show original”
+
 ## Next implementation steps
 
-1. Chat with AI translation
-2. Admin moderation
+1. Admin moderation
+2. Product photos / object storage
+3. Email notifications
