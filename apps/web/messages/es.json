@@ -56,7 +56,8 @@
     "inbox": "Bandeja de entrada",
     "myRequests": "Mis solicitudes",
     "chat": "Chat",
-    "admin": "Admin"
+    "admin": "Admin",
+    "language": "Idioma"
   },
   "catalog": {
     "title": "Catálogo de productos",

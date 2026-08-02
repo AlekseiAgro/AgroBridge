@@ -56,7 +56,8 @@
     "inbox": "Posta in arrivo",
     "myRequests": "Le mie richieste",
     "chat": "Chat",
-    "admin": "Admin"
+    "admin": "Admin",
+    "language": "Lingua"
   },
   "catalog": {
     "title": "Catalogo prodotti",

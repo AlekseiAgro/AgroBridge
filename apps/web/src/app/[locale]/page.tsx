@@ -18,7 +18,7 @@ export default async function HomePage({ params }: Props) {
       <SiteHeader />
 
       <main className="home__hero">
-        <p className="home__brand">{t('brand')}</p>
+        <p className="home__brand">AgroBridge</p>
         <h1 className="home__headline">{t('headline')}</h1>
         <p className="home__subtitle">{t('subtitle')}</p>
 

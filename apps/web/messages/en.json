@@ -56,7 +56,8 @@
     "inbox": "Inbox",
     "myRequests": "My requests",
     "chat": "Chat",
-    "admin": "Admin"
+    "admin": "Admin",
+    "language": "Language"
   },
   "catalog": {
     "title": "Product catalog",

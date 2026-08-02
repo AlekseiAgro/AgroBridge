@@ -2,18 +2,24 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
-import { Source_Sans_3, Fraunces } from 'next/font/google';
+import { Source_Sans_3, Fraunces, Noto_Sans_Georgian } from 'next/font/google';
 import { routing } from '@/i18n/routing';
 import '../globals.css';
 
 const sans = Source_Sans_3({
   variable: '--font-agro-sans',
-  subsets: ['latin', 'cyrillic'],
+  subsets: ['latin', 'cyrillic', 'cyrillic-ext'],
+});
+
+const georgian = Noto_Sans_Georgian({
+  variable: '--font-agro-georgian',
+  subsets: ['georgian'],
+  weight: ['400', '600', '700'],
 });
 
 const display = Fraunces({
   variable: '--font-agro-display',
-  subsets: ['latin'],
+  subsets: ['latin', 'latin-ext'],
 });
 
 type Props = {
@@ -47,7 +53,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={locale}>
-      <body className={`${sans.variable} ${display.variable} antialiased`}>
+      <body className={`${sans.variable} ${georgian.variable} ${display.variable} antialiased`}>
         <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
       </body>
     </html>
