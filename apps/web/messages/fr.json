@@ -473,5 +473,24 @@
         }
       }
     }
+  },
+  "profile": {
+    "eyebrow": "Profil public",
+    "anonymous": "Utilisateur AgroBridge",
+    "memberSince": "Sur AgroBridge depuis {date}",
+    "rating": "Note de transaction",
+    "ratingHint": "Basée sur les deals terminés. Acheteurs et vendeurs s'évaluent mutuellement.",
+    "statsTitle": "Activité",
+    "completedDeals": "Deals terminés",
+    "ratingAverage": "Note moyenne",
+    "ratingCount": "Avis reçus",
+    "farmTitle": "Profil de ferme",
+    "regionUnknown": "Région non précisée",
+    "productCount": "{count} produits publiés",
+    "viewProfile": "Voir le profil",
+    "viewPublicProfile": "Voir le profil public",
+    "backToCabinet": "Retour au cabinet",
+    "buyer": "Acheteur",
+    "seller": "Vendeur"
   }
 }

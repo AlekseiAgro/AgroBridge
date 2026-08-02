@@ -52,7 +52,10 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
           <div>
             <h1>{request.title}</h1>
             <p className="page__subtitle">
-              {t(`statuses.${request.status}`)} · {buyerName}
+              {t(`statuses.${request.status}`)} ·{' '}
+              <Link href={`/users/${request.buyer.id}`} className="profile-link">
+                {buyerName}
+              </Link>
             </p>
           </div>
           {isBuyer && user?.id === request.buyer.id ? (

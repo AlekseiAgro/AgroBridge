@@ -15,6 +15,7 @@ import { RfqsModule } from './rfqs/rfqs.module';
 import { StorageModule } from './storage/storage.module';
 import { SupportModule } from './support/support.module';
 import { TranslationModule } from './translation/translation.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { TranslationModule } from './translation/translation.module';
     ChatModule,
     AdminModule,
     RatingsModule,
+    UsersModule,
     CabinetModule,
     SupportModule,
   ],

@@ -35,7 +35,11 @@ export default async function ChatDetailPage({ params }: Props) {
         <p className="eyebrow">
           <Link href="/dashboard/chat">{t('listTitle')}</Link>
         </p>
-        <h1>{conversation.peer.displayName || t('conversation')}</h1>
+        <h1>
+          <Link href={`/users/${conversation.peer.id}`} className="profile-link">
+            {conversation.peer.displayName || t('conversation')}
+          </Link>
+        </h1>
         <ChatRoom conversationId={conversation.id} initial={conversation} />
     </main>
   );

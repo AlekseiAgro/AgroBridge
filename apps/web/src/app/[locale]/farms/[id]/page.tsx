@@ -20,6 +20,7 @@ export default async function FarmDetailPage({ params }: Props) {
   const t = await getTranslations('farm');
   const tc = await getTranslations('catalog');
   const tp = await getTranslations('product');
+  const tProfile = await getTranslations('profile');
   const tr = await getTranslations();
 
   let farm: FarmDetail;
@@ -46,7 +47,10 @@ export default async function FarmDetailPage({ params }: Props) {
         <h1>{farm.name}</h1>
         <p className="page__subtitle">
           {formatRegionLabel(farm.region, tr) || t('regionUnknown')}
-          {farm.owner.displayName ? ` · ${farm.owner.displayName}` : ''}
+          {' · '}
+          <Link href={`/users/${farm.owner.id}`} className="profile-link">
+            {farm.owner.displayName || tProfile('viewProfile')}
+          </Link>
         </p>
         <div className="farm-rating">
           <RatingStars value={ownerRating.average} count={ownerRating.count} size="sm" />

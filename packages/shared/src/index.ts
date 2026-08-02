@@ -9,3 +9,4 @@ export * from './chat';
 export * from './rating';
 export * from './cabinet';
 export * from './support';
+export * from './user-profile';

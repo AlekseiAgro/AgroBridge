@@ -16,6 +16,7 @@ export default async function ChatListPage({ params }: Props) {
   if (!user) redirect({ href: '/login', locale });
 
   const t = await getTranslations('chat');
+  const tProfile = await getTranslations('profile');
   const items = await apiRequestAuthed<ConversationSummary[]>('/conversations');
 
   return (
@@ -28,16 +29,21 @@ export default async function ChatListPage({ params }: Props) {
         ) : (
           <ul className="product-list">
             {items.map((item) => (
-              <li key={item.id} className="product-list__item">
-                <Link href={`/dashboard/chat/${item.id}`} className="product-list__title">
-                  {item.peer.displayName || item.peer.role}
+              <li key={item.id} className="product-list__item product-list__item--row">
+                <div className="product-list__item-main">
+                  <Link href={`/dashboard/chat/${item.id}`} className="product-list__title">
+                    {item.peer.displayName || item.peer.role}
+                  </Link>
+                  <p className="product-list__meta">
+                    {item.peer.locale.toUpperCase()}
+                    {item.lastMessage
+                      ? ` · ${item.lastMessage.displayText.slice(0, 80)}`
+                      : ` · ${t('noMessagesYet')}`}
+                  </p>
+                </div>
+                <Link href={`/users/${item.peer.id}`} className="button button--ghost">
+                  {tProfile('viewProfile')}
                 </Link>
-                <p className="product-list__meta">
-                  {item.peer.locale.toUpperCase()}
-                  {item.lastMessage
-                    ? ` · ${item.lastMessage.displayText.slice(0, 80)}`
-                    : ` · ${t('noMessagesYet')}`}
-                </p>
               </li>
             ))}
           </ul>

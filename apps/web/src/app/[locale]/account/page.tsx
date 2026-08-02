@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CabinetShell } from '@/components/CabinetShell';
 import { RatingStars } from '@/components/RatingStars';
 import { Link, redirect } from '@/i18n/navigation';
+import { formatMemberSinceMonthYear } from '@/lib/member-since';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
@@ -22,12 +23,13 @@ export default async function AccountPage({ params }: Props) {
   const t = await getTranslations('cabinet');
   const ta = await getTranslations('auth');
   const tn = await getTranslations('nav');
+  const tProfile = await getTranslations('profile');
   const overview = await apiRequestAuthed<CabinetOverview>('/cabinet/overview');
   const { user, activity } = overview;
   const isFarmer = user.role === 'farmer' || user.role === 'admin';
   const isBuyer = user.role === 'buyer' || user.role === 'admin';
   const roleKey = `roles.${user.role}` as 'roles.farmer' | 'roles.buyer' | 'roles.admin';
-  const memberSince = new Date(user.memberSince).toLocaleDateString(locale);
+  const memberSince = formatMemberSinceMonthYear(user.memberSince, locale);
 
   return (
     <CabinetShell title={t('title')} subtitle={t('subtitle')}>
@@ -42,6 +44,11 @@ export default async function AccountPage({ params }: Props) {
               {ta(roleKey)} · {user.email}
             </p>
             <p className="user-card__meta">{t('memberSince', { date: memberSince })}</p>
+            <p className="user-card__meta">
+              <Link href={`/users/${user.id}`} className="profile-link">
+                {tProfile('viewPublicProfile')}
+              </Link>
+            </p>
           </div>
         </div>
         <div className="user-card__rating">

@@ -39,7 +39,9 @@ export async function PurchaseRequestList({
               {t(`statuses.${item.status}`)}
             </p>
             <p className="product-list__meta">
-              {item.buyer.displayName || t('anonymousBuyer')}
+              <Link href={`/users/${item.buyer.id}`} className="profile-link">
+                {item.buyer.displayName || t('anonymousBuyer')}
+              </Link>
               {item.quoteCount > 0 ? ` · ${t('quoteCount', { count: item.quoteCount })}` : ''}
             </p>
           </div>

@@ -473,5 +473,24 @@
         }
       }
     }
+  },
+  "profile": {
+    "eyebrow": "Публичный профиль",
+    "anonymous": "Пользователь AgroBridge",
+    "memberSince": "На AgroBridge с {date}",
+    "rating": "Рейтинг сделок",
+    "ratingHint": "По завершённым сделкам. Покупатели и продавцы оценивают друг друга.",
+    "statsTitle": "Активность",
+    "completedDeals": "Завершённые сделки",
+    "ratingAverage": "Средний рейтинг",
+    "ratingCount": "Получено оценок",
+    "farmTitle": "Профиль хозяйства",
+    "regionUnknown": "Регион не указан",
+    "productCount": "опубликованных товаров: {count}",
+    "viewProfile": "Смотреть профиль",
+    "viewPublicProfile": "Открыть публичный профиль",
+    "backToCabinet": "В личный кабинет",
+    "buyer": "Покупатель",
+    "seller": "Продавец"
   }
 }

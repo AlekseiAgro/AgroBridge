@@ -473,5 +473,24 @@
         }
       }
     }
+  },
+  "profile": {
+    "eyebrow": "Public profile",
+    "anonymous": "AgroBridge user",
+    "memberSince": "On AgroBridge since {date}",
+    "rating": "Deal rating",
+    "ratingHint": "Based on completed deals. Buyers and sellers rate each other.",
+    "statsTitle": "Activity",
+    "completedDeals": "Completed deals",
+    "ratingAverage": "Average rating",
+    "ratingCount": "Ratings received",
+    "farmTitle": "Farm profile",
+    "regionUnknown": "Region not specified",
+    "productCount": "{count} published products",
+    "viewProfile": "View profile",
+    "viewPublicProfile": "View public profile",
+    "backToCabinet": "Back to my cabinet",
+    "buyer": "Buyer",
+    "seller": "Seller"
   }
 }

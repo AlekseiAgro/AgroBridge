@@ -28,6 +28,7 @@ export default async function FarmerInboxDetailPage({ params }: Props) {
   const t = await getTranslations('rfq');
   const tp = await getTranslations('product');
   const tr = await getTranslations('rating');
+  const tProfile = await getTranslations('profile');
 
   let rfq: RfqSummary;
   try {
@@ -48,10 +49,21 @@ export default async function FarmerInboxDetailPage({ params }: Props) {
       </p>
       <h1>{rfq.product.title}</h1>
       <p className="page__subtitle">
-        {t(`statuses.${rfq.status}`)} · {buyerName}
+        {t(`statuses.${rfq.status}`)} ·{' '}
+        <Link href={`/users/${rfq.buyer.id}`} className="profile-link">
+          {buyerName}
+        </Link>
       </p>
 
       <dl className="account-details">
+        <div>
+          <dt>{tProfile('buyer')}</dt>
+          <dd>
+            <Link href={`/users/${rfq.buyer.id}`} className="profile-link">
+              {buyerName}
+            </Link>
+          </dd>
+        </div>
         <div>
           <dt>{t('quantity')}</dt>
           <dd>

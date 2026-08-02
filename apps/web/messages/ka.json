@@ -473,5 +473,24 @@
         }
       }
     }
+  },
+  "profile": {
+    "eyebrow": "საჯარო პროფილი",
+    "anonymous": "AgroBridge-მომხმარებელი",
+    "memberSince": "AgroBridge-ზე {date}-დან",
+    "rating": "გარიგების რეიტინგი",
+    "ratingHint": "დაფუძნებული გარიგებების მიხედვით. მყიდველები და გამყიდველები აფასებენ ურთიერთს.",
+    "statsTitle": "აქტივობა",
+    "completedDeals": "დასრულებული გარიგებები",
+    "ratingAverage": "საშუალო რეიტინგი",
+    "ratingCount": "მიღებული შეფასებები",
+    "farmTitle": "ფერმის პროფილი",
+    "regionUnknown": "რეგიონი მითითებული არ არის",
+    "productCount": "{count} გამოქვეყნებული პროდუქტი",
+    "viewProfile": "პროფილის ნახვა",
+    "viewPublicProfile": "საჯარო პროფილის გახსნა",
+    "backToCabinet": "პირად კაბინეტში",
+    "buyer": "მყიდველი",
+    "seller": "გამყიდველი"
   }
 }

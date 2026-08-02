@@ -27,6 +27,7 @@ export default async function BuyerRfqDetailPage({ params }: Props) {
   const t = await getTranslations('rfq');
   const tp = await getTranslations('product');
   const tr = await getTranslations('rating');
+  const tProfile = await getTranslations('profile');
 
   let rfq: RfqSummary;
   try {
@@ -47,10 +48,23 @@ export default async function BuyerRfqDetailPage({ params }: Props) {
       </p>
       <h1>{rfq.product.title}</h1>
       <p className="page__subtitle">
-        {t(`statuses.${rfq.status}`)} · {rfq.farm.name}
+        {t(`statuses.${rfq.status}`)} ·{' '}
+        <Link href={`/farms/${rfq.farm.id}`}>{rfq.farm.name}</Link>
+        {' · '}
+        <Link href={`/users/${rfq.seller.id}`} className="profile-link">
+          {sellerName}
+        </Link>
       </p>
 
       <dl className="account-details">
+        <div>
+          <dt>{tProfile('seller')}</dt>
+          <dd>
+            <Link href={`/users/${rfq.seller.id}`} className="profile-link">
+              {sellerName}
+            </Link>
+          </dd>
+        </div>
         <div>
           <dt>{t('quantity')}</dt>
           <dd>
