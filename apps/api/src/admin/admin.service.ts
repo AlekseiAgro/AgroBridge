@@ -1,13 +1,35 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { AdminStats, ModeratedProduct, ModerationStatus } from '@agrobridge/shared';
 import { ModerationStatus as PrismaModerationStatus } from '@prisma/client';
+import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { RejectProductDto } from './dto/reject-product.dto';
 
+const farmOwnerInclude = {
+  farm: {
+    select: {
+      id: true,
+      name: true,
+      region: true,
+      owner: {
+        select: {
+          id: true,
+          displayName: true,
+          email: true,
+          locale: true,
+        },
+      },
+    },
+  },
+} as const;
+
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async stats(): Promise<AdminStats> {
     const [productsPending, productsApproved, productsRejected, farmsTotal, usersTotal] =
@@ -43,18 +65,7 @@ export class AdminService {
     const products = await this.prisma.product.findMany({
       where,
       orderBy: { updatedAt: 'desc' },
-      include: {
-        farm: {
-          select: {
-            id: true,
-            name: true,
-            region: true,
-            owner: {
-              select: { id: true, displayName: true, email: true },
-            },
-          },
-        },
-      },
+      include: farmOwnerInclude,
     });
 
     return products.map((product) => this.toModerated(product));
@@ -72,18 +83,13 @@ export class AdminService {
         moderatedById: user.id,
         isPublished: true,
       },
-      include: {
-        farm: {
-          select: {
-            id: true,
-            name: true,
-            region: true,
-            owner: {
-              select: { id: true, displayName: true, email: true },
-            },
-          },
-        },
-      },
+      include: farmOwnerInclude,
+    });
+
+    await this.notifications.notifyProductApproved({
+      farmer: product.farm.owner,
+      productTitle: product.title,
+      productId: product.id,
     });
 
     return this.toModerated(product);
@@ -104,18 +110,14 @@ export class AdminService {
         moderatedAt: new Date(),
         moderatedById: user.id,
       },
-      include: {
-        farm: {
-          select: {
-            id: true,
-            name: true,
-            region: true,
-            owner: {
-              select: { id: true, displayName: true, email: true },
-            },
-          },
-        },
-      },
+      include: farmOwnerInclude,
+    });
+
+    await this.notifications.notifyProductRejected({
+      farmer: product.farm.owner,
+      productTitle: product.title,
+      productId: product.id,
+      note: product.moderationNote ?? 'Rejected by moderator',
     });
 
     return this.toModerated(product);
@@ -145,7 +147,12 @@ export class AdminService {
       id: string;
       name: string;
       region: string | null;
-      owner: { id: string; displayName: string | null; email: string };
+      owner: {
+        id: string;
+        displayName: string | null;
+        email: string;
+        locale: string;
+      };
     };
   }): ModeratedProduct {
     return {
@@ -160,7 +167,16 @@ export class AdminService {
       moderatedAt: product.moderatedAt?.toISOString() ?? null,
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
-      farm: product.farm,
+      farm: {
+        id: product.farm.id,
+        name: product.farm.name,
+        region: product.farm.region,
+        owner: {
+          id: product.farm.owner.id,
+          displayName: product.farm.owner.displayName,
+          email: product.farm.owner.email,
+        },
+      },
     };
   }
 }

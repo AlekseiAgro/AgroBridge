@@ -13,6 +13,11 @@ describe('AdminService', () => {
     user: { count: jest.fn() },
   };
 
+  const notifications = {
+    notifyProductApproved: jest.fn().mockResolvedValue(undefined),
+    notifyProductRejected: jest.fn().mockResolvedValue(undefined),
+  };
+
   let service: AdminService;
 
   const admin = {
@@ -25,7 +30,7 @@ describe('AdminService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new AdminService(prisma as never);
+    service = new AdminService(prisma as never, notifications as never);
   });
 
   it('returns dashboard stats', async () => {

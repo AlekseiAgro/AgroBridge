@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import type { AuthTokenResponse, Locale, PublicUser } from '@agrobridge/shared';
 import { DEFAULT_LOCALE, isLocale, isRegisterableRole } from '@agrobridge/shared';
 import { LocaleCode, UserRole } from '@prisma/client';
+import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -20,6 +21,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthTokenResponse> {
@@ -44,6 +46,13 @@ export class AuthService {
         locale: locale as LocaleCode,
         displayName: dto.displayName?.trim() || null,
       },
+    });
+
+    await this.notifications.notifyWelcome({
+      email: user.email,
+      locale: user.locale,
+      displayName: user.displayName,
+      role: user.role,
     });
 
     return this.issueToken(this.toAuthenticatedUser(user));

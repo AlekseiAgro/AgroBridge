@@ -14,6 +14,15 @@ describe('RfqsService', () => {
     rfqOffer: { create: jest.fn() },
   };
 
+  const notifications = {
+    notifyRfqCreated: jest.fn().mockResolvedValue(undefined),
+    notifyRfqOfferCreated: jest.fn().mockResolvedValue(undefined),
+    notifyRfqAccepted: jest.fn().mockResolvedValue(undefined),
+    notifyRfqDeclinedByBuyer: jest.fn().mockResolvedValue(undefined),
+    notifyRfqDeclinedByFarmer: jest.fn().mockResolvedValue(undefined),
+    notifyRfqCancelled: jest.fn().mockResolvedValue(undefined),
+  };
+
   let service: RfqsService;
 
   const buyer = {
@@ -34,7 +43,7 @@ describe('RfqsService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new RfqsService(prisma as never);
+    service = new RfqsService(prisma as never, notifications as never);
   });
 
   it('rejects farmers from creating RFQs', async () => {
@@ -58,8 +67,24 @@ describe('RfqsService', () => {
       status: 'pending',
       offer: null,
       product: { id: 'p1', title: 'Hazelnuts' },
-      farm: { id: 'f1', name: 'Farm', region: null, ownerId: farmer.id },
-      buyer: { id: buyer.id, displayName: 'Buyer', email: buyer.email },
+      farm: {
+        id: 'f1',
+        name: 'Farm',
+        region: null,
+        ownerId: farmer.id,
+        owner: {
+          id: farmer.id,
+          email: farmer.email,
+          locale: farmer.locale,
+          displayName: farmer.displayName,
+        },
+      },
+      buyer: {
+        id: buyer.id,
+        displayName: 'Buyer',
+        email: buyer.email,
+        locale: buyer.locale,
+      },
       quantity: '100',
       unit: 'kg',
       message: null,

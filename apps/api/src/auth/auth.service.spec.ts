@@ -19,6 +19,10 @@ describe('AuthService', () => {
     get: jest.fn().mockReturnValue('7d'),
   };
 
+  const notifications = {
+    notifyWelcome: jest.fn().mockResolvedValue(undefined),
+  };
+
   let service: AuthService;
 
   beforeEach(() => {
@@ -27,6 +31,7 @@ describe('AuthService', () => {
       prisma as never,
       jwtService as unknown as JwtService,
       config as unknown as ConfigService,
+      notifications as never,
     );
   });
 
@@ -58,6 +63,12 @@ describe('AuthService', () => {
       displayName: 'Nino',
     });
     expect(prisma.user.create).toHaveBeenCalled();
+    expect(notifications.notifyWelcome).toHaveBeenCalledWith({
+      email: 'farmer@example.com',
+      locale: 'ka',
+      displayName: 'Nino',
+      role: 'farmer',
+    });
   });
 
   it('rejects duplicate email', async () => {

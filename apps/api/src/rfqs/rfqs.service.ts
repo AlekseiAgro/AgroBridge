@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import type { RfqOfferView, RfqSummary, RfqStatus } from '@agrobridge/shared';
 import { CurrencyCode, Prisma, RfqStatus as PrismaRfqStatus } from '@prisma/client';
+import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CreateOfferDto } from './dto/create-offer.dto';
@@ -13,8 +14,30 @@ import { CreateRfqDto } from './dto/create-rfq.dto';
 
 const rfqInclude = {
   product: { select: { id: true, title: true } },
-  farm: { select: { id: true, name: true, region: true, ownerId: true } },
-  buyer: { select: { id: true, displayName: true, email: true } },
+  farm: {
+    select: {
+      id: true,
+      name: true,
+      region: true,
+      ownerId: true,
+      owner: {
+        select: {
+          id: true,
+          email: true,
+          locale: true,
+          displayName: true,
+        },
+      },
+    },
+  },
+  buyer: {
+    select: {
+      id: true,
+      displayName: true,
+      email: true,
+      locale: true,
+    },
+  },
   offer: true,
 } satisfies Prisma.RfqInclude;
 
@@ -22,14 +45,30 @@ type RfqEntity = Prisma.RfqGetPayload<{ include: typeof rfqInclude }>;
 
 @Injectable()
 export class RfqsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async create(user: AuthenticatedUser, dto: CreateRfqDto): Promise<RfqSummary> {
     this.assertBuyer(user);
 
     const product = await this.prisma.product.findUnique({
       where: { id: dto.productId },
-      include: { farm: true },
+      include: {
+        farm: {
+          include: {
+            owner: {
+              select: {
+                id: true,
+                email: true,
+                locale: true,
+                displayName: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!product || !product.isPublished) {
@@ -51,6 +90,15 @@ export class RfqsService {
         status: PrismaRfqStatus.pending,
       },
       include: rfqInclude,
+    });
+
+    await this.notifications.notifyRfqCreated({
+      farmer: product.farm.owner,
+      buyerName: user.displayName?.trim() || user.email,
+      productTitle: product.title,
+      quantity: rfq.quantity,
+      unit: rfq.unit,
+      rfqId: rfq.id,
     });
 
     return this.toSummary(rfq);
@@ -111,7 +159,7 @@ export class RfqsService {
       throw new BadRequestException('priceAmount must be greater than zero');
     }
 
-    await this.prisma.rfqOffer.create({
+    const offer = await this.prisma.rfqOffer.create({
       data: {
         rfqId: rfq.id,
         priceAmount: price,
@@ -128,6 +176,15 @@ export class RfqsService {
       data: { status: PrismaRfqStatus.offered },
     });
 
+    await this.notifications.notifyRfqOfferCreated({
+      buyer: rfq.buyer,
+      farmName: rfq.farm.name,
+      productTitle: rfq.product.title,
+      priceAmount: offer.priceAmount.toString(),
+      currency: offer.currency,
+      rfqId: rfq.id,
+    });
+
     return this.getById(user, id);
   }
 
@@ -142,6 +199,13 @@ export class RfqsService {
     await this.prisma.rfq.update({
       where: { id: rfq.id },
       data: { status: PrismaRfqStatus.accepted },
+    });
+
+    await this.notifications.notifyRfqAccepted({
+      farmer: rfq.farm.owner,
+      buyerName: rfq.buyer.displayName?.trim() || rfq.buyer.email,
+      productTitle: rfq.product.title,
+      rfqId: rfq.id,
     });
 
     return this.getById(user, id);
@@ -170,6 +234,22 @@ export class RfqsService {
       data: { status: PrismaRfqStatus.declined },
     });
 
+    if (isBuyer) {
+      await this.notifications.notifyRfqDeclinedByBuyer({
+        farmer: rfq.farm.owner,
+        buyerName: rfq.buyer.displayName?.trim() || rfq.buyer.email,
+        productTitle: rfq.product.title,
+        rfqId: rfq.id,
+      });
+    } else {
+      await this.notifications.notifyRfqDeclinedByFarmer({
+        buyer: rfq.buyer,
+        farmName: rfq.farm.name,
+        productTitle: rfq.product.title,
+        rfqId: rfq.id,
+      });
+    }
+
     return this.getById(user, id);
   }
 
@@ -184,6 +264,12 @@ export class RfqsService {
     await this.prisma.rfq.update({
       where: { id: rfq.id },
       data: { status: PrismaRfqStatus.cancelled },
+    });
+
+    await this.notifications.notifyRfqCancelled({
+      farmer: rfq.farm.owner,
+      buyerName: rfq.buyer.displayName?.trim() || rfq.buyer.email,
+      productTitle: rfq.product.title,
     });
 
     return this.getById(user, id);
@@ -251,7 +337,11 @@ export class RfqsService {
         name: rfq.farm.name,
         region: rfq.farm.region,
       },
-      buyer: rfq.buyer,
+      buyer: {
+        id: rfq.buyer.id,
+        displayName: rfq.buyer.displayName,
+        email: rfq.buyer.email,
+      },
       offer: rfq.offer ? this.toOffer(rfq.offer) : null,
     };
   }

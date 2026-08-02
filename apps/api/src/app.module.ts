@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { FarmsModule } from './farms/farms.module';
 import { HealthModule } from './health/health.module';
+import { MailModule } from './mail/mail.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
 import { RfqsModule } from './rfqs/rfqs.module';
@@ -18,6 +19,7 @@ import { TranslationModule } from './translation/translation.module';
     }),
     PrismaModule,
     StorageModule,
+    MailModule,
     HealthModule,
     AuthModule,
     FarmsModule,

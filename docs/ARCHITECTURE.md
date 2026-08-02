@@ -79,6 +79,15 @@
   - `s3` — AWS S3 / R2 (`S3_*` env vars); public URLs from `STORAGE_PUBLIC_BASE_URL`
 - Image changes on a published product reset moderation to `pending`.
 
+## Email notifications
+
+- `MailModule` provides `MailService` + `NotificationsService` (global).
+- Drivers: `console` (dev/default) or `smtp` via nodemailer.
+- Templates are locale-aware (`ka|en|ru|de|fr|it|es`) with English fallback.
+- Events: welcome, RFQ lifecycle, product moderation decisions.
+- Failures are logged and never block the primary API action.
+- Chat per-message email is deferred (noise / preference settings later).
+
 ## Out of scope for early MVP
 
 - Native mobile apps

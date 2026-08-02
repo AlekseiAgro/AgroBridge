@@ -118,7 +118,7 @@ pnpm --filter @agrobridge/api db:seed
 # default: admin@agrobridge.local / ChangeMeAdmin1
 ```
 
-## Product photos (current step)
+## Product photos
 
 - Farmers upload up to **8** product photos (JPEG / PNG / WebP, max **5MB** each) on the product edit page
 - First photo becomes primary; primary can be changed later
@@ -133,6 +133,23 @@ API:
 - `PATCH /api/products/:id/images/:imageId/primary`
 - Local files served at `GET /api/uploads/products/:productId/:filename`
 
+## Email notifications (current step)
+
+Transactional emails (locale-aware templates: ka/en/ru/de/fr/it/es):
+
+- Welcome after registration
+- RFQ created / offer sent / accepted / declined / cancelled
+- Product approved / rejected by admin
+
+Drivers:
+
+- `MAIL_DRIVER=console` (default) — logs emails in the API console
+- `MAIL_DRIVER=smtp` — send via SMTP (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM`)
+- Links use `WEB_PUBLIC_URL`
+
+Chat messages are intentionally not emailed yet (too noisy for MVP).
+
 ## Next implementation steps
 
-1. Email notifications
+1. Payment / order confirmation flow
+2. Chat unread digests (optional)
