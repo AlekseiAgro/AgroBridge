@@ -63,6 +63,9 @@ export function FarmForm({ initial, mode }: Props) {
         <span>{t('region')}</span>
         <select name="region" defaultValue={initial?.region ?? ''}>
           <option value="">{t('regionPlaceholder')}</option>
+          {initial?.region && !isGeorgiaRegion(initial.region) ? (
+            <option value={initial.region}>{initial.region}</option>
+          ) : null}
           {GEORGIA_REGIONS.map((value) => (
             <option key={value} value={value}>
               {tr(`regions.${value}`)}
