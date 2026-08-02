@@ -78,7 +78,8 @@
       "honey": "Honig",
       "herbs": "Kräuter",
       "other": "Sonstiges"
-    }
+    },
+    "allRegions": "Alle Regionen"
   },
   "farm": {
     "createTitle": "Betriebsprofil erstellen",
@@ -95,7 +96,8 @@
     "manageProducts": "Produkte verwalten",
     "productsHeading": "Veröffentlichte Produkte",
     "noProducts": "Dieser Betrieb hat noch keine veröffentlichten Produkte.",
-    "regionUnknown": "Region nicht angegeben"
+    "regionUnknown": "Region nicht angegeben",
+    "regionPlaceholder": "Region auswählen"
   },
   "product": {
     "dashboardTitle": "Meine Produkte",
@@ -240,5 +242,18 @@
       "rejected": "Abgelehnt",
       "draft": "Entwürfe"
     }
+  },
+  "regions": {
+    "tbilisi": "Tiflis",
+    "adjara": "Adscharien",
+    "guria": "Gurien",
+    "imereti": "Imeretien",
+    "kakheti": "Kachetien",
+    "kvemoKartli": "Niederkartlien",
+    "mtskhetaMtianeti": "Mzcheta-Mtianeti",
+    "rachaLechkhumiKvemoSvaneti": "Ratscha-Letschchumi und Niederswanetien",
+    "samegreloZemoSvaneti": "Mingrelien und Oberswanetien",
+    "samtskheJavakheti": "Samzche-Dschawachetien",
+    "shidaKartli": "Innerkartlien"
   }
 }

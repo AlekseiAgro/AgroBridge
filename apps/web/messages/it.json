@@ -78,7 +78,8 @@
       "honey": "Miele",
       "herbs": "Erbe",
       "other": "Altro"
-    }
+    },
+    "allRegions": "Tutte le regioni"
   },
   "farm": {
     "createTitle": "Crea profilo azienda",
@@ -95,7 +96,8 @@
     "manageProducts": "Gestisci prodotti",
     "productsHeading": "Prodotti pubblicati",
     "noProducts": "Questa azienda non ha ancora prodotti pubblicati.",
-    "regionUnknown": "Regione non specificata"
+    "regionUnknown": "Regione non specificata",
+    "regionPlaceholder": "Seleziona una regione"
   },
   "product": {
     "dashboardTitle": "I miei prodotti",
@@ -240,5 +242,18 @@
       "rejected": "Rifiutati",
       "draft": "Bozze"
     }
+  },
+  "regions": {
+    "tbilisi": "Tbilisi",
+    "adjara": "Adzharia",
+    "guria": "Guria",
+    "imereti": "Imereti",
+    "kakheti": "Cachezia",
+    "kvemoKartli": "Kvemo Kartli",
+    "mtskhetaMtianeti": "Mtskheta-Mtianeti",
+    "rachaLechkhumiKvemoSvaneti": "Racha-Lechkhumi e Kvemo Svaneti",
+    "samegreloZemoSvaneti": "Samegrelo-Zemo Svaneti",
+    "samtskheJavakheti": "Samtskhe-Javakheti",
+    "shidaKartli": "Shida Kartli"
   }
 }

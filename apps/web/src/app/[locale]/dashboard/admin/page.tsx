@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ModerationActions } from '@/components/ModerationActions';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link, redirect } from '@/i18n/navigation';
+import { formatRegionLabel } from '@/lib/region';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
@@ -22,6 +23,7 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
 
   const t = await getTranslations('admin');
   const tc = await getTranslations('catalog');
+  const tr = await getTranslations();
 
   const [stats, products] = await Promise.all([
     apiRequestAuthed<AdminStats>('/admin/stats'),
@@ -83,7 +85,9 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
                 <p className="product-list__title">{product.title}</p>
                 <p className="product-list__meta">
                   {product.farm.name}
-                  {product.farm.region ? ` · ${product.farm.region}` : ''}
+                  {product.farm.region
+                    ? ` · ${formatRegionLabel(product.farm.region, tr) ?? product.farm.region}`
+                    : ''}
                   {' · '}
                   {product.farm.owner.displayName || product.farm.owner.email}
                   {product.category

@@ -78,7 +78,8 @@
       "honey": "თაფლი",
       "herbs": "მწვანილი",
       "other": "სხვა"
-    }
+    },
+    "allRegions": "ყველა რეგიონი"
   },
   "farm": {
     "createTitle": "მეურნეობის პროფილის შექმნა",
@@ -95,7 +96,8 @@
     "manageProducts": "პროდუქციის მართვა",
     "productsHeading": "გამოქვეყნებული პროდუქცია",
     "noProducts": "ამ მეურნეობას ჯერ არ აქვს გამოქვეყნებული პროდუქცია.",
-    "regionUnknown": "რეგიონი მითითებული არ არის"
+    "regionUnknown": "რეგიონი მითითებული არ არის",
+    "regionPlaceholder": "აირჩიეთ რეგიონი"
   },
   "product": {
     "dashboardTitle": "ჩემი პროდუქცია",
@@ -240,5 +242,18 @@
       "rejected": "უარყოფილი",
       "draft": "დრაფტები"
     }
+  },
+  "regions": {
+    "tbilisi": "თბილისი",
+    "adjara": "აჭარა",
+    "guria": "გურია",
+    "imereti": "იმერეთი",
+    "kakheti": "კახეთი",
+    "kvemoKartli": "ქვემო ქართლი",
+    "mtskhetaMtianeti": "მცხეთა-მთიანეთი",
+    "rachaLechkhumiKvemoSvaneti": "რაჭა-ლეჩხუმი და ქვემო სვანეთი",
+    "samegreloZemoSvaneti": "სამეგრელო-ზემო სვანეთი",
+    "samtskheJavakheti": "სამცხე-ჯავახეთი",
+    "shidaKartli": "შიდა ქართლი"
   }
 }

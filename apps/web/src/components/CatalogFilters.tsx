@@ -1,6 +1,6 @@
 'use client';
 
-import { PRODUCT_CATEGORIES } from '@agrobridge/shared';
+import { GEORGIA_REGIONS, PRODUCT_CATEGORIES } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { FormEvent, useState } from 'react';
@@ -13,6 +13,7 @@ type Props = {
 
 export function CatalogFilters({ initialQ = '', initialCategory = '', initialRegion = '' }: Props) {
   const t = useTranslations('catalog');
+  const tr = useTranslations();
   const router = useRouter();
   const [q, setQ] = useState(initialQ);
   const [category, setCategory] = useState(initialCategory);
@@ -23,7 +24,7 @@ export function CatalogFilters({ initialQ = '', initialCategory = '', initialReg
     const params = new URLSearchParams();
     if (q.trim()) params.set('q', q.trim());
     if (category) params.set('category', category);
-    if (region.trim()) params.set('region', region.trim());
+    if (region) params.set('region', region);
     const query = params.toString();
     router.push(query ? `/catalog?${query}` : '/catalog');
   }
@@ -47,7 +48,14 @@ export function CatalogFilters({ initialQ = '', initialCategory = '', initialReg
       </label>
       <label className="field">
         <span>{t('region')}</span>
-        <input value={region} onChange={(e) => setRegion(e.target.value)} name="region" />
+        <select value={region} onChange={(e) => setRegion(e.target.value)} name="region">
+          <option value="">{t('allRegions')}</option>
+          {GEORGIA_REGIONS.map((value) => (
+            <option key={value} value={value}>
+              {tr(`regions.${value}`)}
+            </option>
+          ))}
+        </select>
       </label>
       <button className="button button--primary" type="submit">
         {t('applyFilters')}

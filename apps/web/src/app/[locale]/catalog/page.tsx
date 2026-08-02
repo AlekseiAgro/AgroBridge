@@ -5,6 +5,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
 import { getPrimaryProductImage } from '@/lib/product-image';
+import { formatRegionLabel } from '@/lib/region';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -17,6 +18,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('catalog');
+  const tr = await getTranslations();
   const query = new URLSearchParams();
   if (filters.q) query.set('q', filters.q);
   if (filters.category) query.set('category', filters.category);
@@ -65,7 +67,9 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                   </Link>
                   <p className="product-list__meta">
                     <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
-                    {product.farm.region ? ` · ${product.farm.region}` : ''}
+                    {product.farm.region
+                      ? ` · ${formatRegionLabel(product.farm.region, tr) ?? product.farm.region}`
+                      : ''}
                     {product.category ? ` · ${t(`categories.${product.category as 'fruits'}`)}` : ''}
                   </p>
                   {product.description ? (

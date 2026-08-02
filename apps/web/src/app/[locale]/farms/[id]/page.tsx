@@ -5,6 +5,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getPrimaryProductImage } from '@/lib/product-image';
+import { formatRegionLabel } from '@/lib/region';
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
@@ -15,6 +16,7 @@ export default async function FarmDetailPage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations('farm');
   const tc = await getTranslations('catalog');
+  const tr = await getTranslations();
 
   let farm: FarmDetail;
   try {
@@ -32,7 +34,7 @@ export default async function FarmDetailPage({ params }: Props) {
       <main className="page__main">
         <h1>{farm.name}</h1>
         <p className="page__subtitle">
-          {farm.region || t('regionUnknown')}
+          {formatRegionLabel(farm.region, tr) || t('regionUnknown')}
           {farm.owner.displayName ? ` · ${farm.owner.displayName}` : ''}
         </p>
         {farm.description ? <p className="detail-text">{farm.description}</p> : null}

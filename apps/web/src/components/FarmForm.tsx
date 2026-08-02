@@ -1,6 +1,10 @@
 'use client';
 
-import type { FarmDetail } from '@agrobridge/shared';
+import {
+  GEORGIA_REGIONS,
+  isGeorgiaRegion,
+  type FarmDetail,
+} from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
@@ -12,6 +16,7 @@ type Props = {
 
 export function FarmForm({ initial, mode }: Props) {
   const t = useTranslations('farm');
+  const tr = useTranslations();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -56,7 +61,14 @@ export function FarmForm({ initial, mode }: Props) {
       </label>
       <label className="field">
         <span>{t('region')}</span>
-        <input name="region" defaultValue={initial?.region ?? ''} />
+        <select name="region" defaultValue={initial?.region ?? ''}>
+          <option value="">{t('regionPlaceholder')}</option>
+          {GEORGIA_REGIONS.map((value) => (
+            <option key={value} value={value}>
+              {tr(`regions.${value}`)}
+            </option>
+          ))}
+        </select>
       </label>
       <label className="field">
         <span>{t('description')}</span>

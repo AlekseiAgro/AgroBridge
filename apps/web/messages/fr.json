@@ -78,7 +78,8 @@
       "honey": "Miel",
       "herbs": "Herbes",
       "other": "Autre"
-    }
+    },
+    "allRegions": "Toutes les régions"
   },
   "farm": {
     "createTitle": "Créer le profil de ferme",
@@ -95,7 +96,8 @@
     "manageProducts": "Gérer les produits",
     "productsHeading": "Produits publiés",
     "noProducts": "Cette ferme n’a pas encore de produits publiés.",
-    "regionUnknown": "Région non indiquée"
+    "regionUnknown": "Région non indiquée",
+    "regionPlaceholder": "Choisir une région"
   },
   "product": {
     "dashboardTitle": "Mes produits",
@@ -240,5 +242,18 @@
       "rejected": "Refusés",
       "draft": "Brouillons"
     }
+  },
+  "regions": {
+    "tbilisi": "Tbilissi",
+    "adjara": "Adjarie",
+    "guria": "Gourie",
+    "imereti": "Iméréthie",
+    "kakheti": "Kakhétie",
+    "kvemoKartli": "Kvemo Kartli",
+    "mtskhetaMtianeti": "Mtskheta-Mtianeti",
+    "rachaLechkhumiKvemoSvaneti": "Ratcha-Letchkhoumi et Kvemo Svaneti",
+    "samegreloZemoSvaneti": "Samegrelo-Zemo Svaneti",
+    "samtskheJavakheti": "Samtskhe-Djavakheti",
+    "shidaKartli": "Shida Kartli"
   }
 }

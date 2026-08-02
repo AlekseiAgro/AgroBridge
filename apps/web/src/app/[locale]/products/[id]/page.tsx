@@ -6,6 +6,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
+import { formatRegionLabel } from '@/lib/region';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -18,6 +19,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const t = await getTranslations('product');
   const tc = await getTranslations('catalog');
   const tr = await getTranslations('rfq');
+  const tRoot = await getTranslations();
   const token = await getAuthToken();
   const user = await getCurrentUser();
 
@@ -41,7 +43,9 @@ export default async function ProductDetailPage({ params }: Props) {
         <h1>{product.title}</h1>
         <p className="page__subtitle">
           <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
-          {product.farm.region ? ` · ${product.farm.region}` : ''}
+          {product.farm.region
+            ? ` · ${formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region}`
+            : ''}
         </p>
 
         {product.images.length > 0 ? (

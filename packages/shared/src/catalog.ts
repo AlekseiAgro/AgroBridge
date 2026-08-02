@@ -15,12 +15,33 @@ export const PRODUCT_UNITS = ['kg', 'ton', 'box', 'liter', 'bottle', 'piece'] as
 
 export type ProductUnit = (typeof PRODUCT_UNITS)[number];
 
+/** Canonical keys for Georgia's main administrative regions (+ Tbilisi). */
+export const GEORGIA_REGIONS = [
+  'tbilisi',
+  'adjara',
+  'guria',
+  'imereti',
+  'kakheti',
+  'kvemoKartli',
+  'mtskhetaMtianeti',
+  'rachaLechkhumiKvemoSvaneti',
+  'samegreloZemoSvaneti',
+  'samtskheJavakheti',
+  'shidaKartli',
+] as const;
+
+export type GeorgiaRegion = (typeof GEORGIA_REGIONS)[number];
+
 export function isProductCategory(value: string): value is ProductCategory {
   return (PRODUCT_CATEGORIES as readonly string[]).includes(value);
 }
 
 export function isProductUnit(value: string): value is ProductUnit {
   return (PRODUCT_UNITS as readonly string[]).includes(value);
+}
+
+export function isGeorgiaRegion(value: string): value is GeorgiaRegion {
+  return (GEORGIA_REGIONS as readonly string[]).includes(value);
 }
 
 export type FarmSummary = {

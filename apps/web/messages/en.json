@@ -78,7 +78,8 @@
       "honey": "Honey",
       "herbs": "Herbs",
       "other": "Other"
-    }
+    },
+    "allRegions": "All regions"
   },
   "farm": {
     "createTitle": "Create farm profile",
@@ -95,7 +96,8 @@
     "manageProducts": "Manage products",
     "productsHeading": "Published products",
     "noProducts": "This farm has no published products yet.",
-    "regionUnknown": "Region not specified"
+    "regionUnknown": "Region not specified",
+    "regionPlaceholder": "Select a region"
   },
   "product": {
     "dashboardTitle": "My products",
@@ -240,5 +242,18 @@
       "rejected": "Rejected",
       "draft": "Drafts"
     }
+  },
+  "regions": {
+    "tbilisi": "Tbilisi",
+    "adjara": "Adjara",
+    "guria": "Guria",
+    "imereti": "Imereti",
+    "kakheti": "Kakheti",
+    "kvemoKartli": "Kvemo Kartli",
+    "mtskhetaMtianeti": "Mtskheta-Mtianeti",
+    "rachaLechkhumiKvemoSvaneti": "Racha-Lechkhumi and Kvemo Svaneti",
+    "samegreloZemoSvaneti": "Samegrelo-Zemo Svaneti",
+    "samtskheJavakheti": "Samtskhe-Javakheti",
+    "shidaKartli": "Shida Kartli"
   }
 }

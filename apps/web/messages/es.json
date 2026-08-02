@@ -78,7 +78,8 @@
       "honey": "Miel",
       "herbs": "Hierbas",
       "other": "Otros"
-    }
+    },
+    "allRegions": "Todas las regiones"
   },
   "farm": {
     "createTitle": "Crear perfil de granja",
@@ -95,7 +96,8 @@
     "manageProducts": "Gestionar productos",
     "productsHeading": "Productos publicados",
     "noProducts": "Esta granja aún no tiene productos publicados.",
-    "regionUnknown": "Región no indicada"
+    "regionUnknown": "Región no indicada",
+    "regionPlaceholder": "Selecciona una región"
   },
   "product": {
     "dashboardTitle": "Mis productos",
@@ -240,5 +242,18 @@
       "rejected": "Rechazados",
       "draft": "Borradores"
     }
+  },
+  "regions": {
+    "tbilisi": "Tiflis",
+    "adjara": "Ayaria",
+    "guria": "Guria",
+    "imereti": "Imericia",
+    "kakheti": "Kajetia",
+    "kvemoKartli": "Kvemo Kartli",
+    "mtskhetaMtianeti": "Mtsjeta-Mtianeti",
+    "rachaLechkhumiKvemoSvaneti": "Racha-Lechjumi y Kvemo Svaneti",
+    "samegreloZemoSvaneti": "Samegrelo-Zemo Svaneti",
+    "samtskheJavakheti": "Samtsje-Yavajeti",
+    "shidaKartli": "Shida Kartli"
   }
 }

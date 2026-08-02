@@ -78,7 +78,8 @@
       "honey": "Мёд",
       "herbs": "Травы",
       "other": "Другое"
-    }
+    },
+    "allRegions": "Все регионы"
   },
   "farm": {
     "createTitle": "Создать профиль хозяйства",
@@ -95,7 +96,8 @@
     "manageProducts": "Управление товарами",
     "productsHeading": "Опубликованные товары",
     "noProducts": "У этого хозяйства пока нет опубликованных товаров.",
-    "regionUnknown": "Регион не указан"
+    "regionUnknown": "Регион не указан",
+    "regionPlaceholder": "Выберите регион"
   },
   "product": {
     "dashboardTitle": "Мои товары",
@@ -240,5 +242,18 @@
       "rejected": "Отклонённые",
       "draft": "Черновики"
     }
+  },
+  "regions": {
+    "tbilisi": "Тбилиси",
+    "adjara": "Аджария",
+    "guria": "Гурия",
+    "imereti": "Имеретия",
+    "kakheti": "Кахетия",
+    "kvemoKartli": "Квемо Картли",
+    "mtskhetaMtianeti": "Мцхета-Мтианети",
+    "rachaLechkhumiKvemoSvaneti": "Рача-Лечхуми и Квемо Сванети",
+    "samegreloZemoSvaneti": "Самегрело-Земо Сванети",
+    "samtskheJavakheti": "Самцхе-Джавахети",
+    "shidaKartli": "Шида Картли"
   }
 }
