@@ -11,22 +11,24 @@ export function LanguageSwitcher() {
   const pathname = usePathname() || '/';
 
   return (
-    <nav className="language-switcher" aria-label={t('language')}>
-      <ul className="language-switcher__list">
+    <details className="language-switcher">
+      <summary className="language-switcher__button" aria-label={t('language')}>
+        {LOCALE_LABELS[locale as Locale]}
+      </summary>
+      <ul className="language-switcher__menu" role="listbox" aria-label={t('language')}>
         {routing.locales.map((code) => {
           const active = code === locale;
           return (
-            <li key={code}>
+            <li key={code} role="option" aria-selected={active}>
               <Link
                 href={pathname}
                 locale={code as Locale}
                 hrefLang={code}
                 className={
                   active
-                    ? 'language-switcher__link language-switcher__link--active'
-                    : 'language-switcher__link'
+                    ? 'language-switcher__option language-switcher__option--active'
+                    : 'language-switcher__option'
                 }
-                aria-current={active ? 'true' : undefined}
               >
                 {LOCALE_LABELS[code]}
               </Link>
@@ -34,6 +36,6 @@ export function LanguageSwitcher() {
           );
         })}
       </ul>
-    </nav>
+    </details>
   );
 }
