@@ -40,8 +40,6 @@ export default async function HomePage({ params }: Props) {
             </Link>
           )}
         </div>
-
-        <p className="home__hint">{t('languagesHint')}</p>
       </main>
     </div>
   );
