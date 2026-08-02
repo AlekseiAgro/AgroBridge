@@ -29,7 +29,7 @@ export function BrandLogo({
     <span className={classes}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/images/brand/logo.svg"
+        src="/images/brand/logo.png"
         alt="AgroBridge"
         className={imageClass}
       />
