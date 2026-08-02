@@ -56,7 +56,8 @@
     "myRequests": "My requests",
     "chat": "Chat",
     "admin": "Admin",
-    "language": "Language"
+    "language": "Language",
+    "howItWorks": "How it works"
   },
   "catalog": {
     "title": "Product catalog",
@@ -257,5 +258,27 @@
     "samegreloZemoSvaneti": "Samegrelo-Zemo Svaneti",
     "samtskheJavakheti": "Samtskhe-Javakheti",
     "shidaKartli": "Shida Kartli"
+  },
+  "howItWorks": {
+    "eyebrow": "Direct trade route",
+    "title": "One platform. A simpler trade process.",
+    "lead": "Three clear steps to connect Georgian farms with buyers in Georgia and abroad.",
+    "steps": {
+      "find": {
+        "title": "Find or publish a product",
+        "text": "Browse the catalog of Georgian produce, or create a farm profile and list what you can supply for moderation."
+      },
+      "connect": {
+        "title": "Connect with a trade partner",
+        "text": "Buyers send quote requests, farmers reply with offers, and both sides chat in their own language with AI translation."
+      },
+      "agree": {
+        "title": "Agree on supply terms",
+        "text": "Review price, quantity, and timing, then accept an offer and continue coordination in one place."
+      }
+    },
+    "ctaFarmer": "For farmers",
+    "ctaBuyer": "Browse catalog",
+    "pageNote": "AgroBridge helps Georgian producers and buyers meet, negotiate, and grow trade without unnecessary intermediaries."
   }
 }

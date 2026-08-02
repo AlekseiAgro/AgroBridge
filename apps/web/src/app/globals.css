@@ -120,6 +120,101 @@ body {
   font-size: 0.92rem;
 }
 
+.how-it-works {
+  max-width: 52rem;
+  margin: 18vh auto 0;
+  padding: 0 0 2rem;
+  text-align: center;
+  scroll-margin-top: 5rem;
+}
+
+.how-it-works__eyebrow {
+  margin: 0 0 0.6rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.how-it-works__title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--brand-deep);
+}
+
+.how-it-works__lead {
+  margin: 0 auto 2rem;
+  max-width: 34rem;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.how-it-works__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+  text-align: left;
+}
+
+.how-it-works__step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: start;
+  padding: 0.25rem 0;
+}
+
+.how-it-works__number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  background: rgba(47, 107, 58, 0.12);
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+.how-it-works__step-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.15rem;
+  color: var(--brand-deep);
+}
+
+.how-it-works__step-text {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.how-it-works__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.page .how-it-works {
+  margin-top: 0;
+  text-align: left;
+}
+
+.page .how-it-works__lead {
+  margin-left: 0;
+}
+
+.page .how-it-works__actions {
+  justify-content: flex-start;
+}
+
 .button {
   display: inline-flex;
   align-items: center;

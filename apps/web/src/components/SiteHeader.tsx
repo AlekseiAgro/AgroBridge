@@ -14,6 +14,7 @@ export async function SiteHeader() {
       </Link>
       <nav className="site-header__nav">
         <Link href="/catalog">{t('catalog')}</Link>
+        <Link href="/how-it-works">{t('howItWorks')}</Link>
         {user?.role === 'farmer' || user?.role === 'admin' ? (
           <>
             <Link href="/dashboard/farm">{t('myFarm')}</Link>

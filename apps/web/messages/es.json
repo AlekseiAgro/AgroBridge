@@ -56,7 +56,8 @@
     "myRequests": "Mis solicitudes",
     "chat": "Chat",
     "admin": "Admin",
-    "language": "Idioma"
+    "language": "Idioma",
+    "howItWorks": "Cómo funciona"
   },
   "catalog": {
     "title": "Catálogo de productos",
@@ -257,5 +258,27 @@
     "samegreloZemoSvaneti": "Samegrelo-Zemo Svaneti",
     "samtskheJavakheti": "Samtsje-Yavajeti",
     "shidaKartli": "Shida Kartli"
+  },
+  "howItWorks": {
+    "eyebrow": "Ruta comercial directa",
+    "title": "Una plataforma. Un proceso comercial más simple.",
+    "lead": "Tres pasos claros para conectar granjas georgianas con compradores en Georgia y en el extranjero.",
+    "steps": {
+      "find": {
+        "title": "Encuentra o publica un producto",
+        "text": "Explora el catálogo de productos georgianos, o crea un perfil de granja y envía tus ofertas a moderación."
+      },
+      "connect": {
+        "title": "Conéctate con un socio comercial",
+        "text": "Los compradores envían solicitudes de precio, los agricultores responden con ofertas y el chat traduce los mensajes al idioma de cada uno."
+      },
+      "agree": {
+        "title": "Acuerda los términos de suministro",
+        "text": "Revisa precio, cantidad y plazos, acepta una oferta y continúa la coordinación en un solo lugar."
+      }
+    },
+    "ctaFarmer": "Para agricultores",
+    "ctaBuyer": "Ver catálogo",
+    "pageNote": "AgroBridge ayuda a productores y compradores georgianos a encontrarse, negociar y hacer crecer el comercio sin intermediarios innecesarios."
   }
 }

@@ -56,7 +56,8 @@
     "myRequests": "Meine Anfragen",
     "chat": "Chat",
     "admin": "Admin",
-    "language": "Sprache"
+    "language": "Sprache",
+    "howItWorks": "So funktioniert’s"
   },
   "catalog": {
     "title": "Produktkatalog",
@@ -257,5 +258,27 @@
     "samegreloZemoSvaneti": "Mingrelien und Oberswanetien",
     "samtskheJavakheti": "Samzche-Dschawachetien",
     "shidaKartli": "Innerkartlien"
+  },
+  "howItWorks": {
+    "eyebrow": "Direkter Handelsweg",
+    "title": "Eine Plattform. Ein einfacherer Handelsprozess.",
+    "lead": "Drei klare Schritte, um georgische Betriebe mit Käufern in Georgien und im Ausland zu verbinden.",
+    "steps": {
+      "find": {
+        "title": "Produkt finden oder veröffentlichen",
+        "text": "Durchsuchen Sie den Katalog georgischer Erzeugnisse oder legen Sie ein Betriebsprofil an und reichen Sie Angebote zur Prüfung ein."
+      },
+      "connect": {
+        "title": "Mit einem Handelspartner verbinden",
+        "text": "Käufer senden Preisanfragen, Landwirte antworten mit Angeboten, und der Chat übersetzt Nachrichten in die Sprache jedes Nutzers."
+      },
+      "agree": {
+        "title": "Lieferbedingungen vereinbaren",
+        "text": "Prüfen Sie Preis, Menge und Timing, nehmen Sie ein Angebot an und koordinieren Sie alles an einem Ort."
+      }
+    },
+    "ctaFarmer": "Für Landwirte",
+    "ctaBuyer": "Katalog ansehen",
+    "pageNote": "AgroBridge hilft georgischen Erzeugern und Käufern, einander zu finden, zu verhandeln und Handel ohne unnötige Zwischenhändler auszubauen."
   }
 }
