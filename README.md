@@ -111,13 +111,16 @@ Statuses: `pending` → `offered` → `accepted` | `declined` (or `cancelled` wh
 - Statuses: `draft` → `pending` → `approved` | `rejected`
 - Public catalog shows only **approved + published** products
 - Admin desk: `/dashboard/admin`
-- Seed admin user:
+- Seed admin + demo users:
 
 ```bash
 pnpm --filter @agrobridge/api db:seed
-# default: admin@agrobridge.local / ChangeMeAdmin1
+# admin: admin@agrobridge.local / ChangeMeAdmin1
+# demo farmers & buyers: DemoPass123
+# examples: farmer-fruits-1@agrobridge.local , buyer-1@agrobridge.local
 ```
 
+Demo seed creates ~3–4 farmers (with farm + published product) per product category, plus 4 buyers. Product photos are copied from the category showcase images.
 ## Product photos
 
 - Farmers upload up to **8** product photos (JPEG / PNG / WebP, max **5MB** each) on the product edit page
