@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  farmer
+  buyer
+  admin
+}
+
+enum LocaleCode {
+  ka
+  en
+  ru
+  de
+  fr
+  it
+  es
+}
+
+enum MessageTranslationStatus {
+  pending
+  completed
+  failed
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String?
+  role         UserRole
+  locale       LocaleCode @default(en)
+  displayName  String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  farm                 Farm?
+  conversationsAsFarmer Conversation[] @relation("FarmerConversations")
+  conversationsAsBuyer  Conversation[] @relation("BuyerConversations")
+  messages             Message[]
+}
+
+model Farm {
+  id          String   @id @default(cuid())
+  ownerId     String   @unique
+  name        String
+  region      String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  farmId      String
+  title       String
+  description String?
+  category    String?
+  unit        String?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@index([farmId])
+  @@index([isPublished])
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  farmerId  String
+  buyerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  farmer   User      @relation("FarmerConversations", fields: [farmerId], references: [id], onDelete: Cascade)
+  buyer    User      @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([farmerId, buyerId])
+  @@index([farmerId])
+  @@index([buyerId])
+}
+
+/// Original message text is stored as source of truth.
+/// Translations are cached per target locale for the recipient.
+model Message {
+  id             String     @id @default(cuid())
+  conversationId String
+  senderId       String
+  sourceLocale   LocaleCode
+  sourceText     String
+  createdAt      DateTime   @default(now())
+
+  conversation Conversation         @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User                 @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  translations MessageTranslation[]
+
+  @@index([conversationId, createdAt])
+}
+
+model MessageTranslation {
+  id          String                    @id @default(cuid())
+  messageId   String
+  targetLocale LocaleCode
+  translatedText String?
+  status      MessageTranslationStatus  @default(pending)
+  provider    String?
+  error       String?
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, targetLocale])
+  @@index([status])
+}

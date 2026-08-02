@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "title": "AgroBridge",
+    "description": "Relier les producteurs agricoles géorgiens aux acheteurs du monde entier."
+  },
+  "home": {
+    "brand": "AgroBridge",
+    "headline": "Fermes géorgiennes. Acheteurs mondiaux.",
+    "subtitle": "Une plateforme simple pour que producteurs et acheteurs se trouvent et négocient dans leur langue.",
+    "ctaPrimary": "Voir les produits",
+    "ctaSecondary": "Rejoindre comme agriculteur",
+    "languagesHint": "7 langues · Traduction IA dans le chat"
+  }
+}

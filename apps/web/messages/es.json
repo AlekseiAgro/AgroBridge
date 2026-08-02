@@ -1,0 +1,14 @@
+{
+  "meta": {
+    "title": "AgroBridge",
+    "description": "Conecta a productores agrícolas georgianos con compradores de todo el mundo."
+  },
+  "home": {
+    "brand": "AgroBridge",
+    "headline": "Granjas georgianas. Compradores globales.",
+    "subtitle": "Una plataforma sencilla donde productores y compradores se encuentran y negocian en su propio idioma.",
+    "ctaPrimary": "Ver productos",
+    "ctaSecondary": "Unirse como agricultor",
+    "languagesHint": "7 idiomas · Traducción con IA en el chat"
+  }
+}
