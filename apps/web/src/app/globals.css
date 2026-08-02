@@ -93,7 +93,6 @@ body {
   display: block;
   width: min(100%, 15rem);
   height: auto;
-  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.3));
 }
 
 .auth-brand.brand-logo,
