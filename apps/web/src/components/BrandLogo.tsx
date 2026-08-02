@@ -18,21 +18,46 @@ export function BrandLogo({
     .filter(Boolean)
     .join(' ');
 
-  const imageClass =
-    variant === 'stacked'
-      ? 'brand-logo__image'
-      : variant === 'mark'
-        ? 'brand-logo__mark-image'
-        : 'brand-logo__lockup';
+  if (variant === 'stacked') {
+    return (
+      <span className={classes}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/brand/agrobridge-logo-transparent.png"
+          alt="AgroBridge"
+          className="brand-logo__image"
+        />
+      </span>
+    );
+  }
+
+  if (variant === 'mark') {
+    return (
+      <span className={classes}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/brand/agrobridge-mark-transparent.png"
+          alt=""
+          className="brand-logo__mark-image"
+        />
+        <span className="sr-only">AgroBridge</span>
+      </span>
+    );
+  }
 
   return (
     <span className={classes}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/images/brand/logo.png"
-        alt="AgroBridge"
-        className={imageClass}
+        src="/images/brand/agrobridge-mark-transparent.png"
+        alt=""
+        className="brand-logo__mark-image"
       />
+      <span className="brand-logo__word" aria-hidden="true">
+        <span className="brand-logo__agro">Agro</span>
+        <span className="brand-logo__bridge">Bridge</span>
+      </span>
+      <span className="sr-only">AgroBridge</span>
     </span>
   );
 }

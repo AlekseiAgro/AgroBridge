@@ -51,7 +51,7 @@ body {
 .brand-logo {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.55rem;
   text-decoration: none;
   color: inherit;
   line-height: 1;
@@ -69,18 +69,31 @@ body {
 }
 
 .brand-logo__mark-image {
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 2.25rem;
+  height: 2.25rem;
   object-fit: contain;
   flex: 0 0 auto;
   display: block;
 }
 
-.brand-logo__lockup {
-  display: block;
-  height: 2.75rem;
-  width: auto;
-  object-fit: contain;
+.brand-logo--light .brand-logo__mark-image {
+  filter: brightness(0) invert(1);
+}
+
+.brand-logo__word {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 1.28rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.brand-logo__agro {
+  color: var(--logo-green);
+}
+
+.brand-logo__bridge {
+  color: var(--logo-navy);
 }
 
 .brand-logo--light {
@@ -91,8 +104,13 @@ body {
 
 .brand-logo__image {
   display: block;
-  width: min(100%, 15rem);
+  width: min(100%, 17rem);
   height: auto;
+  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.3));
+}
+
+.brand-logo--light .brand-logo__image {
+  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.35));
 }
 
 .auth-brand.brand-logo,
@@ -100,12 +118,12 @@ a.brand-logo {
   text-decoration: none;
 }
 
-.site-footer__logo .brand-logo__lockup {
-  height: 2.4rem;
+.site-footer__logo .brand-logo__word {
+  font-size: 1.2rem;
 }
 
-.cabinet__brand .brand-logo__lockup {
-  height: 2.35rem;
+.cabinet__brand .brand-logo__word {
+  font-size: 1.15rem;
 }
 
 .home__brand {
@@ -113,7 +131,7 @@ a.brand-logo {
 }
 
 .home__brand .brand-logo__image {
-  width: min(100%, 16rem);
+  width: min(100%, 18rem);
   margin: 0 auto;
 }
 
