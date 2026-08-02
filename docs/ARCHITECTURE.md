@@ -32,6 +32,13 @@
 - **Conversation / Message** — 1:1 chat.
 - **MessageTranslation** — cached AI translation per target locale; original text remains source of truth.
 
+## Authentication
+
+- NestJS issues JWT access tokens (`JWT_SECRET`, `JWT_EXPIRES_SECONDS`).
+- Self-registration is limited to `farmer` and `buyer`. `admin` is provisioned separately.
+- Web stores the access token in an httpOnly cookie (`agrobridge_token`) via `/api/auth/*` route handlers.
+- Protected API routes use `JwtAuthGuard` and optional `RolesGuard`.
+
 ## Chat translation flow (planned)
 
 1. Sender writes in their language.

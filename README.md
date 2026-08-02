@@ -60,10 +60,22 @@ pnpm dev
 
 Health check: `GET http://localhost:3001/api/health`
 
+## Auth (current step)
+
+API (JWT):
+
+- `POST /api/auth/register` — roles `farmer` | `buyer` (admin is not self-serve)
+- `POST /api/auth/login`
+- `GET /api/auth/me` — Bearer token
+
+Web:
+
+- `/[locale]/register`, `/[locale]/login`, `/[locale]/account`
+- Session cookie: `agrobridge_token` (httpOnly), set by Next.js route handlers
+
 ## Next implementation steps
 
-1. Authentication (roles: farmer / buyer / admin)
-2. Farm profiles and product catalog
-3. RFQ / offer flow
-4. Chat with AI translation
-5. Admin moderation
+1. Farm profiles and product catalog
+2. RFQ / offer flow
+3. Chat with AI translation
+4. Admin moderation

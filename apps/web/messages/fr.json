@@ -8,7 +8,41 @@
     "headline": "Fermes géorgiennes. Acheteurs mondiaux.",
     "subtitle": "Une plateforme simple pour que producteurs et acheteurs se trouvent et négocient dans leur langue.",
     "ctaPrimary": "Voir les produits",
-    "ctaSecondary": "Rejoindre comme agriculteur",
+    "ctaSecondary": "Créer un compte",
+    "ctaAccount": "Ouvrir mon compte",
+    "login": "Connexion",
+    "register": "Inscription",
+    "account": "Mon compte",
     "languagesHint": "7 langues · Traduction IA dans le chat"
+  },
+  "auth": {
+    "loginTitle": "Bon retour",
+    "loginSubtitle": "Connectez-vous en tant qu’agriculteur ou acheteur.",
+    "registerTitle": "Rejoindre AgroBridge",
+    "registerSubtitle": "Créez un compte pour publier des produits ou trouver des fournisseurs.",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "displayName": "Nom affiché",
+    "role": "Je suis",
+    "roles": {
+      "farmer": "Agriculteur / producteur",
+      "buyer": "Acheteur",
+      "admin": "Admin"
+    },
+    "loginSubmit": "Se connecter",
+    "registerSubmit": "Créer un compte",
+    "logout": "Se déconnecter",
+    "pleaseWait": "Veuillez patienter…",
+    "genericError": "Une erreur s’est produite. Réessayez.",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Déjà inscrit ?",
+    "goRegister": "S’inscrire",
+    "goLogin": "Se connecter"
+  },
+  "account": {
+    "title": "Votre compte",
+    "subtitle": "Informations de profil pour votre rôle sur AgroBridge.",
+    "locale": "Langue préférée",
+    "noDisplayName": "Non défini"
   }
 }

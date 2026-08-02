@@ -60,6 +60,22 @@ body {
   justify-content: flex-end;
 }
 
+.home__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.text-link {
+  color: var(--brand-deep);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.text-link:hover {
+  text-decoration: underline;
+}
+
 .home__hero {
   max-width: 42rem;
   margin: 12vh auto 0;
@@ -146,6 +162,137 @@ body {
   font: inherit;
 }
 
+.auth-page {
+  min-height: 100vh;
+  padding: 1.25rem 1.25rem 3rem;
+}
+
+.auth-page__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.auth-page__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.auth-brand {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 650;
+  color: var(--brand-deep);
+  text-decoration: none;
+}
+
+.auth-card {
+  width: min(100%, 28rem);
+  margin: 0 auto;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--surface);
+  backdrop-filter: blur(8px);
+}
+
+.auth-card h1 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.7rem;
+}
+
+.auth-card__subtitle,
+.auth-card__footer {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.auth-card__footer {
+  margin: 1.25rem 0 0;
+}
+
+.auth-card__footer a {
+  color: var(--brand-deep);
+  font-weight: 600;
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1.25rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field span,
+.role-fieldset legend {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.field input {
+  min-height: 2.7rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.9);
+  font: inherit;
+}
+
+.role-fieldset {
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form-error {
+  margin: 0;
+  color: #8a2f2f;
+  font-size: 0.92rem;
+}
+
+.account-details {
+  margin: 1.25rem 0 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.account-details div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.account-details dt {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.account-details dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 @media (max-width: 640px) {
   .home__hero {
     margin-top: 8vh;
@@ -157,5 +304,10 @@ body {
 
   .button {
     width: 100%;
+  }
+
+  .auth-page__actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 }

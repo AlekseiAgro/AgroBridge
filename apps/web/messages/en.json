@@ -8,7 +8,41 @@
     "headline": "Georgian farms. Global buyers.",
     "subtitle": "A simple marketplace that helps producers and buyers find each other and negotiate in their own language.",
     "ctaPrimary": "Browse products",
-    "ctaSecondary": "Join as a farmer",
+    "ctaSecondary": "Create account",
+    "ctaAccount": "Open my account",
+    "login": "Log in",
+    "register": "Sign up",
+    "account": "My account",
     "languagesHint": "Available in 7 languages · AI chat translation"
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Log in to continue as a farmer or buyer.",
+    "registerTitle": "Join AgroBridge",
+    "registerSubtitle": "Create an account to list products or find suppliers.",
+    "email": "Email",
+    "password": "Password",
+    "displayName": "Display name",
+    "role": "I am a",
+    "roles": {
+      "farmer": "Farmer / producer",
+      "buyer": "Buyer",
+      "admin": "Admin"
+    },
+    "loginSubmit": "Log in",
+    "registerSubmit": "Create account",
+    "logout": "Log out",
+    "pleaseWait": "Please wait…",
+    "genericError": "Something went wrong. Please try again.",
+    "noAccount": "No account yet?",
+    "hasAccount": "Already registered?",
+    "goRegister": "Sign up",
+    "goLogin": "Log in"
+  },
+  "account": {
+    "title": "Your account",
+    "subtitle": "Basic profile details for your AgroBridge role.",
+    "locale": "Preferred language",
+    "noDisplayName": "Not set"
   }
 }

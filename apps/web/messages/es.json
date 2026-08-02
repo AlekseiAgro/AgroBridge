@@ -8,7 +8,41 @@
     "headline": "Granjas georgianas. Compradores globales.",
     "subtitle": "Una plataforma sencilla donde productores y compradores se encuentran y negocian en su propio idioma.",
     "ctaPrimary": "Ver productos",
-    "ctaSecondary": "Unirse como agricultor",
+    "ctaSecondary": "Crear cuenta",
+    "ctaAccount": "Abrir mi cuenta",
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "account": "Mi cuenta",
     "languagesHint": "7 idiomas · Traducción con IA en el chat"
+  },
+  "auth": {
+    "loginTitle": "Bienvenido de nuevo",
+    "loginSubtitle": "Inicia sesión como agricultor o comprador.",
+    "registerTitle": "Únete a AgroBridge",
+    "registerSubtitle": "Crea una cuenta para publicar productos o encontrar proveedores.",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "displayName": "Nombre visible",
+    "role": "Soy",
+    "roles": {
+      "farmer": "Agricultor / productor",
+      "buyer": "Comprador",
+      "admin": "Admin"
+    },
+    "loginSubmit": "Iniciar sesión",
+    "registerSubmit": "Crear cuenta",
+    "logout": "Cerrar sesión",
+    "pleaseWait": "Espera…",
+    "genericError": "Algo salió mal. Inténtalo de nuevo.",
+    "noAccount": "¿Aún no tienes cuenta?",
+    "hasAccount": "¿Ya estás registrado?",
+    "goRegister": "Registrarse",
+    "goLogin": "Iniciar sesión"
+  },
+  "account": {
+    "title": "Tu cuenta",
+    "subtitle": "Datos básicos del perfil para tu rol en AgroBridge.",
+    "locale": "Idioma preferido",
+    "noDisplayName": "Sin definir"
   }
 }

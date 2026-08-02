@@ -8,7 +8,41 @@
     "headline": "Aziende georgiane. Acquirenti globali.",
     "subtitle": "Una piattaforma semplice dove produttori e acquirenti si trovano e negoziano nella propria lingua.",
     "ctaPrimary": "Esplora i prodotti",
-    "ctaSecondary": "Unisciti come agricoltore",
+    "ctaSecondary": "Crea account",
+    "ctaAccount": "Apri il mio account",
+    "login": "Accedi",
+    "register": "Registrati",
+    "account": "Il mio account",
     "languagesHint": "7 lingue · Traduzione IA in chat"
+  },
+  "auth": {
+    "loginTitle": "Bentornato",
+    "loginSubtitle": "Accedi come agricoltore o acquirente.",
+    "registerTitle": "Unisciti ad AgroBridge",
+    "registerSubtitle": "Crea un account per pubblicare prodotti o trovare fornitori.",
+    "email": "Email",
+    "password": "Password",
+    "displayName": "Nome visualizzato",
+    "role": "Sono",
+    "roles": {
+      "farmer": "Agricoltore / produttore",
+      "buyer": "Acquirente",
+      "admin": "Admin"
+    },
+    "loginSubmit": "Accedi",
+    "registerSubmit": "Crea account",
+    "logout": "Esci",
+    "pleaseWait": "Attendere…",
+    "genericError": "Qualcosa è andato storto. Riprova.",
+    "noAccount": "Non hai ancora un account?",
+    "hasAccount": "Sei già registrato?",
+    "goRegister": "Registrati",
+    "goLogin": "Accedi"
+  },
+  "account": {
+    "title": "Il tuo account",
+    "subtitle": "Dati di profilo per il tuo ruolo su AgroBridge.",
+    "locale": "Lingua preferita",
+    "noDisplayName": "Non impostato"
   }
 }

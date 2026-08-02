@@ -8,7 +8,41 @@
     "headline": "Georgische Betriebe. Globale Käufer.",
     "subtitle": "Eine einfache Plattform, auf der Erzeuger und Käufer einander finden und in ihrer eigenen Sprache verhandeln.",
     "ctaPrimary": "Produkte entdecken",
-    "ctaSecondary": "Als Landwirt starten",
+    "ctaSecondary": "Konto erstellen",
+    "ctaAccount": "Mein Konto öffnen",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "account": "Mein Konto",
     "languagesHint": "7 Sprachen · KI-Übersetzung im Chat"
+  },
+  "auth": {
+    "loginTitle": "Willkommen zurück",
+    "loginSubtitle": "Melden Sie sich als Landwirt oder Käufer an.",
+    "registerTitle": "AgroBridge beitreten",
+    "registerSubtitle": "Erstellen Sie ein Konto, um Produkte einzustellen oder Lieferanten zu finden.",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "displayName": "Anzeigename",
+    "role": "Ich bin",
+    "roles": {
+      "farmer": "Landwirt / Erzeuger",
+      "buyer": "Käufer",
+      "admin": "Admin"
+    },
+    "loginSubmit": "Anmelden",
+    "registerSubmit": "Konto erstellen",
+    "logout": "Abmelden",
+    "pleaseWait": "Bitte warten…",
+    "genericError": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "noAccount": "Noch kein Konto?",
+    "hasAccount": "Bereits registriert?",
+    "goRegister": "Registrieren",
+    "goLogin": "Anmelden"
+  },
+  "account": {
+    "title": "Ihr Konto",
+    "subtitle": "Grundlegende Profildaten für Ihre Rolle bei AgroBridge.",
+    "locale": "Bevorzugte Sprache",
+    "noDisplayName": "Nicht festgelegt"
   }
 }
