@@ -13,7 +13,8 @@
     "login": "Log in",
     "register": "Sign up",
     "account": "My account",
-    "languagesHint": "Available in 7 languages · AI chat translation"
+    "languagesHint": "Available in 7 languages · AI chat translation",
+    "ctaFarm": "Manage my farm"
   },
   "auth": {
     "loginTitle": "Welcome back",
@@ -44,5 +45,86 @@
     "subtitle": "Basic profile details for your AgroBridge role.",
     "locale": "Preferred language",
     "noDisplayName": "Not set"
+  },
+  "nav": {
+    "catalog": "Catalog",
+    "myFarm": "My farm",
+    "myProducts": "My products",
+    "account": "Account",
+    "login": "Log in",
+    "register": "Sign up"
+  },
+  "catalog": {
+    "title": "Product catalog",
+    "subtitle": "Browse published offers from Georgian farms.",
+    "search": "Search",
+    "category": "Category",
+    "region": "Region",
+    "allCategories": "All categories",
+    "applyFilters": "Apply",
+    "empty": "No products match your filters yet.",
+    "loadError": "Could not load the catalog. Is the API running?",
+    "categories": {
+      "fruits": "Fruits",
+      "vegetables": "Vegetables",
+      "nuts": "Nuts",
+      "wine": "Wine",
+      "dairy": "Dairy",
+      "honey": "Honey",
+      "herbs": "Herbs",
+      "other": "Other"
+    }
+  },
+  "farm": {
+    "createTitle": "Create farm profile",
+    "editTitle": "Edit farm profile",
+    "dashboardSubtitle": "Tell buyers who you are and where you produce.",
+    "name": "Farm name",
+    "region": "Region",
+    "description": "Description",
+    "createSubmit": "Create farm",
+    "saveSubmit": "Save changes",
+    "pleaseWait": "Please wait…",
+    "genericError": "Could not save the farm profile.",
+    "viewPublic": "View public page",
+    "manageProducts": "Manage products",
+    "productsHeading": "Published products",
+    "noProducts": "This farm has no published products yet.",
+    "regionUnknown": "Region not specified"
+  },
+  "product": {
+    "dashboardTitle": "My products",
+    "dashboardSubtitle": "Create drafts, publish offers, and keep listings up to date.",
+    "addProduct": "Add product",
+    "createTitle": "New product",
+    "createSubtitle": "Describe what you can supply.",
+    "editTitle": "Edit product",
+    "editSubtitle": "Update details or publishing status.",
+    "title": "Title",
+    "description": "Description",
+    "category": "Category",
+    "unit": "Unit",
+    "noUnit": "No unit",
+    "publish": "Publish in catalog",
+    "createSubmit": "Create product",
+    "saveSubmit": "Save changes",
+    "pleaseWait": "Please wait…",
+    "genericError": "Could not save the product.",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this product?",
+    "published": "Published",
+    "draft": "Draft",
+    "emptyMine": "You have no products yet.",
+    "needFarmFirst": "Create a farm profile before adding products.",
+    "goCreateFarm": "Go to farm profile",
+    "units": {
+      "kg": "Kilogram",
+      "ton": "Ton",
+      "box": "Box",
+      "liter": "Liter",
+      "bottle": "Bottle",
+      "piece": "Piece"
+    }
   }
 }

@@ -1,0 +1,57 @@
+import type { FarmDetail } from '@agrobridge/shared';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { FarmForm } from '@/components/FarmForm';
+import { SiteHeader } from '@/components/SiteHeader';
+import { Link, redirect } from '@/i18n/navigation';
+import { apiRequestAuthed } from '@/lib/server-api';
+import { getCurrentUser } from '@/lib/session';
+
+type Props = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function DashboardFarmPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect({ href: '/login', locale });
+  }
+  if (user!.role !== 'farmer' && user!.role !== 'admin') {
+    redirect({ href: '/account', locale });
+  }
+
+  const t = await getTranslations('farm');
+  let farm: FarmDetail | null = null;
+  try {
+    farm = await apiRequestAuthed<FarmDetail | null>('/farms/me');
+  } catch {
+    farm = null;
+  }
+
+  return (
+    <div className="page">
+      <SiteHeader />
+      <main className="page__main narrow">
+        <h1>{farm ? t('editTitle') : t('createTitle')}</h1>
+        <p className="page__subtitle">{t('dashboardSubtitle')}</p>
+        <FarmForm
+          mode={farm ? 'edit' : 'create'}
+          initial={
+            farm
+              ? { name: farm.name, region: farm.region, description: farm.description }
+              : null
+          }
+        />
+        {farm ? (
+          <p className="auth-card__footer">
+            <Link href={`/farms/${farm.id}`}>{t('viewPublic')}</Link>
+            {' · '}
+            <Link href="/dashboard/products">{t('manageProducts')}</Link>
+          </p>
+        ) : null}
+      </main>
+    </div>
+  );
+}

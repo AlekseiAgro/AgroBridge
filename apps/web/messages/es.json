@@ -13,7 +13,8 @@
     "login": "Iniciar sesión",
     "register": "Registrarse",
     "account": "Mi cuenta",
-    "languagesHint": "7 idiomas · Traducción con IA en el chat"
+    "languagesHint": "7 idiomas · Traducción con IA en el chat",
+    "ctaFarm": "Gestionar mi granja"
   },
   "auth": {
     "loginTitle": "Bienvenido de nuevo",
@@ -44,5 +45,86 @@
     "subtitle": "Datos básicos del perfil para tu rol en AgroBridge.",
     "locale": "Idioma preferido",
     "noDisplayName": "Sin definir"
+  },
+  "nav": {
+    "catalog": "Catálogo",
+    "myFarm": "Mi granja",
+    "myProducts": "Mis productos",
+    "account": "Cuenta",
+    "login": "Iniciar sesión",
+    "register": "Registrarse"
+  },
+  "catalog": {
+    "title": "Catálogo de productos",
+    "subtitle": "Explora las ofertas publicadas de granjas georgianas.",
+    "search": "Buscar",
+    "category": "Categoría",
+    "region": "Región",
+    "allCategories": "Todas las categorías",
+    "applyFilters": "Aplicar",
+    "empty": "Ningún producto coincide con los filtros.",
+    "loadError": "No se pudo cargar el catálogo. ¿Está la API en marcha?",
+    "categories": {
+      "fruits": "Frutas",
+      "vegetables": "Verduras",
+      "nuts": "Frutos secos",
+      "wine": "Vino",
+      "dairy": "Lácteos",
+      "honey": "Miel",
+      "herbs": "Hierbas",
+      "other": "Otros"
+    }
+  },
+  "farm": {
+    "createTitle": "Crear perfil de granja",
+    "editTitle": "Editar perfil de granja",
+    "dashboardSubtitle": "Cuéntales a los compradores quién eres y dónde produces.",
+    "name": "Nombre de la granja",
+    "region": "Región",
+    "description": "Descripción",
+    "createSubmit": "Crear",
+    "saveSubmit": "Guardar",
+    "pleaseWait": "Espera…",
+    "genericError": "No se pudo guardar el perfil.",
+    "viewPublic": "Página pública",
+    "manageProducts": "Gestionar productos",
+    "productsHeading": "Productos publicados",
+    "noProducts": "Esta granja aún no tiene productos publicados.",
+    "regionUnknown": "Región no indicada"
+  },
+  "product": {
+    "dashboardTitle": "Mis productos",
+    "dashboardSubtitle": "Crea borradores, publica ofertas y mantén los anuncios al día.",
+    "addProduct": "Añadir producto",
+    "createTitle": "Nuevo producto",
+    "createSubtitle": "Describe lo que puedes suministrar.",
+    "editTitle": "Editar producto",
+    "editSubtitle": "Actualiza los detalles o el estado.",
+    "title": "Título",
+    "description": "Descripción",
+    "category": "Categoría",
+    "unit": "Unidad",
+    "noUnit": "Sin unidad",
+    "publish": "Publicar en el catálogo",
+    "createSubmit": "Crear",
+    "saveSubmit": "Guardar",
+    "pleaseWait": "Espera…",
+    "genericError": "No se pudo guardar el producto.",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "deleteConfirm": "¿Eliminar este producto?",
+    "published": "Publicado",
+    "draft": "Borrador",
+    "emptyMine": "Aún no tienes productos.",
+    "needFarmFirst": "Crea primero un perfil de granja.",
+    "goCreateFarm": "Ir al perfil de granja",
+    "units": {
+      "kg": "Kilogramo",
+      "ton": "Tonelada",
+      "box": "Caja",
+      "liter": "Litro",
+      "bottle": "Botella",
+      "piece": "Pieza"
+    }
   }
 }

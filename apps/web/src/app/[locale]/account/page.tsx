@@ -20,7 +20,9 @@ export default async function AccountPage({ params }: Props) {
   const user = currentUser!;
   const t = await getTranslations('account');
   const ta = await getTranslations('auth');
+  const tn = await getTranslations('nav');
   const roleKey = `roles.${user.role}` as 'roles.farmer' | 'roles.buyer' | 'roles.admin';
+  const isFarmer = user.role === 'farmer' || user.role === 'admin';
 
   return (
     <div className="auth-page">
@@ -56,6 +58,22 @@ export default async function AccountPage({ params }: Props) {
             <dd>{user.locale}</dd>
           </div>
         </dl>
+
+        <div className="home__actions" style={{ marginTop: '1.25rem' }}>
+          <Link className="button button--ghost" href="/catalog">
+            {tn('catalog')}
+          </Link>
+          {isFarmer ? (
+            <>
+              <Link className="button button--primary" href="/dashboard/farm">
+                {tn('myFarm')}
+              </Link>
+              <Link className="button button--ghost" href="/dashboard/products">
+                {tn('myProducts')}
+              </Link>
+            </>
+          ) : null}
+        </div>
       </main>
     </div>
   );

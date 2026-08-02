@@ -13,7 +13,8 @@
     "login": "Connexion",
     "register": "Inscription",
     "account": "Mon compte",
-    "languagesHint": "7 langues · Traduction IA dans le chat"
+    "languagesHint": "7 langues · Traduction IA dans le chat",
+    "ctaFarm": "Gérer ma ferme"
   },
   "auth": {
     "loginTitle": "Bon retour",
@@ -44,5 +45,86 @@
     "subtitle": "Informations de profil pour votre rôle sur AgroBridge.",
     "locale": "Langue préférée",
     "noDisplayName": "Non défini"
+  },
+  "nav": {
+    "catalog": "Catalogue",
+    "myFarm": "Ma ferme",
+    "myProducts": "Mes produits",
+    "account": "Compte",
+    "login": "Connexion",
+    "register": "Inscription"
+  },
+  "catalog": {
+    "title": "Catalogue de produits",
+    "subtitle": "Parcourez les offres publiées des fermes géorgiennes.",
+    "search": "Recherche",
+    "category": "Catégorie",
+    "region": "Région",
+    "allCategories": "Toutes les catégories",
+    "applyFilters": "Appliquer",
+    "empty": "Aucun produit ne correspond à vos filtres.",
+    "loadError": "Impossible de charger le catalogue. L’API tourne-t-elle ?",
+    "categories": {
+      "fruits": "Fruits",
+      "vegetables": "Légumes",
+      "nuts": "Noix",
+      "wine": "Vin",
+      "dairy": "Produits laitiers",
+      "honey": "Miel",
+      "herbs": "Herbes",
+      "other": "Autre"
+    }
+  },
+  "farm": {
+    "createTitle": "Créer le profil de ferme",
+    "editTitle": "Modifier le profil de ferme",
+    "dashboardSubtitle": "Dites aux acheteurs qui vous êtes et où vous produisez.",
+    "name": "Nom de la ferme",
+    "region": "Région",
+    "description": "Description",
+    "createSubmit": "Créer",
+    "saveSubmit": "Enregistrer",
+    "pleaseWait": "Veuillez patienter…",
+    "genericError": "Impossible d’enregistrer le profil.",
+    "viewPublic": "Page publique",
+    "manageProducts": "Gérer les produits",
+    "productsHeading": "Produits publiés",
+    "noProducts": "Cette ferme n’a pas encore de produits publiés.",
+    "regionUnknown": "Région non indiquée"
+  },
+  "product": {
+    "dashboardTitle": "Mes produits",
+    "dashboardSubtitle": "Créez des brouillons, publiez des offres et tenez vos annonces à jour.",
+    "addProduct": "Ajouter un produit",
+    "createTitle": "Nouveau produit",
+    "createSubtitle": "Décrivez ce que vous pouvez fournir.",
+    "editTitle": "Modifier le produit",
+    "editSubtitle": "Mettez à jour les détails ou le statut.",
+    "title": "Titre",
+    "description": "Description",
+    "category": "Catégorie",
+    "unit": "Unité",
+    "noUnit": "Sans unité",
+    "publish": "Publier dans le catalogue",
+    "createSubmit": "Créer",
+    "saveSubmit": "Enregistrer",
+    "pleaseWait": "Veuillez patienter…",
+    "genericError": "Impossible d’enregistrer le produit.",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer ce produit ?",
+    "published": "Publié",
+    "draft": "Brouillon",
+    "emptyMine": "Vous n’avez pas encore de produits.",
+    "needFarmFirst": "Créez d’abord un profil de ferme.",
+    "goCreateFarm": "Aller au profil de ferme",
+    "units": {
+      "kg": "Kilogramme",
+      "ton": "Tonne",
+      "box": "Caisse",
+      "liter": "Litre",
+      "bottle": "Bouteille",
+      "piece": "Pièce"
+    }
   }
 }

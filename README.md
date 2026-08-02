@@ -73,9 +73,22 @@ Web:
 - `/[locale]/register`, `/[locale]/login`, `/[locale]/account`
 - Session cookie: `agrobridge_token` (httpOnly), set by Next.js route handlers
 
+## Farms & catalog (current step)
+
+API:
+
+- `GET /api/farms`, `GET /api/farms/:id`, `GET|POST /api/farms/me` / `POST /api/farms`, `PATCH /api/farms/me`
+- `GET /api/products` (filters: `q`, `category`, `region`)
+- `GET /api/products/:id`, `GET /api/products/mine`
+- `POST|PATCH|DELETE /api/products`
+
+Web:
+
+- Public: `/[locale]/catalog`, `/products/[id]`, `/farms/[id]`
+- Farmer dashboard: `/dashboard/farm`, `/dashboard/products`
+
 ## Next implementation steps
 
-1. Farm profiles and product catalog
-2. RFQ / offer flow
-3. Chat with AI translation
-4. Admin moderation
+1. RFQ / offer flow
+2. Chat with AI translation
+3. Admin moderation

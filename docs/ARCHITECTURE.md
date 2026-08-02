@@ -32,6 +32,13 @@
 - **Conversation / Message** — 1:1 chat.
 - **MessageTranslation** — cached AI translation per target locale; original text remains source of truth.
 
+## Farms and catalog
+
+- Each farmer has at most one `Farm` profile.
+- Products belong to a farm; only `isPublished=true` items appear in the public catalog.
+- Catalog filters: text query, category, region.
+- Farmer dashboard manages farm profile and product drafts/publish state.
+
 ## Authentication
 
 - NestJS issues JWT access tokens (`JWT_SECRET`, `JWT_EXPIRES_SECONDS`).

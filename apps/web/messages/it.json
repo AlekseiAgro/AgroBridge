@@ -13,7 +13,8 @@
     "login": "Accedi",
     "register": "Registrati",
     "account": "Il mio account",
-    "languagesHint": "7 lingue · Traduzione IA in chat"
+    "languagesHint": "7 lingue · Traduzione IA in chat",
+    "ctaFarm": "Gestisci l’azienda"
   },
   "auth": {
     "loginTitle": "Bentornato",
@@ -44,5 +45,86 @@
     "subtitle": "Dati di profilo per il tuo ruolo su AgroBridge.",
     "locale": "Lingua preferita",
     "noDisplayName": "Non impostato"
+  },
+  "nav": {
+    "catalog": "Catalogo",
+    "myFarm": "La mia azienda",
+    "myProducts": "I miei prodotti",
+    "account": "Account",
+    "login": "Accedi",
+    "register": "Registrati"
+  },
+  "catalog": {
+    "title": "Catalogo prodotti",
+    "subtitle": "Sfoglia le offerte pubblicate delle aziende georgiane.",
+    "search": "Cerca",
+    "category": "Categoria",
+    "region": "Regione",
+    "allCategories": "Tutte le categorie",
+    "applyFilters": "Applica",
+    "empty": "Nessun prodotto corrisponde ai filtri.",
+    "loadError": "Impossibile caricare il catalogo. L’API è attiva?",
+    "categories": {
+      "fruits": "Frutta",
+      "vegetables": "Verdura",
+      "nuts": "Noci",
+      "wine": "Vino",
+      "dairy": "Latticini",
+      "honey": "Miele",
+      "herbs": "Erbe",
+      "other": "Altro"
+    }
+  },
+  "farm": {
+    "createTitle": "Crea profilo azienda",
+    "editTitle": "Modifica profilo azienda",
+    "dashboardSubtitle": "Racconta agli acquirenti chi sei e dove produci.",
+    "name": "Nome azienda",
+    "region": "Regione",
+    "description": "Descrizione",
+    "createSubmit": "Crea",
+    "saveSubmit": "Salva",
+    "pleaseWait": "Attendere…",
+    "genericError": "Impossibile salvare il profilo.",
+    "viewPublic": "Pagina pubblica",
+    "manageProducts": "Gestisci prodotti",
+    "productsHeading": "Prodotti pubblicati",
+    "noProducts": "Questa azienda non ha ancora prodotti pubblicati.",
+    "regionUnknown": "Regione non specificata"
+  },
+  "product": {
+    "dashboardTitle": "I miei prodotti",
+    "dashboardSubtitle": "Crea bozze, pubblica offerte e aggiorna gli annunci.",
+    "addProduct": "Aggiungi prodotto",
+    "createTitle": "Nuovo prodotto",
+    "createSubtitle": "Descrivi cosa puoi fornire.",
+    "editTitle": "Modifica prodotto",
+    "editSubtitle": "Aggiorna i dettagli o lo stato.",
+    "title": "Titolo",
+    "description": "Descrizione",
+    "category": "Categoria",
+    "unit": "Unità",
+    "noUnit": "Nessuna unità",
+    "publish": "Pubblica nel catalogo",
+    "createSubmit": "Crea",
+    "saveSubmit": "Salva",
+    "pleaseWait": "Attendere…",
+    "genericError": "Impossibile salvare il prodotto.",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "deleteConfirm": "Eliminare questo prodotto?",
+    "published": "Pubblicato",
+    "draft": "Bozza",
+    "emptyMine": "Non hai ancora prodotti.",
+    "needFarmFirst": "Crea prima un profilo azienda.",
+    "goCreateFarm": "Vai al profilo azienda",
+    "units": {
+      "kg": "Chilogrammo",
+      "ton": "Tonnellata",
+      "box": "Cassetta",
+      "liter": "Litro",
+      "bottle": "Bottiglia",
+      "piece": "Pezzo"
+    }
   }
 }

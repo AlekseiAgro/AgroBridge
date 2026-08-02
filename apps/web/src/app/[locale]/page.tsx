@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { getCurrentUser } from '@/lib/session';
 
@@ -15,25 +15,7 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <div className="home">
-      <header className="home__top">
-        <div className="home__nav">
-          {user ? (
-            <Link href="/account" className="text-link">
-              {t('account')}
-            </Link>
-          ) : (
-            <>
-              <Link href="/login" className="text-link">
-                {t('login')}
-              </Link>
-              <Link href="/register" className="text-link">
-                {t('register')}
-              </Link>
-            </>
-          )}
-          <LanguageSwitcher />
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="home__hero">
         <p className="home__brand">{t('brand')}</p>
@@ -41,19 +23,21 @@ export default async function HomePage({ params }: Props) {
         <p className="home__subtitle">{t('subtitle')}</p>
 
         <div className="home__actions">
-          {user ? (
-            <Link className="button button--primary" href="/account">
+          <Link className="button button--primary" href="/catalog">
+            {t('ctaPrimary')}
+          </Link>
+          {user?.role === 'farmer' || user?.role === 'admin' ? (
+            <Link className="button button--ghost" href="/dashboard/farm">
+              {t('ctaFarm')}
+            </Link>
+          ) : user ? (
+            <Link className="button button--ghost" href="/account">
               {t('ctaAccount')}
             </Link>
           ) : (
-            <>
-              <Link className="button button--primary" href="/register">
-                {t('ctaSecondary')}
-              </Link>
-              <Link className="button button--ghost" href="/login">
-                {t('login')}
-              </Link>
-            </>
+            <Link className="button button--ghost" href="/register">
+              {t('ctaSecondary')}
+            </Link>
           )}
         </div>
 

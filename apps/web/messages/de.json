@@ -13,7 +13,8 @@
     "login": "Anmelden",
     "register": "Registrieren",
     "account": "Mein Konto",
-    "languagesHint": "7 Sprachen · KI-Übersetzung im Chat"
+    "languagesHint": "7 Sprachen · KI-Übersetzung im Chat",
+    "ctaFarm": "Betrieb verwalten"
   },
   "auth": {
     "loginTitle": "Willkommen zurück",
@@ -44,5 +45,86 @@
     "subtitle": "Grundlegende Profildaten für Ihre Rolle bei AgroBridge.",
     "locale": "Bevorzugte Sprache",
     "noDisplayName": "Nicht festgelegt"
+  },
+  "nav": {
+    "catalog": "Katalog",
+    "myFarm": "Mein Betrieb",
+    "myProducts": "Meine Produkte",
+    "account": "Konto",
+    "login": "Anmelden",
+    "register": "Registrieren"
+  },
+  "catalog": {
+    "title": "Produktkatalog",
+    "subtitle": "Entdecken Sie veröffentlichte Angebote georgischer Betriebe.",
+    "search": "Suche",
+    "category": "Kategorie",
+    "region": "Region",
+    "allCategories": "Alle Kategorien",
+    "applyFilters": "Anwenden",
+    "empty": "Keine Produkte passen zu Ihren Filtern.",
+    "loadError": "Katalog konnte nicht geladen werden. Läuft die API?",
+    "categories": {
+      "fruits": "Obst",
+      "vegetables": "Gemüse",
+      "nuts": "Nüsse",
+      "wine": "Wein",
+      "dairy": "Milchprodukte",
+      "honey": "Honig",
+      "herbs": "Kräuter",
+      "other": "Sonstiges"
+    }
+  },
+  "farm": {
+    "createTitle": "Betriebsprofil erstellen",
+    "editTitle": "Betriebsprofil bearbeiten",
+    "dashboardSubtitle": "Erzählen Sie Käufern, wer Sie sind und wo Sie produzieren.",
+    "name": "Betriebsname",
+    "region": "Region",
+    "description": "Beschreibung",
+    "createSubmit": "Erstellen",
+    "saveSubmit": "Speichern",
+    "pleaseWait": "Bitte warten…",
+    "genericError": "Betriebsprofil konnte nicht gespeichert werden.",
+    "viewPublic": "Öffentliche Seite",
+    "manageProducts": "Produkte verwalten",
+    "productsHeading": "Veröffentlichte Produkte",
+    "noProducts": "Dieser Betrieb hat noch keine veröffentlichten Produkte.",
+    "regionUnknown": "Region nicht angegeben"
+  },
+  "product": {
+    "dashboardTitle": "Meine Produkte",
+    "dashboardSubtitle": "Entwürfe erstellen, Angebote veröffentlichen und Einträge aktuell halten.",
+    "addProduct": "Produkt hinzufügen",
+    "createTitle": "Neues Produkt",
+    "createSubtitle": "Beschreiben Sie, was Sie liefern können.",
+    "editTitle": "Produkt bearbeiten",
+    "editSubtitle": "Details oder Veröffentlichungsstatus aktualisieren.",
+    "title": "Titel",
+    "description": "Beschreibung",
+    "category": "Kategorie",
+    "unit": "Einheit",
+    "noUnit": "Keine Einheit",
+    "publish": "Im Katalog veröffentlichen",
+    "createSubmit": "Erstellen",
+    "saveSubmit": "Speichern",
+    "pleaseWait": "Bitte warten…",
+    "genericError": "Produkt konnte nicht gespeichert werden.",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "deleteConfirm": "Dieses Produkt löschen?",
+    "published": "Veröffentlicht",
+    "draft": "Entwurf",
+    "emptyMine": "Sie haben noch keine Produkte.",
+    "needFarmFirst": "Erstellen Sie zuerst ein Betriebsprofil.",
+    "goCreateFarm": "Zum Betriebsprofil",
+    "units": {
+      "kg": "Kilogramm",
+      "ton": "Tonne",
+      "box": "Kiste",
+      "liter": "Liter",
+      "bottle": "Flasche",
+      "piece": "Stück"
+    }
   }
 }
