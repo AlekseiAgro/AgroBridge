@@ -25,6 +25,7 @@ export async function SiteFooter() {
           <nav className="site-footer__col" aria-label={t('explore')}>
             <p className="site-footer__heading">{t('explore')}</p>
             <Link href="/catalog">{tn('catalog')}</Link>
+            <Link href="/requests">{tn('purchaseRequests')}</Link>
             <Link href="/how-it-works">{tn('howItWorks')}</Link>
             <Link href="/support">{t('support')}</Link>
           </nav>

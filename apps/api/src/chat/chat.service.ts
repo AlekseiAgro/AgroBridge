@@ -197,6 +197,35 @@ export class ChatService {
       return { farmerId: rfq.farm.ownerId, buyerId: rfq.buyerId };
     }
 
+    if (dto.purchaseRequestId) {
+      const request = await this.prisma.purchaseRequest.findUnique({
+        where: { id: dto.purchaseRequestId },
+      });
+      if (!request) {
+        throw new NotFoundException('Purchase request not found');
+      }
+
+      const isBuyer = request.buyerId === user.id;
+      const isFarmer = user.role === 'farmer' || user.role === 'admin';
+
+      if (isBuyer) {
+        if (!dto.farmerId) {
+          throw new BadRequestException('farmerId is required when buyer opens chat');
+        }
+        const farmer = await this.prisma.user.findUnique({ where: { id: dto.farmerId } });
+        if (!farmer || (farmer.role !== 'farmer' && farmer.role !== 'admin')) {
+          throw new NotFoundException('Farmer not found');
+        }
+        return { farmerId: farmer.id, buyerId: request.buyerId };
+      }
+
+      if (isFarmer && user.id !== request.buyerId) {
+        return { farmerId: user.id, buyerId: request.buyerId };
+      }
+
+      throw new ForbiddenException('Not allowed to open chat for this purchase request');
+    }
+
     if (dto.farmerId) {
       if (user.role !== 'buyer' && user.role !== 'admin') {
         throw new ForbiddenException('Only buyers can start chat with a farmer this way');
@@ -210,7 +239,18 @@ export class ChatService {
       return { farmerId: farmer.id, buyerId: user.role === 'admin' && dto.buyerId ? dto.buyerId : user.id };
     }
 
-    throw new BadRequestException('rfqId or farmerId is required');
+    if (dto.buyerId) {
+      if (user.role !== 'farmer' && user.role !== 'admin') {
+        throw new ForbiddenException('Only farmers can start chat with a buyer this way');
+      }
+      const buyer = await this.prisma.user.findUnique({ where: { id: dto.buyerId } });
+      if (!buyer || (buyer.role !== 'buyer' && buyer.role !== 'admin')) {
+        throw new NotFoundException('Buyer not found');
+      }
+      return { farmerId: user.id, buyerId: buyer.id };
+    }
+
+    throw new BadRequestException('rfqId, purchaseRequestId, farmerId, or buyerId is required');
   }
 
   private async requireConversation(user: AuthenticatedUser, id: string) {

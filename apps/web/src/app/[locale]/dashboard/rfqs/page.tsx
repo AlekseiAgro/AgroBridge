@@ -20,6 +20,7 @@ export default async function BuyerRfqsPage({ params }: Props) {
   }
 
   const t = await getTranslations('rfq');
+  const tp = await getTranslations('purchaseRequests');
   const items = await apiRequestAuthed<RfqSummary[]>('/rfqs/mine');
 
   return (
@@ -28,6 +29,8 @@ export default async function BuyerRfqsPage({ params }: Props) {
         <p className="page__subtitle">{t('mineSubtitle')}</p>
         <p className="eyebrow">
           <Link href="/catalog">{t('browseCatalog')}</Link>
+          {' · '}
+          <Link href="/dashboard/purchase-requests">{tp('mineTitle')}</Link>
         </p>
         <RfqList items={items} emptyLabel={t('mineEmpty')} detailBasePath="/dashboard/rfqs" />
     </main>

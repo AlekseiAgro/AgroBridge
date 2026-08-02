@@ -32,9 +32,15 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
               <Link href="/dashboard/farm">{t('myFarm')}</Link>
               <Link href="/dashboard/products">{t('myProducts')}</Link>
               <Link href="/dashboard/inbox">{t('inbox')}</Link>
+              <Link href="/requests">{t('purchaseRequests')}</Link>
             </>
           ) : null}
-          {isBuyer ? <Link href="/dashboard/rfqs">{t('myRequests')}</Link> : null}
+          {isBuyer ? (
+            <>
+              <Link href="/dashboard/purchase-requests">{t('purchaseRequests')}</Link>
+              <Link href="/dashboard/rfqs">{t('myRequests')}</Link>
+            </>
+          ) : null}
           {user ? <Link href="/dashboard/chat">{t('chat')}</Link> : null}
           {user?.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
           <Link href="/catalog">{t('catalog')}</Link>

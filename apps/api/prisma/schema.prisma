@@ -51,6 +51,20 @@ enum ModerationStatus {
   rejected
 }
 
+enum PurchaseRequestStatus {
+  open
+  closed
+  cancelled
+  fulfilled
+}
+
+enum PurchaseQuoteStatus {
+  pending
+  accepted
+  declined
+  withdrawn
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -65,10 +79,11 @@ model User {
   conversationsAsFarmer Conversation[] @relation("FarmerConversations")
   conversationsAsBuyer  Conversation[] @relation("BuyerConversations")
   messages              Message[]
-  rfqsAsBuyer           Rfq[]           @relation("BuyerRfqs")
-  moderatedProducts     Product[]       @relation("ProductModerator")
-  ratingsGiven          Rating[]        @relation("RatingsGiven")
-  ratingsReceived       Rating[]        @relation("RatingsReceived")
+  rfqsAsBuyer           Rfq[]              @relation("BuyerRfqs")
+  purchaseRequests      PurchaseRequest[]  @relation("BuyerPurchaseRequests")
+  moderatedProducts     Product[]          @relation("ProductModerator")
+  ratingsGiven          Rating[]           @relation("RatingsGiven")
+  ratingsReceived       Rating[]           @relation("RatingsReceived")
 }
 
 model Farm {
@@ -80,9 +95,10 @@ model Farm {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  products Product[]
-  rfqs     Rfq[]
+  owner           User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products        Product[]
+  rfqs            Rfq[]
+  purchaseQuotes  PurchaseQuote[]
 }
 
 model Product {
@@ -186,6 +202,54 @@ model RfqOffer {
   updatedAt   DateTime     @updatedAt
 
   rfq Rfq @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+}
+
+/// Open purchase need published by a buyer for any matching farmer to quote.
+model PurchaseRequest {
+  id                  String                @id @default(cuid())
+  buyerId             String
+  title               String
+  category            String
+  quantity            String
+  unit                String?
+  variety             String?
+  packaging           String?
+  destinationCountry  String?
+  message             String?
+  status              PurchaseRequestStatus @default(open)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  buyer  User            @relation("BuyerPurchaseRequests", fields: [buyerId], references: [id], onDelete: Cascade)
+  quotes PurchaseQuote[]
+
+  @@index([status, createdAt])
+  @@index([buyerId, createdAt])
+  @@index([category, status])
+  @@map("purchase_requests")
+}
+
+model PurchaseQuote {
+  id          String              @id @default(cuid())
+  requestId   String
+  farmId      String
+  priceAmount Decimal             @db.Decimal(12, 2)
+  currency    CurrencyCode
+  quantity    String?
+  unit        String?
+  message     String?
+  validUntil  DateTime?
+  status      PurchaseQuoteStatus @default(pending)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  request PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  farm    Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, farmId])
+  @@index([farmId, createdAt])
+  @@index([requestId, status])
+  @@map("purchase_quotes")
 }
 
 model Conversation {

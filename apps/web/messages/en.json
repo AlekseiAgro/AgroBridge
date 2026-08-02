@@ -59,7 +59,8 @@
     "chat": "Chat",
     "admin": "Admin",
     "language": "Language",
-    "howItWorks": "How it works"
+    "howItWorks": "How it works",
+    "purchaseRequests": "Purchase requests"
   },
   "footer": {
     "tagline": "Connecting Georgian farms with buyers worldwide.",
@@ -312,7 +313,7 @@
       },
       "connect": {
         "title": "Connect with a trade partner",
-        "text": "Buyers send quote requests, farmers reply with offers, and both sides chat in their own language with AI translation."
+        "text": "Buyers publish purchase requests or ask for quotes on catalog products. Farmers reply with offers and both sides chat in their own language with AI translation."
       },
       "agree": {
         "title": "Agree on supply terms",
@@ -355,5 +356,76 @@
     "genericError": "Could not submit the rating.",
     "yourRating": "Your rating",
     "theirRating": "Their rating of you"
+  },
+  "purchaseRequests": {
+    "boardTitle": "Purchase requests",
+    "boardSubtitle": "Buyers publish what they need. Farmers reply with a quote or open a chat.",
+    "boardEmpty": "No open purchase requests yet.",
+    "createCta": "Post a request",
+    "loginToCreate": "Log in to post a request",
+    "loginToRespond": "Log in to send a quote or message",
+    "createTitle": "New purchase request",
+    "createSubtitle": "Describe the product you want to buy. Matching farms can send quotes.",
+    "titleField": "Product name",
+    "titlePlaceholder": "e.g. Fresh blueberries",
+    "category": "Category",
+    "quantity": "Quantity",
+    "quantityPlaceholder": "e.g. 500",
+    "unit": "Unit",
+    "variety": "Variety",
+    "varietyPlaceholder": "e.g. Hass, Saperavi",
+    "packaging": "Packaging",
+    "packagingPlaceholder": "e.g. 5 kg cartons, bulk bags",
+    "destinationCountry": "Destination country",
+    "destinationCountryPlaceholder": "e.g. Germany, UAE, Georgia",
+    "message": "Additional details",
+    "messagePlaceholder": "Delivery window, quality specs, Incoterms…",
+    "optional": "(optional)",
+    "submit": "Publish request",
+    "pleaseWait": "Please wait…",
+    "genericError": "Something went wrong. Please try again.",
+    "loadError": "Could not load purchase requests. Is the API running?",
+    "search": "Search",
+    "searchPlaceholder": "Product, variety, destination…",
+    "applyFilters": "Search",
+    "view": "Open",
+    "mineTitle": "My purchase requests",
+    "mineSubtitle": "Open needs you published for farms to quote.",
+    "mineEmpty": "You have not published any purchase requests yet.",
+    "productRfqsLink": "Product quote requests",
+    "anonymousBuyer": "Buyer",
+    "quoteCount": "{count} quotes",
+    "quoteTitle": "Send your quote",
+    "quoteSubtitle": "Propose price and terms for this buyer request.",
+    "quoteMessagePlaceholder": "Lead time, quality notes, logistics…",
+    "submitQuote": "Send quote",
+    "price": "Price",
+    "currency": "Currency",
+    "yourQuote": "Your quote",
+    "quoteStatus": "Quote status",
+    "quotesTitle": "Quotes from farms",
+    "noQuotesYet": "No quotes yet. Farms can respond from the public board.",
+    "messageBuyer": "Message buyer",
+    "messageFarmer": "Message farm",
+    "viewFarm": "View farm",
+    "statuses": {
+      "open": "Open",
+      "closed": "Closed",
+      "cancelled": "Cancelled",
+      "fulfilled": "Fulfilled"
+    },
+    "quoteStatuses": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "withdrawn": "Withdrawn"
+    },
+    "actions": {
+      "cancel": "Cancel request",
+      "close": "Close request",
+      "accept": "Accept quote",
+      "decline": "Decline",
+      "withdraw": "Withdraw quote"
+    }
   }
 }

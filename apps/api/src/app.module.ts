@@ -10,6 +10,7 @@ import { MailModule } from './mail/mail.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
 import { RatingsModule } from './ratings/ratings.module';
+import { PurchaseRequestsModule } from './purchase-requests/purchase-requests.module';
 import { RfqsModule } from './rfqs/rfqs.module';
 import { StorageModule } from './storage/storage.module';
 import { SupportModule } from './support/support.module';
@@ -28,6 +29,7 @@ import { TranslationModule } from './translation/translation.module';
     FarmsModule,
     ProductsModule,
     RfqsModule,
+    PurchaseRequestsModule,
     TranslationModule,
     ChatModule,
     AdminModule,

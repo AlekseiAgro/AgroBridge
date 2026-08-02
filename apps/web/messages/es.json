@@ -59,7 +59,8 @@
     "chat": "Chat",
     "admin": "Admin",
     "language": "Idioma",
-    "howItWorks": "Cómo funciona"
+    "howItWorks": "Cómo funciona",
+    "purchaseRequests": "Solicitudes de compra"
   },
   "footer": {
     "tagline": "Conectamos granjas georgianas con compradores de todo el mundo.",
@@ -312,7 +313,7 @@
       },
       "connect": {
         "title": "Conéctate con un socio comercial",
-        "text": "Los compradores envían solicitudes de precio, los agricultores responden con ofertas y el chat traduce los mensajes al idioma de cada uno."
+        "text": "Los compradores publican solicitudes de compra o piden cotizaciones de productos del catálogo. Los agricultores responden con ofertas y el chat traduce al idioma de cada uno."
       },
       "agree": {
         "title": "Acuerda los términos de suministro",
@@ -355,5 +356,76 @@
     "genericError": "No se pudo enviar la valoración.",
     "yourRating": "Tu valoración",
     "theirRating": "Su valoración sobre ti"
+  },
+  "purchaseRequests": {
+    "boardTitle": "Solicitudes de compra",
+    "boardSubtitle": "Los compradores publican lo que necesitan. Los agricultores responden con una oferta o por chat.",
+    "boardEmpty": "Aún no hay solicitudes de compra abiertas.",
+    "createCta": "Publicar solicitud",
+    "loginToCreate": "Inicia sesión para publicar una solicitud",
+    "loginToRespond": "Inicia sesión para enviar una oferta o un mensaje",
+    "createTitle": "Nueva solicitud de compra",
+    "createSubtitle": "Describe el producto que quieres comprar. Las fincas adecuadas podrán enviar ofertas.",
+    "titleField": "Nombre del producto",
+    "titlePlaceholder": "p. ej. Arándanos frescos",
+    "category": "Categoría",
+    "quantity": "Cantidad",
+    "quantityPlaceholder": "p. ej. 500",
+    "unit": "Unidad",
+    "variety": "Variedad",
+    "varietyPlaceholder": "p. ej. Hass, Saperavi",
+    "packaging": "Embalaje",
+    "packagingPlaceholder": "p. ej. cajas de 5 kg",
+    "destinationCountry": "País de destino",
+    "destinationCountryPlaceholder": "p. ej. Alemania, EAU, Georgia",
+    "message": "Detalles adicionales",
+    "messagePlaceholder": "Ventana de entrega, calidad, Incoterms…",
+    "optional": "(opcional)",
+    "submit": "Publicar solicitud",
+    "pleaseWait": "Espere…",
+    "genericError": "Algo salió mal. Inténtelo de nuevo.",
+    "loadError": "No se pudieron cargar las solicitudes de compra.",
+    "search": "Buscar",
+    "searchPlaceholder": "Producto, variedad, destino…",
+    "applyFilters": "Buscar",
+    "view": "Abrir",
+    "mineTitle": "Mis solicitudes de compra",
+    "mineSubtitle": "Necesidades que publicó para las fincas.",
+    "mineEmpty": "Aún no ha publicado solicitudes de compra.",
+    "productRfqsLink": "Solicitudes de cotización de producto",
+    "anonymousBuyer": "Comprador",
+    "quoteCount": "{count} ofertas",
+    "quoteTitle": "Enviar su oferta",
+    "quoteSubtitle": "Proponga precio y condiciones para esta solicitud.",
+    "quoteMessagePlaceholder": "Plazos, calidad, logística…",
+    "submitQuote": "Enviar oferta",
+    "price": "Precio",
+    "currency": "Moneda",
+    "yourQuote": "Su oferta",
+    "quoteStatus": "Estado de la oferta",
+    "quotesTitle": "Ofertas de fincas",
+    "noQuotesYet": "Aún no hay ofertas.",
+    "messageBuyer": "Mensaje al comprador",
+    "messageFarmer": "Mensaje a la finca",
+    "viewFarm": "Ver finca",
+    "statuses": {
+      "open": "Abierta",
+      "closed": "Cerrada",
+      "cancelled": "Cancelada",
+      "fulfilled": "Cumplida"
+    },
+    "quoteStatuses": {
+      "pending": "Pendiente",
+      "accepted": "Aceptada",
+      "declined": "Rechazada",
+      "withdrawn": "Retirada"
+    },
+    "actions": {
+      "cancel": "Cancelar solicitud",
+      "close": "Cerrar solicitud",
+      "accept": "Aceptar oferta",
+      "decline": "Rechazar",
+      "withdraw": "Retirar oferta"
+    }
   }
 }

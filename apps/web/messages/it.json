@@ -59,7 +59,8 @@
     "chat": "Chat",
     "admin": "Admin",
     "language": "Lingua",
-    "howItWorks": "Come funziona"
+    "howItWorks": "Come funziona",
+    "purchaseRequests": "Richieste di acquisto"
   },
   "footer": {
     "tagline": "Colleghiamo le aziende georgiane con acquirenti in tutto il mondo.",
@@ -312,7 +313,7 @@
       },
       "connect": {
         "title": "Collegati con un partner commerciale",
-        "text": "Gli acquirenti inviano richieste di preventivo, gli agricoltori rispondono con offerte e la chat traduce i messaggi nella lingua di ciascuno."
+        "text": "Gli acquirenti pubblicano richieste di acquisto o chiedono preventivi sui prodotti del catalogo. Gli agricoltori rispondono con offerte e la chat traduce nella lingua di ciascuno."
       },
       "agree": {
         "title": "Concordate i termini di fornitura",
@@ -355,5 +356,76 @@
     "genericError": "Impossibile inviare la valutazione.",
     "yourRating": "La tua valutazione",
     "theirRating": "La loro valutazione su di te"
+  },
+  "purchaseRequests": {
+    "boardTitle": "Richieste di acquisto",
+    "boardSubtitle": "Gli acquirenti pubblicano il fabbisogno. Gli agricoltori rispondono con un'offerta o in chat.",
+    "boardEmpty": "Nessuna richiesta di acquisto aperta al momento.",
+    "createCta": "Pubblica richiesta",
+    "loginToCreate": "Accedi per pubblicare una richiesta",
+    "loginToRespond": "Accedi per inviare un'offerta o un messaggio",
+    "createTitle": "Nuova richiesta di acquisto",
+    "createSubtitle": "Descrivi il prodotto che vuoi acquistare. Le aziende adatte potranno inviare un'offerta.",
+    "titleField": "Nome del prodotto",
+    "titlePlaceholder": "es. Mirtilli freschi",
+    "category": "Categoria",
+    "quantity": "Quantità",
+    "quantityPlaceholder": "es. 500",
+    "unit": "Unità",
+    "variety": "Varietà",
+    "varietyPlaceholder": "es. Hass, Saperavi",
+    "packaging": "Imballaggio",
+    "packagingPlaceholder": "es. cartoni da 5 kg",
+    "destinationCountry": "Paese di destinazione",
+    "destinationCountryPlaceholder": "es. Germania, Emirati, Georgia",
+    "message": "Dettagli aggiuntivi",
+    "messagePlaceholder": "Finestra di consegna, qualità, Incoterms…",
+    "optional": "(facoltativo)",
+    "submit": "Pubblica richiesta",
+    "pleaseWait": "Attendere…",
+    "genericError": "Qualcosa è andato storto. Riprova.",
+    "loadError": "Impossibile caricare le richieste di acquisto.",
+    "search": "Cerca",
+    "searchPlaceholder": "Prodotto, varietà, destinazione…",
+    "applyFilters": "Cerca",
+    "view": "Apri",
+    "mineTitle": "Le mie richieste di acquisto",
+    "mineSubtitle": "Esigenze che hai pubblicato per le aziende agricole.",
+    "mineEmpty": "Non hai ancora pubblicato richieste di acquisto.",
+    "productRfqsLink": "Richieste di preventivo prodotto",
+    "anonymousBuyer": "Acquirente",
+    "quoteCount": "{count} offerte",
+    "quoteTitle": "Invia la tua offerta",
+    "quoteSubtitle": "Proponi prezzo e condizioni per questa richiesta.",
+    "quoteMessagePlaceholder": "Tempi, qualità, logistica…",
+    "submitQuote": "Invia offerta",
+    "price": "Prezzo",
+    "currency": "Valuta",
+    "yourQuote": "La tua offerta",
+    "quoteStatus": "Stato offerta",
+    "quotesTitle": "Offerte dalle aziende",
+    "noQuotesYet": "Nessuna offerta ancora.",
+    "messageBuyer": "Messaggia acquirente",
+    "messageFarmer": "Messaggia azienda",
+    "viewFarm": "Vedi azienda",
+    "statuses": {
+      "open": "Aperta",
+      "closed": "Chiusa",
+      "cancelled": "Annullata",
+      "fulfilled": "Evasa"
+    },
+    "quoteStatuses": {
+      "pending": "In attesa",
+      "accepted": "Accettata",
+      "declined": "Rifiutata",
+      "withdrawn": "Ritirata"
+    },
+    "actions": {
+      "cancel": "Annulla richiesta",
+      "close": "Chiudi richiesta",
+      "accept": "Accetta offerta",
+      "decline": "Rifiuta",
+      "withdraw": "Ritira offerta"
+    }
   }
 }

@@ -59,7 +59,8 @@
     "chat": "Chat",
     "admin": "Admin",
     "language": "Langue",
-    "howItWorks": "Comment ça marche"
+    "howItWorks": "Comment ça marche",
+    "purchaseRequests": "Demandes d'achat"
   },
   "footer": {
     "tagline": "Nous relions les fermes géorgiennes aux acheteurs du monde entier.",
@@ -312,7 +313,7 @@
       },
       "connect": {
         "title": "Entrer en contact avec un partenaire",
-        "text": "Les acheteurs envoient des demandes de devis, les agriculteurs répondent par des offres, et le chat traduit les messages dans la langue de chacun."
+        "text": "Les acheteurs publient des demandes d'achat ou demandent un devis sur les produits du catalogue. Les agriculteurs répondent par des offres et le chat traduit dans la langue de chacun."
       },
       "agree": {
         "title": "Convenir des conditions de fourniture",
@@ -355,5 +356,76 @@
     "genericError": "Impossible d’envoyer la note.",
     "yourRating": "Votre note",
     "theirRating": "Leur note vous concernant"
+  },
+  "purchaseRequests": {
+    "boardTitle": "Demandes d'achat",
+    "boardSubtitle": "Les acheteurs publient leur besoin. Les agriculteurs répondent par une offre ou un message.",
+    "boardEmpty": "Aucune demande d'achat ouverte pour le moment.",
+    "createCta": "Publier une demande",
+    "loginToCreate": "Connectez-vous pour publier une demande",
+    "loginToRespond": "Connectez-vous pour envoyer une offre ou un message",
+    "createTitle": "Nouvelle demande d'achat",
+    "createSubtitle": "Décrivez le produit que vous souhaitez acheter. Les fermes concernées pourront envoyer une offre.",
+    "titleField": "Nom du produit",
+    "titlePlaceholder": "ex. Myrtilles fraîches",
+    "category": "Catégorie",
+    "quantity": "Quantité",
+    "quantityPlaceholder": "ex. 500",
+    "unit": "Unité",
+    "variety": "Variété",
+    "varietyPlaceholder": "ex. Hass, Saperavi",
+    "packaging": "Emballage",
+    "packagingPlaceholder": "ex. cartons de 5 kg",
+    "destinationCountry": "Pays de destination",
+    "destinationCountryPlaceholder": "ex. Allemagne, EAU, Géorgie",
+    "message": "Détails supplémentaires",
+    "messagePlaceholder": "Fenêtre de livraison, qualité, Incoterms…",
+    "optional": "(facultatif)",
+    "submit": "Publier la demande",
+    "pleaseWait": "Veuillez patienter…",
+    "genericError": "Une erreur s'est produite. Réessayez.",
+    "loadError": "Impossible de charger les demandes d'achat.",
+    "search": "Recherche",
+    "searchPlaceholder": "Produit, variété, destination…",
+    "applyFilters": "Rechercher",
+    "view": "Ouvrir",
+    "mineTitle": "Mes demandes d'achat",
+    "mineSubtitle": "Besoins que vous avez publiés pour les fermes.",
+    "mineEmpty": "Vous n'avez encore publié aucune demande d'achat.",
+    "productRfqsLink": "Demandes de prix produit",
+    "anonymousBuyer": "Acheteur",
+    "quoteCount": "{count} offres",
+    "quoteTitle": "Envoyer votre offre",
+    "quoteSubtitle": "Proposez un prix et des conditions pour cette demande.",
+    "quoteMessagePlaceholder": "Délai, qualité, logistique…",
+    "submitQuote": "Envoyer l'offre",
+    "price": "Prix",
+    "currency": "Devise",
+    "yourQuote": "Votre offre",
+    "quoteStatus": "Statut de l'offre",
+    "quotesTitle": "Offres des fermes",
+    "noQuotesYet": "Aucune offre pour le moment.",
+    "messageBuyer": "Contacter l'acheteur",
+    "messageFarmer": "Contacter la ferme",
+    "viewFarm": "Voir la ferme",
+    "statuses": {
+      "open": "Ouverte",
+      "closed": "Fermée",
+      "cancelled": "Annulée",
+      "fulfilled": "Satisfaite"
+    },
+    "quoteStatuses": {
+      "pending": "En attente",
+      "accepted": "Acceptée",
+      "declined": "Refusée",
+      "withdrawn": "Retirée"
+    },
+    "actions": {
+      "cancel": "Annuler la demande",
+      "close": "Fermer la demande",
+      "accept": "Accepter l'offre",
+      "decline": "Refuser",
+      "withdraw": "Retirer l'offre"
+    }
   }
 }

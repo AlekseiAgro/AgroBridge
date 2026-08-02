@@ -4,6 +4,7 @@ export * from './auth';
 export * from './moderation';
 export * from './catalog';
 export * from './rfq';
+export * from './purchase-request';
 export * from './chat';
 export * from './rating';
 export * from './cabinet';

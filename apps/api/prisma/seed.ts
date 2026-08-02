@@ -3,6 +3,8 @@ import {
   LocaleCode,
   ModerationStatus,
   PrismaClient,
+  PurchaseQuoteStatus,
+  PurchaseRequestStatus,
   RfqStatus,
   UserRole,
 } from '@prisma/client';
@@ -836,8 +838,9 @@ async function main() {
   }
 
   const deals = await seedCompletedDeals();
+  const purchaseRequests = await seedPurchaseRequests();
   console.log(
-    `Demo seed complete: ${farmerCount} farmers, ${productCount} products, ${BUYERS.length} buyers, ${deals} completed deals with ratings`,
+    `Demo seed complete: ${farmerCount} farmers, ${productCount} products, ${BUYERS.length} buyers, ${deals} completed deals with ratings, ${purchaseRequests} open purchase requests`,
   );
   console.log(`Demo password for farmers/buyers: ${DEMO_PASSWORD}`);
   console.log('Example logins: farmer-fruits-1@agrobridge.local / buyer-1@agrobridge.local');
@@ -944,6 +947,121 @@ async function seedCompletedDeals() {
     void rfq;
     created += 1;
   }
+  return created;
+}
+
+async function seedPurchaseRequests() {
+  const samples = [
+    {
+      buyerEmail: 'buyer-1@agrobridge.local',
+      title: 'Export-grade blueberries',
+      category: 'berries',
+      quantity: '2',
+      unit: 'ton',
+      variety: 'Duke',
+      packaging: '1 kg clamshells in 5 kg cartons',
+      destinationCountry: 'Italy',
+      message: 'Need weekly shipments through September. Prefer GLOBALG.A.P. farms.',
+      quoteFarmerEmail: 'farmer-berries-1@agrobridge.local',
+      quotePrice: '6.80',
+    },
+    {
+      buyerEmail: 'buyer-2@agrobridge.local',
+      title: 'Saperavi wine for retail',
+      category: 'wine',
+      quantity: '3000',
+      unit: 'bottle',
+      variety: 'Saperavi',
+      packaging: '0.75 L glass bottles, 6-pack cartons',
+      destinationCountry: 'Germany',
+      message: 'Looking for 2023–2024 vintage. Need EU label-ready lots.',
+      quoteFarmerEmail: null,
+      quotePrice: null,
+    },
+    {
+      buyerEmail: 'buyer-3@agrobridge.local',
+      title: 'Mountain flower honey',
+      category: 'honey',
+      quantity: '500',
+      unit: 'kg',
+      variety: 'Wildflower',
+      packaging: 'Bulk drums + 250 g retail jars sample pack',
+      destinationCountry: 'France',
+      message: 'Organic preferred. Please include lab analysis if available.',
+      quoteFarmerEmail: 'farmer-honey-1@agrobridge.local',
+      quotePrice: '18.50',
+    },
+    {
+      buyerEmail: 'buyer-4@agrobridge.local',
+      title: 'Natural mineral water',
+      category: 'mineralWater',
+      quantity: '20000',
+      unit: 'liter',
+      variety: null,
+      packaging: '0.5 L PET and 1.5 L PET',
+      destinationCountry: 'United Arab Emirates',
+      message: 'Need FOB Poti quote and earliest loading date.',
+      quoteFarmerEmail: null,
+      quotePrice: null,
+    },
+  ];
+
+  let created = 0;
+  for (const sample of samples) {
+    const buyer = await prisma.user.findUnique({ where: { email: sample.buyerEmail } });
+    if (!buyer) continue;
+
+    const existing = await prisma.purchaseRequest.findFirst({
+      where: {
+        buyerId: buyer.id,
+        title: sample.title,
+        status: PurchaseRequestStatus.open,
+      },
+    });
+    if (existing) {
+      created += 1;
+      continue;
+    }
+
+    const request = await prisma.purchaseRequest.create({
+      data: {
+        buyerId: buyer.id,
+        title: sample.title,
+        category: sample.category,
+        quantity: sample.quantity,
+        unit: sample.unit,
+        variety: sample.variety,
+        packaging: sample.packaging,
+        destinationCountry: sample.destinationCountry,
+        message: sample.message,
+        status: PurchaseRequestStatus.open,
+      },
+    });
+
+    if (sample.quoteFarmerEmail && sample.quotePrice) {
+      const farmer = await prisma.user.findUnique({
+        where: { email: sample.quoteFarmerEmail },
+        include: { farm: true },
+      });
+      if (farmer?.farm) {
+        await prisma.purchaseQuote.create({
+          data: {
+            requestId: request.id,
+            farmId: farmer.farm.id,
+            priceAmount: sample.quotePrice,
+            currency: CurrencyCode.EUR,
+            quantity: sample.quantity,
+            unit: sample.unit,
+            message: 'Demo quote from matching Georgian farm.',
+            status: PurchaseQuoteStatus.pending,
+          },
+        });
+      }
+    }
+
+    created += 1;
+  }
+
   return created;
 }
 
