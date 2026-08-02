@@ -20,6 +20,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('catalog');
+  const tn = await getTranslations('nav');
   const tr = await getTranslations();
   const query = new URLSearchParams();
   if (filters.q) query.set('q', filters.q);
@@ -39,6 +40,9 @@ export default async function CatalogPage({ params, searchParams }: Props) {
     <div className="page">
       <SiteHeader />
       <main className="page__main">
+        <p className="eyebrow">
+          <Link href="/buyers">{tn('forBuyers')}</Link>
+        </p>
         <h1>{t('title')}</h1>
         <p className="page__subtitle">{t('subtitle')}</p>
         <CatalogFilters

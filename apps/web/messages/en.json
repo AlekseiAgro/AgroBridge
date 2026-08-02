@@ -15,7 +15,9 @@
     "account": "My account",
     "ctaFarm": "Manage my farm",
     "categoriesTitle": "Product groups",
-    "categoriesLead": "Fruits, vegetables, berries, nuts, wine, dairy, honey, mineral water, spices, tea, bay leaf, essential oils, and organic products from Georgian producers."
+    "categoriesLead": "Fruits, vegetables, berries, nuts, wine, dairy, honey, mineral water, spices, tea, bay leaf, essential oils, and organic products from Georgian producers.",
+    "ctaBuyer": "I'm a buyer",
+    "ctaSeller": "I'm a seller"
   },
   "auth": {
     "loginTitle": "Welcome back",
@@ -60,7 +62,9 @@
     "admin": "Admin",
     "language": "Language",
     "howItWorks": "How it works",
-    "purchaseRequests": "Purchase requests"
+    "purchaseRequests": "Purchase requests",
+    "forBuyers": "I'm a buyer",
+    "forSellers": "I'm a seller"
   },
   "footer": {
     "tagline": "Connecting Georgian farms with buyers worldwide.",
@@ -320,8 +324,8 @@
         "text": "Review price, quantity, and timing, then accept an offer and continue coordination in one place."
       }
     },
-    "ctaFarmer": "For farmers",
-    "ctaBuyer": "Browse catalog",
+    "ctaFarmer": "I'm a seller",
+    "ctaBuyer": "I'm a buyer",
     "pageNote": "AgroBridge helps Georgian producers and buyers meet, negotiate, and grow trade without unnecessary intermediaries."
   },
   "cabinet": {
@@ -426,6 +430,47 @@
       "accept": "Accept quote",
       "decline": "Decline",
       "withdraw": "Withdraw quote"
+    }
+  },
+  "roleHubs": {
+    "buyers": {
+      "eyebrow": "For buyers",
+      "title": "I'm a buyer",
+      "lead": "Browse Georgian farm offers or publish exactly what you need to buy.",
+      "asideNote": "Need an account to post a request or message farms? Sign in any time.",
+      "asideRegister": "Create buyer account",
+      "asideMine": "My purchase requests",
+      "paths": {
+        "catalog": {
+          "title": "Browse the catalog",
+          "text": "Explore published offers from farms across Georgia and request a quote on any product.",
+          "cta": "Open catalog"
+        },
+        "request": {
+          "title": "Post a purchase request",
+          "text": "Describe the product, quantity, variety, packaging, and destination so farms can send quotes.",
+          "cta": "Create request"
+        }
+      }
+    },
+    "sellers": {
+      "eyebrow": "For sellers",
+      "title": "I'm a seller",
+      "lead": "Respond to buyer demand or publish your own product offer for the catalog.",
+      "asideNote": "Create a farm profile first if you are new, then list products and reply to requests.",
+      "asideRegister": "Create seller account",
+      "paths": {
+        "requests": {
+          "title": "Open purchase requests",
+          "text": "See what buyers are looking for and send a quote or start a chat.",
+          "cta": "View requests"
+        },
+        "offer": {
+          "title": "Create a product offer",
+          "text": "Add a product card with details and photos. After moderation it appears in the catalog.",
+          "cta": "Add product"
+        }
+      }
     }
   }
 }

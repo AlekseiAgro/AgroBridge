@@ -15,7 +15,9 @@
     "account": "Mon compte",
     "ctaFarm": "Gérer ma ferme",
     "categoriesTitle": "Groupes de produits",
-    "categoriesLead": "Fruits, légumes, baies, noix, vin, produits laitiers, miel, eau minérale, épices, thé, feuille de laurier, huiles essentielles et produits biologiques des producteurs géorgiens."
+    "categoriesLead": "Fruits, légumes, baies, noix, vin, produits laitiers, miel, eau minérale, épices, thé, feuille de laurier, huiles essentielles et produits biologiques des producteurs géorgiens.",
+    "ctaBuyer": "Je suis acheteur",
+    "ctaSeller": "Je suis vendeur"
   },
   "auth": {
     "loginTitle": "Bon retour",
@@ -60,7 +62,9 @@
     "admin": "Admin",
     "language": "Langue",
     "howItWorks": "Comment ça marche",
-    "purchaseRequests": "Demandes d'achat"
+    "purchaseRequests": "Demandes d'achat",
+    "forBuyers": "Je suis acheteur",
+    "forSellers": "Je suis vendeur"
   },
   "footer": {
     "tagline": "Nous relions les fermes géorgiennes aux acheteurs du monde entier.",
@@ -320,8 +324,8 @@
         "text": "Examinez le prix, la quantité et les délais, acceptez une offre et poursuivez la coordination au même endroit."
       }
     },
-    "ctaFarmer": "Pour les agriculteurs",
-    "ctaBuyer": "Voir le catalogue",
+    "ctaFarmer": "Je suis vendeur",
+    "ctaBuyer": "Je suis acheteur",
     "pageNote": "AgroBridge aide les producteurs et acheteurs géorgiens à se rencontrer, négocier et développer le commerce sans intermédiaires inutiles."
   },
   "cabinet": {
@@ -426,6 +430,47 @@
       "accept": "Accepter l'offre",
       "decline": "Refuser",
       "withdraw": "Retirer l'offre"
+    }
+  },
+  "roleHubs": {
+    "buyers": {
+      "eyebrow": "Pour les acheteurs",
+      "title": "Je suis acheteur",
+      "lead": "Parcourez les offres des fermes géorgiennes ou publiez votre besoin d'achat.",
+      "asideNote": "Connectez-vous pour publier une demande ou écrire aux fermes.",
+      "asideRegister": "Créer un compte acheteur",
+      "asideMine": "Mes demandes d'achat",
+      "paths": {
+        "catalog": {
+          "title": "Parcourir le catalogue",
+          "text": "Explorez les offres publiées et demandez un devis sur n'importe quel produit.",
+          "cta": "Ouvrir le catalogue"
+        },
+        "request": {
+          "title": "Publier une demande d'achat",
+          "text": "Indiquez le produit, la quantité, la variété, l'emballage et le pays de destination.",
+          "cta": "Créer une demande"
+        }
+      }
+    },
+    "sellers": {
+      "eyebrow": "Pour les vendeurs",
+      "title": "Je suis vendeur",
+      "lead": "Répondez à la demande des acheteurs ou publiez votre propre offre produit.",
+      "asideNote": "Créez d'abord un profil de ferme, puis ajoutez des produits et répondez aux demandes.",
+      "asideRegister": "Créer un compte vendeur",
+      "paths": {
+        "requests": {
+          "title": "Demandes d'achat ouvertes",
+          "text": "Voyez ce que recherchent les acheteurs et envoyez une offre ou un message.",
+          "cta": "Voir les demandes"
+        },
+        "offer": {
+          "title": "Créer une offre produit",
+          "text": "Ajoutez une fiche produit avec détails et photos. Après modération, elle apparaît au catalogue.",
+          "cta": "Ajouter un produit"
+        }
+      }
     }
   }
 }

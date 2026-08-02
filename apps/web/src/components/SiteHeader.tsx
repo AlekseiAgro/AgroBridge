@@ -17,19 +17,13 @@ export async function SiteHeader({ tone = 'default' }: Props) {
         AgroBridge
       </Link>
       <nav className="site-header__nav">
-        <Link href="/catalog">{t('catalog')}</Link>
-        <Link href="/requests">{t('purchaseRequests')}</Link>
+        <Link href="/buyers" className="site-header__role-link">
+          {t('forBuyers')}
+        </Link>
+        <Link href="/sellers" className="site-header__role-link">
+          {t('forSellers')}
+        </Link>
         <Link href="/how-it-works">{t('howItWorks')}</Link>
-        {user?.role === 'farmer' || user?.role === 'admin' ? (
-          <>
-            <Link href="/dashboard/farm">{t('myFarm')}</Link>
-            <Link href="/dashboard/products">{t('myProducts')}</Link>
-            <Link href="/dashboard/inbox">{t('inbox')}</Link>
-          </>
-        ) : null}
-        {user?.role === 'buyer' || user?.role === 'admin' ? (
-          <Link href="/dashboard/rfqs">{t('myRequests')}</Link>
-        ) : null}
         {user ? <Link href="/dashboard/chat">{t('chat')}</Link> : null}
         {user?.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
         {user ? (

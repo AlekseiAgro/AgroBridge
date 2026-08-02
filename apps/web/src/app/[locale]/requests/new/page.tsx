@@ -20,12 +20,15 @@ export default async function NewPurchaseRequestPage({ params }: Props) {
   }
 
   const t = await getTranslations('purchaseRequests');
+  const tn = await getTranslations('nav');
 
   return (
     <div className="page">
       <SiteHeader />
       <main className="page__main narrow">
         <p className="eyebrow">
+          <Link href="/buyers">{tn('forBuyers')}</Link>
+          {' · '}
           <Link href="/requests">{t('boardTitle')}</Link>
         </p>
         <h1>{t('createTitle')}</h1>

@@ -20,6 +20,7 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
   setRequestLocale(locale);
 
   const t = await getTranslations('purchaseRequests');
+  const tn = await getTranslations('nav');
   const user = await getCurrentUser();
   const token = await getAuthToken();
 
@@ -44,6 +45,11 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
     <div className="page">
       <SiteHeader />
       <main className="page__main">
+        <p className="eyebrow">
+          <Link href="/sellers">{tn('forSellers')}</Link>
+          {' · '}
+          <Link href="/buyers">{tn('forBuyers')}</Link>
+        </p>
         <div className="page__heading-row">
           <div>
             <h1>{t('boardTitle')}</h1>

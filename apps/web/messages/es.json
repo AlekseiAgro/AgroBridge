@@ -15,7 +15,9 @@
     "account": "Mi cuenta",
     "ctaFarm": "Gestionar mi granja",
     "categoriesTitle": "Grupos de productos",
-    "categoriesLead": "Frutas, verduras, bayas, frutos secos, vino, lácteos, miel, agua mineral, especias, té, hoja de laurel, aceites esenciales y productos orgánicos de productores georgianos."
+    "categoriesLead": "Frutas, verduras, bayas, frutos secos, vino, lácteos, miel, agua mineral, especias, té, hoja de laurel, aceites esenciales y productos orgánicos de productores georgianos.",
+    "ctaBuyer": "Soy comprador",
+    "ctaSeller": "Soy vendedor"
   },
   "auth": {
     "loginTitle": "Bienvenido de nuevo",
@@ -60,7 +62,9 @@
     "admin": "Admin",
     "language": "Idioma",
     "howItWorks": "Cómo funciona",
-    "purchaseRequests": "Solicitudes de compra"
+    "purchaseRequests": "Solicitudes de compra",
+    "forBuyers": "Soy comprador",
+    "forSellers": "Soy vendedor"
   },
   "footer": {
     "tagline": "Conectamos granjas georgianas con compradores de todo el mundo.",
@@ -320,8 +324,8 @@
         "text": "Revisa precio, cantidad y plazos, acepta una oferta y continúa la coordinación en un solo lugar."
       }
     },
-    "ctaFarmer": "Para agricultores",
-    "ctaBuyer": "Ver catálogo",
+    "ctaFarmer": "Soy vendedor",
+    "ctaBuyer": "Soy comprador",
     "pageNote": "AgroBridge ayuda a productores y compradores georgianos a encontrarse, negociar y hacer crecer el comercio sin intermediarios innecesarios."
   },
   "cabinet": {
@@ -426,6 +430,47 @@
       "accept": "Aceptar oferta",
       "decline": "Rechazar",
       "withdraw": "Retirar oferta"
+    }
+  },
+  "roleHubs": {
+    "buyers": {
+      "eyebrow": "Para compradores",
+      "title": "Soy comprador",
+      "lead": "Explore ofertas de fincas georgianas o publique su solicitud de compra.",
+      "asideNote": "Inicie sesión para publicar una solicitud o escribir a las fincas.",
+      "asideRegister": "Crear cuenta de comprador",
+      "asideMine": "Mis solicitudes de compra",
+      "paths": {
+        "catalog": {
+          "title": "Ver el catálogo",
+          "text": "Explore ofertas publicadas y solicite cotización de cualquier producto.",
+          "cta": "Abrir catálogo"
+        },
+        "request": {
+          "title": "Publicar solicitud de compra",
+          "text": "Indique producto, cantidad, variedad, embalaje y país de destino.",
+          "cta": "Crear solicitud"
+        }
+      }
+    },
+    "sellers": {
+      "eyebrow": "Para vendedores",
+      "title": "Soy vendedor",
+      "lead": "Responda a la demanda de compradores o publique su propia oferta de producto.",
+      "asideNote": "Cree primero el perfil de finca, luego añada productos y responda a solicitudes.",
+      "asideRegister": "Crear cuenta de vendedor",
+      "paths": {
+        "requests": {
+          "title": "Solicitudes de compra abiertas",
+          "text": "Vea qué buscan los compradores y envíe una oferta o un mensaje.",
+          "cta": "Ver solicitudes"
+        },
+        "offer": {
+          "title": "Crear oferta de producto",
+          "text": "Añada una ficha de producto con detalles y fotos. Tras la moderación aparece en el catálogo.",
+          "cta": "Añadir producto"
+        }
+      }
     }
   }
 }

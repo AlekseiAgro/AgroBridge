@@ -90,8 +90,11 @@ export default async function AccountPage({ params }: Props) {
       <section className="cabinet-links">
         <h2 className="section-title">{t('quickLinks')}</h2>
         <div className="home__actions">
-          <Link className="button button--ghost" href="/catalog">
-            {tn('catalog')}
+          <Link className="button button--ghost" href="/buyers">
+            {tn('forBuyers')}
+          </Link>
+          <Link className="button button--ghost" href="/sellers">
+            {tn('forSellers')}
           </Link>
           {isFarmer ? (
             <>
@@ -107,9 +110,14 @@ export default async function AccountPage({ params }: Props) {
             </>
           ) : null}
           {isBuyer ? (
-            <Link className="button button--primary" href="/dashboard/rfqs">
-              {tn('myRequests')}
-            </Link>
+            <>
+              <Link className="button button--primary" href="/dashboard/purchase-requests">
+                {tn('purchaseRequests')}
+              </Link>
+              <Link className="button button--ghost" href="/dashboard/rfqs">
+                {tn('myRequests')}
+              </Link>
+            </>
           ) : null}
           <Link className="button button--ghost" href="/dashboard/chat">
             {tn('chat')}

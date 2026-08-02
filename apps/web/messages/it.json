@@ -15,7 +15,9 @@
     "account": "Il mio account",
     "ctaFarm": "Gestisci l’azienda",
     "categoriesTitle": "Gruppi di prodotti",
-    "categoriesLead": "Frutta, verdura, bacche, noci, vino, latticini, miele, acqua minerale, spezie, tè, alloro, oli essenziali e prodotti biologici dai produttori georgiani."
+    "categoriesLead": "Frutta, verdura, bacche, noci, vino, latticini, miele, acqua minerale, spezie, tè, alloro, oli essenziali e prodotti biologici dai produttori georgiani.",
+    "ctaBuyer": "Sono un acquirente",
+    "ctaSeller": "Sono un venditore"
   },
   "auth": {
     "loginTitle": "Bentornato",
@@ -60,7 +62,9 @@
     "admin": "Admin",
     "language": "Lingua",
     "howItWorks": "Come funziona",
-    "purchaseRequests": "Richieste di acquisto"
+    "purchaseRequests": "Richieste di acquisto",
+    "forBuyers": "Sono un acquirente",
+    "forSellers": "Sono un venditore"
   },
   "footer": {
     "tagline": "Colleghiamo le aziende georgiane con acquirenti in tutto il mondo.",
@@ -320,8 +324,8 @@
         "text": "Valutate prezzo, quantità e tempi, accettate un’offerta e continuate il coordinamento in un unico spazio."
       }
     },
-    "ctaFarmer": "Per gli agricoltori",
-    "ctaBuyer": "Sfoglia il catalogo",
+    "ctaFarmer": "Sono un venditore",
+    "ctaBuyer": "Sono un acquirente",
     "pageNote": "AgroBridge aiuta produttori e acquirenti georgiani a incontrarsi, negoziare e far crescere il commercio senza intermediari inutili."
   },
   "cabinet": {
@@ -426,6 +430,47 @@
       "accept": "Accetta offerta",
       "decline": "Rifiuta",
       "withdraw": "Ritira offerta"
+    }
+  },
+  "roleHubs": {
+    "buyers": {
+      "eyebrow": "Per gli acquirenti",
+      "title": "Sono un acquirente",
+      "lead": "Esplora le offerte delle aziende georgiane o pubblica la tua richiesta di acquisto.",
+      "asideNote": "Accedi per pubblicare una richiesta o scrivere alle aziende.",
+      "asideRegister": "Crea account acquirente",
+      "asideMine": "Le mie richieste di acquisto",
+      "paths": {
+        "catalog": {
+          "title": "Sfoglia il catalogo",
+          "text": "Scopri le offerte pubblicate e richiedi un preventivo su qualsiasi prodotto.",
+          "cta": "Apri catalogo"
+        },
+        "request": {
+          "title": "Pubblica una richiesta di acquisto",
+          "text": "Indica prodotto, quantità, varietà, imballaggio e paese di destinazione.",
+          "cta": "Crea richiesta"
+        }
+      }
+    },
+    "sellers": {
+      "eyebrow": "Per i venditori",
+      "title": "Sono un venditore",
+      "lead": "Rispondi alle esigenze degli acquirenti o crea la tua offerta prodotto.",
+      "asideNote": "Crea prima il profilo azienda, poi aggiungi prodotti e rispondi alle richieste.",
+      "asideRegister": "Crea account venditore",
+      "paths": {
+        "requests": {
+          "title": "Richieste di acquisto aperte",
+          "text": "Vedi cosa cercano gli acquirenti e invia un'offerta o un messaggio in chat.",
+          "cta": "Vedi richieste"
+        },
+        "offer": {
+          "title": "Crea un'offerta prodotto",
+          "text": "Aggiungi una scheda prodotto con dettagli e foto. Dopo la moderazione compare nel catalogo.",
+          "cta": "Aggiungi prodotto"
+        }
+      }
     }
   }
 }

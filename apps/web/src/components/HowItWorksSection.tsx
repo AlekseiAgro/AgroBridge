@@ -36,11 +36,11 @@ export async function HowItWorksSection({
 
       {showActions ? (
         <div className="how-it-works__actions">
-          <Link className="button button--primary" href="/register">
-            {t('ctaFarmer')}
-          </Link>
-          <Link className="button button--ghost" href="/catalog">
+          <Link className="button button--primary" href="/buyers">
             {t('ctaBuyer')}
+          </Link>
+          <Link className="button button--ghost" href="/sellers">
+            {t('ctaFarmer')}
           </Link>
         </div>
       ) : null}

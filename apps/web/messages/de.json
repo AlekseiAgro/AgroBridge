@@ -15,7 +15,9 @@
     "account": "Mein Konto",
     "ctaFarm": "Betrieb verwalten",
     "categoriesTitle": "Produktgruppen",
-    "categoriesLead": "Obst, Gemüse, Beeren, Nüsse, Wein, Milchprodukte, Honig, Mineralwasser, Gewürze, Tee, Lorbeerblatt, ätherische Öle und Bioprodukte von georgischen Erzeugern."
+    "categoriesLead": "Obst, Gemüse, Beeren, Nüsse, Wein, Milchprodukte, Honig, Mineralwasser, Gewürze, Tee, Lorbeerblatt, ätherische Öle und Bioprodukte von georgischen Erzeugern.",
+    "ctaBuyer": "Ich bin Käufer",
+    "ctaSeller": "Ich bin Verkäufer"
   },
   "auth": {
     "loginTitle": "Willkommen zurück",
@@ -60,7 +62,9 @@
     "admin": "Admin",
     "language": "Sprache",
     "howItWorks": "So funktioniert’s",
-    "purchaseRequests": "Kaufanfragen"
+    "purchaseRequests": "Kaufanfragen",
+    "forBuyers": "Ich bin Käufer",
+    "forSellers": "Ich bin Verkäufer"
   },
   "footer": {
     "tagline": "Wir verbinden georgische Betriebe mit Käufern weltweit.",
@@ -320,8 +324,8 @@
         "text": "Prüfen Sie Preis, Menge und Timing, nehmen Sie ein Angebot an und koordinieren Sie alles an einem Ort."
       }
     },
-    "ctaFarmer": "Für Landwirte",
-    "ctaBuyer": "Katalog ansehen",
+    "ctaFarmer": "Ich bin Verkäufer",
+    "ctaBuyer": "Ich bin Käufer",
     "pageNote": "AgroBridge hilft georgischen Erzeugern und Käufern, einander zu finden, zu verhandeln und Handel ohne unnötige Zwischenhändler auszubauen."
   },
   "cabinet": {
@@ -426,6 +430,47 @@
       "accept": "Angebot annehmen",
       "decline": "Ablehnen",
       "withdraw": "Angebot zurückziehen"
+    }
+  },
+  "roleHubs": {
+    "buyers": {
+      "eyebrow": "Für Käufer",
+      "title": "Ich bin Käufer",
+      "lead": "Durchstöbern Sie Angebote georgischer Betriebe oder veröffentlichen Sie Ihren Kaufbedarf.",
+      "asideNote": "Melden Sie sich an, um eine Anfrage zu posten oder Betriebe zu kontaktieren.",
+      "asideRegister": "Käuferkonto erstellen",
+      "asideMine": "Meine Kaufanfragen",
+      "paths": {
+        "catalog": {
+          "title": "Katalog durchsuchen",
+          "text": "Entdecken Sie veröffentlichte Angebote aus Georgien und fragen Sie Preise an.",
+          "cta": "Katalog öffnen"
+        },
+        "request": {
+          "title": "Kaufanfrage veröffentlichen",
+          "text": "Beschreiben Sie Produkt, Menge, Sorte, Verpackung und Bestimmungsland.",
+          "cta": "Anfrage erstellen"
+        }
+      }
+    },
+    "sellers": {
+      "eyebrow": "Für Verkäufer",
+      "title": "Ich bin Verkäufer",
+      "lead": "Reagieren Sie auf Käuferbedarf oder erstellen Sie Ihr eigenes Produktangebot.",
+      "asideNote": "Legen Sie zuerst ein Betriebsprofil an, dann Produkte und Antworten auf Anfragen.",
+      "asideRegister": "Verkäuferkonto erstellen",
+      "paths": {
+        "requests": {
+          "title": "Offene Kaufanfragen",
+          "text": "Sehen Sie, was Käufer suchen, und senden Sie ein Angebot oder eine Chat-Nachricht.",
+          "cta": "Anfragen ansehen"
+        },
+        "offer": {
+          "title": "Produktangebot erstellen",
+          "text": "Erstellen Sie eine Produktkarte mit Details und Fotos. Nach der Moderation erscheint sie im Katalog.",
+          "cta": "Produkt hinzufügen"
+        }
+      }
     }
   }
 }

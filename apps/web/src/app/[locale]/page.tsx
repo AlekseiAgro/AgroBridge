@@ -4,7 +4,6 @@ import { HowItWorksSection } from '@/components/HowItWorksSection';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
-import { getCurrentUser } from '@/lib/session';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -14,7 +13,6 @@ export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('home');
-  const user = await getCurrentUser();
 
   return (
     <div className="home">
@@ -37,22 +35,12 @@ export default async function HomePage({ params }: Props) {
             <p className="home__subtitle">{t('subtitle')}</p>
 
             <div className="home__actions">
-              <Link className="button button--primary" href="/catalog">
-                {t('ctaPrimary')}
+              <Link className="button button--primary" href="/buyers">
+                {t('ctaBuyer')}
               </Link>
-              {user?.role === 'farmer' || user?.role === 'admin' ? (
-                <Link className="button button--ghost-light" href="/dashboard/farm">
-                  {t('ctaFarm')}
-                </Link>
-              ) : user ? (
-                <Link className="button button--ghost-light" href="/account">
-                  {t('ctaAccount')}
-                </Link>
-              ) : (
-                <Link className="button button--ghost-light" href="/register">
-                  {t('ctaSecondary')}
-                </Link>
-              )}
+              <Link className="button button--ghost-light" href="/sellers">
+                {t('ctaSeller')}
+              </Link>
             </div>
           </div>
         </div>

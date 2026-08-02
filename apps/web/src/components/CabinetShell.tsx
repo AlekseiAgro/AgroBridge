@@ -43,7 +43,8 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
           ) : null}
           {user ? <Link href="/dashboard/chat">{t('chat')}</Link> : null}
           {user?.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
-          <Link href="/catalog">{t('catalog')}</Link>
+          <Link href="/buyers">{t('forBuyers')}</Link>
+          <Link href="/sellers">{t('forSellers')}</Link>
         </nav>
         <div className="cabinet__sidebar-foot">
           <LanguageSwitcher />
