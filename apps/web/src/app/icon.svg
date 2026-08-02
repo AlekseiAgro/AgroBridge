@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 420" fill="none" role="img" aria-label="AgroBridge">
+  <!-- A left leg -->
+  <path d="M198 296H72L198 52h58L198 296Z" fill="#1B7D44"/>
+  <!-- A right leg -->
+  <path d="M232 52 380 296H304L232 52Z" fill="#1B7D44"/>
+
+  <!-- B body -->
+  <path fill="#0D223F" d="M250 88h36c50 0 82 27 82 68 0 30-15.5 52-42 61 33.5 9 54 34 54 72 0 51-37.5 81-95 81h-35V88Z"/>
+  <!-- B counters (cutouts) -->
+  <path fill="#000000" fill-opacity="0" d="M0 0h1v1H0z"/>
+  <path fill="#FFFFFF" style="mix-blend-mode:destination-out" d="M282 118h12c24 0 38 12 38 31s-14 31-38 31h-12V118Z"/>
+  <path fill="#FFFFFF" style="mix-blend-mode:destination-out" d="M282 214h14c27 0 43 14 43 36s-16 37-43 37h-14V214Z"/>
+
+  <!-- Leaf -->
+  <path fill="#1B7D44" d="M186 218c48-39 94-89 121-145 5.5-12 1-26.5-11.5-30.5-11.5-3.5-24 3.5-28.5 14.5C243 108 206 155 160 192c-10 8-12 22.5-4 32.5 8 10 22.5 12 32.5 3.5 1-.8 2-1.7 3-2.7Z"/>
+  <path d="M200 206c38-32 74-72 99-118" stroke="#071510" stroke-width="9" stroke-linecap="round"/>
+
+  <!-- Agro wordmark -->
+  <text x="72" y="368" fill="#1B7D44" font-family="Arial, Helvetica, sans-serif" font-size="92" font-weight="700" letter-spacing="-2">Agro</text>
+</svg>

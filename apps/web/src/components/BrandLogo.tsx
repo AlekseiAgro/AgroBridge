@@ -18,11 +18,6 @@ export function BrandLogo({
     .filter(Boolean)
     .join(' ');
 
-  const src =
-    variant === 'mark'
-      ? '/images/brand/agrobridge-mark-transparent.png'
-      : '/images/brand/agrobridge-logo-transparent.png';
-
   const imageClass =
     variant === 'stacked'
       ? 'brand-logo__image'
@@ -33,7 +28,11 @@ export function BrandLogo({
   return (
     <span className={classes}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt="AgroBridge" className={imageClass} />
+      <img
+        src="/images/brand/logo.svg"
+        alt="AgroBridge"
+        className={imageClass}
+      />
     </span>
   );
 }
