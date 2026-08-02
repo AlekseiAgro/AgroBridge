@@ -39,7 +39,7 @@ export async function HowItWorksSection({
           <Link className="button button--primary" href="/buyers">
             {t('ctaBuyer')}
           </Link>
-          <Link className="button button--ghost" href="/sellers">
+          <Link className="button button--accent" href="/sellers">
             {t('ctaFarmer')}
           </Link>
         </div>

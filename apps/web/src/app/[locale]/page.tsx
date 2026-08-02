@@ -38,7 +38,7 @@ export default async function HomePage({ params }: Props) {
               <Link className="button button--primary" href="/buyers">
                 {t('ctaBuyer')}
               </Link>
-              <Link className="button button--ghost-light" href="/sellers">
+              <Link className="button button--accent" href="/sellers">
                 {t('ctaSeller')}
               </Link>
             </div>

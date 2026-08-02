@@ -422,6 +422,17 @@ body {
   background: rgba(255, 255, 255, 0.24);
 }
 
+.button--accent {
+  background: var(--accent-gold);
+  border-color: rgba(29, 42, 31, 0.12);
+  color: #1d2a1f;
+}
+
+.button--accent:hover {
+  background: #b89245;
+  color: #142016;
+}
+
 @keyframes rise-in {
   from {
     opacity: 0;
