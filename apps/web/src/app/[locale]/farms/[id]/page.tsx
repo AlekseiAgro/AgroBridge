@@ -1,6 +1,7 @@
-import type { FarmDetail } from '@agrobridge/shared';
+import type { FarmDetail, RatingSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { RatingStars } from '@/components/RatingStars';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
@@ -30,6 +31,13 @@ export default async function FarmDetailPage({ params }: Props) {
     throw error;
   }
 
+  let ownerRating: RatingSummary = { average: null, count: 0 };
+  try {
+    ownerRating = await apiRequest<RatingSummary>(`/users/${farm.owner.id}/rating`);
+  } catch {
+    ownerRating = { average: null, count: 0 };
+  }
+
   return (
     <div className="page">
       <SiteHeader />
@@ -39,6 +47,9 @@ export default async function FarmDetailPage({ params }: Props) {
           {formatRegionLabel(farm.region, tr) || t('regionUnknown')}
           {farm.owner.displayName ? ` · ${farm.owner.displayName}` : ''}
         </p>
+        <div className="farm-rating">
+          <RatingStars value={ownerRating.average} count={ownerRating.count} size="sm" />
+        </div>
         {farm.description ? <p className="detail-text">{farm.description}</p> : null}
 
         <h2 className="section-title">{t('productsHeading')}</h2>

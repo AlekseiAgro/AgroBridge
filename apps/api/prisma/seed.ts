@@ -1,7 +1,9 @@
 import {
+  CurrencyCode,
   LocaleCode,
   ModerationStatus,
   PrismaClient,
+  RfqStatus,
   UserRole,
 } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -601,11 +603,116 @@ async function main() {
     console.log(`Category ${category}: ${farmers.length} farmers/products`);
   }
 
+  const deals = await seedCompletedDeals();
   console.log(
-    `Demo seed complete: ${farmerCount} farmers, ${productCount} products, ${BUYERS.length} buyers`,
+    `Demo seed complete: ${farmerCount} farmers, ${productCount} products, ${BUYERS.length} buyers, ${deals} completed deals with ratings`,
   );
   console.log(`Demo password for farmers/buyers: ${DEMO_PASSWORD}`);
   console.log('Example logins: farmer-fruits-1@agrobridge.local / buyer-1@agrobridge.local');
+}
+
+async function seedCompletedDeals() {
+  const pairs = [
+    {
+      buyerEmail: 'buyer-1@agrobridge.local',
+      farmerEmail: 'farmer-fruits-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 4,
+      quantity: '200',
+      price: '4.50',
+    },
+    {
+      buyerEmail: 'buyer-2@agrobridge.local',
+      farmerEmail: 'farmer-wine-1@agrobridge.local',
+      buyerScore: 4,
+      sellerScore: 5,
+      quantity: '120',
+      price: '18.00',
+    },
+    {
+      buyerEmail: 'buyer-3@agrobridge.local',
+      farmerEmail: 'farmer-honey-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 5,
+      quantity: '80',
+      price: '22.00',
+    },
+    {
+      buyerEmail: 'buyer-4@agrobridge.local',
+      farmerEmail: 'farmer-nuts-1@agrobridge.local',
+      buyerScore: 3,
+      sellerScore: 4,
+      quantity: '500',
+      price: '9.20',
+    },
+  ];
+
+  let created = 0;
+  for (const pair of pairs) {
+    const buyer = await prisma.user.findUnique({ where: { email: pair.buyerEmail } });
+    const farmer = await prisma.user.findUnique({
+      where: { email: pair.farmerEmail },
+      include: { farm: { include: { products: { take: 1, orderBy: { createdAt: 'asc' } } } } },
+    });
+    if (!buyer || !farmer?.farm || !farmer.farm.products[0]) {
+      continue;
+    }
+
+    const product = farmer.farm.products[0];
+    // Keep seed idempotent: one completed demo deal per buyer+farmer pair.
+    const existing = await prisma.rfq.findFirst({
+      where: {
+        buyerId: buyer.id,
+        farmId: farmer.farm.id,
+        status: RfqStatus.completed,
+      },
+    });
+    if (existing) {
+      created += 1;
+      continue;
+    }
+
+    const rfq = await prisma.rfq.create({
+      data: {
+        productId: product.id,
+        farmId: farmer.farm.id,
+        buyerId: buyer.id,
+        quantity: pair.quantity,
+        unit: product.unit,
+        message: 'Demo completed deal for rating showcase.',
+        status: RfqStatus.completed,
+        completedAt: new Date(),
+        offer: {
+          create: {
+            priceAmount: pair.price,
+            currency: CurrencyCode.EUR,
+            quantity: pair.quantity,
+            unit: product.unit,
+            message: 'Demo offer accepted and fulfilled.',
+          },
+        },
+        ratings: {
+          create: [
+            {
+              fromUserId: buyer.id,
+              toUserId: farmer.id,
+              score: pair.buyerScore,
+              comment: 'Reliable supply and clear communication.',
+            },
+            {
+              fromUserId: farmer.id,
+              toUserId: buyer.id,
+              score: pair.sellerScore,
+              comment: 'Smooth coordination after acceptance.',
+            },
+          ],
+        },
+      },
+    });
+    void rfq;
+    created += 1;
+  }
+  return created;
 }
 
 main()

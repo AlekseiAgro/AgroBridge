@@ -1,7 +1,6 @@
 import type { ProductSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { DeleteProductButton } from '@/components/DeleteProductButton';
-import { SiteHeader } from '@/components/SiteHeader';
 import { Link, redirect } from '@/i18n/navigation';
 import { getProductCardImage } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
@@ -36,9 +35,7 @@ export default async function DashboardProductsPage({ params }: Props) {
   }
 
   return (
-    <div className="page">
-      <SiteHeader />
-      <main className="page__main">
+    <main className="cabinet-page">
         <div className="page__heading-row">
           <div>
             <h1>{t('dashboardTitle')}</h1>
@@ -100,7 +97,6 @@ export default async function DashboardProductsPage({ params }: Props) {
             })}
           </ul>
         )}
-      </main>
-    </div>
+    </main>
   );
 }

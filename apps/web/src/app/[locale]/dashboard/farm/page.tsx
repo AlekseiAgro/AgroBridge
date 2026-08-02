@@ -1,7 +1,6 @@
 import type { FarmDetail } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { FarmForm } from '@/components/FarmForm';
-import { SiteHeader } from '@/components/SiteHeader';
 import { Link, redirect } from '@/i18n/navigation';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
@@ -31,9 +30,7 @@ export default async function DashboardFarmPage({ params }: Props) {
   }
 
   return (
-    <div className="page">
-      <SiteHeader />
-      <main className="page__main narrow">
+    <main className="cabinet-page cabinet-page--narrow">
         <h1>{farm ? t('editTitle') : t('createTitle')}</h1>
         <p className="page__subtitle">{t('dashboardSubtitle')}</p>
         <FarmForm
@@ -51,7 +48,6 @@ export default async function DashboardFarmPage({ params }: Props) {
             <Link href="/dashboard/products">{t('manageProducts')}</Link>
           </p>
         ) : null}
-      </main>
-    </div>
+    </main>
   );
 }

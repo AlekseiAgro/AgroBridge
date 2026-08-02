@@ -7,6 +7,7 @@ import {
 } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
+import { toPublicMediaUrl } from '@/lib/product-image';
 import { useRef, useState } from 'react';
 
 type Props = {

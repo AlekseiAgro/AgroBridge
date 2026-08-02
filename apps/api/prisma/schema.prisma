@@ -33,6 +33,7 @@ enum RfqStatus {
   pending
   offered
   accepted
+  completed
   declined
   cancelled
 }
@@ -66,6 +67,8 @@ model User {
   messages              Message[]
   rfqsAsBuyer           Rfq[]           @relation("BuyerRfqs")
   moderatedProducts     Product[]       @relation("ProductModerator")
+  ratingsGiven          Rating[]        @relation("RatingsGiven")
+  ratingsReceived       Rating[]        @relation("RatingsReceived")
 }
 
 model Farm {
@@ -126,25 +129,48 @@ model ProductImage {
 }
 
 model Rfq {
-  id        String    @id @default(cuid())
-  productId String
-  farmId    String
-  buyerId   String
-  quantity  String
-  unit      String?
-  message   String?
-  status    RfqStatus @default(pending)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String    @id @default(cuid())
+  productId   String
+  farmId      String
+  buyerId     String
+  quantity    String
+  unit        String?
+  message     String?
+  status      RfqStatus @default(pending)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   product Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   farm    Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
   buyer   User      @relation("BuyerRfqs", fields: [buyerId], references: [id], onDelete: Cascade)
   offer   RfqOffer?
+  ratings Rating[]
 
   @@index([buyerId, createdAt])
   @@index([farmId, status, createdAt])
   @@index([productId])
+}
+
+/// Mutual deal rating: buyer rates seller (farm owner), seller rates buyer.
+/// Allowed only after the RFQ reaches status `completed`.
+model Rating {
+  id         String   @id @default(cuid())
+  rfqId      String
+  fromUserId String
+  toUserId   String
+  score      Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  rfq      Rfq  @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  fromUser User @relation("RatingsGiven", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User @relation("RatingsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([rfqId, fromUserId])
+  @@index([toUserId])
+  @@index([fromUserId])
+  @@map("ratings")
 }
 
 model RfqOffer {

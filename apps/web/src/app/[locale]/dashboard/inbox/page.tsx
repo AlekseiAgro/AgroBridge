@@ -1,7 +1,6 @@
 import type { RfqSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RfqList } from '@/components/RfqList';
-import { SiteHeader } from '@/components/SiteHeader';
 import { redirect } from '@/i18n/navigation';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
@@ -24,13 +23,10 @@ export default async function FarmerInboxPage({ params }: Props) {
   const items = await apiRequestAuthed<RfqSummary[]>('/rfqs/inbox');
 
   return (
-    <div className="page">
-      <SiteHeader />
-      <main className="page__main">
+    <main className="cabinet-page">
         <h1>{t('inboxTitle')}</h1>
         <p className="page__subtitle">{t('inboxSubtitle')}</p>
         <RfqList items={items} emptyLabel={t('inboxEmpty')} detailBasePath="/dashboard/inbox" />
-      </main>
-    </div>
+    </main>
   );
 }

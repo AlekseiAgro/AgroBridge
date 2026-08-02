@@ -3,7 +3,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { ProductForm } from '@/components/ProductForm';
 import { ProductImagesManager } from '@/components/ProductImagesManager';
-import { SiteHeader } from '@/components/SiteHeader';
 import { redirect } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -38,14 +37,11 @@ export default async function EditProductPage({ params }: Props) {
   }
 
   return (
-    <div className="page">
-      <SiteHeader />
-      <main className="page__main narrow">
+    <main className="cabinet-page cabinet-page--narrow">
         <h1>{t('editTitle')}</h1>
         <p className="page__subtitle">{t('editSubtitle')}</p>
         <ProductImagesManager productId={product.id} initialImages={product.images} />
         <ProductForm mode="edit" initial={product} />
-      </main>
-    </div>
+    </main>
   );
 }

@@ -2,8 +2,9 @@ import type { RfqSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { OpenChatButton } from '@/components/OpenChatButton';
+import { RateDealForm } from '@/components/RateDealForm';
+import { RatingStars } from '@/components/RatingStars';
 import { RfqActionButton } from '@/components/RfqActionButton';
-import { SiteHeader } from '@/components/SiteHeader';
 import { Link, redirect } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -25,6 +26,7 @@ export default async function BuyerRfqDetailPage({ params }: Props) {
 
   const t = await getTranslations('rfq');
   const tp = await getTranslations('product');
+  const tr = await getTranslations('rating');
 
   let rfq: RfqSummary;
   try {
@@ -36,63 +38,87 @@ export default async function BuyerRfqDetailPage({ params }: Props) {
     throw error;
   }
 
-  return (
-    <div className="page">
-      <SiteHeader />
-      <main className="page__main narrow">
-        <p className="eyebrow">
-          <Link href="/dashboard/rfqs">{t('mineTitle')}</Link>
-        </p>
-        <h1>{rfq.product.title}</h1>
-        <p className="page__subtitle">
-          {t(`statuses.${rfq.status}`)} · {rfq.farm.name}
-        </p>
+  const sellerName = rfq.seller.displayName || rfq.seller.email;
 
-        <dl className="account-details">
+  return (
+    <main className="cabinet-page cabinet-page--narrow">
+      <p className="eyebrow">
+        <Link href="/dashboard/rfqs">{t('mineTitle')}</Link>
+      </p>
+      <h1>{rfq.product.title}</h1>
+      <p className="page__subtitle">
+        {t(`statuses.${rfq.status}`)} · {rfq.farm.name}
+      </p>
+
+      <dl className="account-details">
+        <div>
+          <dt>{t('quantity')}</dt>
+          <dd>
+            {rfq.quantity}
+            {rfq.unit ? ` ${tp(`units.${rfq.unit as 'kg'}`)}` : ''}
+          </dd>
+        </div>
+        {rfq.message ? (
           <div>
-            <dt>{t('quantity')}</dt>
+            <dt>{t('message')}</dt>
+            <dd>{rfq.message}</dd>
+          </div>
+        ) : null}
+        {rfq.offer ? (
+          <>
+            <div>
+              <dt>{t('price')}</dt>
+              <dd>
+                {rfq.offer.priceAmount} {rfq.offer.currency}
+              </dd>
+            </div>
+            {rfq.offer.message ? (
+              <div>
+                <dt>{t('farmerMessage')}</dt>
+                <dd>{rfq.offer.message}</dd>
+              </div>
+            ) : null}
+          </>
+        ) : null}
+        {rfq.myRating ? (
+          <div>
+            <dt>{tr('yourRating')}</dt>
             <dd>
-              {rfq.quantity}
-              {rfq.unit ? ` ${tp(`units.${rfq.unit as 'kg'}`)}` : ''}
+              <RatingStars value={rfq.myRating.score} showValue />
             </dd>
           </div>
-          {rfq.message ? (
-            <div>
-              <dt>{t('message')}</dt>
-              <dd>{rfq.message}</dd>
-            </div>
-          ) : null}
-          {rfq.offer ? (
-            <>
-              <div>
-                <dt>{t('price')}</dt>
-                <dd>
-                  {rfq.offer.priceAmount} {rfq.offer.currency}
-                </dd>
-              </div>
-              {rfq.offer.message ? (
-                <div>
-                  <dt>{t('farmerMessage')}</dt>
-                  <dd>{rfq.offer.message}</dd>
-                </div>
-              ) : null}
-            </>
-          ) : null}
-        </dl>
+        ) : null}
+        {rfq.counterpartyRating ? (
+          <div>
+            <dt>{tr('theirRating')}</dt>
+            <dd>
+              <RatingStars value={rfq.counterpartyRating.score} showValue />
+            </dd>
+          </div>
+        ) : null}
+      </dl>
 
-        <div className="home__actions" style={{ marginTop: '1.25rem' }}>
-          {rfq.status === 'pending' ? (
-            <RfqActionButton rfqId={rfq.id} action="cancel" />
-          ) : null}
-          {rfq.status === 'offered' ? (
-            <>
-              <RfqActionButton rfqId={rfq.id} action="accept" variant="primary" />
-              <RfqActionButton rfqId={rfq.id} action="decline" />
-            </>
-          ) : null}
-          <OpenChatButton rfqId={rfq.id} />
+      <div className="home__actions" style={{ marginTop: '1.25rem' }}>
+        {rfq.status === 'pending' ? (
+          <RfqActionButton rfqId={rfq.id} action="cancel" />
+        ) : null}
+        {rfq.status === 'offered' ? (
+          <>
+            <RfqActionButton rfqId={rfq.id} action="accept" variant="primary" />
+            <RfqActionButton rfqId={rfq.id} action="decline" />
+          </>
+        ) : null}
+        {rfq.canComplete ? (
+          <RfqActionButton rfqId={rfq.id} action="complete" variant="primary" />
+        ) : null}
+        <OpenChatButton rfqId={rfq.id} />
+      </div>
+
+      {rfq.canRate ? (
+        <div style={{ marginTop: '1.75rem' }}>
+          <RateDealForm rfqId={rfq.id} counterpartyName={sellerName} />
         </div>
-      </main>
-    </div>
+      ) : null}
+    </main>
   );
 }

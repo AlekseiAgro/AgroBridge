@@ -9,6 +9,12 @@ describe('AuthService', () => {
       findUnique: jest.fn(),
       create: jest.fn(),
     },
+    rating: {
+      aggregate: jest.fn().mockResolvedValue({
+        _avg: { score: null },
+        _count: { _all: 0 },
+      }),
+    },
   };
 
   const jwtService = {
@@ -61,6 +67,7 @@ describe('AuthService', () => {
       role: 'farmer',
       locale: 'ka',
       displayName: 'Nino',
+      rating: { average: null, count: 0 },
     });
     expect(prisma.user.create).toHaveBeenCalled();
     expect(notifications.notifyWelcome).toHaveBeenCalledWith({

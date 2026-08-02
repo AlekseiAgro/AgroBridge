@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 
-type Action = 'accept' | 'decline' | 'cancel';
+type Action = 'accept' | 'decline' | 'cancel' | 'complete';
 
 type Props = {
   rfqId: string;

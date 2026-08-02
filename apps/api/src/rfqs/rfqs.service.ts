@@ -39,6 +39,16 @@ const rfqInclude = {
     },
   },
   offer: true,
+  ratings: {
+    select: {
+      id: true,
+      fromUserId: true,
+      toUserId: true,
+      score: true,
+      comment: true,
+      createdAt: true,
+    },
+  },
 } satisfies Prisma.RfqInclude;
 
 type RfqEntity = Prisma.RfqGetPayload<{ include: typeof rfqInclude }>;
@@ -101,7 +111,7 @@ export class RfqsService {
       rfqId: rfq.id,
     });
 
-    return this.toSummary(rfq);
+    return this.toSummary(rfq, user);
   }
 
   async listMine(user: AuthenticatedUser): Promise<RfqSummary[]> {
@@ -113,7 +123,7 @@ export class RfqsService {
       include: rfqInclude,
     });
 
-    return items.map((item) => this.toSummary(item));
+    return items.map((item) => this.toSummary(item, user));
   }
 
   async listInbox(user: AuthenticatedUser): Promise<RfqSummary[]> {
@@ -130,12 +140,12 @@ export class RfqsService {
       include: rfqInclude,
     });
 
-    return items.map((item) => this.toSummary(item));
+    return items.map((item) => this.toSummary(item, user));
   }
 
   async getById(user: AuthenticatedUser, id: string): Promise<RfqSummary> {
     const rfq = await this.requireAccessibleRfq(user, id);
-    return this.toSummary(rfq);
+    return this.toSummary(rfq, user);
   }
 
   async createOffer(
@@ -275,6 +285,29 @@ export class RfqsService {
     return this.getById(user, id);
   }
 
+  async complete(user: AuthenticatedUser, id: string): Promise<RfqSummary> {
+    const rfq = await this.requireAccessibleRfq(user, id);
+    const isBuyer = rfq.buyerId === user.id;
+    const isSeller = rfq.farm.ownerId === user.id || user.role === 'admin';
+
+    if (!isBuyer && !isSeller) {
+      throw new ForbiddenException('Not allowed');
+    }
+    if (rfq.status !== PrismaRfqStatus.accepted) {
+      throw new BadRequestException('Only accepted deals can be marked completed');
+    }
+
+    await this.prisma.rfq.update({
+      where: { id: rfq.id },
+      data: {
+        status: PrismaRfqStatus.completed,
+        completedAt: new Date(),
+      },
+    });
+
+    return this.getById(user, id);
+  }
+
   private async requireAccessibleRfq(user: AuthenticatedUser, id: string): Promise<RfqEntity> {
     const rfq = await this.prisma.rfq.findUnique({
       where: { id },
@@ -322,7 +355,18 @@ export class RfqsService {
     }
   }
 
-  private toSummary(rfq: RfqEntity): RfqSummary {
+  private toSummary(rfq: RfqEntity, viewer: AuthenticatedUser): RfqSummary {
+    const seller = {
+      id: rfq.farm.owner.id,
+      displayName: rfq.farm.owner.displayName,
+      email: rfq.farm.owner.email,
+    };
+    const isParticipant =
+      rfq.buyerId === viewer.id || rfq.farm.ownerId === viewer.id || viewer.role === 'admin';
+    const myRating = rfq.ratings.find((rating) => rating.fromUserId === viewer.id) ?? null;
+    const counterpartyRating =
+      rfq.ratings.find((rating) => rating.fromUserId !== viewer.id) ?? null;
+
     return {
       id: rfq.id,
       status: rfq.status as RfqStatus,
@@ -331,18 +375,37 @@ export class RfqsService {
       message: rfq.message,
       createdAt: rfq.createdAt.toISOString(),
       updatedAt: rfq.updatedAt.toISOString(),
+      completedAt: rfq.completedAt?.toISOString() ?? null,
       product: rfq.product,
       farm: {
         id: rfq.farm.id,
         name: rfq.farm.name,
         region: rfq.farm.region,
+        ownerId: rfq.farm.ownerId,
       },
       buyer: {
         id: rfq.buyer.id,
         displayName: rfq.buyer.displayName,
         email: rfq.buyer.email,
       },
+      seller,
       offer: rfq.offer ? this.toOffer(rfq.offer) : null,
+      canComplete: isParticipant && rfq.status === PrismaRfqStatus.accepted,
+      canRate: isParticipant && rfq.status === PrismaRfqStatus.completed && myRating == null,
+      myRating: myRating
+        ? {
+            score: myRating.score,
+            comment: myRating.comment,
+            createdAt: myRating.createdAt.toISOString(),
+          }
+        : null,
+      counterpartyRating: counterpartyRating
+        ? {
+            score: counterpartyRating.score,
+            comment: counterpartyRating.comment,
+            createdAt: counterpartyRating.createdAt.toISOString(),
+          }
+        : null,
     };
   }
 

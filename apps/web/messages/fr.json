@@ -201,12 +201,14 @@
       "offered": "Offre reçue",
       "accepted": "Acceptée",
       "declined": "Refusée",
-      "cancelled": "Annulée"
+      "cancelled": "Annulée",
+      "completed": "Terminé"
     },
     "actions": {
       "accept": "Accepter",
       "decline": "Refuser",
-      "cancel": "Annuler la demande"
+      "cancel": "Annuler la demande",
+      "complete": "Marquer le deal comme terminé"
     }
   },
   "chat": {
@@ -292,5 +294,38 @@
     "ctaFarmer": "Pour les agriculteurs",
     "ctaBuyer": "Voir le catalogue",
     "pageNote": "AgroBridge aide les producteurs et acheteurs géorgiens à se rencontrer, négocier et développer le commerce sans intermédiaires inutiles."
+  },
+  "cabinet": {
+    "shellLabel": "Espace personnel",
+    "overview": "Vue d’ensemble",
+    "title": "Votre espace",
+    "subtitle": "Profil, activité et note de deals au même endroit.",
+    "guest": "Invité",
+    "noDisplayName": "Nom non défini",
+    "memberSince": "Membre depuis {date}",
+    "rating": "Note des deals",
+    "ratingHint": "Basée sur les deals terminés. Acheteur et vendeur s’évaluent uniquement après clôture.",
+    "activityTitle": "Résumé d’activité",
+    "quickLinks": "Liens rapides",
+    "stats": {
+      "completedDeals": "Deals terminés",
+      "openRequests": "Demandes ouvertes",
+      "conversations": "Conversations",
+      "publishedProducts": "Produits publiés",
+      "pendingModeration": "En modération",
+      "awaitingMyRating": "En attente de votre note"
+    }
+  },
+  "rating": {
+    "title": "Noter votre partenaire",
+    "subtitle": "Donnez une note de 1 à 5 à {name} après ce deal terminé.",
+    "score": "Note",
+    "comment": "Commentaire",
+    "commentPlaceholder": "Retour facultatif sur la communication ou la livraison…",
+    "submit": "Envoyer la note",
+    "pleaseWait": "Veuillez patienter…",
+    "genericError": "Impossible d’envoyer la note.",
+    "yourRating": "Votre note",
+    "theirRating": "Leur note vous concernant"
   }
 }

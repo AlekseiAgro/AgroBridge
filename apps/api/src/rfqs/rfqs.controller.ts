@@ -64,4 +64,10 @@ export class RfqsController {
   cancel(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.rfqsService.cancel(user, id);
   }
+
+  @Post(':id/complete')
+  @Roles('buyer', 'farmer', 'admin')
+  complete(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.rfqsService.complete(user, id);
+  }
 }

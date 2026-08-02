@@ -4,6 +4,7 @@ export const RFQ_STATUSES = [
   'pending',
   'offered',
   'accepted',
+  'completed',
   'declined',
   'cancelled',
 ] as const;
@@ -33,6 +34,12 @@ export type RfqOfferView = {
   createdAt: string;
 };
 
+export type RfqDealParticipant = {
+  id: string;
+  displayName: string | null;
+  email: string;
+};
+
 export type RfqSummary = {
   id: string;
   status: RfqStatus;
@@ -41,6 +48,7 @@ export type RfqSummary = {
   message: string | null;
   createdAt: string;
   updatedAt: string;
+  completedAt: string | null;
   product: {
     id: string;
     title: string;
@@ -49,13 +57,25 @@ export type RfqSummary = {
     id: string;
     name: string;
     region: string | null;
+    ownerId: string;
   };
-  buyer: {
-    id: string;
-    displayName: string | null;
-    email: string;
-  };
+  buyer: RfqDealParticipant;
+  seller: RfqDealParticipant;
   offer: RfqOfferView | null;
+  /** Either party may mark an accepted deal as completed. */
+  canComplete: boolean;
+  /** Current viewer may leave a rating after completion. */
+  canRate: boolean;
+  myRating: {
+    score: number;
+    comment: string | null;
+    createdAt: string;
+  } | null;
+  counterpartyRating: {
+    score: number;
+    comment: string | null;
+    createdAt: string;
+  } | null;
 };
 
 export type CreateRfqInput = {

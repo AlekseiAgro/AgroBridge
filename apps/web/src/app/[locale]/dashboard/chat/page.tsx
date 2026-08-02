@@ -1,6 +1,5 @@
 import type { ConversationSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { SiteHeader } from '@/components/SiteHeader';
 import { Link, redirect } from '@/i18n/navigation';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
@@ -20,9 +19,7 @@ export default async function ChatListPage({ params }: Props) {
   const items = await apiRequestAuthed<ConversationSummary[]>('/conversations');
 
   return (
-    <div className="page">
-      <SiteHeader />
-      <main className="page__main">
+    <main className="cabinet-page">
         <h1>{t('listTitle')}</h1>
         <p className="page__subtitle">{t('listSubtitle')}</p>
 
@@ -45,7 +42,6 @@ export default async function ChatListPage({ params }: Props) {
             ))}
           </ul>
         )}
-      </main>
-    </div>
+    </main>
   );
 }

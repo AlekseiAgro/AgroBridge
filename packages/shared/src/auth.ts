@@ -1,5 +1,6 @@
 import { USER_ROLES, type UserRole } from './roles';
 import type { Locale } from './locales';
+import type { RatingSummary } from './rating';
 
 /** Roles that can self-register. Admin is provisioned separately. */
 export const REGISTERABLE_ROLES = ['farmer', 'buyer'] as const;
@@ -20,6 +21,7 @@ export type PublicUser = {
   role: UserRole;
   locale: Locale;
   displayName: string | null;
+  rating: RatingSummary;
 };
 
 export type AuthTokenResponse = {

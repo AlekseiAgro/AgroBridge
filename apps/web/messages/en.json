@@ -201,12 +201,14 @@
       "offered": "Offer received",
       "accepted": "Accepted",
       "declined": "Declined",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "completed": "Completed"
     },
     "actions": {
       "accept": "Accept offer",
       "decline": "Decline",
-      "cancel": "Cancel request"
+      "cancel": "Cancel request",
+      "complete": "Mark deal completed"
     }
   },
   "chat": {
@@ -292,5 +294,38 @@
     "ctaFarmer": "For farmers",
     "ctaBuyer": "Browse catalog",
     "pageNote": "AgroBridge helps Georgian producers and buyers meet, negotiate, and grow trade without unnecessary intermediaries."
+  },
+  "cabinet": {
+    "shellLabel": "Personal cabinet",
+    "overview": "Overview",
+    "title": "Your cabinet",
+    "subtitle": "Profile, activity, and deal reputation in one place.",
+    "guest": "Guest",
+    "noDisplayName": "Name not set",
+    "memberSince": "Member since {date}",
+    "rating": "Deal rating",
+    "ratingHint": "Based on completed deals. Buyers and sellers rate each other after completion.",
+    "activityTitle": "Activity summary",
+    "quickLinks": "Quick links",
+    "stats": {
+      "completedDeals": "Completed deals",
+      "openRequests": "Open requests",
+      "conversations": "Conversations",
+      "publishedProducts": "Published products",
+      "pendingModeration": "Pending moderation",
+      "awaitingMyRating": "Awaiting your rating"
+    }
+  },
+  "rating": {
+    "title": "Rate your partner",
+    "subtitle": "Leave a 1–5 score for {name} after this completed deal.",
+    "score": "Score",
+    "comment": "Comment",
+    "commentPlaceholder": "Optional feedback about communication or delivery…",
+    "submit": "Submit rating",
+    "pleaseWait": "Please wait…",
+    "genericError": "Could not submit the rating.",
+    "yourRating": "Your rating",
+    "theirRating": "Their rating of you"
   }
 }

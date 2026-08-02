@@ -1,7 +1,6 @@
 import type { AdminStats, ModeratedProduct } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ModerationActions } from '@/components/ModerationActions';
-import { SiteHeader } from '@/components/SiteHeader';
 import { Link, redirect } from '@/i18n/navigation';
 import { formatRegionLabel } from '@/lib/region';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -35,9 +34,7 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
   const tabs = ['pending', 'approved', 'rejected', 'draft'] as const;
 
   return (
-    <div className="page">
-      <SiteHeader />
-      <main className="page__main">
+    <main className="cabinet-page">
         <h1>{t('title')}</h1>
         <p className="page__subtitle">{t('subtitle')}</p>
 
@@ -109,7 +106,6 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
             ))}
           </ul>
         )}
-      </main>
-    </div>
+    </main>
   );
 }

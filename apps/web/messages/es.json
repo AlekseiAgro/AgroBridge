@@ -201,12 +201,14 @@
       "offered": "Oferta recibida",
       "accepted": "Aceptada",
       "declined": "Rechazada",
-      "cancelled": "Cancelada"
+      "cancelled": "Cancelada",
+      "completed": "Completada"
     },
     "actions": {
       "accept": "Aceptar",
       "decline": "Rechazar",
-      "cancel": "Cancelar solicitud"
+      "cancel": "Cancelar solicitud",
+      "complete": "Marcar operación completada"
     }
   },
   "chat": {
@@ -292,5 +294,38 @@
     "ctaFarmer": "Para agricultores",
     "ctaBuyer": "Ver catálogo",
     "pageNote": "AgroBridge ayuda a productores y compradores georgianos a encontrarse, negociar y hacer crecer el comercio sin intermediarios innecesarios."
+  },
+  "cabinet": {
+    "shellLabel": "Área personal",
+    "overview": "Resumen",
+    "title": "Tu área",
+    "subtitle": "Perfil, actividad y valoración de operaciones en un solo lugar.",
+    "guest": "Invitado",
+    "noDisplayName": "Nombre no indicado",
+    "memberSince": "Miembro desde {date}",
+    "rating": "Valoración de operaciones",
+    "ratingHint": "Basada en operaciones completadas. Comprador y vendedor se valoran solo tras el cierre.",
+    "activityTitle": "Resumen de actividad",
+    "quickLinks": "Enlaces rápidos",
+    "stats": {
+      "completedDeals": "Operaciones completadas",
+      "openRequests": "Solicitudes abiertas",
+      "conversations": "Conversaciones",
+      "publishedProducts": "Productos publicados",
+      "pendingModeration": "En moderación",
+      "awaitingMyRating": "Pendiente de tu valoración"
+    }
+  },
+  "rating": {
+    "title": "Valora a tu partner",
+    "subtitle": "Da a {name} una puntuación de 1 a 5 tras esta operación completada.",
+    "score": "Puntuación",
+    "comment": "Comentario",
+    "commentPlaceholder": "Comentario opcional sobre comunicación o entrega…",
+    "submit": "Enviar valoración",
+    "pleaseWait": "Espere…",
+    "genericError": "No se pudo enviar la valoración.",
+    "yourRating": "Tu valoración",
+    "theirRating": "Su valoración sobre ti"
   }
 }

@@ -82,7 +82,7 @@ export class AuthService {
     return this.toPublicUser(this.toAuthenticatedUser(user));
   }
 
-  private issueToken(user: AuthenticatedUser): AuthTokenResponse {
+  private async issueToken(user: AuthenticatedUser): Promise<AuthTokenResponse> {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -97,7 +97,7 @@ export class AuthService {
       accessToken,
       tokenType: 'Bearer',
       expiresIn,
-      user: this.toPublicUser(user),
+      user: await this.toPublicUser(user),
     };
   }
 
@@ -117,13 +117,25 @@ export class AuthService {
     };
   }
 
-  private toPublicUser(user: AuthenticatedUser): PublicUser {
+  private async toPublicUser(user: AuthenticatedUser): Promise<PublicUser> {
+    const aggregate = await this.prisma.rating.aggregate({
+      where: { toUserId: user.id },
+      _avg: { score: true },
+      _count: { _all: true },
+    });
+    const count = aggregate._count._all;
+    const average =
+      count === 0 || aggregate._avg.score == null
+        ? null
+        : Math.round(aggregate._avg.score * 10) / 10;
+
     return {
       id: user.id,
       email: user.email,
       role: user.role,
       locale: user.locale,
       displayName: user.displayName,
+      rating: { average, count },
     };
   }
 

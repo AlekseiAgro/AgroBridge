@@ -201,12 +201,14 @@
       "offered": "Angebot erhalten",
       "accepted": "Angenommen",
       "declined": "Abgelehnt",
-      "cancelled": "Storniert"
+      "cancelled": "Storniert",
+      "completed": "Abgeschlossen"
     },
     "actions": {
       "accept": "Annehmen",
       "decline": "Ablehnen",
-      "cancel": "Anfrage stornieren"
+      "cancel": "Anfrage stornieren",
+      "complete": "Deal als abgeschlossen markieren"
     }
   },
   "chat": {
@@ -292,5 +294,38 @@
     "ctaFarmer": "Für Landwirte",
     "ctaBuyer": "Katalog ansehen",
     "pageNote": "AgroBridge hilft georgischen Erzeugern und Käufern, einander zu finden, zu verhandeln und Handel ohne unnötige Zwischenhändler auszubauen."
+  },
+  "cabinet": {
+    "shellLabel": "Persönlicher Bereich",
+    "overview": "Übersicht",
+    "title": "Ihr Bereich",
+    "subtitle": "Profil, Aktivität und Deal-Bewertung an einem Ort.",
+    "guest": "Gast",
+    "noDisplayName": "Kein Name",
+    "memberSince": "Mitglied seit {date}",
+    "rating": "Deal-Bewertung",
+    "ratingHint": "Basierend auf abgeschlossenen Deals. Käufer und Verkäufer bewerten sich erst nach Abschluss.",
+    "activityTitle": "Aktivitätsübersicht",
+    "quickLinks": "Schnellzugriff",
+    "stats": {
+      "completedDeals": "Abgeschlossene Deals",
+      "openRequests": "Offene Anfragen",
+      "conversations": "Chats",
+      "publishedProducts": "Veröffentlichte Produkte",
+      "pendingModeration": "In Moderation",
+      "awaitingMyRating": "Wartet auf Ihre Bewertung"
+    }
+  },
+  "rating": {
+    "title": "Partner bewerten",
+    "subtitle": "Geben Sie {name} nach diesem abgeschlossenen Deal eine Note von 1–5.",
+    "score": "Note",
+    "comment": "Kommentar",
+    "commentPlaceholder": "Optionales Feedback zu Kommunikation oder Lieferung…",
+    "submit": "Bewertung senden",
+    "pleaseWait": "Bitte warten…",
+    "genericError": "Bewertung konnte nicht gesendet werden.",
+    "yourRating": "Ihre Bewertung",
+    "theirRating": "Deren Bewertung von Ihnen"
   }
 }

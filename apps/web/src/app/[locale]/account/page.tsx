@@ -1,7 +1,9 @@
+import type { CabinetOverview } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
-import { LogoutButton } from '@/components/LogoutButton';
+import { CabinetShell } from '@/components/CabinetShell';
+import { RatingStars } from '@/components/RatingStars';
 import { Link, redirect } from '@/i18n/navigation';
+import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -17,49 +19,77 @@ export default async function AccountPage({ params }: Props) {
     redirect({ href: '/login', locale });
   }
 
-  const user = currentUser!;
-  const t = await getTranslations('account');
+  const t = await getTranslations('cabinet');
   const ta = await getTranslations('auth');
   const tn = await getTranslations('nav');
-  const roleKey = `roles.${user.role}` as 'roles.farmer' | 'roles.buyer' | 'roles.admin';
+  const overview = await apiRequestAuthed<CabinetOverview>('/cabinet/overview');
+  const { user, activity } = overview;
   const isFarmer = user.role === 'farmer' || user.role === 'admin';
+  const isBuyer = user.role === 'buyer' || user.role === 'admin';
+  const roleKey = `roles.${user.role}` as 'roles.farmer' | 'roles.buyer' | 'roles.admin';
+  const memberSince = new Date(user.memberSince).toLocaleDateString(locale);
 
   return (
-    <div className="auth-page">
-      <header className="auth-page__top">
-        <Link href="/" className="auth-brand">
-          AgroBridge
-        </Link>
-        <div className="auth-page__actions">
-          <LanguageSwitcher />
-          <LogoutButton />
+    <CabinetShell title={t('title')} subtitle={t('subtitle')}>
+      <section className="user-card">
+        <div className="user-card__identity">
+          <div className="user-card__avatar" aria-hidden>
+            {(user.displayName || user.email).slice(0, 1).toUpperCase()}
+          </div>
+          <div>
+            <h2 className="user-card__name">{user.displayName || t('noDisplayName')}</h2>
+            <p className="user-card__meta">
+              {ta(roleKey)} · {user.email}
+            </p>
+            <p className="user-card__meta">{t('memberSince', { date: memberSince })}</p>
+          </div>
         </div>
-      </header>
+        <div className="user-card__rating">
+          <p className="user-card__rating-label">{t('rating')}</p>
+          <RatingStars value={user.rating.average} count={user.rating.count} />
+          <p className="user-card__rating-hint">{t('ratingHint')}</p>
+        </div>
+      </section>
 
-      <main className="auth-card">
-        <h1>{t('title')}</h1>
-        <p className="auth-card__subtitle">{t('subtitle')}</p>
+      <section className="activity-summary" aria-labelledby="activity-summary-title">
+        <h2 id="activity-summary-title" className="section-title">
+          {t('activityTitle')}
+        </h2>
+        <ul className="activity-summary__grid">
+          <li>
+            <strong>{activity.completedDeals}</strong>
+            <span>{t('stats.completedDeals')}</span>
+          </li>
+          <li>
+            <strong>{activity.openRequests}</strong>
+            <span>{t('stats.openRequests')}</span>
+          </li>
+          <li>
+            <strong>{activity.conversations}</strong>
+            <span>{t('stats.conversations')}</span>
+          </li>
+          {isFarmer ? (
+            <>
+              <li>
+                <strong>{activity.publishedProducts}</strong>
+                <span>{t('stats.publishedProducts')}</span>
+              </li>
+              <li>
+                <strong>{activity.pendingModeration}</strong>
+                <span>{t('stats.pendingModeration')}</span>
+              </li>
+            </>
+          ) : null}
+          <li>
+            <strong>{activity.awaitingMyRating}</strong>
+            <span>{t('stats.awaitingMyRating')}</span>
+          </li>
+        </ul>
+      </section>
 
-        <dl className="account-details">
-          <div>
-            <dt>{ta('displayName')}</dt>
-            <dd>{user.displayName || t('noDisplayName')}</dd>
-          </div>
-          <div>
-            <dt>{ta('email')}</dt>
-            <dd>{user.email}</dd>
-          </div>
-          <div>
-            <dt>{ta('role')}</dt>
-            <dd>{ta(roleKey)}</dd>
-          </div>
-          <div>
-            <dt>{t('locale')}</dt>
-            <dd>{user.locale}</dd>
-          </div>
-        </dl>
-
-        <div className="home__actions" style={{ marginTop: '1.25rem' }}>
+      <section className="cabinet-links">
+        <h2 className="section-title">{t('quickLinks')}</h2>
+        <div className="home__actions">
           <Link className="button button--ghost" href="/catalog">
             {tn('catalog')}
           </Link>
@@ -76,7 +106,7 @@ export default async function AccountPage({ params }: Props) {
               </Link>
             </>
           ) : null}
-          {user.role === 'buyer' || user.role === 'admin' ? (
+          {isBuyer ? (
             <Link className="button button--primary" href="/dashboard/rfqs">
               {tn('myRequests')}
             </Link>
@@ -84,13 +114,8 @@ export default async function AccountPage({ params }: Props) {
           <Link className="button button--ghost" href="/dashboard/chat">
             {tn('chat')}
           </Link>
-          {user.role === 'admin' ? (
-            <Link className="button button--primary" href="/dashboard/admin">
-              {tn('admin')}
-            </Link>
-          ) : null}
         </div>
-      </main>
-    </div>
+      </section>
+    </CabinetShell>
   );
 }

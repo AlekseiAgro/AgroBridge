@@ -201,12 +201,14 @@
       "offered": "Offerta ricevuta",
       "accepted": "Accettata",
       "declined": "Rifiutata",
-      "cancelled": "Annullata"
+      "cancelled": "Annullata",
+      "completed": "Completata"
     },
     "actions": {
       "accept": "Accetta",
       "decline": "Rifiuta",
-      "cancel": "Annulla richiesta"
+      "cancel": "Annulla richiesta",
+      "complete": "Segna trattativa completata"
     }
   },
   "chat": {
@@ -292,5 +294,38 @@
     "ctaFarmer": "Per gli agricoltori",
     "ctaBuyer": "Sfoglia il catalogo",
     "pageNote": "AgroBridge aiuta produttori e acquirenti georgiani a incontrarsi, negoziare e far crescere il commercio senza intermediari inutili."
+  },
+  "cabinet": {
+    "shellLabel": "Area personale",
+    "overview": "Panoramica",
+    "title": "La tua area",
+    "subtitle": "Profilo, attività e rating delle trattative in un unico posto.",
+    "guest": "Ospite",
+    "noDisplayName": "Nome non impostato",
+    "memberSince": "Membro dal {date}",
+    "rating": "Rating trattative",
+    "ratingHint": "Basato sulle trattative completate. Acquirente e venditore si valutano solo dopo il completamento.",
+    "activityTitle": "Riepilogo attività",
+    "quickLinks": "Collegamenti rapidi",
+    "stats": {
+      "completedDeals": "Trattative completate",
+      "openRequests": "Richieste aperte",
+      "conversations": "Conversazioni",
+      "publishedProducts": "Prodotti pubblicati",
+      "pendingModeration": "In moderazione",
+      "awaitingMyRating": "In attesa della tua valutazione"
+    }
+  },
+  "rating": {
+    "title": "Valuta il partner",
+    "subtitle": "Assegna a {name} un voto da 1 a 5 dopo questa trattativa completata.",
+    "score": "Voto",
+    "comment": "Commento",
+    "commentPlaceholder": "Feedback opzionale su comunicazione o consegna…",
+    "submit": "Invia valutazione",
+    "pleaseWait": "Attendere…",
+    "genericError": "Impossibile inviare la valutazione.",
+    "yourRating": "La tua valutazione",
+    "theirRating": "La loro valutazione su di te"
   }
 }
