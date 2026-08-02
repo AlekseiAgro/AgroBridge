@@ -52,7 +52,9 @@
     "myProducts": "I miei prodotti",
     "account": "Account",
     "login": "Accedi",
-    "register": "Registrati"
+    "register": "Registrati",
+    "inbox": "Posta in arrivo",
+    "myRequests": "Le mie richieste"
   },
   "catalog": {
     "title": "Catalogo prodotti",
@@ -125,6 +127,44 @@
       "liter": "Litro",
       "bottle": "Bottiglia",
       "piece": "Pezzo"
+    }
+  },
+  "rfq": {
+    "requestTitle": "Richiedi un preventivo",
+    "requestSubtitle": "Indica cosa ti serve: l’azienda risponderà con un’offerta.",
+    "quantity": "Quantità",
+    "unit": "Unità",
+    "message": "Messaggio",
+    "messagePlaceholder": "Tempi di consegna, qualità, imballaggio…",
+    "submitRequest": "Invia richiesta",
+    "pleaseWait": "Attendere…",
+    "genericError": "Qualcosa è andato storto. Riprova.",
+    "loginToRequest": "Accedi come acquirente per richiedere un preventivo",
+    "mineTitle": "Le mie richieste",
+    "mineSubtitle": "Monitora le richieste inviate alle aziende.",
+    "mineEmpty": "Non hai ancora inviato richieste.",
+    "browseCatalog": "Vai al catalogo",
+    "inboxTitle": "Richieste in arrivo",
+    "inboxSubtitle": "Rispondi agli acquirenti interessati ai tuoi prodotti.",
+    "inboxEmpty": "Nessuna richiesta al momento.",
+    "offerTitle": "Invia la tua offerta",
+    "price": "Prezzo",
+    "currency": "Valuta",
+    "submitOffer": "Invia offerta",
+    "buyerMessage": "Messaggio dell’acquirente",
+    "farmerMessage": "Messaggio del produttore",
+    "offerSummary": "Offerta: {amount} {currency}",
+    "statuses": {
+      "pending": "In attesa",
+      "offered": "Offerta ricevuta",
+      "accepted": "Accettata",
+      "declined": "Rifiutata",
+      "cancelled": "Annullata"
+    },
+    "actions": {
+      "accept": "Accetta",
+      "decline": "Rifiuta",
+      "cancel": "Annulla richiesta"
     }
   }
 }

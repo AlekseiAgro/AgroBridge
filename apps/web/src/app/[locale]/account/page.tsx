@@ -71,7 +71,15 @@ export default async function AccountPage({ params }: Props) {
               <Link className="button button--ghost" href="/dashboard/products">
                 {tn('myProducts')}
               </Link>
+              <Link className="button button--ghost" href="/dashboard/inbox">
+                {tn('inbox')}
+              </Link>
             </>
+          ) : null}
+          {user.role === 'buyer' || user.role === 'admin' ? (
+            <Link className="button button--primary" href="/dashboard/rfqs">
+              {tn('myRequests')}
+            </Link>
           ) : null}
         </div>
       </main>

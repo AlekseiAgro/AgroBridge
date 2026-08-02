@@ -52,7 +52,9 @@
     "myProducts": "Mes produits",
     "account": "Compte",
     "login": "Connexion",
-    "register": "Inscription"
+    "register": "Inscription",
+    "inbox": "Boîte de réception",
+    "myRequests": "Mes demandes"
   },
   "catalog": {
     "title": "Catalogue de produits",
@@ -125,6 +127,44 @@
       "liter": "Litre",
       "bottle": "Bouteille",
       "piece": "Pièce"
+    }
+  },
+  "rfq": {
+    "requestTitle": "Demander un devis",
+    "requestSubtitle": "Indiquez votre besoin — le producteur répondra avec une offre.",
+    "quantity": "Quantité",
+    "unit": "Unité",
+    "message": "Message",
+    "messagePlaceholder": "Délai, qualité, emballage…",
+    "submitRequest": "Envoyer la demande",
+    "pleaseWait": "Veuillez patienter…",
+    "genericError": "Une erreur s’est produite. Réessayez.",
+    "loginToRequest": "Connectez-vous en tant qu’acheteur pour demander un devis",
+    "mineTitle": "Mes demandes de devis",
+    "mineSubtitle": "Suivez les demandes envoyées aux fermes.",
+    "mineEmpty": "Vous n’avez encore envoyé aucune demande.",
+    "browseCatalog": "Voir le catalogue",
+    "inboxTitle": "Demandes reçues",
+    "inboxSubtitle": "Répondez aux acheteurs intéressés par vos produits.",
+    "inboxEmpty": "Aucune demande pour le moment.",
+    "offerTitle": "Envoyer votre offre",
+    "price": "Prix",
+    "currency": "Devise",
+    "submitOffer": "Envoyer l’offre",
+    "buyerMessage": "Message de l’acheteur",
+    "farmerMessage": "Message du producteur",
+    "offerSummary": "Offre : {amount} {currency}",
+    "statuses": {
+      "pending": "En attente",
+      "offered": "Offre reçue",
+      "accepted": "Acceptée",
+      "declined": "Refusée",
+      "cancelled": "Annulée"
+    },
+    "actions": {
+      "accept": "Accepter",
+      "decline": "Refuser",
+      "cancel": "Annuler la demande"
     }
   }
 }

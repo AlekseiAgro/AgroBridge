@@ -29,6 +29,20 @@ enum MessageTranslationStatus {
   failed
 }
 
+enum RfqStatus {
+  pending
+  offered
+  accepted
+  declined
+  cancelled
+}
+
+enum CurrencyCode {
+  GEL
+  EUR
+  USD
+}
+
 model User {
   id           String     @id @default(cuid())
   email        String     @unique
@@ -39,10 +53,11 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  farm                 Farm?
+  farm                  Farm?
   conversationsAsFarmer Conversation[] @relation("FarmerConversations")
   conversationsAsBuyer  Conversation[] @relation("BuyerConversations")
-  messages             Message[]
+  messages              Message[]
+  rfqsAsBuyer           Rfq[]           @relation("BuyerRfqs")
 }
 
 model Farm {
@@ -56,6 +71,7 @@ model Farm {
 
   owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   products Product[]
+  rfqs     Rfq[]
 }
 
 model Product {
@@ -69,10 +85,48 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  farm Farm  @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  rfqs Rfq[]
 
   @@index([farmId])
   @@index([isPublished])
+}
+
+model Rfq {
+  id        String    @id @default(cuid())
+  productId String
+  farmId    String
+  buyerId   String
+  quantity  String
+  unit      String?
+  message   String?
+  status    RfqStatus @default(pending)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  product Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  farm    Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  buyer   User      @relation("BuyerRfqs", fields: [buyerId], references: [id], onDelete: Cascade)
+  offer   RfqOffer?
+
+  @@index([buyerId, createdAt])
+  @@index([farmId, status, createdAt])
+  @@index([productId])
+}
+
+model RfqOffer {
+  id          String       @id @default(cuid())
+  rfqId       String       @unique
+  priceAmount Decimal      @db.Decimal(12, 2)
+  currency    CurrencyCode
+  quantity    String?
+  unit        String?
+  message     String?
+  validUntil  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  rfq Rfq @relation(fields: [rfqId], references: [id], onDelete: Cascade)
 }
 
 model Conversation {
@@ -109,15 +163,15 @@ model Message {
 }
 
 model MessageTranslation {
-  id          String                    @id @default(cuid())
-  messageId   String
-  targetLocale LocaleCode
+  id             String                   @id @default(cuid())
+  messageId      String
+  targetLocale   LocaleCode
   translatedText String?
-  status      MessageTranslationStatus  @default(pending)
-  provider    String?
-  error       String?
-  createdAt   DateTime                  @default(now())
-  updatedAt   DateTime                  @updatedAt
+  status         MessageTranslationStatus @default(pending)
+  provider       String?
+  error          String?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
 
   message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
 

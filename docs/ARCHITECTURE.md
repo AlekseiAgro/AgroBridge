@@ -32,6 +32,13 @@
 - **Conversation / Message** — 1:1 chat.
 - **MessageTranslation** — cached AI translation per target locale; original text remains source of truth.
 
+## RFQ / offer flow
+
+- Buyer creates an `Rfq` against a published product.
+- Farmer responds with one `RfqOffer` (price, currency, optional quantity/message).
+- Buyer can accept or decline an offered RFQ; pending RFQs can be cancelled by the buyer.
+- Farmer can decline a pending RFQ without offering.
+
 ## Farms and catalog
 
 - Each farmer has at most one `Farm` profile.

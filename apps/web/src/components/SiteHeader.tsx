@@ -18,7 +18,11 @@ export async function SiteHeader() {
           <>
             <Link href="/dashboard/farm">{t('myFarm')}</Link>
             <Link href="/dashboard/products">{t('myProducts')}</Link>
+            <Link href="/dashboard/inbox">{t('inbox')}</Link>
           </>
+        ) : null}
+        {user?.role === 'buyer' || user?.role === 'admin' ? (
+          <Link href="/dashboard/rfqs">{t('myRequests')}</Link>
         ) : null}
         {user ? (
           <Link href="/account">{t('account')}</Link>

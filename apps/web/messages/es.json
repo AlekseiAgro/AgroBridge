@@ -52,7 +52,9 @@
     "myProducts": "Mis productos",
     "account": "Cuenta",
     "login": "Iniciar sesión",
-    "register": "Registrarse"
+    "register": "Registrarse",
+    "inbox": "Bandeja de entrada",
+    "myRequests": "Mis solicitudes"
   },
   "catalog": {
     "title": "Catálogo de productos",
@@ -125,6 +127,44 @@
       "liter": "Litro",
       "bottle": "Botella",
       "piece": "Pieza"
+    }
+  },
+  "rfq": {
+    "requestTitle": "Solicitar cotización",
+    "requestSubtitle": "Indica lo que necesitas: la granja responderá con una oferta.",
+    "quantity": "Cantidad",
+    "unit": "Unidad",
+    "message": "Mensaje",
+    "messagePlaceholder": "Plazos, calidad, embalaje…",
+    "submitRequest": "Enviar solicitud",
+    "pleaseWait": "Espera…",
+    "genericError": "Algo salió mal. Inténtalo de nuevo.",
+    "loginToRequest": "Inicia sesión como comprador para solicitar una cotización",
+    "mineTitle": "Mis solicitudes",
+    "mineSubtitle": "Sigue las solicitudes enviadas a granjas.",
+    "mineEmpty": "Aún no has enviado solicitudes.",
+    "browseCatalog": "Ver catálogo",
+    "inboxTitle": "Solicitudes entrantes",
+    "inboxSubtitle": "Responde a compradores interesados en tus productos.",
+    "inboxEmpty": "Aún no hay solicitudes.",
+    "offerTitle": "Enviar tu oferta",
+    "price": "Precio",
+    "currency": "Moneda",
+    "submitOffer": "Enviar oferta",
+    "buyerMessage": "Mensaje del comprador",
+    "farmerMessage": "Mensaje del productor",
+    "offerSummary": "Oferta: {amount} {currency}",
+    "statuses": {
+      "pending": "Pendiente",
+      "offered": "Oferta recibida",
+      "accepted": "Aceptada",
+      "declined": "Rechazada",
+      "cancelled": "Cancelada"
+    },
+    "actions": {
+      "accept": "Aceptar",
+      "decline": "Rechazar",
+      "cancel": "Cancelar solicitud"
     }
   }
 }

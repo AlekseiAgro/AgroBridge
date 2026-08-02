@@ -52,7 +52,9 @@
     "myProducts": "My products",
     "account": "Account",
     "login": "Log in",
-    "register": "Sign up"
+    "register": "Sign up",
+    "inbox": "Inbox",
+    "myRequests": "My requests"
   },
   "catalog": {
     "title": "Product catalog",
@@ -125,6 +127,44 @@
       "liter": "Liter",
       "bottle": "Bottle",
       "piece": "Piece"
+    }
+  },
+  "rfq": {
+    "requestTitle": "Request a quote",
+    "requestSubtitle": "Tell the farmer what you need. They will reply with an offer.",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "message": "Message",
+    "messagePlaceholder": "Delivery window, quality needs, packaging…",
+    "submitRequest": "Send request",
+    "pleaseWait": "Please wait…",
+    "genericError": "Something went wrong. Please try again.",
+    "loginToRequest": "Log in as a buyer to request a quote",
+    "mineTitle": "My quote requests",
+    "mineSubtitle": "Track requests you sent to farms.",
+    "mineEmpty": "You have not sent any requests yet.",
+    "browseCatalog": "Browse catalog",
+    "inboxTitle": "Incoming requests",
+    "inboxSubtitle": "Respond to buyers interested in your products.",
+    "inboxEmpty": "No quote requests yet.",
+    "offerTitle": "Send your offer",
+    "price": "Price",
+    "currency": "Currency",
+    "submitOffer": "Send offer",
+    "buyerMessage": "Buyer message",
+    "farmerMessage": "Farmer message",
+    "offerSummary": "Offer: {amount} {currency}",
+    "statuses": {
+      "pending": "Pending",
+      "offered": "Offer received",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "cancelled": "Cancelled"
+    },
+    "actions": {
+      "accept": "Accept offer",
+      "decline": "Decline",
+      "cancel": "Cancel request"
     }
   }
 }

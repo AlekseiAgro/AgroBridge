@@ -52,7 +52,9 @@
     "myProducts": "Meine Produkte",
     "account": "Konto",
     "login": "Anmelden",
-    "register": "Registrieren"
+    "register": "Registrieren",
+    "inbox": "Posteingang",
+    "myRequests": "Meine Anfragen"
   },
   "catalog": {
     "title": "Produktkatalog",
@@ -125,6 +127,44 @@
       "liter": "Liter",
       "bottle": "Flasche",
       "piece": "Stück"
+    }
+  },
+  "rfq": {
+    "requestTitle": "Preis anfragen",
+    "requestSubtitle": "Sagen Sie dem Betrieb, was Sie brauchen. Sie erhalten ein Angebot.",
+    "quantity": "Menge",
+    "unit": "Einheit",
+    "message": "Nachricht",
+    "messagePlaceholder": "Lieferfenster, Qualität, Verpackung…",
+    "submitRequest": "Anfrage senden",
+    "pleaseWait": "Bitte warten…",
+    "genericError": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "loginToRequest": "Melden Sie sich als Käufer an, um eine Anfrage zu senden",
+    "mineTitle": "Meine Preisanfragen",
+    "mineSubtitle": "Verfolgen Sie Anfragen an Betriebe.",
+    "mineEmpty": "Sie haben noch keine Anfragen gesendet.",
+    "browseCatalog": "Katalog öffnen",
+    "inboxTitle": "Eingehende Anfragen",
+    "inboxSubtitle": "Antworten Sie auf interessierte Käufer.",
+    "inboxEmpty": "Noch keine Anfragen.",
+    "offerTitle": "Angebot senden",
+    "price": "Preis",
+    "currency": "Währung",
+    "submitOffer": "Angebot senden",
+    "buyerMessage": "Nachricht des Käufers",
+    "farmerMessage": "Nachricht des Landwirts",
+    "offerSummary": "Angebot: {amount} {currency}",
+    "statuses": {
+      "pending": "Offen",
+      "offered": "Angebot erhalten",
+      "accepted": "Angenommen",
+      "declined": "Abgelehnt",
+      "cancelled": "Storniert"
+    },
+    "actions": {
+      "accept": "Annehmen",
+      "decline": "Ablehnen",
+      "cancel": "Anfrage stornieren"
     }
   }
 }

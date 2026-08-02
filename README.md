@@ -87,8 +87,17 @@ Web:
 - Public: `/[locale]/catalog`, `/products/[id]`, `/farms/[id]`
 - Farmer dashboard: `/dashboard/farm`, `/dashboard/products`
 
+## RFQ / offers (current step)
+
+Flow:
+
+1. Buyer opens a product → sends quote request (quantity, message)
+2. Farmer sees it in `/dashboard/inbox` → sends price offer (GEL/EUR/USD)
+3. Buyer accepts / declines in `/dashboard/rfqs`
+
+Statuses: `pending` → `offered` → `accepted` | `declined` (or `cancelled` while pending)
+
 ## Next implementation steps
 
-1. RFQ / offer flow
-2. Chat with AI translation
-3. Admin moderation
+1. Chat with AI translation
+2. Admin moderation
