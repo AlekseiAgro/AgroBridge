@@ -2615,6 +2615,11 @@ body {
   background: rgba(196, 163, 90, 0.14);
 }
 
+.product-editor {
+  display: grid;
+  gap: 1rem;
+}
+
 .product-form {
   gap: 1rem;
 }

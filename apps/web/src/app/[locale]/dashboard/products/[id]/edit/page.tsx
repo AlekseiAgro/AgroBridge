@@ -39,9 +39,16 @@ export default async function EditProductPage({ params }: Props) {
     <main className="cabinet-page cabinet-page--narrow">
       <h1>{t('editTitle')}</h1>
       <p className="page__subtitle">{t('editSubtitle')}</p>
-      <ProductImagesManager productId={product.id} initialImages={product.images} />
-      <ProductVideosManager productId={product.id} initialVideos={product.videos} />
-      <ProductForm mode="edit" initial={product} />
+      <ProductForm
+        mode="edit"
+        initial={product}
+        leading={
+          <>
+            <ProductImagesManager productId={product.id} initialImages={product.images} />
+            <ProductVideosManager productId={product.id} initialVideos={product.videos} />
+          </>
+        }
+      />
       <ProductCertificatesManager
         productId={product.id}
         initialCertificates={product.certificates}
