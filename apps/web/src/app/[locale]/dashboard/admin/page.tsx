@@ -18,6 +18,7 @@ import { UserBlockActions } from '@/components/UserBlockActions';
 import { Link, redirect } from '@/i18n/navigation';
 import { formatRegionLabel } from '@/lib/region';
 import { toPublicMediaUrl } from '@/lib/product-image';
+import { formatProductTitle } from '@/lib/product-title';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
@@ -79,6 +80,7 @@ export default async function AdminDashboardPage({ params, searchParams }: Props
       {section === 'products' ? (
         <ProductsSection
           status={status}
+          locale={locale}
           t={t}
           tc={tc}
           tr={tr}
@@ -182,11 +184,13 @@ function OverviewSection({
 
 async function ProductsSection({
   status,
+  locale,
   t,
   tc,
   tr,
 }: {
   status: string;
+  locale: string;
   t: Awaited<ReturnType<typeof getTranslations<'admin'>>>;
   tc: Awaited<ReturnType<typeof getTranslations<'catalog'>>>;
   tr: Awaited<ReturnType<typeof getTranslations>>;
@@ -215,7 +219,9 @@ async function ProductsSection({
         <ul className="product-list">
           {products.map((product) => (
             <li key={product.id} className="product-list__item">
-              <p className="product-list__title">{product.title}</p>
+              <p className="product-list__title">
+                {formatProductTitle(product.title, locale)}
+              </p>
               <p className="product-list__meta">
                 {product.farm.name}
                 {product.farm.region

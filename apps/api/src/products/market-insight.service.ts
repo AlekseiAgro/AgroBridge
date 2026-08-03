@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   evaluateMarketOpportunity,
   isLocale,
+  localizeProductTitle,
   type Locale,
   type ProductMarketInsight,
 } from '@agrobridge/shared';
@@ -106,7 +107,7 @@ export class MarketInsightService {
       product.farm.region ||
       product.country ||
       'Georgia';
-    const variety = product.variety?.trim() || product.title;
+    const variety = product.variety?.trim() || localizeProductTitle(product.title, locale);
     const markets =
       product.farm.exportMarkets.length > 0
         ? product.farm.exportMarkets.slice(0, 2)

@@ -18,6 +18,7 @@ import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
 import { getProductCardImage, toPublicMediaUrl } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
+import { formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
 import { getCurrentUser } from '@/lib/session';
 
@@ -67,7 +68,7 @@ export default async function ProductDetailPage({ params }: Props) {
           <Link href="/catalog">{tc('title')}</Link>
         </p>
         <h1 className="farm-title-row">
-          {product.title}
+          {formatProductTitle(product.title, locale)}
           <HarvestStatusBadge
             status={product.harvestStatus}
             preorderEnabled={product.preorderEnabled}
@@ -102,7 +103,7 @@ export default async function ProductDetailPage({ params }: Props) {
               <img
                 key={image.id}
                 src={toPublicMediaUrl(image.url)}
-                alt={product.title}
+                alt={formatProductTitle(product.title, locale)}
                 className={
                   image.isPrimary
                     ? 'product-gallery__image product-gallery__image--primary'
@@ -116,7 +117,7 @@ export default async function ProductDetailPage({ params }: Props) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={fallbackImage.url}
-              alt={product.title}
+              alt={formatProductTitle(product.title, locale)}
               className="product-gallery__image product-gallery__image--primary"
             />
           </div>

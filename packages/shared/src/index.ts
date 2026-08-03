@@ -8,6 +8,7 @@ export * from './harvest';
 export * from './quality';
 export * from './market-insight';
 export * from './catalog';
+export * from './product-titles';
 export * from './rfq';
 export * from './purchase-request';
 export * from './chat';

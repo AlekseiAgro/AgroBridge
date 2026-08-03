@@ -8,6 +8,7 @@ import { RfqActionButton } from '@/components/RfqActionButton';
 import { RfqOfferForm } from '@/components/RfqOfferForm';
 import { Link, redirect } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api';
+import { formatProductTitle } from '@/lib/product-title';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
@@ -47,7 +48,7 @@ export default async function FarmerInboxDetailPage({ params }: Props) {
       <p className="eyebrow">
         <Link href="/dashboard/inbox">{t('inboxTitle')}</Link>
       </p>
-      <h1>{rfq.product.title}</h1>
+      <h1>{formatProductTitle(rfq.product.title, locale)}</h1>
       <p className="page__subtitle">
         {t(`statuses.${rfq.status}`)} ·{' '}
         <Link href={`/users/${rfq.buyer.id}`} className="profile-link">

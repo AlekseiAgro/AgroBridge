@@ -1,6 +1,7 @@
 import type { RfqSummary } from '@agrobridge/shared';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { formatProductTitle } from '@/lib/product-title';
 
 type Props = {
   items: RfqSummary[];
@@ -10,6 +11,7 @@ type Props = {
 
 export async function RfqList({ items, emptyLabel, detailBasePath }: Props) {
   const t = await getTranslations('rfq');
+  const locale = await getLocale();
 
   if (items.length === 0) {
     return <p className="empty-state">{emptyLabel}</p>;
@@ -20,7 +22,7 @@ export async function RfqList({ items, emptyLabel, detailBasePath }: Props) {
       {items.map((item) => (
         <li key={item.id} className="product-list__item">
           <Link href={`${detailBasePath}/${item.id}`} className="product-list__title">
-            {item.product.title}
+            {formatProductTitle(item.product.title, locale)}
           </Link>
           <p className="product-list__meta">
             {t(`statuses.${item.status}`)}

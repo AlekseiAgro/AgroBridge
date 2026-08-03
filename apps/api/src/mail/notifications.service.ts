@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Locale } from '@agrobridge/shared';
-import { DEFAULT_LOCALE, isLocale } from '@agrobridge/shared';
+import { DEFAULT_LOCALE, isLocale, localizeProductTitle } from '@agrobridge/shared';
 import { renderEmailTemplate } from './email-templates';
 import { MailService } from './mail.service';
 import type { MailRecipient } from './mail.types';
@@ -253,7 +253,14 @@ export class NotificationsService {
   ): Promise<void> {
     try {
       const locale = this.localeOf(recipient.locale);
-      const rendered = renderEmailTemplate(locale, key, vars);
+      const localizedVars =
+        'productTitle' in vars
+          ? {
+              ...vars,
+              productTitle: localizeProductTitle(vars.productTitle, locale),
+            }
+          : vars;
+      const rendered = renderEmailTemplate(locale, key, localizedVars);
       await this.mail.send({
         to: recipient.email,
         subject: rendered.subject,

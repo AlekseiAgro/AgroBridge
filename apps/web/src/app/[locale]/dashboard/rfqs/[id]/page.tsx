@@ -7,6 +7,7 @@ import { RatingStars } from '@/components/RatingStars';
 import { RfqActionButton } from '@/components/RfqActionButton';
 import { Link, redirect } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api';
+import { formatProductTitle } from '@/lib/product-title';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
@@ -46,7 +47,7 @@ export default async function BuyerRfqDetailPage({ params }: Props) {
       <p className="eyebrow">
         <Link href="/dashboard/rfqs">{t('mineTitle')}</Link>
       </p>
-      <h1>{rfq.product.title}</h1>
+      <h1>{formatProductTitle(rfq.product.title, locale)}</h1>
       <p className="page__subtitle">
         {t(`statuses.${rfq.status}`)} ·{' '}
         <Link href={`/farms/${rfq.farm.id}`}>{rfq.farm.name}</Link>

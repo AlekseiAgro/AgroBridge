@@ -10,6 +10,7 @@ import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getProductCardImage } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
+import { formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
 
 type Props = {
@@ -83,7 +84,7 @@ export default async function FarmDetailPage({ params }: Props) {
                   )}
                   <div>
                     <Link href={`/products/${product.id}`} className="product-list__title">
-                      {product.title}
+                      {formatProductTitle(product.title, locale)}
                     </Link>
                     <p className="product-list__meta">
                       {product.category

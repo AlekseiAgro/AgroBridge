@@ -5,6 +5,7 @@ import { DeleteProductButton } from '@/components/DeleteProductButton';
 import { Link, redirect } from '@/i18n/navigation';
 import { getProductCardImage } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
+import { formatProductTitle } from '@/lib/product-title';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
@@ -80,7 +81,9 @@ export default async function DashboardProductsPage({ params }: Props) {
                     />
                   )}
                   <div>
-                    <p className="product-list__title">{product.title}</p>
+                    <p className="product-list__title">
+                      {formatProductTitle(product.title, locale)}
+                    </p>
                     <p className="product-list__meta">
                       {t(`moderation.${product.moderationStatus}`)}
                       {product.category
