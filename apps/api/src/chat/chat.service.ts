@@ -183,19 +183,19 @@ export class ChatService {
     if (dto.rfqId) {
       const rfq = await this.prisma.rfq.findUnique({
         where: { id: dto.rfqId },
-        include: { farm: true },
+        include: { product: { select: { ownerUserId: true } } },
       });
       if (!rfq) {
         throw new NotFoundException('RFQ not found');
       }
 
       const isBuyer = rfq.buyerId === user.id;
-      const isFarmer = rfq.farm.ownerId === user.id;
+      const isFarmer = rfq.product.ownerUserId === user.id;
       if (!isBuyer && !isFarmer && user.role !== 'admin') {
         throw new ForbiddenException('Not allowed to open chat for this RFQ');
       }
 
-      return { farmerId: rfq.farm.ownerId, buyerId: rfq.buyerId };
+      return { farmerId: rfq.product.ownerUserId, buyerId: rfq.buyerId };
     }
 
     if (dto.purchaseRequestId) {

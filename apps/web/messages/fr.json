@@ -270,7 +270,7 @@
     "published": "Publié",
     "draft": "Brouillon",
     "emptyMine": "Vous n’avez pas encore de produits.",
-    "needFarmFirst": "Créez d’abord un profil de ferme.",
+    "needFarmFirst": "Le profil de ferme est facultatif. Vous pouvez ajouter des produits sans en créer un.",
     "goCreateFarm": "Aller au profil de ferme",
     "units": {
       "kg": "Kilogramme",
@@ -445,7 +445,9 @@
         "approved": "Approved",
         "rejected": "Rejected"
       }
-    }
+    },
+    "loadError": "Impossible de charger vos produits.",
+    "sellerFallback": "Vendeur"
   },
   "rfq": {
     "requestTitle": "Demander un devis",
@@ -654,7 +656,7 @@
     "steps": {
       "find": {
         "title": "Trouver ou publier un produit",
-        "text": "Parcourez le catalogue de produits géorgiens, ou créez un profil de ferme et soumettez vos offres à la modération."
+        "text": "Parcourez le catalogue de produits géorgiens, ou publiez votre offre pour modération."
       },
       "connect": {
         "title": "Entrer en contact avec un partenaire",
@@ -838,7 +840,7 @@
       "eyebrow": "Pour les vendeurs",
       "title": "Je suis vendeur",
       "lead": "Répondez à la demande des acheteurs ou publiez votre propre offre produit.",
-      "asideNote": "Créez d'abord un profil de ferme, puis ajoutez des produits et répondez aux demandes.",
+      "asideNote": "Ajoutez des produits et répondez aux demandes d'achat. Le profil de ferme est facultatif et aide les acheteurs à en savoir plus sur vous.",
       "asideRegister": "Créer un compte vendeur",
       "paths": {
         "requests": {

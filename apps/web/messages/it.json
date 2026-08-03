@@ -270,7 +270,7 @@
     "published": "Pubblicato",
     "draft": "Bozza",
     "emptyMine": "Non hai ancora prodotti.",
-    "needFarmFirst": "Crea prima un profilo azienda.",
+    "needFarmFirst": "Il profilo azienda è facoltativo. Puoi aggiungere prodotti anche senza.",
     "goCreateFarm": "Vai al profilo azienda",
     "units": {
       "kg": "Chilogrammo",
@@ -445,7 +445,9 @@
         "approved": "Approved",
         "rejected": "Rejected"
       }
-    }
+    },
+    "loadError": "Impossibile caricare i tuoi prodotti.",
+    "sellerFallback": "Venditore"
   },
   "rfq": {
     "requestTitle": "Richiedi un preventivo",
@@ -654,7 +656,7 @@
     "steps": {
       "find": {
         "title": "Trova o pubblica un prodotto",
-        "text": "Sfoglia il catalogo dei prodotti georgiani, oppure crea un profilo aziendale e invia le offerte in moderazione."
+        "text": "Sfoglia il catalogo di prodotti georgiani oppure pubblica la tua offerta per la moderazione."
       },
       "connect": {
         "title": "Collegati con un partner commerciale",
@@ -838,7 +840,7 @@
       "eyebrow": "Per i venditori",
       "title": "Sono un venditore",
       "lead": "Rispondi alle esigenze degli acquirenti o crea la tua offerta prodotto.",
-      "asideNote": "Crea prima il profilo azienda, poi aggiungi prodotti e rispondi alle richieste.",
+      "asideNote": "Aggiungi prodotti e rispondi alle richieste di acquisto. Il profilo azienda è facoltativo e aiuta gli acquirenti a conoscerti meglio.",
       "asideRegister": "Crea account venditore",
       "paths": {
         "requests": {

@@ -64,20 +64,30 @@ const imageOrderBy: Prisma.ProductImageOrderByWithRelationInput[] = [
   { createdAt: 'asc' },
 ];
 
+const productOwnerSelect = {
+  id: true,
+  displayName: true,
+} as const;
+
+const productFarmSelect = {
+  id: true,
+  name: true,
+  region: true,
+  ownerId: true,
+  verificationStatus: true,
+  foundedYear: true,
+  farmSizeHectares: true,
+  ownershipType: true,
+  exportMarkets: true,
+  history: true,
+} as const;
+
 const productListInclude = {
+  owner: {
+    select: productOwnerSelect,
+  },
   farm: {
-    select: {
-      id: true,
-      name: true,
-      region: true,
-      ownerId: true,
-      verificationStatus: true,
-      foundedYear: true,
-      farmSizeHectares: true,
-      ownershipType: true,
-      exportMarkets: true,
-      history: true,
-    },
+    select: productFarmSelect,
   },
   images: {
     orderBy: imageOrderBy,
@@ -91,19 +101,11 @@ const productListInclude = {
 } satisfies Prisma.ProductInclude;
 
 const productDetailInclude = {
+  owner: {
+    select: productOwnerSelect,
+  },
   farm: {
-    select: {
-      id: true,
-      name: true,
-      region: true,
-      ownerId: true,
-      verificationStatus: true,
-      foundedYear: true,
-      farmSizeHectares: true,
-      ownershipType: true,
-      exportMarkets: true,
-      history: true,
-    },
+    select: productFarmSelect,
   },
   images: {
     orderBy: imageOrderBy,
@@ -176,6 +178,7 @@ export class ProductsService {
         { description: { contains: q, mode: 'insensitive' } },
         { variety: { contains: q, mode: 'insensitive' } },
         { farm: { name: { contains: q, mode: 'insensitive' } } },
+        { owner: { displayName: { contains: q, mode: 'insensitive' } } },
       ];
       if (localized.titles.length > 0) {
         searchOr.push({ title: { in: localized.titles } });
@@ -210,10 +213,10 @@ export class ProductsService {
     });
 
     const ratings = await this.ratings.summariesForUsers(
-      products.map((product) => product.farm.ownerId),
+      products.map((product) => product.ownerUserId),
     );
 
-    return products.map((product) => this.toSummary(product, ratings.get(product.farm.ownerId)));
+    return products.map((product) => this.toSummary(product, ratings.get(product.ownerUserId)));
   }
 
   async getById(id: string, viewer?: AuthenticatedUser | null): Promise<ProductDetail> {
@@ -226,7 +229,7 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
-    const isOwner = viewer && (viewer.role === 'admin' || product.farm.ownerId === viewer.id);
+    const isOwner = viewer && (viewer.role === 'admin' || product.ownerUserId === viewer.id);
 
     const isPublic =
       product.isPublished && product.moderationStatus === PrismaModerationStatus.approved;
@@ -235,7 +238,7 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
-    const sellerRating = await this.ratings.summaryForUser(product.farm.ownerId);
+    const sellerRating = await this.ratings.summaryForUser(product.ownerUserId);
     const watching = viewer
       ? Boolean(
           await this.prisma.harvestWatch.findUnique({
@@ -246,16 +249,15 @@ export class ProductsService {
           }),
         )
       : false;
-    const isCardOwner = Boolean(viewer && product.farm.ownerId === viewer.id);
+    const isCardOwner = Boolean(viewer && product.ownerUserId === viewer.id);
     return this.toDetail(product, sellerRating, watching, isCardOwner);
   }
 
   async listMine(user: AuthenticatedUser): Promise<ProductSummary[]> {
     this.assertFarmer(user);
 
-    const farm = await this.requireFarm(user.id);
     const products = await this.prisma.product.findMany({
-      where: { farmId: farm.id },
+      where: { ownerUserId: user.id },
       orderBy: { updatedAt: 'desc' },
       include: productListInclude,
     });
@@ -266,7 +268,7 @@ export class ProductsService {
 
   async create(user: AuthenticatedUser, dto: CreateProductDto): Promise<ProductDetail> {
     this.assertFarmer(user);
-    const farm = await this.requireFarm(user.id);
+    const farm = await this.prisma.farm.findUnique({ where: { ownerId: user.id } });
     const input = dto as any;
     const isPublished = dto.isPublished ?? false;
     const quantity = this.normalizeQuantityRange(dto.minQuantity, dto.maxQuantity);
@@ -278,7 +280,8 @@ export class ProductsService {
 
     const product = await this.prisma.product.create({
       data: {
-        farmId: farm.id,
+        ownerUserId: user.id,
+        farmId: farm?.id ?? null,
         title: dto.title.trim(),
         description: dto.description?.trim() || null,
         category: dto.category || null,
@@ -552,9 +555,9 @@ export class ProductsService {
     user: AuthenticatedUser,
     productId: string,
   ): Promise<{ watching: true; productId: string }> {
-    if (user.role === 'farmer') {
+    if (canTrade(user.role)) {
       const owned = await this.prisma.product.findFirst({
-        where: { id: productId, farm: { ownerId: user.id } },
+        where: { id: productId, ownerUserId: user.id },
         select: { id: true },
       });
       if (owned) {
@@ -948,21 +951,13 @@ export class ProductsService {
     }
   }
 
-  private async requireFarm(ownerId: string) {
-    const farm = await this.prisma.farm.findUnique({ where: { ownerId } });
-    if (!farm) {
-      throw new NotFoundException('Create a farm profile before adding products');
-    }
-    return farm;
-  }
-
   private async requireOwnedProduct(ownerId: string, productId: string) {
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
-      include: { farm: true },
+      include: { farm: true, owner: { select: productOwnerSelect } },
     });
 
-    if (!product || product.farm.ownerId !== ownerId) {
+    if (!product || product.ownerUserId !== ownerId) {
       throw new NotFoundException('Product not found');
     }
 
@@ -1156,13 +1151,13 @@ export class ProductsService {
         id: true,
         isPublished: true,
         moderationStatus: true,
-        farm: { select: { ownerId: true } },
+        ownerUserId: true,
       },
     });
     if (!product) {
       throw new NotFoundException('Product not found');
     }
-    const isOwner = user.role === 'admin' || product.farm.ownerId === user.id;
+    const isOwner = user.role === 'admin' || product.ownerUserId === user.id;
     const isPublic =
       product.isPublished && product.moderationStatus === PrismaModerationStatus.approved;
     if (!isPublic && !isOwner) {
@@ -1205,17 +1200,22 @@ export class ProductsService {
       },
     });
 
+    const sellerLabel =
+      params.product.farm?.name ||
+      params.product.owner.displayName?.trim() ||
+      'Seller';
+
     await Promise.all(
       watches
         .filter((watch) => !watch.user.blockedAt)
-        .filter((watch) => watch.user.id !== params.product.farm.ownerId)
+        .filter((watch) => watch.user.id !== params.product.ownerUserId)
         .map(async (watch) => {
           if (becameAvailable) {
             await this.notifications.notifyHarvestAvailable({
               user: watch.user,
               productId: params.product.id,
               productTitle: params.product.title,
-              farmName: params.product.farm.name,
+              farmName: sellerLabel,
               harvestStatus: params.nextStatus ?? 'available',
             });
           }
@@ -1224,7 +1224,7 @@ export class ProductsService {
               user: watch.user,
               productId: params.product.id,
               productTitle: params.product.title,
-              farmName: params.product.farm.name,
+              farmName: sellerLabel,
             });
           }
         }),

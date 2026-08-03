@@ -270,7 +270,7 @@
     "published": "Publicado",
     "draft": "Borrador",
     "emptyMine": "Aún no tienes productos.",
-    "needFarmFirst": "Crea primero un perfil de granja.",
+    "needFarmFirst": "El perfil de finca es opcional. Puedes añadir productos sin crearlo.",
     "goCreateFarm": "Ir al perfil de granja",
     "units": {
       "kg": "Kilogramo",
@@ -445,7 +445,9 @@
         "approved": "Approved",
         "rejected": "Rejected"
       }
-    }
+    },
+    "loadError": "No se pudieron cargar tus productos.",
+    "sellerFallback": "Vendedor"
   },
   "rfq": {
     "requestTitle": "Solicitar cotización",
@@ -654,7 +656,7 @@
     "steps": {
       "find": {
         "title": "Encuentra o publica un producto",
-        "text": "Explora el catálogo de productos georgianos, o crea un perfil de granja y envía tus ofertas a moderación."
+        "text": "Explora el catálogo de productos georgianos o publica tu oferta para moderación."
       },
       "connect": {
         "title": "Conéctate con un socio comercial",
@@ -838,7 +840,7 @@
       "eyebrow": "Para vendedores",
       "title": "Soy vendedor",
       "lead": "Responda a la demanda de compradores o publique su propia oferta de producto.",
-      "asideNote": "Cree primero el perfil de finca, luego añada productos y responda a solicitudes.",
+      "asideNote": "Publica productos y responde a solicitudes de compra. El perfil de finca es opcional y ayuda a los compradores a conocerte mejor.",
       "asideRegister": "Crear cuenta de vendedor",
       "paths": {
         "requests": {

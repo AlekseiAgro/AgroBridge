@@ -63,9 +63,12 @@ export class CabinetService {
             where: { buyerId: user.id, status: PrismaRfqStatus.completed },
           })
         : Promise.resolve(0),
-      trader && dbUser.farm
+      trader
         ? this.prisma.rfq.count({
-            where: { farmId: dbUser.farm.id, status: PrismaRfqStatus.completed },
+            where: {
+              product: { ownerUserId: user.id },
+              status: PrismaRfqStatus.completed,
+            },
           })
         : Promise.resolve(0),
       trader
@@ -76,10 +79,10 @@ export class CabinetService {
             },
           })
         : Promise.resolve(0),
-      trader && dbUser.farm
+      trader
         ? this.prisma.rfq.count({
             where: {
-              farmId: dbUser.farm.id,
+              product: { ownerUserId: user.id },
               status: { in: [PrismaRfqStatus.pending, PrismaRfqStatus.offered, PrismaRfqStatus.accepted] },
             },
           })
@@ -89,24 +92,24 @@ export class CabinetService {
           OR: [{ buyerId: user.id }, { farmerId: user.id }],
         },
       }),
-      trader && dbUser.farm
+      trader
         ? this.prisma.product.count({
             where: {
-              farmId: dbUser.farm.id,
+              ownerUserId: user.id,
               isPublished: true,
               moderationStatus: PrismaModerationStatus.approved,
             },
           })
         : Promise.resolve(0),
-      trader && dbUser.farm
+      trader
         ? this.prisma.product.count({
             where: {
-              farmId: dbUser.farm.id,
+              ownerUserId: user.id,
               moderationStatus: PrismaModerationStatus.pending,
             },
           })
         : Promise.resolve(0),
-      this.countAwaitingRating(user.id, dbUser.farm?.id ?? null),
+      this.countAwaitingRating(user.id),
     ]);
 
     return {
@@ -362,7 +365,7 @@ export class CabinetService {
     await this.assertPassword(dbUser.passwordHash, password);
     await this.consumeCode(user.id, VerificationChannel.accountDeletion, code);
 
-    const [avatarUser, farm] = await Promise.all([
+    const [avatarUser, farm, ownedProducts] = await Promise.all([
       this.prisma.user.findUnique({
         where: { id: user.id },
         select: { avatarKey: true },
@@ -371,13 +374,14 @@ export class CabinetService {
         where: { ownerId: user.id },
         select: {
           documents: { select: { key: true } },
-          products: {
-            select: {
-              images: { select: { key: true } },
-              videos: { select: { key: true } },
-              certificates: { select: { key: true } },
-            },
-          },
+        },
+      }),
+      this.prisma.product.findMany({
+        where: { ownerUserId: user.id },
+        select: {
+          images: { select: { key: true } },
+          videos: { select: { key: true } },
+          certificates: { select: { key: true } },
         },
       }),
     ]);
@@ -386,11 +390,11 @@ export class CabinetService {
     if (avatarUser?.avatarKey) storageKeys.push(avatarUser.avatarKey);
     if (farm) {
       for (const document of farm.documents) storageKeys.push(document.key);
-      for (const product of farm.products) {
-        for (const image of product.images) storageKeys.push(image.key);
-        for (const video of product.videos) storageKeys.push(video.key);
-        for (const certificate of product.certificates) storageKeys.push(certificate.key);
-      }
+    }
+    for (const product of ownedProducts) {
+      for (const image of product.images) storageKeys.push(image.key);
+      for (const video of product.videos) storageKeys.push(video.key);
+      for (const certificate of product.certificates) storageKeys.push(certificate.key);
     }
 
     await this.prisma.user.delete({ where: { id: user.id } });
@@ -473,11 +477,11 @@ export class CabinetService {
     return createHash('sha256').update(code).digest('hex');
   }
 
-  private async countAwaitingRating(userId: string, farmId: string | null) {
+  private async countAwaitingRating(userId: string) {
     const deals = await this.prisma.rfq.findMany({
       where: {
         status: PrismaRfqStatus.completed,
-        OR: [{ buyerId: userId }, ...(farmId ? [{ farmId }] : [])],
+        OR: [{ buyerId: userId }, { product: { ownerUserId: userId } }],
       },
       select: {
         id: true,

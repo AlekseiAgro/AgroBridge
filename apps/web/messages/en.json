@@ -270,7 +270,7 @@
     "published": "Published",
     "draft": "Draft",
     "emptyMine": "You have no products yet.",
-    "needFarmFirst": "Create a farm profile before adding products.",
+    "needFarmFirst": "A farm profile is optional. You can add products without one.",
     "goCreateFarm": "Go to farm profile",
     "units": {
       "kg": "Kilogram",
@@ -445,7 +445,9 @@
         "approved": "Approved",
         "rejected": "Rejected"
       }
-    }
+    },
+    "loadError": "Could not load your products.",
+    "sellerFallback": "Seller"
   },
   "rfq": {
     "requestTitle": "Request a quote",
@@ -654,7 +656,7 @@
     "steps": {
       "find": {
         "title": "Find or publish a product",
-        "text": "Browse the catalog of Georgian produce, or create a farm profile and list what you can supply for moderation."
+        "text": "Browse the catalog of Georgian produce, or list what you can supply for moderation."
       },
       "connect": {
         "title": "Connect with a trade partner",
@@ -838,7 +840,7 @@
       "eyebrow": "For sellers",
       "title": "I'm a seller",
       "lead": "Respond to buyer demand or publish your own product offer for the catalog.",
-      "asideNote": "Create a farm profile first if you are new, then list products and reply to requests.",
+      "asideNote": "List products and reply to purchase requests. A farm profile is optional and helps buyers learn more about you.",
       "asideRegister": "Create seller account",
       "paths": {
         "requests": {

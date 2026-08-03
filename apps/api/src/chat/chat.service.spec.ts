@@ -45,7 +45,7 @@ describe('ChatService', () => {
     prisma.rfq.findUnique.mockResolvedValue({
       id: 'rfq1',
       buyerId: 'other-buyer',
-      farm: { ownerId: 'other-farmer' },
+      product: { ownerUserId: 'other-farmer' },
     });
 
     await expect(

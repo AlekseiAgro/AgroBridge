@@ -84,7 +84,11 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                 product,
                 product.unit ? tr(`product.units.${product.unit as 'kg'}`) : null,
               );
-              const rating = product.farm.sellerRating;
+              const rating = product.sellerRating;
+              const sellerLabel =
+                product.farm?.name ||
+                product.owner.displayName?.trim() ||
+                tr('product.sellerFallback');
               return (
                 <li key={product.id} className="product-list__item product-list__item--with-media">
                   {image ? (
@@ -98,11 +102,17 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                       {formatProductTitle(product.title, locale)}
                     </Link>
                     <p className="product-list__meta">
-                      <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
-                      <VerifiedBadge verified={product.farm.verified} />
-                      {product.farm.region
-                        ? ` · ${formatRegionLabel(product.farm.region, tr) ?? product.farm.region}`
-                        : ''}
+                      {product.farm ? (
+                        <>
+                          <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
+                          <VerifiedBadge verified={product.farm.verified} />
+                          {product.farm.region
+                            ? ` · ${formatRegionLabel(product.farm.region, tr) ?? product.farm.region}`
+                            : ''}
+                        </>
+                      ) : (
+                        <Link href={`/users/${product.owner.id}`}>{sellerLabel}</Link>
+                      )}
                       {product.category
                         ? ` · ${t(`categories.${product.category as 'fruits'}`)}`
                         : ''}

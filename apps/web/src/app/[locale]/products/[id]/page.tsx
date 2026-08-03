@@ -79,17 +79,25 @@ export default async function ProductDetailPage({ params }: Props) {
           <MarketOpportunityBadge opportunity={product.opportunity} />
         </div>
         <p className="page__subtitle">
-          <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
-          <VerifiedBadge verified={product.farm.verified} />
-          {product.farm.region
-            ? ` · ${formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region}`
-            : ''}
+          {product.farm ? (
+            <>
+              <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
+              <VerifiedBadge verified={product.farm.verified} />
+              {product.farm.region
+                ? ` · ${formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region}`
+                : ''}
+            </>
+          ) : (
+            <Link href={`/users/${product.owner.id}`}>
+              {product.owner.displayName?.trim() || t('sellerFallback')}
+            </Link>
+          )}
         </p>
         <div className="product-list__rating product-list__rating--detail">
           <span className="product-list__rating-label">{tc('sellerRating')}</span>
           <RatingStars
-            value={product.farm.sellerRating?.average ?? null}
-            count={product.farm.sellerRating?.count ?? 0}
+            value={product.sellerRating?.average ?? null}
+            count={product.sellerRating?.count ?? 0}
             size="sm"
           />
         </div>
@@ -325,11 +333,12 @@ export default async function ProductDetailPage({ params }: Props) {
             </section>
           ) : null}
 
-          {product.farm.foundedYear ||
-          product.farm.farmSizeHectares != null ||
-          product.farm.ownershipType ||
-          product.farm.exportMarkets.length ||
-          product.farm.history ? (
+          {product.farm &&
+          (product.farm.foundedYear ||
+            product.farm.farmSizeHectares != null ||
+            product.farm.ownershipType ||
+            product.farm.exportMarkets.length ||
+            product.farm.history) ? (
             <section className="product-detail-section">
               <h2 className="section-title">{t('sections.farmStory')}</h2>
               <dl className="account-details product-detail-grid">

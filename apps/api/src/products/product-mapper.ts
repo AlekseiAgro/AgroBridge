@@ -69,8 +69,14 @@ export type ProductCertificateSlice = {
   createdAt: Date;
 };
 
+export type ProductOwnerSlice = {
+  id: string;
+  displayName: string | null;
+};
+
 export type ProductRowSlice = {
   id: string;
+  ownerUserId: string;
   title: string;
   description: string | null;
   category: string | null;
@@ -109,7 +115,8 @@ export type ProductRowSlice = {
   images: ProductMediaSlice[];
   videos?: ProductVideoSlice[];
   certificates?: ProductCertificateSlice[];
-  farm: ProductFarmSlice;
+  owner: ProductOwnerSlice;
+  farm: ProductFarmSlice | null;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -180,12 +187,13 @@ export function toPublicQualityScore(score: ProductQualityScore): ProductQuality
 export function buildQualityScore(product: ProductRowSlice): ProductQualityScore {
   const images = mapProductImages(product.images);
   const certificates = mapProductCertificates(product.certificates);
+  const farm = product.farm;
   return computeProductQualityScore({
     title: product.title,
     category: product.category,
     variety: product.variety,
     country: product.country,
-    region: product.farm.region,
+    region: farm?.region ?? null,
     originPlace: product.originPlace,
     description: product.description,
     imageCount: images.length,
@@ -213,10 +221,10 @@ export function buildQualityScore(product: ProductRowSlice): ProductQualityScore
     priceFrom: toNumberOrNull(product.priceFrom),
     priceNegotiable: product.priceNegotiable,
     priceDependsOnVolume: product.priceDependsOnVolume,
-    farmFoundedYear: product.farm.foundedYear,
-    farmSizeHectares: toNumberOrNull(product.farm.farmSizeHectares),
-    farmHistory: product.farm.history,
-    farmExportMarkets: product.farm.exportMarkets,
+    farmFoundedYear: farm?.foundedYear ?? null,
+    farmSizeHectares: toNumberOrNull(farm?.farmSizeHectares),
+    farmHistory: farm?.history ?? null,
+    farmExportMarkets: farm?.exportMarkets ?? [],
   });
 }
 
@@ -284,21 +292,28 @@ export function mapProductSummary(
       preorderEnabled: product.preorderEnabled,
       currentStock: toNumberOrNull(product.currentStock),
       maxQuantity: toNumberOrNull(product.maxQuantity),
-      exportMarkets: product.farm.exportMarkets,
+      exportMarkets: product.farm?.exportMarkets ?? [],
     }),
-    farm: {
-      id: product.farm.id,
-      name: product.farm.name,
-      region: product.farm.region,
-      verificationStatus: product.farm.verificationStatus as VerificationStatus,
-      verified: product.farm.verificationStatus === 'approved',
-      foundedYear: product.farm.foundedYear,
-      farmSizeHectares: toNumberOrNull(product.farm.farmSizeHectares),
-      ownershipType: product.farm.ownershipType,
-      exportMarkets: product.farm.exportMarkets ?? [],
-      history: product.farm.history,
-      sellerRating: sellerRating ?? { average: null, count: 0 },
+    ownerUserId: product.ownerUserId,
+    owner: {
+      id: product.owner.id,
+      displayName: product.owner.displayName,
     },
+    sellerRating: sellerRating ?? { average: null, count: 0 },
+    farm: product.farm
+      ? {
+          id: product.farm.id,
+          name: product.farm.name,
+          region: product.farm.region,
+          verificationStatus: product.farm.verificationStatus as VerificationStatus,
+          verified: product.farm.verificationStatus === 'approved',
+          foundedYear: product.farm.foundedYear,
+          farmSizeHectares: toNumberOrNull(product.farm.farmSizeHectares),
+          ownershipType: product.farm.ownershipType,
+          exportMarkets: product.farm.exportMarkets ?? [],
+          history: product.farm.history,
+        }
+      : null,
   };
 }
 

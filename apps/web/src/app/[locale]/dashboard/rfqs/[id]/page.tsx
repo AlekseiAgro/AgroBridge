@@ -47,8 +47,12 @@ export default async function BuyerRfqDetailPage({ params }: Props) {
       <h1>{formatProductTitle(rfq.product.title, locale)}</h1>
       <p className="page__subtitle">
         {t(`statuses.${rfq.status}`)} ·{' '}
-        <Link href={`/farms/${rfq.farm.id}`}>{rfq.farm.name}</Link>
-        {' · '}
+        {rfq.farm ? (
+          <>
+            <Link href={`/farms/${rfq.farm.id}`}>{rfq.farm.name}</Link>
+            {' · '}
+          </>
+        ) : null}
         <Link href={`/users/${rfq.seller.id}`} className="profile-link">
           {sellerName}
         </Link>

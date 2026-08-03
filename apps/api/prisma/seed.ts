@@ -853,6 +853,7 @@ async function seedFarmer(
 
   const product = await prisma.product.create({
     data: {
+      ownerUserId: user.id,
       farmId: farm.id,
       title: farmer.product.title,
       description: farmer.product.description,

@@ -18,6 +18,9 @@ describe('CabinetService', () => {
     farm: {
       findUnique: jest.fn(),
     },
+    product: {
+      findMany: jest.fn(),
+    },
     verificationCode: {
       create: jest.fn(),
       findFirst: jest.fn(),
@@ -121,14 +124,14 @@ describe('CabinetService', () => {
     prisma.verificationCode.update.mockResolvedValue({ id: 'c1' });
     prisma.farm.findUnique.mockResolvedValue({
       documents: [{ key: 'docs/id.pdf' }],
-      products: [
-        {
-          images: [{ key: 'img/1.jpg' }],
-          videos: [],
-          certificates: [],
-        },
-      ],
     });
+    prisma.product.findMany.mockResolvedValue([
+      {
+        images: [{ key: 'img/1.jpg' }],
+        videos: [],
+        certificates: [],
+      },
+    ]);
     prisma.user.delete.mockResolvedValue({ id: 'user_1' });
 
     await expect(service.confirmAccountDeletion(farmer, 'password1', code)).resolves.toEqual({

@@ -58,7 +58,7 @@ export type RfqSummary = {
     name: string;
     region: string | null;
     ownerId: string;
-  };
+  } | null;
   buyer: RfqDealParticipant;
   seller: RfqDealParticipant;
   offer: RfqOfferView | null;

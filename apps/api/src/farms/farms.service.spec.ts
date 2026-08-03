@@ -1,4 +1,4 @@
-import { ConflictException, ForbiddenException } from '@nestjs/common';
+import { ConflictException } from '@nestjs/common';
 import { FarmsService } from './farms.service';
 
 describe('FarmsService', () => {
@@ -8,6 +8,12 @@ describe('FarmsService', () => {
       findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+    },
+    product: {
+      updateMany: jest.fn(),
+    },
+    rfq: {
+      updateMany: jest.fn(),
     },
   };
 
@@ -28,19 +34,50 @@ describe('FarmsService', () => {
     );
   });
 
-  it('rejects non-farmers', async () => {
-    await expect(
-      service.create(
-        {
-          id: 'u1',
-          email: 'b@example.com',
-          role: 'buyer',
-          locale: 'en',
-          displayName: null,
-        },
-        { name: 'Test Farm' },
-      ),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+  it('links existing products when a farm profile is created', async () => {
+    prisma.farm.findUnique
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: 'farm1',
+        ownerId: 'u1',
+        name: 'Test Farm',
+        region: null,
+        description: null,
+        foundedYear: null,
+        farmSizeHectares: null,
+        ownershipType: null,
+        exportMarkets: [],
+        history: null,
+        verificationStatus: 'unverified',
+        verificationNote: null,
+        verifiedAt: null,
+        companyRegistrationNumber: null,
+        companyRegistryValid: null,
+        createdAt: new Date(),
+        owner: { id: 'u1', displayName: 'Nino' },
+        documents: [],
+        products: [],
+        _count: { products: 0 },
+      });
+    prisma.farm.create.mockResolvedValue({ id: 'farm1' });
+    prisma.product.updateMany.mockResolvedValue({ count: 1 });
+    prisma.rfq.updateMany.mockResolvedValue({ count: 0 });
+
+    await service.create(
+      {
+        id: 'u1',
+        email: 'f@example.com',
+        role: 'farmer',
+        locale: 'ka',
+        displayName: 'Nino',
+      },
+      { name: 'Test Farm' },
+    );
+
+    expect(prisma.product.updateMany).toHaveBeenCalledWith({
+      where: { ownerUserId: 'u1', farmId: null },
+      data: { farmId: 'farm1' },
+    });
   });
 
   it('rejects second farm for same owner', async () => {

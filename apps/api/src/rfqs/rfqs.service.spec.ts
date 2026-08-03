@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { RfqsService } from './rfqs.service';
 
 describe('RfqsService', () => {
@@ -46,10 +46,27 @@ describe('RfqsService', () => {
     service = new RfqsService(prisma as never, notifications as never);
   });
 
-  it('rejects farmers from creating RFQs', async () => {
+  it('rejects RFQ for own product', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      title: 'Hazelnuts',
+      ownerUserId: farmer.id,
+      farmId: null,
+      unit: 'kg',
+      isPublished: true,
+      moderationStatus: 'approved',
+      owner: {
+        id: farmer.id,
+        email: farmer.email,
+        locale: farmer.locale,
+        displayName: farmer.displayName,
+      },
+      farm: null,
+    });
+
     await expect(
       service.create(farmer, { productId: 'p1', quantity: '100' }),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('rejects RFQ for unpublished product', async () => {
@@ -66,12 +83,10 @@ describe('RfqsService', () => {
       buyerId: buyer.id,
       status: 'pending',
       offer: null,
-      product: { id: 'p1', title: 'Hazelnuts' },
-      farm: {
-        id: 'f1',
-        name: 'Farm',
-        region: null,
-        ownerId: farmer.id,
+      product: {
+        id: 'p1',
+        title: 'Hazelnuts',
+        ownerUserId: farmer.id,
         owner: {
           id: farmer.id,
           email: farmer.email,
@@ -79,17 +94,25 @@ describe('RfqsService', () => {
           displayName: farmer.displayName,
         },
       },
+      farm: {
+        id: 'f1',
+        name: 'Farm',
+        region: null,
+        ownerId: farmer.id,
+      },
       buyer: {
         id: buyer.id,
         displayName: 'Buyer',
         email: buyer.email,
         locale: buyer.locale,
       },
+      ratings: [],
       quantity: '100',
       unit: 'kg',
       message: null,
       createdAt: new Date(),
       updatedAt: new Date(),
+      completedAt: null,
     });
 
     await expect(service.accept(buyer, 'rfq1')).rejects.toBeInstanceOf(BadRequestException);
