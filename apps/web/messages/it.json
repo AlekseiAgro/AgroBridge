@@ -325,11 +325,12 @@
         "other": "Other"
       }
     },
-    "minQuantity": "Quantità minima",
-    "maxQuantity": "Quantità massima",
+    "minQuantity": "Quantità minima in vendita",
+    "maxQuantity": "Quantità massima in vendita",
     "minQuantityPlaceholder": "es. 50",
     "maxQuantityPlaceholder": "es. 1000",
     "quantityHint": "Intervallo vendibile nell’unità selezionata ({unit}).",
+    "volumeUnitHint": "Presa dai dati principali. Cambia l’unità lì se serve.",
     "unitSuggested": "consigliata",
     "quantityInvalid": "Inserisci quantità valide maggiori di zero.",
     "quantityRangeInvalid": "La quantità minima non può superare la massima.",

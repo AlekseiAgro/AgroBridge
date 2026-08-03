@@ -325,11 +325,12 @@
         "other": "Other"
       }
     },
-    "minQuantity": "Minimum quantity",
-    "maxQuantity": "Maximum quantity",
+    "minQuantity": "Minimum quantity for sale",
+    "maxQuantity": "Maximum quantity for sale",
     "minQuantityPlaceholder": "e.g. 50",
     "maxQuantityPlaceholder": "e.g. 1000",
     "quantityHint": "Sellable range in the selected unit ({unit}).",
+    "volumeUnitHint": "Taken from Product basics. Change the unit there if needed.",
     "unitSuggested": "suggested",
     "quantityInvalid": "Enter valid quantities greater than zero.",
     "quantityRangeInvalid": "Minimum quantity cannot be greater than maximum.",

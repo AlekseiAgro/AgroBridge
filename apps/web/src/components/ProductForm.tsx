@@ -403,6 +403,22 @@ export function ProductForm({ mode, initial }: Props) {
 
       <fieldset className="field-group product-form__section">
         <legend className="section-title">{t('sections.volume')}</legend>
+        <label className="field">
+          <span>{t('unit')}</span>
+          <input
+            value={
+              unit
+                ? t(`units.${unit as ProductUnit}`)
+                : suggestedUnit
+                  ? t(`units.${suggestedUnit as ProductUnit}`)
+                  : t('noUnit')
+            }
+            readOnly
+            tabIndex={-1}
+            aria-readonly="true"
+          />
+        </label>
+        <p className="field-hint">{t('volumeUnitHint')}</p>
         <div className="field-row">
           {[
             ['currentStock', currentStock, setCurrentStock],
@@ -413,15 +429,24 @@ export function ProductForm({ mode, initial }: Props) {
           ].map(([name, value, setter]) => (
             <label className="field" key={String(name)}>
               <span>{t(String(name))}</span>
-              <input
-                name={String(name)}
-                type="number"
-                min={0.01}
-                step="0.01"
-                inputMode="decimal"
-                value={String(value)}
-                onChange={(event) => (setter as (next: string) => void)(event.target.value)}
-              />
+              <div className="field-with-suffix">
+                <input
+                  name={String(name)}
+                  type="number"
+                  min={0.01}
+                  step="0.01"
+                  inputMode="decimal"
+                  value={String(value)}
+                  onChange={(event) => (setter as (next: string) => void)(event.target.value)}
+                />
+                <span className="field-with-suffix__unit" aria-hidden={!(unit || suggestedUnit)}>
+                  {unit
+                    ? t(`units.${unit as ProductUnit}`)
+                    : suggestedUnit
+                      ? t(`units.${suggestedUnit as ProductUnit}`)
+                      : '—'}
+                </span>
+              </div>
             </label>
           ))}
         </div>

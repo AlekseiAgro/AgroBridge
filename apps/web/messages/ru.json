@@ -325,11 +325,12 @@
         "other": "Other"
       }
     },
-    "minQuantity": "Минимальное количество",
-    "maxQuantity": "Максимальное количество",
+    "minQuantity": "Минимальное количество для продажи",
+    "maxQuantity": "Максимальное количество для продажи",
     "minQuantityPlaceholder": "напр. 50",
     "maxQuantityPlaceholder": "напр. 1000",
     "quantityHint": "Диапазон поставки в выбранных единицах ({unit}).",
+    "volumeUnitHint": "Берётся из основных данных. Чтобы изменить, выберите единицу там.",
     "unitSuggested": "рекомендуется",
     "quantityInvalid": "Укажите корректные количества больше нуля.",
     "quantityRangeInvalid": "Минимум не может быть больше максимума.",
