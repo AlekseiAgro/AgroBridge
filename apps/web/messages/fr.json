@@ -89,8 +89,6 @@
   "support": {
     "title": "Assistance",
     "subtitle": "Envoyez une demande — notre équipe vous répondra par e-mail.",
-    "emailLabel": "E-mail d’assistance",
-    "emailHint": "Vous pouvez aussi nous écrire directement à cette adresse.",
     "name": "Votre nom",
     "email": "Votre e-mail",
     "subject": "Objet",
