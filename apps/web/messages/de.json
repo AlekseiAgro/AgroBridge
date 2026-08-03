@@ -270,7 +270,7 @@
     "published": "Veröffentlicht",
     "draft": "Entwurf",
     "emptyMine": "Sie haben noch keine Produkte.",
-    "needFarmFirst": "Erstellen Sie zuerst ein Betriebsprofil.",
+    "needFarmFirst": "Ein Betriebsprofil ist optional. Sie können auch ohne eines Produkte hinzufügen.",
     "goCreateFarm": "Zum Betriebsprofil",
     "units": {
       "kg": "Kilogramm",
@@ -445,7 +445,9 @@
         "approved": "Approved",
         "rejected": "Rejected"
       }
-    }
+    },
+    "loadError": "Ihre Produkte konnten nicht geladen werden.",
+    "sellerFallback": "Verkäufer"
   },
   "rfq": {
     "requestTitle": "Preis anfragen",
@@ -654,7 +656,7 @@
     "steps": {
       "find": {
         "title": "Produkt finden oder veröffentlichen",
-        "text": "Durchsuchen Sie den Katalog georgischer Erzeugnisse oder legen Sie ein Betriebsprofil an und reichen Sie Angebote zur Prüfung ein."
+        "text": "Durchsuchen Sie den Katalog georgischer Produkte oder listen Sie Ihr Angebot zur Moderation."
       },
       "connect": {
         "title": "Mit einem Handelspartner verbinden",
@@ -838,7 +840,7 @@
       "eyebrow": "Für Verkäufer",
       "title": "Ich bin Verkäufer",
       "lead": "Reagieren Sie auf Käuferbedarf oder erstellen Sie Ihr eigenes Produktangebot.",
-      "asideNote": "Legen Sie zuerst ein Betriebsprofil an, dann Produkte und Antworten auf Anfragen.",
+      "asideNote": "Listen Sie Produkte und antworten Sie auf Kaufanfragen. Ein Betriebsprofil ist optional und hilft Käufern, mehr über Sie zu erfahren.",
       "asideRegister": "Verkäuferkonto erstellen",
       "paths": {
         "requests": {

@@ -19,7 +19,7 @@ export class RatingsService {
     const rfq = await this.prisma.rfq.findUnique({
       where: { id: dto.rfqId },
       include: {
-        farm: { select: { ownerId: true, owner: { select: { id: true, displayName: true, email: true } } } },
+        product: { select: { ownerUserId: true } },
         buyer: { select: { id: true, displayName: true, email: true } },
         ratings: { select: { fromUserId: true } },
       },
@@ -32,7 +32,7 @@ export class RatingsService {
       throw new BadRequestException('Ratings are allowed only after the deal is completed');
     }
 
-    const sellerId = rfq.farm.ownerId;
+    const sellerId = rfq.product.ownerUserId;
     const isBuyer = rfq.buyerId === user.id;
     const isSeller = sellerId === user.id || user.role === 'admin';
 

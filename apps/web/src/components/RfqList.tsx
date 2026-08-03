@@ -30,7 +30,7 @@ export async function RfqList({ items, emptyLabel, detailBasePath }: Props) {
             {item.quantity}
             {item.unit ? ` ${item.unit}` : ''}
             {' · '}
-            {item.farm.name}
+            {item.farm?.name || item.seller.displayName || item.seller.email}
           </p>
           {item.offer ? (
             <p className="product-list__desc">

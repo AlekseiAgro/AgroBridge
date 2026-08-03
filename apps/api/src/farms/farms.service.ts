@@ -75,6 +75,7 @@ export class FarmsService {
           orderBy: { updatedAt: 'desc' },
           select: {
             id: true,
+            ownerUserId: true,
             title: true,
             description: true,
             category: true,
@@ -181,6 +182,7 @@ export class FarmsService {
           orderBy: { updatedAt: 'desc' },
           select: {
             id: true,
+            ownerUserId: true,
             title: true,
             description: true,
             category: true,
@@ -283,7 +285,7 @@ export class FarmsService {
       throw new ConflictException('Farm profile already exists');
     }
 
-    await this.prisma.farm.create({
+    const farm = await this.prisma.farm.create({
       data: {
         ownerId: user.id,
         name: dto.name.trim(),
@@ -296,6 +298,16 @@ export class FarmsService {
         history: dto.history?.trim() || null,
         verificationStatus: PrismaVerificationStatus.unverified,
       },
+    });
+
+    // Attach existing listings so the optional farm profile enriches them.
+    await this.prisma.product.updateMany({
+      where: { ownerUserId: user.id, farmId: null },
+      data: { farmId: farm.id },
+    });
+    await this.prisma.rfq.updateMany({
+      where: { farmId: null, product: { ownerUserId: user.id } },
+      data: { farmId: farm.id },
     });
 
     return (await this.getMine(user))!;
@@ -483,10 +495,17 @@ export class FarmsService {
   }
 
   private toProductSummary(
-    product: Omit<ProductRowSlice, 'farm'>,
-    farm: ProductFarmSlice,
+    product: Omit<ProductRowSlice, 'farm' | 'owner'>,
+    farm: ProductFarmSlice & { owner: { id: string; displayName: string | null } },
     sellerRating?: RatingSummary | null,
   ) {
-    return mapProductSummary({ ...product, farm }, sellerRating);
+    return mapProductSummary(
+      {
+        ...product,
+        owner: farm.owner,
+        farm,
+      },
+      sellerRating,
+    );
   }
 }

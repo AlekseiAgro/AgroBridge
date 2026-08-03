@@ -12,22 +12,28 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { CreateRfqDto } from './dto/create-rfq.dto';
 
+const sellerSelect = {
+  id: true,
+  email: true,
+  locale: true,
+  displayName: true,
+} as const;
+
 const rfqInclude = {
-  product: { select: { id: true, title: true } },
+  product: {
+    select: {
+      id: true,
+      title: true,
+      ownerUserId: true,
+      owner: { select: sellerSelect },
+    },
+  },
   farm: {
     select: {
       id: true,
       name: true,
       region: true,
       ownerId: true,
-      owner: {
-        select: {
-          id: true,
-          email: true,
-          locale: true,
-          displayName: true,
-        },
-      },
     },
   },
   buyer: {
@@ -66,18 +72,8 @@ export class RfqsService {
     const product = await this.prisma.product.findUnique({
       where: { id: dto.productId },
       include: {
-        farm: {
-          include: {
-            owner: {
-              select: {
-                id: true,
-                email: true,
-                locale: true,
-                displayName: true,
-              },
-            },
-          },
-        },
+        owner: { select: sellerSelect },
+        farm: { select: { id: true, name: true } },
       },
     });
 
@@ -89,7 +85,7 @@ export class RfqsService {
       throw new NotFoundException('Product not found');
     }
 
-    if (product.farm.ownerId === user.id) {
+    if (product.ownerUserId === user.id) {
       throw new BadRequestException('You cannot request a quote for your own product');
     }
 
@@ -107,7 +103,7 @@ export class RfqsService {
     });
 
     await this.notifications.notifyRfqCreated({
-      farmer: product.farm.owner,
+      farmer: product.owner,
       buyerName: user.displayName?.trim() || user.email,
       productTitle: product.title,
       quantity: rfq.quantity,
@@ -133,13 +129,8 @@ export class RfqsService {
   async listInbox(user: AuthenticatedUser): Promise<RfqSummary[]> {
     this.assertFarmer(user);
 
-    const farm = await this.prisma.farm.findUnique({ where: { ownerId: user.id } });
-    if (!farm) {
-      return [];
-    }
-
     const items = await this.prisma.rfq.findMany({
-      where: { farmId: farm.id },
+      where: { product: { ownerUserId: user.id } },
       orderBy: { createdAt: 'desc' },
       include: rfqInclude,
     });
@@ -158,7 +149,7 @@ export class RfqsService {
     dto: CreateOfferDto,
   ): Promise<RfqSummary> {
     this.assertFarmer(user);
-    const rfq = await this.requireFarmOwnedRfq(user, id);
+    const rfq = await this.requireSellerOwnedRfq(user, id);
 
     if (rfq.status !== PrismaRfqStatus.pending && rfq.status !== PrismaRfqStatus.offered) {
       throw new BadRequestException('Offers can only be sent for pending or offered requests');
@@ -192,7 +183,7 @@ export class RfqsService {
 
     await this.notifications.notifyRfqOfferCreated({
       buyer: rfq.buyer,
-      farmName: rfq.farm.name,
+      farmName: this.sellerLabel(rfq),
       productTitle: rfq.product.title,
       priceAmount: offer.priceAmount.toString(),
       currency: offer.currency,
@@ -216,7 +207,7 @@ export class RfqsService {
     });
 
     await this.notifications.notifyRfqAccepted({
-      farmer: rfq.farm.owner,
+      farmer: rfq.product.owner,
       buyerName: rfq.buyer.displayName?.trim() || rfq.buyer.email,
       productTitle: rfq.product.title,
       rfqId: rfq.id,
@@ -229,13 +220,13 @@ export class RfqsService {
     const rfq = await this.requireAccessibleRfq(user, id);
 
     const isBuyer = rfq.buyerId === user.id;
-    const isFarmerOwner = rfq.farm.ownerId === user.id || user.role === 'admin';
+    const isSellerOwner = this.isSeller(rfq, user);
 
     if (isBuyer) {
       if (rfq.status !== PrismaRfqStatus.offered) {
         throw new BadRequestException('Buyers can decline only after an offer is received');
       }
-    } else if (isFarmerOwner) {
+    } else if (isSellerOwner) {
       if (rfq.status !== PrismaRfqStatus.pending && rfq.status !== PrismaRfqStatus.offered) {
         throw new BadRequestException('This request can no longer be declined');
       }
@@ -250,7 +241,7 @@ export class RfqsService {
 
     if (isBuyer) {
       await this.notifications.notifyRfqDeclinedByBuyer({
-        farmer: rfq.farm.owner,
+        farmer: rfq.product.owner,
         buyerName: rfq.buyer.displayName?.trim() || rfq.buyer.email,
         productTitle: rfq.product.title,
         rfqId: rfq.id,
@@ -258,7 +249,7 @@ export class RfqsService {
     } else {
       await this.notifications.notifyRfqDeclinedByFarmer({
         buyer: rfq.buyer,
-        farmName: rfq.farm.name,
+        farmName: this.sellerLabel(rfq),
         productTitle: rfq.product.title,
         rfqId: rfq.id,
       });
@@ -281,7 +272,7 @@ export class RfqsService {
     });
 
     await this.notifications.notifyRfqCancelled({
-      farmer: rfq.farm.owner,
+      farmer: rfq.product.owner,
       buyerName: rfq.buyer.displayName?.trim() || rfq.buyer.email,
       productTitle: rfq.product.title,
     });
@@ -292,7 +283,7 @@ export class RfqsService {
   async complete(user: AuthenticatedUser, id: string): Promise<RfqSummary> {
     const rfq = await this.requireAccessibleRfq(user, id);
     const isBuyer = rfq.buyerId === user.id;
-    const isSeller = rfq.farm.ownerId === user.id || user.role === 'admin';
+    const isSeller = this.isSeller(rfq, user);
 
     if (!isBuyer && !isSeller) {
       throw new ForbiddenException('Not allowed');
@@ -323,8 +314,8 @@ export class RfqsService {
     }
 
     const isBuyer = rfq.buyerId === user.id;
-    const isFarmerOwner = rfq.farm.ownerId === user.id;
-    if (!isBuyer && !isFarmerOwner && user.role !== 'admin') {
+    const isSellerOwner = rfq.product.ownerUserId === user.id;
+    if (!isBuyer && !isSellerOwner && user.role !== 'admin') {
       throw new ForbiddenException('Not allowed to view this request');
     }
 
@@ -339,9 +330,9 @@ export class RfqsService {
     return rfq;
   }
 
-  private async requireFarmOwnedRfq(user: AuthenticatedUser, id: string): Promise<RfqEntity> {
+  private async requireSellerOwnedRfq(user: AuthenticatedUser, id: string): Promise<RfqEntity> {
     const rfq = await this.requireAccessibleRfq(user, id);
-    if (rfq.farm.ownerId !== user.id && user.role !== 'admin') {
+    if (rfq.product.ownerUserId !== user.id && user.role !== 'admin') {
       throw new ForbiddenException('Not allowed');
     }
     return rfq;
@@ -359,14 +350,28 @@ export class RfqsService {
     }
   }
 
+  private isSeller(rfq: RfqEntity, user: AuthenticatedUser): boolean {
+    return rfq.product.ownerUserId === user.id || user.role === 'admin';
+  }
+
+  private sellerLabel(rfq: RfqEntity): string {
+    return (
+      rfq.farm?.name ||
+      rfq.product.owner.displayName?.trim() ||
+      rfq.product.owner.email
+    );
+  }
+
   private toSummary(rfq: RfqEntity, viewer: AuthenticatedUser): RfqSummary {
     const seller = {
-      id: rfq.farm.owner.id,
-      displayName: rfq.farm.owner.displayName,
-      email: rfq.farm.owner.email,
+      id: rfq.product.owner.id,
+      displayName: rfq.product.owner.displayName,
+      email: rfq.product.owner.email,
     };
     const isParticipant =
-      rfq.buyerId === viewer.id || rfq.farm.ownerId === viewer.id || viewer.role === 'admin';
+      rfq.buyerId === viewer.id ||
+      rfq.product.ownerUserId === viewer.id ||
+      viewer.role === 'admin';
     const myRating = rfq.ratings.find((rating) => rating.fromUserId === viewer.id) ?? null;
     const counterpartyRating =
       rfq.ratings.find((rating) => rating.fromUserId !== viewer.id) ?? null;
@@ -380,13 +385,18 @@ export class RfqsService {
       createdAt: rfq.createdAt.toISOString(),
       updatedAt: rfq.updatedAt.toISOString(),
       completedAt: rfq.completedAt?.toISOString() ?? null,
-      product: rfq.product,
-      farm: {
-        id: rfq.farm.id,
-        name: rfq.farm.name,
-        region: rfq.farm.region,
-        ownerId: rfq.farm.ownerId,
+      product: {
+        id: rfq.product.id,
+        title: rfq.product.title,
       },
+      farm: rfq.farm
+        ? {
+            id: rfq.farm.id,
+            name: rfq.farm.name,
+            region: rfq.farm.region,
+            ownerId: rfq.farm.ownerId,
+          }
+        : null,
       buyer: {
         id: rfq.buyer.id,
         displayName: rfq.buyer.displayName,

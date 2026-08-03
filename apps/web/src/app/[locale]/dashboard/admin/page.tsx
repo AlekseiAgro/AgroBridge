@@ -223,12 +223,14 @@ async function ProductsSection({
                 {formatProductTitle(product.title, locale)}
               </p>
               <p className="product-list__meta">
-                {product.farm.name}
-                {product.farm.region
-                  ? ` · ${formatRegionLabel(product.farm.region, tr) ?? product.farm.region}`
+                {product.farm
+                  ? `${product.farm.name}${
+                      product.farm.region
+                        ? ` · ${formatRegionLabel(product.farm.region, tr) ?? product.farm.region}`
+                        : ''
+                    } · `
                   : ''}
-                {' · '}
-                {product.farm.owner.displayName || product.farm.owner.email}
+                {product.owner.displayName || product.owner.email}
                 {product.category
                   ? ` · ${tc(`categories.${product.category as 'fruits'}`)}`
                   : ''}

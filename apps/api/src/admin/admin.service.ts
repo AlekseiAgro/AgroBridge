@@ -35,20 +35,20 @@ import { VerificationService } from '../verification/verification.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { BlockUserDto, RejectProductDto, ReviewNoteDto, UpdateCategoryDto } from './dto/admin.dto';
 
-const farmOwnerInclude = {
+const productOwnerInclude = {
+  owner: {
+    select: {
+      id: true,
+      displayName: true,
+      email: true,
+      locale: true,
+    },
+  },
   farm: {
     select: {
       id: true,
       name: true,
       region: true,
-      owner: {
-        select: {
-          id: true,
-          displayName: true,
-          email: true,
-          locale: true,
-        },
-      },
     },
   },
 } as const;
@@ -175,7 +175,7 @@ export class AdminService {
     const products = await this.prisma.product.findMany({
       where,
       orderBy: { updatedAt: 'desc' },
-      include: farmOwnerInclude,
+      include: productOwnerInclude,
     });
 
     return products.map((product) => this.toModerated(product));
@@ -193,11 +193,11 @@ export class AdminService {
         moderatedById: user.id,
         isPublished: true,
       },
-      include: farmOwnerInclude,
+      include: productOwnerInclude,
     });
 
     await this.notifications.notifyProductApproved({
-      farmer: product.farm.owner,
+      farmer: product.owner,
       productTitle: product.title,
       productId: product.id,
     });
@@ -206,9 +206,9 @@ export class AdminService {
       productId: product.id,
       productTitle: product.title,
       category: product.category,
-      region: product.farm.region,
-      farmName: product.farm.name,
-      ownerUserId: product.farm.owner.id,
+      region: product.farm?.region ?? null,
+      farmName: product.farm?.name || product.owner.displayName?.trim() || product.owner.email,
+      ownerUserId: product.owner.id,
     });
 
     return this.toModerated(product);
@@ -229,11 +229,11 @@ export class AdminService {
         moderatedAt: new Date(),
         moderatedById: user.id,
       },
-      include: farmOwnerInclude,
+      include: productOwnerInclude,
     });
 
     await this.notifications.notifyProductRejected({
-      farmer: product.farm.owner,
+      farmer: product.owner,
       productTitle: product.title,
       productId: product.id,
       note: product.moderationNote ?? 'Rejected by moderator',
@@ -290,16 +290,26 @@ export class AdminService {
       _count: { _all: true },
     });
     const sellerDealCounts = await this.prisma.rfq.groupBy({
-      by: ['farmId'],
+      by: ['productId'],
       where: {
         status: RfqStatus.completed,
-        farmId: { in: users.map((u) => u.farm?.id).filter(Boolean) as string[] },
+        product: { ownerUserId: { in: users.map((u) => u.id) } },
       },
       _count: { _all: true },
     });
+    const productOwners = await this.prisma.product.findMany({
+      where: { id: { in: sellerDealCounts.map((row) => row.productId) } },
+      select: { id: true, ownerUserId: true },
+    });
+    const productOwnerById = new Map(productOwners.map((p) => [p.id, p.ownerUserId]));
+    const sellerDeals = new Map<string, number>();
+    for (const row of sellerDealCounts) {
+      const ownerId = productOwnerById.get(row.productId);
+      if (!ownerId) continue;
+      sellerDeals.set(ownerId, (sellerDeals.get(ownerId) ?? 0) + row._count._all);
+    }
 
     const buyerDeals = new Map(dealCounts.map((row) => [row.buyerId, row._count._all]));
-    const farmDeals = new Map(sellerDealCounts.map((row) => [row.farmId, row._count._all]));
 
     return users.map((user) => ({
       id: user.id,
@@ -317,9 +327,7 @@ export class AdminService {
             verificationStatus: user.farm.verificationStatus as VerificationStatus,
           }
         : null,
-      completedDeals:
-        (buyerDeals.get(user.id) ?? 0) +
-        (user.farm ? (farmDeals.get(user.farm.id) ?? 0) : 0),
+      completedDeals: (buyerDeals.get(user.id) ?? 0) + (sellerDeals.get(user.id) ?? 0),
     }));
   }
 
@@ -605,12 +613,16 @@ export class AdminService {
         orderBy: { updatedAt: 'desc' },
         take: 100,
         include: {
-          product: { select: { title: true } },
+          product: {
+            select: {
+              title: true,
+              owner: { select: { id: true, email: true, displayName: true } },
+            },
+          },
           buyer: { select: { id: true, email: true, displayName: true } },
           farm: {
             select: {
               name: true,
-              owner: { select: { id: true, email: true, displayName: true } },
             },
           },
         },
@@ -647,10 +659,10 @@ export class AdminService {
         createdAt: rfq.createdAt.toISOString(),
         buyer: rfq.buyer,
         seller: {
-          id: rfq.farm.owner.id,
-          email: rfq.farm.owner.email,
-          displayName: rfq.farm.owner.displayName,
-          farmName: rfq.farm.name,
+          id: rfq.product.owner.id,
+          email: rfq.product.owner.email,
+          displayName: rfq.product.owner.displayName,
+          farmName: rfq.farm?.name || rfq.product.owner.displayName?.trim() || rfq.product.owner.email,
         },
       })),
       ...fulfilledRequests.map((request) => {
@@ -824,17 +836,17 @@ export class AdminService {
     moderatedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
+    owner: {
+      id: string;
+      displayName: string | null;
+      email: string;
+      locale: string;
+    };
     farm: {
       id: string;
       name: string;
       region: string | null;
-      owner: {
-        id: string;
-        displayName: string | null;
-        email: string;
-        locale: string;
-      };
-    };
+    } | null;
   }): ModeratedProduct {
     return {
       id: product.id,
@@ -848,16 +860,18 @@ export class AdminService {
       moderatedAt: product.moderatedAt?.toISOString() ?? null,
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
-      farm: {
-        id: product.farm.id,
-        name: product.farm.name,
-        region: product.farm.region,
-        owner: {
-          id: product.farm.owner.id,
-          displayName: product.farm.owner.displayName,
-          email: product.farm.owner.email,
-        },
+      owner: {
+        id: product.owner.id,
+        displayName: product.owner.displayName,
+        email: product.owner.email,
       },
+      farm: product.farm
+        ? {
+            id: product.farm.id,
+            name: product.farm.name,
+            region: product.farm.region,
+          }
+        : null,
     };
   }
 }

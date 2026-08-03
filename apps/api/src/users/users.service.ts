@@ -48,11 +48,12 @@ export class UsersService {
       this.prisma.rfq.count({
         where: { buyerId: user.id, status: PrismaRfqStatus.completed },
       }),
-      user.farm
-        ? this.prisma.rfq.count({
-            where: { farmId: user.farm.id, status: PrismaRfqStatus.completed },
-          })
-        : Promise.resolve(0),
+      this.prisma.rfq.count({
+        where: {
+          product: { ownerUserId: user.id },
+          status: PrismaRfqStatus.completed,
+        },
+      }),
     ]);
 
     return {

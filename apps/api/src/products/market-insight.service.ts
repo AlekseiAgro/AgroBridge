@@ -27,7 +27,7 @@ type InsightProduct = {
     name: string;
     region: string | null;
     exportMarkets: string[];
-  };
+  } | null;
 };
 
 function toNumberOrNull(
@@ -104,12 +104,12 @@ export class MarketInsightService {
     const category = product.category ?? 'other';
     const origin =
       product.originPlace ||
-      product.farm.region ||
+      product.farm?.region ||
       product.country ||
       'Georgia';
     const variety = product.variety?.trim() || localizeProductTitle(product.title, locale);
     const markets =
-      product.farm.exportMarkets.length > 0
+      product.farm && product.farm.exportMarkets.length > 0
         ? product.farm.exportMarkets.slice(0, 2)
         : (DEMAND_MARKETS[category] ?? DEMAND_MARKETS.other).slice(0, 2);
     const localizedMarkets = markets.map((market) => this.localizeMarket(market, locale));
@@ -156,7 +156,7 @@ export class MarketInsightService {
         preorderEnabled: product.preorderEnabled,
         currentStock: toNumberOrNull(product.currentStock),
         maxQuantity: toNumberOrNull(product.maxQuantity),
-        exportMarkets: product.farm.exportMarkets,
+        exportMarkets: product.farm?.exportMarkets ?? [],
       }),
     };
   }

@@ -193,6 +193,14 @@ export type ProductSummary = {
   certificateBadges: CertificateType[];
   qualityScore: ProductQualityScore;
   opportunity: MarketOpportunity;
+  ownerUserId: string;
+  owner: {
+    id: string;
+    displayName: string | null;
+  };
+  /** Aggregate deal rating of the product owner (seller). */
+  sellerRating: RatingSummary;
+  /** Optional farm profile enrichment; null when the seller has not created one. */
   farm: {
     id: string;
     name: string;
@@ -204,9 +212,7 @@ export type ProductSummary = {
     ownershipType: string | null;
     exportMarkets: string[];
     history: string | null;
-    /** Aggregate deal rating of the farm owner (seller). */
-    sellerRating: RatingSummary;
-  };
+  } | null;
 };
 
 export type ProductDetail = ProductSummary & {
@@ -214,7 +220,7 @@ export type ProductDetail = ProductSummary & {
   updatedAt: string;
   /** Whether the current viewer watches harvest/preorder alerts for this product. */
   watching?: boolean;
-  /** True when the authenticated viewer owns this listing's farm. */
+  /** True when the authenticated viewer owns this product listing. */
   isOwner?: boolean;
   videos: ProductVideo[];
   certificates: ProductCertificate[];

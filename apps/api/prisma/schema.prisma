@@ -149,6 +149,7 @@ model User {
   blockedBy                    User?              @relation("BlockedByAdmin", fields: [blockedById], references: [id], onDelete: SetNull)
   blockedUsers                 User[]             @relation("BlockedByAdmin")
   farm                         Farm?
+  ownedProducts                Product[]          @relation("ProductOwner")
   conversationsAsFarmer        Conversation[]     @relation("FarmerConversations")
   conversationsAsBuyer         Conversation[]     @relation("BuyerConversations")
   messages                     Message[]
@@ -274,7 +275,8 @@ model CategoryConfig {
 
 model Product {
   id                   String           @id @default(cuid())
-  farmId               String
+  ownerUserId          String
+  farmId               String?
   title                String
   description          String?
   category             String?
@@ -315,7 +317,8 @@ model Product {
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
 
-  farm           Farm                 @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  owner          User                 @relation("ProductOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  farm           Farm?                @relation(fields: [farmId], references: [id], onDelete: SetNull)
   moderatedBy    User?                @relation("ProductModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
   rfqs           Rfq[]
   images         ProductImage[]
@@ -323,6 +326,7 @@ model Product {
   certificates   ProductCertificate[]
   harvestWatches HarvestWatch[]
 
+  @@index([ownerUserId])
   @@index([farmId])
   @@index([isPublished])
   @@index([moderationStatus])
@@ -407,7 +411,7 @@ model ProductCertificate {
 model Rfq {
   id          String    @id @default(cuid())
   productId   String
-  farmId      String
+  farmId      String?
   buyerId     String
   quantity    String
   unit        String?
@@ -418,7 +422,7 @@ model Rfq {
   updatedAt   DateTime  @updatedAt
 
   product Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  farm    Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  farm    Farm?     @relation(fields: [farmId], references: [id], onDelete: SetNull)
   buyer   User      @relation("BuyerRfqs", fields: [buyerId], references: [id], onDelete: Cascade)
   offer   RfqOffer?
   ratings Rating[]

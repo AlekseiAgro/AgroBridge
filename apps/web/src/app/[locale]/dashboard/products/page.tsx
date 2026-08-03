@@ -31,7 +31,7 @@ export default async function DashboardProductsPage({ params }: Props) {
   try {
     products = await apiRequestAuthed<ProductSummary[]>('/products/mine');
   } catch {
-    error = t('needFarmFirst');
+    error = t('loadError');
   }
 
   return (
@@ -46,11 +46,7 @@ export default async function DashboardProductsPage({ params }: Props) {
         </Link>
       </div>
 
-      {error ? (
-        <p className="form-error">
-          {error} <Link href="/dashboard/farm">{t('goCreateFarm')}</Link>
-        </p>
-      ) : null}
+      {error ? <p className="form-error">{error}</p> : null}
 
       {!error && products.length === 0 ? (
         <p className="empty-state">{t('emptyMine')}</p>

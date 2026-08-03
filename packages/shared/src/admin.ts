@@ -131,16 +131,16 @@ export type ModeratedProduct = {
   moderatedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  owner: {
+    id: string;
+    displayName: string | null;
+    email: string;
+  };
   farm: {
     id: string;
     name: string;
     region: string | null;
-    owner: {
-      id: string;
-      displayName: string | null;
-      email: string;
-    };
-  };
+  } | null;
 };
 
 export const ADMIN_SECTIONS = [
