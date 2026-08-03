@@ -23,7 +23,7 @@ import { useTranslations } from 'next-intl';
 import { FormEvent, useMemo, useState, type ReactNode } from 'react';
 import { OriginPlaceInput } from '@/components/OriginPlaceInput';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
-import { useRouter } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 
 type Props = {
   mode: 'create' | 'edit';
@@ -31,6 +31,8 @@ type Props = {
   /** Rendered under the quality widget and above the form sections (e.g. media uploads). */
   leading?: ReactNode;
 };
+
+type SubmitIntent = 'save' | 'publish';
 
 function parseOptionalQuantity(value: FormDataEntryValue | null): number | null {
   const raw = String(value ?? '').trim();
@@ -79,7 +81,9 @@ export function ProductForm({ mode, initial, leading }: Props) {
   const tc = useTranslations('catalog');
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [lastIntent, setLastIntent] = useState<SubmitIntent>('save');
   const [title, setTitle] = useState(initial?.title ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
   const [category, setCategory] = useState(initial?.category ?? '');
@@ -215,8 +219,13 @@ export function ProductForm({ mode, initial, leading }: Props) {
     event.preventDefault();
     setPending(true);
     setError(null);
+    setSuccess(null);
 
     const form = new FormData(event.currentTarget);
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const intent: SubmitIntent =
+      submitter?.value === 'publish' || form.get('intent') === 'publish' ? 'publish' : 'save';
+    setLastIntent(intent);
     const parsedMinQuantity = parseOptionalQuantity(form.get('minQuantity'));
     const parsedMaxQuantity = parseOptionalQuantity(form.get('maxQuantity'));
     const parsedCurrentStock = parseOptionalQuantity(form.get('currentStock'));
@@ -287,7 +296,8 @@ export function ProductForm({ mode, initial, leading }: Props) {
       forecastQuantity,
       harvestStatus: harvestStatus || null,
       preorderEnabled,
-      isPublished: form.get('isPublished') === 'on',
+      // Save keeps a draft; Publish submits the card for admin moderation.
+      isPublished: intent === 'publish',
     };
 
     try {
@@ -299,17 +309,22 @@ export function ProductForm({ mode, initial, leading }: Props) {
           body: JSON.stringify(payload),
         },
       );
-      const data = (await response.json()) as { message?: string; id?: string };
+      const data = (await response.json()) as {
+        message?: string;
+        id?: string;
+        moderationStatus?: string;
+      };
       if (!response.ok) {
         setError(data.message ?? t('genericError'));
         return;
       }
+
       if (mode === 'create' && data.id) {
         router.replace(`/dashboard/products/${data.id}/edit`);
       } else {
-        router.replace('/dashboard/products');
+        setSuccess(intent === 'publish' ? t('publishedPendingHint') : t('savedDraftHint'));
+        router.refresh();
       }
-      router.refresh();
     } catch {
       setError(t('genericError'));
     } finally {
@@ -737,20 +752,40 @@ export function ProductForm({ mode, initial, leading }: Props) {
         </label>
       </fieldset>
 
-      <label className="role-option">
-        <input name="isPublished" type="checkbox" defaultChecked={initial?.isPublished ?? false} />
-        <span>{t('submitForReview')}</span>
-      </label>
       {initial?.moderationStatus ? (
         <p className="product-list__meta">
           {t('moderationLabel')}: {t(`moderation.${initial.moderationStatus}`)}
           {initial.moderationNote ? ` — ${initial.moderationNote}` : ''}
         </p>
       ) : null}
+      {success ? <p className="form-success">{success}</p> : null}
       {error ? <p className="form-error">{error}</p> : null}
-      <button className="button button--primary" type="submit" disabled={pending}>
-        {pending ? t('pleaseWait') : mode === 'create' ? t('createSubmit') : t('saveSubmit')}
-      </button>
+      <div className="product-form__actions">
+        {initial?.id ? (
+          <Link className="button button--ghost" href={`/products/${initial.id}`}>
+            {t('preview')}
+          </Link>
+        ) : null}
+        <button
+          className="button button--ghost"
+          type="submit"
+          name="intent"
+          value="save"
+          disabled={pending}
+        >
+          {pending && lastIntent === 'save' ? t('pleaseWait') : t('saveSubmit')}
+        </button>
+        <button
+          className="button button--primary"
+          type="submit"
+          name="intent"
+          value="publish"
+          disabled={pending}
+        >
+          {pending && lastIntent === 'publish' ? t('pleaseWait') : t('publish')}
+        </button>
+      </div>
+      <p className="field-hint">{t('publishHint')}</p>
       </form>
     </div>
   );

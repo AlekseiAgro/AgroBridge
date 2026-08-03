@@ -93,6 +93,9 @@ export default async function DashboardProductsPage({ params }: Props) {
                   </div>
                 </div>
                 <div className="product-list__actions">
+                  <Link className="button button--ghost" href={`/products/${product.id}`}>
+                    {t('preview')}
+                  </Link>
                   <Link
                     className="button button--ghost"
                     href={`/dashboard/products/${product.id}/edit`}
