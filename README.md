@@ -158,17 +158,19 @@ Single-host production compose (web + api + Postgres + Redis).
 
 Configured by default for **agrobrid.ge** (API on **api.agrobrid.ge**). Domain is env-only — see [`docs/DOMAIN.md`](docs/DOMAIN.md) to move later without code changes.
 
-```bash
-cp .env.production.example .env.production
-# set JWT_SECRET, POSTGRES_PASSWORD, SUPPORT_EMAIL (URLs already use agrobrid.ge)
-pnpm docker:prod:up
-# TLS proxy: deploy/Caddyfile
-```
+**Hosting options**
 
-Details: [`docs/DEPLOY.md`](docs/DEPLOY.md).
+- **Railway (PaaS):** [`docs/RAILWAY.md`](docs/RAILWAY.md) — GitHub + Postgres + Redis + web/api services
+- **VPS / Docker:** [`docs/DEPLOY.md`](docs/DEPLOY.md) — `pnpm docker:prod:up` + [`deploy/Caddyfile`](deploy/Caddyfile)
+
+```bash
+# Docker / VPS path
+cp .env.production.example .env.production
+pnpm docker:prod:up
+```
 
 ## Next implementation steps
 
-1. Point DNS for `agrobrid.ge` + `api.agrobrid.ge`, enable HTTPS (`deploy/Caddyfile`)
+1. Deploy on Railway ([`docs/RAILWAY.md`](docs/RAILWAY.md)) or a VPS, then attach `agrobrid.ge`
 2. Turn on SMTP + S3/R2 for mail and durable uploads
 3. Payment / order confirmation flow (product)
