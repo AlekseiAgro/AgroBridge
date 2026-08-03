@@ -1,5 +1,26 @@
+import { evaluateMarketOpportunity } from '@agrobridge/shared';
 import { NotFoundException } from '@nestjs/common';
 import { MarketInsightService } from './market-insight.service';
+
+describe('evaluateMarketOpportunity', () => {
+  it('marks limited high-demand listings as excellent', () => {
+    const opportunity = evaluateMarketOpportunity({
+      id: 'berry-1',
+      category: 'berries',
+      harvestStartAt: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
+      harvestStatus: 'limited',
+      preorderEnabled: true,
+      exportMarkets: ['Germany', 'Netherlands'],
+    });
+
+    expect(opportunity.tier).toBe('excellent');
+    expect(opportunity.highDemand).toBe(true);
+    expect(opportunity.limitedSupply).toBe(true);
+    expect(opportunity.priceRiseLikely).toBe(true);
+    expect(opportunity.markets).toEqual(['Germany', 'Netherlands']);
+    expect(opportunity.weeksToSeason).toBe(3);
+  });
+});
 
 describe('MarketInsightService', () => {
   const prisma = {
@@ -26,6 +47,8 @@ describe('MarketInsightService', () => {
       harvestStartAt: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
       harvestStatus: 'growing',
       preorderEnabled: true,
+      currentStock: 120,
+      maxQuantity: 500,
       priceFrom: 0.85,
       priceCurrency: 'EUR',
       isPublished: true,
@@ -43,6 +66,8 @@ describe('MarketInsightService', () => {
     expect(insight.summary).toContain('Superior');
     expect(insight.summary).toContain('Германии');
     expect(insight.highlights.length).toBeGreaterThan(0);
+    expect(insight.opportunity.tier).toBeTruthy();
+    expect(insight.opportunity.markets).toEqual(['Germany', 'Poland']);
   });
 
   it('rejects unpublished products', async () => {

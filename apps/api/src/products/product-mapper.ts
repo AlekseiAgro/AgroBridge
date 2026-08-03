@@ -1,5 +1,6 @@
 import {
   computeProductQualityScore,
+  evaluateMarketOpportunity,
   isCarrier,
   isCertificateType,
   isIncoterm,
@@ -265,6 +266,16 @@ export function mapProductSummary(
       ),
     ],
     qualityScore: buildQualityScore(product),
+    opportunity: evaluateMarketOpportunity({
+      id: product.id,
+      category: product.category,
+      harvestStartAt: product.harvestStartAt,
+      harvestStatus: product.harvestStatus,
+      preorderEnabled: product.preorderEnabled,
+      currentStock: toNumberOrNull(product.currentStock),
+      maxQuantity: toNumberOrNull(product.maxQuantity),
+      exportMarkets: product.farm.exportMarkets,
+    }),
     farm: {
       id: product.farm.id,
       name: product.farm.name,

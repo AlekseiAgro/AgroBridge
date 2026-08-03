@@ -69,7 +69,6 @@ export function CatalogFilters({
 
   return (
     <form className="catalog-filters" onSubmit={onSubmit}>
-      <p className="catalog-filters__hint">{t('filtersHint')}</p>
       <label className="field">
         <span>{t('search')}</span>
         <input

@@ -6,6 +6,7 @@ import { HarvestPlanSummary } from '@/components/HarvestPlanSummary';
 import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
 import { HarvestWatchButton } from '@/components/HarvestWatchButton';
 import { MarketInsightButton } from '@/components/MarketInsightButton';
+import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
 import { RatingStars } from '@/components/RatingStars';
 import { RfqRequestForm } from '@/components/RfqRequestForm';
@@ -72,6 +73,9 @@ export default async function ProductDetailPage({ params }: Props) {
             preorderEnabled={product.preorderEnabled}
           />
         </h1>
+        <div className="product-opportunity-row">
+          <MarketOpportunityBadge opportunity={product.opportunity} />
+        </div>
         <p className="page__subtitle">
           <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
           <VerifiedBadge verified={product.farm.verified} />

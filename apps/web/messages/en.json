@@ -946,5 +946,23 @@
     "loading": "Preparing a short market note…",
     "error": "Could not load market insight.",
     "disclaimer": "Indicative note based on listing details. Not financial or trading advice."
+  },
+  "opportunity": {
+    "tiers": {
+      "excellent": "Excellent Opportunity",
+      "good": "Good Opportunity",
+      "fair": "Fair Opportunity",
+      "watch": "Watch Opportunity"
+    },
+    "tooltip": {
+      "highDemand": "High demand in {markets}.",
+      "steadyDemand": "Steady demand in {markets}.",
+      "limitedSupply": "Supply limited.",
+      "availableSupply": "Supply is available.",
+      "priceRiseThreeWeeks": "Price growth expected in the next three weeks.",
+      "priceRiseWeeks": "Price growth expected in the next {weeks} weeks.",
+      "priceRiseSoon": "Price growth is expected soon.",
+      "priceStable": "Recent price move about +{percent}%."
+    }
   }
 }

@@ -4,6 +4,7 @@ import { CertificateBadges } from '@/components/CertificateBadges';
 import { CatalogFilters } from '@/components/CatalogFilters';
 import { CatalogPurchaseCta } from '@/components/CatalogPurchaseCta';
 import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
+import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { RatingStars } from '@/components/RatingStars';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -109,6 +110,9 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                       status={product.harvestStatus}
                       preorderEnabled={product.preorderEnabled}
                     />
+                    <div className="product-opportunity-row">
+                      <MarketOpportunityBadge opportunity={product.opportunity} />
+                    </div>
                     <div className="product-quality-summary">
                       <span
                         className={`quality-score-chip quality-score-chip--${product.qualityScore.tier}`}

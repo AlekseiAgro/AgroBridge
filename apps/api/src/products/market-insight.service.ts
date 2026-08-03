@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { isLocale, type Locale, type ProductMarketInsight } from '@agrobridge/shared';
+import {
+  evaluateMarketOpportunity,
+  isLocale,
+  type Locale,
+  type ProductMarketInsight,
+} from '@agrobridge/shared';
 import { ModerationStatus as PrismaModerationStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -13,6 +18,8 @@ type InsightProduct = {
   harvestStartAt: Date | null;
   harvestStatus: string | null;
   preorderEnabled: boolean;
+  currentStock: { toNumber(): number } | number | null;
+  maxQuantity: { toNumber(): number } | number | null;
   priceFrom: { toNumber(): number } | number | null;
   priceCurrency: string | null;
   farm: {
@@ -21,6 +28,13 @@ type InsightProduct = {
     exportMarkets: string[];
   };
 };
+
+function toNumberOrNull(
+  value: { toNumber(): number } | number | null | undefined,
+): number | null {
+  if (value == null) return null;
+  return typeof value === 'number' ? value : value.toNumber();
+}
 
 const DEMAND_MARKETS: Record<string, string[]> = {
   fruits: ['Germany', 'Poland', 'Baltic states'],
@@ -58,6 +72,8 @@ export class MarketInsightService {
         harvestStartAt: true,
         harvestStatus: true,
         preorderEnabled: true,
+        currentStock: true,
+        maxQuantity: true,
         priceFrom: true,
         priceCurrency: true,
         isPublished: true,
@@ -131,6 +147,16 @@ export class MarketInsightService {
       highlights,
       generatedAt: new Date().toISOString(),
       source: 'heuristic',
+      opportunity: evaluateMarketOpportunity({
+        id: product.id,
+        category: product.category,
+        harvestStartAt: product.harvestStartAt,
+        harvestStatus: product.harvestStatus,
+        preorderEnabled: product.preorderEnabled,
+        currentStock: toNumberOrNull(product.currentStock),
+        maxQuantity: toNumberOrNull(product.maxQuantity),
+        exportMarkets: product.farm.exportMarkets,
+      }),
     };
   }
 

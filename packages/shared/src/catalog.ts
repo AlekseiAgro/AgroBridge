@@ -123,6 +123,7 @@ import type {
   ProductQualityScore,
   ProductVideo,
 } from './quality';
+import type { MarketOpportunity } from './market-insight';
 
 export const PRODUCT_IMAGE_MAX_COUNT = 10;
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
@@ -191,6 +192,7 @@ export type ProductSummary = {
   videoCount: number;
   certificateBadges: CertificateType[];
   qualityScore: ProductQualityScore;
+  opportunity: MarketOpportunity;
   farm: {
     id: string;
     name: string;

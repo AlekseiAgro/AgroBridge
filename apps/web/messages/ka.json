@@ -946,5 +946,23 @@
     "loading": "მოკლე ბაზრის შენიშვნა მზადდება…",
     "error": "ბაზრის მიმოხილვის ჩატვირთვა ვერ მოხერხდა.",
     "disclaimer": "საორიენტაციო შენიშვნა ბარათის მონაცემებით. არ არის ფინანსური რჩევა."
+  },
+  "opportunity": {
+    "tiers": {
+      "excellent": "Excellent Opportunity",
+      "good": "Good Opportunity",
+      "fair": "Fair Opportunity",
+      "watch": "Watch Opportunity"
+    },
+    "tooltip": {
+      "highDemand": "მაღალი მოთხოვნა {markets}.",
+      "steadyDemand": "სტაბილური მოთხოვნა {markets}.",
+      "limitedSupply": "მიწოდება შეზღუდულია.",
+      "availableSupply": "მიწოდება ხელმისაწვდომია.",
+      "priceRiseThreeWeeks": "ფასების ზრდა მოსალოდნელია მომდევნო სამი კვირის განმავლობაში.",
+      "priceRiseWeeks": "ფასების ზრდა მოსალოდნელია მომდევნო {weeks} კვირაში.",
+      "priceRiseSoon": "ფასების ზრდა მალე მოსალოდნელია.",
+      "priceStable": "ბოლო ფასის ცვლილება დაახლოებით +{percent}%."
+    }
   }
 }

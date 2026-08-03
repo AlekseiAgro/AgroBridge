@@ -946,5 +946,23 @@
     "loading": "Готовим короткий рыночный обзор…",
     "error": "Не удалось загрузить обзор.",
     "disclaimer": "Ориентировочная заметка по данным карточки. Не является финансовой рекомендацией."
+  },
+  "opportunity": {
+    "tiers": {
+      "excellent": "Excellent Opportunity",
+      "good": "Good Opportunity",
+      "fair": "Fair Opportunity",
+      "watch": "Watch Opportunity"
+    },
+    "tooltip": {
+      "highDemand": "Высокий спрос в {markets}.",
+      "steadyDemand": "Устойчивый спрос в {markets}.",
+      "limitedSupply": "Предложение ограничено.",
+      "availableSupply": "Предложение доступно.",
+      "priceRiseThreeWeeks": "Ожидается рост цен в течение ближайших трех недель.",
+      "priceRiseWeeks": "Ожидается рост цен в течение ближайших {weeks} недель.",
+      "priceRiseSoon": "В ближайшее время ожидается рост цен.",
+      "priceStable": "Недавнее изменение цены около +{percent}%."
+    }
   }
 }
