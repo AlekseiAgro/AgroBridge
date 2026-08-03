@@ -80,6 +80,27 @@ export function isGeorgiaRegion(value: string): value is GeorgiaRegion {
 import type { FarmDocument, VerificationStatus } from './verification';
 import type { HarvestStatus, SeasonMonth } from './harvest';
 
+export const FARM_PHOTO_MAX_COUNT = 3;
+export const FARM_PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+export const FARM_PHOTO_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+] as const;
+
+export type FarmPhotoMimeType = (typeof FARM_PHOTO_MIME_TYPES)[number];
+
+export function isFarmPhotoMimeType(value: string): value is FarmPhotoMimeType {
+  return (FARM_PHOTO_MIME_TYPES as readonly string[]).includes(value);
+}
+
+export type FarmPhoto = {
+  id: string;
+  url: string;
+  sortOrder: number;
+  isPrimary: boolean;
+};
+
 export type FarmSummary = {
   id: string;
   name: string;
@@ -98,6 +119,7 @@ export type FarmSummary = {
     displayName: string | null;
   };
   productCount: number;
+  photos: FarmPhoto[];
 };
 
 export type FarmDetail = FarmSummary & {

@@ -40,6 +40,24 @@ export class UploadsController {
     return this.serveLocalFile(`users/${userId}/${filename}`, filename, res);
   }
 
+  @Get('farms/:farmId/photos/:filename')
+  async serveFarmPhoto(
+    @Param('farmId') farmId: string,
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ) {
+    return this.serveLocalFile(`farms/${farmId}/photos/${filename}`, filename, res);
+  }
+
+  @Get('farms/:farmId/documents/:filename')
+  async serveFarmDocument(
+    @Param('farmId') farmId: string,
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ) {
+    return this.serveLocalFile(`farms/${farmId}/documents/${filename}`, filename, res);
+  }
+
   private serveLocalFile(key: string, filename: string, res: Response) {
     if (this.storage.getDriver() !== STORAGE_DRIVER.LOCAL) {
       throw new NotFoundException('Local uploads are not enabled');

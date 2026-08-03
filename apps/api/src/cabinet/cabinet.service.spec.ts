@@ -124,6 +124,7 @@ describe('CabinetService', () => {
     prisma.verificationCode.update.mockResolvedValue({ id: 'c1' });
     prisma.farm.findUnique.mockResolvedValue({
       documents: [{ key: 'docs/id.pdf' }],
+      images: [{ key: 'farms/1/photos/a.jpg' }],
     });
     prisma.product.findMany.mockResolvedValue([
       {
@@ -140,6 +141,7 @@ describe('CabinetService', () => {
     expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: 'user_1' } });
     expect(storage.delete).toHaveBeenCalledWith('users/user_1/avatar.jpg');
     expect(storage.delete).toHaveBeenCalledWith('docs/id.pdf');
+    expect(storage.delete).toHaveBeenCalledWith('farms/1/photos/a.jpg');
     expect(storage.delete).toHaveBeenCalledWith('img/1.jpg');
   });
 

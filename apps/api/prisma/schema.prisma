@@ -217,8 +217,24 @@ model Farm {
   rfqs            Rfq[]
   purchaseQuotes  PurchaseQuote[]
   documents       FarmDocument[]
+  images          FarmImage[]
 
   @@index([verificationStatus])
+}
+
+model FarmImage {
+  id        String   @id @default(cuid())
+  farmId    String
+  url       String
+  key       String
+  sortOrder Int      @default(0)
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@index([farmId, sortOrder])
+  @@map("farm_images")
 }
 
 model FarmDocument {

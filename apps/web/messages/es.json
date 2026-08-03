@@ -239,6 +239,20 @@
         "other": "Other"
       }
     },
+    "photos": {
+      "title": "Fotos de la finca",
+      "subtitle": "Añade hasta {max} fotos de tu finca (JPEG, PNG o WebP, hasta 5 MB cada una).",
+      "upload": "Subir foto",
+      "empty": "Aún no hay fotos de la finca.",
+      "primary": "Portada",
+      "setPrimary": "Usar como portada",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Eliminar esta foto?",
+      "uploadError": "No se pudo subir la foto.",
+      "deleteError": "No se pudo eliminar la foto.",
+      "primaryError": "No se pudo actualizar la portada.",
+      "maxReached": "Se alcanzó el límite de {max} fotos."
+    },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",
     "ownershipType": "Ownership type",

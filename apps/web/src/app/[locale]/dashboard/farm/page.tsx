@@ -2,6 +2,7 @@ import type { FarmDetail, ProducerVerificationStatus } from '@agrobridge/shared'
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { FarmDocumentsManager } from '@/components/FarmDocumentsManager';
 import { FarmForm } from '@/components/FarmForm';
+import { FarmPhotosManager } from '@/components/FarmPhotosManager';
 import { ProducerVerificationPanel } from '@/components/ProducerVerificationPanel';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link, redirect } from '@/i18n/navigation';
@@ -64,6 +65,7 @@ export default async function DashboardFarmPage({ params }: Props) {
             : null
         }
       />
+      {farm ? <FarmPhotosManager initialPhotos={farm.photos ?? []} /> : null}
       {farm && verification ? <ProducerVerificationPanel initial={verification} /> : null}
       {farm ? (
         <>

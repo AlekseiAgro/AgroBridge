@@ -374,6 +374,7 @@ export class CabinetService {
         where: { ownerId: user.id },
         select: {
           documents: { select: { key: true } },
+          images: { select: { key: true } },
         },
       }),
       this.prisma.product.findMany({
@@ -390,6 +391,7 @@ export class CabinetService {
     if (avatarUser?.avatarKey) storageKeys.push(avatarUser.avatarKey);
     if (farm) {
       for (const document of farm.documents) storageKeys.push(document.key);
+      for (const image of farm.images) storageKeys.push(image.key);
     }
     for (const product of ownedProducts) {
       for (const image of product.images) storageKeys.push(image.key);
