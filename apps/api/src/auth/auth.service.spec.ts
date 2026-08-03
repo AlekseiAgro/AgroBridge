@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -46,14 +46,14 @@ describe('AuthService', () => {
     );
   });
 
-  it('registers a farmer and returns a token', async () => {
+  it('registers a farmer without seller/buyer subtypes', async () => {
     prisma.user.findUnique.mockResolvedValue(null);
     prisma.user.create.mockResolvedValue({
       id: 'user_1',
       email: 'farmer@example.com',
       role: 'farmer',
-      sellerType: 'privateFarmer',
-      buyerType: 'individual',
+      sellerType: null,
+      buyerType: null,
       locale: 'ka',
       displayName: 'Nino',
       passwordHash: 'hash',
@@ -64,7 +64,6 @@ describe('AuthService', () => {
       email: 'Farmer@Example.com',
       password: 'password1',
       role: 'farmer',
-      sellerType: 'privateFarmer',
       displayName: 'Nino',
       locale: 'ka',
     });
@@ -74,8 +73,8 @@ describe('AuthService', () => {
       id: 'user_1',
       email: 'farmer@example.com',
       role: 'farmer',
-      sellerType: 'privateFarmer',
-      buyerType: 'individual',
+      sellerType: null,
+      buyerType: null,
       locale: 'ka',
       displayName: 'Nino',
       emailVerified: false,
@@ -84,8 +83,8 @@ describe('AuthService', () => {
     expect(prisma.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          sellerType: 'privateFarmer',
-          buyerType: 'individual',
+          sellerType: null,
+          buyerType: null,
           role: 'farmer',
         }),
       }),
@@ -99,38 +98,14 @@ describe('AuthService', () => {
     expect(verification.sendEmailCode).toHaveBeenCalled();
   });
 
-  it('requires seller type for farmers', async () => {
-    prisma.user.findUnique.mockResolvedValue(null);
-
-    await expect(
-      service.register({
-        email: 'farmer@example.com',
-        password: 'password1',
-        role: 'farmer',
-      }),
-    ).rejects.toBeInstanceOf(BadRequestException);
-  });
-
-  it('requires buyer type for buyers', async () => {
-    prisma.user.findUnique.mockResolvedValue(null);
-
-    await expect(
-      service.register({
-        email: 'buyer@example.com',
-        password: 'password1',
-        role: 'buyer',
-      }),
-    ).rejects.toBeInstanceOf(BadRequestException);
-  });
-
-  it('registers a buyer with buyer type', async () => {
+  it('registers a buyer without seller/buyer subtypes', async () => {
     prisma.user.findUnique.mockResolvedValue(null);
     prisma.user.create.mockResolvedValue({
       id: 'user_2',
       email: 'buyer@example.com',
       role: 'buyer',
-      sellerType: 'privateFarmer',
-      buyerType: 'company',
+      sellerType: null,
+      buyerType: null,
       locale: 'en',
       displayName: 'Elena',
       passwordHash: 'hash',
@@ -141,19 +116,19 @@ describe('AuthService', () => {
       email: 'buyer@example.com',
       password: 'password1',
       role: 'buyer',
-      buyerType: 'company',
       displayName: 'Elena',
       locale: 'en',
     });
 
-    expect(result.user.buyerType).toBe('company');
-    expect(result.user.sellerType).toBe('privateFarmer');
+    expect(result.user.role).toBe('buyer');
+    expect(result.user.buyerType).toBeNull();
+    expect(result.user.sellerType).toBeNull();
     expect(result.user.emailVerified).toBe(false);
     expect(prisma.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          buyerType: 'company',
-          sellerType: 'privateFarmer',
+          buyerType: null,
+          sellerType: null,
           role: 'buyer',
         }),
       }),
@@ -168,7 +143,6 @@ describe('AuthService', () => {
         email: 'farmer@example.com',
         password: 'password1',
         role: 'farmer',
-        sellerType: 'privateFarmer',
       }),
     ).rejects.toBeInstanceOf(ConflictException);
   });

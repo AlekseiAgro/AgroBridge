@@ -55,7 +55,8 @@
       "company": "Entreprise"
     },
     "dualCapabilityHint": "Un seul compte permet de vendre des produits et de publier des demandes d’achat. Choisissez surtout par où commencer.",
-    "registerEmailVerifyHint": "Après l’inscription, nous envoyons un code de confirmation. Le compte s’ouvre une fois l’e-mail vérifié."
+    "registerEmailVerifyHint": "Après l’inscription, nous envoyons un code de confirmation. Le compte s’ouvre une fois l’e-mail vérifié.",
+    "roleHint": "Choisissez vendeur ou acheteur. Nous utilisons ce choix pour les statistiques d’inscription."
   },
   "account": {
     "title": "Votre compte",

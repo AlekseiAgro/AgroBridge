@@ -55,7 +55,8 @@
       "company": "Company"
     },
     "dualCapabilityHint": "One account can both sell products and post purchase requests. Pick how you mainly start.",
-    "registerEmailVerifyHint": "After sign-up we email a confirmation code. You can open your account once the address is verified."
+    "registerEmailVerifyHint": "After sign-up we email a confirmation code. You can open your account once the address is verified.",
+    "roleHint": "Choose seller or buyer. We use this for registration statistics."
   },
   "account": {
     "title": "Your account",

@@ -1,13 +1,9 @@
 'use client';
 
 import {
-  BUYER_TYPES,
   REGISTERABLE_ROLES,
-  SELLER_TYPES,
-  type BuyerType,
   type PublicUser,
   type RegisterableRole,
-  type SellerType,
 } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
@@ -30,8 +26,6 @@ export function AuthForm({ mode, nextPath }: Props) {
   const [role, setRole] = useState<RegisterableRole>(
     nextPath?.includes('/requests/new') ? 'buyer' : 'farmer',
   );
-  const [sellerType, setSellerType] = useState<SellerType>('privateFarmer');
-  const [buyerType, setBuyerType] = useState<BuyerType>('individual');
   const redirectTo = safeNextPath(nextPath, '/account');
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -51,8 +45,6 @@ export function AuthForm({ mode, nextPath }: Props) {
             password: String(form.get('password') ?? ''),
             displayName: String(form.get('displayName') ?? ''),
             role,
-            sellerType,
-            buyerType,
             locale,
           };
 
@@ -95,7 +87,7 @@ export function AuthForm({ mode, nextPath }: Props) {
 
           <fieldset className="role-fieldset">
             <legend>{t('role')}</legend>
-            <p className="product-list__meta">{t('dualCapabilityHint')}</p>
+            <p className="product-list__meta">{t('roleHint')}</p>
             {REGISTERABLE_ROLES.map((value) => (
               <label key={value} className="role-option">
                 <input
@@ -106,42 +98,6 @@ export function AuthForm({ mode, nextPath }: Props) {
                   onChange={() => setRole(value)}
                 />
                 <span>{t(`roles.${value}`)}</span>
-              </label>
-            ))}
-          </fieldset>
-
-          <fieldset className="role-fieldset">
-            <legend>{t('sellerType')}</legend>
-            <p className="product-list__meta">{t('sellerTypeHint')}</p>
-            {SELLER_TYPES.map((value) => (
-              <label key={value} className="role-option">
-                <input
-                  type="radio"
-                  name="sellerType"
-                  value={value}
-                  checked={sellerType === value}
-                  onChange={() => setSellerType(value)}
-                  required
-                />
-                <span>{t(`sellerTypes.${value}`)}</span>
-              </label>
-            ))}
-          </fieldset>
-
-          <fieldset className="role-fieldset">
-            <legend>{t('buyerType')}</legend>
-            <p className="product-list__meta">{t('buyerTypeHint')}</p>
-            {BUYER_TYPES.map((value) => (
-              <label key={value} className="role-option">
-                <input
-                  type="radio"
-                  name="buyerType"
-                  value={value}
-                  checked={buyerType === value}
-                  onChange={() => setBuyerType(value)}
-                  required
-                />
-                <span>{t(`buyerTypes.${value}`)}</span>
               </label>
             ))}
           </fieldset>
