@@ -48,6 +48,7 @@ describe('AuthService', () => {
       email: 'farmer@example.com',
       role: 'farmer',
       sellerType: 'privateFarmer',
+      buyerType: null,
       locale: 'ka',
       displayName: 'Nino',
       passwordHash: 'hash',
@@ -68,6 +69,7 @@ describe('AuthService', () => {
       email: 'farmer@example.com',
       role: 'farmer',
       sellerType: 'privateFarmer',
+      buyerType: null,
       locale: 'ka',
       displayName: 'Nino',
       rating: { average: null, count: 0 },
@@ -98,6 +100,53 @@ describe('AuthService', () => {
         role: 'farmer',
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('requires buyer type for buyers', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.register({
+        email: 'buyer@example.com',
+        password: 'password1',
+        role: 'buyer',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('registers a buyer with buyer type', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+    prisma.user.create.mockResolvedValue({
+      id: 'user_2',
+      email: 'buyer@example.com',
+      role: 'buyer',
+      sellerType: null,
+      buyerType: 'company',
+      locale: 'en',
+      displayName: 'Elena',
+      passwordHash: 'hash',
+    });
+
+    const result = await service.register({
+      email: 'buyer@example.com',
+      password: 'password1',
+      role: 'buyer',
+      buyerType: 'company',
+      displayName: 'Elena',
+      locale: 'en',
+    });
+
+    expect(result.user.buyerType).toBe('company');
+    expect(result.user.sellerType).toBeNull();
+    expect(prisma.user.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          buyerType: 'company',
+          sellerType: null,
+          role: 'buyer',
+        }),
+      }),
+    );
   });
 
   it('rejects duplicate email', async () => {

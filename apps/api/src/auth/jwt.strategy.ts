@@ -31,6 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         email: true,
         role: true,
         sellerType: true,
+        buyerType: true,
         locale: true,
         displayName: true,
         blockedAt: true,
@@ -53,6 +54,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       email: user.email,
       role: user.role,
       sellerType: user.sellerType,
+      buyerType: user.buyerType,
       locale: user.locale,
       displayName: user.displayName,
     };

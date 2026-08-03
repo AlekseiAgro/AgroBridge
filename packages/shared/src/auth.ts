@@ -12,6 +12,11 @@ export const SELLER_TYPES = ['privateFarmer', 'company'] as const;
 
 export type SellerType = (typeof SELLER_TYPES)[number];
 
+/** Buyer classification chosen at registration (buyers only). */
+export const BUYER_TYPES = ['individual', 'company'] as const;
+
+export type BuyerType = (typeof BUYER_TYPES)[number];
+
 export function isUserRole(value: string): value is UserRole {
   return (USER_ROLES as readonly string[]).includes(value);
 }
@@ -24,11 +29,16 @@ export function isSellerType(value: string): value is SellerType {
   return (SELLER_TYPES as readonly string[]).includes(value);
 }
 
+export function isBuyerType(value: string): value is BuyerType {
+  return (BUYER_TYPES as readonly string[]).includes(value);
+}
+
 export type PublicUser = {
   id: string;
   email: string;
   role: UserRole;
   sellerType: SellerType | null;
+  buyerType: BuyerType | null;
   locale: Locale;
   displayName: string | null;
   rating: RatingSummary;

@@ -45,6 +45,9 @@ export default async function AccountPage({ params }: Props) {
               {user.sellerType
                 ? ` · ${ta(`sellerTypes.${user.sellerType}`)}`
                 : ''}
+              {user.buyerType
+                ? ` · ${ta(`buyerTypes.${user.buyerType}`)}`
+                : ''}
               {' · '}
               {user.email}
             </p>

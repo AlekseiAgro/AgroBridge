@@ -56,6 +56,9 @@ export default async function PublicUserProfilePage({ params }: Props) {
                 {profile.sellerType
                   ? ` · ${ta(`sellerTypes.${profile.sellerType}`)}`
                   : ''}
+                {profile.buyerType
+                  ? ` · ${ta(`buyerTypes.${profile.buyerType}`)}`
+                  : ''}
               </p>
               <p className="user-card__meta">{t('memberSince', { date: memberSince })}</p>
             </div>

@@ -60,6 +60,7 @@ export class UsersService {
       displayName: user.displayName,
       role: user.role,
       sellerType: user.sellerType,
+      buyerType: user.buyerType,
       memberSince: user.createdAt.toISOString(),
       rating,
       completedDeals: completedAsBuyer + completedAsSeller,

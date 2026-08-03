@@ -636,10 +636,15 @@ async function upsertUser(params: {
   locale: LocaleCode;
   passwordHash: string;
   sellerType?: 'privateFarmer' | 'company' | null;
+  buyerType?: 'individual' | 'company' | null;
 }) {
   const sellerType =
     params.role === UserRole.farmer
       ? (params.sellerType ?? 'privateFarmer')
+      : null;
+  const buyerType =
+    params.role === UserRole.buyer
+      ? (params.buyerType ?? 'individual')
       : null;
 
   return prisma.user.upsert({
@@ -650,6 +655,7 @@ async function upsertUser(params: {
       locale: params.locale,
       passwordHash: params.passwordHash,
       sellerType,
+      buyerType,
     },
     create: {
       email: params.email,
@@ -658,6 +664,7 @@ async function upsertUser(params: {
       locale: params.locale,
       passwordHash: params.passwordHash,
       sellerType,
+      buyerType,
     },
   });
 }
@@ -878,13 +885,14 @@ async function main() {
     });
   }
 
-  for (const buyer of BUYERS) {
+  for (const [index, buyer] of BUYERS.entries()) {
     await upsertUser({
       email: buyer.email,
       role: UserRole.buyer,
       displayName: buyer.displayName,
       locale: buyer.locale,
       passwordHash: demoPasswordHash,
+      buyerType: index % 2 === 0 ? 'individual' : 'company',
     });
   }
   console.log(`Buyers ready: ${BUYERS.length}`);

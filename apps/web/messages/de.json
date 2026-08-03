@@ -47,6 +47,12 @@
     "sellerTypes": {
       "privateFarmer": "Privater Landwirt",
       "company": "Unternehmen"
+    },
+    "buyerType": "Käufertyp",
+    "buyerTypeHint": "Erforderlich für Käufer. Privatperson oder Unternehmen.",
+    "buyerTypes": {
+      "individual": "Privatperson",
+      "company": "Unternehmen"
     }
   },
   "account": {

@@ -47,6 +47,12 @@
     "sellerTypes": {
       "privateFarmer": "Private farmer",
       "company": "Company"
+    },
+    "buyerType": "I am registering as",
+    "buyerTypeHint": "Required for buyers. Choose whether you buy as an individual or a company.",
+    "buyerTypes": {
+      "individual": "Individual",
+      "company": "Company"
     }
   },
   "account": {

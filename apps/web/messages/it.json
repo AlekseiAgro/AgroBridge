@@ -47,6 +47,12 @@
     "sellerTypes": {
       "privateFarmer": "Agricoltore privato",
       "company": "Azienda"
+    },
+    "buyerType": "Tipo di acquirente",
+    "buyerTypeHint": "Obbligatorio per gli acquirenti. Persona fisica o azienda.",
+    "buyerTypes": {
+      "individual": "Persona fisica",
+      "company": "Azienda"
     }
   },
   "account": {

@@ -1,4 +1,4 @@
-import type { Locale, SellerType, UserRole } from '@agrobridge/shared';
+import type { BuyerType, Locale, SellerType, UserRole } from '@agrobridge/shared';
 
 export type JwtPayload = {
   sub: string;
@@ -12,6 +12,7 @@ export type AuthenticatedUser = {
   email: string;
   role: UserRole;
   sellerType: SellerType | null;
+  buyerType: BuyerType | null;
   locale: Locale;
   displayName: string | null;
 };

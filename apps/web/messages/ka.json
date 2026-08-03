@@ -47,6 +47,12 @@
     "sellerTypes": {
       "privateFarmer": "კერძო ფერმერი",
       "company": "კომპანია"
+    },
+    "buyerType": "მყიდველის ტიპი",
+    "buyerTypeHint": "სავალდებულოა მყიდველისთვის. აირჩიეთ — ფიზიკური პირი თუ კომპანია.",
+    "buyerTypes": {
+      "individual": "ფიზიკური პირი",
+      "company": "კომპანია"
     }
   },
   "account": {

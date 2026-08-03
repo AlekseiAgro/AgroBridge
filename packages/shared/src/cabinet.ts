@@ -1,13 +1,14 @@
+import type { BuyerType, SellerType } from './auth';
 import type { RatingSummary } from './rating';
 import type { UserRole } from './roles';
 import type { Locale } from './locales';
-import type { SellerType } from './auth';
 
 export type CabinetUserCard = {
   id: string;
   email: string;
   role: UserRole;
   sellerType: SellerType | null;
+  buyerType: BuyerType | null;
   locale: Locale;
   displayName: string | null;
   rating: RatingSummary;

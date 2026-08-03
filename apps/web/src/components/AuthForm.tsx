@@ -1,8 +1,10 @@
 'use client';
 
 import {
+  BUYER_TYPES,
   REGISTERABLE_ROLES,
   SELLER_TYPES,
+  type BuyerType,
   type RegisterableRole,
   type SellerType,
 } from '@agrobridge/shared';
@@ -24,6 +26,7 @@ export function AuthForm({ mode }: Props) {
   const [pending, setPending] = useState(false);
   const [role, setRole] = useState<RegisterableRole>('farmer');
   const [sellerType, setSellerType] = useState<SellerType>('privateFarmer');
+  const [buyerType, setBuyerType] = useState<BuyerType>('individual');
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,6 +46,7 @@ export function AuthForm({ mode }: Props) {
             displayName: String(form.get('displayName') ?? ''),
             role,
             ...(role === 'farmer' ? { sellerType } : {}),
+            ...(role === 'buyer' ? { buyerType } : {}),
             locale,
           };
 
@@ -109,6 +113,26 @@ export function AuthForm({ mode }: Props) {
                     required
                   />
                   <span>{t(`sellerTypes.${value}`)}</span>
+                </label>
+              ))}
+            </fieldset>
+          ) : null}
+
+          {role === 'buyer' ? (
+            <fieldset className="role-fieldset">
+              <legend>{t('buyerType')}</legend>
+              <p className="product-list__meta">{t('buyerTypeHint')}</p>
+              {BUYER_TYPES.map((value) => (
+                <label key={value} className="role-option">
+                  <input
+                    type="radio"
+                    name="buyerType"
+                    value={value}
+                    checked={buyerType === value}
+                    onChange={() => setBuyerType(value)}
+                    required
+                  />
+                  <span>{t(`buyerTypes.${value}`)}</span>
                 </label>
               ))}
             </fieldset>

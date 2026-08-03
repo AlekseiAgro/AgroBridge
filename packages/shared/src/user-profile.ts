@@ -1,4 +1,4 @@
-import type { SellerType } from './auth';
+import type { BuyerType, SellerType } from './auth';
 import type { RatingSummary } from './rating';
 import type { UserRole } from './roles';
 
@@ -8,6 +8,7 @@ export type PublicUserProfile = {
   displayName: string | null;
   role: UserRole;
   sellerType: SellerType | null;
+  buyerType: BuyerType | null;
   /** ISO timestamp of account creation. UI formats as month + year. */
   memberSince: string;
   rating: RatingSummary;

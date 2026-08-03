@@ -47,6 +47,12 @@
     "sellerTypes": {
       "privateFarmer": "Частный фермер",
       "company": "Компания"
+    },
+    "buyerType": "Тип покупателя",
+    "buyerTypeHint": "Обязательно для покупателя. Укажите, вы физическое лицо или компания.",
+    "buyerTypes": {
+      "individual": "Физическое лицо",
+      "company": "Компания"
     }
   },
   "account": {
