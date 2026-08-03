@@ -688,7 +688,6 @@
       "pendingModeration": "In moderazione",
       "awaitingMyRating": "In attesa della tua valutazione"
     },
-    "dangerZone": "Zona pericolosa",
     "deleteAccount": "Elimina account",
     "deleteAccountHint": "Elimina definitivamente account, profilo azienda, prodotti e richieste collegate.",
     "deleteAccountFlowHint": "Inserisci la password. Invieremo un codice di conferma a {email}.",

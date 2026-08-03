@@ -688,7 +688,6 @@
       "pendingModeration": "In Moderation",
       "awaitingMyRating": "Wartet auf Ihre Bewertung"
     },
-    "dangerZone": "Gefahrenzone",
     "deleteAccount": "Konto löschen",
     "deleteAccountHint": "Löscht dauerhaft Ihr Konto, Farmprofil, Produkte und zugehörige Anfragen.",
     "deleteAccountFlowHint": "Geben Sie Ihr Passwort ein. Wir senden einen Bestätigungscode an {email}.",
