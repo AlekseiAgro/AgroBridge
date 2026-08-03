@@ -348,7 +348,6 @@
     "country": "Страна",
     "originPlace": "Место происхождения",
     "originPlacePlaceholder": "Начните вводить город или село",
-    "originPlaceHint": "Подсказки из Google Maps — выберите населённый пункт, без точного адреса.",
     "originPlaceSearching": "Поиск населённых пунктов…",
     "currentStock": "Текущий запас",
     "monthlyProduction": "Производство в месяц",
