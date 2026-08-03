@@ -1,8 +1,11 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "apps/api/Dockerfile"
+watchPatterns = ["/apps/api/**", "/packages/shared/**"]
 
 [deploy]
+# Used only if Dockerfile is somehow skipped; primary path is Docker CMD.
+startCommand = "./docker-entrypoint.sh"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
