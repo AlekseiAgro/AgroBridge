@@ -18,7 +18,7 @@ import { UserBlockActions } from '@/components/UserBlockActions';
 import { Link, redirect } from '@/i18n/navigation';
 import { formatRegionLabel } from '@/lib/region';
 import { toPublicMediaUrl } from '@/lib/product-image';
-import { formatProductTitle } from '@/lib/product-title';
+import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
@@ -234,7 +234,9 @@ async function ProductsSection({
                   : ''}
               </p>
               {product.description ? (
-                <p className="product-list__desc">{product.description}</p>
+                <p className="product-list__desc">
+                  {formatProductDescription(product.description, locale)}
+                </p>
               ) : null}
               {product.moderationNote ? (
                 <p className="form-error">

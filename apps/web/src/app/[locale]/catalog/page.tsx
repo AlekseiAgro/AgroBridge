@@ -13,7 +13,7 @@ import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
 import { getProductCardImage } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
-import { formatProductTitle } from '@/lib/product-title';
+import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
 
 type Props = {
@@ -137,7 +137,9 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                       </p>
                     ) : null}
                     {product.description ? (
-                      <p className="product-list__desc">{product.description}</p>
+                      <p className="product-list__desc">
+                        {formatProductDescription(product.description, locale)}
+                      </p>
                     ) : null}
                   </div>
                 </li>

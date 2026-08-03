@@ -18,7 +18,7 @@ import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
 import { getProductCardImage, toPublicMediaUrl } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
-import { formatProductTitle } from '@/lib/product-title';
+import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
 import { getCurrentUser } from '@/lib/session';
 
@@ -160,7 +160,11 @@ export default async function ProductDetailPage({ params }: Props) {
                 </div>
               ) : null}
             </dl>
-            {product.description ? <p className="detail-text">{product.description}</p> : null}
+            {product.description ? (
+              <p className="detail-text">
+                {formatProductDescription(product.description, locale)}
+              </p>
+            ) : null}
           </section>
 
           <section className="product-detail-section">

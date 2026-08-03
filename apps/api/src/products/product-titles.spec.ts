@@ -1,4 +1,9 @@
-import { localizeProductTitle, PRODUCT_TITLE_I18N } from '@agrobridge/shared';
+import {
+  localizeProductDescription,
+  localizeProductTitle,
+  PRODUCT_DESCRIPTION_I18N,
+  PRODUCT_TITLE_I18N,
+} from '@agrobridge/shared';
 
 describe('localizeProductTitle', () => {
   it('returns Russian title for a known product', () => {
@@ -21,6 +26,33 @@ describe('localizeProductTitle', () => {
       for (const locale of locales) {
         expect(translations[locale]).toBeTruthy();
         expect(localizeProductTitle(title, locale)).toBe(translations[locale]);
+      }
+    }
+  });
+});
+
+describe('localizeProductDescription', () => {
+  it('returns Russian description for a known product', () => {
+    expect(
+      localizeProductDescription(
+        'Seasonal freestone peaches, hand-picked for export.',
+        'ru',
+      ),
+    ).toBe('Сезонные персики свободной косточки, собранные вручную на экспорт.');
+  });
+
+  it('falls back to the stored description when translation is missing', () => {
+    expect(localizeProductDescription('Custom farm description.', 'de')).toBe(
+      'Custom farm description.',
+    );
+  });
+
+  it('covers every catalog seed description for all non-English locales', () => {
+    const locales = ['ka', 'ru', 'de', 'fr', 'it', 'es'] as const;
+    for (const [description, translations] of Object.entries(PRODUCT_DESCRIPTION_I18N)) {
+      for (const locale of locales) {
+        expect(translations[locale]).toBeTruthy();
+        expect(localizeProductDescription(description, locale)).toBe(translations[locale]);
       }
     }
   });
