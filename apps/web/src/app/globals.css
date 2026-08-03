@@ -777,7 +777,6 @@ body {
   font-size: 0.88rem;
 }
 
-.place-autocomplete__hint,
 .place-autocomplete__status {
   margin: 0;
   color: var(--muted);
