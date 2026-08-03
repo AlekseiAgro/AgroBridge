@@ -131,10 +131,11 @@ node ./prisma/ensure-admin.cjs
 Full demo seed (optional):
 
 ```bash
-# slash in path: .bin/prisma
 ./node_modules/.bin/prisma db seed
 # fallback:
 /app/node_modules/.bin/prisma db seed
+# or:
+node ./prisma/run-seed.cjs
 ```
 
 ## 5. Point agrobrid.ge (Cloudflare)

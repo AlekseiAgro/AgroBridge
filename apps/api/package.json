@@ -25,7 +25,7 @@
     "db:seed": "prisma db seed"
   },
   "prisma": {
-    "seed": "TS_NODE_PROJECT=./prisma/tsconfig.json node --require ts-node/register/transpile-only ./prisma/seed.ts"
+    "seed": "node ./prisma/run-seed.cjs"
   },
   "dependencies": {
     "@agrobridge/shared": "workspace:*",
