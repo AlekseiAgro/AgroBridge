@@ -26,11 +26,11 @@ export default async function BuyersHubPage({ params }: Props) {
     : user
       ? [{ href: '/account', label: tn('account') }]
       : [
-          { href: '/login', label: tn('login') },
-          { href: '/register', label: t('asideRegister') },
+          { href: '/login?next=/requests/new', label: tn('login') },
+          { href: '/register?next=/requests/new', label: t('asideRegister') },
         ];
 
-  const requestHref = isBuyer ? '/requests/new' : user ? '/account' : '/register';
+  const requestHref = '/requests/new';
 
   return (
     <div className="page">

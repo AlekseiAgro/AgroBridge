@@ -126,7 +126,10 @@ export default async function AccountPage({ params }: Props) {
           ) : null}
           {isBuyer ? (
             <>
-              <Link className="button button--primary" href="/dashboard/purchase-requests">
+              <Link className="button button--primary" href="/requests/new">
+                {tn('purchaseRequests')}
+              </Link>
+              <Link className="button button--ghost" href="/dashboard/purchase-requests">
                 {tn('purchaseRequests')}
               </Link>
               <Link className="button button--ghost" href="/dashboard/rfqs">

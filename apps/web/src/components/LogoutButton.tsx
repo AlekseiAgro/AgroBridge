@@ -4,7 +4,11 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 
-export function LogoutButton() {
+type Props = {
+  redirectTo?: string;
+};
+
+export function LogoutButton({ redirectTo = '/login' }: Props) {
   const t = useTranslations('auth');
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -12,7 +16,7 @@ export function LogoutButton() {
   async function onLogout() {
     setPending(true);
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.replace('/login');
+    router.replace(redirectTo);
     router.refresh();
   }
 

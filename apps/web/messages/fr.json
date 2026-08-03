@@ -771,7 +771,9 @@
     },
     "floatingLead": "Vous pouvez fournir cela ?",
     "floatingText": "Publiez votre offre produit pour atteindre les acheteurs intéressés.",
-    "floatingCta": "Mettre en ligne mon produit"
+    "floatingCta": "Mettre en ligne mon produit",
+    "buyerOnly": "Les demandes d’achat sont réservées aux acheteurs. Vous êtes connecté en tant que vendeur — déconnectez-vous et inscrivez-vous comme acheteur, ou consultez le tableau des demandes.",
+    "registerAsBuyer": "S’inscrire comme acheteur"
   },
   "roleHubs": {
     "buyers": {

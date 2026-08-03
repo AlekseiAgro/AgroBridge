@@ -771,7 +771,9 @@
     },
     "floatingLead": "¿Puede suministrar esto?",
     "floatingText": "Publique su oferta de producto y llegue a compradores interesados.",
-    "floatingCta": "Publicar mi producto"
+    "floatingCta": "Publicar mi producto",
+    "buyerOnly": "Las solicitudes de compra las publican los compradores. Has iniciado sesión como vendedor: cierra sesión y regístrate como comprador, o abre el tablón de solicitudes.",
+    "registerAsBuyer": "Registrarse como comprador"
   },
   "roleHubs": {
     "buyers": {

@@ -771,7 +771,9 @@
     },
     "floatingLead": "Können Sie das liefern?",
     "floatingText": "Veröffentlichen Sie Ihr Angebot und erreichen Sie interessierte Käufer.",
-    "floatingCta": "Eigenes Produkt listen"
+    "floatingCta": "Eigenes Produkt listen",
+    "buyerOnly": "Kaufanfragen können nur Käufer veröffentlichen. Sie sind als Verkäufer angemeldet — melden Sie sich ab und registrieren Sie sich als Käufer, oder öffnen Sie die Anfragenbörse.",
+    "registerAsBuyer": "Als Käufer registrieren"
   },
   "roleHubs": {
     "buyers": {
