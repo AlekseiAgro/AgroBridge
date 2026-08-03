@@ -1,12 +1,10 @@
 import { getTranslations } from 'next-intl/server';
 import { FloatingCta } from '@/components/FloatingCta';
-import { getCurrentUser } from '@/lib/session';
 
 export async function CatalogPurchaseCta() {
   const t = await getTranslations('catalog');
-  const user = await getCurrentUser();
-  const isBuyer = user?.role === 'buyer' || user?.role === 'admin';
-  const href = isBuyer ? '/requests/new' : user ? '/buyers' : '/register';
+  // Always open the create-request form; the page handles login / buyer role.
+  const href = '/requests/new';
 
   return (
     <FloatingCta

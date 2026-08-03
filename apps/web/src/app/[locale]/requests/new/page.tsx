@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { LogoutButton } from '@/components/LogoutButton';
 import { PurchaseRequestForm } from '@/components/PurchaseRequestForm';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -14,13 +15,13 @@ export default async function NewPurchaseRequestPage({ params }: Props) {
   setRequestLocale(locale);
 
   const user = await getCurrentUser();
-  if (!user) redirect({ href: '/login', locale });
-  if (user!.role !== 'buyer' && user!.role !== 'admin') {
-    redirect({ href: '/requests', locale });
+  if (!user) {
+    redirect({ href: '/login?next=/requests/new', locale });
   }
 
   const t = await getTranslations('purchaseRequests');
   const tn = await getTranslations('nav');
+  const canCreate = user!.role === 'buyer' || user!.role === 'admin';
 
   return (
     <div className="page">
@@ -33,7 +34,22 @@ export default async function NewPurchaseRequestPage({ params }: Props) {
         </p>
         <h1>{t('createTitle')}</h1>
         <p className="page__subtitle">{t('createSubtitle')}</p>
-        <PurchaseRequestForm />
+        {canCreate ? (
+          <PurchaseRequestForm />
+        ) : (
+          <div className="auth-card" style={{ marginTop: '1.25rem' }}>
+            <p>{t('buyerOnly')}</p>
+            <div className="how-it-works__actions" style={{ marginTop: '1rem' }}>
+              <LogoutButton redirectTo="/register?next=/requests/new" />
+              <Link href="/register?next=/requests/new" className="button button--primary">
+                {t('registerAsBuyer')}
+              </Link>
+              <Link href="/requests" className="button button--ghost">
+                {t('boardTitle')}
+              </Link>
+            </div>
+          </div>
+        )}
       </main>
       <SiteFooter />
     </div>

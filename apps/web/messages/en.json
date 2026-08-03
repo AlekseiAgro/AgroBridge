@@ -771,7 +771,9 @@
     },
     "floatingLead": "Can you supply this?",
     "floatingText": "Publish your product offer and reach buyers looking for it.",
-    "floatingCta": "List your product"
+    "floatingCta": "List your product",
+    "buyerOnly": "Purchase requests can be posted by buyers. You are signed in with a seller account — sign out and register as a buyer, or browse the request board.",
+    "registerAsBuyer": "Register as a buyer"
   },
   "roleHubs": {
     "buyers": {

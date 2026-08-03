@@ -11,22 +11,26 @@ import {
 import { useLocale, useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
+import { safeNextPath } from '@/lib/safe-next-path';
 
 type Mode = 'login' | 'register';
 
 type Props = {
   mode: Mode;
+  nextPath?: string;
 };
 
-export function AuthForm({ mode }: Props) {
+export function AuthForm({ mode, nextPath }: Props) {
   const t = useTranslations('auth');
   const locale = useLocale();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [role, setRole] = useState<RegisterableRole>('farmer');
-  const [sellerType, setSellerType] = useState<SellerType>('privateFarmer');
+  const [role, setRole] = useState<RegisterableRole>(
+    nextPath?.includes('/requests/new') ? 'buyer' : 'farmer',
+  );  const [sellerType, setSellerType] = useState<SellerType>('privateFarmer');
   const [buyerType, setBuyerType] = useState<BuyerType>('individual');
+  const redirectTo = safeNextPath(nextPath, '/account');
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,7 +68,7 @@ export function AuthForm({ mode }: Props) {
         return;
       }
 
-      router.replace('/account');
+      router.replace(redirectTo);
       router.refresh();
     } catch {
       setError(t('genericError'));

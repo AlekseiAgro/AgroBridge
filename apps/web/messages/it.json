@@ -771,7 +771,9 @@
     },
     "floatingLead": "Puoi fornire questo prodotto?",
     "floatingText": "Pubblica la tua offerta e raggiungi gli acquirenti interessati.",
-    "floatingCta": "Pubblica il tuo prodotto"
+    "floatingCta": "Pubblica il tuo prodotto",
+    "buyerOnly": "Le richieste di acquisto possono essere pubblicate dagli acquirenti. Hai effettuato l’accesso come venditore: esci e registrati come acquirente oppure apri la bacheca delle richieste.",
+    "registerAsBuyer": "Registrati come acquirente"
   },
   "roleHubs": {
     "buyers": {
