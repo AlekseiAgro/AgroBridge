@@ -5,24 +5,34 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  FARM_DOCUMENT_MAX_BYTES,
+  FARM_DOCUMENT_MAX_COUNT,
   PRODUCT_IMAGE_MAX_BYTES,
   PRODUCT_IMAGE_MAX_COUNT,
+  PRODUCT_VIDEO_MAX_BYTES,
+  PRODUCT_VIDEO_MAX_COUNT,
+  PRODUCT_VIDEO_MIME_TYPES,
+  isCarrier,
+  isCertificateType,
+  isFarmDocumentMimeType,
   isHarvestStatus,
+  isIncoterm,
+  isPackagingType,
+  isPriceCurrency,
+  isProductImageKind,
   isProductImageMimeType,
   normalizeSeasonMonths,
-  type HarvestStatus,
-  type ModerationStatus,
   type ProductDetail,
-  type ProductImage,
   type ProductSummary,
   type RatingSummary,
   type SeasonMonth,
-  type VerificationStatus,
 } from '@agrobridge/shared';
 import {
+  CertificateType as PrismaCertificateType,
   HarvestStatus as PrismaHarvestStatus,
   ModerationStatus as PrismaModerationStatus,
   Prisma,
+  ProductImageKind as PrismaProductImageKind,
 } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { NotificationsService } from '../mail/notifications.service';
@@ -33,6 +43,13 @@ import { CategoriesService } from '../categories/categories.service';
 import { CatalogQueryDto } from './dto/catalog-query.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import {
+  asAttributes,
+  mapProductDetail,
+  mapProductSummary,
+  sanitizeStringArray,
+  toNumberOrNull,
+} from './product-mapper';
 
 const publicProductWhere: Prisma.ProductWhereInput = {
   isPublished: true,
@@ -53,10 +70,21 @@ const productListInclude = {
       region: true,
       ownerId: true,
       verificationStatus: true,
+      foundedYear: true,
+      farmSizeHectares: true,
+      ownershipType: true,
+      exportMarkets: true,
+      history: true,
     },
   },
   images: {
     orderBy: imageOrderBy,
+  },
+  videos: {
+    orderBy: { createdAt: 'desc' },
+  },
+  certificates: {
+    orderBy: { createdAt: 'desc' },
   },
 } satisfies Prisma.ProductInclude;
 
@@ -68,10 +96,21 @@ const productDetailInclude = {
       region: true,
       ownerId: true,
       verificationStatus: true,
+      foundedYear: true,
+      farmSizeHectares: true,
+      ownershipType: true,
+      exportMarkets: true,
+      history: true,
     },
   },
   images: {
     orderBy: imageOrderBy,
+  },
+  videos: {
+    orderBy: { createdAt: 'desc' },
+  },
+  certificates: {
+    orderBy: { createdAt: 'desc' },
   },
 } satisfies Prisma.ProductInclude;
 
@@ -98,9 +137,7 @@ export class ProductsService {
     const category = query.category?.trim() || undefined;
     const region = query.region?.trim() || undefined;
     const harvestStatus =
-      query.harvestStatus && isHarvestStatus(query.harvestStatus)
-        ? query.harvestStatus
-        : undefined;
+      query.harvestStatus && isHarvestStatus(query.harvestStatus) ? query.harvestStatus : undefined;
     const preorder = query.preorder === true;
     const inSeason = query.inSeason === true;
     const enabledCategories = await this.categories.enabledIds();
@@ -167,9 +204,7 @@ export class ProductsService {
       products.map((product) => product.farm.ownerId),
     );
 
-    return products.map((product) =>
-      this.toSummary(product, ratings.get(product.farm.ownerId)),
-    );
+    return products.map((product) => this.toSummary(product, ratings.get(product.farm.ownerId)));
   }
 
   async getById(id: string, viewer?: AuthenticatedUser | null): Promise<ProductDetail> {
@@ -182,9 +217,7 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
-    const isOwner =
-      viewer &&
-      (viewer.role === 'admin' || product.farm.ownerId === viewer.id);
+    const isOwner = viewer && (viewer.role === 'admin' || product.farm.ownerId === viewer.id);
 
     const isPublic =
       product.isPublished && product.moderationStatus === PrismaModerationStatus.approved;
@@ -224,10 +257,14 @@ export class ProductsService {
   async create(user: AuthenticatedUser, dto: CreateProductDto): Promise<ProductDetail> {
     this.assertFarmer(user);
     const farm = await this.requireFarm(user.id);
+    const input = dto as any;
     const isPublished = dto.isPublished ?? false;
     const quantity = this.normalizeQuantityRange(dto.minQuantity, dto.maxQuantity);
-
     const harvest = this.normalizeHarvestInput(dto);
+    const packagingTypes = sanitizeStringArray(input.packagingTypes).filter(isPackagingType);
+    const packagingWeights = sanitizeStringArray(input.packagingWeights);
+    const incoterms = sanitizeStringArray(input.incoterms).filter(isIncoterm);
+    const carriers = sanitizeStringArray(input.carriers).filter(isCarrier);
 
     const product = await this.prisma.product.create({
       data: {
@@ -235,15 +272,38 @@ export class ProductsService {
         title: dto.title.trim(),
         description: dto.description?.trim() || null,
         category: dto.category || null,
+        variety: this.normalizeOptionalString(input.variety),
+        country: this.normalizeOptionalString(input.country) ?? 'Georgia',
+        originPlace: this.normalizeOptionalString(input.originPlace),
         unit: dto.unit || null,
         minQuantity: quantity.minQuantity,
         maxQuantity: quantity.maxQuantity,
+        currentStock: this.normalizeNullableNumber(input.currentStock),
+        monthlyProduction: this.normalizeNullableNumber(input.monthlyProduction),
+        maxAnnualProduction: this.normalizeNullableNumber(input.maxAnnualProduction),
         seasonMonths: harvest.seasonMonths,
         harvestStartAt: harvest.harvestStartAt,
         harvestEndAt: harvest.harvestEndAt,
         forecastQuantity: harvest.forecastQuantity,
         harvestStatus: harvest.harvestStatus,
         preorderEnabled: harvest.preorderEnabled,
+        attributes: this.normalizeAttributes(input.attributes),
+        packagingTypes,
+        packagingWeights,
+        palletSize: this.normalizeOptionalString(input.palletSize),
+        incoterms,
+        carriers,
+        customDelivery: this.normalizeOptionalString(input.customDelivery),
+        nearestPort: this.normalizeOptionalString(input.nearestPort),
+        deliveryAvailable: input.deliveryAvailable ?? false,
+        leadTimeDays: this.normalizeNullableNumber(input.leadTimeDays),
+        priceFrom: this.normalizeNullableNumber(input.priceFrom),
+        priceCurrency:
+          typeof input.priceCurrency === 'string' && isPriceCurrency(input.priceCurrency)
+            ? input.priceCurrency
+            : null,
+        priceNegotiable: input.priceNegotiable ?? false,
+        priceDependsOnVolume: input.priceDependsOnVolume ?? false,
         isPublished,
         moderationStatus: isPublished
           ? PrismaModerationStatus.pending
@@ -256,43 +316,128 @@ export class ProductsService {
     return this.toDetail(product);
   }
 
-  async update(
-    user: AuthenticatedUser,
-    id: string,
-    dto: UpdateProductDto,
-  ): Promise<ProductDetail> {
+  async update(user: AuthenticatedUser, id: string, dto: UpdateProductDto): Promise<ProductDetail> {
     this.assertFarmer(user);
     const product = await this.requireOwnedProduct(user.id, id);
+    const input = dto as any;
 
     const nextPublished = dto.isPublished ?? product.isPublished;
     const nextMin =
-      dto.minQuantity === undefined
-        ? this.toNumberOrNull(product.minQuantity)
-        : dto.minQuantity;
+      dto.minQuantity === undefined ? toNumberOrNull(product.minQuantity) : dto.minQuantity;
     const nextMax =
-      dto.maxQuantity === undefined
-        ? this.toNumberOrNull(product.maxQuantity)
-        : dto.maxQuantity;
+      dto.maxQuantity === undefined ? toNumberOrNull(product.maxQuantity) : dto.maxQuantity;
     const quantity = this.normalizeQuantityRange(nextMin, nextMax);
     const harvest = this.normalizeHarvestInput(dto, {
       seasonMonths: product.seasonMonths,
       harvestStartAt: product.harvestStartAt,
       harvestEndAt: product.harvestEndAt,
-      forecastQuantity: this.toNumberOrNull(product.forecastQuantity),
+      forecastQuantity: toNumberOrNull(product.forecastQuantity),
       harvestStatus: product.harvestStatus,
       preorderEnabled: product.preorderEnabled,
     });
+    const variety =
+      input.variety === undefined ? undefined : this.normalizeOptionalString(input.variety);
+    const country =
+      input.country === undefined ? undefined : this.normalizeOptionalString(input.country);
+    const originPlace =
+      input.originPlace === undefined ? undefined : this.normalizeOptionalString(input.originPlace);
+    const currentStock =
+      input.currentStock === undefined
+        ? undefined
+        : this.normalizeNullableNumber(input.currentStock);
+    const monthlyProduction =
+      input.monthlyProduction === undefined
+        ? undefined
+        : this.normalizeNullableNumber(input.monthlyProduction);
+    const maxAnnualProduction =
+      input.maxAnnualProduction === undefined
+        ? undefined
+        : this.normalizeNullableNumber(input.maxAnnualProduction);
+    const attributes =
+      input.attributes === undefined ? undefined : this.normalizeAttributes(input.attributes);
+    const packagingTypes =
+      input.packagingTypes === undefined
+        ? undefined
+        : sanitizeStringArray(input.packagingTypes).filter(isPackagingType);
+    const packagingWeights =
+      input.packagingWeights === undefined
+        ? undefined
+        : sanitizeStringArray(input.packagingWeights);
+    const palletSize =
+      input.palletSize === undefined ? undefined : this.normalizeOptionalString(input.palletSize);
+    const incoterms =
+      input.incoterms === undefined
+        ? undefined
+        : sanitizeStringArray(input.incoterms).filter(isIncoterm);
+    const carriers =
+      input.carriers === undefined
+        ? undefined
+        : sanitizeStringArray(input.carriers).filter(isCarrier);
+    const customDelivery =
+      input.customDelivery === undefined
+        ? undefined
+        : this.normalizeOptionalString(input.customDelivery);
+    const nearestPort =
+      input.nearestPort === undefined ? undefined : this.normalizeOptionalString(input.nearestPort);
+    const deliveryAvailable =
+      input.deliveryAvailable === undefined ? undefined : input.deliveryAvailable;
+    const leadTimeDays =
+      input.leadTimeDays === undefined
+        ? undefined
+        : this.normalizeNullableNumber(input.leadTimeDays);
+    const priceFrom =
+      input.priceFrom === undefined ? undefined : this.normalizeNullableNumber(input.priceFrom);
+    const priceCurrency =
+      input.priceCurrency === undefined
+        ? undefined
+        : typeof input.priceCurrency === 'string' && isPriceCurrency(input.priceCurrency)
+          ? input.priceCurrency
+          : null;
+    const priceNegotiable = input.priceNegotiable === undefined ? undefined : input.priceNegotiable;
+    const priceDependsOnVolume =
+      input.priceDependsOnVolume === undefined ? undefined : input.priceDependsOnVolume;
 
     const contentChanged =
       (dto.title !== undefined && dto.title.trim() !== product.title) ||
-      (dto.description !== undefined &&
-        (dto.description.trim() || null) !== product.description) ||
+      (dto.description !== undefined && (dto.description.trim() || null) !== product.description) ||
       (dto.category !== undefined && (dto.category || null) !== product.category) ||
       (dto.unit !== undefined && (dto.unit || null) !== product.unit) ||
       (dto.minQuantity !== undefined &&
-        quantity.minQuantity !== this.toNumberOrNull(product.minQuantity)) ||
+        quantity.minQuantity !== toNumberOrNull(product.minQuantity)) ||
       (dto.maxQuantity !== undefined &&
-        quantity.maxQuantity !== this.toNumberOrNull(product.maxQuantity));
+        quantity.maxQuantity !== toNumberOrNull(product.maxQuantity)) ||
+      (variety !== undefined && variety !== product.variety) ||
+      (country !== undefined && country !== product.country) ||
+      (originPlace !== undefined && originPlace !== product.originPlace) ||
+      (currentStock !== undefined && currentStock !== toNumberOrNull(product.currentStock)) ||
+      (monthlyProduction !== undefined &&
+        monthlyProduction !== toNumberOrNull(product.monthlyProduction)) ||
+      (maxAnnualProduction !== undefined &&
+        maxAnnualProduction !== toNumberOrNull(product.maxAnnualProduction)) ||
+      (dto.seasonMonths !== undefined &&
+        !this.valuesEqual(harvest.seasonMonths, product.seasonMonths)) ||
+      (dto.harvestStartAt !== undefined &&
+        harvest.harvestStartAt?.getTime() !== product.harvestStartAt?.getTime()) ||
+      (dto.harvestEndAt !== undefined &&
+        harvest.harvestEndAt?.getTime() !== product.harvestEndAt?.getTime()) ||
+      (dto.forecastQuantity !== undefined &&
+        harvest.forecastQuantity !== toNumberOrNull(product.forecastQuantity)) ||
+      (attributes !== undefined &&
+        !this.valuesEqual(attributes, asAttributes(product.attributes))) ||
+      (packagingTypes !== undefined && !this.valuesEqual(packagingTypes, product.packagingTypes)) ||
+      (packagingWeights !== undefined &&
+        !this.valuesEqual(packagingWeights, product.packagingWeights)) ||
+      (palletSize !== undefined && palletSize !== product.palletSize) ||
+      (incoterms !== undefined && !this.valuesEqual(incoterms, product.incoterms)) ||
+      (carriers !== undefined && !this.valuesEqual(carriers, product.carriers)) ||
+      (customDelivery !== undefined && customDelivery !== product.customDelivery) ||
+      (nearestPort !== undefined && nearestPort !== product.nearestPort) ||
+      (deliveryAvailable !== undefined && deliveryAvailable !== product.deliveryAvailable) ||
+      (leadTimeDays !== undefined && leadTimeDays !== product.leadTimeDays) ||
+      (priceFrom !== undefined && priceFrom !== toNumberOrNull(product.priceFrom)) ||
+      (priceCurrency !== undefined && priceCurrency !== product.priceCurrency) ||
+      (priceNegotiable !== undefined && priceNegotiable !== product.priceNegotiable) ||
+      (priceDependsOnVolume !== undefined && priceDependsOnVolume !== product.priceDependsOnVolume);
 
     let moderationStatus = product.moderationStatus;
     let moderationNote = product.moderationNote;
@@ -323,9 +468,11 @@ export class ProductsService {
       where: { id: product.id },
       data: {
         title: dto.title?.trim(),
-        description:
-          dto.description === undefined ? undefined : dto.description.trim() || null,
+        description: dto.description === undefined ? undefined : dto.description.trim() || null,
         category: dto.category === undefined ? undefined : dto.category || null,
+        variety,
+        country,
+        originPlace,
         unit: dto.unit === undefined ? undefined : dto.unit || null,
         minQuantity:
           dto.minQuantity === undefined && dto.maxQuantity === undefined
@@ -335,18 +482,29 @@ export class ProductsService {
           dto.minQuantity === undefined && dto.maxQuantity === undefined
             ? undefined
             : quantity.maxQuantity,
-        seasonMonths:
-          dto.seasonMonths === undefined ? undefined : harvest.seasonMonths,
-        harvestStartAt:
-          dto.harvestStartAt === undefined ? undefined : harvest.harvestStartAt,
-        harvestEndAt:
-          dto.harvestEndAt === undefined ? undefined : harvest.harvestEndAt,
-        forecastQuantity:
-          dto.forecastQuantity === undefined ? undefined : harvest.forecastQuantity,
-        harvestStatus:
-          dto.harvestStatus === undefined ? undefined : harvest.harvestStatus,
-        preorderEnabled:
-          dto.preorderEnabled === undefined ? undefined : harvest.preorderEnabled,
+        currentStock,
+        monthlyProduction,
+        maxAnnualProduction,
+        seasonMonths: dto.seasonMonths === undefined ? undefined : harvest.seasonMonths,
+        harvestStartAt: dto.harvestStartAt === undefined ? undefined : harvest.harvestStartAt,
+        harvestEndAt: dto.harvestEndAt === undefined ? undefined : harvest.harvestEndAt,
+        forecastQuantity: dto.forecastQuantity === undefined ? undefined : harvest.forecastQuantity,
+        harvestStatus: dto.harvestStatus === undefined ? undefined : harvest.harvestStatus,
+        preorderEnabled: dto.preorderEnabled === undefined ? undefined : harvest.preorderEnabled,
+        attributes,
+        packagingTypes,
+        packagingWeights,
+        palletSize,
+        incoterms,
+        carriers,
+        customDelivery,
+        nearestPort,
+        deliveryAvailable,
+        leadTimeDays,
+        priceFrom,
+        priceCurrency,
+        priceNegotiable,
+        priceDependsOnVolume,
         isPublished: nextPublished,
         moderationStatus,
         moderationNote,
@@ -362,9 +520,7 @@ export class ProductsService {
       previousPreorder,
       nextStatus: updated.harvestStatus,
       nextPreorder: updated.preorderEnabled,
-      isPublic:
-        updated.isPublished &&
-        updated.moderationStatus === PrismaModerationStatus.approved,
+      isPublic: updated.isPublished && updated.moderationStatus === PrismaModerationStatus.approved,
     });
 
     return this.toDetail(updated);
@@ -418,17 +574,27 @@ export class ProductsService {
   async remove(user: AuthenticatedUser, id: string): Promise<{ ok: true }> {
     this.assertFarmer(user);
     const product = await this.requireOwnedProduct(user.id, id);
-    const images = await this.prisma.productImage.findMany({
-      where: { productId: product.id },
-      select: { key: true },
-    });
+    const [images, videos, certificates] = await Promise.all([
+      this.prisma.productImage.findMany({
+        where: { productId: product.id },
+        select: { key: true },
+      }),
+      this.prisma.productVideo.findMany({
+        where: { productId: product.id },
+        select: { key: true },
+      }),
+      this.prisma.productCertificate.findMany({
+        where: { productId: product.id },
+        select: { key: true },
+      }),
+    ]);
 
     await this.prisma.product.delete({ where: { id: product.id } });
 
     await Promise.all(
-      images.map(async (image) => {
+      [...images, ...videos, ...certificates].map(async (media) => {
         try {
-          await this.storage.delete(image.key);
+          await this.storage.delete(media.key);
         } catch {
           // Best-effort cleanup; DB row is already gone.
         }
@@ -442,12 +608,17 @@ export class ProductsService {
     user: AuthenticatedUser,
     productId: string,
     file?: Express.Multer.File,
+    kindRaw?: string,
   ): Promise<ProductDetail> {
     this.assertFarmer(user);
     const product = await this.requireOwnedProduct(user.id, productId);
+    const kind = kindRaw ?? 'other';
 
     if (!file) {
       throw new BadRequestException('Image file is required');
+    }
+    if (!isProductImageKind(kind)) {
+      throw new BadRequestException('Image kind is invalid');
     }
 
     if (!isProductImageMimeType(file.mimetype)) {
@@ -463,9 +634,7 @@ export class ProductsService {
     });
 
     if (existingCount >= PRODUCT_IMAGE_MAX_COUNT) {
-      throw new BadRequestException(
-        `A product can have at most ${PRODUCT_IMAGE_MAX_COUNT} images`,
-      );
+      throw new BadRequestException(`A product can have at most ${PRODUCT_IMAGE_MAX_COUNT} images`);
     }
 
     const stored = await this.storage.upload({
@@ -486,6 +655,7 @@ export class ProductsService {
             key: stored.key,
             sortOrder: existingCount,
             isPrimary,
+            kind: kind as PrismaProductImageKind,
           },
         });
 
@@ -495,6 +665,176 @@ export class ProductsService {
       await this.storage.delete(stored.key).catch(() => undefined);
       throw error;
     }
+
+    return this.getById(product.id, user);
+  }
+
+  async addVideo(
+    user: AuthenticatedUser,
+    productId: string,
+    file?: Express.Multer.File,
+    durationSeconds?: number | string,
+  ): Promise<ProductDetail> {
+    this.assertFarmer(user);
+    const product = await this.requireOwnedProduct(user.id, productId);
+
+    if (!file) {
+      throw new BadRequestException('Video file is required');
+    }
+    if (!(PRODUCT_VIDEO_MIME_TYPES as readonly string[]).includes(file.mimetype)) {
+      throw new BadRequestException('Only MP4, WebM, and QuickTime videos are allowed');
+    }
+    if (file.size > PRODUCT_VIDEO_MAX_BYTES) {
+      throw new BadRequestException('Video is too large');
+    }
+
+    const existingCount = await this.prisma.productVideo.count({
+      where: { productId: product.id },
+    });
+    if (existingCount >= PRODUCT_VIDEO_MAX_COUNT) {
+      throw new BadRequestException(`A product can have at most ${PRODUCT_VIDEO_MAX_COUNT} videos`);
+    }
+
+    const duration = this.normalizeDurationSeconds(durationSeconds);
+    const stored = await this.storage.upload({
+      buffer: file.buffer,
+      mimeType: file.mimetype,
+      originalName: file.originalname || 'video',
+      folder: `products/${product.id}/videos`,
+    });
+
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.productVideo.create({
+          data: {
+            productId: product.id,
+            url: stored.url,
+            key: stored.key,
+            fileName: file.originalname || 'video',
+            mimeType: file.mimetype,
+            sizeBytes: file.size,
+            durationSeconds: duration,
+          },
+        });
+        await this.markPendingForImageChange(tx, product);
+      });
+    } catch (error) {
+      await this.storage.delete(stored.key).catch(() => undefined);
+      throw error;
+    }
+
+    return this.getById(product.id, user);
+  }
+
+  async removeVideo(
+    user: AuthenticatedUser,
+    productId: string,
+    videoId: string,
+  ): Promise<ProductDetail> {
+    this.assertFarmer(user);
+    const product = await this.requireOwnedProduct(user.id, productId);
+    const video = await this.prisma.productVideo.findFirst({
+      where: { id: videoId, productId: product.id },
+    });
+    if (!video) {
+      throw new NotFoundException('Video not found');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.productVideo.delete({ where: { id: video.id } });
+      await this.markPendingForImageChange(tx, product);
+    });
+    await this.storage.delete(video.key).catch(() => undefined);
+
+    return this.getById(product.id, user);
+  }
+
+  async addCertificate(
+    user: AuthenticatedUser,
+    productId: string,
+    typeRaw: string,
+    title: string,
+    file?: Express.Multer.File,
+  ): Promise<ProductDetail> {
+    this.assertFarmer(user);
+    const product = await this.requireOwnedProduct(user.id, productId);
+    const trimmedTitle = title?.trim();
+
+    if (!isCertificateType(typeRaw)) {
+      throw new BadRequestException('Certificate type is invalid');
+    }
+    if (!trimmedTitle) {
+      throw new BadRequestException('Certificate title is required');
+    }
+    if (!file) {
+      throw new BadRequestException('Certificate file is required');
+    }
+    if (!isFarmDocumentMimeType(file.mimetype)) {
+      throw new BadRequestException('Only PDF, JPEG, PNG, and WebP certificates are allowed');
+    }
+    if (file.size > FARM_DOCUMENT_MAX_BYTES) {
+      throw new BadRequestException('Certificate is too large');
+    }
+
+    const existingCount = await this.prisma.productCertificate.count({
+      where: { productId: product.id },
+    });
+    if (existingCount >= FARM_DOCUMENT_MAX_COUNT) {
+      throw new BadRequestException(
+        `A product can have at most ${FARM_DOCUMENT_MAX_COUNT} certificates`,
+      );
+    }
+
+    const stored = await this.storage.upload({
+      buffer: file.buffer,
+      mimeType: file.mimetype,
+      originalName: file.originalname || 'certificate',
+      folder: `products/${product.id}/certificates`,
+    });
+
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.productCertificate.create({
+          data: {
+            productId: product.id,
+            type: typeRaw as PrismaCertificateType,
+            title: trimmedTitle,
+            fileName: file.originalname || 'certificate',
+            url: stored.url,
+            key: stored.key,
+            mimeType: file.mimetype,
+            sizeBytes: file.size,
+          },
+        });
+        await this.markPendingForImageChange(tx, product);
+      });
+    } catch (error) {
+      await this.storage.delete(stored.key).catch(() => undefined);
+      throw error;
+    }
+
+    return this.getById(product.id, user);
+  }
+
+  async removeCertificate(
+    user: AuthenticatedUser,
+    productId: string,
+    certificateId: string,
+  ): Promise<ProductDetail> {
+    this.assertFarmer(user);
+    const product = await this.requireOwnedProduct(user.id, productId);
+    const certificate = await this.prisma.productCertificate.findFirst({
+      where: { id: certificateId, productId: product.id },
+    });
+    if (!certificate) {
+      throw new NotFoundException('Certificate not found');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.productCertificate.delete({ where: { id: certificate.id } });
+      await this.markPendingForImageChange(tx, product);
+    });
+    await this.storage.delete(certificate.key).catch(() => undefined);
 
     return this.getById(product.id, user);
   }
@@ -625,13 +965,6 @@ export class ProductsService {
     }
   }
 
-  private toNumberOrNull(value: Prisma.Decimal | number | null | undefined): number | null {
-    if (value === null || value === undefined) {
-      return null;
-    }
-    return typeof value === 'number' ? value : Number(value);
-  }
-
   private normalizeQuantityRange(
     minQuantity?: number | null,
     maxQuantity?: number | null,
@@ -658,53 +991,42 @@ export class ProductsService {
     return { minQuantity: min, maxQuantity: max };
   }
 
-  private toImages(
-    images: Array<{
-      id: string;
-      url: string;
-      sortOrder: number;
-      isPrimary: boolean;
-    }>,
-  ): ProductImage[] {
-    return images.map((image) => ({
-      id: image.id,
-      url: image.url,
-      sortOrder: image.sortOrder,
-      isPrimary: image.isPrimary,
-    }));
+  private normalizeOptionalString(value: unknown): string | null {
+    return typeof value === 'string' ? value.trim() || null : null;
+  }
+
+  private normalizeNullableNumber(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+    const normalized = Number(value);
+    return Number.isFinite(normalized) ? normalized : null;
+  }
+
+  private normalizeAttributes(value: unknown): Prisma.InputJsonObject {
+    return asAttributes(value as Prisma.JsonValue) as Prisma.InputJsonObject;
+  }
+
+  private normalizeDurationSeconds(value: number | string | undefined): number | null {
+    if (value === undefined || value === '') {
+      return null;
+    }
+    const normalized = Number(value);
+    if (!Number.isInteger(normalized) || normalized < 0) {
+      throw new BadRequestException('durationSeconds must be a non-negative integer');
+    }
+    return normalized;
+  }
+
+  private valuesEqual(left: unknown, right: unknown): boolean {
+    return JSON.stringify(left) === JSON.stringify(right);
   }
 
   private toSummary(
     product: ProductWithFarmAndImages | ProductWithOwnerAndImages,
     sellerRating?: RatingSummary | null,
   ): ProductSummary {
-    return {
-      id: product.id,
-      title: product.title,
-      description: product.description,
-      category: product.category,
-      unit: product.unit,
-      minQuantity: this.toNumberOrNull(product.minQuantity),
-      maxQuantity: this.toNumberOrNull(product.maxQuantity),
-      seasonMonths: normalizeSeasonMonths(product.seasonMonths),
-      harvestStartAt: product.harvestStartAt?.toISOString() ?? null,
-      harvestEndAt: product.harvestEndAt?.toISOString() ?? null,
-      forecastQuantity: this.toNumberOrNull(product.forecastQuantity),
-      harvestStatus: (product.harvestStatus as HarvestStatus | null) ?? null,
-      preorderEnabled: product.preorderEnabled,
-      isPublished: product.isPublished,
-      moderationStatus: product.moderationStatus as ModerationStatus,
-      moderationNote: product.moderationNote,
-      images: this.toImages(product.images),
-      farm: {
-        id: product.farm.id,
-        name: product.farm.name,
-        region: product.farm.region,
-        verificationStatus: product.farm.verificationStatus as VerificationStatus,
-        verified: product.farm.verificationStatus === 'approved',
-        sellerRating: sellerRating ?? { average: null, count: 0 },
-      },
-    };
+    return mapProductSummary(product, sellerRating);
   }
 
   private toDetail(
@@ -712,12 +1034,7 @@ export class ProductsService {
     sellerRating?: RatingSummary | null,
     watching = false,
   ): ProductDetail {
-    return {
-      ...this.toSummary(product, sellerRating),
-      createdAt: product.createdAt.toISOString(),
-      updatedAt: product.updatedAt.toISOString(),
-      watching,
-    };
+    return mapProductDetail(product, sellerRating, watching);
   }
 
   private normalizeHarvestInput(
@@ -763,11 +1080,7 @@ export class ProductsService {
           ? new Date(dto.harvestEndAt)
           : null;
 
-    if (
-      harvestStartAt &&
-      harvestEndAt &&
-      harvestStartAt.getTime() > harvestEndAt.getTime()
-    ) {
+    if (harvestStartAt && harvestEndAt && harvestStartAt.getTime() > harvestEndAt.getTime()) {
       throw new BadRequestException('harvestStartAt cannot be after harvestEndAt');
     }
 
@@ -780,8 +1093,7 @@ export class ProductsService {
       throw new BadRequestException('forecastQuantity must be greater than 0');
     }
 
-    let harvestStatus: PrismaHarvestStatus | null =
-      fallback?.harvestStatus ?? null;
+    let harvestStatus: PrismaHarvestStatus | null = fallback?.harvestStatus ?? null;
     if (dto.harvestStatus !== undefined) {
       if (dto.harvestStatus === null || dto.harvestStatus === '') {
         harvestStatus = null;
@@ -826,10 +1138,7 @@ export class ProductsService {
     return product;
   }
 
-  private async requirePublicOrOwnedProduct(
-    productId: string,
-    user: AuthenticatedUser,
-  ) {
+  private async requirePublicOrOwnedProduct(productId: string, user: AuthenticatedUser) {
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
       select: {
@@ -844,8 +1153,7 @@ export class ProductsService {
     }
     const isOwner = user.role === 'admin' || product.farm.ownerId === user.id;
     const isPublic =
-      product.isPublished &&
-      product.moderationStatus === PrismaModerationStatus.approved;
+      product.isPublished && product.moderationStatus === PrismaModerationStatus.approved;
     if (!isPublic && !isOwner) {
       throw new NotFoundException('Product not found');
     }
@@ -867,8 +1175,7 @@ export class ProductsService {
       (params.nextStatus === PrismaHarvestStatus.available ||
         params.nextStatus === PrismaHarvestStatus.limited);
 
-    const preorderOpened =
-      !params.previousPreorder && params.nextPreorder === true;
+    const preorderOpened = !params.previousPreorder && params.nextPreorder === true;
 
     if (!becameAvailable && !preorderOpened) return;
 

@@ -15,7 +15,11 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import type { Request } from 'express';
-import { PRODUCT_IMAGE_MAX_BYTES } from '@agrobridge/shared';
+import {
+  FARM_DOCUMENT_MAX_BYTES,
+  PRODUCT_IMAGE_MAX_BYTES,
+  PRODUCT_VIDEO_MAX_BYTES,
+} from '@agrobridge/shared';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
@@ -105,8 +109,9 @@ export class ProductsController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @UploadedFile() file?: Express.Multer.File,
+    @Body('kind') kind?: string,
   ) {
-    return this.productsService.addImage(user, id, file);
+    return this.productsService.addImage(user, id, file, kind);
   }
 
   @Delete(':id/images/:imageId')
@@ -129,5 +134,64 @@ export class ProductsController {
     @Param('imageId') imageId: string,
   ) {
     return this.productsService.setPrimaryImage(user, id, imageId);
+  }
+
+  @Post(':id/videos')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('farmer', 'admin')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: PRODUCT_VIDEO_MAX_BYTES },
+    }),
+  )
+  addVideo(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @UploadedFile() file?: Express.Multer.File,
+    @Body('durationSeconds') durationSeconds?: string,
+  ) {
+    return this.productsService.addVideo(user, id, file, durationSeconds);
+  }
+
+  @Delete(':id/videos/:videoId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('farmer', 'admin')
+  removeVideo(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Param('videoId') videoId: string,
+  ) {
+    return this.productsService.removeVideo(user, id, videoId);
+  }
+
+  @Post(':id/certificates')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('farmer', 'admin')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: FARM_DOCUMENT_MAX_BYTES },
+    }),
+  )
+  addCertificate(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body('type') type: string,
+    @Body('title') title: string,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.productsService.addCertificate(user, id, type, title, file);
+  }
+
+  @Delete(':id/certificates/:certificateId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('farmer', 'admin')
+  removeCertificate(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Param('certificateId') certificateId: string,
+  ) {
+    return this.productsService.removeCertificate(user, id, certificateId);
   }
 }

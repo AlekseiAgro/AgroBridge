@@ -9,8 +9,6 @@ import type {
   FarmDetail,
   FarmDocument,
   FarmSummary,
-  HarvestStatus,
-  ModerationStatus,
   RatingSummary,
   VerificationStatus,
 } from '@agrobridge/shared';
@@ -19,7 +17,6 @@ import {
   FARM_DOCUMENT_MAX_COUNT,
   isFarmDocumentKind,
   isFarmDocumentMimeType,
-  normalizeSeasonMonths,
 } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
@@ -31,6 +28,12 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
 import { StorageService } from '../storage/storage.service';
+import {
+  mapProductSummary,
+  sanitizeStringArray,
+  type ProductFarmSlice,
+  type ProductRowSlice,
+} from '../products/product-mapper';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
 
@@ -74,15 +77,35 @@ export class FarmsService {
             title: true,
             description: true,
             category: true,
+            variety: true,
+            country: true,
+            originPlace: true,
             unit: true,
             minQuantity: true,
             maxQuantity: true,
+            currentStock: true,
+            monthlyProduction: true,
+            maxAnnualProduction: true,
             seasonMonths: true,
             harvestStartAt: true,
             harvestEndAt: true,
             forecastQuantity: true,
             harvestStatus: true,
             preorderEnabled: true,
+            attributes: true,
+            packagingTypes: true,
+            packagingWeights: true,
+            palletSize: true,
+            incoterms: true,
+            carriers: true,
+            customDelivery: true,
+            nearestPort: true,
+            deliveryAvailable: true,
+            leadTimeDays: true,
+            priceFrom: true,
+            priceCurrency: true,
+            priceNegotiable: true,
+            priceDependsOnVolume: true,
             isPublished: true,
             moderationStatus: true,
             moderationNote: true,
@@ -94,6 +117,32 @@ export class FarmsService {
                 url: true,
                 sortOrder: true,
                 isPrimary: true,
+                kind: true,
+              },
+            },
+            videos: {
+              orderBy: { createdAt: 'desc' },
+              select: {
+                id: true,
+                url: true,
+                fileName: true,
+                mimeType: true,
+                durationSeconds: true,
+                createdAt: true,
+              },
+            },
+            certificates: {
+              orderBy: { createdAt: 'desc' },
+              select: {
+                id: true,
+                type: true,
+                title: true,
+                fileName: true,
+                url: true,
+                mimeType: true,
+                reviewStatus: true,
+                reviewNote: true,
+                createdAt: true,
               },
             },
           },
@@ -115,9 +164,7 @@ export class FarmsService {
       createdAt: farm.createdAt.toISOString(),
       verificationNote: null,
       verifiedAt: farm.verifiedAt?.toISOString() ?? null,
-      products: farm.products.map((product) =>
-        this.toProductSummary(product, farm, sellerRating),
-      ),
+      products: farm.products.map((product) => this.toProductSummary(product, farm, sellerRating)),
     };
   }
 
@@ -136,15 +183,35 @@ export class FarmsService {
             title: true,
             description: true,
             category: true,
+            variety: true,
+            country: true,
+            originPlace: true,
             unit: true,
             minQuantity: true,
             maxQuantity: true,
+            currentStock: true,
+            monthlyProduction: true,
+            maxAnnualProduction: true,
             seasonMonths: true,
             harvestStartAt: true,
             harvestEndAt: true,
             forecastQuantity: true,
             harvestStatus: true,
             preorderEnabled: true,
+            attributes: true,
+            packagingTypes: true,
+            packagingWeights: true,
+            palletSize: true,
+            incoterms: true,
+            carriers: true,
+            customDelivery: true,
+            nearestPort: true,
+            deliveryAvailable: true,
+            leadTimeDays: true,
+            priceFrom: true,
+            priceCurrency: true,
+            priceNegotiable: true,
+            priceDependsOnVolume: true,
             isPublished: true,
             moderationStatus: true,
             moderationNote: true,
@@ -155,6 +222,32 @@ export class FarmsService {
                 url: true,
                 sortOrder: true,
                 isPrimary: true,
+                kind: true,
+              },
+            },
+            videos: {
+              orderBy: { createdAt: 'desc' },
+              select: {
+                id: true,
+                url: true,
+                fileName: true,
+                mimeType: true,
+                durationSeconds: true,
+                createdAt: true,
+              },
+            },
+            certificates: {
+              orderBy: { createdAt: 'desc' },
+              select: {
+                id: true,
+                type: true,
+                title: true,
+                fileName: true,
+                url: true,
+                mimeType: true,
+                reviewStatus: true,
+                reviewNote: true,
+                createdAt: true,
               },
             },
           },
@@ -177,9 +270,7 @@ export class FarmsService {
       companyRegistrationNumber: farm.companyRegistrationNumber,
       companyRegistryValid: farm.companyRegistryValid,
       documents: farm.documents.map((doc) => this.toDocument(doc)),
-      products: farm.products.map((product) =>
-        this.toProductSummary(product, farm, sellerRating),
-      ),
+      products: farm.products.map((product) => this.toProductSummary(product, farm, sellerRating)),
     };
   }
 
@@ -197,6 +288,11 @@ export class FarmsService {
         name: dto.name.trim(),
         region: dto.region?.trim() || null,
         description: dto.description?.trim() || null,
+        foundedYear: dto.foundedYear ?? null,
+        farmSizeHectares: dto.farmSizeHectares ?? null,
+        ownershipType: dto.ownershipType?.trim() || null,
+        exportMarkets: sanitizeStringArray(dto.exportMarkets, 50),
+        history: dto.history?.trim() || null,
         verificationStatus: PrismaVerificationStatus.unverified,
       },
     });
@@ -217,8 +313,14 @@ export class FarmsService {
       data: {
         name: dto.name?.trim(),
         region: dto.region === undefined ? undefined : dto.region.trim() || null,
-        description:
-          dto.description === undefined ? undefined : dto.description.trim() || null,
+        description: dto.description === undefined ? undefined : dto.description.trim() || null,
+        foundedYear: dto.foundedYear,
+        farmSizeHectares: dto.farmSizeHectares,
+        ownershipType:
+          dto.ownershipType === undefined ? undefined : dto.ownershipType.trim() || null,
+        exportMarkets:
+          dto.exportMarkets === undefined ? undefined : sanitizeStringArray(dto.exportMarkets, 50),
+        history: dto.history === undefined ? undefined : dto.history.trim() || null,
       },
     });
 
@@ -251,8 +353,7 @@ export class FarmsService {
       throw new BadRequestException('Document is too large');
     }
 
-    const kind =
-      kindRaw && isFarmDocumentKind(kindRaw) ? kindRaw : ('other' as const);
+    const kind = kindRaw && isFarmDocumentKind(kindRaw) ? kindRaw : ('other' as const);
 
     const count = await this.prisma.farmDocument.count({ where: { farmId: farm.id } });
     if (count >= FARM_DOCUMENT_MAX_COUNT) {
@@ -348,6 +449,11 @@ export class FarmsService {
     name: string;
     region: string | null;
     description: string | null;
+    foundedYear: number | null;
+    farmSizeHectares: { toNumber(): number } | number | null;
+    ownershipType: string | null;
+    exportMarkets: string[];
+    history: string | null;
     verificationStatus: PrismaVerificationStatus;
     owner: { id: string; displayName: string | null };
     _count: { products: number };
@@ -358,6 +464,16 @@ export class FarmsService {
       name: farm.name,
       region: farm.region,
       description: farm.description,
+      foundedYear: farm.foundedYear,
+      farmSizeHectares:
+        farm.farmSizeHectares == null
+          ? null
+          : typeof farm.farmSizeHectares === 'number'
+            ? farm.farmSizeHectares
+            : farm.farmSizeHectares.toNumber(),
+      ownershipType: farm.ownershipType,
+      exportMarkets: farm.exportMarkets,
+      history: farm.history,
       verificationStatus,
       verified: verificationStatus === 'approved',
       owner: farm.owner,
@@ -366,81 +482,10 @@ export class FarmsService {
   }
 
   private toProductSummary(
-    product: {
-      id: string;
-      title: string;
-      description: string | null;
-      category: string | null;
-      unit: string | null;
-      minQuantity: { toNumber(): number } | number | null;
-      maxQuantity: { toNumber(): number } | number | null;
-      seasonMonths: number[];
-      harvestStartAt: Date | null;
-      harvestEndAt: Date | null;
-      forecastQuantity: { toNumber(): number } | number | null;
-      harvestStatus: string | null;
-      preorderEnabled: boolean;
-      isPublished: boolean;
-      moderationStatus: ModerationStatus | string;
-      moderationNote: string | null;
-      images: Array<{
-        id: string;
-        url: string;
-        sortOrder: number;
-        isPrimary: boolean;
-      }>;
-    },
-    farm: {
-      id: string;
-      name: string;
-      region: string | null;
-      verificationStatus?: PrismaVerificationStatus | VerificationStatus;
-    },
+    product: Omit<ProductRowSlice, 'farm'>,
+    farm: ProductFarmSlice,
     sellerRating?: RatingSummary | null,
   ) {
-    const verificationStatus = (farm.verificationStatus ??
-      'unverified') as VerificationStatus;
-    return {
-      id: product.id,
-      title: product.title,
-      description: product.description,
-      category: product.category,
-      unit: product.unit,
-      minQuantity:
-        product.minQuantity == null
-          ? null
-          : typeof product.minQuantity === 'number'
-            ? product.minQuantity
-            : product.minQuantity.toNumber(),
-      maxQuantity:
-        product.maxQuantity == null
-          ? null
-          : typeof product.maxQuantity === 'number'
-            ? product.maxQuantity
-            : product.maxQuantity.toNumber(),
-      seasonMonths: normalizeSeasonMonths(product.seasonMonths ?? []),
-      harvestStartAt: product.harvestStartAt?.toISOString() ?? null,
-      harvestEndAt: product.harvestEndAt?.toISOString() ?? null,
-      forecastQuantity:
-        product.forecastQuantity == null
-          ? null
-          : typeof product.forecastQuantity === 'number'
-            ? product.forecastQuantity
-            : product.forecastQuantity.toNumber(),
-      harvestStatus: (product.harvestStatus as HarvestStatus | null) ?? null,
-      preorderEnabled: product.preorderEnabled ?? false,
-      isPublished: product.isPublished,
-      moderationStatus: product.moderationStatus as ModerationStatus,
-      moderationNote: product.moderationNote,
-      images: product.images,
-      farm: {
-        id: farm.id,
-        name: farm.name,
-        region: farm.region,
-        verificationStatus,
-        verified: verificationStatus === 'approved',
-        sellerRating: sellerRating ?? { average: null, count: 0 },
-      },
-    };
+    return mapProductSummary({ ...product, farm }, sellerRating);
   }
 }
