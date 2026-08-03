@@ -66,6 +66,8 @@ MAIL_FROM=AgroBridge <noreply@agrobrid.ge>
 # SMTP_PASSWORD=<api-key>
 # Broken/slow SMTP previously hung registration until Cloudflare returned HTML 524.
 TRANSLATION_PROVIDER=mock
+# Optional: product "place of origin" city/village suggestions (Places API New)
+# GOOGLE_MAPS_API_KEY=<google-maps-api-key>
 STORAGE_DRIVER=local
 
 # Link Railway Postgres / Redis (reference variables):

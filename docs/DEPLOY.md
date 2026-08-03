@@ -34,6 +34,7 @@ Optional production upgrades:
 - `MAIL_DRIVER=smtp` + SMTP_* for real email
 - `STORAGE_DRIVER=s3` + S3_* for durable media (R2/S3) — recommended before any domain move
 - `TRANSLATION_PROVIDER=openai` + `OPENAI_API_KEY` for chat translation
+- `GOOGLE_MAPS_API_KEY` for product origin place autocomplete (Places API New; settlements only)
 
 ## 2. Build and start
 
