@@ -436,7 +436,7 @@
       "title": "Видео продукции",
       "publicTitle": "Product videos",
       "subtitle": "Добавьте до {max} видео продукции (MP4, WebM или MOV, до 80 МБ).",
-      "upload": "Upload video",
+      "upload": "Загрузить видео",
       "empty": "No videos yet.",
       "delete": "Delete",
       "deleteConfirm": "Delete this video?",
