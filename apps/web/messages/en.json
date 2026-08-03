@@ -680,7 +680,6 @@
     "rating": "Deal rating",
     "ratingHint": "Based on completed deals. Buyers and sellers rate each other after completion.",
     "activityTitle": "Activity summary",
-    "quickLinks": "Quick links",
     "stats": {
       "completedDeals": "Completed deals",
       "openRequests": "Open requests",

@@ -21,8 +21,6 @@ export default async function AccountPage({ params }: Props) {
 
   const t = await getTranslations('cabinet');
   const ta = await getTranslations('auth');
-  const tn = await getTranslations('nav');
-  const tp = await getTranslations('purchaseRequests');
   const tProfile = await getTranslations('profile');
   const overview = await apiRequestAuthed<CabinetOverview>('/cabinet/overview');
   const { user, activity } = overview;
@@ -99,46 +97,6 @@ export default async function AccountPage({ params }: Props) {
             <span>{t('stats.awaitingMyRating')}</span>
           </li>
         </ul>
-      </section>
-
-      <section className="cabinet-links">
-        <h2 className="section-title">{t('quickLinks')}</h2>
-        <div className="home__actions">
-          <Link className="button button--ghost" href="/buyers">
-            {tn('forBuyers')}
-          </Link>
-          <Link className="button button--ghost" href="/sellers">
-            {tn('forSellers')}
-          </Link>
-          {trader ? (
-            <>
-              <Link className="button button--primary" href="/dashboard/farm">
-                {tn('myFarm')}
-              </Link>
-              <Link className="button button--ghost" href="/dashboard/products">
-                {tn('myProducts')}
-              </Link>
-              <Link className="button button--ghost" href="/dashboard/inbox">
-                {tn('inbox')}
-              </Link>
-              <Link className="button button--primary" href="/requests/new">
-                {tn('purchaseRequests')}
-              </Link>
-              <Link className="button button--ghost" href="/dashboard/purchase-requests">
-                {tp('mineTitle')}
-              </Link>
-              <Link className="button button--ghost" href="/dashboard/rfqs">
-                {tn('myRequests')}
-              </Link>
-            </>
-          ) : null}
-          <Link className="button button--ghost" href="/dashboard/chat">
-            {tn('chat')}
-          </Link>
-          <Link className="button button--ghost" href="/dashboard/subscriptions">
-            {tn('subscriptions')}
-          </Link>
-        </div>
       </section>
 
       {user.role !== 'admin' ? (

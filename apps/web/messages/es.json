@@ -680,7 +680,6 @@
     "rating": "Valoración de operaciones",
     "ratingHint": "Basada en operaciones completadas. Comprador y vendedor se valoran solo tras el cierre.",
     "activityTitle": "Resumen de actividad",
-    "quickLinks": "Enlaces rápidos",
     "stats": {
       "completedDeals": "Operaciones completadas",
       "openRequests": "Solicitudes abiertas",
