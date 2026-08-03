@@ -200,12 +200,8 @@ export function ProductForm({ mode, initial, leading }: Props) {
     ],
   );
 
-  function toggleMonth(month: SeasonMonth) {
-    setSeasonMonths((prev) =>
-      prev.includes(month)
-        ? prev.filter((item) => item !== month)
-        : [...prev, month].sort((a, b) => a - b),
-    );
+  function setSeasonMonthsSorted(months: SeasonMonth[]) {
+    setSeasonMonths([...months].sort((a, b) => a - b));
   }
 
   function selectAllMonths() {
@@ -653,46 +649,41 @@ export function ProductForm({ mode, initial, leading }: Props) {
         <legend className="section-title">{th('formTitle')}</legend>
         <p className="page__subtitle">{th('formSubtitle')}</p>
 
-        <div className="field">
-          <span>{th('seasonality')}</span>
-          <div className="season-months" role="group" aria-label={th('seasonality')}>
-            <div className="season-months__grid">
-              {SEASON_MONTHS.map((month) => {
-                const selected = seasonMonths.includes(month);
-                return (
-                  <button
-                    key={month}
-                    type="button"
-                    className={
-                      selected
-                        ? 'season-months__month season-months__month--selected'
-                        : 'season-months__month'
-                    }
-                    aria-pressed={selected}
-                    onClick={() => toggleMonth(month)}
-                  >
-                    {th(`months.${month}`)}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="season-months__actions">
-              <button
-                type="button"
-                className="button button--ghost product-form__quick-button"
-                onClick={selectAllMonths}
-              >
-                {th('selectAllMonths')}
-              </button>
-              <button
-                type="button"
-                className="button button--ghost product-form__quick-button"
-                onClick={clearMonths}
-                disabled={seasonMonths.length === 0}
-              >
-                {th('clearMonths')}
-              </button>
-            </div>
+        <div className="season-months">
+          <MultiSelectDropdown
+            label={th('seasonality')}
+            options={SEASON_MONTHS.map((month) => ({
+              value: month,
+              label: th(`months.${month}`),
+            }))}
+            values={seasonMonths}
+            onChange={setSeasonMonthsSorted}
+            placeholder={t('multiSelectPlaceholder')}
+            selectedSummary={
+              seasonMonths.length
+                ? t('multiSelectSelected', {
+                    count: seasonMonths.length,
+                    values: seasonMonths.map((month) => th(`months.${month}`)).join(', '),
+                  })
+                : t('multiSelectPlaceholder')
+            }
+          />
+          <div className="season-months__actions">
+            <button
+              type="button"
+              className="button button--ghost product-form__quick-button"
+              onClick={selectAllMonths}
+            >
+              {th('selectAllMonths')}
+            </button>
+            <button
+              type="button"
+              className="button button--ghost product-form__quick-button"
+              onClick={clearMonths}
+              disabled={seasonMonths.length === 0}
+            >
+              {th('clearMonths')}
+            </button>
           </div>
         </div>
 

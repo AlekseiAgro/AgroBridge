@@ -2356,55 +2356,6 @@ body {
 .season-months {
   display: grid;
   gap: 0.55rem;
-  margin-top: 0.35rem;
-}
-
-.season-months__grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.35rem;
-}
-
-@media (min-width: 520px) {
-  .season-months__grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 860px) {
-  .season-months__grid {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-  }
-}
-
-.season-months__month {
-  min-height: 2.35rem;
-  padding: 0.3rem 0.2rem;
-  border: 1px solid var(--line);
-  border-radius: 0.55rem;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--brand-deep);
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 650;
-  line-height: 1.1;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.season-months__month:hover {
-  border-color: rgba(47, 107, 58, 0.35);
-  background: rgba(47, 107, 58, 0.08);
-}
-
-.season-months__month--selected {
-  border-color: rgba(47, 107, 58, 0.5);
-  background: rgba(47, 107, 58, 0.16);
-  color: var(--brand-deep);
-}
-
-.season-months__month--selected:hover {
-  background: rgba(47, 107, 58, 0.22);
 }
 
 .season-months__actions {
