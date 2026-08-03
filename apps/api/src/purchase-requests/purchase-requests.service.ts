@@ -4,10 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type {
-  PurchaseQuoteView,
-  PurchaseRequestDetail,
-  PurchaseRequestSummary,
+import {
+  canTrade,
+  type PurchaseQuoteView,
+  type PurchaseRequestDetail,
+  type PurchaseRequestSummary,
 } from '@agrobridge/shared';
 import {
   CurrencyCode,
@@ -348,14 +349,14 @@ export class PurchaseRequestsService {
   }
 
   private assertBuyer(user: AuthenticatedUser) {
-    if (user.role !== 'buyer' && user.role !== 'admin') {
-      throw new ForbiddenException('Only buyers can perform this action');
+    if (!canTrade(user.role)) {
+      throw new ForbiddenException('Sign in to perform this action');
     }
   }
 
   private assertFarmer(user: AuthenticatedUser) {
-    if (user.role !== 'farmer' && user.role !== 'admin') {
-      throw new ForbiddenException('Only farmers can perform this action');
+    if (!canTrade(user.role)) {
+      throw new ForbiddenException('Sign in to perform this action');
     }
   }
 
@@ -435,7 +436,7 @@ export class PurchaseRequestsService {
   ): PurchaseRequestDetail {
     const isOwner = Boolean(viewer && request.buyerId === viewer.id);
     const isAdmin = viewer?.role === 'admin';
-    const isFarmer = Boolean(viewer && (viewer.role === 'farmer' || viewer.role === 'admin'));
+    const isSellerSide = Boolean(viewer && canTrade(viewer.role));
     const requestOpen = request.status === PurchaseRequestStatus.open;
     const hasActiveQuote = Boolean(
       viewer &&
@@ -456,14 +457,14 @@ export class PurchaseRequestsService {
       canCancel: Boolean((isOwner || isAdmin) && requestOpen),
       canClose: Boolean((isOwner || isAdmin) && requestOpen),
       canQuote: Boolean(
-        isFarmer &&
+        isSellerSide &&
           requestOpen &&
           viewer &&
           request.buyerId !== viewer.id &&
           !hasActiveQuote,
       ),
       canMessageBuyer: Boolean(
-        isFarmer && viewer && request.buyerId !== viewer.id && requestOpen,
+        isSellerSide && viewer && request.buyerId !== viewer.id && requestOpen,
       ),
     };
   }

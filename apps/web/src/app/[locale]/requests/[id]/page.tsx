@@ -37,8 +37,7 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
     throw error;
   }
 
-  const isBuyer = user?.role === 'buyer' || user?.role === 'admin';
-  const isFarmer = user?.role === 'farmer' || user?.role === 'admin';
+  const isOwner = Boolean(user && user.id === request.buyer.id);
   const buyerName = request.buyer.displayName || t('anonymousBuyer');
 
   return (
@@ -58,7 +57,7 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
               </Link>
             </p>
           </div>
-          {isBuyer && user?.id === request.buyer.id ? (
+          {isOwner ? (
             <Link href="/dashboard/purchase-requests" className="button button--ghost">
               {t('mineTitle')}
             </Link>
@@ -130,7 +129,7 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
           </div>
         ) : null}
 
-        {request.myQuote && isFarmer ? (
+        {request.myQuote ? (
           <section style={{ marginTop: '2rem' }}>
             <h2 className="section-title">{t('yourQuote')}</h2>
             <dl className="account-details">

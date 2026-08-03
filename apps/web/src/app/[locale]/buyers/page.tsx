@@ -1,3 +1,4 @@
+import { canTrade } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RoleHub } from '@/components/RoleHub';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -15,22 +16,18 @@ export default async function BuyersHubPage({ params }: Props) {
   const t = await getTranslations('roleHubs.buyers');
   const tn = await getTranslations('nav');
   const user = await getCurrentUser();
-  const isBuyer = user?.role === 'buyer' || user?.role === 'admin';
+  const trader = Boolean(user && canTrade(user.role));
 
-  const asideLinks = isBuyer
+  const asideLinks = trader
     ? [
         { href: '/dashboard/purchase-requests', label: t('asideMine') },
         { href: '/dashboard/rfqs', label: tn('myRequests') },
         { href: '/dashboard/chat', label: tn('chat') },
       ]
-    : user
-      ? [{ href: '/account', label: tn('account') }]
-      : [
-          { href: '/login?next=/requests/new', label: tn('login') },
-          { href: '/register?next=/requests/new', label: t('asideRegister') },
-        ];
-
-  const requestHref = '/requests/new';
+    : [
+        { href: '/login?next=/requests/new', label: tn('login') },
+        { href: '/register?next=/requests/new', label: t('asideRegister') },
+      ];
 
   return (
     <div className="page">
@@ -49,7 +46,7 @@ export default async function BuyersHubPage({ params }: Props) {
               imageSrc: '/images/categories/fruits.jpg',
             },
             {
-              href: requestHref,
+              href: '/requests/new',
               title: t('paths.request.title'),
               text: t('paths.request.text'),
               cta: t('paths.request.cta'),

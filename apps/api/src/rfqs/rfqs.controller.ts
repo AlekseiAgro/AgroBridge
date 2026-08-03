@@ -14,19 +14,19 @@ export class RfqsController {
   constructor(private readonly rfqsService: RfqsService) {}
 
   @Post()
-  @Roles('buyer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateRfqDto) {
     return this.rfqsService.create(user, dto);
   }
 
   @Get('mine')
-  @Roles('buyer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   listMine(@CurrentUser() user: AuthenticatedUser) {
     return this.rfqsService.listMine(user);
   }
 
   @Get('inbox')
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   listInbox(@CurrentUser() user: AuthenticatedUser) {
     return this.rfqsService.listInbox(user);
   }
@@ -38,7 +38,7 @@ export class RfqsController {
   }
 
   @Post(':id/offer')
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   createOffer(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -48,7 +48,7 @@ export class RfqsController {
   }
 
   @Post(':id/accept')
-  @Roles('buyer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   accept(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.rfqsService.accept(user, id);
   }
@@ -60,7 +60,7 @@ export class RfqsController {
   }
 
   @Post(':id/cancel')
-  @Roles('buyer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   cancel(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.rfqsService.cancel(user, id);
   }

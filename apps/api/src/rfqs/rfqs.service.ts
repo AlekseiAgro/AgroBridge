@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { RfqOfferView, RfqSummary, RfqStatus } from '@agrobridge/shared';
+import { canTrade, type RfqOfferView, type RfqSummary, type RfqStatus } from '@agrobridge/shared';
 import { CurrencyCode, Prisma, RfqStatus as PrismaRfqStatus } from '@prisma/client';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -348,14 +348,14 @@ export class RfqsService {
   }
 
   private assertBuyer(user: AuthenticatedUser) {
-    if (user.role !== 'buyer' && user.role !== 'admin') {
-      throw new ForbiddenException('Only buyers can perform this action');
+    if (!canTrade(user.role)) {
+      throw new ForbiddenException('Sign in to perform this action');
     }
   }
 
   private assertFarmer(user: AuthenticatedUser) {
-    if (user.role !== 'farmer' && user.role !== 'admin') {
-      throw new ForbiddenException('Only farmers can perform this action');
+    if (!canTrade(user.role)) {
+      throw new ForbiddenException('Sign in to perform this action');
     }
   }
 

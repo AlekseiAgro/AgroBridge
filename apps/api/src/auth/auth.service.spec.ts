@@ -48,7 +48,7 @@ describe('AuthService', () => {
       email: 'farmer@example.com',
       role: 'farmer',
       sellerType: 'privateFarmer',
-      buyerType: null,
+      buyerType: 'individual',
       locale: 'ka',
       displayName: 'Nino',
       passwordHash: 'hash',
@@ -69,7 +69,7 @@ describe('AuthService', () => {
       email: 'farmer@example.com',
       role: 'farmer',
       sellerType: 'privateFarmer',
-      buyerType: null,
+      buyerType: 'individual',
       locale: 'ka',
       displayName: 'Nino',
       rating: { average: null, count: 0 },
@@ -78,6 +78,7 @@ describe('AuthService', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           sellerType: 'privateFarmer',
+          buyerType: 'individual',
           role: 'farmer',
         }),
       }),
@@ -120,7 +121,7 @@ describe('AuthService', () => {
       id: 'user_2',
       email: 'buyer@example.com',
       role: 'buyer',
-      sellerType: null,
+      sellerType: 'privateFarmer',
       buyerType: 'company',
       locale: 'en',
       displayName: 'Elena',
@@ -137,12 +138,12 @@ describe('AuthService', () => {
     });
 
     expect(result.user.buyerType).toBe('company');
-    expect(result.user.sellerType).toBeNull();
+    expect(result.user.sellerType).toBe('privateFarmer');
     expect(prisma.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           buyerType: 'company',
-          sellerType: null,
+          sellerType: 'privateFarmer',
           role: 'buyer',
         }),
       }),

@@ -1,3 +1,4 @@
+import { canTrade } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RoleHub } from '@/components/RoleHub';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -15,27 +16,21 @@ export default async function SellersHubPage({ params }: Props) {
   const t = await getTranslations('roleHubs.sellers');
   const tn = await getTranslations('nav');
   const user = await getCurrentUser();
-  const isFarmer = user?.role === 'farmer' || user?.role === 'admin';
+  const trader = Boolean(user && canTrade(user.role));
 
-  const asideLinks = isFarmer
+  const asideLinks = trader
     ? [
         { href: '/dashboard/products', label: tn('myProducts') },
         { href: '/dashboard/inbox', label: tn('inbox') },
         { href: '/dashboard/farm', label: tn('myFarm') },
         { href: '/dashboard/chat', label: tn('chat') },
       ]
-    : user
-      ? [{ href: '/account', label: tn('account') }]
-      : [
-          { href: '/login', label: tn('login') },
-          { href: '/register', label: t('asideRegister') },
-        ];
+    : [
+        { href: '/login', label: tn('login') },
+        { href: '/register', label: t('asideRegister') },
+      ];
 
-  const offerHref = isFarmer
-    ? '/dashboard/products/new'
-    : user
-      ? '/account'
-      : '/register';
+  const offerHref = trader ? '/dashboard/products/new' : '/register';
 
   return (
     <div className="page">

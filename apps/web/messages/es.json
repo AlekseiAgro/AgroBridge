@@ -43,17 +43,18 @@
     "goRegister": "Registrarse",
     "goLogin": "Iniciar sesión",
     "sellerType": "Tipo de vendedor",
-    "sellerTypeHint": "Obligatorio para vendedores. Agricultor particular o empresa.",
+    "sellerTypeHint": "Cómo vendes. Toda cuenta también puede comprar.",
     "sellerTypes": {
       "privateFarmer": "Agricultor particular",
       "company": "Empresa"
     },
     "buyerType": "Tipo de comprador",
-    "buyerTypeHint": "Obligatorio para compradores. Persona física o empresa.",
+    "buyerTypeHint": "Cómo compras. Toda cuenta también puede vender.",
     "buyerTypes": {
       "individual": "Persona física",
       "company": "Empresa"
-    }
+    },
+    "dualCapabilityHint": "Con una sola cuenta puedes vender productos y publicar solicitudes de compra. Elige cómo quieres empezar principalmente."
   },
   "account": {
     "title": "Tu cuenta",
@@ -772,7 +773,7 @@
     "floatingLead": "¿Puede suministrar esto?",
     "floatingText": "Publique su oferta de producto y llegue a compradores interesados.",
     "floatingCta": "Publicar mi producto",
-    "buyerOnly": "Las solicitudes de compra las publican los compradores. Has iniciado sesión como vendedor: cierra sesión y regístrate como comprador, o abre el tablón de solicitudes.",
+    "buyerOnly": "Inicia sesión para publicar una solicitud de compra. Cualquier cuenta de AgroBridge puede comprar y vender.",
     "registerAsBuyer": "Registrarse como comprador"
   },
   "roleHubs": {

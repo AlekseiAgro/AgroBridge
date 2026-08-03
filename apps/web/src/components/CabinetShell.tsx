@@ -1,3 +1,4 @@
+import { canTrade } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -14,9 +15,9 @@ type Props = {
 export async function CabinetShell({ children, title, subtitle }: Props) {
   const t = await getTranslations('nav');
   const tc = await getTranslations('cabinet');
+  const tp = await getTranslations('purchaseRequests');
   const user = await getCurrentUser();
-  const isFarmer = user?.role === 'farmer' || user?.role === 'admin';
-  const isBuyer = user?.role === 'buyer' || user?.role === 'admin';
+  const trader = Boolean(user && canTrade(user.role));
 
   return (
     <div className="cabinet">
@@ -27,17 +28,13 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
         <p className="cabinet__eyebrow">{tc('shellLabel')}</p>
         <nav className="cabinet__nav">
           <Link href="/account">{tc('overview')}</Link>
-          {isFarmer ? (
+          {trader ? (
             <>
               <Link href="/dashboard/farm">{t('myFarm')}</Link>
               <Link href="/dashboard/products">{t('myProducts')}</Link>
               <Link href="/dashboard/inbox">{t('inbox')}</Link>
               <Link href="/requests">{t('purchaseRequests')}</Link>
-            </>
-          ) : null}
-          {isBuyer ? (
-            <>
-              <Link href="/dashboard/purchase-requests">{t('purchaseRequests')}</Link>
+              <Link href="/dashboard/purchase-requests">{tp('mineTitle')}</Link>
               <Link href="/dashboard/rfqs">{t('myRequests')}</Link>
             </>
           ) : null}

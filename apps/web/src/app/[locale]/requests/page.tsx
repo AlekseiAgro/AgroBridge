@@ -40,7 +40,7 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
     loadError = t('loadError');
   }
 
-  const canCreate = user?.role === 'buyer' || user?.role === 'admin';
+  const canCreate = Boolean(user);
 
   return (
     <div className="page">

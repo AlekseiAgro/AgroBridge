@@ -1,4 +1,5 @@
 import type { CabinetOverview } from '@agrobridge/shared';
+import { canTrade } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CabinetShell } from '@/components/CabinetShell';
 import { RatingStars } from '@/components/RatingStars';
@@ -23,11 +24,11 @@ export default async function AccountPage({ params }: Props) {
   const t = await getTranslations('cabinet');
   const ta = await getTranslations('auth');
   const tn = await getTranslations('nav');
+  const tp = await getTranslations('purchaseRequests');
   const tProfile = await getTranslations('profile');
   const overview = await apiRequestAuthed<CabinetOverview>('/cabinet/overview');
   const { user, activity } = overview;
-  const isFarmer = user.role === 'farmer' || user.role === 'admin';
-  const isBuyer = user.role === 'buyer' || user.role === 'admin';
+  const trader = canTrade(user.role);
   const roleKey = `roles.${user.role}` as 'roles.farmer' | 'roles.buyer' | 'roles.admin';
   const memberSince = formatMemberSinceMonthYear(user.memberSince, locale);
 
@@ -83,7 +84,7 @@ export default async function AccountPage({ params }: Props) {
             <strong>{activity.conversations}</strong>
             <span>{t('stats.conversations')}</span>
           </li>
-          {isFarmer ? (
+          {trader ? (
             <>
               <li>
                 <strong>{activity.publishedProducts}</strong>
@@ -111,7 +112,7 @@ export default async function AccountPage({ params }: Props) {
           <Link className="button button--ghost" href="/sellers">
             {tn('forSellers')}
           </Link>
-          {isFarmer ? (
+          {trader ? (
             <>
               <Link className="button button--primary" href="/dashboard/farm">
                 {tn('myFarm')}
@@ -122,15 +123,11 @@ export default async function AccountPage({ params }: Props) {
               <Link className="button button--ghost" href="/dashboard/inbox">
                 {tn('inbox')}
               </Link>
-            </>
-          ) : null}
-          {isBuyer ? (
-            <>
               <Link className="button button--primary" href="/requests/new">
                 {tn('purchaseRequests')}
               </Link>
               <Link className="button button--ghost" href="/dashboard/purchase-requests">
-                {tn('purchaseRequests')}
+                {tp('mineTitle')}
               </Link>
               <Link className="button button--ghost" href="/dashboard/rfqs">
                 {tn('myRequests')}

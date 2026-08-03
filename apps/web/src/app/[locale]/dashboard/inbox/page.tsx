@@ -15,9 +15,6 @@ export default async function FarmerInboxPage({ params }: Props) {
 
   const user = await getCurrentUser();
   if (!user) redirect({ href: '/login', locale });
-  if (user!.role !== 'farmer' && user!.role !== 'admin') {
-    redirect({ href: '/account', locale });
-  }
 
   const t = await getTranslations('rfq');
   const items = await apiRequestAuthed<RfqSummary[]>('/rfqs/inbox');

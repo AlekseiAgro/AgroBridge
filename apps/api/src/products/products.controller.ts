@@ -46,7 +46,7 @@ export class ProductsController {
 
   @Get('mine')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   listMine(@CurrentUser() user: AuthenticatedUser) {
     return this.productsService.listMine(user);
   }
@@ -64,14 +64,14 @@ export class ProductsController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateProductDto) {
     return this.productsService.create(user, dto);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   update(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -100,14 +100,14 @@ export class ProductsController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   remove(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.productsService.remove(user, id);
   }
 
   @Post(':id/images')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -125,7 +125,7 @@ export class ProductsController {
 
   @Delete(':id/images/:imageId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   removeImage(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -136,7 +136,7 @@ export class ProductsController {
 
   @Patch(':id/images/:imageId/primary')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   setPrimaryImage(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -147,7 +147,7 @@ export class ProductsController {
 
   @Post(':id/videos')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -165,7 +165,7 @@ export class ProductsController {
 
   @Delete(':id/videos/:videoId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   removeVideo(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -176,7 +176,7 @@ export class ProductsController {
 
   @Post(':id/certificates')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -195,7 +195,7 @@ export class ProductsController {
 
   @Delete(':id/certificates/:certificateId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   removeCertificate(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
