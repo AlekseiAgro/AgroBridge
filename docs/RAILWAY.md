@@ -29,14 +29,24 @@ Recommended path from an empty project:
 
 ## 2. Configure `api` service
 
-**Settings**
+**Settings → Build** (critical — otherwise Railway uses Railpack and fails with “No start command detected”):
 
 | Setting | Value |
 |---------|--------|
-| Root Directory | *(leave empty — repo root)* |
-| Builder | Dockerfile |
+| Builder | **Dockerfile** (not Railpack / Railpack) |
 | Dockerfile path | `apps/api/Dockerfile` |
+| Root Directory | *(leave empty — repo root)* |
 | Watch Paths | `/apps/api/**`, `/packages/shared/**` |
+
+**Settings → Config-as-code**
+
+| Setting | Value |
+|---------|--------|
+| Config file path | `apps/api/railway.toml` |
+
+If Build Logs still say `using build driver railpack`, the builder is still Railpack — switch Builder to Dockerfile and redeploy.
+
+**Settings → Networking:** enable public domain (URL appears after a successful deploy).
 
 **Variables** (Variables tab):
 
@@ -128,6 +138,18 @@ NEXT_PUBLIC_API_URL=https://api.agrobrid.ge/api
 - Start: Railway Postgres backups / snapshots (plan-dependent).
 - Later: periodic `pg_dump` to B2 / R2 / S3 (another provider), same as planned for Hetzner.
 
-## Trial tip
+## Troubleshooting
 
-You have a short Railway trial credit. Deploy **Postgres → Redis → api → web** in that order, set secrets once, then attach custom domains when the default `*.up.railway.app` URLs already return healthy responses.
+### Build log: `using build driver railpack` / `No start command detected`
+
+Railway did **not** use the Dockerfile. Fix:
+
+1. `api` → **Settings → Build** → Builder = **Dockerfile**
+2. Dockerfile path = `apps/api/Dockerfile`
+3. **Settings → Config-as-code** → config path = `apps/api/railway.toml`
+4. Redeploy and confirm Build Logs mention **Dockerfile** / `docker build`, not `Railpack`
+
+### Build ok, deploy crash on boot
+
+- Check `JWT_SECRET` is set and not `change-me-in-production`
+- Check `DATABASE_URL` / `REDIS_URL` are Variable References to Postgres / Redis
