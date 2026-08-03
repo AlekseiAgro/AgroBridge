@@ -29,6 +29,10 @@ describe('AuthService', () => {
     notifyWelcome: jest.fn().mockResolvedValue(undefined),
   };
 
+  const verification = {
+    sendEmailCode: jest.fn().mockResolvedValue({ sent: true, destination: 'farmer@example.com' }),
+  };
+
   let service: AuthService;
 
   beforeEach(() => {
@@ -38,6 +42,7 @@ describe('AuthService', () => {
       jwtService as unknown as JwtService,
       config as unknown as ConfigService,
       notifications as never,
+      verification as never,
     );
   });
 
@@ -52,6 +57,7 @@ describe('AuthService', () => {
       locale: 'ka',
       displayName: 'Nino',
       passwordHash: 'hash',
+      emailVerifiedAt: null,
     });
 
     const result = await service.register({
@@ -72,6 +78,7 @@ describe('AuthService', () => {
       buyerType: 'individual',
       locale: 'ka',
       displayName: 'Nino',
+      emailVerified: false,
       rating: { average: null, count: 0 },
     });
     expect(prisma.user.create).toHaveBeenCalledWith(
@@ -89,6 +96,7 @@ describe('AuthService', () => {
       displayName: 'Nino',
       role: 'farmer',
     });
+    expect(verification.sendEmailCode).toHaveBeenCalled();
   });
 
   it('requires seller type for farmers', async () => {
@@ -126,6 +134,7 @@ describe('AuthService', () => {
       locale: 'en',
       displayName: 'Elena',
       passwordHash: 'hash',
+      emailVerifiedAt: null,
     });
 
     const result = await service.register({
@@ -139,6 +148,7 @@ describe('AuthService', () => {
 
     expect(result.user.buyerType).toBe('company');
     expect(result.user.sellerType).toBe('privateFarmer');
+    expect(result.user.emailVerified).toBe(false);
     expect(prisma.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({

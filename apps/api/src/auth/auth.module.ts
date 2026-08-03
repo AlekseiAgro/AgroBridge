@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, type JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { VerificationModule } from '../verification/verification.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { EmailVerifiedGuard } from './email-verified.guard';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
@@ -20,9 +22,10 @@ import { JwtStrategy } from './jwt.strategy';
         },
       }),
     }),
+    VerificationModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService, JwtModule, PassportModule],
+  providers: [AuthService, JwtStrategy, EmailVerifiedGuard],
+  exports: [AuthService, JwtModule, PassportModule, EmailVerifiedGuard],
 })
 export class AuthModule {}

@@ -54,7 +54,8 @@
       "individual": "Individual",
       "company": "Company"
     },
-    "dualCapabilityHint": "One account can both sell products and post purchase requests. Pick how you mainly start."
+    "dualCapabilityHint": "One account can both sell products and post purchase requests. Pick how you mainly start.",
+    "registerEmailVerifyHint": "After sign-up we email a confirmation code. You can open your account once the address is verified."
   },
   "account": {
     "title": "Your account",
@@ -965,5 +966,17 @@
       "priceRiseSoon": "Price growth is expected soon.",
       "priceStable": "Recent price move about +{percent}%."
     }
+  },
+  "verifyEmail": {
+    "title": "Confirm your email",
+    "subtitle": "Enter the 6-digit code we sent to your inbox to open your account.",
+    "code": "Verification code",
+    "confirm": "Confirm email",
+    "resend": "Resend code",
+    "sent": "Code sent to {destination}",
+    "sentHint": "We sent a code to {email}. Check your inbox and spam folder.",
+    "confirmed": "Email confirmed. Opening your account…",
+    "pleaseWait": "Please wait…",
+    "genericError": "Something went wrong. Please try again."
   }
 }

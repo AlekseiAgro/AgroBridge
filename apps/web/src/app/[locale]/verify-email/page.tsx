@@ -1,9 +1,8 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { AuthForm } from '@/components/AuthForm';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { VerifyEmailForm } from '@/components/VerifyEmailForm';
 import { Link, redirect } from '@/i18n/navigation';
 import { safeNextPath } from '@/lib/safe-next-path';
-import { cabinetPathForUser } from '@/lib/require-verified-user';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -11,18 +10,23 @@ type Props = {
   searchParams: Promise<{ next?: string }>;
 };
 
-export default async function RegisterPage({ params, searchParams }: Props) {
+export default async function VerifyEmailPage({ params, searchParams }: Props) {
   const { locale } = await params;
   const { next } = await searchParams;
   setRequestLocale(locale);
 
   const nextPath = safeNextPath(next, '/account');
   const user = await getCurrentUser();
-  if (user) {
-    redirect({ href: cabinetPathForUser(user, nextPath), locale });
+
+  if (!user) {
+    redirect({ href: `/login?next=${encodeURIComponent('/verify-email')}`, locale });
   }
 
-  const t = await getTranslations('auth');
+  if (user!.emailVerified) {
+    redirect({ href: nextPath, locale });
+  }
+
+  const t = await getTranslations('verifyEmail');
 
   return (
     <div className="auth-page">
@@ -34,16 +38,9 @@ export default async function RegisterPage({ params, searchParams }: Props) {
       </header>
 
       <main className="auth-card">
-        <h1>{t('registerTitle')}</h1>
-        <p className="auth-card__subtitle">{t('registerSubtitle')}</p>
-        <p className="product-list__meta">{t('registerEmailVerifyHint')}</p>
-        <AuthForm mode="register" nextPath={nextPath} />
-        <p className="auth-card__footer">
-          {t('hasAccount')}{' '}
-          <Link href={next ? `/login?next=${encodeURIComponent(nextPath)}` : '/login'}>
-            {t('goLogin')}
-          </Link>
-        </p>
+        <h1>{t('title')}</h1>
+        <p className="auth-card__subtitle">{t('subtitle')}</p>
+        <VerifyEmailForm email={user!.email} nextPath={nextPath} />
       </main>
     </div>
   );

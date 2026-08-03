@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -32,14 +33,14 @@ export class PurchaseRequestsController {
   }
 
   @Get('mine')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   listMine(@CurrentUser() user: AuthenticatedUser) {
     return this.purchaseRequestsService.listMine(user);
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreatePurchaseRequestDto) {
     return this.purchaseRequestsService.create(user, dto);
@@ -52,21 +53,21 @@ export class PurchaseRequestsController {
   }
 
   @Post(':id/cancel')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   cancel(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.purchaseRequestsService.cancel(user, id);
   }
 
   @Post(':id/close')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   close(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.purchaseRequestsService.close(user, id);
   }
 
   @Post(':id/quotes')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   createQuote(
     @CurrentUser() user: AuthenticatedUser,
@@ -77,7 +78,7 @@ export class PurchaseRequestsController {
   }
 
   @Post(':id/quotes/:quoteId/accept')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   acceptQuote(
     @CurrentUser() user: AuthenticatedUser,
@@ -88,7 +89,7 @@ export class PurchaseRequestsController {
   }
 
   @Post(':id/quotes/:quoteId/decline')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   declineQuote(
     @CurrentUser() user: AuthenticatedUser,
@@ -99,7 +100,7 @@ export class PurchaseRequestsController {
   }
 
   @Post(':id/quotes/:quoteId/withdraw')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   withdrawQuote(
     @CurrentUser() user: AuthenticatedUser,

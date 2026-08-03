@@ -41,6 +41,7 @@ export type PublicUser = {
   buyerType: BuyerType | null;
   locale: Locale;
   displayName: string | null;
+  emailVerified: boolean;
   rating: RatingSummary;
 };
 

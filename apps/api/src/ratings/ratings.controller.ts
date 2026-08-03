@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CreateRatingDto } from './dto/create-rating.dto';
@@ -10,7 +11,7 @@ export class RatingsController {
   constructor(private readonly ratingsService: RatingsService) {}
 
   @Post('ratings')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateRatingDto) {
     return this.ratingsService.create(user, dto);
   }

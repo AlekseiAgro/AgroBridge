@@ -54,7 +54,8 @@
       "individual": "Particulier",
       "company": "Entreprise"
     },
-    "dualCapabilityHint": "Un seul compte permet de vendre des produits et de publier des demandes d’achat. Choisissez surtout par où commencer."
+    "dualCapabilityHint": "Un seul compte permet de vendre des produits et de publier des demandes d’achat. Choisissez surtout par où commencer.",
+    "registerEmailVerifyHint": "Après l’inscription, nous envoyons un code de confirmation. Le compte s’ouvre une fois l’e-mail vérifié."
   },
   "account": {
     "title": "Votre compte",
@@ -965,5 +966,17 @@
       "priceRiseSoon": "Une hausse des prix est attendue bientôt.",
       "priceStable": "Variation récente des prix d’environ +{percent}%."
     }
+  },
+  "verifyEmail": {
+    "title": "Confirmez votre e-mail",
+    "subtitle": "Saisissez le code à 6 chiffres reçu par e-mail pour ouvrir votre compte.",
+    "code": "Code de vérification",
+    "confirm": "Confirmer l’e-mail",
+    "resend": "Renvoyer le code",
+    "sent": "Code envoyé à {destination}",
+    "sentHint": "Nous avons envoyé un code à {email}. Vérifiez votre boîte de réception et vos spams.",
+    "confirmed": "E-mail confirmé. Ouverture du compte…",
+    "pleaseWait": "Veuillez patienter…",
+    "genericError": "Une erreur s’est produite. Réessayez."
   }
 }

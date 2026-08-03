@@ -38,6 +38,9 @@ describe('VerificationService', () => {
     role: 'farmer' as const,
     locale: 'en' as const,
     displayName: 'Farmer',
+    sellerType: 'privateFarmer' as const,
+    buyerType: 'individual' as const,
+    emailVerified: false,
   };
 
   let service: VerificationService;
@@ -52,13 +55,25 @@ describe('VerificationService', () => {
     );
   });
 
-  it('rejects non-producers', async () => {
-    await expect(
-      service.getStatus({
-        ...farmer,
-        role: 'buyer',
-      }),
-    ).rejects.toBeInstanceOf(Error);
+  it('allows marketplace buyers to request email verification', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'buyer@example.com',
+      locale: 'en',
+      displayName: 'Buyer',
+      emailVerifiedAt: null,
+      phone: null,
+      phoneVerifiedAt: null,
+      sellerType: 'privateFarmer',
+    });
+    prisma.verificationCode.create.mockResolvedValue({ id: 'c1' });
+
+    const result = await service.sendEmailCode({
+      ...farmer,
+      role: 'buyer',
+      email: 'buyer@example.com',
+    });
+    expect(result.sent).toBe(true);
   });
 
   it('sends an email verification code', async () => {

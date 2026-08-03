@@ -4,7 +4,7 @@ import { PurchaseRequestForm } from '@/components/PurchaseRequestForm';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link, redirect } from '@/i18n/navigation';
-import { getCurrentUser } from '@/lib/session';
+import { requireVerifiedUser } from '@/lib/require-verified-user';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -14,15 +14,12 @@ export default async function NewPurchaseRequestPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect({ href: '/login?next=/requests/new', locale });
-  }
+  const user = await requireVerifiedUser(locale, '/requests/new');
 
   const t = await getTranslations('purchaseRequests');
   const tn = await getTranslations('nav');
 
-  if (!canTrade(user!.role)) {
+  if (!canTrade(user.role)) {
     redirect({ href: '/account', locale });
   }
 
