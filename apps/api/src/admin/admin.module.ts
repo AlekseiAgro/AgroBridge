@@ -1,3 +1,4 @@
+import { Module } from '@nestjs/common';
 import { CategoriesModule } from '../categories/categories.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { VerificationModule } from '../verification/verification.module';
