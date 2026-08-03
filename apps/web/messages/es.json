@@ -80,7 +80,8 @@
     "purchaseRequests": "Solicitudes de compra",
     "forBuyers": "Soy comprador",
     "forSellers": "Soy vendedor",
-    "subscriptions": "Alertas"
+    "subscriptions": "Alertas",
+    "chatUnread": "Chat, {count} sin leer"
   },
   "footer": {
     "tagline": "Conectamos granjas georgianas con compradores de todo el mundo.",
@@ -536,7 +537,8 @@
       "completed": "Traducido",
       "failed": "Error de traducción",
       "none": "Original"
-    }
+    },
+    "unreadCount": "{count} sin leer"
   },
   "admin": {
     "title": "Panel de administración",

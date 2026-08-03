@@ -80,7 +80,8 @@
     "purchaseRequests": "Kaufanfragen",
     "forBuyers": "Ich bin Käufer",
     "forSellers": "Ich bin Verkäufer",
-    "subscriptions": "Alerts"
+    "subscriptions": "Alerts",
+    "chatUnread": "Chat, {count} ungelesen"
   },
   "footer": {
     "tagline": "Wir verbinden georgische Betriebe mit Käufern weltweit.",
@@ -536,7 +537,8 @@
       "completed": "Übersetzt",
       "failed": "Übersetzung fehlgeschlagen",
       "none": "Original"
-    }
+    },
+    "unreadCount": "{count} ungelesen"
   },
   "admin": {
     "title": "Admin-Bereich",

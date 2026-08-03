@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { ChatNavLink } from '@/components/ChatNavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link } from '@/i18n/navigation';
 import { getCurrentUser } from '@/lib/session';
@@ -24,7 +25,7 @@ export async function SiteHeader({ tone = 'default' }: Props) {
           {t('forSellers')}
         </Link>
         <Link href="/how-it-works">{t('howItWorks')}</Link>
-        {user ? <Link href="/dashboard/chat">{t('chat')}</Link> : null}
+        {user ? <ChatNavLink /> : null}
         {user?.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
         {user ? (
           <Link href="/account">{t('account')}</Link>

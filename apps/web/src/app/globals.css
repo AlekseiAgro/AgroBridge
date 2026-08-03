@@ -870,6 +870,33 @@ body {
   font-weight: 600;
 }
 
+.chat-nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.chat-nav-link__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: #c45c26;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.site-header--light .chat-nav-link__badge {
+  background: #f0a060;
+  color: #2a1a10;
+}
+
 .site-header__role-link {
   position: relative;
   padding: 0.35rem 0.7rem;
@@ -1400,6 +1427,9 @@ body {
   font-weight: 700;
   text-decoration: none;
   font-size: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .product-list__meta {
@@ -1838,6 +1868,10 @@ body {
   color: var(--brand-deep);
   text-decoration: none;
   font-weight: 600;
+}
+
+.cabinet__nav .chat-nav-link {
+  justify-content: space-between;
 }
 
 .cabinet__nav a:hover {

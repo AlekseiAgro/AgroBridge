@@ -1,6 +1,7 @@
 import { canTrade } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { ChatNavLink } from '@/components/ChatNavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LogoutButton } from '@/components/LogoutButton';
 import { Link } from '@/i18n/navigation';
@@ -38,7 +39,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
               <Link href="/dashboard/rfqs">{t('myRequests')}</Link>
             </>
           ) : null}
-          {user ? <Link href="/dashboard/chat">{t('chat')}</Link> : null}
+          {user ? <ChatNavLink /> : null}
           {user ? <Link href="/dashboard/subscriptions">{t('subscriptions')}</Link> : null}
           {user?.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
           <Link href="/buyers">{t('forBuyers')}</Link>
