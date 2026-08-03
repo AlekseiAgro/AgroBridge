@@ -919,6 +919,8 @@
     "formTitle": "Harvest planning",
     "formSubtitle": "Help buyers plan around seasonality, expected volume, and pre-orders.",
     "seasonality": "Season months",
+    "selectAllMonths": "Tous les mois",
+    "clearMonths": "Effacer",
     "window": "Expected harvest window",
     "startDate": "Harvest start",
     "endDate": "Harvest end",
