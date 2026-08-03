@@ -698,6 +698,68 @@ body {
   font: inherit;
 }
 
+.place-autocomplete {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.place-autocomplete__control {
+  position: relative;
+}
+
+.place-autocomplete__list {
+  position: absolute;
+  top: calc(100% + 0.2rem);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(20, 40, 24, 0.12);
+  max-height: 14rem;
+  overflow: auto;
+}
+
+.place-autocomplete__option {
+  width: 100%;
+  display: grid;
+  gap: 0.1rem;
+  text-align: left;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+
+.place-autocomplete__option--active,
+.place-autocomplete__option:hover {
+  background: rgba(31, 74, 40, 0.08);
+}
+
+.place-autocomplete__main {
+  font-weight: 600;
+}
+
+.place-autocomplete__secondary {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.place-autocomplete__hint,
+.place-autocomplete__status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
 .role-fieldset {
   margin: 0;
   padding: 0.75rem;

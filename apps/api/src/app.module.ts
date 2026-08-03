@@ -18,6 +18,7 @@ import { StorageModule } from './storage/storage.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { SupportModule } from './support/support.module';
 import { TranslationModule } from './translation/translation.module';
+import { PlacesModule } from './places/places.module';
 import { UsersModule } from './users/users.module';
 import { VerificationModule } from './verification/verification.module';
 
@@ -35,6 +36,7 @@ import { VerificationModule } from './verification/verification.module';
     FarmsModule,
     ProductsModule,
     CategoriesModule,
+    PlacesModule,
     RfqsModule,
     PurchaseRequestsModule,
     SubscriptionsModule,

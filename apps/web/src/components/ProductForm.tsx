@@ -22,6 +22,7 @@ import {
 } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { FormEvent, useMemo, useState } from 'react';
+import { OriginPlaceInput } from '@/components/OriginPlaceInput';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
 import { useRouter } from '@/i18n/navigation';
 
@@ -382,9 +383,10 @@ export function ProductForm({ mode, initial }: Props) {
           </label>
           <label className="field">
             <span>{t('originPlace')}</span>
-            <input
+            <OriginPlaceInput
               value={originPlace}
-              onChange={(event) => setOriginPlace(event.target.value)}
+              country={country}
+              onChange={setOriginPlace}
               placeholder={t('originPlacePlaceholder')}
             />
           </label>
