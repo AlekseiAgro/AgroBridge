@@ -21,6 +21,7 @@ import {
 } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { FormEvent, useMemo, useState, type ReactNode } from 'react';
+import { MultiSelectDropdown } from '@/components/MultiSelectDropdown';
 import { OriginPlaceInput } from '@/components/OriginPlaceInput';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -583,36 +584,38 @@ export function ProductForm({ mode, initial, leading }: Props) {
         </label>
         {deliveryAvailable ? (
           <>
-            <div className="field">
-              <span>{t('incoterms')}</span>
-              <div className="chip-grid">
-                {INCOTERMS.map((value) => (
-                  <label key={value} className="check-row check-row--chip">
-                    <input
-                      type="checkbox"
-                      checked={incoterms.includes(value)}
-                      onChange={() => setIncoterms((current) => toggleValue(current, value))}
-                    />
-                    <span>{value}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="field">
-              <span>{t('carriers')}</span>
-              <div className="chip-grid">
-                {CARRIERS.map((value) => (
-                  <label key={value} className="check-row check-row--chip">
-                    <input
-                      type="checkbox"
-                      checked={carriers.includes(value)}
-                      onChange={() => setCarriers((current) => toggleValue(current, value))}
-                    />
-                    <span>{value === 'other' ? t('other') : value}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
+            <MultiSelectDropdown
+              label={t('incoterms')}
+              options={INCOTERMS.map((value) => ({ value, label: value }))}
+              values={incoterms}
+              onChange={setIncoterms}
+              placeholder={t('multiSelectPlaceholder')}
+              selectedSummary={
+                incoterms.length
+                  ? t('multiSelectSelected', { count: incoterms.length, values: incoterms.join(', ') })
+                  : t('multiSelectPlaceholder')
+              }
+            />
+            <MultiSelectDropdown
+              label={t('carriers')}
+              options={CARRIERS.map((value) => ({
+                value,
+                label: value === 'other' ? t('other') : value,
+              }))}
+              values={carriers}
+              onChange={setCarriers}
+              placeholder={t('multiSelectPlaceholder')}
+              selectedSummary={
+                carriers.length
+                  ? t('multiSelectSelected', {
+                      count: carriers.length,
+                      values: carriers
+                        .map((value) => (value === 'other' ? t('other') : value))
+                        .join(', '),
+                    })
+                  : t('multiSelectPlaceholder')
+              }
+            />
             <div className="field-row">
               <label className="field">
                 <span>{t('nearestPort')}</span>
