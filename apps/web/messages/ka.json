@@ -688,7 +688,19 @@
       "publishedProducts": "გამოქვეყნებული პროდუქტები",
       "pendingModeration": "მოდერაციაზე",
       "awaitingMyRating": "ელოდება თქვენს შეფასებას"
-    }
+    },
+    "dangerZone": "საშიში ზონა",
+    "deleteAccount": "ანგარიშის წაშლა",
+    "deleteAccountHint": "სამუდამოდ წაიშლება ანგარიში, ფერმის პროფილი, პროდუქტები და დაკავშირებული მოთხოვნები.",
+    "deleteAccountFlowHint": "შეიყვანეთ პაროლი. დადასტურების კოდს გამოგიგზავნით {email}-ზე.",
+    "deleteAccountSendCode": "დადასტურების კოდის გაგზავნა",
+    "deleteAccountResendCode": "კოდის ხელახლა გაგზავნა",
+    "deleteAccountCode": "ელფოსტის კოდი",
+    "deleteAccountCodeSent": "კოდი გაიგზავნა {email}-ზე. შეიყვანეთ ის ქვემოთ პაროლთან ერთად.",
+    "deleteAccountConfirmSubmit": "წაშლის დადასტურება",
+    "deleteAccountCancel": "გაუქმება",
+    "deleteAccountConfirm": "წავშალოთ AgroBridge ანგარიში სამუდამოდ? ამ მოქმედების გაუქმება შეუძლებელია.",
+    "deleteAccountError": "ანგარიშის წაშლა ვერ მოხერხდა. სცადეთ თავიდან."
   },
   "rating": {
     "title": "შეაფასეთ პარტნიორი",

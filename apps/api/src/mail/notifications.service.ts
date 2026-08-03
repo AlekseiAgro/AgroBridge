@@ -221,6 +221,22 @@ export class NotificationsService {
     });
   }
 
+  async notifyAccountDeletionCode(params: {
+    user: MailRecipient;
+    code: string;
+  }): Promise<void> {
+    const locale = this.localeOf(params.user.locale);
+    const rendered = renderEmailTemplate(locale, 'accountDeletionCode', {
+      name: this.displayName(params.user),
+      code: params.code,
+    });
+    await this.mail.send({
+      to: params.user.email,
+      subject: rendered.subject,
+      text: rendered.text,
+    });
+  }
+
   async notifyHarvestAvailable(params: {
     user: MailRecipient;
     productId: string;

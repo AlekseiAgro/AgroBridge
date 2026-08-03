@@ -688,7 +688,19 @@
       "publishedProducts": "Productos publicados",
       "pendingModeration": "En moderación",
       "awaitingMyRating": "Pendiente de tu valoración"
-    }
+    },
+    "dangerZone": "Zona de peligro",
+    "deleteAccount": "Eliminar cuenta",
+    "deleteAccountHint": "Elimina de forma permanente tu cuenta, perfil de granja, productos y solicitudes relacionadas.",
+    "deleteAccountFlowHint": "Introduce tu contraseña. Enviaremos un código de confirmación a {email}.",
+    "deleteAccountSendCode": "Enviar código de confirmación",
+    "deleteAccountResendCode": "Reenviar código",
+    "deleteAccountCode": "Código del correo",
+    "deleteAccountCodeSent": "Código enviado a {email}. Introdúcelo abajo con tu contraseña.",
+    "deleteAccountConfirmSubmit": "Confirmar eliminación",
+    "deleteAccountCancel": "Cancelar",
+    "deleteAccountConfirm": "¿Eliminar tu cuenta de AgroBridge de forma permanente? No se puede deshacer.",
+    "deleteAccountError": "No se pudo eliminar la cuenta. Inténtalo de nuevo."
   },
   "rating": {
     "title": "Valora a tu partner",

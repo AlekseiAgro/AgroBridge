@@ -688,7 +688,19 @@
       "publishedProducts": "Опубликованные товары",
       "pendingModeration": "На модерации",
       "awaitingMyRating": "Ждут вашей оценки"
-    }
+    },
+    "dangerZone": "Опасная зона",
+    "deleteAccount": "Удалить аккаунт",
+    "deleteAccountHint": "Безвозвратно удалит аккаунт, профиль фермы, товары и связанные запросы.",
+    "deleteAccountFlowHint": "Введите пароль. Мы отправим код подтверждения на {email}.",
+    "deleteAccountSendCode": "Отправить код подтверждения",
+    "deleteAccountResendCode": "Отправить код снова",
+    "deleteAccountCode": "Код из письма",
+    "deleteAccountCodeSent": "Код отправлен на {email}. Введите его ниже вместе с паролем.",
+    "deleteAccountConfirmSubmit": "Подтвердить удаление",
+    "deleteAccountCancel": "Отмена",
+    "deleteAccountConfirm": "Удалить аккаунт AgroBridge навсегда? Это действие нельзя отменить.",
+    "deleteAccountError": "Не удалось удалить аккаунт. Попробуйте ещё раз."
   },
   "rating": {
     "title": "Оцените партнёра",

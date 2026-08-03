@@ -688,7 +688,19 @@
       "publishedProducts": "Prodotti pubblicati",
       "pendingModeration": "In moderazione",
       "awaitingMyRating": "In attesa della tua valutazione"
-    }
+    },
+    "dangerZone": "Zona pericolosa",
+    "deleteAccount": "Elimina account",
+    "deleteAccountHint": "Elimina definitivamente account, profilo azienda, prodotti e richieste collegate.",
+    "deleteAccountFlowHint": "Inserisci la password. Invieremo un codice di conferma a {email}.",
+    "deleteAccountSendCode": "Invia codice di conferma",
+    "deleteAccountResendCode": "Invia di nuovo il codice",
+    "deleteAccountCode": "Codice email",
+    "deleteAccountCodeSent": "Codice inviato a {email}. Inseriscilo sotto con la password.",
+    "deleteAccountConfirmSubmit": "Conferma eliminazione",
+    "deleteAccountCancel": "Annulla",
+    "deleteAccountConfirm": "Eliminare definitivamente l’account AgroBridge? L’azione non può essere annullata.",
+    "deleteAccountError": "Impossibile eliminare l’account. Riprova."
   },
   "rating": {
     "title": "Valuta il partner",
