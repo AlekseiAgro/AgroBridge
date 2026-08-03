@@ -113,7 +113,8 @@ Statuses: `pending` → `offered` → `accepted` | `declined` (or `cancelled` wh
 - Admin desk: `/{locale}/dashboard/admin` (e.g. `/en/dashboard/admin` or `https://agrobrid.ge/en/dashboard/admin`)
 - Product review queue: `/{locale}/dashboard/admin?section=products&status=pending`
 - Admins are emailed when a listing enters moderation
-- Seed admin + demo users:
+- Production admin: set `ADMIN_EMAIL` / `ADMIN_PASSWORD` on the API service; the container upserts that account on start (`prisma/ensure-admin.cjs`)
+- Local seed admin + demo users:
 
 ```bash
 pnpm --filter @agrobridge/api db:seed
