@@ -2,6 +2,7 @@ import type { ProductSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CertificateBadges } from '@/components/CertificateBadges';
 import { DeleteProductButton } from '@/components/DeleteProductButton';
+import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { Link, redirect } from '@/i18n/navigation';
 import { getProductCardImage } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
@@ -93,11 +94,7 @@ export default async function DashboardProductsPage({ params }: Props) {
                       {product.moderationNote ? ` · ${product.moderationNote}` : ''}
                     </p>
                     <div className="product-quality-summary">
-                      <span
-                        className={`quality-score-chip quality-score-chip--${product.qualityScore.tier}`}
-                      >
-                        {product.qualityScore.score}/100
-                      </span>
+                      <QualityScoreChip score={product.qualityScore} />
                       <CertificateBadges badges={product.certificateBadges} />
                     </div>
                   </div>

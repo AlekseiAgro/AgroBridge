@@ -905,7 +905,7 @@
     }
   },
   "quality": {
-    "title": "Product card quality",
+    "title": "პროდუქტის ბარათის ხარისხი",
     "scoreLabel": "Product card quality score: {score} out of 100",
     "tiers": {
       "low": "Getting started",

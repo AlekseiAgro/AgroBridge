@@ -5,6 +5,7 @@ import { CatalogFilters } from '@/components/CatalogFilters';
 import { CatalogPurchaseCta } from '@/components/CatalogPurchaseCta';
 import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
 import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
+import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -35,7 +36,6 @@ export default async function CatalogPage({ params, searchParams }: Props) {
 
   const t = await getTranslations('catalog');
   const tn = await getTranslations('nav');
-  const tq = await getTranslations('quality');
   const tr = await getTranslations();
   const query = new URLSearchParams();
   if (filters.q) query.set('q', filters.q);
@@ -115,12 +115,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                       <MarketOpportunityBadge opportunity={product.opportunity} />
                     </div>
                     <div className="product-quality-summary">
-                      <span
-                        className={`quality-score-chip quality-score-chip--${product.qualityScore.tier}`}
-                      >
-                        {product.qualityScore.score}/100 ·{' '}
-                        {tq(`tiers.${product.qualityScore.tier}`)}
-                      </span>
+                      <QualityScoreChip score={product.qualityScore} showTier />
                       <CertificateBadges badges={product.certificateBadges} />
                     </div>
                     <div className="product-list__rating">

@@ -2,6 +2,7 @@ import type { FarmDetail, RatingSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { CertificateBadges } from '@/components/CertificateBadges';
+import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -93,11 +94,7 @@ export default async function FarmDetailPage({ params }: Props) {
                       {quantity ? ` · ${quantity}` : ''}
                     </p>
                     <div className="product-quality-summary">
-                      <span
-                        className={`quality-score-chip quality-score-chip--${product.qualityScore.tier}`}
-                      >
-                        {product.qualityScore.score}/100
-                      </span>
+                      <QualityScoreChip score={product.qualityScore} />
                       <CertificateBadges badges={product.certificateBadges} />
                     </div>
                   </div>

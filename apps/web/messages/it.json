@@ -905,7 +905,7 @@
     }
   },
   "quality": {
-    "title": "Product card quality",
+    "title": "Qualità della scheda prodotto",
     "scoreLabel": "Product card quality score: {score} out of 100",
     "tiers": {
       "low": "Getting started",

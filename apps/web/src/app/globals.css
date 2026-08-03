@@ -2149,21 +2149,22 @@ body {
   gap: 1rem;
 }
 
-.quality-widget__eyebrow {
-  margin: 0 0 0.15rem;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.quality-widget__title {
+  margin: 0 0 0.2rem;
+  color: var(--brand-deep);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .quality-widget__tier {
   margin: 0;
-  color: var(--brand-deep);
-  font-family: var(--font-display), Georgia, serif;
-  font-size: 1.35rem;
-  font-weight: 650;
+  color: var(--muted);
+  font-family: var(--font-body), Georgia, serif;
+  font-size: 0.92rem;
+  font-weight: 600;
 }
 
 .quality-widget__score {
@@ -2263,6 +2264,19 @@ body {
   align-items: center;
   gap: 0.4rem;
   margin-top: 0.55rem;
+}
+
+.quality-score-chip-wrap {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.45rem;
+}
+
+.quality-score-chip__name {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .quality-score-chip {

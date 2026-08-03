@@ -14,7 +14,7 @@ export function ProductQualityWidget({ score }: Props) {
     <section className={`quality-widget quality-widget--${score.tier}`} aria-live="polite">
       <div className="quality-widget__head">
         <div>
-          <p className="quality-widget__eyebrow">{t('title')}</p>
+          <h2 className="quality-widget__title">{t('title')}</h2>
           <p className="quality-widget__tier">{t(`tiers.${score.tier}`)}</p>
         </div>
         <div className="quality-widget__score" aria-label={t('scoreLabel', { score: score.score })}>
