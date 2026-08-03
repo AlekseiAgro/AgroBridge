@@ -10,7 +10,9 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
+  IsInt,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Max,
@@ -89,6 +91,21 @@ export class UpdateProductDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(120)
+  variety?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  country?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  originPlace?: string;
+
+  @IsOptional()
+  @IsString()
   @Validate(ProductCategoryConstraint)
   category?: string;
 
@@ -110,6 +127,101 @@ export class UpdateProductDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0.01)
   maxQuantity?: number | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null && value !== undefined)
+  @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0.01)
+  currentStock?: number | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null && value !== undefined)
+  @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0.01)
+  monthlyProduction?: number | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null && value !== undefined)
+  @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0.01)
+  maxAnnualProduction?: number | null;
+
+  @IsOptional()
+  @IsObject()
+  attributes?: Record<string, unknown>;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(12)
+  @IsString({ each: true })
+  packagingTypes?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(12)
+  @IsString({ each: true })
+  packagingWeights?: string[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  palletSize?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  incoterms?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(10)
+  @IsString({ each: true })
+  carriers?: string[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  customDelivery?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  nearestPort?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  deliveryAvailable?: boolean;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null && value !== undefined)
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @Max(365)
+  leadTimeDays?: number | null;
+
+  @IsOptional()
+  @ValidateIf((_, value) => value !== null && value !== undefined)
+  @Type(() => Number)
+  @IsNumber()
+  priceFrom?: number | null;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(8)
+  priceCurrency?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  priceNegotiable?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  priceDependsOnVolume?: boolean;
 
   @IsOptional()
   @IsArray()
