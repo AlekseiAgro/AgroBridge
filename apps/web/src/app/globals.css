@@ -432,6 +432,31 @@ body {
   background: rgba(255, 255, 255, 0.24);
 }
 
+.button--danger {
+  background: #9b3b2f;
+  border-color: #9b3b2f;
+  color: #fff;
+}
+
+.button--danger:hover {
+  background: #7e2f25;
+  border-color: #7e2f25;
+}
+
+.cabinet-danger__trigger {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: start;
+  max-width: 28rem;
+}
+
+.cabinet-danger__hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
 .button--accent {
   background: var(--accent-gold);
   border-color: rgba(29, 42, 31, 0.12);

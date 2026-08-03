@@ -100,11 +100,7 @@ export default async function AccountPage({ params }: Props) {
       </section>
 
       {user.role !== 'admin' ? (
-        <section className="cabinet-danger" aria-labelledby="cabinet-danger-title">
-          <h2 id="cabinet-danger-title" className="section-title">
-            {t('dangerZone')}
-          </h2>
-          <p className="page__subtitle">{t('deleteAccountHint')}</p>
+        <section className="cabinet-danger">
           <DeleteAccountButton email={user.email} />
         </section>
       ) : null}
