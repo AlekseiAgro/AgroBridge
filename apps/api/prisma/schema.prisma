@@ -98,6 +98,7 @@ enum VerificationChannel {
   email
   sms
   accountDeletion
+  emailChange
 }
 
 enum HarvestStatus {
