@@ -114,6 +114,7 @@ export function ProductImagesManager({ productId, initialImages }: Props) {
       <div className="product-images__header">
         <h2 className="section-title">{t('images.title')}</h2>
         <p className="page__subtitle">{t('images.subtitle', { max: PRODUCT_IMAGE_MAX_COUNT })}</p>
+        {images.length > 0 ? <p className="field-hint">{t('images.coverHint')}</p> : null}
       </div>
 
       {images.length > 0 ? (
