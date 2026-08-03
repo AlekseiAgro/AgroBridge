@@ -680,7 +680,6 @@
     "rating": "Note des deals",
     "ratingHint": "Basée sur les deals terminés. Acheteur et vendeur s’évaluent uniquement après clôture.",
     "activityTitle": "Résumé d’activité",
-    "quickLinks": "Liens rapides",
     "stats": {
       "completedDeals": "Deals terminés",
       "openRequests": "Demandes ouvertes",
