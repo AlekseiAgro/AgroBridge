@@ -56,6 +56,30 @@ describe('NotificationsService', () => {
     ).resolves.toBeUndefined();
   });
 
+  it('sends a localized product pending moderation email', async () => {
+    await service.notifyProductPendingModeration({
+      admin: {
+        email: 'admin@example.com',
+        locale: 'ru',
+        displayName: 'Admin',
+      },
+      productTitle: 'Hazelnuts',
+      productId: 'p1',
+      sellerName: 'Nino',
+    });
+
+    expect(mail.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'admin@example.com',
+        subject: expect.stringContaining('Hazelnuts'),
+        text: expect.stringContaining('Nino'),
+      }),
+    );
+    expect(mail.send.mock.calls[0][0].text).toContain(
+      'http://localhost:3000/ru/dashboard/admin?section=products&status=pending',
+    );
+  });
+
   it('sends a localized chat message email', async () => {
     await service.notifyChatMessage({
       recipient: {

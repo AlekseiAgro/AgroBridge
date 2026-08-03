@@ -24,6 +24,7 @@ export type EmailTemplateKey =
   | 'rfqCancelled'
   | 'productApproved'
   | 'productRejected'
+  | 'productPendingModeration'
   | 'newProductListing'
   | 'newPurchaseRequest'
   | 'verificationCode'

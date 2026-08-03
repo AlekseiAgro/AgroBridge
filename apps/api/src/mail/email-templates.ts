@@ -43,6 +43,10 @@ const en: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'Product needs changes: {{productTitle}}',
     text: 'Hello {{name}},\n\nYour product “{{productTitle}}” was not approved.\n\nReason: {{note}}\n\nEdit product: {{link}}\n\n— AgroBridge',
   },
+  productPendingModeration: {
+    subject: 'Product awaiting review: {{productTitle}}',
+    text: 'Hello {{name}},\n\n{{sellerName}} submitted “{{productTitle}}” for moderation.\n\nOpen admin review queue: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "New catalog listing: {{productTitle}}",
     text: "Hello {{name}},\n\nA new product matching your alert is in the AgroBridge catalog.\n\n{{productTitle}} from {{farmName}}{{categoryPart}}{{regionPart}}.\n\nView listing: {{link}}\n\nManage alerts: {{settingsLink}}\n\n— AgroBridge",
@@ -114,6 +118,10 @@ const ru: Record<EmailTemplateKey, EmailTemplate> = {
   productRejected: {
     subject: 'Нужны правки по товару: {{productTitle}}',
     text: 'Здравствуйте, {{name}}!\n\nТовар «{{productTitle}}» не одобрен.\n\nПричина: {{note}}\n\nРедактировать: {{link}}\n\n— AgroBridge',
+  },
+  productPendingModeration: {
+    subject: 'Товар на модерации: {{productTitle}}',
+    text: 'Здравствуйте, {{name}}!\n\n{{sellerName}} отправил(а) «{{productTitle}}» на модерацию.\n\nОткрыть очередь модерации: {{link}}\n\n— AgroBridge',
   },
   newProductListing: {
     subject: "Новое объявление: {{productTitle}}",
@@ -187,6 +195,10 @@ const de: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'Produkt benötigt Änderungen: {{productTitle}}',
     text: 'Hallo {{name}},\n\nIhr Produkt „{{productTitle}}“ wurde nicht freigegeben.\n\nGrund: {{note}}\n\nProdukt bearbeiten: {{link}}\n\n— AgroBridge',
   },
+  productPendingModeration: {
+    subject: 'Produkt zur Prüfung: {{productTitle}}',
+    text: 'Hallo {{name}},\n\n{{sellerName}} hat „{{productTitle}}“ zur Moderation eingereicht.\n\nPrüfwarteschlange öffnen: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "Neues Angebot: {{productTitle}}",
     text: "Hallo {{name}},\n\nEin neues Produkt passend zu Ihrem Alert ist im AgroBridge-Katalog.\n\n{{productTitle}} von {{farmName}}{{categoryPart}}{{regionPart}}.\n\nAngebot öffnen: {{link}}\n\nAlerts verwalten: {{settingsLink}}\n\n— AgroBridge",
@@ -258,6 +270,10 @@ const fr: Record<EmailTemplateKey, EmailTemplate> = {
   productRejected: {
     subject: 'Modifications nécessaires : {{productTitle}}',
     text: 'Bonjour {{name}},\n\nVotre produit « {{productTitle}} » n’a pas été approuvé.\n\nMotif : {{note}}\n\nModifier le produit : {{link}}\n\n— AgroBridge',
+  },
+  productPendingModeration: {
+    subject: 'Produit en attente de validation : {{productTitle}}',
+    text: 'Bonjour {{name}},\n\n{{sellerName}} a soumis « {{productTitle}} » pour modération.\n\nOuvrir la file de modération : {{link}}\n\n— AgroBridge',
   },
   newProductListing: {
     subject: "Nouvelle annonce : {{productTitle}}",
@@ -331,6 +347,10 @@ const it: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'Modifiche richieste: {{productTitle}}',
     text: 'Ciao {{name}},\n\nIl tuo prodotto “{{productTitle}}” non è stato approvato.\n\nMotivo: {{note}}\n\nModifica prodotto: {{link}}\n\n— AgroBridge',
   },
+  productPendingModeration: {
+    subject: 'Prodotto in revisione: {{productTitle}}',
+    text: 'Ciao {{name}},\n\n{{sellerName}} ha inviato «{{productTitle}}» in moderazione.\n\nApri la coda di moderazione: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "Nuovo annuncio: {{productTitle}}",
     text: "Ciao {{name}},\n\nUn nuovo prodotto corrispondente al tuo avviso è nel catalogo AgroBridge.\n\n{{productTitle}} di {{farmName}}{{categoryPart}}{{regionPart}}.\n\nVedi annuncio: {{link}}\n\nGestisci avvisi: {{settingsLink}}\n\n— AgroBridge",
@@ -403,6 +423,10 @@ const es: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'Se requieren cambios: {{productTitle}}',
     text: 'Hola {{name}},\n\nTu producto “{{productTitle}}” no fue aprobado.\n\nMotivo: {{note}}\n\nEditar producto: {{link}}\n\n— AgroBridge',
   },
+  productPendingModeration: {
+    subject: 'Producto pendiente de revisión: {{productTitle}}',
+    text: 'Hola {{name}},\n\n{{sellerName}} ha enviado «{{productTitle}}» a moderación.\n\nAbrir la cola de moderación: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "Nuevo anuncio: {{productTitle}}",
     text: "Hola {{name}},\n\nHay un nuevo producto de tu alerta en el catálogo de AgroBridge.\n\n{{productTitle}} de {{farmName}}{{categoryPart}}{{regionPart}}.\n\nVer anuncio: {{link}}\n\nGestionar alertas: {{settingsLink}}\n\n— AgroBridge",
@@ -474,6 +498,10 @@ const ka: Record<EmailTemplateKey, EmailTemplate> = {
   productRejected: {
     subject: 'საჭიროა ცვლილებები: {{productTitle}}',
     text: 'გამარჯობა, {{name}}!\n\nთქვენი პროდუქტი „{{productTitle}}“ არ დამტკიცდა.\n\nმიზეზი: {{note}}\n\nრედაქტირება: {{link}}\n\n— AgroBridge',
+  },
+  productPendingModeration: {
+    subject: 'პროდუქტი მოდერაციაზე: {{productTitle}}',
+    text: 'გამარჯობა, {{name}}!\n\n{{sellerName}}-მა გააგზავნა „{{productTitle}}“ მოდერაციაზე.\n\nმოდერაციის რიგის გახსნა: {{link}}\n\n— AgroBridge',
   },
   newProductListing: {
     subject: "ახალი განცხადება: {{productTitle}}",
