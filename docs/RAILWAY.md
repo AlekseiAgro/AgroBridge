@@ -1,0 +1,133 @@
+# Deploy AgroBridge on Railway
+
+Railway replaces a single VPS: you run **four services** in one project.
+
+| Service | Role |
+|---------|------|
+| Postgres | Database |
+| Redis | Cache / jobs |
+| `api` | NestJS (`apps/api`) |
+| `web` | Next.js (`apps/web`) |
+
+Custom domain later: `agrobrid.ge` → web, `api.agrobrid.ge` → api (Cloudflare CNAME, not an A→IP).
+
+## 1. Create the project (your current screen)
+
+1. Click **Deploy a GitHub Repository** (or **+ New** → GitHub).
+2. Connect GitHub if asked, select **`AlekseiAgro/AgroBridge`**.
+3. If Railway offers monorepo packages, keep going — you will still add DB/Redis and env vars manually below.
+4. Prefer starting with **Empty Project**, then add services one by one (clearest for this stack).
+
+Recommended path from an empty project:
+
+1. **+ New** → **Empty Project** (or finish GitHub import, then delete auto services if confusing).
+2. In the project canvas: **+ Create** / **+ New**:
+   - **Database** → **PostgreSQL**
+   - **Database** → **Redis**
+   - **GitHub Repo** → same monorepo → name it **`api`**
+   - **GitHub Repo** → same monorepo again → name it **`web`**
+
+## 2. Configure `api` service
+
+**Settings**
+
+| Setting | Value |
+|---------|--------|
+| Root Directory | *(leave empty — repo root)* |
+| Builder | Dockerfile |
+| Dockerfile path | `apps/api/Dockerfile` |
+| Watch Paths | `/apps/api/**`, `/packages/shared/**` |
+
+**Variables** (Variables tab):
+
+```bash
+NODE_ENV=production
+JWT_SECRET=<generate a long random string>
+JWT_EXPIRES_SECONDS=604800
+SUPPORT_EMAIL=gabo.m0619@gmail.com
+MAIL_DRIVER=console
+MAIL_FROM=AgroBridge <noreply@agrobrid.ge>
+TRANSLATION_PROVIDER=mock
+STORAGE_DRIVER=local
+
+# Link Railway Postgres / Redis (reference variables):
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+REDIS_URL=${{Redis.REDIS_URL}}
+
+# After web has a public domain, set (or use references):
+WEB_ORIGIN=https://${{web.RAILWAY_PUBLIC_DOMAIN}}
+WEB_PUBLIC_URL=https://${{web.RAILWAY_PUBLIC_DOMAIN}}
+API_PUBLIC_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
+```
+
+Notes:
+
+- Exact reference names depend on how you named the Postgres/Redis/web services in the canvas — pick them from Railway’s variable reference menu.
+- First deploy: generate a **public domain** for `api` (Settings → Networking → Generate Domain).
+- Health: `https://<api-domain>/api/health`
+
+The API image runs `prisma migrate deploy` on start.
+
+## 3. Configure `web` service
+
+**Settings**
+
+| Setting | Value |
+|---------|--------|
+| Root Directory | *(empty — repo root)* |
+| Builder | Dockerfile |
+| Dockerfile path | `apps/web/Dockerfile` |
+| Watch Paths | `/apps/web/**`, `/packages/shared/**` |
+
+**Variables**
+
+```bash
+NODE_ENV=production
+NEXT_PUBLIC_API_URL=https://${{api.RAILWAY_PUBLIC_DOMAIN}}/api
+```
+
+`NEXT_PUBLIC_API_URL` is baked at **build** time — set it before/with the first successful web build, then redeploy web if the API domain changes.
+
+Generate a public domain for `web`.
+
+## 4. Seed demo data (optional)
+
+In the `api` service → **Settings** → one-off command / shell (or Railway CLI):
+
+```bash
+./node_modules/.bin/prisma db seed
+```
+
+(If the shell cwd is `/app/apps/api` inside the container.)
+
+## 5. Point agrobrid.ge (Cloudflare)
+
+After Railway domains work:
+
+1. Railway → `web` → Custom Domain → `agrobrid.ge` (and optionally `www`).
+2. Railway → `api` → Custom Domain → `api.agrobrid.ge`.
+3. Cloudflare DNS (follow Railway’s CNAME target exactly), usually:
+
+| Type | Name | Target | Proxy |
+|------|------|--------|-------|
+| CNAME | `@` or Railway-required host | Railway web hostname | often DNS only while verifying |
+| CNAME | `www` | Railway web hostname / redirect | |
+| CNAME | `api` | Railway api hostname | DNS only recommended at first |
+
+4. Update Railway variables to the real domains and **redeploy web**:
+
+```bash
+WEB_ORIGIN=https://agrobrid.ge
+WEB_PUBLIC_URL=https://agrobrid.ge
+API_PUBLIC_URL=https://api.agrobrid.ge
+NEXT_PUBLIC_API_URL=https://api.agrobrid.ge/api
+```
+
+## 6. Backups later
+
+- Start: Railway Postgres backups / snapshots (plan-dependent).
+- Later: periodic `pg_dump` to B2 / R2 / S3 (another provider), same as planned for Hetzner.
+
+## Trial tip
+
+You have a short Railway trial credit. Deploy **Postgres → Redis → api → web** in that order, set secrets once, then attach custom domains when the default `*.up.railway.app` URLs already return healthy responses.

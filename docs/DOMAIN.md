@@ -4,6 +4,11 @@ AgroBridge does **not** bake a brand domain into application logic.
 Public URLs come from environment variables, so you can launch on `agrobrid.ge`
 and later move to another domain without rewriting product code.
 
+## Hosting on Railway (no VPS IP)
+
+If the app runs on Railway, Cloudflare uses **CNAME** targets from Railway Custom Domains — not an A record to a VPS IP.
+See [`docs/RAILWAY.md`](RAILWAY.md).
+
 ## Current target: agrobrid.ge
 
 | Role | URL |
