@@ -168,6 +168,15 @@ export function mapProductCertificates(
   }));
 }
 
+export function toPublicQualityScore(score: ProductQualityScore): ProductQualityScore {
+  return {
+    score: score.score,
+    tier: score.tier,
+    checklist: [],
+    suggestions: [],
+  };
+}
+
 export function buildQualityScore(product: ProductRowSlice): ProductQualityScore {
   const images = mapProductImages(product.images);
   const certificates = mapProductCertificates(product.certificates);
@@ -265,7 +274,8 @@ export function mapProductSummary(
           .map((cert) => cert.type),
       ),
     ],
-    qualityScore: buildQualityScore(product),
+    // Catalog/list payloads never include fill tips — those are owner-only on detail.
+    qualityScore: toPublicQualityScore(buildQualityScore(product)),
     opportunity: evaluateMarketOpportunity({
       id: product.id,
       category: product.category,
@@ -300,13 +310,8 @@ export function mapProductDetail(
 ): ProductDetail {
   const summary = mapProductSummary(product, sellerRating);
   const qualityScore = isOwner
-    ? summary.qualityScore
-    : {
-        score: summary.qualityScore.score,
-        tier: summary.qualityScore.tier,
-        checklist: [],
-        suggestions: [],
-      };
+    ? buildQualityScore(product)
+    : summary.qualityScore;
 
   return {
     ...summary,
