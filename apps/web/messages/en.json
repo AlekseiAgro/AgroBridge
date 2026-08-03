@@ -464,7 +464,8 @@
       }
     },
     "loadError": "Could not load your products.",
-    "sellerFallback": "Seller"
+    "sellerFallback": "Seller",
+    "packagingWeightQuick": "{value} kg"
   },
   "rfq": {
     "requestTitle": "Request a quote",

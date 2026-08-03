@@ -319,7 +319,7 @@
       "kinds": {
         "overview": "Product overview",
         "closeup": "Close-up",
-        "packaging": "Packaging",
+        "packaging": "Упаковка",
         "harvest": "Harvest",
         "field": "Field or farm",
         "other": "Other"
@@ -403,13 +403,13 @@
     },
     "packagingTypesLabel": "Типы упаковки",
     "packagingTypes": {
-      "carton": "Carton",
-      "woodenBox": "Wooden box",
-      "plasticCrate": "Plastic crate",
-      "pallet": "Pallet",
-      "bag": "Bag",
-      "bulk": "Bulk",
-      "other": "Other"
+      "carton": "Картонная коробка",
+      "woodenBox": "Деревянный ящик",
+      "plasticCrate": "Пластиковый контейнер",
+      "pallet": "Паллета",
+      "bag": "Мешок",
+      "bulk": "Навалом",
+      "other": "Другое"
     },
     "packagingWeights": "Вес упаковки",
     "packagingWeightsPlaceholder": "Через запятую, например 5 кг, 10 кг",
@@ -464,7 +464,8 @@
       }
     },
     "loadError": "Не удалось загрузить ваши товары.",
-    "sellerFallback": "Продавец"
+    "sellerFallback": "Продавец",
+    "packagingWeightQuick": "{value} кг"
   },
   "rfq": {
     "requestTitle": "Запросить цену",

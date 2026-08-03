@@ -319,7 +319,7 @@
       "kinds": {
         "overview": "Product overview",
         "closeup": "Close-up",
-        "packaging": "Packaging",
+        "packaging": "Imballaggio",
         "harvest": "Harvest",
         "field": "Field or farm",
         "other": "Other"
@@ -339,7 +339,7 @@
       "basics": "Product basics",
       "volume": "Available volume",
       "attributes": "Product characteristics",
-      "packaging": "Packaging",
+      "packaging": "Imballaggio",
       "logistics": "Logistics and delivery",
       "pricing": "Pricing",
       "farmStory": "About the farm"
@@ -401,19 +401,19 @@
       "ground": "Ground",
       "flakes": "Flakes"
     },
-    "packagingTypesLabel": "Packaging types",
+    "packagingTypesLabel": "Tipi di imballaggio",
     "packagingTypes": {
-      "carton": "Carton",
-      "woodenBox": "Wooden box",
-      "plasticCrate": "Plastic crate",
+      "carton": "Cartone",
+      "woodenBox": "Cassetta di legno",
+      "plasticCrate": "Cassetta di plastica",
       "pallet": "Pallet",
-      "bag": "Bag",
-      "bulk": "Bulk",
-      "other": "Other"
+      "bag": "Sacco",
+      "bulk": "Alla rinfusa",
+      "other": "Altro"
     },
-    "packagingWeights": "Packaging weights",
-    "packagingWeightsPlaceholder": "Comma separated, e.g. 5 kg, 10 kg",
-    "palletSize": "Pallet size",
+    "packagingWeights": "Pesi di imballaggio",
+    "packagingWeightsPlaceholder": "Separati da virgola, es. 5 kg, 10 kg",
+    "palletSize": "Dimensione pallet",
     "incoterms": "Incoterms",
     "carriers": "Carriers",
     "customDelivery": "Custom delivery terms",
@@ -464,7 +464,8 @@
       }
     },
     "loadError": "Impossibile caricare i tuoi prodotti.",
-    "sellerFallback": "Venditore"
+    "sellerFallback": "Venditore",
+    "packagingWeightQuick": "{value} kg"
   },
   "rfq": {
     "requestTitle": "Richiedi un preventivo",
@@ -980,7 +981,7 @@
       "seasonality": "Add season or harvest dates",
       "volume": "Complete stock and production volumes",
       "attributes": "Complete product characteristics",
-      "packaging": "Add packaging types and weights",
+      "packaging": "Aggiungi tipi e pesi di imballaggio",
       "certificates": "Upload a certificate",
       "logistics": "Describe delivery and logistics",
       "pricing": "Add a starting price or pricing terms",
