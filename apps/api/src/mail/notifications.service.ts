@@ -237,6 +237,24 @@ export class NotificationsService {
     });
   }
 
+  async notifyEmailChangeCode(params: {
+    user: MailRecipient;
+    code: string;
+    newEmail: string;
+  }): Promise<void> {
+    const locale = this.localeOf(params.user.locale);
+    const rendered = renderEmailTemplate(locale, 'emailChangeCode', {
+      name: this.displayName(params.user),
+      code: params.code,
+      newEmail: params.newEmail,
+    });
+    await this.mail.send({
+      to: params.user.email,
+      subject: rendered.subject,
+      text: rendered.text,
+    });
+  }
+
   async notifyHarvestAvailable(params: {
     user: MailRecipient;
     productId: string;

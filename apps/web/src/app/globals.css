@@ -1868,6 +1868,33 @@ body {
   font-size: 0.85rem;
 }
 
+.profile-settings {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.profile-edit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.75rem;
+}
+
+.profile-edit-row__label {
+  color: var(--brand-deep);
+  font-weight: 600;
+}
+
+.profile-edit-row__button {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.profile-edit-form {
+  max-width: 28rem;
+}
+
 .user-card__name {
   margin: 0 0 0.3rem;
   font-size: 1.35rem;

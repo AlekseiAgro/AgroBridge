@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Patch,
   Post,
   UploadedFile,
   UseGuards,
@@ -17,9 +18,14 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CabinetService } from './cabinet.service';
 import {
+  ConfirmEmailChangeDto,
+  RequestEmailChangeDto,
+} from './dto/change-email.dto';
+import {
   ConfirmAccountDeletionDto,
   RequestAccountDeletionDto,
 } from './dto/delete-account.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Controller('cabinet')
 @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
@@ -29,6 +35,27 @@ export class CabinetController {
   @Get('overview')
   overview(@CurrentUser() user: AuthenticatedUser) {
     return this.cabinetService.overview(user);
+  }
+
+  @Patch('me/profile')
+  updateProfile(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateProfileDto) {
+    return this.cabinetService.updateProfile(user, dto.displayName);
+  }
+
+  @Post('me/email/request')
+  requestEmailChange(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: RequestEmailChangeDto,
+  ) {
+    return this.cabinetService.requestEmailChange(user, dto.password, dto.newEmail);
+  }
+
+  @Post('me/email/confirm')
+  confirmEmailChange(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: ConfirmEmailChangeDto,
+  ) {
+    return this.cabinetService.confirmEmailChange(user, dto.password, dto.code);
   }
 
   @Post('me/avatar')

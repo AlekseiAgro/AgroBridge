@@ -2,7 +2,9 @@ import type { CabinetOverview } from '@agrobridge/shared';
 import { canTrade } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CabinetShell } from '@/components/CabinetShell';
+import { ChangeEmailButton } from '@/components/ChangeEmailButton';
 import { DeleteAccountButton } from '@/components/DeleteAccountButton';
+import { EditDisplayNameForm } from '@/components/EditDisplayNameForm';
 import { RatingStars } from '@/components/RatingStars';
 import { UserAvatarEditor } from '@/components/UserAvatarEditor';
 import { Link } from '@/i18n/navigation';
@@ -47,8 +49,6 @@ export default async function AccountPage({ params }: Props) {
               {user.buyerType
                 ? ` · ${ta(`buyerTypes.${user.buyerType}`)}`
                 : ''}
-              {' · '}
-              {user.email}
             </p>
             <p className="user-card__meta">{t('memberSince', { date: memberSince })}</p>
             <p className="user-card__meta">
@@ -63,6 +63,14 @@ export default async function AccountPage({ params }: Props) {
           <RatingStars value={user.rating.average} count={user.rating.count} />
           <p className="user-card__rating-hint">{t('ratingHint')}</p>
         </div>
+      </section>
+
+      <section className="profile-settings" aria-labelledby="profile-settings-title">
+        <h2 id="profile-settings-title" className="section-title">
+          {t('profileSettingsTitle')}
+        </h2>
+        <EditDisplayNameForm initialDisplayName={user.displayName} />
+        <ChangeEmailButton email={user.email} />
       </section>
 
       <section className="activity-summary" aria-labelledby="activity-summary-title">

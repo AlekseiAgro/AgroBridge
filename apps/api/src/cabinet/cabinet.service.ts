@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   ServiceUnavailableException,
@@ -205,6 +206,111 @@ export class CabinetService {
     return { avatarUrl: null };
   }
 
+  async updateProfile(
+    user: AuthenticatedUser,
+    displayNameRaw: string,
+  ): Promise<{ displayName: string | null }> {
+    const displayName = displayNameRaw.trim() || null;
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { displayName },
+    });
+    return { displayName };
+  }
+
+  async requestEmailChange(
+    user: AuthenticatedUser,
+    password: string,
+    newEmailRaw: string,
+  ): Promise<{ sent: true; destination: string; newEmail: string }> {
+    const dbUser = await this.requireUserWithPassword(user.id);
+    await this.assertPassword(dbUser.passwordHash, password);
+
+    const newEmail = newEmailRaw.trim().toLowerCase();
+    if (!newEmail) {
+      throw new BadRequestException('Enter a new email address');
+    }
+    if (newEmail === dbUser.email) {
+      throw new BadRequestException('New email must be different from the current address');
+    }
+
+    const taken = await this.prisma.user.findUnique({
+      where: { email: newEmail },
+      select: { id: true },
+    });
+    if (taken) {
+      throw new ConflictException('Email is already registered');
+    }
+
+    const code = String(randomInt(100000, 999999));
+    await this.prisma.verificationCode.create({
+      data: {
+        userId: user.id,
+        channel: VerificationChannel.emailChange,
+        // Store the intended new email; the code itself is mailed to the old address.
+        destination: newEmail,
+        codeHash: this.hashCode(code),
+        expiresAt: new Date(Date.now() + CODE_TTL_MS),
+      },
+    });
+
+    try {
+      await this.notifications.notifyEmailChangeCode({
+        user: {
+          email: dbUser.email,
+          locale: dbUser.locale,
+          displayName: dbUser.displayName,
+        },
+        code,
+        newEmail,
+      });
+    } catch (error) {
+      const detail =
+        error instanceof Error
+          ? error.message.replace(/\s+/g, ' ').trim().slice(0, 180)
+          : 'unknown mail error';
+      throw new ServiceUnavailableException(
+        `Could not send the email change confirmation (${detail}). Check SMTP settings and try again.`,
+      );
+    }
+
+    return { sent: true, destination: dbUser.email, newEmail };
+  }
+
+  async confirmEmailChange(
+    user: AuthenticatedUser,
+    password: string,
+    code: string,
+  ): Promise<{ ok: true; email: string }> {
+    const dbUser = await this.requireUserWithPassword(user.id);
+    await this.assertPassword(dbUser.passwordHash, password);
+
+    const latest = await this.consumeCode(user.id, VerificationChannel.emailChange, code);
+    const newEmail = latest.destination.trim().toLowerCase();
+
+    if (!newEmail || newEmail === dbUser.email) {
+      throw new BadRequestException('Invalid email change request');
+    }
+
+    const taken = await this.prisma.user.findUnique({
+      where: { email: newEmail },
+      select: { id: true },
+    });
+    if (taken && taken.id !== user.id) {
+      throw new ConflictException('Email is already registered');
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        email: newEmail,
+        emailVerifiedAt: null,
+      },
+    });
+
+    return { ok: true, email: newEmail };
+  }
+
   async requestAccountDeletion(
     user: AuthenticatedUser,
     password: string,
@@ -254,7 +360,7 @@ export class CabinetService {
     this.assertDeletable(user);
     const dbUser = await this.requireUserWithPassword(user.id);
     await this.assertPassword(dbUser.passwordHash, password);
-    await this.consumeDeletionCode(user.id, code);
+    await this.consumeCode(user.id, VerificationChannel.accountDeletion, code);
 
     const [avatarUser, farm] = await Promise.all([
       this.prisma.user.findUnique({
@@ -335,7 +441,7 @@ export class CabinetService {
     }
   }
 
-  private async consumeDeletionCode(userId: string, code: string) {
+  private async consumeCode(userId: string, channel: VerificationChannel, code: string) {
     const trimmed = code.trim();
     if (!/^\d{6}$/.test(trimmed)) {
       throw new BadRequestException('Enter the 6-digit confirmation code from your email');
@@ -344,7 +450,7 @@ export class CabinetService {
     const latest = await this.prisma.verificationCode.findFirst({
       where: {
         userId,
-        channel: VerificationChannel.accountDeletion,
+        channel,
         consumedAt: null,
         expiresAt: { gt: new Date() },
       },
@@ -359,6 +465,8 @@ export class CabinetService {
       where: { id: latest.id },
       data: { consumedAt: new Date() },
     });
+
+    return latest;
   }
 
   private hashCode(code: string): string {

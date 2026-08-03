@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -7,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { createHash } from 'crypto';
 import { CabinetService } from './cabinet.service';
 
-describe('CabinetService account deletion', () => {
+describe('CabinetService', () => {
   const prisma = {
     user: {
       findUnique: jest.fn(),
@@ -31,6 +32,7 @@ describe('CabinetService account deletion', () => {
   };
   const notifications = {
     notifyAccountDeletionCode: jest.fn().mockResolvedValue(undefined),
+    notifyEmailChangeCode: jest.fn().mockResolvedValue(undefined),
   };
 
   const service = new CabinetService(
@@ -190,5 +192,101 @@ describe('CabinetService account deletion', () => {
         originalname: 'x.gif',
       } as Express.Multer.File),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('updates display name', async () => {
+    prisma.user.update.mockResolvedValue({});
+    await expect(service.updateProfile(farmer, '  Aleksei  ')).resolves.toEqual({
+      displayName: 'Aleksei',
+    });
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'user_1' },
+      data: { displayName: 'Aleksei' },
+    });
+  });
+
+  it('requests email change and mails the old address', async () => {
+    prisma.user.findUnique
+      .mockResolvedValueOnce({
+        id: 'user_1',
+        email: 'farmer@example.com',
+        locale: 'en',
+        displayName: 'Nino',
+        passwordHash,
+      })
+      .mockResolvedValueOnce(null);
+    prisma.verificationCode.create.mockResolvedValue({ id: 'c1' });
+
+    await expect(
+      service.requestEmailChange(farmer, 'password1', 'New@Example.com'),
+    ).resolves.toEqual({
+      sent: true,
+      destination: 'farmer@example.com',
+      newEmail: 'new@example.com',
+    });
+
+    expect(notifications.notifyEmailChangeCode).toHaveBeenCalledWith(
+      expect.objectContaining({
+        user: expect.objectContaining({ email: 'farmer@example.com' }),
+        newEmail: 'new@example.com',
+      }),
+    );
+    expect(prisma.verificationCode.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          channel: 'emailChange',
+          destination: 'new@example.com',
+        }),
+      }),
+    );
+  });
+
+  it('rejects email change to an already registered address', async () => {
+    prisma.user.findUnique
+      .mockResolvedValueOnce({
+        id: 'user_1',
+        email: 'farmer@example.com',
+        locale: 'en',
+        displayName: 'Nino',
+        passwordHash,
+      })
+      .mockResolvedValueOnce({ id: 'other' });
+
+    await expect(
+      service.requestEmailChange(farmer, 'password1', 'taken@example.com'),
+    ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('confirms email change and clears verification', async () => {
+    const code = '654321';
+    const codeHash = createHash('sha256').update(code).digest('hex');
+    prisma.user.findUnique
+      .mockResolvedValueOnce({
+        id: 'user_1',
+        email: 'farmer@example.com',
+        locale: 'en',
+        displayName: 'Nino',
+        passwordHash,
+      })
+      .mockResolvedValueOnce(null);
+    prisma.verificationCode.findFirst.mockResolvedValue({
+      id: 'c1',
+      codeHash,
+      destination: 'new@example.com',
+    });
+    prisma.verificationCode.update.mockResolvedValue({ id: 'c1' });
+    prisma.user.update.mockResolvedValue({});
+
+    await expect(service.confirmEmailChange(farmer, 'password1', code)).resolves.toEqual({
+      ok: true,
+      email: 'new@example.com',
+    });
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'user_1' },
+      data: {
+        email: 'new@example.com',
+        emailVerifiedAt: null,
+      },
+    });
   });
 });
