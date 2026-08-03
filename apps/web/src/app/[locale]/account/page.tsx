@@ -3,10 +3,10 @@ import { canTrade } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CabinetShell } from '@/components/CabinetShell';
 import { RatingStars } from '@/components/RatingStars';
-import { Link, redirect } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
 import { formatMemberSinceMonthYear } from '@/lib/member-since';
 import { apiRequestAuthed } from '@/lib/server-api';
-import { getCurrentUser } from '@/lib/session';
+import { requireVerifiedUser } from '@/lib/require-verified-user';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -16,10 +16,7 @@ export default async function AccountPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const currentUser = await getCurrentUser();
-  if (!currentUser) {
-    redirect({ href: '/login', locale });
-  }
+  await requireVerifiedUser(locale, '/account');
 
   const t = await getTranslations('cabinet');
   const ta = await getTranslations('auth');

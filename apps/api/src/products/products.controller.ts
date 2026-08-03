@@ -21,6 +21,7 @@ import {
   PRODUCT_VIDEO_MAX_BYTES,
 } from '@agrobridge/shared';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -45,7 +46,7 @@ export class ProductsController {
   }
 
   @Get('mine')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   listMine(@CurrentUser() user: AuthenticatedUser) {
     return this.productsService.listMine(user);
@@ -63,14 +64,14 @@ export class ProductsController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateProductDto) {
     return this.productsService.create(user, dto);
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   update(
     @CurrentUser() user: AuthenticatedUser,
@@ -81,32 +82,32 @@ export class ProductsController {
   }
 
   @Get(':id/watch')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
   getWatch(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.productsService.getWatchStatus(user, id);
   }
 
   @Post(':id/watch')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
   watch(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.productsService.watchProduct(user, id);
   }
 
   @Delete(':id/watch')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
   unwatch(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.productsService.unwatchProduct(user, id);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   remove(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.productsService.remove(user, id);
   }
 
   @Post(':id/images')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -124,7 +125,7 @@ export class ProductsController {
   }
 
   @Delete(':id/images/:imageId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   removeImage(
     @CurrentUser() user: AuthenticatedUser,
@@ -135,7 +136,7 @@ export class ProductsController {
   }
 
   @Patch(':id/images/:imageId/primary')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   setPrimaryImage(
     @CurrentUser() user: AuthenticatedUser,
@@ -146,7 +147,7 @@ export class ProductsController {
   }
 
   @Post(':id/videos')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -164,7 +165,7 @@ export class ProductsController {
   }
 
   @Delete(':id/videos/:videoId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   removeVideo(
     @CurrentUser() user: AuthenticatedUser,
@@ -175,7 +176,7 @@ export class ProductsController {
   }
 
   @Post(':id/certificates')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -194,7 +195,7 @@ export class ProductsController {
   }
 
   @Delete(':id/certificates/:certificateId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   removeCertificate(
     @CurrentUser() user: AuthenticatedUser,

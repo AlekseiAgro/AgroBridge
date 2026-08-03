@@ -32,7 +32,7 @@ export class NotificationsService {
     await this.sendTemplate(user, 'welcome', {
       name: this.displayName(user),
       role: user.role,
-      link: this.appLink(locale, '/account'),
+      link: this.appLink(locale, '/verify-email'),
     });
   }
 

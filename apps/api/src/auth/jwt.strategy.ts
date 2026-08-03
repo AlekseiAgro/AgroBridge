@@ -34,6 +34,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         buyerType: true,
         locale: true,
         displayName: true,
+        emailVerifiedAt: true,
         blockedAt: true,
         blockedReason: true,
       },
@@ -57,6 +58,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       buyerType: user.buyerType,
       locale: user.locale,
       displayName: user.displayName,
+      emailVerified: Boolean(user.emailVerifiedAt),
     };
   }
 }

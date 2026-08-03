@@ -15,6 +15,7 @@ import { memoryStorage } from 'multer';
 import { FARM_DOCUMENT_MAX_BYTES } from '@agrobridge/shared';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
+import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -32,21 +33,21 @@ export class FarmsController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   getMine(@CurrentUser() user: AuthenticatedUser) {
     return this.farmsService.getMine(user);
   }
 
   @Get('me/documents')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   listMyDocuments(@CurrentUser() user: AuthenticatedUser) {
     return this.farmsService.listMyDocuments(user);
   }
 
   @Post('me/documents')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -64,7 +65,7 @@ export class FarmsController {
   }
 
   @Delete('me/documents/:documentId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   removeDocument(
     @CurrentUser() user: AuthenticatedUser,
@@ -79,14 +80,14 @@ export class FarmsController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateFarmDto) {
     return this.farmsService.create(user, dto);
   }
 
   @Patch('me')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
   @Roles('farmer', 'buyer', 'admin')
   updateMine(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateFarmDto) {
     return this.farmsService.updateMine(user, dto);

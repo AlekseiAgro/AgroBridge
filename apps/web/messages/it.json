@@ -54,7 +54,8 @@
       "individual": "Persona fisica",
       "company": "Azienda"
     },
-    "dualCapabilityHint": "Con un solo account puoi vendere prodotti e pubblicare richieste di acquisto. Scegli da dove preferisci iniziare."
+    "dualCapabilityHint": "Con un solo account puoi vendere prodotti e pubblicare richieste di acquisto. Scegli da dove preferisci iniziare.",
+    "registerEmailVerifyHint": "Dopo la registrazione inviamo un codice di conferma. L’account si apre dopo la verifica dell’email."
   },
   "account": {
     "title": "Il tuo account",
@@ -965,5 +966,17 @@
       "priceRiseSoon": "Presto è previsto un aumento dei prezzi.",
       "priceStable": "Variazione recente dei prezzi di circa +{percent}%."
     }
+  },
+  "verifyEmail": {
+    "title": "Conferma la tua email",
+    "subtitle": "Inserisci il codice a 6 cifre inviato via email per aprire il tuo account.",
+    "code": "Codice di verifica",
+    "confirm": "Conferma email",
+    "resend": "Invia di nuovo il codice",
+    "sent": "Codice inviato a {destination}",
+    "sentHint": "Abbiamo inviato un codice a {email}. Controlla posta in arrivo e spam.",
+    "confirmed": "Email confermata. Apertura dell’account…",
+    "pleaseWait": "Attendere…",
+    "genericError": "Qualcosa è andato storto. Riprova."
   }
 }

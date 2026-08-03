@@ -37,7 +37,7 @@ describe('NotificationsService', () => {
         text: expect.stringContaining('Nino'),
       }),
     );
-    expect(mail.send.mock.calls[0][0].text).toContain('http://localhost:3000/ru/account');
+    expect(mail.send.mock.calls[0][0].text).toContain('http://localhost:3000/ru/verify-email');
   });
 
   it('does not throw when mail delivery fails', async () => {

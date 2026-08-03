@@ -18,6 +18,7 @@ import {
 } from '@prisma/client';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { VerificationService } from '../verification/verification.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import type { AuthenticatedUser, JwtPayload } from './auth.types';
@@ -29,6 +30,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
     private readonly notifications: NotificationsService,
+    private readonly verification: VerificationService,
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthTokenResponse> {
@@ -78,6 +80,8 @@ export class AuthService {
       },
     });
 
+    const authUser = this.toAuthenticatedUser(user);
+
     await this.notifications.notifyWelcome({
       email: user.email,
       locale: user.locale,
@@ -85,7 +89,13 @@ export class AuthService {
       role: user.role,
     });
 
-    return this.issueToken(this.toAuthenticatedUser(user));
+    try {
+      await this.verification.sendEmailCode(authUser);
+    } catch {
+      // Registration should succeed even if the verification email fails to send.
+    }
+
+    return this.issueToken(authUser);
   }
 
   async login(dto: LoginDto): Promise<AuthTokenResponse> {
@@ -150,6 +160,7 @@ export class AuthService {
     buyerType?: PrismaBuyerType | null;
     locale: LocaleCode;
     displayName: string | null;
+    emailVerifiedAt?: Date | null;
   }): AuthenticatedUser {
     return {
       id: user.id,
@@ -159,6 +170,7 @@ export class AuthService {
       buyerType: (user.buyerType as BuyerType | null | undefined) ?? null,
       locale: user.locale as Locale,
       displayName: user.displayName,
+      emailVerified: Boolean(user.emailVerifiedAt),
     };
   }
 
@@ -182,6 +194,7 @@ export class AuthService {
       buyerType: user.buyerType,
       locale: user.locale,
       displayName: user.displayName,
+      emailVerified: user.emailVerified,
       rating: { average, count },
     };
   }

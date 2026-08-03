@@ -3,6 +3,7 @@ import { AuthForm } from '@/components/AuthForm';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link, redirect } from '@/i18n/navigation';
 import { safeNextPath } from '@/lib/safe-next-path';
+import { cabinetPathForUser } from '@/lib/require-verified-user';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -18,7 +19,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
   const nextPath = safeNextPath(next, '/account');
   const user = await getCurrentUser();
   if (user) {
-    redirect({ href: nextPath, locale });
+    redirect({ href: cabinetPathForUser(user, nextPath), locale });
   }
 
   const t = await getTranslations('auth');

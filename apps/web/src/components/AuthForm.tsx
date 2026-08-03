@@ -5,6 +5,7 @@ import {
   REGISTERABLE_ROLES,
   SELLER_TYPES,
   type BuyerType,
+  type PublicUser,
   type RegisterableRole,
   type SellerType,
 } from '@agrobridge/shared';
@@ -62,14 +63,19 @@ export function AuthForm({ mode, nextPath }: Props) {
         body: JSON.stringify(payload),
       });
 
-      const data = (await response.json()) as { message?: string };
+      const data = (await response.json()) as { message?: string; user?: PublicUser };
 
       if (!response.ok) {
         setError(data.message ?? t('genericError'));
         return;
       }
 
-      router.replace(redirectTo);
+      const destination =
+        data.user && !data.user.emailVerified
+          ? `/verify-email?next=${encodeURIComponent(redirectTo)}`
+          : redirectTo;
+
+      router.replace(destination);
       router.refresh();
     } catch {
       setError(t('genericError'));

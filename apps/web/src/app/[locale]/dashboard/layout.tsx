@@ -1,8 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { CabinetShell } from '@/components/CabinetShell';
-import { redirect } from '@/i18n/navigation';
-import { getCurrentUser } from '@/lib/session';
+import { requireVerifiedUser } from '@/lib/require-verified-user';
 
 type Props = {
   children: ReactNode;
@@ -13,10 +12,7 @@ export default async function DashboardLayout({ children, params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const user = await getCurrentUser();
-  if (!user) {
-    redirect({ href: '/login', locale });
-  }
+  await requireVerifiedUser(locale, '/account');
 
   return <CabinetShell>{children}</CabinetShell>;
 }

@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -9,7 +10,7 @@ import { CreateRfqDto } from './dto/create-rfq.dto';
 import { RfqsService } from './rfqs.service';
 
 @Controller('rfqs')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
 export class RfqsController {
   constructor(private readonly rfqsService: RfqsService) {}
 

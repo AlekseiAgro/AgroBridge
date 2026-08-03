@@ -54,7 +54,8 @@
       "individual": "Privatperson",
       "company": "Unternehmen"
     },
-    "dualCapabilityHint": "Mit einem Konto können Sie Produkte verkaufen und Kaufanfragen stellen. Wählen Sie, womit Sie vor allem starten."
+    "dualCapabilityHint": "Mit einem Konto können Sie Produkte verkaufen und Kaufanfragen stellen. Wählen Sie, womit Sie vor allem starten.",
+    "registerEmailVerifyHint": "Nach der Registrierung senden wir einen Bestätigungscode. Das Konto öffnet sich nach der E-Mail-Prüfung."
   },
   "account": {
     "title": "Ihr Konto",
@@ -965,5 +966,17 @@
       "priceRiseSoon": "Bald wird ein Preisanstieg erwartet.",
       "priceStable": "Jüngste Preisbewegung etwa +{percent}%."
     }
+  },
+  "verifyEmail": {
+    "title": "E-Mail bestätigen",
+    "subtitle": "Geben Sie den 6-stelligen Code aus Ihrer E-Mail ein, um Ihr Konto zu öffnen.",
+    "code": "Bestätigungscode",
+    "confirm": "E-Mail bestätigen",
+    "resend": "Code erneut senden",
+    "sent": "Code an {destination} gesendet",
+    "sentHint": "Wir haben einen Code an {email} gesendet. Prüfen Sie Posteingang und Spam.",
+    "confirmed": "E-Mail bestätigt. Konto wird geöffnet…",
+    "pleaseWait": "Bitte warten…",
+    "genericError": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
   }
 }
