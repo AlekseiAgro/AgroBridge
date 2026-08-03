@@ -436,7 +436,7 @@
       "title": "პროდუქციის ვიდეო",
       "publicTitle": "Product videos",
       "subtitle": "დაამატეთ მაქსიმუმ {max} პროდუქტის ვიდეო (MP4, WebM ან MOV, 80 მბ-მდე).",
-      "upload": "Upload video",
+      "upload": "ვიდეოს ატვირთვა",
       "empty": "No videos yet.",
       "delete": "Delete",
       "deleteConfirm": "Delete this video?",
