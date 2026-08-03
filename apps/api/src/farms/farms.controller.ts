@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { FARM_DOCUMENT_MAX_BYTES } from '@agrobridge/shared';
+import { FARM_DOCUMENT_MAX_BYTES, FARM_PHOTO_MAX_BYTES } from '@agrobridge/shared';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { EmailVerifiedGuard } from '../auth/email-verified.guard';
@@ -72,6 +72,39 @@ export class FarmsController {
     @Param('documentId') documentId: string,
   ) {
     return this.farmsService.removeDocument(user, documentId);
+  }
+
+  @Post('me/photos')
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @Roles('farmer', 'buyer', 'admin')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: FARM_PHOTO_MAX_BYTES },
+    }),
+  )
+  uploadPhoto(
+    @CurrentUser() user: AuthenticatedUser,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.farmsService.uploadPhoto(user, file);
+  }
+
+  @Delete('me/photos/:photoId')
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @Roles('farmer', 'buyer', 'admin')
+  removePhoto(@CurrentUser() user: AuthenticatedUser, @Param('photoId') photoId: string) {
+    return this.farmsService.removePhoto(user, photoId);
+  }
+
+  @Patch('me/photos/:photoId/primary')
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @Roles('farmer', 'buyer', 'admin')
+  setPrimaryPhoto(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('photoId') photoId: string,
+  ) {
+    return this.farmsService.setPrimaryPhoto(user, photoId);
   }
 
   @Get(':id')

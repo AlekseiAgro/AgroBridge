@@ -9,7 +9,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
-import { getProductCardImage } from '@/lib/product-image';
+import { getProductCardImage, toPublicMediaUrl } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
@@ -62,6 +62,23 @@ export default async function FarmDetailPage({ params }: Props) {
         <div className="farm-rating">
           <RatingStars value={ownerRating.average} count={ownerRating.count} size="sm" />
         </div>
+        {farm.photos.length > 0 ? (
+          <div className="product-gallery">
+            {farm.photos.map((photo) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={photo.id}
+                src={toPublicMediaUrl(photo.url)}
+                alt={farm.name}
+                className={
+                  photo.isPrimary
+                    ? 'product-gallery__image product-gallery__image--primary'
+                    : 'product-gallery__image'
+                }
+              />
+            ))}
+          </div>
+        ) : null}
         {farm.description ? <p className="detail-text">{farm.description}</p> : null}
 
         <h2 className="section-title">{t('productsHeading')}</h2>

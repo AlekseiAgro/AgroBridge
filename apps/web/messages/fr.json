@@ -239,6 +239,20 @@
         "other": "Other"
       }
     },
+    "photos": {
+      "title": "Photos de l’exploitation",
+      "subtitle": "Ajoutez jusqu’à {max} photos de votre exploitation (JPEG, PNG ou WebP, 5 Mo max chacune).",
+      "upload": "Téléverser une photo",
+      "empty": "Aucune photo d’exploitation pour le moment.",
+      "primary": "Couverture",
+      "setPrimary": "Définir comme couverture",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer cette photo ?",
+      "uploadError": "Impossible de téléverser la photo.",
+      "deleteError": "Impossible de supprimer la photo.",
+      "primaryError": "Impossible de mettre à jour la couverture.",
+      "maxReached": "Limite de {max} photos atteinte."
+    },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",
     "ownershipType": "Ownership type",

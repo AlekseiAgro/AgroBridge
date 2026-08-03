@@ -1,7 +1,12 @@
-import { ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { FarmsService } from './farms.service';
 
 describe('FarmsService', () => {
+  const storage = {
+    upload: jest.fn(),
+    delete: jest.fn(),
+  };
+
   const prisma = {
     farm: {
       findUnique: jest.fn(),
@@ -9,12 +14,21 @@ describe('FarmsService', () => {
       create: jest.fn(),
       update: jest.fn(),
     },
+    farmImage: {
+      count: jest.fn(),
+      create: jest.fn(),
+      findFirst: jest.fn(),
+      delete: jest.fn(),
+      update: jest.fn(),
+      updateMany: jest.fn(),
+    },
     product: {
       updateMany: jest.fn(),
     },
     rfq: {
       updateMany: jest.fn(),
     },
+    $transaction: jest.fn(async (fn: (tx: typeof prisma) => Promise<unknown>) => fn(prisma)),
   };
 
   let service: FarmsService;
@@ -27,10 +41,7 @@ describe('FarmsService', () => {
         summaryForUser: jest.fn().mockResolvedValue({ average: null, count: 0 }),
         summariesForUsers: jest.fn().mockResolvedValue(new Map()),
       } as never,
-      {
-        upload: jest.fn(),
-        delete: jest.fn(),
-      } as never,
+      storage as never,
     );
   });
 
@@ -56,6 +67,7 @@ describe('FarmsService', () => {
         createdAt: new Date(),
         owner: { id: 'u1', displayName: 'Nino' },
         documents: [],
+        images: [],
         products: [],
         _count: { products: 0 },
       });
@@ -95,5 +107,30 @@ describe('FarmsService', () => {
         { name: 'Second Farm' },
       ),
     ).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('rejects a fourth farm photo', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
+    prisma.farmImage.count.mockResolvedValue(3);
+
+    await expect(
+      service.uploadPhoto(
+        {
+          id: 'u1',
+          email: 'f@example.com',
+          role: 'farmer',
+          locale: 'ka',
+          displayName: 'Nino',
+        },
+        {
+          buffer: Buffer.from('img'),
+          mimetype: 'image/jpeg',
+          originalname: 'farm.jpg',
+          size: 1024,
+        } as Express.Multer.File,
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(storage.upload).not.toHaveBeenCalled();
   });
 });

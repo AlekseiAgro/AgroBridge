@@ -239,6 +239,20 @@
         "other": "Other"
       }
     },
+    "photos": {
+      "title": "Farm photos",
+      "subtitle": "Add up to {max} photos of your farm (JPEG, PNG or WebP, up to 5 MB each).",
+      "upload": "Upload photo",
+      "empty": "No farm photos yet.",
+      "primary": "Cover",
+      "setPrimary": "Set as cover",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this photo?",
+      "uploadError": "Could not upload the photo.",
+      "deleteError": "Could not delete the photo.",
+      "primaryError": "Could not update the cover photo.",
+      "maxReached": "Photo limit of {max} reached."
+    },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",
     "ownershipType": "Ownership type",

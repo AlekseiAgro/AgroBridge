@@ -239,6 +239,20 @@
         "other": "Other"
       }
     },
+    "photos": {
+      "title": "Hof-Fotos",
+      "subtitle": "Fügen Sie bis zu {max} Fotos Ihres Hofs hinzu (JPEG, PNG oder WebP, je max. 5 MB).",
+      "upload": "Foto hochladen",
+      "empty": "Noch keine Hof-Fotos.",
+      "primary": "Titelbild",
+      "setPrimary": "Als Titelbild",
+      "delete": "Löschen",
+      "deleteConfirm": "Dieses Foto löschen?",
+      "uploadError": "Foto konnte nicht hochgeladen werden.",
+      "deleteError": "Foto konnte nicht gelöscht werden.",
+      "primaryError": "Titelbild konnte nicht aktualisiert werden.",
+      "maxReached": "Limit von {max} Fotos erreicht."
+    },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",
     "ownershipType": "Ownership type",

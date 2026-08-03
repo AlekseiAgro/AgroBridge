@@ -8,6 +8,7 @@ import {
 import type {
   FarmDetail,
   FarmDocument,
+  FarmPhoto,
   FarmSummary,
   RatingSummary,
   VerificationStatus,
@@ -15,9 +16,12 @@ import type {
 import {
   FARM_DOCUMENT_MAX_BYTES,
   FARM_DOCUMENT_MAX_COUNT,
+  FARM_PHOTO_MAX_BYTES,
+  FARM_PHOTO_MAX_COUNT,
   canTrade,
   isFarmDocumentKind,
   isFarmDocumentMimeType,
+  isFarmPhotoMimeType,
 } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
@@ -43,6 +47,16 @@ const publicProductWhere = {
   moderationStatus: PrismaModerationStatus.approved,
 };
 
+const farmImagesInclude = {
+  orderBy: [{ isPrimary: 'desc' as const }, { sortOrder: 'asc' as const }, { createdAt: 'asc' as const }],
+  select: {
+    id: true,
+    url: true,
+    sortOrder: true,
+    isPrimary: true,
+  },
+};
+
 @Injectable()
 export class FarmsService {
   constructor(
@@ -56,6 +70,7 @@ export class FarmsService {
       orderBy: { updatedAt: 'desc' },
       include: {
         owner: { select: { id: true, displayName: true } },
+        images: farmImagesInclude,
         _count: {
           select: { products: { where: publicProductWhere } },
         },
@@ -70,6 +85,7 @@ export class FarmsService {
       where: { id },
       include: {
         owner: { select: { id: true, displayName: true } },
+        images: farmImagesInclude,
         products: {
           where: publicProductWhere,
           orderBy: { updatedAt: 'desc' },
@@ -177,6 +193,7 @@ export class FarmsService {
       where: { ownerId: user.id },
       include: {
         owner: { select: { id: true, displayName: true } },
+        images: farmImagesInclude,
         documents: { orderBy: { createdAt: 'desc' } },
         products: {
           orderBy: { updatedAt: 'desc' },
@@ -414,6 +431,107 @@ export class FarmsService {
     await this.prisma.farmDocument.delete({ where: { id: doc.id } });
   }
 
+  async uploadPhoto(
+    user: AuthenticatedUser,
+    file?: Express.Multer.File,
+  ): Promise<FarmDetail> {
+    const farm = await this.requireOwnFarm(user);
+    if (!file) {
+      throw new BadRequestException('Photo file is required');
+    }
+    if (!isFarmPhotoMimeType(file.mimetype)) {
+      throw new BadRequestException('Only JPEG, PNG, and WebP photos are allowed');
+    }
+    if (file.size > FARM_PHOTO_MAX_BYTES) {
+      throw new BadRequestException('Photo is too large');
+    }
+
+    const existingCount = await this.prisma.farmImage.count({ where: { farmId: farm.id } });
+    if (existingCount >= FARM_PHOTO_MAX_COUNT) {
+      throw new BadRequestException(`A farm can have at most ${FARM_PHOTO_MAX_COUNT} photos`);
+    }
+
+    const stored = await this.storage.upload({
+      buffer: file.buffer,
+      mimeType: file.mimetype,
+      originalName: file.originalname || 'farm-photo',
+      folder: `farms/${farm.id}/photos`,
+    });
+
+    const isPrimary = existingCount === 0;
+
+    try {
+      await this.prisma.farmImage.create({
+        data: {
+          farmId: farm.id,
+          url: stored.url,
+          key: stored.key,
+          sortOrder: existingCount,
+          isPrimary,
+        },
+      });
+    } catch (error) {
+      await this.storage.delete(stored.key).catch(() => undefined);
+      throw error;
+    }
+
+    return (await this.getMine(user))!;
+  }
+
+  async removePhoto(user: AuthenticatedUser, photoId: string): Promise<FarmDetail> {
+    const farm = await this.requireOwnFarm(user);
+    const image = await this.prisma.farmImage.findFirst({
+      where: { id: photoId, farmId: farm.id },
+    });
+    if (!image) {
+      throw new NotFoundException('Photo not found');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.farmImage.delete({ where: { id: image.id } });
+
+      if (image.isPrimary) {
+        const next = await tx.farmImage.findFirst({
+          where: { farmId: farm.id },
+          orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        });
+        if (next) {
+          await tx.farmImage.update({
+            where: { id: next.id },
+            data: { isPrimary: true },
+          });
+        }
+      }
+    });
+
+    await this.storage.delete(image.key).catch(() => undefined);
+
+    return (await this.getMine(user))!;
+  }
+
+  async setPrimaryPhoto(user: AuthenticatedUser, photoId: string): Promise<FarmDetail> {
+    const farm = await this.requireOwnFarm(user);
+    const image = await this.prisma.farmImage.findFirst({
+      where: { id: photoId, farmId: farm.id },
+    });
+    if (!image) {
+      throw new NotFoundException('Photo not found');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.farmImage.updateMany({
+        where: { farmId: farm.id, isPrimary: true },
+        data: { isPrimary: false },
+      });
+      await tx.farmImage.update({
+        where: { id: image.id },
+        data: { isPrimary: true },
+      });
+    });
+
+    return (await this.getMine(user))!;
+  }
+
   private async requireOwnFarm(user: AuthenticatedUser) {
     this.assertFarmer(user);
     const farm = await this.prisma.farm.findUnique({ where: { ownerId: user.id } });
@@ -457,6 +575,20 @@ export class FarmsService {
     };
   }
 
+  private toPhoto(image: {
+    id: string;
+    url: string;
+    sortOrder: number;
+    isPrimary: boolean;
+  }): FarmPhoto {
+    return {
+      id: image.id,
+      url: image.url,
+      sortOrder: image.sortOrder,
+      isPrimary: image.isPrimary,
+    };
+  }
+
   private toSummary(farm: {
     id: string;
     name: string;
@@ -469,6 +601,12 @@ export class FarmsService {
     history: string | null;
     verificationStatus: PrismaVerificationStatus;
     owner: { id: string; displayName: string | null };
+    images?: Array<{
+      id: string;
+      url: string;
+      sortOrder: number;
+      isPrimary: boolean;
+    }>;
     _count: { products: number };
   }): FarmSummary {
     const verificationStatus = farm.verificationStatus as VerificationStatus;
@@ -491,6 +629,7 @@ export class FarmsService {
       verified: verificationStatus === 'approved',
       owner: farm.owner,
       productCount: farm._count.products,
+      photos: (farm.images ?? []).map((image) => this.toPhoto(image)),
     };
   }
 

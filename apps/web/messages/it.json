@@ -239,6 +239,20 @@
         "other": "Other"
       }
     },
+    "photos": {
+      "title": "Foto dell’azienda",
+      "subtitle": "Aggiungi fino a {max} foto della tua azienda (JPEG, PNG o WebP, max 5 MB ciascuna).",
+      "upload": "Carica foto",
+      "empty": "Nessuna foto dell’azienda ancora.",
+      "primary": "Copertina",
+      "setPrimary": "Imposta come copertina",
+      "delete": "Elimina",
+      "deleteConfirm": "Eliminare questa foto?",
+      "uploadError": "Impossibile caricare la foto.",
+      "deleteError": "Impossibile eliminare la foto.",
+      "primaryError": "Impossibile aggiornare la copertina.",
+      "maxReached": "Raggiunto il limite di {max} foto."
+    },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",
     "ownershipType": "Ownership type",

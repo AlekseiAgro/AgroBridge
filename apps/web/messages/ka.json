@@ -239,6 +239,20 @@
         "other": "სხვა"
       }
     },
+    "photos": {
+      "title": "მეურნეობის ფოტოები",
+      "subtitle": "დაამატეთ მეურნეობის მაქსიმუმ {max} ფოტო (JPEG, PNG ან WebP, თითო 5 მბ-მდე).",
+      "upload": "ფოტოს ატვირთვა",
+      "empty": "მეურნეობის ფოტოები ჯერ არ არის.",
+      "primary": "ყდა",
+      "setPrimary": "ყდად დაყენება",
+      "delete": "წაშლა",
+      "deleteConfirm": "წავშალოთ ეს ფოტო?",
+      "uploadError": "ფოტოს ატვირთვა ვერ მოხერხდა.",
+      "deleteError": "ფოტოს წაშლა ვერ მოხერხდა.",
+      "primaryError": "ყდის განახლება ვერ მოხერხდა.",
+      "maxReached": "მიღწეულია {max} ფოტოს ლიმიტი."
+    },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",
     "ownershipType": "Ownership type",
