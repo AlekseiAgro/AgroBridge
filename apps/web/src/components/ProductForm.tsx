@@ -201,6 +201,14 @@ export function ProductForm({ mode, initial }: Props) {
     );
   }
 
+  function selectAllMonths() {
+    setSeasonMonths([...SEASON_MONTHS]);
+  }
+
+  function clearMonths() {
+    setSeasonMonths([]);
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
@@ -626,17 +634,44 @@ export function ProductForm({ mode, initial }: Props) {
 
         <div className="field">
           <span>{th('seasonality')}</span>
-          <div className="chip-grid">
-            {SEASON_MONTHS.map((month) => (
-              <label key={month} className="check-row check-row--chip">
-                <input
-                  type="checkbox"
-                  checked={seasonMonths.includes(month)}
-                  onChange={() => toggleMonth(month)}
-                />
-                <span>{th(`months.${month}`)}</span>
-              </label>
-            ))}
+          <div className="season-months" role="group" aria-label={th('seasonality')}>
+            <div className="season-months__grid">
+              {SEASON_MONTHS.map((month) => {
+                const selected = seasonMonths.includes(month);
+                return (
+                  <button
+                    key={month}
+                    type="button"
+                    className={
+                      selected
+                        ? 'season-months__month season-months__month--selected'
+                        : 'season-months__month'
+                    }
+                    aria-pressed={selected}
+                    onClick={() => toggleMonth(month)}
+                  >
+                    {th(`months.${month}`)}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="season-months__actions">
+              <button
+                type="button"
+                className="button button--ghost product-form__quick-button"
+                onClick={selectAllMonths}
+              >
+                {th('selectAllMonths')}
+              </button>
+              <button
+                type="button"
+                className="button button--ghost product-form__quick-button"
+                onClick={clearMonths}
+                disabled={seasonMonths.length === 0}
+              >
+                {th('clearMonths')}
+              </button>
+            </div>
           </div>
         </div>
 
