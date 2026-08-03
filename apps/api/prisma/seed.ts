@@ -945,6 +945,8 @@ async function main() {
     displayName: adminDisplayName,
     locale: LocaleCode.en,
     passwordHash: adminPasswordHash,
+    // Admin desk requires a verified email; skip the inbox loop for the seeded account.
+    emailVerifiedAt: new Date(),
   });
   console.log(`Admin ready: ${admin.email}`);
 
