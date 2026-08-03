@@ -33,14 +33,14 @@ export class PurchaseRequestsController {
 
   @Get('mine')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('buyer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   listMine(@CurrentUser() user: AuthenticatedUser) {
     return this.purchaseRequestsService.listMine(user);
   }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('buyer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreatePurchaseRequestDto) {
     return this.purchaseRequestsService.create(user, dto);
   }
@@ -53,21 +53,21 @@ export class PurchaseRequestsController {
 
   @Post(':id/cancel')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('buyer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   cancel(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.purchaseRequestsService.cancel(user, id);
   }
 
   @Post(':id/close')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('buyer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   close(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.purchaseRequestsService.close(user, id);
   }
 
   @Post(':id/quotes')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   createQuote(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -78,7 +78,7 @@ export class PurchaseRequestsController {
 
   @Post(':id/quotes/:quoteId/accept')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('buyer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   acceptQuote(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -89,7 +89,7 @@ export class PurchaseRequestsController {
 
   @Post(':id/quotes/:quoteId/decline')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('buyer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   declineQuote(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -100,7 +100,7 @@ export class PurchaseRequestsController {
 
   @Post(':id/quotes/:quoteId/withdraw')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   withdrawQuote(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,

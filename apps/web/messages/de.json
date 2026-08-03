@@ -43,17 +43,18 @@
     "goRegister": "Registrieren",
     "goLogin": "Anmelden",
     "sellerType": "Verkäufertyp",
-    "sellerTypeHint": "Erforderlich für Verkäufer. Privater Landwirt oder Unternehmen.",
+    "sellerTypeHint": "Wie Sie verkaufen. Jedes Konto kann auch kaufen.",
     "sellerTypes": {
       "privateFarmer": "Privater Landwirt",
       "company": "Unternehmen"
     },
     "buyerType": "Käufertyp",
-    "buyerTypeHint": "Erforderlich für Käufer. Privatperson oder Unternehmen.",
+    "buyerTypeHint": "Wie Sie kaufen. Jedes Konto kann auch verkaufen.",
     "buyerTypes": {
       "individual": "Privatperson",
       "company": "Unternehmen"
-    }
+    },
+    "dualCapabilityHint": "Mit einem Konto können Sie Produkte verkaufen und Kaufanfragen stellen. Wählen Sie, womit Sie vor allem starten."
   },
   "account": {
     "title": "Ihr Konto",
@@ -772,7 +773,7 @@
     "floatingLead": "Können Sie das liefern?",
     "floatingText": "Veröffentlichen Sie Ihr Angebot und erreichen Sie interessierte Käufer.",
     "floatingCta": "Eigenes Produkt listen",
-    "buyerOnly": "Kaufanfragen können nur Käufer veröffentlichen. Sie sind als Verkäufer angemeldet — melden Sie sich ab und registrieren Sie sich als Käufer, oder öffnen Sie die Anfragenbörse.",
+    "buyerOnly": "Melden Sie sich an, um eine Kaufanfrage zu stellen. Jedes AgroBridge-Konto kann kaufen und verkaufen.",
     "registerAsBuyer": "Als Käufer registrieren"
   },
   "roleHubs": {

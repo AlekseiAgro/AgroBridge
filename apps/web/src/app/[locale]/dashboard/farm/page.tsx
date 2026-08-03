@@ -20,9 +20,6 @@ export default async function DashboardFarmPage({ params }: Props) {
   if (!user) {
     redirect({ href: '/login', locale });
   }
-  if (user!.role !== 'farmer' && user!.role !== 'admin') {
-    redirect({ href: '/account', locale });
-  }
 
   const t = await getTranslations('farm');
   let farm: FarmDetail | null = null;

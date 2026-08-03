@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import type { CabinetOverview } from '@agrobridge/shared';
+import { canTrade, type CabinetOverview } from '@agrobridge/shared';
 import {
   ModerationStatus as PrismaModerationStatus,
   RfqStatus as PrismaRfqStatus,
@@ -25,8 +25,7 @@ export class CabinetService {
     }
 
     const rating = await this.ratings.summaryForUser(user.id);
-    const isFarmer = user.role === 'farmer' || user.role === 'admin';
-    const isBuyer = user.role === 'buyer' || user.role === 'admin';
+    const trader = canTrade(user.role);
 
     const [
       completedAsBuyer,
@@ -38,17 +37,17 @@ export class CabinetService {
       pendingModeration,
       awaitingMyRating,
     ] = await Promise.all([
-      isBuyer
+      trader
         ? this.prisma.rfq.count({
             where: { buyerId: user.id, status: PrismaRfqStatus.completed },
           })
         : Promise.resolve(0),
-      isFarmer && dbUser.farm
+      trader && dbUser.farm
         ? this.prisma.rfq.count({
             where: { farmId: dbUser.farm.id, status: PrismaRfqStatus.completed },
           })
         : Promise.resolve(0),
-      isBuyer
+      trader
         ? this.prisma.rfq.count({
             where: {
               buyerId: user.id,
@@ -56,7 +55,7 @@ export class CabinetService {
             },
           })
         : Promise.resolve(0),
-      isFarmer && dbUser.farm
+      trader && dbUser.farm
         ? this.prisma.rfq.count({
             where: {
               farmId: dbUser.farm.id,
@@ -69,7 +68,7 @@ export class CabinetService {
           OR: [{ buyerId: user.id }, { farmerId: user.id }],
         },
       }),
-      isFarmer && dbUser.farm
+      trader && dbUser.farm
         ? this.prisma.product.count({
             where: {
               farmId: dbUser.farm.id,
@@ -78,7 +77,7 @@ export class CabinetService {
             },
           })
         : Promise.resolve(0),
-      isFarmer && dbUser.farm
+      trader && dbUser.farm
         ? this.prisma.product.count({
             where: {
               farmId: dbUser.farm.id,

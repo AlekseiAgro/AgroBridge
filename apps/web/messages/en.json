@@ -43,17 +43,18 @@
     "goRegister": "Sign up",
     "goLogin": "Log in",
     "sellerType": "I am registering as",
-    "sellerTypeHint": "Required for sellers. Choose whether you trade as a private farmer or a company.",
+    "sellerTypeHint": "How you sell. Every account can also buy.",
     "sellerTypes": {
       "privateFarmer": "Private farmer",
       "company": "Company"
     },
     "buyerType": "I am registering as",
-    "buyerTypeHint": "Required for buyers. Choose whether you buy as an individual or a company.",
+    "buyerTypeHint": "How you buy. Every account can also sell.",
     "buyerTypes": {
       "individual": "Individual",
       "company": "Company"
-    }
+    },
+    "dualCapabilityHint": "One account can both sell products and post purchase requests. Pick how you mainly start."
   },
   "account": {
     "title": "Your account",
@@ -772,7 +773,7 @@
     "floatingLead": "Can you supply this?",
     "floatingText": "Publish your product offer and reach buyers looking for it.",
     "floatingCta": "List your product",
-    "buyerOnly": "Purchase requests can be posted by buyers. You are signed in with a seller account — sign out and register as a buyer, or browse the request board.",
+    "buyerOnly": "Sign in to post a purchase request. Any AgroBridge account can buy and sell.",
     "registerAsBuyer": "Register as a buyer"
   },
   "roleHubs": {

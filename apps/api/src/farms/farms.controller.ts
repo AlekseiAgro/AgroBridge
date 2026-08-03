@@ -33,21 +33,21 @@ export class FarmsController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   getMine(@CurrentUser() user: AuthenticatedUser) {
     return this.farmsService.getMine(user);
   }
 
   @Get('me/documents')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   listMyDocuments(@CurrentUser() user: AuthenticatedUser) {
     return this.farmsService.listMyDocuments(user);
   }
 
   @Post('me/documents')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -65,7 +65,7 @@ export class FarmsController {
 
   @Delete('me/documents/:documentId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   removeDocument(
     @CurrentUser() user: AuthenticatedUser,
     @Param('documentId') documentId: string,
@@ -80,14 +80,14 @@ export class FarmsController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateFarmDto) {
     return this.farmsService.create(user, dto);
   }
 
   @Patch('me')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('farmer', 'admin')
+  @Roles('farmer', 'buyer', 'admin')
   updateMine(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateFarmDto) {
     return this.farmsService.updateMine(user, dto);
   }

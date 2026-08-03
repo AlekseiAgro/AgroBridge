@@ -36,19 +36,25 @@ export class AuthService {
       throw new ConflictException('Invalid role for registration');
     }
 
-    let sellerType: PrismaSellerType | null = null;
-    let buyerType: PrismaBuyerType | null = null;
+    // Every marketplace account can buy and sell. Role is a starting preference only.
+    let sellerType: PrismaSellerType;
+    let buyerType: PrismaBuyerType;
     if (dto.role === 'farmer') {
       if (!dto.sellerType || !isSellerType(dto.sellerType)) {
         throw new BadRequestException('Seller type is required for farmers');
       }
       sellerType = dto.sellerType as PrismaSellerType;
-    }
-    if (dto.role === 'buyer') {
+      buyerType = (
+        dto.buyerType && isBuyerType(dto.buyerType) ? dto.buyerType : 'individual'
+      ) as PrismaBuyerType;
+    } else {
       if (!dto.buyerType || !isBuyerType(dto.buyerType)) {
         throw new BadRequestException('Buyer type is required for buyers');
       }
       buyerType = dto.buyerType as PrismaBuyerType;
+      sellerType = (
+        dto.sellerType && isSellerType(dto.sellerType) ? dto.sellerType : 'privateFarmer'
+      ) as PrismaSellerType;
     }
 
     const email = dto.email.trim().toLowerCase();

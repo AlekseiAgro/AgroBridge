@@ -1,3 +1,4 @@
+import { canTrade } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
 import { FloatingCta } from '@/components/FloatingCta';
 import { getCurrentUser } from '@/lib/session';
@@ -5,8 +6,8 @@ import { getCurrentUser } from '@/lib/session';
 export async function RequestsSellCta() {
   const t = await getTranslations('purchaseRequests');
   const user = await getCurrentUser();
-  const isFarmer = user?.role === 'farmer' || user?.role === 'admin';
-  const href = isFarmer ? '/dashboard/products/new' : user ? '/sellers' : '/register';
+  const trader = Boolean(user && canTrade(user.role));
+  const href = trader ? '/dashboard/products/new' : '/register';
 
   return (
     <FloatingCta

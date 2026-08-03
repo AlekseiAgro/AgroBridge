@@ -11,6 +11,7 @@ import type {
   Locale,
   TranslationStatus,
 } from '@agrobridge/shared';
+import { canTrade } from '@agrobridge/shared';
 import { LocaleCode, Prisma, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { TranslationService } from '../translation/translation.service';
@@ -206,20 +207,20 @@ export class ChatService {
       }
 
       const isBuyer = request.buyerId === user.id;
-      const isFarmer = user.role === 'farmer' || user.role === 'admin';
+      const isSellerSide = canTrade(user.role) && user.id !== request.buyerId;
 
       if (isBuyer) {
         if (!dto.farmerId) {
           throw new BadRequestException('farmerId is required when buyer opens chat');
         }
         const farmer = await this.prisma.user.findUnique({ where: { id: dto.farmerId } });
-        if (!farmer || (farmer.role !== 'farmer' && farmer.role !== 'admin')) {
+        if (!farmer || !canTrade(farmer.role)) {
           throw new NotFoundException('Farmer not found');
         }
         return { farmerId: farmer.id, buyerId: request.buyerId };
       }
 
-      if (isFarmer && user.id !== request.buyerId) {
+      if (isSellerSide) {
         return { farmerId: user.id, buyerId: request.buyerId };
       }
 
@@ -227,12 +228,12 @@ export class ChatService {
     }
 
     if (dto.farmerId) {
-      if (user.role !== 'buyer' && user.role !== 'admin') {
-        throw new ForbiddenException('Only buyers can start chat with a farmer this way');
+      if (!canTrade(user.role)) {
+        throw new ForbiddenException('Sign in to start chat with a farmer');
       }
 
       const farmer = await this.prisma.user.findUnique({ where: { id: dto.farmerId } });
-      if (!farmer || farmer.role !== 'farmer') {
+      if (!farmer || !canTrade(farmer.role)) {
         throw new NotFoundException('Farmer not found');
       }
 
@@ -240,11 +241,11 @@ export class ChatService {
     }
 
     if (dto.buyerId) {
-      if (user.role !== 'farmer' && user.role !== 'admin') {
-        throw new ForbiddenException('Only farmers can start chat with a buyer this way');
+      if (!canTrade(user.role)) {
+        throw new ForbiddenException('Sign in to start chat with a buyer');
       }
       const buyer = await this.prisma.user.findUnique({ where: { id: dto.buyerId } });
-      if (!buyer || (buyer.role !== 'buyer' && buyer.role !== 'admin')) {
+      if (!buyer || !canTrade(buyer.role)) {
         throw new NotFoundException('Buyer not found');
       }
       return { farmerId: user.id, buyerId: buyer.id };

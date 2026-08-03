@@ -12,6 +12,7 @@ import {
   PRODUCT_VIDEO_MAX_BYTES,
   PRODUCT_VIDEO_MAX_COUNT,
   PRODUCT_VIDEO_MIME_TYPES,
+  canTrade,
   catalogSearchCanonicalMatches,
   isCarrier,
   isCertificateType,
@@ -969,8 +970,8 @@ export class ProductsService {
   }
 
   private assertFarmer(user: AuthenticatedUser) {
-    if (user.role !== 'farmer' && user.role !== 'admin') {
-      throw new ForbiddenException('Only farmers can manage products');
+    if (!canTrade(user.role)) {
+      throw new ForbiddenException('Sign in to manage products');
     }
   }
 

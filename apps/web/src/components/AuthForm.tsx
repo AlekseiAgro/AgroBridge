@@ -28,7 +28,8 @@ export function AuthForm({ mode, nextPath }: Props) {
   const [pending, setPending] = useState(false);
   const [role, setRole] = useState<RegisterableRole>(
     nextPath?.includes('/requests/new') ? 'buyer' : 'farmer',
-  );  const [sellerType, setSellerType] = useState<SellerType>('privateFarmer');
+  );
+  const [sellerType, setSellerType] = useState<SellerType>('privateFarmer');
   const [buyerType, setBuyerType] = useState<BuyerType>('individual');
   const redirectTo = safeNextPath(nextPath, '/account');
 
@@ -49,8 +50,8 @@ export function AuthForm({ mode, nextPath }: Props) {
             password: String(form.get('password') ?? ''),
             displayName: String(form.get('displayName') ?? ''),
             role,
-            ...(role === 'farmer' ? { sellerType } : {}),
-            ...(role === 'buyer' ? { buyerType } : {}),
+            sellerType,
+            buyerType,
             locale,
           };
 
@@ -88,6 +89,7 @@ export function AuthForm({ mode, nextPath }: Props) {
 
           <fieldset className="role-fieldset">
             <legend>{t('role')}</legend>
+            <p className="product-list__meta">{t('dualCapabilityHint')}</p>
             {REGISTERABLE_ROLES.map((value) => (
               <label key={value} className="role-option">
                 <input
@@ -102,45 +104,41 @@ export function AuthForm({ mode, nextPath }: Props) {
             ))}
           </fieldset>
 
-          {role === 'farmer' ? (
-            <fieldset className="role-fieldset">
-              <legend>{t('sellerType')}</legend>
-              <p className="product-list__meta">{t('sellerTypeHint')}</p>
-              {SELLER_TYPES.map((value) => (
-                <label key={value} className="role-option">
-                  <input
-                    type="radio"
-                    name="sellerType"
-                    value={value}
-                    checked={sellerType === value}
-                    onChange={() => setSellerType(value)}
-                    required
-                  />
-                  <span>{t(`sellerTypes.${value}`)}</span>
-                </label>
-              ))}
-            </fieldset>
-          ) : null}
+          <fieldset className="role-fieldset">
+            <legend>{t('sellerType')}</legend>
+            <p className="product-list__meta">{t('sellerTypeHint')}</p>
+            {SELLER_TYPES.map((value) => (
+              <label key={value} className="role-option">
+                <input
+                  type="radio"
+                  name="sellerType"
+                  value={value}
+                  checked={sellerType === value}
+                  onChange={() => setSellerType(value)}
+                  required
+                />
+                <span>{t(`sellerTypes.${value}`)}</span>
+              </label>
+            ))}
+          </fieldset>
 
-          {role === 'buyer' ? (
-            <fieldset className="role-fieldset">
-              <legend>{t('buyerType')}</legend>
-              <p className="product-list__meta">{t('buyerTypeHint')}</p>
-              {BUYER_TYPES.map((value) => (
-                <label key={value} className="role-option">
-                  <input
-                    type="radio"
-                    name="buyerType"
-                    value={value}
-                    checked={buyerType === value}
-                    onChange={() => setBuyerType(value)}
-                    required
-                  />
-                  <span>{t(`buyerTypes.${value}`)}</span>
-                </label>
-              ))}
-            </fieldset>
-          ) : null}
+          <fieldset className="role-fieldset">
+            <legend>{t('buyerType')}</legend>
+            <p className="product-list__meta">{t('buyerTypeHint')}</p>
+            {BUYER_TYPES.map((value) => (
+              <label key={value} className="role-option">
+                <input
+                  type="radio"
+                  name="buyerType"
+                  value={value}
+                  checked={buyerType === value}
+                  onChange={() => setBuyerType(value)}
+                  required
+                />
+                <span>{t(`buyerTypes.${value}`)}</span>
+              </label>
+            ))}
+          </fieldset>
         </>
       ) : null}
 

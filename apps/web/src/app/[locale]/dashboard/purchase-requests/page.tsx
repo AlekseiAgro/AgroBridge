@@ -15,9 +15,6 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
 
   const user = await getCurrentUser();
   if (!user) redirect({ href: '/login', locale });
-  if (user!.role !== 'buyer' && user!.role !== 'admin') {
-    redirect({ href: '/account', locale });
-  }
 
   const t = await getTranslations('purchaseRequests');
   const items = await apiRequestAuthed<PurchaseRequestSummary[]>('/purchase-requests/mine');

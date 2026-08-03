@@ -69,14 +69,14 @@ export class RegisterDto {
   @Validate(RegisterableRoleConstraint)
   role!: string;
 
-  /** Required when registering as a farmer/seller. */
-  @ValidateIf((dto: RegisterDto) => dto.role === 'farmer')
+  /** Required when registering as a farmer/seller; optional otherwise (defaults applied). */
+  @ValidateIf((dto: RegisterDto) => dto.role === 'farmer' || dto.sellerType != null)
   @IsString()
   @Validate(SellerTypeConstraint)
   sellerType?: string;
 
-  /** Required when registering as a buyer. */
-  @ValidateIf((dto: RegisterDto) => dto.role === 'buyer')
+  /** Required when registering as a buyer; optional otherwise (defaults applied). */
+  @ValidateIf((dto: RegisterDto) => dto.role === 'buyer' || dto.buyerType != null)
   @IsString()
   @Validate(BuyerTypeConstraint)
   buyerType?: string;

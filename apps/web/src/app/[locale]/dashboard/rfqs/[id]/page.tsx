@@ -21,9 +21,6 @@ export default async function BuyerRfqDetailPage({ params }: Props) {
 
   const user = await getCurrentUser();
   if (!user) redirect({ href: '/login', locale });
-  if (user!.role !== 'buyer' && user!.role !== 'admin') {
-    redirect({ href: '/account', locale });
-  }
 
   const t = await getTranslations('rfq');
   const tp = await getTranslations('product');

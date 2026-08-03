@@ -13,7 +13,7 @@ import { VerificationService } from './verification.service';
 
 @Controller('verification')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('farmer', 'admin')
+@Roles('farmer', 'buyer', 'admin')
 export class VerificationController {
   constructor(private readonly verificationService: VerificationService) {}
 

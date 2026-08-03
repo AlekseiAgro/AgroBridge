@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { ProducerVerificationStatus, SellerType } from '@agrobridge/shared';
+import { canTrade, type ProducerVerificationStatus, type SellerType } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
   FarmDocumentKind,
@@ -369,8 +369,8 @@ export class VerificationService {
   }
 
   private assertProducer(user: AuthenticatedUser) {
-    if (user.role !== 'farmer' && user.role !== 'admin') {
-      throw new ForbiddenException('Only producers can use verification');
+    if (!canTrade(user.role)) {
+      throw new ForbiddenException('Sign in to use producer verification');
     }
   }
 

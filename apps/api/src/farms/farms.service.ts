@@ -15,6 +15,7 @@ import type {
 import {
   FARM_DOCUMENT_MAX_BYTES,
   FARM_DOCUMENT_MAX_COUNT,
+  canTrade,
   isFarmDocumentKind,
   isFarmDocumentMimeType,
 } from '@agrobridge/shared';
@@ -411,8 +412,8 @@ export class FarmsService {
   }
 
   private assertFarmer(user: AuthenticatedUser) {
-    if (user.role !== 'farmer' && user.role !== 'admin') {
-      throw new ForbiddenException('Only farmers can manage farm profiles');
+    if (!canTrade(user.role)) {
+      throw new ForbiddenException('Sign in to manage farm profiles');
     }
   }
 
