@@ -96,6 +96,8 @@ describe('ProductsService', () => {
           role: 'farmer',
           locale: 'en',
           displayName: null,
+          sellerType: null,
+          buyerType: null,
         },
         'p1',
         {
@@ -106,5 +108,23 @@ describe('ProductsService', () => {
         } as Express.Multer.File,
       ),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('searches catalog by localized title via canonical title keys', async () => {
+    prisma.product.findMany.mockResolvedValue([]);
+
+    await service.catalog({ q: 'персики' });
+
+    expect(prisma.product.findMany).toHaveBeenCalled();
+    const arg = prisma.product.findMany.mock.calls[0][0] as {
+      where: { AND: Array<{ OR?: Array<Record<string, unknown>> }> };
+    };
+    const searchClause = arg.where.AND.find((clause) => Array.isArray(clause.OR));
+    expect(searchClause?.OR).toEqual(
+      expect.arrayContaining([
+        { title: { contains: 'персики', mode: 'insensitive' } },
+        { title: { in: expect.arrayContaining(['Fresh Kakheti peaches']) } },
+      ]),
+    );
   });
 });

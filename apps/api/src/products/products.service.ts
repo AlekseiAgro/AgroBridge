@@ -12,6 +12,7 @@ import {
   PRODUCT_VIDEO_MAX_BYTES,
   PRODUCT_VIDEO_MAX_COUNT,
   PRODUCT_VIDEO_MIME_TYPES,
+  catalogSearchCanonicalMatches,
   isCarrier,
   isCertificateType,
   isFarmDocumentMimeType,
@@ -168,13 +169,20 @@ export class ProductsService {
     }
 
     if (q) {
-      and.push({
-        OR: [
-          { title: { contains: q, mode: 'insensitive' } },
-          { description: { contains: q, mode: 'insensitive' } },
-          { farm: { name: { contains: q, mode: 'insensitive' } } },
-        ],
-      });
+      const localized = catalogSearchCanonicalMatches(q);
+      const searchOr: Prisma.ProductWhereInput[] = [
+        { title: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+        { variety: { contains: q, mode: 'insensitive' } },
+        { farm: { name: { contains: q, mode: 'insensitive' } } },
+      ];
+      if (localized.titles.length > 0) {
+        searchOr.push({ title: { in: localized.titles } });
+      }
+      if (localized.descriptions.length > 0) {
+        searchOr.push({ description: { in: localized.descriptions } });
+      }
+      and.push({ OR: searchOr });
     }
 
     if (harvestStatus) {
