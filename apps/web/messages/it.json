@@ -421,6 +421,8 @@
     "palletSize": "Dimensione pallet",
     "incoterms": "Incoterms",
     "carriers": "Carriers",
+    "multiSelectPlaceholder": "Seleziona una o più opzioni",
+    "multiSelectSelected": "{values}",
     "customDelivery": "Custom delivery terms",
     "nearestPort": "Nearest port or terminal",
     "deliveryAvailable": "Delivery is available",

@@ -421,6 +421,8 @@
     "palletSize": "Размер паллеты",
     "incoterms": "Инкотермс",
     "carriers": "Перевозчики",
+    "multiSelectPlaceholder": "Выберите один или несколько вариантов",
+    "multiSelectSelected": "{values}",
     "customDelivery": "Особые условия доставки",
     "nearestPort": "Ближайший порт или терминал",
     "deliveryAvailable": "Доставка доступна",
