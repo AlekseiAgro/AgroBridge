@@ -688,7 +688,6 @@
       "pendingModeration": "En modération",
       "awaitingMyRating": "En attente de votre note"
     },
-    "dangerZone": "Zone sensible",
     "deleteAccount": "Supprimer le compte",
     "deleteAccountHint": "Supprime définitivement votre compte, profil de ferme, produits et demandes associées.",
     "deleteAccountFlowHint": "Saisissez votre mot de passe. Nous enverrons un code de confirmation à {email}.",

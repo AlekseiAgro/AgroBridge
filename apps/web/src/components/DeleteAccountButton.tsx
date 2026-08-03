@@ -162,7 +162,7 @@ export function DeleteAccountButton({ email }: { email: string }) {
           {error ? <p className="form-error">{error}</p> : null}
           <div className="how-it-works__actions">
             <button
-              className="button button--primary"
+              className="button button--danger"
               type="submit"
               disabled={pending || code.length !== 6}
             >

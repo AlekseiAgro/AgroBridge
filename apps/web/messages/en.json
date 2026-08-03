@@ -688,7 +688,6 @@
       "pendingModeration": "Pending moderation",
       "awaitingMyRating": "Awaiting your rating"
     },
-    "dangerZone": "Danger zone",
     "deleteAccount": "Delete account",
     "deleteAccountHint": "Permanently delete your account, farm profile, products, and related requests. This cannot be undone.",
     "deleteAccountFlowHint": "Enter your password. We will email a confirmation code to {email}.",

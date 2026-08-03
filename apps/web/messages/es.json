@@ -688,7 +688,6 @@
       "pendingModeration": "En moderación",
       "awaitingMyRating": "Pendiente de tu valoración"
     },
-    "dangerZone": "Zona de peligro",
     "deleteAccount": "Eliminar cuenta",
     "deleteAccountHint": "Elimina de forma permanente tu cuenta, perfil de granja, productos y solicitudes relacionadas.",
     "deleteAccountFlowHint": "Introduce tu contraseña. Enviaremos un código de confirmación a {email}.",

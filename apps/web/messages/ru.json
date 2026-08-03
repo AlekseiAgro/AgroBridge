@@ -688,7 +688,6 @@
       "pendingModeration": "На модерации",
       "awaitingMyRating": "Ждут вашей оценки"
     },
-    "dangerZone": "Опасная зона",
     "deleteAccount": "Удалить аккаунт",
     "deleteAccountHint": "Безвозвратно удалит аккаунт, профиль фермы, товары и связанные запросы.",
     "deleteAccountFlowHint": "Введите пароль. Мы отправим код подтверждения на {email}.",
