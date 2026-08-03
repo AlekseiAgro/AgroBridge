@@ -1,5 +1,6 @@
 import type { ProductSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { CertificateBadges } from '@/components/CertificateBadges';
 import { CatalogFilters } from '@/components/CatalogFilters';
 import { CatalogPurchaseCta } from '@/components/CatalogPurchaseCta';
 import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
@@ -32,6 +33,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
 
   const t = await getTranslations('catalog');
   const tn = await getTranslations('nav');
+  const tq = await getTranslations('quality');
   const tr = await getTranslations();
   const query = new URLSearchParams();
   if (filters.q) query.set('q', filters.q);
@@ -82,10 +84,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
               );
               const rating = product.farm.sellerRating;
               return (
-                <li
-                  key={product.id}
-                  className="product-list__item product-list__item--with-media"
-                >
+                <li key={product.id} className="product-list__item product-list__item--with-media">
                   {image ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={image.url} alt="" className="product-list__media" />
@@ -110,6 +109,15 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                       status={product.harvestStatus}
                       preorderEnabled={product.preorderEnabled}
                     />
+                    <div className="product-quality-summary">
+                      <span
+                        className={`quality-score-chip quality-score-chip--${product.qualityScore.tier}`}
+                      >
+                        {product.qualityScore.score}/100 ·{' '}
+                        {tq(`tiers.${product.qualityScore.tier}`)}
+                      </span>
+                      <CertificateBadges badges={product.certificateBadges} />
+                    </div>
                     <div className="product-list__rating">
                       <span className="product-list__rating-label">{t('sellerRating')}</span>
                       <RatingStars

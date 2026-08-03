@@ -106,6 +106,24 @@ enum HarvestStatus {
   soldOut
 }
 
+enum ProductImageKind {
+  overview
+  closeup
+  packaging
+  harvest
+  field
+  other
+}
+
+enum CertificateType {
+  globalGap
+  organic
+  haccp
+  iso
+  grasp
+  other
+}
+
 model User {
   id               String      @id @default(cuid())
   email            String      @unique
@@ -135,9 +153,10 @@ model User {
   moderatedProducts            Product[]          @relation("ProductModerator")
   moderatedPurchaseRequests    PurchaseRequest[]  @relation("PurchaseRequestModerator")
   verifiedFarms                Farm[]             @relation("FarmVerifier")
-  reviewedDocuments            FarmDocument[]     @relation("DocumentReviewer")
-  ratingsGiven                 Rating[]           @relation("RatingsGiven")
-  ratingsReceived              Rating[]           @relation("RatingsReceived")
+  reviewedDocuments            FarmDocument[]         @relation("DocumentReviewer")
+  reviewedCertificates         ProductCertificate[]   @relation("CertificateReviewer")
+  ratingsGiven                 Rating[]               @relation("RatingsGiven")
+  ratingsReceived              Rating[]               @relation("RatingsReceived")
   alertSubscription            AlertSubscription?
   verificationCodes            VerificationCode[]
   harvestWatches               HarvestWatch[]
@@ -179,6 +198,11 @@ model Farm {
   companyRegistryName        String?
   companyRegistryCheckedAt   DateTime?
   companyRegistryValid       Boolean?
+  foundedYear                Int?
+  farmSizeHectares           Decimal?           @db.Decimal(12, 2)
+  ownershipType              String?
+  exportMarkets              String[]           @default([])
+  history                    String?
   createdAt                  DateTime           @default(now())
   updatedAt                  DateTime           @updatedAt
 
@@ -245,32 +269,54 @@ model CategoryConfig {
 }
 
 model Product {
-  id               String           @id @default(cuid())
-  farmId           String
-  title            String
-  description      String?
-  category         String?
-  unit             String?
-  minQuantity      Decimal?         @db.Decimal(12, 2)
-  maxQuantity      Decimal?         @db.Decimal(12, 2)
-  seasonMonths     Int[]            @default([])
-  harvestStartAt   DateTime?
-  harvestEndAt     DateTime?
-  forecastQuantity Decimal?         @db.Decimal(12, 2)
-  harvestStatus    HarvestStatus?
-  preorderEnabled  Boolean          @default(false)
-  isPublished      Boolean          @default(false)
-  moderationStatus ModerationStatus @default(draft)
-  moderationNote   String?
-  moderatedAt      DateTime?
-  moderatedById    String?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id                   String           @id @default(cuid())
+  farmId               String
+  title                String
+  description          String?
+  category             String?
+  variety              String?
+  country              String?          @default("Georgia")
+  originPlace          String?
+  unit                 String?
+  minQuantity          Decimal?         @db.Decimal(12, 2)
+  maxQuantity          Decimal?         @db.Decimal(12, 2)
+  currentStock         Decimal?         @db.Decimal(12, 2)
+  monthlyProduction    Decimal?         @db.Decimal(12, 2)
+  maxAnnualProduction  Decimal?         @db.Decimal(12, 2)
+  seasonMonths         Int[]            @default([])
+  harvestStartAt       DateTime?
+  harvestEndAt         DateTime?
+  forecastQuantity     Decimal?         @db.Decimal(12, 2)
+  harvestStatus        HarvestStatus?
+  preorderEnabled      Boolean          @default(false)
+  attributes           Json             @default("{}")
+  packagingTypes       String[]         @default([])
+  packagingWeights     String[]         @default([])
+  palletSize           String?
+  incoterms            String[]         @default([])
+  carriers             String[]         @default([])
+  customDelivery       String?
+  nearestPort          String?
+  deliveryAvailable    Boolean          @default(false)
+  leadTimeDays         Int?
+  priceFrom            Decimal?         @db.Decimal(12, 2)
+  priceCurrency        String?
+  priceNegotiable      Boolean          @default(false)
+  priceDependsOnVolume Boolean          @default(false)
+  isPublished          Boolean          @default(false)
+  moderationStatus     ModerationStatus @default(draft)
+  moderationNote       String?
+  moderatedAt          DateTime?
+  moderatedById        String?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
 
-  farm           Farm           @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  moderatedBy    User?          @relation("ProductModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  farm           Farm                 @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  moderatedBy    User?                @relation("ProductModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
   rfqs           Rfq[]
   images         ProductImage[]
+  videos         ProductVideo[]
+  certificates   ProductCertificate[]
   harvestWatches HarvestWatch[]
 
   @@index([farmId])
@@ -297,18 +343,61 @@ model HarvestWatch {
 }
 
 model ProductImage {
-  id        String   @id @default(cuid())
+  id        String           @id @default(cuid())
   productId String
   url       String
   key       String
-  sortOrder Int      @default(0)
-  isPrimary Boolean  @default(false)
-  createdAt DateTime @default(now())
+  sortOrder Int              @default(0)
+  isPrimary Boolean          @default(false)
+  kind      ProductImageKind @default(other)
+  createdAt DateTime         @default(now())
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId, sortOrder])
   @@map("product_images")
+}
+
+model ProductVideo {
+  id              String   @id @default(cuid())
+  productId       String
+  url             String
+  key             String
+  fileName        String
+  mimeType        String
+  sizeBytes       Int
+  durationSeconds Int?
+  createdAt       DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, createdAt])
+  @@map("product_videos")
+}
+
+model ProductCertificate {
+  id           String               @id @default(cuid())
+  productId    String
+  type         CertificateType
+  title        String
+  fileName     String
+  url          String
+  key          String
+  mimeType     String
+  sizeBytes    Int
+  reviewStatus DocumentReviewStatus @default(pending)
+  reviewNote   String?
+  reviewedAt   DateTime?
+  reviewedById String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  reviewedBy User?   @relation("CertificateReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([productId, reviewStatus])
+  @@index([reviewStatus, createdAt])
+  @@map("product_certificates")
 }
 
 model Rfq {

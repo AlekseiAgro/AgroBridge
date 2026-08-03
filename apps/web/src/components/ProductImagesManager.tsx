@@ -2,8 +2,10 @@
 
 import {
   PRODUCT_IMAGE_MAX_COUNT,
+  PRODUCT_IMAGE_KINDS,
   type ProductDetail,
   type ProductImage,
+  type ProductImageKind,
 } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
@@ -22,6 +24,7 @@ export function ProductImagesManager({ productId, initialImages }: Props) {
   const [images, setImages] = useState(initialImages);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [kind, setKind] = useState<ProductImageKind>('overview');
 
   async function refreshFrom(product: ProductDetail) {
     setImages(product.images);
@@ -37,6 +40,7 @@ export function ProductImagesManager({ productId, initialImages }: Props) {
 
     const body = new FormData();
     body.append('file', file);
+    body.append('kind', kind);
 
     try {
       const response = await fetch(`/api/products/${productId}/images`, {
@@ -87,10 +91,9 @@ export function ProductImagesManager({ productId, initialImages }: Props) {
     setPending(true);
     setError(null);
     try {
-      const response = await fetch(
-        `/api/products/${productId}/images/${imageId}/primary`,
-        { method: 'PATCH' },
-      );
+      const response = await fetch(`/api/products/${productId}/images/${imageId}/primary`, {
+        method: 'PATCH',
+      });
       const data = (await response.json()) as ProductDetail & { message?: string };
       if (!response.ok) {
         setError(data.message ?? t('images.primaryError'));
@@ -120,6 +123,7 @@ export function ProductImagesManager({ productId, initialImages }: Props) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={toPublicMediaUrl(image.url)} alt="" className="product-images__thumb" />
               <div className="product-images__meta">
+                <span className="product-images__badge">{t(`images.kinds.${image.kind}`)}</span>
                 {image.isPrimary ? (
                   <span className="product-images__badge">{t('images.primary')}</span>
                 ) : (
@@ -149,20 +153,38 @@ export function ProductImagesManager({ productId, initialImages }: Props) {
       )}
 
       {canUpload ? (
-        <label className="product-images__upload">
-          <span className="button button--primary">
-            {pending ? t('pleaseWait') : t('images.upload')}
-          </span>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            disabled={pending}
-            onChange={(event) => void onUpload(event.target.files)}
-          />
-        </label>
+        <div className="product-media-upload">
+          <label className="field">
+            <span>{t('images.kind')}</span>
+            <select
+              value={kind}
+              disabled={pending}
+              onChange={(event) => setKind(event.target.value as ProductImageKind)}
+            >
+              {PRODUCT_IMAGE_KINDS.map((value) => (
+                <option key={value} value={value}>
+                  {t(`images.kinds.${value}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="product-images__upload">
+            <span className="button button--primary">
+              {pending ? t('pleaseWait') : t('images.upload')}
+            </span>
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              disabled={pending}
+              onChange={(event) => void onUpload(event.target.files)}
+            />
+          </label>
+        </div>
       ) : (
-        <p className="product-list__meta">{t('images.maxReached', { max: PRODUCT_IMAGE_MAX_COUNT })}</p>
+        <p className="product-list__meta">
+          {t('images.maxReached', { max: PRODUCT_IMAGE_MAX_COUNT })}
+        </p>
       )}
 
       {error ? <p className="form-error">{error}</p> : null}

@@ -88,6 +88,11 @@ export type FarmSummary = {
   verificationStatus: VerificationStatus;
   /** True when verificationStatus === 'approved' (public Verified badge). */
   verified: boolean;
+  foundedYear: number | null;
+  farmSizeHectares: number | null;
+  ownershipType: string | null;
+  exportMarkets: string[];
+  history: string | null;
   owner: {
     id: string;
     displayName: string | null;
@@ -107,8 +112,19 @@ export type FarmDetail = FarmSummary & {
 
 import type { ModerationStatus } from './moderation';
 import type { RatingSummary } from './rating';
+import type {
+  Carrier,
+  CertificateType,
+  Incoterm,
+  PackagingType,
+  PriceCurrency,
+  ProductCertificate,
+  ProductImageKind,
+  ProductQualityScore,
+  ProductVideo,
+} from './quality';
 
-export const PRODUCT_IMAGE_MAX_COUNT = 8;
+export const PRODUCT_IMAGE_MAX_COUNT = 10;
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 export const PRODUCT_IMAGE_MIME_TYPES = [
   'image/jpeg',
@@ -127,6 +143,7 @@ export type ProductImage = {
   url: string;
   sortOrder: number;
   isPrimary: boolean;
+  kind: ProductImageKind;
 };
 
 export type ProductSummary = {
@@ -134,11 +151,17 @@ export type ProductSummary = {
   title: string;
   description: string | null;
   category: string | null;
+  variety: string | null;
+  country: string | null;
+  originPlace: string | null;
   unit: string | null;
-  /** Minimum quantity the farmer can sell in one deal (in `unit`). */
+  /** Minimum order quantity (in `unit`). */
   minQuantity: number | null;
-  /** Maximum quantity the farmer can sell (in `unit`). */
+  /** Maximum order quantity (in `unit`). */
   maxQuantity: number | null;
+  currentStock: number | null;
+  monthlyProduction: number | null;
+  maxAnnualProduction: number | null;
   /** Months (1–12) when this crop is typically in season. */
   seasonMonths: SeasonMonth[];
   harvestStartAt: string | null;
@@ -147,16 +170,38 @@ export type ProductSummary = {
   forecastQuantity: number | null;
   harvestStatus: HarvestStatus | null;
   preorderEnabled: boolean;
+  attributes: Record<string, unknown>;
+  packagingTypes: PackagingType[];
+  packagingWeights: string[];
+  palletSize: string | null;
+  incoterms: Incoterm[];
+  carriers: Carrier[];
+  customDelivery: string | null;
+  nearestPort: string | null;
+  deliveryAvailable: boolean;
+  leadTimeDays: number | null;
+  priceFrom: number | null;
+  priceCurrency: PriceCurrency | null;
+  priceNegotiable: boolean;
+  priceDependsOnVolume: boolean;
   isPublished: boolean;
   moderationStatus: ModerationStatus;
   moderationNote: string | null;
   images: ProductImage[];
+  videoCount: number;
+  certificateBadges: CertificateType[];
+  qualityScore: ProductQualityScore;
   farm: {
     id: string;
     name: string;
     region: string | null;
     verificationStatus: VerificationStatus;
     verified: boolean;
+    foundedYear: number | null;
+    farmSizeHectares: number | null;
+    ownershipType: string | null;
+    exportMarkets: string[];
+    history: string | null;
     /** Aggregate deal rating of the farm owner (seller). */
     sellerRating: RatingSummary;
   };
@@ -167,6 +212,8 @@ export type ProductDetail = ProductSummary & {
   updatedAt: string;
   /** Whether the current viewer watches harvest/preorder alerts for this product. */
   watching?: boolean;
+  videos: ProductVideo[];
+  certificates: ProductCertificate[];
 };
 
 export type CatalogQuery = {

@@ -2,7 +2,9 @@ import type { ProductDetail } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { ProductForm } from '@/components/ProductForm';
+import { ProductCertificatesManager } from '@/components/ProductCertificatesManager';
 import { ProductImagesManager } from '@/components/ProductImagesManager';
+import { ProductVideosManager } from '@/components/ProductVideosManager';
 import { redirect } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -38,10 +40,15 @@ export default async function EditProductPage({ params }: Props) {
 
   return (
     <main className="cabinet-page cabinet-page--narrow">
-        <h1>{t('editTitle')}</h1>
-        <p className="page__subtitle">{t('editSubtitle')}</p>
-        <ProductImagesManager productId={product.id} initialImages={product.images} />
-        <ProductForm mode="edit" initial={product} />
+      <h1>{t('editTitle')}</h1>
+      <p className="page__subtitle">{t('editSubtitle')}</p>
+      <ProductImagesManager productId={product.id} initialImages={product.images} />
+      <ProductVideosManager productId={product.id} initialVideos={product.videos} />
+      <ProductCertificatesManager
+        productId={product.id}
+        initialCertificates={product.certificates}
+      />
+      <ProductForm mode="edit" initial={product} />
     </main>
   );
 }

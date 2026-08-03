@@ -238,7 +238,13 @@
         "businessRegistration": "Business registration",
         "other": "Other"
       }
-    }
+    },
+    "foundedYear": "Founded year",
+    "farmSizeHectares": "Farm size (hectares)",
+    "ownershipType": "Ownership type",
+    "exportMarkets": "Export markets",
+    "exportMarketsPlaceholder": "Comma separated, e.g. Germany, UAE, Poland",
+    "history": "Farm history and story"
   },
   "product": {
     "dashboardTitle": "Mis productos",
@@ -294,7 +300,16 @@
       "uploadError": "No se pudo subir la foto.",
       "deleteError": "No se pudo eliminar la foto.",
       "primaryError": "No se pudo actualizar la foto principal.",
-      "maxReached": "Se alcanzó el máximo de {max} fotos."
+      "maxReached": "Se alcanzó el máximo de {max} fotos.",
+      "kind": "Photo type",
+      "kinds": {
+        "overview": "Product overview",
+        "closeup": "Close-up",
+        "packaging": "Packaging",
+        "harvest": "Harvest",
+        "field": "Field or farm",
+        "other": "Other"
+      }
     },
     "minQuantity": "Cantidad mínima",
     "maxQuantity": "Cantidad máxima",
@@ -304,7 +319,133 @@
     "unitSuggested": "sugerida",
     "quantityInvalid": "Introduce cantidades válidas mayores que cero.",
     "quantityRangeInvalid": "La cantidad mínima no puede ser mayor que la máxima.",
-    "availableQuantity": "Cantidad disponible"
+    "availableQuantity": "Cantidad disponible",
+    "sections": {
+      "basics": "Product basics",
+      "volume": "Available volume",
+      "attributes": "Product characteristics",
+      "packaging": "Packaging",
+      "logistics": "Logistics and delivery",
+      "pricing": "Pricing",
+      "farmStory": "About the farm"
+    },
+    "variety": "Variety",
+    "country": "Country",
+    "originPlace": "Place of origin",
+    "originPlacePlaceholder": "Region, village, or appellation",
+    "currentStock": "Current stock",
+    "monthlyProduction": "Monthly production",
+    "maxAnnualProduction": "Maximum annual production",
+    "attributesHint": "Fields are tailored to the selected category. Add the details buyers use to compare offers.",
+    "notSpecified": "Not specified",
+    "yes": "Yes",
+    "no": "No",
+    "other": "Other",
+    "attributes": {
+      "color": "Color",
+      "berrySize": "Size",
+      "brix": "Brix",
+      "seedless": "Seedless",
+      "organic": "Organic",
+      "fresh": "Fresh",
+      "varietyDetail": "Variety details",
+      "caliber": "Caliber",
+      "grade": "Grade",
+      "shelled": "Shelled",
+      "moisturePercent": "Moisture, %",
+      "grapeVariety": "Grape variety",
+      "vintageYear": "Vintage year",
+      "alcoholPercent": "Alcohol, %",
+      "fatPercent": "Fat, %",
+      "pasteurized": "Pasteurized",
+      "floralSource": "Floral source",
+      "crystallized": "Crystallized",
+      "raw": "Raw",
+      "mineralization": "Mineralization",
+      "sparkling": "Sparkling",
+      "sourceName": "Source name",
+      "form": "Form",
+      "dried": "Dried",
+      "leafGrade": "Leaf grade",
+      "fermented": "Fermented",
+      "leafSize": "Leaf size",
+      "purityPercent": "Purity, %",
+      "extractionMethod": "Extraction method"
+    },
+    "attributeOptions": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "white": "White",
+      "red": "Red",
+      "rose": "Rosé",
+      "orange": "Orange",
+      "whole": "Whole",
+      "ground": "Ground",
+      "flakes": "Flakes"
+    },
+    "packagingTypesLabel": "Packaging types",
+    "packagingTypes": {
+      "carton": "Carton",
+      "woodenBox": "Wooden box",
+      "plasticCrate": "Plastic crate",
+      "pallet": "Pallet",
+      "bag": "Bag",
+      "bulk": "Bulk",
+      "other": "Other"
+    },
+    "packagingWeights": "Packaging weights",
+    "packagingWeightsPlaceholder": "Comma separated, e.g. 5 kg, 10 kg",
+    "palletSize": "Pallet size",
+    "incoterms": "Incoterms",
+    "carriers": "Carriers",
+    "customDelivery": "Custom delivery terms",
+    "nearestPort": "Nearest port or terminal",
+    "deliveryAvailable": "Delivery is available",
+    "deliveryAvailableLabel": "Delivery available",
+    "leadTimeDays": "Lead time (days)",
+    "daysValue": "{count} days",
+    "priceFrom": "Price from",
+    "priceCurrency": "Currency",
+    "priceNegotiable": "Price is negotiable",
+    "priceDependsOnVolume": "Price depends on volume",
+    "farmFoundedYear": "Founded",
+    "farmSize": "Farm size",
+    "hectaresValue": "{count} ha",
+    "ownershipType": "Ownership type",
+    "exportMarkets": "Export markets",
+    "videos": {
+      "title": "Videos",
+      "publicTitle": "Product videos",
+      "subtitle": "Add up to {max} MP4, WebM, or QuickTime videos (max 80 MB each).",
+      "upload": "Upload video",
+      "empty": "No videos yet.",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this video?",
+      "uploadError": "Could not upload the video.",
+      "deleteError": "Could not delete the video.",
+      "maxReached": "Maximum of {max} videos reached."
+    },
+    "certificates": {
+      "title": "Certificates",
+      "subtitle": "Upload PDF or image certificates for buyer trust and moderator review.",
+      "type": "Certificate type",
+      "titleField": "Certificate title",
+      "titlePlaceholder": "e.g. GLOBALG.A.P. 2026",
+      "file": "PDF or image",
+      "fileRequired": "Choose a certificate file.",
+      "upload": "Upload certificate",
+      "empty": "No certificates yet.",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this certificate?",
+      "uploadError": "Could not upload the certificate.",
+      "deleteError": "Could not delete the certificate.",
+      "status": {
+        "pending": "Pending review",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
+    }
   },
   "rfq": {
     "requestTitle": "Solicitar cotización",
@@ -764,6 +905,39 @@
       "10": "Oct",
       "11": "Nov",
       "12": "Dec"
+    }
+  },
+  "quality": {
+    "title": "Product card quality",
+    "scoreLabel": "Product card quality score: {score} out of 100",
+    "tiers": {
+      "low": "Getting started",
+      "fair": "Fair",
+      "good": "Good",
+      "excellent": "Excellent"
+    },
+    "checklist": {
+      "basics": "Complete the basic product details",
+      "photos": "Add 5 useful photos in several views",
+      "video": "Add a product or farm video",
+      "seasonality": "Add season or harvest dates",
+      "volume": "Complete stock and production volumes",
+      "attributes": "Complete product characteristics",
+      "packaging": "Add packaging types and weights",
+      "certificates": "Upload a certificate",
+      "logistics": "Describe delivery and logistics",
+      "pricing": "Add a starting price or pricing terms",
+      "farmStory": "Complete your farm story"
+    },
+    "nextHint": "Best next steps",
+    "complete": "This product card is ready to impress buyers.",
+    "certificates": {
+      "globalGap": "GLOBALG.A.P.",
+      "organic": "Organic",
+      "haccp": "HACCP",
+      "iso": "ISO",
+      "grasp": "GRASP",
+      "other": "Certificate"
     }
   }
 }

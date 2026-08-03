@@ -238,7 +238,13 @@
         "businessRegistration": "Регистрация бизнеса",
         "other": "Другое"
       }
-    }
+    },
+    "foundedYear": "Год основания",
+    "farmSizeHectares": "Площадь хозяйства (га)",
+    "ownershipType": "Форма владения",
+    "exportMarkets": "Экспортные рынки",
+    "exportMarketsPlaceholder": "Через запятую, например Германия, ОАЭ, Польша",
+    "history": "История хозяйства"
   },
   "product": {
     "dashboardTitle": "Мои товары",
@@ -294,7 +300,16 @@
       "uploadError": "Не удалось загрузить фото.",
       "deleteError": "Не удалось удалить фото.",
       "primaryError": "Не удалось обновить главное фото.",
-      "maxReached": "Достигнут лимит в {max} фото."
+      "maxReached": "Достигнут лимит в {max} фото.",
+      "kind": "Photo type",
+      "kinds": {
+        "overview": "Product overview",
+        "closeup": "Close-up",
+        "packaging": "Packaging",
+        "harvest": "Harvest",
+        "field": "Field or farm",
+        "other": "Other"
+      }
     },
     "minQuantity": "Минимальное количество",
     "maxQuantity": "Максимальное количество",
@@ -304,7 +319,133 @@
     "unitSuggested": "рекомендуется",
     "quantityInvalid": "Укажите корректные количества больше нуля.",
     "quantityRangeInvalid": "Минимум не может быть больше максимума.",
-    "availableQuantity": "Доступный объём"
+    "availableQuantity": "Доступный объём",
+    "sections": {
+      "basics": "Основные данные",
+      "volume": "Доступный объём",
+      "attributes": "Характеристики",
+      "packaging": "Упаковка",
+      "logistics": "Логистика и доставка",
+      "pricing": "Цена",
+      "farmStory": "О хозяйстве"
+    },
+    "variety": "Сорт",
+    "country": "Страна",
+    "originPlace": "Место происхождения",
+    "originPlacePlaceholder": "Регион, село или наименование места",
+    "currentStock": "Текущий запас",
+    "monthlyProduction": "Производство в месяц",
+    "maxAnnualProduction": "Максимум в год",
+    "attributesHint": "Поля зависят от категории. Добавьте данные, по которым покупатели сравнивают предложения.",
+    "notSpecified": "Не указано",
+    "yes": "Да",
+    "no": "Нет",
+    "other": "Другое",
+    "attributes": {
+      "color": "Color",
+      "berrySize": "Size",
+      "brix": "Brix",
+      "seedless": "Seedless",
+      "organic": "Organic",
+      "fresh": "Fresh",
+      "varietyDetail": "Variety details",
+      "caliber": "Caliber",
+      "grade": "Grade",
+      "shelled": "Shelled",
+      "moisturePercent": "Moisture, %",
+      "grapeVariety": "Grape variety",
+      "vintageYear": "Vintage year",
+      "alcoholPercent": "Alcohol, %",
+      "fatPercent": "Fat, %",
+      "pasteurized": "Pasteurized",
+      "floralSource": "Floral source",
+      "crystallized": "Crystallized",
+      "raw": "Raw",
+      "mineralization": "Mineralization",
+      "sparkling": "Sparkling",
+      "sourceName": "Source name",
+      "form": "Form",
+      "dried": "Dried",
+      "leafGrade": "Leaf grade",
+      "fermented": "Fermented",
+      "leafSize": "Leaf size",
+      "purityPercent": "Purity, %",
+      "extractionMethod": "Extraction method"
+    },
+    "attributeOptions": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "white": "White",
+      "red": "Red",
+      "rose": "Rosé",
+      "orange": "Orange",
+      "whole": "Whole",
+      "ground": "Ground",
+      "flakes": "Flakes"
+    },
+    "packagingTypesLabel": "Типы упаковки",
+    "packagingTypes": {
+      "carton": "Carton",
+      "woodenBox": "Wooden box",
+      "plasticCrate": "Plastic crate",
+      "pallet": "Pallet",
+      "bag": "Bag",
+      "bulk": "Bulk",
+      "other": "Other"
+    },
+    "packagingWeights": "Вес упаковки",
+    "packagingWeightsPlaceholder": "Через запятую, например 5 кг, 10 кг",
+    "palletSize": "Размер паллеты",
+    "incoterms": "Инкотермс",
+    "carriers": "Перевозчики",
+    "customDelivery": "Особые условия доставки",
+    "nearestPort": "Ближайший порт или терминал",
+    "deliveryAvailable": "Доставка доступна",
+    "deliveryAvailableLabel": "Возможна доставка",
+    "leadTimeDays": "Срок поставки (дни)",
+    "daysValue": "{count} дн.",
+    "priceFrom": "Цена от",
+    "priceCurrency": "Валюта",
+    "priceNegotiable": "Цена обсуждается",
+    "priceDependsOnVolume": "Цена зависит от объёма",
+    "farmFoundedYear": "Год основания",
+    "farmSize": "Площадь хозяйства",
+    "hectaresValue": "{count} га",
+    "ownershipType": "Форма владения",
+    "exportMarkets": "Экспортные рынки",
+    "videos": {
+      "title": "Videos",
+      "publicTitle": "Product videos",
+      "subtitle": "Add up to {max} MP4, WebM, or QuickTime videos (max 80 MB each).",
+      "upload": "Upload video",
+      "empty": "No videos yet.",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this video?",
+      "uploadError": "Could not upload the video.",
+      "deleteError": "Could not delete the video.",
+      "maxReached": "Maximum of {max} videos reached."
+    },
+    "certificates": {
+      "title": "Certificates",
+      "subtitle": "Upload PDF or image certificates for buyer trust and moderator review.",
+      "type": "Certificate type",
+      "titleField": "Certificate title",
+      "titlePlaceholder": "e.g. GLOBALG.A.P. 2026",
+      "file": "PDF or image",
+      "fileRequired": "Choose a certificate file.",
+      "upload": "Upload certificate",
+      "empty": "No certificates yet.",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this certificate?",
+      "uploadError": "Could not upload the certificate.",
+      "deleteError": "Could not delete the certificate.",
+      "status": {
+        "pending": "Pending review",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
+    }
   },
   "rfq": {
     "requestTitle": "Запросить цену",
@@ -764,6 +905,39 @@
       "10": "окт",
       "11": "ноя",
       "12": "дек"
+    }
+  },
+  "quality": {
+    "title": "Качество карточки товара",
+    "scoreLabel": "Качество карточки: {score} из 100",
+    "tiers": {
+      "low": "Начальный уровень",
+      "fair": "Неплохо",
+      "good": "Хорошо",
+      "excellent": "Отлично"
+    },
+    "checklist": {
+      "basics": "Заполните основные данные товара",
+      "photos": "Добавьте 5 полезных фото разных типов",
+      "video": "Добавьте видео товара или хозяйства",
+      "seasonality": "Укажите сезон или даты сбора",
+      "volume": "Заполните запасы и объёмы производства",
+      "attributes": "Заполните характеристики",
+      "packaging": "Укажите типы и вес упаковки",
+      "certificates": "Загрузите сертификат",
+      "logistics": "Опишите доставку и логистику",
+      "pricing": "Укажите цену или условия расчёта",
+      "farmStory": "Расскажите о хозяйстве"
+    },
+    "nextHint": "Следующие шаги",
+    "complete": "Карточка готова произвести хорошее впечатление на покупателей.",
+    "certificates": {
+      "globalGap": "GLOBALG.A.P.",
+      "organic": "Organic",
+      "haccp": "HACCP",
+      "iso": "ISO",
+      "grasp": "GRASP",
+      "other": "Certificate"
     }
   }
 }

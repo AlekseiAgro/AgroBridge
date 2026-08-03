@@ -5,6 +5,7 @@ export * from './moderation';
 export * from './verification';
 export * from './admin';
 export * from './harvest';
+export * from './quality';
 export * from './catalog';
 export * from './rfq';
 export * from './purchase-request';

@@ -1,16 +1,22 @@
 'use client';
 
-import {
-  GEORGIA_REGIONS,
-  isGeorgiaRegion,
-  type FarmDetail,
-} from '@agrobridge/shared';
+import { GEORGIA_REGIONS, isGeorgiaRegion, type FarmDetail } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 
 type Props = {
-  initial?: Pick<FarmDetail, 'name' | 'region' | 'description'> | null;
+  initial?: Pick<
+    FarmDetail,
+    | 'name'
+    | 'region'
+    | 'description'
+    | 'foundedYear'
+    | 'farmSizeHectares'
+    | 'ownershipType'
+    | 'exportMarkets'
+    | 'history'
+  > | null;
   mode: 'create' | 'edit';
 };
 
@@ -27,10 +33,24 @@ export function FarmForm({ initial, mode }: Props) {
     setError(null);
 
     const form = new FormData(event.currentTarget);
+    const foundedYearRaw = String(form.get('foundedYear') ?? '').trim();
+    const farmSizeRaw = String(form.get('farmSizeHectares') ?? '').trim();
     const payload = {
       name: String(form.get('name') ?? ''),
       region: String(form.get('region') ?? ''),
       description: String(form.get('description') ?? ''),
+      foundedYear: foundedYearRaw ? Number(foundedYearRaw) : undefined,
+      farmSizeHectares: farmSizeRaw ? Number(farmSizeRaw) : undefined,
+      ownershipType: String(form.get('ownershipType') ?? '').trim(),
+      exportMarkets: [
+        ...new Set(
+          String(form.get('exportMarkets') ?? '')
+            .split(',')
+            .map((market) => market.trim())
+            .filter(Boolean),
+        ),
+      ],
+      history: String(form.get('history') ?? '').trim(),
     };
 
     try {
@@ -76,6 +96,45 @@ export function FarmForm({ initial, mode }: Props) {
       <label className="field">
         <span>{t('description')}</span>
         <textarea name="description" rows={5} defaultValue={initial?.description ?? ''} />
+      </label>
+      <div className="field-row">
+        <label className="field">
+          <span>{t('foundedYear')}</span>
+          <input
+            name="foundedYear"
+            type="number"
+            min={1800}
+            max={2200}
+            step={1}
+            defaultValue={initial?.foundedYear ?? ''}
+          />
+        </label>
+        <label className="field">
+          <span>{t('farmSizeHectares')}</span>
+          <input
+            name="farmSizeHectares"
+            type="number"
+            min={0}
+            step="0.01"
+            defaultValue={initial?.farmSizeHectares ?? ''}
+          />
+        </label>
+      </div>
+      <label className="field">
+        <span>{t('ownershipType')}</span>
+        <input name="ownershipType" defaultValue={initial?.ownershipType ?? ''} />
+      </label>
+      <label className="field">
+        <span>{t('exportMarkets')}</span>
+        <input
+          name="exportMarkets"
+          defaultValue={(initial?.exportMarkets ?? []).join(', ')}
+          placeholder={t('exportMarketsPlaceholder')}
+        />
+      </label>
+      <label className="field">
+        <span>{t('history')}</span>
+        <textarea name="history" rows={6} defaultValue={initial?.history ?? ''} />
       </label>
       {error ? <p className="form-error">{error}</p> : null}
       <button className="button button--primary" type="submit" disabled={pending}>

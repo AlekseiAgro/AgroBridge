@@ -1,6 +1,7 @@
 import type { FarmDetail, RatingSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { CertificateBadges } from '@/components/CertificateBadges';
 import { RatingStars } from '@/components/RatingStars';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -73,25 +74,33 @@ export default async function FarmDetailPage({ params }: Props) {
                 product.unit ? tp(`units.${product.unit as 'kg'}`) : null,
               );
               return (
-              <li key={product.id} className="product-list__item product-list__item--with-media">
-                {image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={image.url} alt="" className="product-list__media" />
-                ) : (
-                  <div className="product-list__media product-list__media--empty" aria-hidden />
-                )}
-                <div>
-                  <Link href={`/products/${product.id}`} className="product-list__title">
-                    {product.title}
-                  </Link>
-                  <p className="product-list__meta">
-                    {product.category
-                      ? tc(`categories.${product.category as 'fruits'}`)
-                      : tc('allCategories')}
-                    {quantity ? ` · ${quantity}` : ''}
-                  </p>
-                </div>
-              </li>
+                <li key={product.id} className="product-list__item product-list__item--with-media">
+                  {image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={image.url} alt="" className="product-list__media" />
+                  ) : (
+                    <div className="product-list__media product-list__media--empty" aria-hidden />
+                  )}
+                  <div>
+                    <Link href={`/products/${product.id}`} className="product-list__title">
+                      {product.title}
+                    </Link>
+                    <p className="product-list__meta">
+                      {product.category
+                        ? tc(`categories.${product.category as 'fruits'}`)
+                        : tc('allCategories')}
+                      {quantity ? ` · ${quantity}` : ''}
+                    </p>
+                    <div className="product-quality-summary">
+                      <span
+                        className={`quality-score-chip quality-score-chip--${product.qualityScore.tier}`}
+                      >
+                        {product.qualityScore.score}/100
+                      </span>
+                      <CertificateBadges badges={product.certificateBadges} />
+                    </div>
+                  </div>
+                </li>
               );
             })}
           </ul>

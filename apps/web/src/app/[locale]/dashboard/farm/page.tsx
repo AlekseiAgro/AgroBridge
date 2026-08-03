@@ -54,7 +54,16 @@ export default async function DashboardFarmPage({ params }: Props) {
         mode={farm ? 'edit' : 'create'}
         initial={
           farm
-            ? { name: farm.name, region: farm.region, description: farm.description }
+            ? {
+                name: farm.name,
+                region: farm.region,
+                description: farm.description,
+                foundedYear: farm.foundedYear,
+                farmSizeHectares: farm.farmSizeHectares,
+                ownershipType: farm.ownershipType,
+                exportMarkets: farm.exportMarkets,
+                history: farm.history,
+              }
             : null
         }
       />
