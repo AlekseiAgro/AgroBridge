@@ -152,10 +152,10 @@ export function ProductForm({ mode, initial }: Props) {
         approvedCertificateCount:
           initial?.certificates.filter((certificate) => certificate.reviewStatus === 'approved')
             .length ?? 0,
-        incoterms,
-        carriers,
-        nearestPort,
-        leadTimeDays: numberOrNull(leadTimeDays),
+        incoterms: deliveryAvailable ? incoterms : [],
+        carriers: deliveryAvailable ? carriers : [],
+        nearestPort: deliveryAvailable ? nearestPort : '',
+        leadTimeDays: deliveryAvailable ? numberOrNull(leadTimeDays) : null,
         priceFrom: numberOrNull(priceFrom),
         priceNegotiable,
         priceDependsOnVolume,
@@ -169,6 +169,7 @@ export function ProductForm({ mode, initial }: Props) {
       category,
       country,
       currentStock,
+      deliveryAvailable,
       description,
       incoterms,
       initial,
@@ -260,12 +261,12 @@ export function ProductForm({ mode, initial }: Props) {
       packagingTypes,
       packagingWeights,
       palletSize: palletSize.trim(),
-      incoterms,
-      carriers,
-      customDelivery: customDelivery.trim(),
-      nearestPort: nearestPort.trim(),
       deliveryAvailable,
-      leadTimeDays: parsedLeadTimeDays,
+      incoterms: deliveryAvailable ? incoterms : [],
+      carriers: deliveryAvailable ? carriers : [],
+      customDelivery: deliveryAvailable ? customDelivery.trim() : '',
+      nearestPort: deliveryAvailable ? nearestPort.trim() : '',
+      leadTimeDays: deliveryAvailable ? parsedLeadTimeDays : null,
       priceFrom: parsedPriceFrom,
       priceCurrency,
       priceNegotiable,
@@ -546,62 +547,6 @@ export function ProductForm({ mode, initial }: Props) {
 
       <fieldset className="field-group product-form__section">
         <legend className="section-title">{t('sections.logistics')}</legend>
-        <div className="field">
-          <span>{t('incoterms')}</span>
-          <div className="chip-grid">
-            {INCOTERMS.map((value) => (
-              <label key={value} className="check-row check-row--chip">
-                <input
-                  type="checkbox"
-                  checked={incoterms.includes(value)}
-                  onChange={() => setIncoterms((current) => toggleValue(current, value))}
-                />
-                <span>{value}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="field">
-          <span>{t('carriers')}</span>
-          <div className="chip-grid">
-            {CARRIERS.map((value) => (
-              <label key={value} className="check-row check-row--chip">
-                <input
-                  type="checkbox"
-                  checked={carriers.includes(value)}
-                  onChange={() => setCarriers((current) => toggleValue(current, value))}
-                />
-                <span>{value === 'other' ? t('other') : value}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="field-row">
-          <label className="field">
-            <span>{t('nearestPort')}</span>
-            <input value={nearestPort} onChange={(event) => setNearestPort(event.target.value)} />
-          </label>
-          <label className="field">
-            <span>{t('leadTimeDays')}</span>
-            <input
-              name="leadTimeDays"
-              type="number"
-              min={0}
-              max={365}
-              step={1}
-              value={leadTimeDays}
-              onChange={(event) => setLeadTimeDays(event.target.value)}
-            />
-          </label>
-        </div>
-        <label className="field">
-          <span>{t('customDelivery')}</span>
-          <textarea
-            rows={3}
-            value={customDelivery}
-            onChange={(event) => setCustomDelivery(event.target.value)}
-          />
-        </label>
         <label className="role-option">
           <input
             type="checkbox"
@@ -610,6 +555,69 @@ export function ProductForm({ mode, initial }: Props) {
           />
           <span>{t('deliveryAvailable')}</span>
         </label>
+        {deliveryAvailable ? (
+          <>
+            <div className="field">
+              <span>{t('incoterms')}</span>
+              <div className="chip-grid">
+                {INCOTERMS.map((value) => (
+                  <label key={value} className="check-row check-row--chip">
+                    <input
+                      type="checkbox"
+                      checked={incoterms.includes(value)}
+                      onChange={() => setIncoterms((current) => toggleValue(current, value))}
+                    />
+                    <span>{value}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="field">
+              <span>{t('carriers')}</span>
+              <div className="chip-grid">
+                {CARRIERS.map((value) => (
+                  <label key={value} className="check-row check-row--chip">
+                    <input
+                      type="checkbox"
+                      checked={carriers.includes(value)}
+                      onChange={() => setCarriers((current) => toggleValue(current, value))}
+                    />
+                    <span>{value === 'other' ? t('other') : value}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="field-row">
+              <label className="field">
+                <span>{t('nearestPort')}</span>
+                <input
+                  value={nearestPort}
+                  onChange={(event) => setNearestPort(event.target.value)}
+                />
+              </label>
+              <label className="field">
+                <span>{t('leadTimeDays')}</span>
+                <input
+                  name="leadTimeDays"
+                  type="number"
+                  min={0}
+                  max={365}
+                  step={1}
+                  value={leadTimeDays}
+                  onChange={(event) => setLeadTimeDays(event.target.value)}
+                />
+              </label>
+            </div>
+            <label className="field">
+              <span>{t('customDelivery')}</span>
+              <textarea
+                rows={3}
+                value={customDelivery}
+                onChange={(event) => setCustomDelivery(event.target.value)}
+              />
+            </label>
+          </>
+        ) : null}
       </fieldset>
 
       <fieldset className="field-group harvest-form product-form__section">
