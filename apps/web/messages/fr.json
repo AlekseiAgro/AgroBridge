@@ -325,11 +325,12 @@
         "other": "Other"
       }
     },
-    "minQuantity": "Quantité minimale",
-    "maxQuantity": "Quantité maximale",
+    "minQuantity": "Quantité minimale à la vente",
+    "maxQuantity": "Quantité maximale à la vente",
     "minQuantityPlaceholder": "ex. 50",
     "maxQuantityPlaceholder": "ex. 1000",
     "quantityHint": "Plage vendable dans l’unité sélectionnée ({unit}).",
+    "volumeUnitHint": "Reprise des données de base. Modifiez l’unité là-bas si besoin.",
     "unitSuggested": "suggérée",
     "quantityInvalid": "Saisissez des quantités valides supérieures à zéro.",
     "quantityRangeInvalid": "La quantité minimale ne peut pas dépasser la maximale.",

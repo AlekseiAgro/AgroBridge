@@ -325,11 +325,12 @@
         "other": "Other"
       }
     },
-    "minQuantity": "Mindestmenge",
-    "maxQuantity": "Höchstmenge",
+    "minQuantity": "Mindestmenge zum Verkauf",
+    "maxQuantity": "Höchstmenge zum Verkauf",
     "minQuantityPlaceholder": "z. B. 50",
     "maxQuantityPlaceholder": "z. B. 1000",
     "quantityHint": "Verkaufsspanne in der gewählten Einheit ({unit}).",
+    "volumeUnitHint": "Wird aus den Basisdaten übernommen. Einheit dort ändern.",
     "unitSuggested": "empfohlen",
     "quantityInvalid": "Bitte gültige Mengen größer als null eingeben.",
     "quantityRangeInvalid": "Die Mindestmenge darf nicht größer als die Höchstmenge sein.",
