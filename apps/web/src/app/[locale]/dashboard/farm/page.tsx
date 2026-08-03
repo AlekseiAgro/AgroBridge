@@ -1,5 +1,6 @@
 import type { FarmDetail } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { FarmDocumentsManager } from '@/components/FarmDocumentsManager';
 import { FarmForm } from '@/components/FarmForm';
 import { Link, redirect } from '@/i18n/navigation';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -33,6 +34,11 @@ export default async function DashboardFarmPage({ params }: Props) {
     <main className="cabinet-page cabinet-page--narrow">
         <h1>{farm ? t('editTitle') : t('createTitle')}</h1>
         <p className="page__subtitle">{t('dashboardSubtitle')}</p>
+        {farm ? (
+          <p className="product-list__meta">
+            {t('verification.label')}: {t(`verification.${farm.verificationStatus}`)}
+          </p>
+        ) : null}
         <FarmForm
           mode={farm ? 'edit' : 'create'}
           initial={
@@ -42,11 +48,14 @@ export default async function DashboardFarmPage({ params }: Props) {
           }
         />
         {farm ? (
-          <p className="auth-card__footer">
-            <Link href={`/farms/${farm.id}`}>{t('viewPublic')}</Link>
-            {' · '}
-            <Link href="/dashboard/products">{t('manageProducts')}</Link>
-          </p>
+          <>
+            <FarmDocumentsManager initialDocuments={farm.documents ?? []} />
+            <p className="auth-card__footer">
+              <Link href={`/farms/${farm.id}`}>{t('viewPublic')}</Link>
+              {' · '}
+              <Link href="/dashboard/products">{t('manageProducts')}</Link>
+            </p>
+          </>
         ) : null}
     </main>
   );

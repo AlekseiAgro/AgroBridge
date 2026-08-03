@@ -140,7 +140,32 @@
     "productsHeading": "Veröffentlichte Produkte",
     "noProducts": "Dieser Betrieb hat noch keine veröffentlichten Produkte.",
     "regionUnknown": "Region nicht angegeben",
-    "regionPlaceholder": "Region auswählen"
+    "regionPlaceholder": "Region auswählen",
+    "verification": {
+      "label": "Verifizierung",
+      "pending": "Prüfung ausstehend",
+      "approved": "Verifizierter Produzent",
+      "rejected": "Verifizierung abgelehnt"
+    },
+    "documents": {
+      "title": "Verifizierungsdokumente",
+      "subtitle": "Laden Sie Registrierungsunterlagen hoch (bis {max}).",
+      "empty": "Noch keine Dokumente.",
+      "titleField": "Dokumenttitel",
+      "titlePlaceholder": "Registrierungsnachweis",
+      "upload": "Dokument hochladen",
+      "open": "Öffnen",
+      "delete": "Löschen",
+      "deleteConfirm": "Dokument löschen?",
+      "note": "Notiz",
+      "uploadError": "Dokument konnte nicht hochgeladen werden.",
+      "deleteError": "Dokument konnte nicht gelöscht werden.",
+      "status": {
+        "pending": "In Prüfung",
+        "approved": "Genehmigt",
+        "rejected": "Abgelehnt"
+      }
+    }
   },
   "product": {
     "dashboardTitle": "Meine Produkte",
@@ -273,8 +298,8 @@
     }
   },
   "admin": {
-    "title": "Moderation",
-    "subtitle": "Prüfen Sie Angebote, bevor sie im Katalog erscheinen.",
+    "title": "Admin-Bereich",
+    "subtitle": "Produzenten bestätigen, Dokumente prüfen, Anzeigen moderieren und die Plattformaktivität überwachen.",
     "empty": "Keine Produkte in dieser Warteschlange.",
     "note": "Hinweis",
     "rejectNote": "Ablehnungsgrund",
@@ -283,18 +308,109 @@
     "reject": "Ablehnen",
     "pleaseWait": "Bitte warten…",
     "genericError": "Aktion fehlgeschlagen.",
+    "sectionsLabel": "Admin-Bereiche",
+    "sections": {
+      "overview": "Übersicht",
+      "products": "Anzeigen",
+      "farms": "Produzenten",
+      "users": "Nutzer",
+      "requests": "Anfragen",
+      "deals": "Deals",
+      "categories": "Kategorien"
+    },
     "stats": {
       "pending": "Offen",
       "approved": "Genehmigt",
       "rejected": "Abgelehnt",
       "farms": "Betriebe",
-      "users": "Nutzer"
+      "users": "Nutzer",
+      "farmsPending": "Offene Farmen",
+      "documentsPending": "Offene Dokumente",
+      "registrations7d": "Registrierungen (7T)",
+      "registrations30d": "Registrierungen (30T)",
+      "dealsCompleted": "Abgeschlossene Deals",
+      "dealsInProgress": "Laufende Deals",
+      "usersBlocked": "Gesperrte Nutzer",
+      "requestsOpen": "Offene Anfragen"
+    },
+    "overview": {
+      "registrationsTitle": "Registrierungen (14 Tage)"
     },
     "tabs": {
       "pending": "Offen",
       "approved": "Genehmigt",
       "rejected": "Abgelehnt",
       "draft": "Entwürfe"
+    },
+    "farms": {
+      "empty": "Keine Farmen in dieser Warteschlange.",
+      "products": "{count} Produkte",
+      "documents": "Dokumente",
+      "noDocuments": "Noch keine Dokumente hochgeladen.",
+      "approve": "Produzent bestätigen",
+      "reject": "Verifizierung ablehnen",
+      "approveDoc": "Dokument genehmigen",
+      "rejectDoc": "Dokument ablehnen",
+      "tabs": {
+        "pending": "Offen",
+        "approved": "Verifiziert",
+        "rejected": "Abgelehnt"
+      },
+      "status": {
+        "pending": "Prüfung ausstehend",
+        "approved": "Verifiziert",
+        "rejected": "Abgelehnt"
+      },
+      "docStatus": {
+        "pending": "Offen",
+        "approved": "Genehmigt",
+        "rejected": "Abgelehnt"
+      }
+    },
+    "users": {
+      "empty": "Keine Nutzer gefunden.",
+      "block": "Sperren",
+      "unblock": "Entsperren",
+      "blockReason": "Sperrgrund",
+      "blockReasonPlaceholder": "Regelverstoß, Spam…",
+      "blockedBadge": "Gesperrt",
+      "registered": "Beigetreten {date}",
+      "deals": "{count} Deals",
+      "roles": {
+        "farmer": "Verkäufer",
+        "buyer": "Käufer",
+        "admin": "Admin"
+      }
+    },
+    "requests": {
+      "empty": "Keine Anfragen in dieser Warteschlange.",
+      "cancel": "Vom Board entfernen",
+      "cancelNote": "Moderationsnotiz",
+      "cancelNotePlaceholder": "Spam, verbotene Ware…",
+      "quotes": "{count} Angebote",
+      "tabs": {
+        "open": "Offen",
+        "fulfilled": "Erfüllt",
+        "closed": "Geschlossen",
+        "cancelled": "Storniert"
+      }
+    },
+    "deals": {
+      "empty": "Noch keine Deals.",
+      "buyer": "Käufer",
+      "seller": "Verkäufer",
+      "kinds": {
+        "rfq": "Produkt-RFQ",
+        "purchase_request": "Kaufanfrage"
+      }
+    },
+    "categories": {
+      "hint": "Deaktivieren Sie eine Kategorie, um sie im öffentlichen Katalog auszublenden.",
+      "enabled": "Aktiv",
+      "disabled": "Deaktiviert",
+      "enable": "Aktivieren",
+      "disable": "Deaktivieren",
+      "sortOrder": "Reihenfolge"
     }
   },
   "regions": {

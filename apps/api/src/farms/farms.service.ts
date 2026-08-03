@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -6,14 +7,26 @@ import {
 } from '@nestjs/common';
 import type {
   FarmDetail,
+  FarmDocument,
   FarmSummary,
   ModerationStatus,
   RatingSummary,
+  VerificationStatus,
 } from '@agrobridge/shared';
-import { ModerationStatus as PrismaModerationStatus } from '@prisma/client';
+import {
+  FARM_DOCUMENT_MAX_BYTES,
+  FARM_DOCUMENT_MAX_COUNT,
+  isFarmDocumentMimeType,
+} from '@agrobridge/shared';
+import {
+  DocumentReviewStatus,
+  ModerationStatus as PrismaModerationStatus,
+  VerificationStatus as PrismaVerificationStatus,
+} from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
+import { StorageService } from '../storage/storage.service';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
 
@@ -27,6 +40,7 @@ export class FarmsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ratings: RatingsService,
+    private readonly storage: StorageService,
   ) {}
 
   async list(): Promise<FarmSummary[]> {
@@ -89,6 +103,8 @@ export class FarmsService {
     return {
       ...this.toSummary(farm),
       createdAt: farm.createdAt.toISOString(),
+      verificationNote: null,
+      verifiedAt: farm.verifiedAt?.toISOString() ?? null,
       products: farm.products.map((product) =>
         this.toProductSummary(product, farm, sellerRating),
       ),
@@ -102,6 +118,7 @@ export class FarmsService {
       where: { ownerId: user.id },
       include: {
         owner: { select: { id: true, displayName: true } },
+        documents: { orderBy: { createdAt: 'desc' } },
         products: {
           orderBy: { updatedAt: 'desc' },
           select: {
@@ -139,6 +156,9 @@ export class FarmsService {
     return {
       ...this.toSummary(farm),
       createdAt: farm.createdAt.toISOString(),
+      verificationNote: farm.verificationNote,
+      verifiedAt: farm.verifiedAt?.toISOString() ?? null,
+      documents: farm.documents.map((doc) => this.toDocument(doc)),
       products: farm.products.map((product) =>
         this.toProductSummary(product, farm, sellerRating),
       ),
@@ -153,16 +173,17 @@ export class FarmsService {
       throw new ConflictException('Farm profile already exists');
     }
 
-    const farm = await this.prisma.farm.create({
+    await this.prisma.farm.create({
       data: {
         ownerId: user.id,
         name: dto.name.trim(),
         region: dto.region?.trim() || null,
         description: dto.description?.trim() || null,
+        verificationStatus: PrismaVerificationStatus.pending,
       },
     });
 
-    return this.getById(farm.id);
+    return (await this.getMine(user))!;
   }
 
   async updateMine(user: AuthenticatedUser, dto: UpdateFarmDto): Promise<FarmDetail> {
@@ -183,7 +204,86 @@ export class FarmsService {
       },
     });
 
-    return this.getById(farm.id);
+    return (await this.getMine(user))!;
+  }
+
+  async listMyDocuments(user: AuthenticatedUser): Promise<FarmDocument[]> {
+    const farm = await this.requireOwnFarm(user);
+    const docs = await this.prisma.farmDocument.findMany({
+      where: { farmId: farm.id },
+      orderBy: { createdAt: 'desc' },
+    });
+    return docs.map((doc) => this.toDocument(doc));
+  }
+
+  async uploadDocument(
+    user: AuthenticatedUser,
+    title: string,
+    file?: Express.Multer.File,
+  ): Promise<FarmDocument> {
+    const farm = await this.requireOwnFarm(user);
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+    if (!isFarmDocumentMimeType(file.mimetype)) {
+      throw new BadRequestException('Unsupported document type');
+    }
+    if (file.size > FARM_DOCUMENT_MAX_BYTES) {
+      throw new BadRequestException('Document is too large');
+    }
+
+    const count = await this.prisma.farmDocument.count({ where: { farmId: farm.id } });
+    if (count >= FARM_DOCUMENT_MAX_COUNT) {
+      throw new BadRequestException('Document limit reached');
+    }
+
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      throw new BadRequestException('Document title is required');
+    }
+
+    const stored = await this.storage.upload({
+      buffer: file.buffer,
+      mimeType: file.mimetype,
+      originalName: file.originalname,
+      folder: `farms/${farm.id}/documents`,
+    });
+
+    const doc = await this.prisma.farmDocument.create({
+      data: {
+        farmId: farm.id,
+        title: trimmedTitle,
+        fileName: file.originalname,
+        url: stored.url,
+        key: stored.key,
+        mimeType: file.mimetype,
+        reviewStatus: DocumentReviewStatus.pending,
+      },
+    });
+
+    return this.toDocument(doc);
+  }
+
+  async removeDocument(user: AuthenticatedUser, documentId: string): Promise<void> {
+    const farm = await this.requireOwnFarm(user);
+    const doc = await this.prisma.farmDocument.findFirst({
+      where: { id: documentId, farmId: farm.id },
+    });
+    if (!doc) {
+      throw new NotFoundException('Document not found');
+    }
+
+    await this.storage.delete(doc.key);
+    await this.prisma.farmDocument.delete({ where: { id: doc.id } });
+  }
+
+  private async requireOwnFarm(user: AuthenticatedUser) {
+    this.assertFarmer(user);
+    const farm = await this.prisma.farm.findUnique({ where: { ownerId: user.id } });
+    if (!farm) {
+      throw new NotFoundException('Farm profile not found');
+    }
+    return farm;
   }
 
   private assertFarmer(user: AuthenticatedUser) {
@@ -192,11 +292,38 @@ export class FarmsService {
     }
   }
 
+  private toDocument(doc: {
+    id: string;
+    farmId: string;
+    title: string;
+    fileName: string;
+    url: string;
+    mimeType: string;
+    reviewStatus: DocumentReviewStatus;
+    reviewNote: string | null;
+    reviewedAt: Date | null;
+    createdAt: Date;
+  }): FarmDocument {
+    return {
+      id: doc.id,
+      farmId: doc.farmId,
+      title: doc.title,
+      fileName: doc.fileName,
+      url: doc.url,
+      mimeType: doc.mimeType,
+      reviewStatus: doc.reviewStatus,
+      reviewNote: doc.reviewNote,
+      reviewedAt: doc.reviewedAt?.toISOString() ?? null,
+      createdAt: doc.createdAt.toISOString(),
+    };
+  }
+
   private toSummary(farm: {
     id: string;
     name: string;
     region: string | null;
     description: string | null;
+    verificationStatus: PrismaVerificationStatus;
     owner: { id: string; displayName: string | null };
     _count: { products: number };
   }): FarmSummary {
@@ -205,6 +332,7 @@ export class FarmsService {
       name: farm.name,
       region: farm.region,
       description: farm.description,
+      verificationStatus: farm.verificationStatus as VerificationStatus,
       owner: farm.owner,
       productCount: farm._count.products,
     };

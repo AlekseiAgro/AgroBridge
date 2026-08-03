@@ -15,10 +15,17 @@ describe('FarmsService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new FarmsService(prisma as never, {
-      summaryForUser: jest.fn().mockResolvedValue({ average: null, count: 0 }),
-      summariesForUsers: jest.fn().mockResolvedValue(new Map()),
-    } as never);
+    service = new FarmsService(
+      prisma as never,
+      {
+        summaryForUser: jest.fn().mockResolvedValue({ average: null, count: 0 }),
+        summariesForUsers: jest.fn().mockResolvedValue(new Map()),
+      } as never,
+      {
+        upload: jest.fn(),
+        delete: jest.fn(),
+      } as never,
+    );
   });
 
   it('rejects non-farmers', async () => {

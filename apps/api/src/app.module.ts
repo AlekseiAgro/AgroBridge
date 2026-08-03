@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { CabinetModule } from './cabinet/cabinet.module';
+import { CategoriesModule } from './categories/categories.module';
 import { ChatModule } from './chat/chat.module';
 import { FarmsModule } from './farms/farms.module';
 import { HealthModule } from './health/health.module';
@@ -29,6 +30,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     FarmsModule,
     ProductsModule,
+    CategoriesModule,
     RfqsModule,
     PurchaseRequestsModule,
     TranslationModule,

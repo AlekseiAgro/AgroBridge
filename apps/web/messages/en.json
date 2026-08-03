@@ -140,7 +140,32 @@
     "productsHeading": "Published products",
     "noProducts": "This farm has no published products yet.",
     "regionUnknown": "Region not specified",
-    "regionPlaceholder": "Select a region"
+    "regionPlaceholder": "Select a region",
+    "verification": {
+      "label": "Verification",
+      "pending": "Pending review",
+      "approved": "Verified producer",
+      "rejected": "Verification rejected"
+    },
+    "documents": {
+      "title": "Verification documents",
+      "subtitle": "Upload business or farm registration papers (up to {max}).",
+      "empty": "No documents uploaded yet.",
+      "titleField": "Document title",
+      "titlePlaceholder": "Farm registration certificate",
+      "upload": "Upload document",
+      "open": "Open",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this document?",
+      "note": "Note",
+      "uploadError": "Could not upload the document.",
+      "deleteError": "Could not delete the document.",
+      "status": {
+        "pending": "Pending review",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
+    }
   },
   "product": {
     "dashboardTitle": "My products",
@@ -273,8 +298,8 @@
     }
   },
   "admin": {
-    "title": "Moderation desk",
-    "subtitle": "Review product listings before they appear in the public catalog.",
+    "title": "Admin panel",
+    "subtitle": "Verify producers, review documents, moderate listings, and monitor platform activity.",
     "empty": "No products in this queue.",
     "note": "Note",
     "rejectNote": "Rejection note",
@@ -283,18 +308,109 @@
     "reject": "Reject",
     "pleaseWait": "Please wait…",
     "genericError": "Action failed. Please try again.",
+    "sectionsLabel": "Admin sections",
+    "sections": {
+      "overview": "Overview",
+      "products": "Listings",
+      "farms": "Producers",
+      "users": "Users",
+      "requests": "Requests",
+      "deals": "Deals",
+      "categories": "Categories"
+    },
     "stats": {
       "pending": "Pending",
       "approved": "Approved",
       "rejected": "Rejected",
       "farms": "Farms",
-      "users": "Users"
+      "users": "Users",
+      "farmsPending": "Farms pending",
+      "documentsPending": "Docs pending",
+      "registrations7d": "Registrations (7d)",
+      "registrations30d": "Registrations (30d)",
+      "dealsCompleted": "Completed deals",
+      "dealsInProgress": "Deals in progress",
+      "usersBlocked": "Blocked users",
+      "requestsOpen": "Open requests"
+    },
+    "overview": {
+      "registrationsTitle": "Registrations (last 14 days)"
     },
     "tabs": {
       "pending": "Pending",
       "approved": "Approved",
       "rejected": "Rejected",
       "draft": "Drafts"
+    },
+    "farms": {
+      "empty": "No farms in this queue.",
+      "products": "{count} products",
+      "documents": "Documents",
+      "noDocuments": "No documents uploaded yet.",
+      "approve": "Confirm producer",
+      "reject": "Reject verification",
+      "approveDoc": "Approve document",
+      "rejectDoc": "Reject document",
+      "tabs": {
+        "pending": "Pending",
+        "approved": "Verified",
+        "rejected": "Rejected"
+      },
+      "status": {
+        "pending": "Pending verification",
+        "approved": "Verified",
+        "rejected": "Rejected"
+      },
+      "docStatus": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
+    },
+    "users": {
+      "empty": "No users found.",
+      "block": "Block user",
+      "unblock": "Unblock user",
+      "blockReason": "Block reason",
+      "blockReasonPlaceholder": "Policy violation, spam…",
+      "blockedBadge": "Blocked",
+      "registered": "Joined {date}",
+      "deals": "{count} deals",
+      "roles": {
+        "farmer": "Seller",
+        "buyer": "Buyer",
+        "admin": "Admin"
+      }
+    },
+    "requests": {
+      "empty": "No purchase requests in this queue.",
+      "cancel": "Remove from board",
+      "cancelNote": "Moderation note",
+      "cancelNotePlaceholder": "Spam, prohibited goods…",
+      "quotes": "{count} quotes",
+      "tabs": {
+        "open": "Open",
+        "fulfilled": "Fulfilled",
+        "closed": "Closed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "deals": {
+      "empty": "No deals yet.",
+      "buyer": "Buyer",
+      "seller": "Seller",
+      "kinds": {
+        "rfq": "Product RFQ",
+        "purchase_request": "Purchase request"
+      }
+    },
+    "categories": {
+      "hint": "Disable a category to hide it from the public catalog filters and listings.",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable",
+      "disable": "Disable",
+      "sortOrder": "Sort order"
     }
   },
   "regions": {

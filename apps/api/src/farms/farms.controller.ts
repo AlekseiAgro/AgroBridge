@@ -1,4 +1,18 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import { FARM_DOCUMENT_MAX_BYTES } from '@agrobridge/shared';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -22,6 +36,40 @@ export class FarmsController {
   @Roles('farmer', 'admin')
   getMine(@CurrentUser() user: AuthenticatedUser) {
     return this.farmsService.getMine(user);
+  }
+
+  @Get('me/documents')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('farmer', 'admin')
+  listMyDocuments(@CurrentUser() user: AuthenticatedUser) {
+    return this.farmsService.listMyDocuments(user);
+  }
+
+  @Post('me/documents')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('farmer', 'admin')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: FARM_DOCUMENT_MAX_BYTES },
+    }),
+  )
+  uploadDocument(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body('title') title: string,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.farmsService.uploadDocument(user, title ?? '', file);
+  }
+
+  @Delete('me/documents/:documentId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('farmer', 'admin')
+  removeDocument(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('documentId') documentId: string,
+  ) {
+    return this.farmsService.removeDocument(user, documentId);
   }
 
   @Get(':id')

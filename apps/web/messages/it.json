@@ -140,7 +140,32 @@
     "productsHeading": "Prodotti pubblicati",
     "noProducts": "Questa azienda non ha ancora prodotti pubblicati.",
     "regionUnknown": "Regione non specificata",
-    "regionPlaceholder": "Seleziona una regione"
+    "regionPlaceholder": "Seleziona una regione",
+    "verification": {
+      "label": "Verifica",
+      "pending": "In revisione",
+      "approved": "Produttore verificato",
+      "rejected": "Verifica rifiutata"
+    },
+    "documents": {
+      "title": "Documenti di verifica",
+      "subtitle": "Carica i documenti di registrazione (fino a {max}).",
+      "empty": "Nessun documento.",
+      "titleField": "Titolo del documento",
+      "titlePlaceholder": "Certificato di registrazione",
+      "upload": "Carica documento",
+      "open": "Apri",
+      "delete": "Elimina",
+      "deleteConfirm": "Eliminare questo documento?",
+      "note": "Nota",
+      "uploadError": "Caricamento non riuscito.",
+      "deleteError": "Eliminazione non riuscita.",
+      "status": {
+        "pending": "In revisione",
+        "approved": "Approvato",
+        "rejected": "Rifiutato"
+      }
+    }
   },
   "product": {
     "dashboardTitle": "I miei prodotti",
@@ -273,8 +298,8 @@
     }
   },
   "admin": {
-    "title": "Moderazione",
-    "subtitle": "Controlla gli annunci prima della pubblicazione nel catalogo.",
+    "title": "Pannello di amministrazione",
+    "subtitle": "Verifica i produttori, controlla i documenti, modera gli annunci e monitora l’attività.",
     "empty": "Nessun prodotto in questa coda.",
     "note": "Nota",
     "rejectNote": "Motivo del rifiuto",
@@ -283,18 +308,109 @@
     "reject": "Rifiuta",
     "pleaseWait": "Attendere…",
     "genericError": "Azione non riuscita.",
+    "sectionsLabel": "Sezioni admin",
+    "sections": {
+      "overview": "Panoramica",
+      "products": "Annunci",
+      "farms": "Produttori",
+      "users": "Utenti",
+      "requests": "Richieste",
+      "deals": "Affari",
+      "categories": "Categorie"
+    },
     "stats": {
       "pending": "In attesa",
       "approved": "Approvati",
       "rejected": "Rifiutati",
       "farms": "Aziende",
-      "users": "Utenti"
+      "users": "Utenti",
+      "farmsPending": "Fattorie in attesa",
+      "documentsPending": "Documenti in attesa",
+      "registrations7d": "Registrazioni (7g)",
+      "registrations30d": "Registrazioni (30g)",
+      "dealsCompleted": "Affari completati",
+      "dealsInProgress": "Affari in corso",
+      "usersBlocked": "Utenti bloccati",
+      "requestsOpen": "Richieste aperte"
+    },
+    "overview": {
+      "registrationsTitle": "Registrazioni (14 giorni)"
     },
     "tabs": {
       "pending": "In attesa",
       "approved": "Approvati",
       "rejected": "Rifiutati",
       "draft": "Bozze"
+    },
+    "farms": {
+      "empty": "Nessuna fattoria in questa coda.",
+      "products": "{count} prodotti",
+      "documents": "Documenti",
+      "noDocuments": "Nessun documento caricato.",
+      "approve": "Conferma produttore",
+      "reject": "Rifiuta verifica",
+      "approveDoc": "Approva documento",
+      "rejectDoc": "Rifiuta documento",
+      "tabs": {
+        "pending": "In attesa",
+        "approved": "Verificati",
+        "rejected": "Rifiutati"
+      },
+      "status": {
+        "pending": "Verifica in attesa",
+        "approved": "Verificato",
+        "rejected": "Rifiutato"
+      },
+      "docStatus": {
+        "pending": "In attesa",
+        "approved": "Approvato",
+        "rejected": "Rifiutato"
+      }
+    },
+    "users": {
+      "empty": "Nessun utente.",
+      "block": "Blocca",
+      "unblock": "Sblocca",
+      "blockReason": "Motivo del blocco",
+      "blockReasonPlaceholder": "Violazione, spam…",
+      "blockedBadge": "Bloccato",
+      "registered": "Iscritto il {date}",
+      "deals": "{count} affari",
+      "roles": {
+        "farmer": "Venditore",
+        "buyer": "Acquirente",
+        "admin": "Admin"
+      }
+    },
+    "requests": {
+      "empty": "Nessuna richiesta in questa coda.",
+      "cancel": "Rimuovi dalla bacheca",
+      "cancelNote": "Nota di moderazione",
+      "cancelNotePlaceholder": "Spam, beni vietati…",
+      "quotes": "{count} offerte",
+      "tabs": {
+        "open": "Aperte",
+        "fulfilled": "Evaso",
+        "closed": "Chiuse",
+        "cancelled": "Annullate"
+      }
+    },
+    "deals": {
+      "empty": "Nessun affare ancora.",
+      "buyer": "Acquirente",
+      "seller": "Venditore",
+      "kinds": {
+        "rfq": "RFQ prodotto",
+        "purchase_request": "Richiesta d’acquisto"
+      }
+    },
+    "categories": {
+      "hint": "Disattiva una categoria per nasconderla dal catalogo pubblico.",
+      "enabled": "Attiva",
+      "disabled": "Disattivata",
+      "enable": "Attiva",
+      "disable": "Disattiva",
+      "sortOrder": "Ordine"
     }
   },
   "regions": {

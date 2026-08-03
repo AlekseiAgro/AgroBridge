@@ -65,40 +65,105 @@ enum PurchaseQuoteStatus {
   withdrawn
 }
 
-model User {
-  id           String     @id @default(cuid())
-  email        String     @unique
-  passwordHash String?
-  role         UserRole
-  locale       LocaleCode @default(en)
-  displayName  String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+enum VerificationStatus {
+  pending
+  approved
+  rejected
+}
 
-  farm                  Farm?
-  conversationsAsFarmer Conversation[] @relation("FarmerConversations")
-  conversationsAsBuyer  Conversation[] @relation("BuyerConversations")
-  messages              Message[]
-  rfqsAsBuyer           Rfq[]              @relation("BuyerRfqs")
-  purchaseRequests      PurchaseRequest[]  @relation("BuyerPurchaseRequests")
-  moderatedProducts     Product[]          @relation("ProductModerator")
-  ratingsGiven          Rating[]           @relation("RatingsGiven")
-  ratingsReceived       Rating[]           @relation("RatingsReceived")
+enum DocumentReviewStatus {
+  pending
+  approved
+  rejected
+}
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  passwordHash  String?
+  role          UserRole
+  locale        LocaleCode @default(en)
+  displayName   String?
+  blockedAt     DateTime?
+  blockedReason String?
+  blockedById   String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  blockedBy                    User?             @relation("BlockedByAdmin", fields: [blockedById], references: [id], onDelete: SetNull)
+  blockedUsers                 User[]            @relation("BlockedByAdmin")
+  farm                         Farm?
+  conversationsAsFarmer        Conversation[]    @relation("FarmerConversations")
+  conversationsAsBuyer         Conversation[]    @relation("BuyerConversations")
+  messages                     Message[]
+  rfqsAsBuyer                  Rfq[]             @relation("BuyerRfqs")
+  purchaseRequests             PurchaseRequest[] @relation("BuyerPurchaseRequests")
+  moderatedProducts            Product[]         @relation("ProductModerator")
+  moderatedPurchaseRequests    PurchaseRequest[] @relation("PurchaseRequestModerator")
+  verifiedFarms                Farm[]            @relation("FarmVerifier")
+  reviewedDocuments            FarmDocument[]    @relation("DocumentReviewer")
+  ratingsGiven                 Rating[]          @relation("RatingsGiven")
+  ratingsReceived              Rating[]          @relation("RatingsReceived")
+
+  @@index([blockedAt])
+  @@index([createdAt])
 }
 
 model Farm {
-  id          String   @id @default(cuid())
-  ownerId     String   @unique
-  name        String
-  region      String?
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                 String             @id @default(cuid())
+  ownerId            String             @unique
+  name               String
+  region             String?
+  description        String?
+  verificationStatus VerificationStatus @default(pending)
+  verificationNote   String?
+  verifiedAt         DateTime?
+  verifiedById       String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   owner           User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  verifiedBy      User?           @relation("FarmVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
   products        Product[]
   rfqs            Rfq[]
   purchaseQuotes  PurchaseQuote[]
+  documents       FarmDocument[]
+
+  @@index([verificationStatus])
+}
+
+model FarmDocument {
+  id           String               @id @default(cuid())
+  farmId       String
+  title        String
+  fileName     String
+  url          String
+  key          String
+  mimeType     String
+  reviewStatus DocumentReviewStatus @default(pending)
+  reviewNote   String?
+  reviewedAt   DateTime?
+  reviewedById String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  farm       Farm  @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("DocumentReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([farmId, reviewStatus])
+  @@index([reviewStatus, createdAt])
+  @@map("farm_documents")
+}
+
+model CategoryConfig {
+  id        String   @id
+  enabled   Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled, sortOrder])
+  @@map("category_configs")
 }
 
 model Product {
@@ -217,11 +282,15 @@ model PurchaseRequest {
   destinationCountry  String?
   message             String?
   status              PurchaseRequestStatus @default(open)
+  moderationNote      String?
+  moderatedAt         DateTime?
+  moderatedById       String?
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 
-  buyer  User            @relation("BuyerPurchaseRequests", fields: [buyerId], references: [id], onDelete: Cascade)
-  quotes PurchaseQuote[]
+  buyer       User            @relation("BuyerPurchaseRequests", fields: [buyerId], references: [id], onDelete: Cascade)
+  moderatedBy User?           @relation("PurchaseRequestModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  quotes      PurchaseQuote[]
 
   @@index([status, createdAt])
   @@index([buyerId, createdAt])

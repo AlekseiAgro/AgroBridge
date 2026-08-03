@@ -140,7 +140,32 @@
     "productsHeading": "Productos publicados",
     "noProducts": "Esta granja aún no tiene productos publicados.",
     "regionUnknown": "Región no indicada",
-    "regionPlaceholder": "Selecciona una región"
+    "regionPlaceholder": "Selecciona una región",
+    "verification": {
+      "label": "Verificación",
+      "pending": "En revisión",
+      "approved": "Productor verificado",
+      "rejected": "Verificación rechazada"
+    },
+    "documents": {
+      "title": "Documentos de verificación",
+      "subtitle": "Sube documentos de registro (hasta {max}).",
+      "empty": "Aún no hay documentos.",
+      "titleField": "Título del documento",
+      "titlePlaceholder": "Certificado de registro",
+      "upload": "Subir documento",
+      "open": "Abrir",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Eliminar este documento?",
+      "note": "Nota",
+      "uploadError": "No se pudo subir el documento.",
+      "deleteError": "No se pudo eliminar el documento.",
+      "status": {
+        "pending": "En revisión",
+        "approved": "Aprobado",
+        "rejected": "Rechazado"
+      }
+    }
   },
   "product": {
     "dashboardTitle": "Mis productos",
@@ -273,8 +298,8 @@
     }
   },
   "admin": {
-    "title": "Moderación",
-    "subtitle": "Revisa los anuncios antes de publicarlos en el catálogo.",
+    "title": "Panel de administración",
+    "subtitle": "Verifica productores, revisa documentos, modera anuncios y controla la actividad.",
     "empty": "No hay productos en esta cola.",
     "note": "Nota",
     "rejectNote": "Motivo del rechazo",
@@ -283,18 +308,109 @@
     "reject": "Rechazar",
     "pleaseWait": "Espera…",
     "genericError": "La acción falló.",
+    "sectionsLabel": "Secciones de admin",
+    "sections": {
+      "overview": "Resumen",
+      "products": "Anuncios",
+      "farms": "Productores",
+      "users": "Usuarios",
+      "requests": "Solicitudes",
+      "deals": "Tratos",
+      "categories": "Categorías"
+    },
     "stats": {
       "pending": "Pendientes",
       "approved": "Aprobados",
       "rejected": "Rechazados",
       "farms": "Granjas",
-      "users": "Usuarios"
+      "users": "Usuarios",
+      "farmsPending": "Granjas pendientes",
+      "documentsPending": "Docs pendientes",
+      "registrations7d": "Registros (7d)",
+      "registrations30d": "Registros (30d)",
+      "dealsCompleted": "Tratos completados",
+      "dealsInProgress": "Tratos en curso",
+      "usersBlocked": "Usuarios bloqueados",
+      "requestsOpen": "Solicitudes abiertas"
+    },
+    "overview": {
+      "registrationsTitle": "Registros (14 días)"
     },
     "tabs": {
       "pending": "Pendientes",
       "approved": "Aprobados",
       "rejected": "Rechazados",
       "draft": "Borradores"
+    },
+    "farms": {
+      "empty": "No hay granjas en esta cola.",
+      "products": "{count} productos",
+      "documents": "Documentos",
+      "noDocuments": "Aún no hay documentos.",
+      "approve": "Confirmar productor",
+      "reject": "Rechazar verificación",
+      "approveDoc": "Aprobar documento",
+      "rejectDoc": "Rechazar documento",
+      "tabs": {
+        "pending": "Pendientes",
+        "approved": "Verificados",
+        "rejected": "Rechazados"
+      },
+      "status": {
+        "pending": "Verificación pendiente",
+        "approved": "Verificado",
+        "rejected": "Rechazado"
+      },
+      "docStatus": {
+        "pending": "Pendiente",
+        "approved": "Aprobado",
+        "rejected": "Rechazado"
+      }
+    },
+    "users": {
+      "empty": "No se encontraron usuarios.",
+      "block": "Bloquear",
+      "unblock": "Desbloquear",
+      "blockReason": "Motivo del bloqueo",
+      "blockReasonPlaceholder": "Infracción, spam…",
+      "blockedBadge": "Bloqueado",
+      "registered": "Alta {date}",
+      "deals": "{count} tratos",
+      "roles": {
+        "farmer": "Vendedor",
+        "buyer": "Comprador",
+        "admin": "Admin"
+      }
+    },
+    "requests": {
+      "empty": "No hay solicitudes en esta cola.",
+      "cancel": "Quitar del tablero",
+      "cancelNote": "Nota de moderación",
+      "cancelNotePlaceholder": "Spam, productos prohibidos…",
+      "quotes": "{count} ofertas",
+      "tabs": {
+        "open": "Abiertas",
+        "fulfilled": "Cumplidas",
+        "closed": "Cerradas",
+        "cancelled": "Canceladas"
+      }
+    },
+    "deals": {
+      "empty": "Aún no hay tratos.",
+      "buyer": "Comprador",
+      "seller": "Vendedor",
+      "kinds": {
+        "rfq": "RFQ de producto",
+        "purchase_request": "Solicitud de compra"
+      }
+    },
+    "categories": {
+      "hint": "Desactiva una categoría para ocultarla del catálogo público.",
+      "enabled": "Activada",
+      "disabled": "Desactivada",
+      "enable": "Activar",
+      "disable": "Desactivar",
+      "sortOrder": "Orden"
     }
   },
   "regions": {

@@ -32,11 +32,19 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         role: true,
         locale: true,
         displayName: true,
+        blockedAt: true,
+        blockedReason: true,
       },
     });
 
     if (!user) {
       throw new UnauthorizedException('User not found');
+    }
+
+    if (user.blockedAt) {
+      throw new UnauthorizedException(
+        user.blockedReason?.trim() || 'This account has been blocked',
+      );
     }
 
     return {

@@ -19,6 +19,7 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
 import { StorageService } from '../storage/storage.service';
+import { CategoriesService } from '../categories/categories.service';
 import { CatalogQueryDto } from './dto/catalog-query.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -71,36 +72,53 @@ export class ProductsService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
     private readonly ratings: RatingsService,
+    private readonly categories: CategoriesService,
   ) {}
 
   async catalog(query: CatalogQueryDto): Promise<ProductSummary[]> {
     const q = query.q?.trim() || undefined;
     const category = query.category?.trim() || undefined;
     const region = query.region?.trim() || undefined;
+    const enabledCategories = await this.categories.enabledIds();
 
-    // Search works with q alone; category/region are optional refinements.
+    const and: Prisma.ProductWhereInput[] = [];
+
+    if (category) {
+      if (enabledCategories && !enabledCategories.includes(category)) {
+        and.push({ id: '__none__' });
+      } else {
+        and.push({ category });
+      }
+    } else if (enabledCategories) {
+      and.push({
+        OR: [{ category: { in: enabledCategories } }, { category: null }],
+      });
+    }
+
+    if (region) {
+      and.push({
+        farm: {
+          region: {
+            equals: region,
+            mode: 'insensitive',
+          },
+        },
+      });
+    }
+
+    if (q) {
+      and.push({
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
+          { farm: { name: { contains: q, mode: 'insensitive' } } },
+        ],
+      });
+    }
+
     const where: Prisma.ProductWhereInput = {
       ...publicProductWhere,
-      ...(category ? { category } : {}),
-      ...(region
-        ? {
-            farm: {
-              region: {
-                equals: region,
-                mode: 'insensitive',
-              },
-            },
-          }
-        : {}),
-      ...(q
-        ? {
-            OR: [
-              { title: { contains: q, mode: 'insensitive' } },
-              { description: { contains: q, mode: 'insensitive' } },
-              { farm: { name: { contains: q, mode: 'insensitive' } } },
-            ],
-          }
-        : {}),
+      ...(and.length > 0 ? { AND: and } : {}),
     };
 
     const products = await this.prisma.product.findMany({

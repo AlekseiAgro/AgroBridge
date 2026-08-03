@@ -81,7 +81,11 @@ export class RfqsService {
       },
     });
 
-    if (!product || !product.isPublished) {
+    if (
+      !product ||
+      !product.isPublished ||
+      product.moderationStatus !== 'approved'
+    ) {
       throw new NotFoundException('Product not found');
     }
 

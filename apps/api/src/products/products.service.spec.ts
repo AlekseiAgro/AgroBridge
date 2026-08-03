@@ -39,7 +39,12 @@ describe('ProductsService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new ProductsService(prisma as never, storage as never, ratings as never);
+    service = new ProductsService(
+      prisma as never,
+      storage as never,
+      ratings as never,
+      { enabledIds: jest.fn().mockResolvedValue(null) } as never,
+    );
   });
 
   it('requires a farm before creating products', async () => {

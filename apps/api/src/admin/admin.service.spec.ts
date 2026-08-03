@@ -10,7 +10,10 @@ describe('AdminService', () => {
       update: jest.fn(),
     },
     farm: { count: jest.fn() },
-    user: { count: jest.fn() },
+    user: { count: jest.fn(), findMany: jest.fn() },
+    rfq: { count: jest.fn() },
+    purchaseRequest: { count: jest.fn() },
+    farmDocument: { count: jest.fn() },
   };
 
   const notifications = {
@@ -38,16 +41,28 @@ describe('AdminService', () => {
       .mockResolvedValueOnce(2)
       .mockResolvedValueOnce(5)
       .mockResolvedValueOnce(1);
-    prisma.farm.count.mockResolvedValue(3);
-    prisma.user.count.mockResolvedValue(10);
+    prisma.farm.count
+      .mockResolvedValueOnce(3)
+      .mockResolvedValueOnce(1)
+      .mockResolvedValueOnce(2);
+    prisma.user.count
+      .mockResolvedValueOnce(10)
+      .mockResolvedValueOnce(4)
+      .mockResolvedValueOnce(5)
+      .mockResolvedValueOnce(1)
+      .mockResolvedValueOnce(2)
+      .mockResolvedValueOnce(6);
+    prisma.rfq.count.mockResolvedValueOnce(7).mockResolvedValueOnce(3);
+    prisma.purchaseRequest.count.mockResolvedValueOnce(4).mockResolvedValueOnce(2);
+    prisma.farmDocument.count.mockResolvedValueOnce(1);
+    prisma.user.findMany.mockResolvedValue([]);
 
-    await expect(service.stats()).resolves.toEqual({
-      productsPending: 2,
-      productsApproved: 5,
-      productsRejected: 1,
-      farmsTotal: 3,
-      usersTotal: 10,
-    });
+    const stats = await service.stats();
+    expect(stats.productsPending).toBe(2);
+    expect(stats.productsApproved).toBe(5);
+    expect(stats.farmsTotal).toBe(3);
+    expect(stats.dealsCompleted).toBe(7);
+    expect(stats.registrationsByDay).toHaveLength(14);
   });
 
   it('rejects approve for missing product', async () => {

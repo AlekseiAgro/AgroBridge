@@ -71,6 +71,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    if (user.blockedAt) {
+      throw new UnauthorizedException(
+        user.blockedReason?.trim() || 'This account has been blocked',
+      );
+    }
+
     return this.issueToken(this.toAuthenticatedUser(user));
   }
 
@@ -78,6 +84,11 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new UnauthorizedException('User not found');
+    }
+    if (user.blockedAt) {
+      throw new UnauthorizedException(
+        user.blockedReason?.trim() || 'This account has been blocked',
+      );
     }
     return this.toPublicUser(this.toAuthenticatedUser(user));
   }

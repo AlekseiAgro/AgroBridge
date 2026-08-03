@@ -2,6 +2,8 @@ export * from './locales';
 export * from './roles';
 export * from './auth';
 export * from './moderation';
+export * from './verification';
+export * from './admin';
 export * from './catalog';
 export * from './rfq';
 export * from './purchase-request';

@@ -77,11 +77,14 @@ export function isGeorgiaRegion(value: string): value is GeorgiaRegion {
   return (GEORGIA_REGIONS as readonly string[]).includes(value);
 }
 
+import type { FarmDocument, VerificationStatus } from './verification';
+
 export type FarmSummary = {
   id: string;
   name: string;
   region: string | null;
   description: string | null;
+  verificationStatus: VerificationStatus;
   owner: {
     id: string;
     displayName: string | null;
@@ -91,6 +94,9 @@ export type FarmSummary = {
 
 export type FarmDetail = FarmSummary & {
   createdAt: string;
+  verificationNote: string | null;
+  verifiedAt: string | null;
+  documents?: FarmDocument[];
   products: ProductSummary[];
 };
 

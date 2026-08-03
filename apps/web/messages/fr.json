@@ -140,7 +140,32 @@
     "productsHeading": "Produits publiés",
     "noProducts": "Cette ferme n’a pas encore de produits publiés.",
     "regionUnknown": "Région non indiquée",
-    "regionPlaceholder": "Choisir une région"
+    "regionPlaceholder": "Choisir une région",
+    "verification": {
+      "label": "Vérification",
+      "pending": "En attente",
+      "approved": "Producteur vérifié",
+      "rejected": "Vérification refusée"
+    },
+    "documents": {
+      "title": "Documents de vérification",
+      "subtitle": "Téléversez les documents d’enregistrement (jusqu’à {max}).",
+      "empty": "Aucun document.",
+      "titleField": "Titre du document",
+      "titlePlaceholder": "Certificat d’enregistrement",
+      "upload": "Téléverser",
+      "open": "Ouvrir",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer ce document ?",
+      "note": "Note",
+      "uploadError": "Échec du téléversement.",
+      "deleteError": "Échec de la suppression.",
+      "status": {
+        "pending": "En revue",
+        "approved": "Approuvé",
+        "rejected": "Refusé"
+      }
+    }
   },
   "product": {
     "dashboardTitle": "Mes produits",
@@ -273,8 +298,8 @@
     }
   },
   "admin": {
-    "title": "Modération",
-    "subtitle": "Vérifiez les annonces avant publication dans le catalogue.",
+    "title": "Panneau d’administration",
+    "subtitle": "Validez les producteurs, vérifiez les documents, modérez les annonces et suivez l’activité.",
     "empty": "Aucun produit dans cette file.",
     "note": "Note",
     "rejectNote": "Motif du refus",
@@ -283,18 +308,109 @@
     "reject": "Refuser",
     "pleaseWait": "Veuillez patienter…",
     "genericError": "Action impossible.",
+    "sectionsLabel": "Sections admin",
+    "sections": {
+      "overview": "Aperçu",
+      "products": "Annonces",
+      "farms": "Producteurs",
+      "users": "Utilisateurs",
+      "requests": "Demandes",
+      "deals": "Affaires",
+      "categories": "Catégories"
+    },
     "stats": {
       "pending": "En attente",
       "approved": "Approuvés",
       "rejected": "Refusés",
       "farms": "Fermes",
-      "users": "Utilisateurs"
+      "users": "Utilisateurs",
+      "farmsPending": "Fermes en attente",
+      "documentsPending": "Docs en attente",
+      "registrations7d": "Inscriptions (7j)",
+      "registrations30d": "Inscriptions (30j)",
+      "dealsCompleted": "Affaires terminées",
+      "dealsInProgress": "Affaires en cours",
+      "usersBlocked": "Utilisateurs bloqués",
+      "requestsOpen": "Demandes ouvertes"
+    },
+    "overview": {
+      "registrationsTitle": "Inscriptions (14 jours)"
     },
     "tabs": {
       "pending": "En attente",
       "approved": "Approuvés",
       "rejected": "Refusés",
       "draft": "Brouillons"
+    },
+    "farms": {
+      "empty": "Aucune ferme dans cette file.",
+      "products": "{count} produits",
+      "documents": "Documents",
+      "noDocuments": "Aucun document téléversé.",
+      "approve": "Confirmer le producteur",
+      "reject": "Refuser la vérification",
+      "approveDoc": "Approuver le document",
+      "rejectDoc": "Refuser le document",
+      "tabs": {
+        "pending": "En attente",
+        "approved": "Vérifiés",
+        "rejected": "Refusés"
+      },
+      "status": {
+        "pending": "Vérification en attente",
+        "approved": "Vérifié",
+        "rejected": "Refusé"
+      },
+      "docStatus": {
+        "pending": "En attente",
+        "approved": "Approuvé",
+        "rejected": "Refusé"
+      }
+    },
+    "users": {
+      "empty": "Aucun utilisateur.",
+      "block": "Bloquer",
+      "unblock": "Débloquer",
+      "blockReason": "Motif du blocage",
+      "blockReasonPlaceholder": "Violation, spam…",
+      "blockedBadge": "Bloqué",
+      "registered": "Inscrit le {date}",
+      "deals": "{count} affaires",
+      "roles": {
+        "farmer": "Vendeur",
+        "buyer": "Acheteur",
+        "admin": "Admin"
+      }
+    },
+    "requests": {
+      "empty": "Aucune demande dans cette file.",
+      "cancel": "Retirer du tableau",
+      "cancelNote": "Note de modération",
+      "cancelNotePlaceholder": "Spam, produits interdits…",
+      "quotes": "{count} offres",
+      "tabs": {
+        "open": "Ouvertes",
+        "fulfilled": "Satisfaites",
+        "closed": "Fermées",
+        "cancelled": "Annulées"
+      }
+    },
+    "deals": {
+      "empty": "Aucune affaire pour le moment.",
+      "buyer": "Acheteur",
+      "seller": "Vendeur",
+      "kinds": {
+        "rfq": "RFQ produit",
+        "purchase_request": "Demande d’achat"
+      }
+    },
+    "categories": {
+      "hint": "Désactivez une catégorie pour la masquer du catalogue public.",
+      "enabled": "Activée",
+      "disabled": "Désactivée",
+      "enable": "Activer",
+      "disable": "Désactiver",
+      "sortOrder": "Ordre"
     }
   },
   "regions": {

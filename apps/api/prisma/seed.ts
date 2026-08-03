@@ -1,5 +1,6 @@
 import {
   CurrencyCode,
+  DocumentReviewStatus,
   LocaleCode,
   ModerationStatus,
   PrismaClient,
@@ -7,10 +8,12 @@ import {
   PurchaseRequestStatus,
   RfqStatus,
   UserRole,
+  VerificationStatus,
 } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { copyFile, mkdir, rm } from 'fs/promises';
+import { copyFile, mkdir, rm, writeFile } from 'fs/promises';
 import { dirname, join, resolve } from 'path';
+import { PRODUCT_CATEGORIES } from '@agrobridge/shared';
 
 const prisma = new PrismaClient();
 
@@ -702,15 +705,58 @@ async function seedFarmer(
       name: farmer.farmName,
       region: farmer.region,
       description: farmer.farmDescription,
+      verificationStatus:
+        index === 0 && category === 'fruits'
+          ? VerificationStatus.pending
+          : VerificationStatus.approved,
+      verificationNote: null,
+      verifiedAt:
+        index === 0 && category === 'fruits' ? null : new Date(),
+      verifiedById: index === 0 && category === 'fruits' ? null : adminId,
     },
     create: {
       ownerId: user.id,
       name: farmer.farmName,
       region: farmer.region,
       description: farmer.farmDescription,
+      verificationStatus:
+        index === 0 && category === 'fruits'
+          ? VerificationStatus.pending
+          : VerificationStatus.approved,
+      verifiedAt:
+        index === 0 && category === 'fruits' ? null : new Date(),
+      verifiedById: index === 0 && category === 'fruits' ? null : adminId,
     },
   });
 
+  // Demo verification document for the pending farm (and a few approved ones).
+  if (index === 0) {
+    await prisma.farmDocument.deleteMany({ where: { farmId: farm.id } });
+    const key = `farms/${farm.id}/documents/demo-registration.txt`;
+    const absolute = join(UPLOADS_DIR, key);
+    await mkdir(dirname(absolute), { recursive: true });
+    await writeFile(
+      absolute,
+      `Demo registration document for ${farmer.farmName}\n`,
+      'utf8',
+    );
+    await prisma.farmDocument.create({
+      data: {
+        farmId: farm.id,
+        title: 'Farm registration certificate',
+        fileName: 'registration.txt',
+        url: `/api/uploads/${key}`,
+        key,
+        mimeType: 'application/pdf',
+        reviewStatus:
+          category === 'fruits'
+            ? DocumentReviewStatus.pending
+            : DocumentReviewStatus.approved,
+        reviewedAt: category === 'fruits' ? null : new Date(),
+        reviewedById: category === 'fruits' ? null : adminId,
+      },
+    });
+  }
   // Keep seed idempotent: replace demo products for this farm.
   const existing = await prisma.product.findMany({
     where: { farmId: farm.id },
@@ -814,6 +860,14 @@ async function main() {
     passwordHash: adminPasswordHash,
   });
   console.log(`Admin ready: ${admin.email}`);
+
+  for (const [index, id] of PRODUCT_CATEGORIES.entries()) {
+    await prisma.categoryConfig.upsert({
+      where: { id },
+      create: { id, enabled: true, sortOrder: index },
+      update: {},
+    });
+  }
 
   for (const buyer of BUYERS) {
     await upsertUser({
