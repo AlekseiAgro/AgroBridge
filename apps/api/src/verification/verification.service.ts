@@ -121,9 +121,13 @@ export class VerificationService {
         code,
         channel: 'email',
       });
-    } catch {
+    } catch (error) {
+      const detail =
+        error instanceof Error
+          ? error.message.replace(/\s+/g, ' ').trim().slice(0, 180)
+          : 'unknown mail error';
       throw new ServiceUnavailableException(
-        'Could not send the verification email. Please try again in a moment.',
+        `Could not send the verification email (${detail}). Check SMTP settings and try again.`,
       );
     }
     return { sent: true, destination: dbUser.email };
