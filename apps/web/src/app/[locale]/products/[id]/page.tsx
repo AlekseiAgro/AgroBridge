@@ -218,20 +218,6 @@ export default async function ProductDetailPage({ params }: Props) {
             </dl>
           </section>
 
-          {Object.keys(product.attributes).length ? (
-            <section className="product-detail-section">
-              <h2 className="section-title">{t('sections.attributes')}</h2>
-              <dl className="account-details product-detail-grid">
-                {Object.entries(product.attributes).map(([key, value]) => (
-                  <div key={key}>
-                    <dt>{t(`attributes.${key}`)}</dt>
-                    <dd>{typeof value === 'boolean' ? t(value ? 'yes' : 'no') : String(value)}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-          ) : null}
-
           {product.packagingTypes.length ||
           product.packagingWeights.length ||
           product.palletSize ? (
