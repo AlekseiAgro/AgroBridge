@@ -443,7 +443,7 @@
       "publicTitle": "Product videos",
       "subtitle": "Ajoutez jusqu’à {max} vidéo du produit (MP4, WebM ou MOV, 80 Mo max).",
       "upload": "Téléverser une vidéo",
-      "empty": "No videos yet.",
+      "empty": "Aucune vidéo pour le moment.",
       "delete": "Delete",
       "deleteConfirm": "Delete this video?",
       "uploadError": "Could not upload the video.",
