@@ -460,7 +460,8 @@ body {
   .role-hub__intro,
   .role-hub__path,
   .role-hub__aside,
-  .role-hub__path-image {
+  .role-hub__path-image,
+  .catalog-cta {
     animation: none !important;
     transition: none !important;
   }
@@ -1329,6 +1330,49 @@ body {
   flex-shrink: 0;
 }
 
+.catalog-cta {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 40;
+  width: min(22.5rem, calc(100vw - 2rem));
+  animation: rise-in 650ms ease both;
+}
+
+.catalog-cta__inner {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(31, 74, 40, 0.18);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 14px 36px rgba(29, 42, 31, 0.14);
+  backdrop-filter: blur(12px);
+}
+
+.catalog-cta__lead {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  color: var(--foreground);
+}
+
+.catalog-cta__text {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.catalog-cta__button {
+  width: 100%;
+}
+
+.page:has(.catalog-cta) .page__main {
+  padding-bottom: 7.5rem;
+}
+
 .empty-state,
 .detail-text {
   line-height: 1.55;
@@ -1541,6 +1585,36 @@ body {
 
   .role-hub__aside-links .button {
     width: 100%;
+  }
+
+  .catalog-cta {
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 0.65rem 0.85rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, transparent, rgba(238, 243, 234, 0.92) 28%);
+  }
+
+  .catalog-cta__inner {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.75rem 0.9rem;
+    padding: 0.85rem 0.95rem;
+    border-radius: 0.9rem;
+  }
+
+  .catalog-cta__text {
+    display: none;
+  }
+
+  .catalog-cta__button {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .page:has(.catalog-cta) .page__main {
+    padding-bottom: 6.5rem;
   }
 
   .site-footer__inner {

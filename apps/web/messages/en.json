@@ -119,7 +119,10 @@
     "filtersHint": "Search works across all categories and regions. Category and region are optional filters.",
     "searchPlaceholder": "Product name or description",
     "availableQuantity": "Available quantity",
-    "sellerRating": "Seller rating"
+    "sellerRating": "Seller rating",
+    "floatingLead": "Looking for something else?",
+    "floatingText": "Tell farms what you need and receive quotes.",
+    "floatingCta": "Post a purchase request"
   },
   "farm": {
     "createTitle": "Create farm profile",

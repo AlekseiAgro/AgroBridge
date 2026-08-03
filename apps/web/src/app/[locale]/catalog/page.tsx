@@ -1,6 +1,7 @@
 import type { ProductSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CatalogFilters } from '@/components/CatalogFilters';
+import { CatalogPurchaseCta } from '@/components/CatalogPurchaseCta';
 import { RatingStars } from '@/components/RatingStars';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -112,6 +113,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
           </ul>
         )}
       </main>
+      <CatalogPurchaseCta />
       <SiteFooter />
     </div>
   );

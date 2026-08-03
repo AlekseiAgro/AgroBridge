@@ -119,7 +119,10 @@
     "filtersHint": "La búsqueda abarca todas las categorías y regiones. Categoría y región son filtros opcionales.",
     "searchPlaceholder": "Nombre o descripción del producto",
     "availableQuantity": "Cantidad disponible",
-    "sellerRating": "Valoración del vendedor"
+    "sellerRating": "Valoración del vendedor",
+    "floatingLead": "¿No encuentra lo que necesita?",
+    "floatingText": "Describa su necesidad y reciba ofertas de las fincas.",
+    "floatingCta": "Publicar solicitud de compra"
   },
   "farm": {
     "createTitle": "Crear perfil de granja",
