@@ -11,9 +11,16 @@ import {
   VerificationStatus,
 } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { copyFile, mkdir, rm, writeFile } from 'fs/promises';
+import { mkdir, rm, writeFile } from 'fs/promises';
 import { dirname, join, resolve } from 'path';
 import { PRODUCT_CATEGORIES } from '@agrobridge/shared';
+import {
+  buildEnrichedProductData,
+  enrichDemoFarm,
+  harvestPlanFor,
+  richnessFor,
+  seedProductMedia,
+} from './seed-enrichment';
 
 const prisma = new PrismaClient();
 
@@ -683,43 +690,15 @@ async function upsertUser(params: {
   });
 }
 
-async function seedProductImage(params: {
-  productId: string;
-  category: string;
-  adminId: string;
-}) {
-  const source = join(CATEGORY_IMAGE_DIR, `${params.category}.jpg`);
-  const key = `products/${params.productId}/seed-${params.category}.jpg`;
-  const absolute = join(UPLOADS_DIR, key);
-
-  await mkdir(dirname(absolute), { recursive: true });
-  try {
-    await copyFile(source, absolute);
-  } catch {
-    // Category image missing — product still usable without a photo.
-    return;
-  }
-
-  await prisma.productImage.deleteMany({ where: { productId: params.productId } });
-  await prisma.productImage.create({
-    data: {
-      productId: params.productId,
-      // Same-origin path; Next.js proxies /api/uploads/* to the API.
-      url: `/api/uploads/${key}`,
-      key,
-      sortOrder: 0,
-      isPrimary: true,
-    },
-  });
-}
-
 async function seedFarmer(
   category: string,
   farmer: DemoFarmer,
   passwordHash: string,
   adminId: string,
   index: number,
+  globalIndex: number,
 ) {
+  const richness = richnessFor(globalIndex);
   const sellerType = index % 2 === 0 ? 'privateFarmer' : 'company';
   const pendingReview = index === 0 && category === 'fruits';
   const verifiedNow = new Date();
@@ -731,12 +710,12 @@ async function seedFarmer(
     passwordHash,
     sellerType,
     emailVerifiedAt: verifiedNow,
-    phone: `+99555500${String(1000 + index).slice(-4)}`,
+    phone: `+99555500${String(1000 + globalIndex).slice(-4)}`,
     phoneVerifiedAt: verifiedNow,
   });
 
   const companyRegistrationNumber =
-    sellerType === 'company' ? `40${String(1000000 + index).slice(-7)}` : null;
+    sellerType === 'company' ? `40${String(1000000 + globalIndex).slice(-7)}` : null;
 
   const farm = await prisma.farm.upsert({
     where: { ownerId: user.id },
@@ -781,6 +760,15 @@ async function seedFarmer(
     },
   });
 
+  await enrichDemoFarm({
+    prisma,
+    farmId: farm.id,
+    richness,
+    globalIndex,
+    region: farmer.region,
+    farmName: farmer.farmName,
+  });
+
   // Demo verification document for the pending private farmer (and a few approved ones).
   if (index === 0) {
     await prisma.farmDocument.deleteMany({ where: { farmId: farm.id } });
@@ -812,11 +800,22 @@ async function seedFarmer(
   // Keep seed idempotent: replace demo products for this farm.
   const existing = await prisma.product.findMany({
     where: { farmId: farm.id },
-    select: { id: true, images: { select: { key: true } } },
+    select: {
+      id: true,
+      images: { select: { key: true } },
+      videos: { select: { key: true } },
+      certificates: { select: { key: true } },
+    },
   });
   for (const product of existing) {
     for (const image of product.images) {
       await rm(join(UPLOADS_DIR, image.key), { force: true }).catch(() => undefined);
+    }
+    for (const video of product.videos) {
+      await rm(join(UPLOADS_DIR, video.key), { force: true }).catch(() => undefined);
+    }
+    for (const certificate of product.certificates) {
+      await rm(join(UPLOADS_DIR, certificate.key), { force: true }).catch(() => undefined);
     }
   }
   await prisma.product.deleteMany({ where: { farmId: farm.id } });
@@ -827,11 +826,12 @@ async function seedFarmer(
           minQuantity: farmer.product.minQuantity,
           maxQuantity: farmer.product.maxQuantity,
         }
-      : quantityForUnit(farmer.product.unit, index);
+      : quantityForUnit(farmer.product.unit, globalIndex);
 
+  const harvestPlan = harvestPlanFor(richness, globalIndex);
   const now = new Date();
-  const startOffset = farmer.product.harvestOffsetDays?.start ?? (index % 3 === 0 ? -10 : 14);
-  const endOffset = farmer.product.harvestOffsetDays?.end ?? startOffset + 25;
+  const startOffset = farmer.product.harvestOffsetDays?.start ?? harvestPlan.startOffset;
+  const endOffset = farmer.product.harvestOffsetDays?.end ?? harvestPlan.endOffset;
   const harvestStartAt = new Date(now);
   harvestStartAt.setUTCDate(harvestStartAt.getUTCDate() + startOffset);
   const harvestEndAt = new Date(now);
@@ -841,10 +841,15 @@ async function seedFarmer(
     farmer.product.seasonMonths ??
     Array.from({ length: 3 }, (_, i) => ((harvestStartAt.getUTCMonth() + i) % 12) + 1);
 
-  const harvestStatuses = ['growing', 'available', 'limited', 'soldOut'] as const;
-  const harvestStatus =
-    farmer.product.harvestStatus ??
-    harvestStatuses[index % harvestStatuses.length];
+  const harvestStatus = farmer.product.harvestStatus ?? harvestPlan.status;
+  const enriched = await buildEnrichedProductData({
+    category,
+    title: farmer.product.title,
+    region: farmer.region,
+    richness,
+    globalIndex,
+    quantity,
+  });
 
   const product = await prisma.product.create({
     data: {
@@ -861,22 +866,26 @@ async function seedFarmer(
       forecastQuantity: farmer.product.forecastQuantity ?? quantity.maxQuantity,
       harvestStatus,
       preorderEnabled:
-        farmer.product.preorderEnabled ??
-        (harvestStatus === 'growing' || harvestStatus === 'limited'),
+        farmer.product.preorderEnabled ?? harvestPlan.preorder,
       isPublished: true,
       moderationStatus: ModerationStatus.approved,
       moderatedAt: new Date(),
       moderatedById: adminId,
+      ...enriched,
     },
   });
 
-  await seedProductImage({
+  await seedProductMedia({
+    prisma,
     productId: product.id,
     category,
+    uploadsDir: UPLOADS_DIR,
+    categoryImageDir: CATEGORY_IMAGE_DIR,
+    richness,
     adminId,
   });
 
-  return { user, farm, product };
+  return { user, farm, product, richness };
 }
 
 async function removeObsoleteDemoData() {
@@ -960,14 +969,28 @@ async function main() {
 
   let farmerCount = 0;
   let productCount = 0;
+  let globalIndex = 0;
+  const richnessCounts = { sparse: 0, light: 0, medium: 0, full: 0 };
   for (const [category, farmers] of Object.entries(FARMERS_BY_CATEGORY)) {
     for (const [index, farmer] of farmers.entries()) {
-      await seedFarmer(category, farmer, demoPasswordHash, admin.id, index);
+      const seeded = await seedFarmer(
+        category,
+        farmer,
+        demoPasswordHash,
+        admin.id,
+        index,
+        globalIndex,
+      );
+      richnessCounts[seeded.richness] += 1;
       farmerCount += 1;
       productCount += 1;
+      globalIndex += 1;
     }
     console.log(`Category ${category}: ${farmers.length} farmers/products`);
   }
+  console.log(
+    `Card richness mix: sparse=${richnessCounts.sparse}, light=${richnessCounts.light}, medium=${richnessCounts.medium}, full=${richnessCounts.full}`,
+  );
 
   const deals = await seedCompletedDeals();
   const purchaseRequests = await seedPurchaseRequests();
@@ -979,43 +1002,246 @@ async function main() {
 }
 
 async function seedCompletedDeals() {
-  const pairs = [
+  /**
+   * Varied seller ratings across the catalog:
+   * - some farms with many high scores
+   * - some mid / mixed
+   * - some low
+   * - most remain unrated
+   */
+  const pairs: Array<{
+    buyerEmail: string;
+    farmerEmail: string;
+    buyerScore: number;
+    sellerScore: number;
+    quantity: string;
+    price: string;
+    comment: string;
+  }> = [
+    // fruits-1: excellent, 4 ratings
     {
       buyerEmail: 'buyer-1@agrobridge.local',
       farmerEmail: 'farmer-fruits-1@agrobridge.local',
       buyerScore: 5,
-      sellerScore: 4,
+      sellerScore: 5,
       quantity: '200',
       price: '4.50',
+      comment: 'Excellent peaches and clear packing specs.',
+    },
+    {
+      buyerEmail: 'buyer-2@agrobridge.local',
+      farmerEmail: 'farmer-fruits-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 4,
+      quantity: '150',
+      price: '4.40',
+      comment: 'On-time shipment, good communication.',
+    },
+    {
+      buyerEmail: 'buyer-3@agrobridge.local',
+      farmerEmail: 'farmer-fruits-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 5,
+      quantity: '180',
+      price: '4.55',
+      comment: 'Consistent quality across pallets.',
+    },
+    {
+      buyerEmail: 'buyer-4@agrobridge.local',
+      farmerEmail: 'farmer-fruits-1@agrobridge.local',
+      buyerScore: 4,
+      sellerScore: 5,
+      quantity: '120',
+      price: '4.35',
+      comment: 'Reliable partner for repeat orders.',
+    },
+    // wine-1: strong, 3 ratings
+    {
+      buyerEmail: 'buyer-1@agrobridge.local',
+      farmerEmail: 'farmer-wine-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 5,
+      quantity: '120',
+      price: '18.00',
+      comment: 'Great qvevri profile for retail.',
     },
     {
       buyerEmail: 'buyer-2@agrobridge.local',
       farmerEmail: 'farmer-wine-1@agrobridge.local',
       buyerScore: 4,
-      sellerScore: 5,
-      quantity: '120',
-      price: '18.00',
+      sellerScore: 4,
+      quantity: '90',
+      price: '17.50',
+      comment: 'Solid labels and export docs.',
     },
     {
       buyerEmail: 'buyer-3@agrobridge.local',
+      farmerEmail: 'farmer-wine-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 5,
+      quantity: '60',
+      price: '18.20',
+      comment: 'Would reorder for next season.',
+    },
+    // honey-1: perfect 2 ratings
+    {
+      buyerEmail: 'buyer-2@agrobridge.local',
       farmerEmail: 'farmer-honey-1@agrobridge.local',
       buyerScore: 5,
       sellerScore: 5,
       quantity: '80',
       price: '22.00',
+      comment: 'Clean lab results and stable moisture.',
     },
     {
       buyerEmail: 'buyer-4@agrobridge.local',
+      farmerEmail: 'farmer-honey-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 5,
+      quantity: '50',
+      price: '21.50',
+      comment: 'Premium jar presentation.',
+    },
+    // nuts-1: mixed mid, 2 ratings
+    {
+      buyerEmail: 'buyer-1@agrobridge.local',
       farmerEmail: 'farmer-nuts-1@agrobridge.local',
       buyerScore: 3,
       sellerScore: 4,
       quantity: '500',
       price: '9.20',
+      comment: 'Good kernels, slower reply times.',
+    },
+    {
+      buyerEmail: 'buyer-3@agrobridge.local',
+      farmerEmail: 'farmer-nuts-1@agrobridge.local',
+      buyerScore: 4,
+      sellerScore: 3,
+      quantity: '300',
+      price: '9.00',
+      comment: 'Acceptable grade after sorting notes.',
+    },
+    // berries-1: high single
+    {
+      buyerEmail: 'buyer-1@agrobridge.local',
+      farmerEmail: 'farmer-berries-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 5,
+      quantity: '2',
+      price: '6.80',
+      comment: 'Firm fruit, export-ready packs.',
+    },
+    // vegetables-2: low single
+    {
+      buyerEmail: 'buyer-2@agrobridge.local',
+      farmerEmail: 'farmer-vegetables-2@agrobridge.local',
+      buyerScore: 2,
+      sellerScore: 3,
+      quantity: '1000',
+      price: '0.75',
+      comment: 'Delays and uneven sizing.',
+    },
+    // dairy-1: mid single
+    {
+      buyerEmail: 'buyer-3@agrobridge.local',
+      farmerEmail: 'farmer-dairy-1@agrobridge.local',
+      buyerScore: 4,
+      sellerScore: 4,
+      quantity: '200',
+      price: '5.10',
+      comment: 'Fresh product, cold chain OK.',
+    },
+    // tea-1: mixed 2
+    {
+      buyerEmail: 'buyer-4@agrobridge.local',
+      farmerEmail: 'farmer-tea-1@agrobridge.local',
+      buyerScore: 3,
+      sellerScore: 4,
+      quantity: '100',
+      price: '7.40',
+      comment: 'Decent leaf, packaging can improve.',
+    },
+    {
+      buyerEmail: 'buyer-1@agrobridge.local',
+      farmerEmail: 'farmer-tea-1@agrobridge.local',
+      buyerScore: 4,
+      sellerScore: 3,
+      quantity: '80',
+      price: '7.20',
+      comment: 'Stable supply, average aroma.',
+    },
+    // organic-1: high 3
+    {
+      buyerEmail: 'buyer-2@agrobridge.local',
+      farmerEmail: 'farmer-organic-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 5,
+      quantity: '400',
+      price: '2.60',
+      comment: 'Certificates ready, clean crates.',
+    },
+    {
+      buyerEmail: 'buyer-3@agrobridge.local',
+      farmerEmail: 'farmer-organic-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 4,
+      quantity: '250',
+      price: '2.55',
+      comment: 'Strong organic story for retail.',
+    },
+    {
+      buyerEmail: 'buyer-4@agrobridge.local',
+      farmerEmail: 'farmer-organic-1@agrobridge.local',
+      buyerScore: 4,
+      sellerScore: 5,
+      quantity: '180',
+      price: '2.70',
+      comment: 'Would expand weekly volume.',
+    },
+    // mineralWater-1: one mid
+    {
+      buyerEmail: 'buyer-1@agrobridge.local',
+      farmerEmail: 'farmer-mineralWater-1@agrobridge.local',
+      buyerScore: 3,
+      sellerScore: 4,
+      quantity: '2000',
+      price: '0.48',
+      comment: 'OK logistics, labels need refresh.',
+    },
+    // spices-1: one high
+    {
+      buyerEmail: 'buyer-2@agrobridge.local',
+      farmerEmail: 'farmer-spices-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 5,
+      quantity: '100',
+      price: '10.20',
+      comment: 'Aroma and dryness were excellent.',
+    },
+    // essentialOils-1: low-mid
+    {
+      buyerEmail: 'buyer-3@agrobridge.local',
+      farmerEmail: 'farmer-essentialOils-1@agrobridge.local',
+      buyerScore: 2,
+      sellerScore: 3,
+      quantity: '20',
+      price: '46.00',
+      comment: 'Docs incomplete on first shipment.',
+    },
+    // bayLeaf-1: high single
+    {
+      buyerEmail: 'buyer-4@agrobridge.local',
+      farmerEmail: 'farmer-bayLeaf-1@agrobridge.local',
+      buyerScore: 5,
+      sellerScore: 4,
+      quantity: '300',
+      price: '5.60',
+      comment: 'Large leaves, strong aroma.',
     },
   ];
 
   let created = 0;
-  for (const pair of pairs) {
+  for (const [pairIndex, pair] of pairs.entries()) {
     const buyer = await prisma.user.findUnique({ where: { email: pair.buyerEmail } });
     const farmer = await prisma.user.findUnique({
       where: { email: pair.farmerEmail },
@@ -1026,12 +1252,13 @@ async function seedCompletedDeals() {
     }
 
     const product = farmer.farm.products[0];
-    // Keep seed idempotent: one completed demo deal per buyer+farmer pair.
+    const demoKey = `demo-deal-${pairIndex}-${pair.buyerEmail}-${pair.farmerEmail}`;
     const existing = await prisma.rfq.findFirst({
       where: {
         buyerId: buyer.id,
         farmId: farmer.farm.id,
         status: RfqStatus.completed,
+        message: demoKey,
       },
     });
     if (existing) {
@@ -1039,16 +1266,26 @@ async function seedCompletedDeals() {
       continue;
     }
 
-    const rfq = await prisma.rfq.create({
+    // Remove older non-keyed completed demo deals for this pair so re-seed stays clean.
+    await prisma.rfq.deleteMany({
+      where: {
+        buyerId: buyer.id,
+        farmId: farmer.farm.id,
+        status: RfqStatus.completed,
+        message: { startsWith: 'Demo completed deal' },
+      },
+    });
+
+    await prisma.rfq.create({
       data: {
         productId: product.id,
         farmId: farmer.farm.id,
         buyerId: buyer.id,
         quantity: pair.quantity,
         unit: product.unit,
-        message: 'Demo completed deal for rating showcase.',
+        message: demoKey,
         status: RfqStatus.completed,
-        completedAt: new Date(),
+        completedAt: new Date(Date.now() - pairIndex * 86_400_000),
         offer: {
           create: {
             priceAmount: pair.price,
@@ -1064,7 +1301,7 @@ async function seedCompletedDeals() {
               fromUserId: buyer.id,
               toUserId: farmer.id,
               score: pair.buyerScore,
-              comment: 'Reliable supply and clear communication.',
+              comment: pair.comment,
             },
             {
               fromUserId: farmer.id,
@@ -1076,7 +1313,6 @@ async function seedCompletedDeals() {
         },
       },
     });
-    void rfq;
     created += 1;
   }
   return created;
