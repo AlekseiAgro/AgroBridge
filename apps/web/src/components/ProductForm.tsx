@@ -391,6 +391,50 @@ export function ProductForm({ mode, initial }: Props) {
             onChange={(event) => setDescription(event.target.value)}
           />
         </label>
+        <div className="field-row">
+          <label className="field">
+            <span>{t('priceFrom')}</span>
+            <input
+              name="priceFrom"
+              type="number"
+              min={0}
+              step="0.01"
+              value={priceFrom}
+              onChange={(event) => setPriceFrom(event.target.value)}
+            />
+          </label>
+          <label className="field">
+            <span>{t('priceCurrency')}</span>
+            <select
+              value={priceCurrency}
+              onChange={(event) =>
+                setPriceCurrency(event.target.value as (typeof PRICE_CURRENCIES)[number])
+              }
+            >
+              {PRICE_CURRENCIES.map((currency) => (
+                <option key={currency} value={currency}>
+                  {currency}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <label className="role-option">
+          <input
+            type="checkbox"
+            checked={priceNegotiable}
+            onChange={(event) => setPriceNegotiable(event.target.checked)}
+          />
+          <span>{t('priceNegotiable')}</span>
+        </label>
+        <label className="role-option">
+          <input
+            type="checkbox"
+            checked={priceDependsOnVolume}
+            onChange={(event) => setPriceDependsOnVolume(event.target.checked)}
+          />
+          <span>{t('priceDependsOnVolume')}</span>
+        </label>
       </fieldset>
 
       <fieldset className="field-group product-form__section">
@@ -565,54 +609,6 @@ export function ProductForm({ mode, initial }: Props) {
             onChange={(event) => setDeliveryAvailable(event.target.checked)}
           />
           <span>{t('deliveryAvailable')}</span>
-        </label>
-      </fieldset>
-
-      <fieldset className="field-group product-form__section">
-        <legend className="section-title">{t('sections.pricing')}</legend>
-        <div className="field-row">
-          <label className="field">
-            <span>{t('priceFrom')}</span>
-            <input
-              name="priceFrom"
-              type="number"
-              min={0}
-              step="0.01"
-              value={priceFrom}
-              onChange={(event) => setPriceFrom(event.target.value)}
-            />
-          </label>
-          <label className="field">
-            <span>{t('priceCurrency')}</span>
-            <select
-              value={priceCurrency}
-              onChange={(event) =>
-                setPriceCurrency(event.target.value as (typeof PRICE_CURRENCIES)[number])
-              }
-            >
-              {PRICE_CURRENCIES.map((currency) => (
-                <option key={currency} value={currency}>
-                  {currency}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <label className="role-option">
-          <input
-            type="checkbox"
-            checked={priceNegotiable}
-            onChange={(event) => setPriceNegotiable(event.target.checked)}
-          />
-          <span>{t('priceNegotiable')}</span>
-        </label>
-        <label className="role-option">
-          <input
-            type="checkbox"
-            checked={priceDependsOnVolume}
-            onChange={(event) => setPriceDependsOnVolume(event.target.checked)}
-          />
-          <span>{t('priceDependsOnVolume')}</span>
         </label>
       </fieldset>
 
