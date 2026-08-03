@@ -16,11 +16,26 @@ async function postJson<T>(url: string, body?: Record<string, unknown>): Promise
     headers: { 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
   });
-  const data = (await response.json()) as T & { message?: string };
-  if (!response.ok) {
-    throw new Error(data.message ?? 'Request failed');
+
+  const text = await response.text();
+  let data: (T & { message?: string }) | null = null;
+  if (text) {
+    try {
+      data = JSON.parse(text) as T & { message?: string };
+    } catch {
+      throw new Error(
+        response.ok
+          ? 'Unexpected server response'
+          : `Request failed (${response.status}). Please try again.`,
+      );
+    }
   }
-  return data;
+
+  if (!response.ok) {
+    throw new Error(data?.message ?? 'Request failed');
+  }
+
+  return (data ?? {}) as T;
 }
 
 export function VerifyEmailForm({ email, nextPath }: Props) {

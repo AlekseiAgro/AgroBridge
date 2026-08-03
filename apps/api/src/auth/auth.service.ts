@@ -60,18 +60,17 @@ export class AuthService {
 
     const authUser = this.toAuthenticatedUser(user);
 
-    await this.notifications.notifyWelcome({
-      email: user.email,
-      locale: user.locale,
-      displayName: user.displayName,
-      role: user.role,
-    });
+    // Never block registration on outbound mail (broken/slow SMTP caused Cloudflare HTML 524s).
+    void this.notifications
+      .notifyWelcome({
+        email: user.email,
+        locale: user.locale,
+        displayName: user.displayName,
+        role: user.role,
+      })
+      .catch(() => undefined);
 
-    try {
-      await this.verification.sendEmailCode(authUser);
-    } catch {
-      // Registration should succeed even if the verification email fails to send.
-    }
+    void this.verification.sendEmailCode(authUser).catch(() => undefined);
 
     return this.issueToken(authUser);
   }

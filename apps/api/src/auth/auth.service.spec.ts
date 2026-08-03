@@ -95,6 +95,8 @@ describe('AuthService', () => {
       displayName: 'Nino',
       role: 'farmer',
     });
+    // Mail is fire-and-forget after account creation.
+    await Promise.resolve();
     expect(verification.sendEmailCode).toHaveBeenCalled();
   });
 

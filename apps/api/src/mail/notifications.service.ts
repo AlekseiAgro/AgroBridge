@@ -208,9 +208,16 @@ export class NotificationsService {
     code: string;
     channel: 'email' | 'sms';
   }): Promise<void> {
-    await this.sendTemplate(params.user, 'verificationCode', {
+    // Do not swallow errors: the caller must know when the code email failed to send.
+    const locale = this.localeOf(params.user.locale);
+    const rendered = renderEmailTemplate(locale, 'verificationCode', {
       name: this.displayName(params.user),
       code: params.code,
+    });
+    await this.mail.send({
+      to: params.user.email,
+      subject: rendered.subject,
+      text: rendered.text,
     });
   }
 
