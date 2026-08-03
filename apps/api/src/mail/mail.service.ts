@@ -3,6 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import nodemailer, { type Transporter } from 'nodemailer';
 import type { MailMessage } from './mail.types';
 
+/** Fail fast instead of hanging until Cloudflare/proxy HTML timeouts. */
+const SMTP_CONNECTION_TIMEOUT_MS = 8_000;
+const SMTP_GREETING_TIMEOUT_MS = 8_000;
+const SMTP_SOCKET_TIMEOUT_MS = 12_000;
+
 @Injectable()
 export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
@@ -40,6 +45,9 @@ export class MailService implements OnModuleInit {
       port,
       secure,
       auth: user && pass ? { user, pass } : undefined,
+      connectionTimeout: SMTP_CONNECTION_TIMEOUT_MS,
+      greetingTimeout: SMTP_GREETING_TIMEOUT_MS,
+      socketTimeout: SMTP_SOCKET_TIMEOUT_MS,
     });
 
     this.logger.log(`Mail driver: smtp (${host}:${port})`);
@@ -53,13 +61,21 @@ export class MailService implements OnModuleInit {
       return;
     }
 
-    await this.transporter.sendMail({
-      from: this.from,
-      to: message.to,
-      replyTo: message.replyTo,
-      subject: message.subject,
-      text: message.text,
-      html: message.html,
-    });
+    try {
+      await this.transporter.sendMail({
+        from: this.from,
+        to: message.to,
+        replyTo: message.replyTo,
+        subject: message.subject,
+        text: message.text,
+        html: message.html,
+      });
+    } catch (error) {
+      this.logger.error(
+        `SMTP send failed to=${message.to} subject=${JSON.stringify(message.subject)}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      throw error;
+    }
   }
 }

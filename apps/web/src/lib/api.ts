@@ -39,7 +39,20 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   });
 
   const text = await response.text();
-  const data = text ? (JSON.parse(text) as unknown) : null;
+  let data: unknown = null;
+  if (text) {
+    try {
+      data = JSON.parse(text) as unknown;
+    } catch {
+      throw new ApiError(
+        response.ok
+          ? 'Unexpected response from API'
+          : `Request failed (${response.status})`,
+        response.status || 502,
+        text.slice(0, 200),
+      );
+    }
+  }
 
   if (!response.ok) {
     const message =

@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { canTrade, type ProducerVerificationStatus, type SellerType } from '@agrobridge/shared';
 import {
@@ -110,15 +111,21 @@ export class VerificationService {
       throw new BadRequestException('Email is already verified');
     }
     const code = await this.issueCode(user.id, VerificationChannel.email, dbUser.email);
-    await this.notifications.notifyVerificationCode({
-      user: {
-        email: dbUser.email,
-        locale: dbUser.locale,
-        displayName: dbUser.displayName,
-      },
-      code,
-      channel: 'email',
-    });
+    try {
+      await this.notifications.notifyVerificationCode({
+        user: {
+          email: dbUser.email,
+          locale: dbUser.locale,
+          displayName: dbUser.displayName,
+        },
+        code,
+        channel: 'email',
+      });
+    } catch {
+      throw new ServiceUnavailableException(
+        'Could not send the verification email. Please try again in a moment.',
+      );
+    }
     return { sent: true, destination: dbUser.email };
   }
 

@@ -57,6 +57,14 @@ JWT_EXPIRES_SECONDS=604800
 SUPPORT_EMAIL=gabo.m0619@gmail.com
 MAIL_DRIVER=console
 MAIL_FROM=AgroBridge <noreply@agrobrid.ge>
+# To send real emails (verification codes), switch to SMTP and set credentials:
+# MAIL_DRIVER=smtp
+# SMTP_HOST=smtp.resend.com
+# SMTP_PORT=465
+# SMTP_SECURE=true
+# SMTP_USER=resend
+# SMTP_PASSWORD=<api-key>
+# Broken/slow SMTP previously hung registration until Cloudflare returned HTML 524.
 TRANSLATION_PROVIDER=mock
 STORAGE_DRIVER=local
 
