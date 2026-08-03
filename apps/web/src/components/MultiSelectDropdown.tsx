@@ -2,12 +2,12 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 
-export type MultiSelectOption<T extends string> = {
+export type MultiSelectOption<T extends string | number> = {
   value: T;
   label: string;
 };
 
-type Props<T extends string> = {
+type Props<T extends string | number> = {
   label: string;
   options: MultiSelectOption<T>[];
   values: T[];
@@ -16,7 +16,7 @@ type Props<T extends string> = {
   selectedSummary: string;
 };
 
-export function MultiSelectDropdown<T extends string>({
+export function MultiSelectDropdown<T extends string | number>({
   label,
   options,
   values,
@@ -67,7 +67,7 @@ export function MultiSelectDropdown<T extends string>({
           {options.map((option) => {
             const selected = values.includes(option.value);
             return (
-              <li key={option.value} role="option" aria-selected={selected}>
+              <li key={String(option.value)} role="option" aria-selected={selected}>
                 <label className="multi-select__option">
                   <input
                     type="checkbox"
