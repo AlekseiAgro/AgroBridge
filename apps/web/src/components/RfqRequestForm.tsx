@@ -8,11 +8,13 @@ import { useRouter } from '@/i18n/navigation';
 type Props = {
   productId: string;
   defaultUnit?: string | null;
+  preorder?: boolean;
 };
 
-export function RfqRequestForm({ productId, defaultUnit }: Props) {
+export function RfqRequestForm({ productId, defaultUnit, preorder = false }: Props) {
   const t = useTranslations('rfq');
   const tp = useTranslations('product');
+  const th = useTranslations('harvest');
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -23,11 +25,14 @@ export function RfqRequestForm({ productId, defaultUnit }: Props) {
     setError(null);
 
     const form = new FormData(event.currentTarget);
+    const message = String(form.get('message') ?? '').trim();
     const payload = {
       productId,
       quantity: String(form.get('quantity') ?? ''),
       unit: String(form.get('unit') ?? '') || undefined,
-      message: String(form.get('message') ?? ''),
+      message: preorder
+        ? [`[Pre-order] ${th('preorderMessagePrefix')}`, message].filter(Boolean).join('\n')
+        : message,
     };
 
     try {
@@ -52,8 +57,12 @@ export function RfqRequestForm({ productId, defaultUnit }: Props) {
 
   return (
     <form className="auth-form" onSubmit={onSubmit}>
-      <h2 className="section-title">{t('requestTitle')}</h2>
-      <p className="page__subtitle">{t('requestSubtitle')}</p>
+      <h2 className="section-title">
+        {preorder ? th('preorderRequestTitle') : t('requestTitle')}
+      </h2>
+      <p className="page__subtitle">
+        {preorder ? th('preorderRequestSubtitle') : t('requestSubtitle')}
+      </p>
       <label className="field">
         <span>{t('quantity')}</span>
         <input name="quantity" required minLength={1} placeholder="500" />

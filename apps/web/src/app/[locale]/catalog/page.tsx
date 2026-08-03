@@ -2,6 +2,7 @@ import type { ProductSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CatalogFilters } from '@/components/CatalogFilters';
 import { CatalogPurchaseCta } from '@/components/CatalogPurchaseCta';
+import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
 import { RatingStars } from '@/components/RatingStars';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -14,7 +15,14 @@ import { formatRegionLabel } from '@/lib/region';
 
 type Props = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ q?: string; category?: string; region?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    category?: string;
+    region?: string;
+    harvestStatus?: string;
+    preorder?: string;
+    inSeason?: string;
+  }>;
 };
 
 export default async function CatalogPage({ params, searchParams }: Props) {
@@ -29,6 +37,9 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   if (filters.q) query.set('q', filters.q);
   if (filters.category) query.set('category', filters.category);
   if (filters.region) query.set('region', filters.region);
+  if (filters.harvestStatus) query.set('harvestStatus', filters.harvestStatus);
+  if (filters.preorder === 'true') query.set('preorder', 'true');
+  if (filters.inSeason === 'true') query.set('inSeason', 'true');
 
   let products: ProductSummary[] = [];
   let loadError: string | null = null;
@@ -52,6 +63,9 @@ export default async function CatalogPage({ params, searchParams }: Props) {
           initialQ={filters.q}
           initialCategory={filters.category}
           initialRegion={filters.region}
+          initialHarvestStatus={filters.harvestStatus}
+          initialPreorder={filters.preorder === 'true'}
+          initialInSeason={filters.inSeason === 'true'}
         />
 
         {loadError ? <p className="form-error">{loadError}</p> : null}
@@ -92,6 +106,10 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                         ? ` · ${t(`categories.${product.category as 'fruits'}`)}`
                         : ''}
                     </p>
+                    <HarvestStatusBadge
+                      status={product.harvestStatus}
+                      preorderEnabled={product.preorderEnabled}
+                    />
                     <div className="product-list__rating">
                       <span className="product-list__rating-label">{t('sellerRating')}</span>
                       <RatingStars

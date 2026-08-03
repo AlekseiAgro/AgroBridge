@@ -9,6 +9,7 @@ import type {
   FarmDetail,
   FarmDocument,
   FarmSummary,
+  HarvestStatus,
   ModerationStatus,
   RatingSummary,
   VerificationStatus,
@@ -18,6 +19,7 @@ import {
   FARM_DOCUMENT_MAX_COUNT,
   isFarmDocumentKind,
   isFarmDocumentMimeType,
+  normalizeSeasonMonths,
 } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
@@ -75,6 +77,12 @@ export class FarmsService {
             unit: true,
             minQuantity: true,
             maxQuantity: true,
+            seasonMonths: true,
+            harvestStartAt: true,
+            harvestEndAt: true,
+            forecastQuantity: true,
+            harvestStatus: true,
+            preorderEnabled: true,
             isPublished: true,
             moderationStatus: true,
             moderationNote: true,
@@ -131,6 +139,12 @@ export class FarmsService {
             unit: true,
             minQuantity: true,
             maxQuantity: true,
+            seasonMonths: true,
+            harvestStartAt: true,
+            harvestEndAt: true,
+            forecastQuantity: true,
+            harvestStatus: true,
+            preorderEnabled: true,
             isPublished: true,
             moderationStatus: true,
             moderationNote: true,
@@ -360,6 +374,12 @@ export class FarmsService {
       unit: string | null;
       minQuantity: { toNumber(): number } | number | null;
       maxQuantity: { toNumber(): number } | number | null;
+      seasonMonths: number[];
+      harvestStartAt: Date | null;
+      harvestEndAt: Date | null;
+      forecastQuantity: { toNumber(): number } | number | null;
+      harvestStatus: string | null;
+      preorderEnabled: boolean;
       isPublished: boolean;
       moderationStatus: ModerationStatus | string;
       moderationNote: string | null;
@@ -398,6 +418,17 @@ export class FarmsService {
           : typeof product.maxQuantity === 'number'
             ? product.maxQuantity
             : product.maxQuantity.toNumber(),
+      seasonMonths: normalizeSeasonMonths(product.seasonMonths ?? []),
+      harvestStartAt: product.harvestStartAt?.toISOString() ?? null,
+      harvestEndAt: product.harvestEndAt?.toISOString() ?? null,
+      forecastQuantity:
+        product.forecastQuantity == null
+          ? null
+          : typeof product.forecastQuantity === 'number'
+            ? product.forecastQuantity
+            : product.forecastQuantity.toNumber(),
+      harvestStatus: (product.harvestStatus as HarvestStatus | null) ?? null,
+      preorderEnabled: product.preorderEnabled ?? false,
       isPublished: product.isPublished,
       moderationStatus: product.moderationStatus as ModerationStatus,
       moderationNote: product.moderationNote,

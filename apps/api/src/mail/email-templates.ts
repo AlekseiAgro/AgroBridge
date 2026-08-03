@@ -55,6 +55,14 @@ const en: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Your AgroBridge verification code",
     text: "Hello {{name}},\n\nYour verification code is {{code}}.\nIt expires in 10 minutes.\n\n— AgroBridge",
   },
+  harvestAvailable: {
+    subject: "Harvest update: {{productTitle}} is {{statusLabel}}",
+    text: "Hello {{name}},\n\n{{productTitle}} from {{farmName}} is now {{statusLabel}}.\n\nView listing: {{link}}\n\nManage watches from the product page.\n\n— AgroBridge",
+  },
+  harvestPreorderOpen: {
+    subject: "Pre-orders open: {{productTitle}}",
+    text: "Hello {{name}},\n\n{{farmName}} opened pre-orders for {{productTitle}}.\n\nView listing: {{link}}\n\n— AgroBridge",
+  },
 };
 
 const ru: Record<EmailTemplateKey, EmailTemplate> = {
@@ -105,6 +113,14 @@ const ru: Record<EmailTemplateKey, EmailTemplate> = {
   verificationCode: {
     subject: "Код подтверждения AgroBridge",
     text: "Здравствуйте, {{name}}!\n\nВаш код подтверждения: {{code}}.\nОн действует 10 минут.\n\n— AgroBridge",
+  },
+  harvestAvailable: {
+    subject: "Урожай: {{productTitle}} — {{statusLabel}}",
+    text: "Здравствуйте, {{name}}!\n\n{{productTitle}} от {{farmName}} теперь в статусе «{{statusLabel}}».\n\nОткрыть объявление: {{link}}\n\n— AgroBridge",
+  },
+  harvestPreorderOpen: {
+    subject: "Открыт предзаказ: {{productTitle}}",
+    text: "Здравствуйте, {{name}}!\n\n{{farmName}} открыл(а) предзаказ на {{productTitle}}.\n\nОткрыть объявление: {{link}}\n\n— AgroBridge",
   },
 };
 
@@ -157,6 +173,14 @@ const de: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Ihr AgroBridge-Bestätigungscode",
     text: "Hallo {{name}},\n\nIhr Bestätigungscode lautet {{code}}.\nEr ist 10 Minuten gültig.\n\n— AgroBridge",
   },
+  harvestAvailable: {
+    subject: "Ernte-Update: {{productTitle}} ist {{statusLabel}}",
+    text: "Hallo {{name}},\n\n{{productTitle}} von {{farmName}} ist jetzt {{statusLabel}}.\n\nAngebot ansehen: {{link}}\n\n— AgroBridge",
+  },
+  harvestPreorderOpen: {
+    subject: "Vorbestellungen offen: {{productTitle}}",
+    text: "Hallo {{name}},\n\n{{farmName}} hat Vorbestellungen für {{productTitle}} geöffnet.\n\nAngebot ansehen: {{link}}\n\n— AgroBridge",
+  },
 };
 
 const fr: Record<EmailTemplateKey, EmailTemplate> = {
@@ -207,6 +231,14 @@ const fr: Record<EmailTemplateKey, EmailTemplate> = {
   verificationCode: {
     subject: "Votre code de vérification AgroBridge",
     text: "Bonjour {{name}},\n\nVotre code de vérification est {{code}}.\nIl expire dans 10 minutes.\n\n— AgroBridge",
+  },
+  harvestAvailable: {
+    subject: "Récolte : {{productTitle}} est {{statusLabel}}",
+    text: "Bonjour {{name}},\n\n{{productTitle}} de {{farmName}} est maintenant {{statusLabel}}.\n\nVoir l'annonce : {{link}}\n\n— AgroBridge",
+  },
+  harvestPreorderOpen: {
+    subject: "Précommandes ouvertes : {{productTitle}}",
+    text: "Bonjour {{name}},\n\n{{farmName}} a ouvert les précommandes pour {{productTitle}}.\n\nVoir l'annonce : {{link}}\n\n— AgroBridge",
   },
 };
 
@@ -259,6 +291,14 @@ const it: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Il tuo codice di verifica AgroBridge",
     text: "Ciao {{name}},\n\nIl tuo codice di verifica è {{code}}.\nScade tra 10 minuti.\n\n— AgroBridge",
   },
+  harvestAvailable: {
+    subject: "Raccolto: {{productTitle}} è {{statusLabel}}",
+    text: "Ciao {{name}},\n\n{{productTitle}} di {{farmName}} è ora {{statusLabel}}.\n\nVedi l'annuncio: {{link}}\n\n— AgroBridge",
+  },
+  harvestPreorderOpen: {
+    subject: "Preordini aperti: {{productTitle}}",
+    text: "Ciao {{name}},\n\n{{farmName}} ha aperto i preordini per {{productTitle}}.\n\nVedi l'annuncio: {{link}}\n\n— AgroBridge",
+  },
 };
 
 const es: Record<EmailTemplateKey, EmailTemplate> = {
@@ -310,6 +350,14 @@ const es: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Tu código de verificación de AgroBridge",
     text: "Hola {{name}},\n\nTu código de verificación es {{code}}.\nCaduca en 10 minutos.\n\n— AgroBridge",
   },
+  harvestAvailable: {
+    subject: "Cosecha: {{productTitle}} está {{statusLabel}}",
+    text: "Hola {{name}},\n\n{{productTitle}} de {{farmName}} ahora está {{statusLabel}}.\n\nVer anuncio: {{link}}\n\n— AgroBridge",
+  },
+  harvestPreorderOpen: {
+    subject: "Preventa abierta: {{productTitle}}",
+    text: "Hola {{name}},\n\n{{farmName}} abrió la preventa de {{productTitle}}.\n\nVer anuncio: {{link}}\n\n— AgroBridge",
+  },
 };
 
 const ka: Record<EmailTemplateKey, EmailTemplate> = {
@@ -360,6 +408,14 @@ const ka: Record<EmailTemplateKey, EmailTemplate> = {
   verificationCode: {
     subject: "AgroBridge-ის ვერიფიკაციის კოდი",
     text: "გამარჯობა, {{name}}!\n\nთქვენი ვერიფიკაციის კოდია {{code}}.\nმოქმედებს 10 წუთი.\n\n— AgroBridge",
+  },
+  harvestAvailable: {
+    subject: "მოსავალი: {{productTitle}} — {{statusLabel}}",
+    text: "გამარჯობა, {{name}}!\n\n{{farmName}}-ის {{productTitle}} ახლა {{statusLabel}} სტატუსშია.\n\nნახვა: {{link}}\n\n— AgroBridge",
+  },
+  harvestPreorderOpen: {
+    subject: "წინასწარი შეკვეთა გაიხსნა: {{productTitle}}",
+    text: "გამარჯობა, {{name}}!\n\n{{farmName}}-მა გახსნა წინასწარი შეკვეთა {{productTitle}}-ზე.\n\nნახვა: {{link}}\n\n— AgroBridge",
   },
 };
 

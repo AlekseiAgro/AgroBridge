@@ -7,16 +7,25 @@ import {
 import {
   PRODUCT_IMAGE_MAX_BYTES,
   PRODUCT_IMAGE_MAX_COUNT,
+  isHarvestStatus,
   isProductImageMimeType,
+  normalizeSeasonMonths,
+  type HarvestStatus,
   type ModerationStatus,
   type ProductDetail,
   type ProductImage,
   type ProductSummary,
   type RatingSummary,
+  type SeasonMonth,
   type VerificationStatus,
 } from '@agrobridge/shared';
-import { ModerationStatus as PrismaModerationStatus, Prisma } from '@prisma/client';
+import {
+  HarvestStatus as PrismaHarvestStatus,
+  ModerationStatus as PrismaModerationStatus,
+  Prisma,
+} from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
 import { StorageService } from '../storage/storage.service';
@@ -81,12 +90,19 @@ export class ProductsService {
     private readonly storage: StorageService,
     private readonly ratings: RatingsService,
     private readonly categories: CategoriesService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async catalog(query: CatalogQueryDto): Promise<ProductSummary[]> {
     const q = query.q?.trim() || undefined;
     const category = query.category?.trim() || undefined;
     const region = query.region?.trim() || undefined;
+    const harvestStatus =
+      query.harvestStatus && isHarvestStatus(query.harvestStatus)
+        ? query.harvestStatus
+        : undefined;
+    const preorder = query.preorder === true;
+    const inSeason = query.inSeason === true;
     const enabledCategories = await this.categories.enabledIds();
 
     const and: Prisma.ProductWhereInput[] = [];
@@ -122,6 +138,18 @@ export class ProductsService {
           { farm: { name: { contains: q, mode: 'insensitive' } } },
         ],
       });
+    }
+
+    if (harvestStatus) {
+      and.push({ harvestStatus: harvestStatus as PrismaHarvestStatus });
+    }
+
+    if (preorder) {
+      and.push({ preorderEnabled: true });
+    }
+
+    if (inSeason) {
+      and.push({ seasonMonths: { has: new Date().getUTCMonth() + 1 } });
     }
 
     const where: Prisma.ProductWhereInput = {
@@ -166,7 +194,17 @@ export class ProductsService {
     }
 
     const sellerRating = await this.ratings.summaryForUser(product.farm.ownerId);
-    return this.toDetail(product, sellerRating);
+    const watching = viewer
+      ? Boolean(
+          await this.prisma.harvestWatch.findUnique({
+            where: {
+              userId_productId: { userId: viewer.id, productId: product.id },
+            },
+            select: { id: true },
+          }),
+        )
+      : false;
+    return this.toDetail(product, sellerRating, watching);
   }
 
   async listMine(user: AuthenticatedUser): Promise<ProductSummary[]> {
@@ -189,6 +227,8 @@ export class ProductsService {
     const isPublished = dto.isPublished ?? false;
     const quantity = this.normalizeQuantityRange(dto.minQuantity, dto.maxQuantity);
 
+    const harvest = this.normalizeHarvestInput(dto);
+
     const product = await this.prisma.product.create({
       data: {
         farmId: farm.id,
@@ -198,6 +238,12 @@ export class ProductsService {
         unit: dto.unit || null,
         minQuantity: quantity.minQuantity,
         maxQuantity: quantity.maxQuantity,
+        seasonMonths: harvest.seasonMonths,
+        harvestStartAt: harvest.harvestStartAt,
+        harvestEndAt: harvest.harvestEndAt,
+        forecastQuantity: harvest.forecastQuantity,
+        harvestStatus: harvest.harvestStatus,
+        preorderEnabled: harvest.preorderEnabled,
         isPublished,
         moderationStatus: isPublished
           ? PrismaModerationStatus.pending
@@ -228,6 +274,14 @@ export class ProductsService {
         ? this.toNumberOrNull(product.maxQuantity)
         : dto.maxQuantity;
     const quantity = this.normalizeQuantityRange(nextMin, nextMax);
+    const harvest = this.normalizeHarvestInput(dto, {
+      seasonMonths: product.seasonMonths,
+      harvestStartAt: product.harvestStartAt,
+      harvestEndAt: product.harvestEndAt,
+      forecastQuantity: this.toNumberOrNull(product.forecastQuantity),
+      harvestStatus: product.harvestStatus,
+      preorderEnabled: product.preorderEnabled,
+    });
 
     const contentChanged =
       (dto.title !== undefined && dto.title.trim() !== product.title) ||
@@ -262,6 +316,9 @@ export class ProductsService {
       moderatedById = null;
     }
 
+    const previousStatus = product.harvestStatus;
+    const previousPreorder = product.preorderEnabled;
+
     const updated = await this.prisma.product.update({
       where: { id: product.id },
       data: {
@@ -278,6 +335,18 @@ export class ProductsService {
           dto.minQuantity === undefined && dto.maxQuantity === undefined
             ? undefined
             : quantity.maxQuantity,
+        seasonMonths:
+          dto.seasonMonths === undefined ? undefined : harvest.seasonMonths,
+        harvestStartAt:
+          dto.harvestStartAt === undefined ? undefined : harvest.harvestStartAt,
+        harvestEndAt:
+          dto.harvestEndAt === undefined ? undefined : harvest.harvestEndAt,
+        forecastQuantity:
+          dto.forecastQuantity === undefined ? undefined : harvest.forecastQuantity,
+        harvestStatus:
+          dto.harvestStatus === undefined ? undefined : harvest.harvestStatus,
+        preorderEnabled:
+          dto.preorderEnabled === undefined ? undefined : harvest.preorderEnabled,
         isPublished: nextPublished,
         moderationStatus,
         moderationNote,
@@ -287,7 +356,63 @@ export class ProductsService {
       include: productDetailInclude,
     });
 
+    await this.notifyHarvestWatchersIfNeeded({
+      product: updated,
+      previousStatus,
+      previousPreorder,
+      nextStatus: updated.harvestStatus,
+      nextPreorder: updated.preorderEnabled,
+      isPublic:
+        updated.isPublished &&
+        updated.moderationStatus === PrismaModerationStatus.approved,
+    });
+
     return this.toDetail(updated);
+  }
+
+  async getWatchStatus(
+    user: AuthenticatedUser,
+    productId: string,
+  ): Promise<{ watching: boolean; productId: string }> {
+    await this.requirePublicOrOwnedProduct(productId, user);
+    const watch = await this.prisma.harvestWatch.findUnique({
+      where: { userId_productId: { userId: user.id, productId } },
+      select: { id: true },
+    });
+    return { watching: Boolean(watch), productId };
+  }
+
+  async watchProduct(
+    user: AuthenticatedUser,
+    productId: string,
+  ): Promise<{ watching: true; productId: string }> {
+    if (user.role === 'farmer') {
+      const owned = await this.prisma.product.findFirst({
+        where: { id: productId, farm: { ownerId: user.id } },
+        select: { id: true },
+      });
+      if (owned) {
+        throw new BadRequestException('You cannot watch your own product');
+      }
+    }
+
+    await this.requirePublicProduct(productId);
+    await this.prisma.harvestWatch.upsert({
+      where: { userId_productId: { userId: user.id, productId } },
+      create: { userId: user.id, productId },
+      update: {},
+    });
+    return { watching: true, productId };
+  }
+
+  async unwatchProduct(
+    user: AuthenticatedUser,
+    productId: string,
+  ): Promise<{ watching: false; productId: string }> {
+    await this.prisma.harvestWatch.deleteMany({
+      where: { userId: user.id, productId },
+    });
+    return { watching: false, productId };
   }
 
   async remove(user: AuthenticatedUser, id: string): Promise<{ ok: true }> {
@@ -561,6 +686,12 @@ export class ProductsService {
       unit: product.unit,
       minQuantity: this.toNumberOrNull(product.minQuantity),
       maxQuantity: this.toNumberOrNull(product.maxQuantity),
+      seasonMonths: normalizeSeasonMonths(product.seasonMonths),
+      harvestStartAt: product.harvestStartAt?.toISOString() ?? null,
+      harvestEndAt: product.harvestEndAt?.toISOString() ?? null,
+      forecastQuantity: this.toNumberOrNull(product.forecastQuantity),
+      harvestStatus: (product.harvestStatus as HarvestStatus | null) ?? null,
+      preorderEnabled: product.preorderEnabled,
       isPublished: product.isPublished,
       moderationStatus: product.moderationStatus as ModerationStatus,
       moderationNote: product.moderationNote,
@@ -579,11 +710,206 @@ export class ProductsService {
   private toDetail(
     product: ProductWithOwnerAndImages,
     sellerRating?: RatingSummary | null,
+    watching = false,
   ): ProductDetail {
     return {
       ...this.toSummary(product, sellerRating),
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
+      watching,
     };
+  }
+
+  private normalizeHarvestInput(
+    dto: {
+      seasonMonths?: number[];
+      harvestStartAt?: string | null;
+      harvestEndAt?: string | null;
+      forecastQuantity?: number | null;
+      harvestStatus?: string | null;
+      preorderEnabled?: boolean;
+    },
+    fallback?: {
+      seasonMonths: number[];
+      harvestStartAt: Date | null;
+      harvestEndAt: Date | null;
+      forecastQuantity: number | null;
+      harvestStatus: PrismaHarvestStatus | null;
+      preorderEnabled: boolean;
+    },
+  ): {
+    seasonMonths: SeasonMonth[];
+    harvestStartAt: Date | null;
+    harvestEndAt: Date | null;
+    forecastQuantity: number | null;
+    harvestStatus: PrismaHarvestStatus | null;
+    preorderEnabled: boolean;
+  } {
+    const seasonMonths =
+      dto.seasonMonths === undefined
+        ? normalizeSeasonMonths(fallback?.seasonMonths ?? [])
+        : normalizeSeasonMonths(dto.seasonMonths);
+
+    const harvestStartAt =
+      dto.harvestStartAt === undefined
+        ? (fallback?.harvestStartAt ?? null)
+        : dto.harvestStartAt
+          ? new Date(dto.harvestStartAt)
+          : null;
+    const harvestEndAt =
+      dto.harvestEndAt === undefined
+        ? (fallback?.harvestEndAt ?? null)
+        : dto.harvestEndAt
+          ? new Date(dto.harvestEndAt)
+          : null;
+
+    if (
+      harvestStartAt &&
+      harvestEndAt &&
+      harvestStartAt.getTime() > harvestEndAt.getTime()
+    ) {
+      throw new BadRequestException('harvestStartAt cannot be after harvestEndAt');
+    }
+
+    const forecastQuantity =
+      dto.forecastQuantity === undefined
+        ? (fallback?.forecastQuantity ?? null)
+        : dto.forecastQuantity;
+
+    if (forecastQuantity !== null && forecastQuantity !== undefined && forecastQuantity <= 0) {
+      throw new BadRequestException('forecastQuantity must be greater than 0');
+    }
+
+    let harvestStatus: PrismaHarvestStatus | null =
+      fallback?.harvestStatus ?? null;
+    if (dto.harvestStatus !== undefined) {
+      if (dto.harvestStatus === null || dto.harvestStatus === '') {
+        harvestStatus = null;
+      } else if (isHarvestStatus(dto.harvestStatus)) {
+        harvestStatus = dto.harvestStatus as PrismaHarvestStatus;
+      } else {
+        throw new BadRequestException('harvestStatus is invalid');
+      }
+    }
+
+    const preorderEnabled =
+      dto.preorderEnabled === undefined
+        ? (fallback?.preorderEnabled ?? false)
+        : dto.preorderEnabled;
+
+    return {
+      seasonMonths,
+      harvestStartAt,
+      harvestEndAt,
+      forecastQuantity: forecastQuantity ?? null,
+      harvestStatus,
+      preorderEnabled,
+    };
+  }
+
+  private async requirePublicProduct(productId: string) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: {
+        id: true,
+        isPublished: true,
+        moderationStatus: true,
+      },
+    });
+    if (
+      !product ||
+      !product.isPublished ||
+      product.moderationStatus !== PrismaModerationStatus.approved
+    ) {
+      throw new NotFoundException('Product not found');
+    }
+    return product;
+  }
+
+  private async requirePublicOrOwnedProduct(
+    productId: string,
+    user: AuthenticatedUser,
+  ) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: {
+        id: true,
+        isPublished: true,
+        moderationStatus: true,
+        farm: { select: { ownerId: true } },
+      },
+    });
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+    const isOwner = user.role === 'admin' || product.farm.ownerId === user.id;
+    const isPublic =
+      product.isPublished &&
+      product.moderationStatus === PrismaModerationStatus.approved;
+    if (!isPublic && !isOwner) {
+      throw new NotFoundException('Product not found');
+    }
+    return product;
+  }
+
+  private async notifyHarvestWatchersIfNeeded(params: {
+    product: ProductWithOwnerAndImages;
+    previousStatus: PrismaHarvestStatus | null;
+    previousPreorder: boolean;
+    nextStatus: PrismaHarvestStatus | null;
+    nextPreorder: boolean;
+    isPublic: boolean;
+  }) {
+    if (!params.isPublic) return;
+
+    const becameAvailable =
+      params.nextStatus !== params.previousStatus &&
+      (params.nextStatus === PrismaHarvestStatus.available ||
+        params.nextStatus === PrismaHarvestStatus.limited);
+
+    const preorderOpened =
+      !params.previousPreorder && params.nextPreorder === true;
+
+    if (!becameAvailable && !preorderOpened) return;
+
+    const watches = await this.prisma.harvestWatch.findMany({
+      where: { productId: params.product.id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            locale: true,
+            displayName: true,
+            blockedAt: true,
+          },
+        },
+      },
+    });
+
+    await Promise.all(
+      watches
+        .filter((watch) => !watch.user.blockedAt)
+        .filter((watch) => watch.user.id !== params.product.farm.ownerId)
+        .map(async (watch) => {
+          if (becameAvailable) {
+            await this.notifications.notifyHarvestAvailable({
+              user: watch.user,
+              productId: params.product.id,
+              productTitle: params.product.title,
+              farmName: params.product.farm.name,
+              harvestStatus: params.nextStatus ?? 'available',
+            });
+          }
+          if (preorderOpened) {
+            await this.notifications.notifyHarvestPreorderOpen({
+              user: watch.user,
+              productId: params.product.id,
+              productTitle: params.product.title,
+              farmName: params.product.farm.name,
+            });
+          }
+        }),
+    );
   }
 }

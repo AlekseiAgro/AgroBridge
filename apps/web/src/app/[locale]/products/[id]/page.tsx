@@ -1,6 +1,9 @@
 import type { ProductDetail } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { HarvestPlanSummary } from '@/components/HarvestPlanSummary';
+import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
+import { HarvestWatchButton } from '@/components/HarvestWatchButton';
 import { RatingStars } from '@/components/RatingStars';
 import { RfqRequestForm } from '@/components/RfqRequestForm';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -23,6 +26,7 @@ export default async function ProductDetailPage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations('product');
   const tc = await getTranslations('catalog');
+  const th = await getTranslations('harvest');
   const tr = await getTranslations('rfq');
   const tRoot = await getTranslations();
   const token = await getAuthToken();
@@ -43,6 +47,13 @@ export default async function ProductDetailPage({ params }: Props) {
     product,
     product.unit ? t(`units.${product.unit as 'kg'}`) : null,
   );
+  const unitLabel = product.unit ? t(`units.${product.unit as 'kg'}`) : null;
+  const canRequest = user?.role === 'buyer' || user?.role === 'admin';
+  const showPreorder =
+    product.preorderEnabled &&
+    (product.harvestStatus === 'growing' ||
+      product.harvestStatus === 'limited' ||
+      product.harvestStatus === null);
 
   return (
     <div className="page">
@@ -51,7 +62,13 @@ export default async function ProductDetailPage({ params }: Props) {
         <p className="eyebrow">
           <Link href="/catalog">{tc('title')}</Link>
         </p>
-        <h1>{product.title}</h1>
+        <h1 className="farm-title-row">
+          {product.title}
+          <HarvestStatusBadge
+            status={product.harvestStatus}
+            preorderEnabled={product.preorderEnabled}
+          />
+        </h1>
         <p className="page__subtitle">
           <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
           <VerifiedBadge verified={product.farm.verified} />
@@ -118,9 +135,34 @@ export default async function ProductDetailPage({ params }: Props) {
 
         {product.description ? <p className="detail-text">{product.description}</p> : null}
 
-        {user?.role === 'buyer' || user?.role === 'admin' ? (
+        <HarvestPlanSummary
+          locale={locale}
+          seasonMonths={product.seasonMonths}
+          harvestStartAt={product.harvestStartAt}
+          harvestEndAt={product.harvestEndAt}
+          forecastQuantity={product.forecastQuantity}
+          harvestStatus={product.harvestStatus}
+          preorderEnabled={product.preorderEnabled}
+          unitLabel={unitLabel}
+        />
+
+        <section className="harvest-watch-section">
+          <h2 className="section-title">{th('alertsTitle')}</h2>
+          <p className="page__subtitle">{th('alertsSubtitle')}</p>
+          <HarvestWatchButton
+            productId={product.id}
+            initialWatching={Boolean(product.watching)}
+            isLoggedIn={Boolean(user)}
+          />
+        </section>
+
+        {canRequest ? (
           <div style={{ marginTop: '1.75rem' }}>
-            <RfqRequestForm productId={product.id} defaultUnit={product.unit} />
+            <RfqRequestForm
+              productId={product.id}
+              defaultUnit={product.unit}
+              preorder={showPreorder}
+            />
           </div>
         ) : !user ? (
           <p className="auth-card__footer" style={{ marginTop: '1.5rem' }}>

@@ -67,6 +67,24 @@ export class ProductsController {
     return this.productsService.update(user, id, dto);
   }
 
+  @Get(':id/watch')
+  @UseGuards(JwtAuthGuard)
+  getWatch(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.productsService.getWatchStatus(user, id);
+  }
+
+  @Post(':id/watch')
+  @UseGuards(JwtAuthGuard)
+  watch(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.productsService.watchProduct(user, id);
+  }
+
+  @Delete(':id/watch')
+  @UseGuards(JwtAuthGuard)
+  unwatch(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.productsService.unwatchProduct(user, id);
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('farmer', 'admin')

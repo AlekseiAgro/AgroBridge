@@ -26,4 +26,6 @@ export type EmailTemplateKey =
   | 'productRejected'
   | 'newProductListing'
   | 'newPurchaseRequest'
-  | 'verificationCode';
+  | 'verificationCode'
+  | 'harvestAvailable'
+  | 'harvestPreorderOpen';

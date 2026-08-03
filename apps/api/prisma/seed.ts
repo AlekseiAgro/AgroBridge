@@ -32,6 +32,11 @@ type DemoProduct = {
   unit: string;
   minQuantity?: number;
   maxQuantity?: number;
+  seasonMonths?: number[];
+  harvestStatus?: 'growing' | 'available' | 'limited' | 'soldOut';
+  forecastQuantity?: number;
+  preorderEnabled?: boolean;
+  harvestOffsetDays?: { start: number; end: number };
 };
 
 function quantityForUnit(unit: string, index: number): { minQuantity: number; maxQuantity: number } {
@@ -824,6 +829,23 @@ async function seedFarmer(
         }
       : quantityForUnit(farmer.product.unit, index);
 
+  const now = new Date();
+  const startOffset = farmer.product.harvestOffsetDays?.start ?? (index % 3 === 0 ? -10 : 14);
+  const endOffset = farmer.product.harvestOffsetDays?.end ?? startOffset + 25;
+  const harvestStartAt = new Date(now);
+  harvestStartAt.setUTCDate(harvestStartAt.getUTCDate() + startOffset);
+  const harvestEndAt = new Date(now);
+  harvestEndAt.setUTCDate(harvestEndAt.getUTCDate() + endOffset);
+
+  const defaultSeason =
+    farmer.product.seasonMonths ??
+    Array.from({ length: 3 }, (_, i) => ((harvestStartAt.getUTCMonth() + i) % 12) + 1);
+
+  const harvestStatuses = ['growing', 'available', 'limited', 'soldOut'] as const;
+  const harvestStatus =
+    farmer.product.harvestStatus ??
+    harvestStatuses[index % harvestStatuses.length];
+
   const product = await prisma.product.create({
     data: {
       farmId: farm.id,
@@ -833,6 +855,14 @@ async function seedFarmer(
       unit: farmer.product.unit,
       minQuantity: quantity.minQuantity,
       maxQuantity: quantity.maxQuantity,
+      seasonMonths: defaultSeason,
+      harvestStartAt,
+      harvestEndAt,
+      forecastQuantity: farmer.product.forecastQuantity ?? quantity.maxQuantity,
+      harvestStatus,
+      preorderEnabled:
+        farmer.product.preorderEnabled ??
+        (harvestStatus === 'growing' || harvestStatus === 'limited'),
       isPublished: true,
       moderationStatus: ModerationStatus.approved,
       moderatedAt: new Date(),

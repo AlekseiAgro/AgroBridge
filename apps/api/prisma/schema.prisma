@@ -99,6 +99,13 @@ enum VerificationChannel {
   sms
 }
 
+enum HarvestStatus {
+  growing
+  available
+  limited
+  soldOut
+}
+
 model User {
   id               String      @id @default(cuid())
   email            String      @unique
@@ -133,6 +140,7 @@ model User {
   ratingsReceived              Rating[]           @relation("RatingsReceived")
   alertSubscription            AlertSubscription?
   verificationCodes            VerificationCode[]
+  harvestWatches               HarvestWatch[]
 
   @@index([blockedAt])
   @@index([createdAt])
@@ -245,6 +253,12 @@ model Product {
   unit             String?
   minQuantity      Decimal?         @db.Decimal(12, 2)
   maxQuantity      Decimal?         @db.Decimal(12, 2)
+  seasonMonths     Int[]            @default([])
+  harvestStartAt   DateTime?
+  harvestEndAt     DateTime?
+  forecastQuantity Decimal?         @db.Decimal(12, 2)
+  harvestStatus    HarvestStatus?
+  preorderEnabled  Boolean          @default(false)
   isPublished      Boolean          @default(false)
   moderationStatus ModerationStatus @default(draft)
   moderationNote   String?
@@ -253,15 +267,33 @@ model Product {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
-  farm        Farm           @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  moderatedBy User?          @relation("ProductModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
-  rfqs        Rfq[]
-  images      ProductImage[]
+  farm           Farm           @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  moderatedBy    User?          @relation("ProductModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  rfqs           Rfq[]
+  images         ProductImage[]
+  harvestWatches HarvestWatch[]
 
   @@index([farmId])
   @@index([isPublished])
   @@index([moderationStatus])
   @@index([isPublished, moderationStatus])
+  @@index([harvestStatus])
+  @@index([preorderEnabled])
+}
+
+/// Buyer opt-in alerts when a product becomes available or opens pre-orders.
+model HarvestWatch {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId, createdAt])
+  @@map("harvest_watches")
 }
 
 model ProductImage {

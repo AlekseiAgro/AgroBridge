@@ -78,6 +78,7 @@ export function isGeorgiaRegion(value: string): value is GeorgiaRegion {
 }
 
 import type { FarmDocument, VerificationStatus } from './verification';
+import type { HarvestStatus, SeasonMonth } from './harvest';
 
 export type FarmSummary = {
   id: string;
@@ -138,6 +139,14 @@ export type ProductSummary = {
   minQuantity: number | null;
   /** Maximum quantity the farmer can sell (in `unit`). */
   maxQuantity: number | null;
+  /** Months (1–12) when this crop is typically in season. */
+  seasonMonths: SeasonMonth[];
+  harvestStartAt: string | null;
+  harvestEndAt: string | null;
+  /** Forecast harvest volume in the product `unit`. */
+  forecastQuantity: number | null;
+  harvestStatus: HarvestStatus | null;
+  preorderEnabled: boolean;
   isPublished: boolean;
   moderationStatus: ModerationStatus;
   moderationNote: string | null;
@@ -156,10 +165,17 @@ export type ProductSummary = {
 export type ProductDetail = ProductSummary & {
   createdAt: string;
   updatedAt: string;
+  /** Whether the current viewer watches harvest/preorder alerts for this product. */
+  watching?: boolean;
 };
 
 export type CatalogQuery = {
   q?: string;
   category?: string;
   region?: string;
+  harvestStatus?: HarvestStatus;
+  /** When true, only listings that accept pre-orders. */
+  preorder?: boolean;
+  /** When true, only listings whose seasonMonths include the current month. */
+  inSeason?: boolean;
 };

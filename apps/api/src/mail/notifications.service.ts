@@ -214,6 +214,38 @@ export class NotificationsService {
     });
   }
 
+  async notifyHarvestAvailable(params: {
+    user: MailRecipient;
+    productId: string;
+    productTitle: string;
+    farmName: string;
+    harvestStatus: string;
+  }): Promise<void> {
+    const locale = this.localeOf(params.user.locale);
+    await this.sendTemplate(params.user, 'harvestAvailable', {
+      name: this.displayName(params.user),
+      productTitle: params.productTitle,
+      farmName: params.farmName,
+      statusLabel: params.harvestStatus,
+      link: this.appLink(locale, `/products/${params.productId}`),
+    });
+  }
+
+  async notifyHarvestPreorderOpen(params: {
+    user: MailRecipient;
+    productId: string;
+    productTitle: string;
+    farmName: string;
+  }): Promise<void> {
+    const locale = this.localeOf(params.user.locale);
+    await this.sendTemplate(params.user, 'harvestPreorderOpen', {
+      name: this.displayName(params.user),
+      productTitle: params.productTitle,
+      farmName: params.farmName,
+      link: this.appLink(locale, `/products/${params.productId}`),
+    });
+  }
+
   private async sendTemplate(
     recipient: MailRecipient,
     key: Parameters<typeof renderEmailTemplate>[1],

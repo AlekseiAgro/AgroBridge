@@ -44,6 +44,10 @@ describe('ProductsService', () => {
       storage as never,
       ratings as never,
       { enabledIds: jest.fn().mockResolvedValue(null) } as never,
+      {
+        notifyHarvestAvailable: jest.fn().mockResolvedValue(undefined),
+        notifyHarvestPreorderOpen: jest.fn().mockResolvedValue(undefined),
+      } as never,
     );
   });
 
