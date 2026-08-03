@@ -326,6 +326,10 @@ export class ProductsService {
       include: productDetailInclude,
     });
 
+    if (product.moderationStatus === PrismaModerationStatus.pending) {
+      this.queuePendingModerationEmail(product, user);
+    }
+
     return this.toDetail(product, null, false, true);
   }
 
@@ -536,6 +540,13 @@ export class ProductsService {
       isPublic: updated.isPublished && updated.moderationStatus === PrismaModerationStatus.approved,
     });
 
+    if (
+      updated.moderationStatus === PrismaModerationStatus.pending &&
+      product.moderationStatus !== PrismaModerationStatus.pending
+    ) {
+      this.queuePendingModerationEmail(updated, user);
+    }
+
     return this.toDetail(updated, null, false, true);
   }
 
@@ -659,6 +670,7 @@ export class ProductsService {
 
     const isPrimary = existingCount === 0;
 
+    let enteredPending = false;
     try {
       await this.prisma.$transaction(async (tx) => {
         await tx.productImage.create({
@@ -672,11 +684,15 @@ export class ProductsService {
           },
         });
 
-        await this.markPendingForImageChange(tx, product);
+        enteredPending = await this.markPendingForImageChange(tx, product);
       });
     } catch (error) {
       await this.storage.delete(stored.key).catch(() => undefined);
       throw error;
+    }
+
+    if (enteredPending) {
+      this.queuePendingModerationEmail(product, user);
     }
 
     return this.getById(product.id, user);
@@ -716,6 +732,7 @@ export class ProductsService {
       folder: `products/${product.id}/videos`,
     });
 
+    let enteredPending = false;
     try {
       await this.prisma.$transaction(async (tx) => {
         await tx.productVideo.create({
@@ -729,11 +746,15 @@ export class ProductsService {
             durationSeconds: duration,
           },
         });
-        await this.markPendingForImageChange(tx, product);
+        enteredPending = await this.markPendingForImageChange(tx, product);
       });
     } catch (error) {
       await this.storage.delete(stored.key).catch(() => undefined);
       throw error;
+    }
+
+    if (enteredPending) {
+      this.queuePendingModerationEmail(product, user);
     }
 
     return this.getById(product.id, user);
@@ -753,11 +774,15 @@ export class ProductsService {
       throw new NotFoundException('Video not found');
     }
 
-    await this.prisma.$transaction(async (tx) => {
+    const enteredPending = await this.prisma.$transaction(async (tx) => {
       await tx.productVideo.delete({ where: { id: video.id } });
-      await this.markPendingForImageChange(tx, product);
+      return this.markPendingForImageChange(tx, product);
     });
     await this.storage.delete(video.key).catch(() => undefined);
+
+    if (enteredPending) {
+      this.queuePendingModerationEmail(product, user);
+    }
 
     return this.getById(product.id, user);
   }
@@ -805,6 +830,7 @@ export class ProductsService {
       folder: `products/${product.id}/certificates`,
     });
 
+    let enteredPending = false;
     try {
       await this.prisma.$transaction(async (tx) => {
         await tx.productCertificate.create({
@@ -819,11 +845,15 @@ export class ProductsService {
             sizeBytes: file.size,
           },
         });
-        await this.markPendingForImageChange(tx, product);
+        enteredPending = await this.markPendingForImageChange(tx, product);
       });
     } catch (error) {
       await this.storage.delete(stored.key).catch(() => undefined);
       throw error;
+    }
+
+    if (enteredPending) {
+      this.queuePendingModerationEmail(product, user);
     }
 
     return this.getById(product.id, user);
@@ -843,11 +873,15 @@ export class ProductsService {
       throw new NotFoundException('Certificate not found');
     }
 
-    await this.prisma.$transaction(async (tx) => {
+    const enteredPending = await this.prisma.$transaction(async (tx) => {
       await tx.productCertificate.delete({ where: { id: certificate.id } });
-      await this.markPendingForImageChange(tx, product);
+      return this.markPendingForImageChange(tx, product);
     });
     await this.storage.delete(certificate.key).catch(() => undefined);
+
+    if (enteredPending) {
+      this.queuePendingModerationEmail(product, user);
+    }
 
     return this.getById(product.id, user);
   }
@@ -868,7 +902,7 @@ export class ProductsService {
       throw new NotFoundException('Image not found');
     }
 
-    await this.prisma.$transaction(async (tx) => {
+    const enteredPending = await this.prisma.$transaction(async (tx) => {
       await tx.productImage.delete({ where: { id: image.id } });
 
       if (image.isPrimary) {
@@ -884,8 +918,12 @@ export class ProductsService {
         }
       }
 
-      await this.markPendingForImageChange(tx, product);
+      return this.markPendingForImageChange(tx, product);
     });
+
+    if (enteredPending) {
+      this.queuePendingModerationEmail(product, user);
+    }
 
     try {
       await this.storage.delete(image.key);
@@ -912,7 +950,7 @@ export class ProductsService {
       throw new NotFoundException('Image not found');
     }
 
-    await this.prisma.$transaction(async (tx) => {
+    const enteredPending = await this.prisma.$transaction(async (tx) => {
       await tx.productImage.updateMany({
         where: { productId: product.id, isPrimary: true },
         data: { isPrimary: false },
@@ -921,8 +959,12 @@ export class ProductsService {
         where: { id: image.id },
         data: { isPrimary: true },
       });
-      await this.markPendingForImageChange(tx, product);
+      return this.markPendingForImageChange(tx, product);
     });
+
+    if (enteredPending) {
+      this.queuePendingModerationEmail(product, user);
+    }
 
     return this.getById(product.id, user);
   }
@@ -930,9 +972,9 @@ export class ProductsService {
   private async markPendingForImageChange(
     tx: Prisma.TransactionClient,
     product: { id: string; isPublished: boolean; moderationStatus: PrismaModerationStatus },
-  ) {
+  ): Promise<boolean> {
     if (!product.isPublished) {
-      return;
+      return false;
     }
 
     if (
@@ -948,7 +990,50 @@ export class ProductsService {
           moderatedById: null,
         },
       });
+      return true;
     }
+
+    return false;
+  }
+
+  private queuePendingModerationEmail(
+    product: { id: string; title: string },
+    seller: AuthenticatedUser,
+  ): void {
+    void this.notifyAdminsProductPending(product, seller).catch(() => undefined);
+  }
+
+  private async notifyAdminsProductPending(
+    product: { id: string; title: string },
+    seller: AuthenticatedUser,
+  ): Promise<void> {
+    const admins = await this.prisma.user.findMany({
+      where: {
+        role: 'admin',
+        blockedAt: null,
+      },
+      select: {
+        email: true,
+        locale: true,
+        displayName: true,
+      },
+    });
+
+    if (admins.length === 0) {
+      return;
+    }
+
+    const sellerName = seller.displayName?.trim() || seller.email;
+    await Promise.all(
+      admins.map((admin) =>
+        this.notifications.notifyProductPendingModeration({
+          admin,
+          productTitle: product.title,
+          productId: product.id,
+          sellerName,
+        }),
+      ),
+    );
   }
 
   private async requireOwnedProduct(ownerId: string, productId: string) {

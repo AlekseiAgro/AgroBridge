@@ -161,6 +161,24 @@ export class NotificationsService {
     });
   }
 
+  async notifyProductPendingModeration(params: {
+    admin: MailRecipient;
+    productTitle: string;
+    productId: string;
+    sellerName: string;
+  }): Promise<void> {
+    const locale = this.localeOf(params.admin.locale);
+    await this.sendTemplate(params.admin, 'productPendingModeration', {
+      name: this.displayName(params.admin),
+      productTitle: params.productTitle,
+      sellerName: params.sellerName,
+      link: this.appLink(
+        locale,
+        `/dashboard/admin?section=products&status=pending`,
+      ),
+    });
+  }
+
   async notifyNewProductListing(params: {
     user: MailRecipient;
     productTitle: string;

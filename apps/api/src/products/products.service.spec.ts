@@ -48,6 +48,7 @@ describe('ProductsService', () => {
       {
         notifyHarvestAvailable: jest.fn().mockResolvedValue(undefined),
         notifyHarvestPreorderOpen: jest.fn().mockResolvedValue(undefined),
+        notifyProductPendingModeration: jest.fn().mockResolvedValue(undefined),
       } as never,
     );
   });

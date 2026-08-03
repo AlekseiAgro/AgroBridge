@@ -110,7 +110,9 @@ Statuses: `pending` → `offered` → `accepted` | `declined` (or `cancelled` wh
 - Farmer submits a product for review (`Submit for moderation`)
 - Statuses: `draft` → `pending` → `approved` | `rejected`
 - Public catalog shows only **approved + published** products
-- Admin desk: `/dashboard/admin`
+- Admin desk: `/{locale}/dashboard/admin` (e.g. `/en/dashboard/admin` or `https://agrobrid.ge/en/dashboard/admin`)
+- Product review queue: `/{locale}/dashboard/admin?section=products&status=pending`
+- Admins are emailed when a listing enters moderation
 - Seed admin + demo users:
 
 ```bash
@@ -142,6 +144,7 @@ Transactional emails (locale-aware templates: ka/en/ru/de/fr/it/es):
 
 - Welcome after registration
 - RFQ created / offer sent / accepted / declined / cancelled
+- Product submitted for moderation (to admin accounts)
 - Product approved / rejected by admin
 
 Drivers:
