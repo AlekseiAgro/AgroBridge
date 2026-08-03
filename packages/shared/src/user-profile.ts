@@ -6,6 +6,7 @@ import type { UserRole } from './roles';
 export type PublicUserProfile = {
   id: string;
   displayName: string | null;
+  avatarUrl: string | null;
   role: UserRole;
   sellerType: SellerType | null;
   buyerType: BuyerType | null;

@@ -698,7 +698,14 @@
     "deleteAccountConfirmSubmit": "წაშლის დადასტურება",
     "deleteAccountCancel": "გაუქმება",
     "deleteAccountConfirm": "წავშალოთ AgroBridge ანგარიში სამუდამოდ? ამ მოქმედების გაუქმება შეუძლებელია.",
-    "deleteAccountError": "ანგარიშის წაშლა ვერ მოხერხდა. სცადეთ თავიდან."
+    "deleteAccountError": "ანგარიშის წაშლა ვერ მოხერხდა. სცადეთ თავიდან.",
+    "avatarUpload": "ფოტოს ატვირთვა",
+    "avatarChange": "ფოტოს შეცვლა",
+    "avatarRemove": "ფოტოს წაშლა",
+    "avatarUploading": "იტვირთება…",
+    "avatarUploadError": "ფოტოს ატვირთვა ვერ მოხერხდა. გამოიყენეთ JPEG, PNG ან WebP 5 მბ-მდე.",
+    "avatarRemoveError": "ფოტოს წაშლა ვერ მოხერხდა.",
+    "avatarRemoveConfirm": "წავშალოთ პროფილის ფოტო?"
   },
   "rating": {
     "title": "შეაფასეთ პარტნიორი",

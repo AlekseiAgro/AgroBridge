@@ -28,11 +28,23 @@ export class UploadsController {
     @Param('filename') filename: string,
     @Res() res: Response,
   ) {
+    return this.serveLocalFile(`products/${productId}/${filename}`, filename, res);
+  }
+
+  @Get('users/:userId/:filename')
+  async serveUserAvatar(
+    @Param('userId') userId: string,
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ) {
+    return this.serveLocalFile(`users/${userId}/${filename}`, filename, res);
+  }
+
+  private serveLocalFile(key: string, filename: string, res: Response) {
     if (this.storage.getDriver() !== STORAGE_DRIVER.LOCAL) {
       throw new NotFoundException('Local uploads are not enabled');
     }
 
-    const key = `products/${productId}/${filename}`;
     const absolute = this.storage.resolveLocalPath(key);
     if (!existsSync(absolute)) {
       throw new NotFoundException('File not found');

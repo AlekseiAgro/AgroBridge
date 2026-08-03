@@ -58,6 +58,7 @@ export class UsersService {
     return {
       id: user.id,
       displayName: user.displayName,
+      avatarUrl: user.avatarUrl,
       role: user.role,
       sellerType: user.sellerType,
       buyerType: user.buyerType,

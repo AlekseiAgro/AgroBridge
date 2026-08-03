@@ -698,7 +698,14 @@
     "deleteAccountConfirmSubmit": "Confirmer la suppression",
     "deleteAccountCancel": "Annuler",
     "deleteAccountConfirm": "Supprimer définitivement votre compte AgroBridge ? Cette action est irréversible.",
-    "deleteAccountError": "Impossible de supprimer le compte. Réessayez."
+    "deleteAccountError": "Impossible de supprimer le compte. Réessayez.",
+    "avatarUpload": "Ajouter une photo",
+    "avatarChange": "Changer la photo",
+    "avatarRemove": "Supprimer la photo",
+    "avatarUploading": "Envoi…",
+    "avatarUploadError": "Impossible d’envoyer la photo. JPEG, PNG ou WebP jusqu’à 5 Mo.",
+    "avatarRemoveError": "Impossible de supprimer la photo.",
+    "avatarRemoveConfirm": "Supprimer la photo de profil ?"
   },
   "rating": {
     "title": "Noter votre partenaire",

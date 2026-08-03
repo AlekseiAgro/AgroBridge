@@ -137,6 +137,7 @@ export class AuthService {
     buyerType?: PrismaBuyerType | null;
     locale: LocaleCode;
     displayName: string | null;
+    avatarUrl?: string | null;
     emailVerifiedAt?: Date | null;
   }): AuthenticatedUser {
     return {
@@ -147,6 +148,7 @@ export class AuthService {
       buyerType: (user.buyerType as BuyerType | null | undefined) ?? null,
       locale: user.locale as Locale,
       displayName: user.displayName,
+      avatarUrl: user.avatarUrl ?? null,
       emailVerified: Boolean(user.emailVerifiedAt),
     };
   }
@@ -171,6 +173,7 @@ export class AuthService {
       buyerType: user.buyerType,
       locale: user.locale,
       displayName: user.displayName,
+      avatarUrl: user.avatarUrl,
       emailVerified: user.emailVerified,
       rating: { average, count },
     };

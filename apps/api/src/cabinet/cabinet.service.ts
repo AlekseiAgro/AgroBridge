@@ -5,7 +5,12 @@ import {
   ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { canTrade, type CabinetOverview } from '@agrobridge/shared';
+import {
+  USER_AVATAR_MAX_BYTES,
+  canTrade,
+  isUserAvatarMimeType,
+  type CabinetOverview,
+} from '@agrobridge/shared';
 import {
   ModerationStatus as PrismaModerationStatus,
   RfqStatus as PrismaRfqStatus,
@@ -112,6 +117,7 @@ export class CabinetService {
         buyerType: dbUser.buyerType,
         locale: dbUser.locale,
         displayName: dbUser.displayName,
+        avatarUrl: dbUser.avatarUrl,
         rating,
         memberSince: dbUser.createdAt.toISOString(),
       },
@@ -124,6 +130,79 @@ export class CabinetService {
         awaitingMyRating,
       },
     };
+  }
+
+  async uploadAvatar(
+    user: AuthenticatedUser,
+    file?: Express.Multer.File,
+  ): Promise<{ avatarUrl: string }> {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+    if (!isUserAvatarMimeType(file.mimetype)) {
+      throw new BadRequestException('Unsupported image type. Use JPEG, PNG, or WebP');
+    }
+    if (file.size > USER_AVATAR_MAX_BYTES) {
+      throw new BadRequestException('Image is too large (max 5 MB)');
+    }
+
+    const existing = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      select: { avatarKey: true },
+    });
+    if (!existing) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const stored = await this.storage.upload({
+      buffer: file.buffer,
+      mimeType: file.mimetype,
+      originalName: file.originalname,
+      folder: `users/${user.id}`,
+    });
+
+    try {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          avatarUrl: stored.url,
+          avatarKey: stored.key,
+        },
+      });
+    } catch (error) {
+      await this.storage.delete(stored.key).catch(() => undefined);
+      throw error;
+    }
+
+    if (existing.avatarKey && existing.avatarKey !== stored.key) {
+      await this.storage.delete(existing.avatarKey).catch(() => undefined);
+    }
+
+    return { avatarUrl: stored.url };
+  }
+
+  async removeAvatar(user: AuthenticatedUser): Promise<{ avatarUrl: null }> {
+    const existing = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      select: { avatarKey: true },
+    });
+    if (!existing) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        avatarUrl: null,
+        avatarKey: null,
+      },
+    });
+
+    if (existing.avatarKey) {
+      await this.storage.delete(existing.avatarKey).catch(() => undefined);
+    }
+
+    return { avatarUrl: null };
   }
 
   async requestAccountDeletion(
@@ -177,21 +256,28 @@ export class CabinetService {
     await this.assertPassword(dbUser.passwordHash, password);
     await this.consumeDeletionCode(user.id, code);
 
-    const farm = await this.prisma.farm.findUnique({
-      where: { ownerId: user.id },
-      select: {
-        documents: { select: { key: true } },
-        products: {
-          select: {
-            images: { select: { key: true } },
-            videos: { select: { key: true } },
-            certificates: { select: { key: true } },
+    const [avatarUser, farm] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: user.id },
+        select: { avatarKey: true },
+      }),
+      this.prisma.farm.findUnique({
+        where: { ownerId: user.id },
+        select: {
+          documents: { select: { key: true } },
+          products: {
+            select: {
+              images: { select: { key: true } },
+              videos: { select: { key: true } },
+              certificates: { select: { key: true } },
+            },
           },
         },
-      },
-    });
+      }),
+    ]);
 
     const storageKeys: string[] = [];
+    if (avatarUser?.avatarKey) storageKeys.push(avatarUser.avatarKey);
     if (farm) {
       for (const document of farm.documents) storageKeys.push(document.key);
       for (const product of farm.products) {

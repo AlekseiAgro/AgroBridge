@@ -698,7 +698,14 @@
     "deleteAccountConfirmSubmit": "Conferma eliminazione",
     "deleteAccountCancel": "Annulla",
     "deleteAccountConfirm": "Eliminare definitivamente l’account AgroBridge? L’azione non può essere annullata.",
-    "deleteAccountError": "Impossibile eliminare l’account. Riprova."
+    "deleteAccountError": "Impossibile eliminare l’account. Riprova.",
+    "avatarUpload": "Carica foto",
+    "avatarChange": "Cambia foto",
+    "avatarRemove": "Rimuovi foto",
+    "avatarUploading": "Caricamento…",
+    "avatarUploadError": "Impossibile caricare la foto. Usa JPEG, PNG o WebP fino a 5 MB.",
+    "avatarRemoveError": "Impossibile rimuovere la foto.",
+    "avatarRemoveConfirm": "Rimuovere la foto del profilo?"
   },
   "rating": {
     "title": "Valuta il partner",

@@ -698,7 +698,14 @@
     "deleteAccountConfirmSubmit": "Löschung bestätigen",
     "deleteAccountCancel": "Abbrechen",
     "deleteAccountConfirm": "AgroBridge-Konto dauerhaft löschen? Das kann nicht rückgängig gemacht werden.",
-    "deleteAccountError": "Konto konnte nicht gelöscht werden. Bitte erneut versuchen."
+    "deleteAccountError": "Konto konnte nicht gelöscht werden. Bitte erneut versuchen.",
+    "avatarUpload": "Foto hochladen",
+    "avatarChange": "Foto ändern",
+    "avatarRemove": "Foto entfernen",
+    "avatarUploading": "Wird hochgeladen…",
+    "avatarUploadError": "Foto konnte nicht hochgeladen werden. JPEG, PNG oder WebP bis 5 MB.",
+    "avatarRemoveError": "Foto konnte nicht entfernt werden.",
+    "avatarRemoveConfirm": "Profilfoto entfernen?"
   },
   "rating": {
     "title": "Partner bewerten",

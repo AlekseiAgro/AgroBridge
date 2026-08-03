@@ -698,7 +698,14 @@
     "deleteAccountConfirmSubmit": "Confirmar eliminación",
     "deleteAccountCancel": "Cancelar",
     "deleteAccountConfirm": "¿Eliminar tu cuenta de AgroBridge de forma permanente? No se puede deshacer.",
-    "deleteAccountError": "No se pudo eliminar la cuenta. Inténtalo de nuevo."
+    "deleteAccountError": "No se pudo eliminar la cuenta. Inténtalo de nuevo.",
+    "avatarUpload": "Subir foto",
+    "avatarChange": "Cambiar foto",
+    "avatarRemove": "Eliminar foto",
+    "avatarUploading": "Subiendo…",
+    "avatarUploadError": "No se pudo subir la foto. Usa JPEG, PNG o WebP de hasta 5 MB.",
+    "avatarRemoveError": "No se pudo eliminar la foto.",
+    "avatarRemoveConfirm": "¿Eliminar la foto de perfil?"
   },
   "rating": {
     "title": "Valora a tu partner",
