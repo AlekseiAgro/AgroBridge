@@ -129,6 +129,9 @@ export default async function AccountPage({ params }: Props) {
           <Link className="button button--ghost" href="/dashboard/chat">
             {tn('chat')}
           </Link>
+          <Link className="button button--ghost" href="/dashboard/subscriptions">
+            {tn('subscriptions')}
+          </Link>
         </div>
       </section>
     </CabinetShell>

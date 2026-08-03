@@ -64,7 +64,8 @@
     "howItWorks": "Comment ça marche",
     "purchaseRequests": "Demandes d'achat",
     "forBuyers": "Je suis acheteur",
-    "forSellers": "Je suis vendeur"
+    "forSellers": "Je suis vendeur",
+    "subscriptions": "Alertes"
   },
   "footer": {
     "tagline": "Nous relions les fermes géorgiennes aux acheteurs du monde entier.",
@@ -614,5 +615,24 @@
     "backToCabinet": "Retour au cabinet",
     "buyer": "Acheteur",
     "seller": "Vendeur"
+  },
+  "subscriptions": {
+    "title": "Abonnements d’alertes",
+    "subtitle": "Recevez des e-mails pour les nouvelles annonces du catalogue et les demandes d’achat selon votre filtre.",
+    "channelsTitle": "Quoi suivre",
+    "channelsHint": "Activez l’un ou les deux. Les e-mails partent vers l’adresse du compte.",
+    "notifyProducts": "Nouveaux produits du catalogue",
+    "notifyPurchaseRequests": "Nouvelles demandes d’achat",
+    "filterTitle": "Filtre",
+    "filterHint": "Toutes les catégories, ou un filtre par catégories et régions géorgiennes.",
+    "allCategories": "Toutes les catégories",
+    "customCategories": "Catégories sélectionnées uniquement",
+    "allRegions": "Toutes les régions",
+    "customRegions": "Régions sélectionnées uniquement",
+    "regionScopeHint": "Le filtre région s’applique aux annonces du catalogue (région de la ferme). Les demandes d’achat sont filtrées par catégorie.",
+    "save": "Enregistrer les alertes",
+    "saved": "Paramètres d’alerte enregistrés.",
+    "pleaseWait": "Enregistrement…",
+    "genericError": "Impossible d’enregistrer les paramètres."
   }
 }

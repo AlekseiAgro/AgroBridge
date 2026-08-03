@@ -17,6 +17,7 @@ import {
 } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../prisma/prisma.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { CreatePurchaseQuoteDto } from './dto/create-purchase-quote.dto';
 import { CreatePurchaseRequestDto } from './dto/create-purchase-request.dto';
 
@@ -49,7 +50,10 @@ type QuoteEntity = Prisma.PurchaseQuoteGetPayload<{ include: typeof quoteInclude
 
 @Injectable()
 export class PurchaseRequestsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly subscriptions: SubscriptionsService,
+  ) {}
 
   async listOpen(
     filters: {
@@ -113,6 +117,16 @@ export class PurchaseRequestsService {
         status: PurchaseRequestStatus.open,
       },
       include: requestInclude,
+    });
+
+    await this.subscriptions.notifyNewPurchaseRequest({
+      requestId: created.id,
+      title: created.title,
+      category: created.category,
+      quantity: created.quantity,
+      unit: created.unit,
+      buyerUserId: user.id,
+      buyerName: user.displayName?.trim() || user.email,
     });
 
     return this.toDetail(created, user);

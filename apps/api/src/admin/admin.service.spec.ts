@@ -33,7 +33,11 @@ describe('AdminService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new AdminService(prisma as never, notifications as never);
+    service = new AdminService(
+      prisma as never,
+      notifications as never,
+      { notifyNewProduct: jest.fn().mockResolvedValue(undefined) } as never,
+    );
   });
 
   it('returns dashboard stats', async () => {

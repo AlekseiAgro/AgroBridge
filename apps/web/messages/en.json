@@ -64,7 +64,8 @@
     "howItWorks": "How it works",
     "purchaseRequests": "Purchase requests",
     "forBuyers": "I'm a buyer",
-    "forSellers": "I'm a seller"
+    "forSellers": "I'm a seller",
+    "subscriptions": "Alerts"
   },
   "footer": {
     "tagline": "Connecting Georgian farms with buyers worldwide.",
@@ -614,5 +615,24 @@
     "backToCabinet": "Back to my cabinet",
     "buyer": "Buyer",
     "seller": "Seller"
+  },
+  "subscriptions": {
+    "title": "Alert subscriptions",
+    "subtitle": "Get email alerts when new catalog listings or purchase requests match your filters.",
+    "channelsTitle": "What to follow",
+    "channelsHint": "Choose one or both. Alerts are sent to your account email.",
+    "notifyProducts": "New products in the catalog",
+    "notifyPurchaseRequests": "New purchase requests from buyers",
+    "filterTitle": "Filter",
+    "filterHint": "Match everything, or narrow by categories and Georgian regions.",
+    "allCategories": "All product categories",
+    "customCategories": "Selected categories only",
+    "allRegions": "All regions",
+    "customRegions": "Selected regions only",
+    "regionScopeHint": "Region filter applies to catalog listings (farm region). Purchase requests are matched by category.",
+    "save": "Save alerts",
+    "saved": "Alert settings saved.",
+    "pleaseWait": "Saving…",
+    "genericError": "Could not save alert settings."
   }
 }

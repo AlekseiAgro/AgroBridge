@@ -23,4 +23,6 @@ export type EmailTemplateKey =
   | 'rfqDeclinedByFarmer'
   | 'rfqCancelled'
   | 'productApproved'
-  | 'productRejected';
+  | 'productRejected'
+  | 'newProductListing'
+  | 'newPurchaseRequest';

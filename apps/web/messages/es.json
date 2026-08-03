@@ -64,7 +64,8 @@
     "howItWorks": "Cómo funciona",
     "purchaseRequests": "Solicitudes de compra",
     "forBuyers": "Soy comprador",
-    "forSellers": "Soy vendedor"
+    "forSellers": "Soy vendedor",
+    "subscriptions": "Alertas"
   },
   "footer": {
     "tagline": "Conectamos granjas georgianas con compradores de todo el mundo.",
@@ -614,5 +615,24 @@
     "backToCabinet": "Volver al panel",
     "buyer": "Comprador",
     "seller": "Vendedor"
+  },
+  "subscriptions": {
+    "title": "Suscripciones de alertas",
+    "subtitle": "Recibe correos sobre nuevos anuncios del catálogo y solicitudes de compra según tu filtro.",
+    "channelsTitle": "Qué seguir",
+    "channelsHint": "Activa una o ambas. Los correos llegan al email de la cuenta.",
+    "notifyProducts": "Nuevos productos en el catálogo",
+    "notifyPurchaseRequests": "Nuevas solicitudes de compra",
+    "filterTitle": "Filtro",
+    "filterHint": "Todas las categorías, o un filtro por categorías y regiones de Georgia.",
+    "allCategories": "Todas las categorías",
+    "customCategories": "Solo categorías seleccionadas",
+    "allRegions": "Todas las regiones",
+    "customRegions": "Solo regiones seleccionadas",
+    "regionScopeHint": "El filtro de región aplica a anuncios del catálogo (región de la granja). Las solicitudes de compra se filtran por categoría.",
+    "save": "Guardar alertas",
+    "saved": "Ajustes de alerta guardados.",
+    "pleaseWait": "Guardando…",
+    "genericError": "No se pudieron guardar los ajustes."
   }
 }

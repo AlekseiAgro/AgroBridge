@@ -161,6 +161,48 @@ export class NotificationsService {
     });
   }
 
+  async notifyNewProductListing(params: {
+    user: MailRecipient;
+    productTitle: string;
+    productId: string;
+    farmName: string;
+    category: string | null;
+    region: string | null;
+  }): Promise<void> {
+    const locale = this.localeOf(params.user.locale);
+    await this.sendTemplate(params.user, 'newProductListing', {
+      name: this.displayName(params.user),
+      productTitle: params.productTitle,
+      farmName: params.farmName,
+      categoryPart: params.category ? ` · ${params.category}` : '',
+      regionPart: params.region ? ` · ${params.region}` : '',
+      link: this.appLink(locale, `/products/${params.productId}`),
+      settingsLink: this.appLink(locale, '/dashboard/subscriptions'),
+    });
+  }
+
+  async notifyNewPurchaseRequest(params: {
+    user: MailRecipient;
+    title: string;
+    requestId: string;
+    buyerName: string;
+    category: string;
+    quantity: string;
+    unit: string | null;
+  }): Promise<void> {
+    const locale = this.localeOf(params.user.locale);
+    await this.sendTemplate(params.user, 'newPurchaseRequest', {
+      name: this.displayName(params.user),
+      title: params.title,
+      buyerName: params.buyerName,
+      quantity: params.quantity,
+      unit: params.unit ? ` ${params.unit}` : '',
+      categoryPart: params.category ? ` · ${params.category}` : '',
+      link: this.appLink(locale, `/requests/${params.requestId}`),
+      settingsLink: this.appLink(locale, '/dashboard/subscriptions'),
+    });
+  }
+
   private async sendTemplate(
     recipient: MailRecipient,
     key: Parameters<typeof renderEmailTemplate>[1],

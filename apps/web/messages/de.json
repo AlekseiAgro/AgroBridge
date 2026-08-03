@@ -64,7 +64,8 @@
     "howItWorks": "So funktioniert’s",
     "purchaseRequests": "Kaufanfragen",
     "forBuyers": "Ich bin Käufer",
-    "forSellers": "Ich bin Verkäufer"
+    "forSellers": "Ich bin Verkäufer",
+    "subscriptions": "Alerts"
   },
   "footer": {
     "tagline": "Wir verbinden georgische Betriebe mit Käufern weltweit.",
@@ -614,5 +615,24 @@
     "backToCabinet": "Zurück zum Kabinett",
     "buyer": "Käufer",
     "seller": "Verkäufer"
+  },
+  "subscriptions": {
+    "title": "Alert-Abos",
+    "subtitle": "E-Mail-Benachrichtigungen für neue Katalogangebote und Kaufanfragen nach Ihrem Filter.",
+    "channelsTitle": "Was verfolgen",
+    "channelsHint": "Eins oder beides aktivieren. Mails gehen an Ihre Konto-E-Mail.",
+    "notifyProducts": "Neue Produkte im Katalog",
+    "notifyPurchaseRequests": "Neue Kaufanfragen von Käufern",
+    "filterTitle": "Filter",
+    "filterHint": "Alles oder nur gewählte Kategorien und georgische Regionen.",
+    "allCategories": "Alle Produktkategorien",
+    "customCategories": "Nur ausgewählte Kategorien",
+    "allRegions": "Alle Regionen",
+    "customRegions": "Nur ausgewählte Regionen",
+    "regionScopeHint": "Der Regionsfilter gilt für Katalogangebote (Farmregion). Kaufanfragen werden nach Kategorie gematcht.",
+    "save": "Alerts speichern",
+    "saved": "Alert-Einstellungen gespeichert.",
+    "pleaseWait": "Speichern…",
+    "genericError": "Einstellungen konnten nicht gespeichert werden."
   }
 }

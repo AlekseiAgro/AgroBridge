@@ -1954,3 +1954,41 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+
+.check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0.45rem 0;
+  font-size: 0.95rem;
+}
+
+.check-row input {
+  margin-top: 0.2rem;
+}
+
+.check-row--chip {
+  margin: 0;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  background: var(--surface);
+}
+
+.chip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.45rem;
+  margin: 0.75rem 0 0.25rem;
+}
+
+.field-group {
+  border: 0;
+  margin: 0 0 1.5rem;
+  padding: 0;
+}
+
+.field-group .section-title {
+  margin-bottom: 0.35rem;
+}

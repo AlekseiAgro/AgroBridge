@@ -104,9 +104,29 @@ model User {
   reviewedDocuments            FarmDocument[]    @relation("DocumentReviewer")
   ratingsGiven                 Rating[]          @relation("RatingsGiven")
   ratingsReceived              Rating[]          @relation("RatingsReceived")
+  alertSubscription            AlertSubscription?
 
   @@index([blockedAt])
   @@index([createdAt])
+}
+
+/// Opt-in alerts for new catalog products and/or purchase requests.
+/// When allCategories/allRegions are true, the matching arrays are ignored.
+model AlertSubscription {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  notifyProducts         Boolean  @default(false)
+  notifyPurchaseRequests Boolean  @default(false)
+  allCategories          Boolean  @default(true)
+  categories             String[] @default([])
+  allRegions             Boolean  @default(true)
+  regions                String[] @default([])
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("alert_subscriptions")
 }
 
 model Farm {

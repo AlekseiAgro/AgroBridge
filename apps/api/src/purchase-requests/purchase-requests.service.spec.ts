@@ -21,7 +21,9 @@ describe('PurchaseRequestsService', () => {
     $transaction: jest.fn(),
   };
 
-  const service = new PurchaseRequestsService(prisma as never);
+  const service = new PurchaseRequestsService(prisma as never, {
+    notifyNewPurchaseRequest: jest.fn().mockResolvedValue(undefined),
+  } as never);
 
   beforeEach(() => {
     jest.clearAllMocks();

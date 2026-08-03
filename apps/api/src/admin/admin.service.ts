@@ -30,6 +30,7 @@ import {
 } from '@prisma/client';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { BlockUserDto, RejectProductDto, ReviewNoteDto, UpdateCategoryDto } from './dto/admin.dto';
 
@@ -56,6 +57,7 @@ export class AdminService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly subscriptions: SubscriptionsService,
   ) {}
 
   async stats(): Promise<AdminStats> {
@@ -196,6 +198,15 @@ export class AdminService {
       farmer: product.farm.owner,
       productTitle: product.title,
       productId: product.id,
+    });
+
+    await this.subscriptions.notifyNewProduct({
+      productId: product.id,
+      productTitle: product.title,
+      category: product.category,
+      region: product.farm.region,
+      farmName: product.farm.name,
+      ownerUserId: product.farm.owner.id,
     });
 
     return this.toModerated(product);

@@ -64,7 +64,8 @@
     "howItWorks": "Come funziona",
     "purchaseRequests": "Richieste di acquisto",
     "forBuyers": "Sono un acquirente",
-    "forSellers": "Sono un venditore"
+    "forSellers": "Sono un venditore",
+    "subscriptions": "Avvisi"
   },
   "footer": {
     "tagline": "Colleghiamo le aziende georgiane con acquirenti in tutto il mondo.",
@@ -614,5 +615,24 @@
     "backToCabinet": "Torna al cabinet",
     "buyer": "Acquirente",
     "seller": "Venditore"
+  },
+  "subscriptions": {
+    "title": "Abbonamenti agli avvisi",
+    "subtitle": "Ricevi email per nuovi annunci del catalogo e richieste di acquisto secondo il tuo filtro.",
+    "channelsTitle": "Cosa seguire",
+    "channelsHint": "Attiva uno o entrambi. Le email arrivano all’indirizzo dell’account.",
+    "notifyProducts": "Nuovi prodotti nel catalogo",
+    "notifyPurchaseRequests": "Nuove richieste di acquisto",
+    "filterTitle": "Filtro",
+    "filterHint": "Tutte le categorie, oppure un filtro per categorie e regioni georgiane.",
+    "allCategories": "Tutte le categorie",
+    "customCategories": "Solo categorie selezionate",
+    "allRegions": "Tutte le regioni",
+    "customRegions": "Solo regioni selezionate",
+    "regionScopeHint": "Il filtro regione vale per gli annunci del catalogo (regione della fattoria). Le richieste di acquisto si abbinano per categoria.",
+    "save": "Salva avvisi",
+    "saved": "Impostazioni salvate.",
+    "pleaseWait": "Salvataggio…",
+    "genericError": "Impossibile salvare le impostazioni."
   }
 }
