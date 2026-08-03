@@ -147,7 +147,7 @@ import type {
 } from './quality';
 import type { MarketOpportunity } from './market-insight';
 
-export const PRODUCT_IMAGE_MAX_COUNT = 10;
+export const PRODUCT_IMAGE_MAX_COUNT = 5;
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 export const PRODUCT_IMAGE_MIME_TYPES = [
   'image/jpeg',

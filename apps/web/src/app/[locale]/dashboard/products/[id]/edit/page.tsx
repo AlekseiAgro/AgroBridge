@@ -41,11 +41,12 @@ export default async function EditProductPage({ params }: Props) {
       <p className="page__subtitle">{t('editSubtitle')}</p>
       <ProductImagesManager productId={product.id} initialImages={product.images} />
       <ProductVideosManager productId={product.id} initialVideos={product.videos} />
+      <ProductForm mode="edit" initial={product} />
+      {/* Certificates stay available below the main card fields. */}
       <ProductCertificatesManager
         productId={product.id}
         initialCertificates={product.certificates}
       />
-      <ProductForm mode="edit" initial={product} />
     </main>
   );
 }

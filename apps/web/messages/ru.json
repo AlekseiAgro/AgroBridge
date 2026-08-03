@@ -266,6 +266,7 @@
     "addProduct": "Добавить товар",
     "createTitle": "Новый товар",
     "createSubtitle": "Опишите, что вы можете поставить.",
+    "draftTitle": "Новый товар",
     "editTitle": "Редактировать товар",
     "editSubtitle": "Обновите детали или статус публикации.",
     "title": "Название",
@@ -303,8 +304,8 @@
       "rejected": "Отклонено"
     },
     "images": {
-      "title": "Фотографии",
-      "subtitle": "Добавьте до {max} фото (JPEG, PNG или WebP, до 5 МБ каждое).",
+      "title": "Фотографии продукции",
+      "subtitle": "Добавьте до {max} фото продукции (JPEG, PNG или WebP, до 5 МБ каждое).",
       "upload": "Загрузить фото",
       "empty": "Фотографий пока нет.",
       "primary": "Главное",
@@ -431,16 +432,16 @@
     "ownershipType": "Форма владения",
     "exportMarkets": "Экспортные рынки",
     "videos": {
-      "title": "Videos",
+      "title": "Видео продукции",
       "publicTitle": "Product videos",
-      "subtitle": "Add up to {max} MP4, WebM, or QuickTime videos (max 80 MB each).",
+      "subtitle": "Добавьте до {max} видео продукции (MP4, WebM или MOV, до 80 МБ).",
       "upload": "Upload video",
       "empty": "No videos yet.",
       "delete": "Delete",
       "deleteConfirm": "Delete this video?",
       "uploadError": "Could not upload the video.",
       "deleteError": "Could not delete the video.",
-      "maxReached": "Maximum of {max} videos reached."
+      "maxReached": "Достигнут лимит в {max} видео."
     },
     "certificates": {
       "title": "Certificates",

@@ -266,6 +266,7 @@
     "addProduct": "პროდუქტის დამატება",
     "createTitle": "ახალი პროდუქტი",
     "createSubtitle": "აღწერეთ, რისი მიწოდება შეგიძლიათ.",
+    "draftTitle": "ახალი პროდუქტი",
     "editTitle": "პროდუქტის რედაქტირება",
     "editSubtitle": "განაახლეთ დეტალები ან სტატუსი.",
     "title": "სათაური",
@@ -303,8 +304,8 @@
       "rejected": "უარყოფილია"
     },
     "images": {
-      "title": "ფოტოები",
-      "subtitle": "დაამატეთ {max}-მდე ფოტო (JPEG, PNG ან WebP, მაქსიმუმ 5MB).",
+      "title": "პროდუქციის ფოტოები",
+      "subtitle": "დაამატეთ მაქსიმუმ {max} პროდუქტის ფოტო (JPEG, PNG ან WebP, თითო 5 მბ-მდე).",
       "upload": "ფოტოს ატვირთვა",
       "empty": "ფოტოები ჯერ არ არის.",
       "primary": "მთავარი",
@@ -431,16 +432,16 @@
     "ownershipType": "Ownership type",
     "exportMarkets": "Export markets",
     "videos": {
-      "title": "Videos",
+      "title": "პროდუქციის ვიდეო",
       "publicTitle": "Product videos",
-      "subtitle": "Add up to {max} MP4, WebM, or QuickTime videos (max 80 MB each).",
+      "subtitle": "დაამატეთ მაქსიმუმ {max} პროდუქტის ვიდეო (MP4, WebM ან MOV, 80 მბ-მდე).",
       "upload": "Upload video",
       "empty": "No videos yet.",
       "delete": "Delete",
       "deleteConfirm": "Delete this video?",
       "uploadError": "Could not upload the video.",
       "deleteError": "Could not delete the video.",
-      "maxReached": "Maximum of {max} videos reached."
+      "maxReached": "მიღწეულია {max} ვიდეოს ლიმიტი."
     },
     "certificates": {
       "title": "Certificates",

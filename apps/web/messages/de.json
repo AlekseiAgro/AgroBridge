@@ -266,6 +266,7 @@
     "addProduct": "Produkt hinzufügen",
     "createTitle": "Neues Produkt",
     "createSubtitle": "Beschreiben Sie, was Sie liefern können.",
+    "draftTitle": "Unbenanntes Produkt",
     "editTitle": "Produkt bearbeiten",
     "editSubtitle": "Details oder Veröffentlichungsstatus aktualisieren.",
     "title": "Titel",
@@ -303,8 +304,8 @@
       "rejected": "Abgelehnt"
     },
     "images": {
-      "title": "Fotos",
-      "subtitle": "Fügen Sie bis zu {max} Fotos hinzu (JPEG, PNG oder WebP, max. 5 MB).",
+      "title": "Produktfotos",
+      "subtitle": "Fügen Sie bis zu {max} Produktfotos hinzu (JPEG, PNG oder WebP, je max. 5 MB).",
       "upload": "Foto hochladen",
       "empty": "Noch keine Fotos.",
       "primary": "Hauptfoto",
@@ -431,16 +432,16 @@
     "ownershipType": "Ownership type",
     "exportMarkets": "Export markets",
     "videos": {
-      "title": "Videos",
+      "title": "Produktvideo",
       "publicTitle": "Product videos",
-      "subtitle": "Add up to {max} MP4, WebM, or QuickTime videos (max 80 MB each).",
+      "subtitle": "Fügen Sie bis zu {max} Produktvideo hinzu (MP4, WebM oder MOV, max. 80 MB).",
       "upload": "Upload video",
       "empty": "No videos yet.",
       "delete": "Delete",
       "deleteConfirm": "Delete this video?",
       "uploadError": "Could not upload the video.",
       "deleteError": "Could not delete the video.",
-      "maxReached": "Maximum of {max} videos reached."
+      "maxReached": "Limit von {max} Video erreicht."
     },
     "certificates": {
       "title": "Certificates",

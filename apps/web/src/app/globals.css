@@ -1335,6 +1335,12 @@ body {
   border-bottom: 1px solid var(--line);
 }
 
+.product-images.product-form__section {
+  margin: 0 0 1rem;
+  padding-bottom: 1.15rem;
+  border-bottom: 0;
+}
+
 .product-images__header .section-title {
   margin-top: 0;
 }

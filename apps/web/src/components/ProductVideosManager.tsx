@@ -73,7 +73,7 @@ export function ProductVideosManager({ productId, initialVideos }: Props) {
   }
 
   return (
-    <section className="product-images product-videos">
+    <section className="product-images product-videos product-form__section">
       <div className="product-images__header">
         <h2 className="section-title">{t('videos.title')}</h2>
         <p className="page__subtitle">{t('videos.subtitle', { max: PRODUCT_VIDEO_MAX_COUNT })}</p>

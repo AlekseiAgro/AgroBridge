@@ -110,7 +110,7 @@ export function ProductImagesManager({ productId, initialImages }: Props) {
   const canUpload = images.length < PRODUCT_IMAGE_MAX_COUNT;
 
   return (
-    <section className="product-images">
+    <section className="product-images product-form__section">
       <div className="product-images__header">
         <h2 className="section-title">{t('images.title')}</h2>
         <p className="page__subtitle">{t('images.subtitle', { max: PRODUCT_IMAGE_MAX_COUNT })}</p>

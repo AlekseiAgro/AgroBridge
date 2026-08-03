@@ -15,7 +15,7 @@ export function isProductImageKind(value: string): value is ProductImageKind {
   return (PRODUCT_IMAGE_KINDS as readonly string[]).includes(value);
 }
 
-export const PRODUCT_VIDEO_MAX_COUNT = 3;
+export const PRODUCT_VIDEO_MAX_COUNT = 1;
 export const PRODUCT_VIDEO_MAX_BYTES = 80 * 1024 * 1024;
 export const PRODUCT_VIDEO_MIME_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'] as const;
 export type ProductVideoMimeType = (typeof PRODUCT_VIDEO_MIME_TYPES)[number];
