@@ -2,6 +2,7 @@ import type { CabinetOverview } from '@agrobridge/shared';
 import { canTrade } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CabinetShell } from '@/components/CabinetShell';
+import { DeleteAccountButton } from '@/components/DeleteAccountButton';
 import { RatingStars } from '@/components/RatingStars';
 import { Link } from '@/i18n/navigation';
 import { formatMemberSinceMonthYear } from '@/lib/member-since';
@@ -139,6 +140,16 @@ export default async function AccountPage({ params }: Props) {
           </Link>
         </div>
       </section>
+
+      {user.role !== 'admin' ? (
+        <section className="cabinet-danger" aria-labelledby="cabinet-danger-title">
+          <h2 id="cabinet-danger-title" className="section-title">
+            {t('dangerZone')}
+          </h2>
+          <p className="page__subtitle">{t('deleteAccountHint')}</p>
+          <DeleteAccountButton email={user.email} />
+        </section>
+      ) : null}
     </CabinetShell>
   );
 }

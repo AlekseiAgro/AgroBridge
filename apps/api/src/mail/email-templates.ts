@@ -55,6 +55,10 @@ const en: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Your AgroBridge verification code",
     text: "Hello {{name}},\n\nYour verification code is {{code}}.\nIt expires in 10 minutes.\n\n— AgroBridge",
   },
+  accountDeletionCode: {
+    subject: "Confirm account deletion on AgroBridge",
+    text: "Hello {{name}},\n\nWe received a request to permanently delete your AgroBridge account.\nYour confirmation code is {{code}}.\nIt expires in 10 minutes.\n\nIf you did not request this, ignore this email and keep your account.\n\n— AgroBridge",
+  },
   harvestAvailable: {
     subject: "Harvest update: {{productTitle}} is {{statusLabel}}",
     text: "Hello {{name}},\n\n{{productTitle}} from {{farmName}} is now {{statusLabel}}.\n\nView listing: {{link}}\n\nManage watches from the product page.\n\n— AgroBridge",
@@ -113,6 +117,10 @@ const ru: Record<EmailTemplateKey, EmailTemplate> = {
   verificationCode: {
     subject: "Код подтверждения AgroBridge",
     text: "Здравствуйте, {{name}}!\n\nВаш код подтверждения: {{code}}.\nОн действует 10 минут.\n\n— AgroBridge",
+  },
+  accountDeletionCode: {
+    subject: "Подтверждение удаления аккаунта AgroBridge",
+    text: "Здравствуйте, {{name}}!\n\nМы получили запрос на безвозвратное удаление вашего аккаунта AgroBridge.\nКод подтверждения: {{code}}.\nОн действует 10 минут.\n\nЕсли это были не вы — просто проигнорируйте письмо.\n\n— AgroBridge",
   },
   harvestAvailable: {
     subject: "Урожай: {{productTitle}} — {{statusLabel}}",
@@ -173,6 +181,10 @@ const de: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Ihr AgroBridge-Bestätigungscode",
     text: "Hallo {{name}},\n\nIhr Bestätigungscode lautet {{code}}.\nEr ist 10 Minuten gültig.\n\n— AgroBridge",
   },
+  accountDeletionCode: {
+    subject: "Konto-Löschung bei AgroBridge bestätigen",
+    text: "Hallo {{name}},\n\nWir haben eine Anfrage zur dauerhaften Löschung Ihres AgroBridge-Kontos erhalten.\nIhr Bestätigungscode lautet {{code}}.\nEr ist 10 Minuten gültig.\n\nWenn Sie das nicht waren, ignorieren Sie diese E-Mail.\n\n— AgroBridge",
+  },
   harvestAvailable: {
     subject: "Ernte-Update: {{productTitle}} ist {{statusLabel}}",
     text: "Hallo {{name}},\n\n{{productTitle}} von {{farmName}} ist jetzt {{statusLabel}}.\n\nAngebot ansehen: {{link}}\n\n— AgroBridge",
@@ -231,6 +243,10 @@ const fr: Record<EmailTemplateKey, EmailTemplate> = {
   verificationCode: {
     subject: "Votre code de vérification AgroBridge",
     text: "Bonjour {{name}},\n\nVotre code de vérification est {{code}}.\nIl expire dans 10 minutes.\n\n— AgroBridge",
+  },
+  accountDeletionCode: {
+    subject: "Confirmez la suppression de votre compte AgroBridge",
+    text: "Bonjour {{name}},\n\nNous avons reçu une demande de suppression définitive de votre compte AgroBridge.\nVotre code de confirmation est {{code}}.\nIl expire dans 10 minutes.\n\nSi vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail.\n\n— AgroBridge",
   },
   harvestAvailable: {
     subject: "Récolte : {{productTitle}} est {{statusLabel}}",
@@ -291,6 +307,10 @@ const it: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Il tuo codice di verifica AgroBridge",
     text: "Ciao {{name}},\n\nIl tuo codice di verifica è {{code}}.\nScade tra 10 minuti.\n\n— AgroBridge",
   },
+  accountDeletionCode: {
+    subject: "Conferma eliminazione account AgroBridge",
+    text: "Ciao {{name}},\n\nAbbiamo ricevuto una richiesta di eliminazione permanente del tuo account AgroBridge.\nIl codice di conferma è {{code}}.\nScade tra 10 minuti.\n\nSe non sei stato tu, ignora questa email.\n\n— AgroBridge",
+  },
   harvestAvailable: {
     subject: "Raccolto: {{productTitle}} è {{statusLabel}}",
     text: "Ciao {{name}},\n\n{{productTitle}} di {{farmName}} è ora {{statusLabel}}.\n\nVedi l'annuncio: {{link}}\n\n— AgroBridge",
@@ -350,6 +370,10 @@ const es: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Tu código de verificación de AgroBridge",
     text: "Hola {{name}},\n\nTu código de verificación es {{code}}.\nCaduca en 10 minutos.\n\n— AgroBridge",
   },
+  accountDeletionCode: {
+    subject: "Confirma la eliminación de tu cuenta AgroBridge",
+    text: "Hola {{name}},\n\nRecibimos una solicitud para eliminar permanentemente tu cuenta de AgroBridge.\nTu código de confirmación es {{code}}.\nCaduca en 10 minutos.\n\nSi no fuiste tú, ignora este correo.\n\n— AgroBridge",
+  },
   harvestAvailable: {
     subject: "Cosecha: {{productTitle}} está {{statusLabel}}",
     text: "Hola {{name}},\n\n{{productTitle}} de {{farmName}} ahora está {{statusLabel}}.\n\nVer anuncio: {{link}}\n\n— AgroBridge",
@@ -408,6 +432,10 @@ const ka: Record<EmailTemplateKey, EmailTemplate> = {
   verificationCode: {
     subject: "AgroBridge-ის ვერიფიკაციის კოდი",
     text: "გამარჯობა, {{name}}!\n\nთქვენი ვერიფიკაციის კოდია {{code}}.\nმოქმედებს 10 წუთი.\n\n— AgroBridge",
+  },
+  accountDeletionCode: {
+    subject: "AgroBridge ანგარიშის წაშლის დადასტურება",
+    text: "გამარჯობა {{name}},\n\nმივიღეთ თქვენი AgroBridge ანგარიშის სამუდამოდ წაშლის მოთხოვნა.\nდადასტურების კოდი: {{code}}.\nკოდი მოქმედებს 10 წუთი.\n\nთუ ეს თქვენ არ ყოფილხართ, უბრალოდ დააიგნორეთ ეს წერილი.\n\n— AgroBridge",
   },
   harvestAvailable: {
     subject: "მოსავალი: {{productTitle}} — {{statusLabel}}",

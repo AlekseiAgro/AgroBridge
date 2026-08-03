@@ -688,7 +688,19 @@
       "publishedProducts": "Veröffentlichte Produkte",
       "pendingModeration": "In Moderation",
       "awaitingMyRating": "Wartet auf Ihre Bewertung"
-    }
+    },
+    "dangerZone": "Gefahrenzone",
+    "deleteAccount": "Konto löschen",
+    "deleteAccountHint": "Löscht dauerhaft Ihr Konto, Farmprofil, Produkte und zugehörige Anfragen.",
+    "deleteAccountFlowHint": "Geben Sie Ihr Passwort ein. Wir senden einen Bestätigungscode an {email}.",
+    "deleteAccountSendCode": "Bestätigungscode senden",
+    "deleteAccountResendCode": "Code erneut senden",
+    "deleteAccountCode": "E-Mail-Bestätigungscode",
+    "deleteAccountCodeSent": "Code an {email} gesendet. Geben Sie ihn unten mit Ihrem Passwort ein.",
+    "deleteAccountConfirmSubmit": "Löschung bestätigen",
+    "deleteAccountCancel": "Abbrechen",
+    "deleteAccountConfirm": "AgroBridge-Konto dauerhaft löschen? Das kann nicht rückgängig gemacht werden.",
+    "deleteAccountError": "Konto konnte nicht gelöscht werden. Bitte erneut versuchen."
   },
   "rating": {
     "title": "Partner bewerten",

@@ -97,6 +97,7 @@ enum FarmDocumentKind {
 enum VerificationChannel {
   email
   sms
+  accountDeletion
 }
 
 enum HarvestStatus {

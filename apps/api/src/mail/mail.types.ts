@@ -27,5 +27,6 @@ export type EmailTemplateKey =
   | 'newProductListing'
   | 'newPurchaseRequest'
   | 'verificationCode'
+  | 'accountDeletionCode'
   | 'harvestAvailable'
   | 'harvestPreorderOpen';
