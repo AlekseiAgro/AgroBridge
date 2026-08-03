@@ -71,6 +71,11 @@ const en: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Pre-orders open: {{productTitle}}",
     text: "Hello {{name}},\n\n{{farmName}} opened pre-orders for {{productTitle}}.\n\nView listing: {{link}}\n\n— AgroBridge",
   },
+  chatMessage: {
+    subject: 'New message from {{senderName}}',
+    text: 'Hello {{name}},\n\n{{senderName}} sent you a message on AgroBridge:\n\n“{{preview}}”\n\nOpen chat: {{link}}\n\n— AgroBridge',
+  },
+
 };
 
 const ru: Record<EmailTemplateKey, EmailTemplate> = {
@@ -138,6 +143,11 @@ const ru: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Открыт предзаказ: {{productTitle}}",
     text: "Здравствуйте, {{name}}!\n\n{{farmName}} открыл(а) предзаказ на {{productTitle}}.\n\nОткрыть объявление: {{link}}\n\n— AgroBridge",
   },
+  chatMessage: {
+    subject: 'Новое сообщение от {{senderName}}',
+    text: 'Здравствуйте, {{name}}!\n\n{{senderName}} написал(а) вам в чате AgroBridge:\n\n«{{preview}}»\n\nОткрыть чат: {{link}}\n\n— AgroBridge',
+  },
+
 };
 
 const de: Record<EmailTemplateKey, EmailTemplate> = {
@@ -205,6 +215,11 @@ const de: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Vorbestellungen offen: {{productTitle}}",
     text: "Hallo {{name}},\n\n{{farmName}} hat Vorbestellungen für {{productTitle}} geöffnet.\n\nAngebot ansehen: {{link}}\n\n— AgroBridge",
   },
+  chatMessage: {
+    subject: 'Neue Nachricht von {{senderName}}',
+    text: 'Hallo {{name}},\n\n{{senderName}} hat Ihnen auf AgroBridge geschrieben:\n\n„{{preview}}“\n\nChat öffnen: {{link}}\n\n— AgroBridge',
+  },
+
 };
 
 const fr: Record<EmailTemplateKey, EmailTemplate> = {
@@ -272,6 +287,11 @@ const fr: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Précommandes ouvertes : {{productTitle}}",
     text: "Bonjour {{name}},\n\n{{farmName}} a ouvert les précommandes pour {{productTitle}}.\n\nVoir l'annonce : {{link}}\n\n— AgroBridge",
   },
+  chatMessage: {
+    subject: 'Nouveau message de {{senderName}}',
+    text: 'Bonjour {{name}},\n\n{{senderName}} vous a écrit sur AgroBridge :\n\n« {{preview}} »\n\nOuvrir le chat : {{link}}\n\n— AgroBridge',
+  },
+
 };
 
 const it: Record<EmailTemplateKey, EmailTemplate> = {
@@ -339,6 +359,11 @@ const it: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Preordini aperti: {{productTitle}}",
     text: "Ciao {{name}},\n\n{{farmName}} ha aperto i preordini per {{productTitle}}.\n\nVedi l'annuncio: {{link}}\n\n— AgroBridge",
   },
+  chatMessage: {
+    subject: 'Nuovo messaggio da {{senderName}}',
+    text: 'Ciao {{name}},\n\n{{senderName}} ti ha scritto su AgroBridge:\n\n«{{preview}}»\n\nApri la chat: {{link}}\n\n— AgroBridge',
+  },
+
 };
 
 const es: Record<EmailTemplateKey, EmailTemplate> = {
@@ -406,6 +431,11 @@ const es: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Preventa abierta: {{productTitle}}",
     text: "Hola {{name}},\n\n{{farmName}} abrió la preventa de {{productTitle}}.\n\nVer anuncio: {{link}}\n\n— AgroBridge",
   },
+  chatMessage: {
+    subject: 'Nuevo mensaje de {{senderName}}',
+    text: 'Hola {{name}},\n\n{{senderName}} te ha escrito en AgroBridge:\n\n«{{preview}}»\n\nAbrir el chat: {{link}}\n\n— AgroBridge',
+  },
+
 };
 
 const ka: Record<EmailTemplateKey, EmailTemplate> = {
@@ -473,6 +503,11 @@ const ka: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "წინასწარი შეკვეთა გაიხსნა: {{productTitle}}",
     text: "გამარჯობა, {{name}}!\n\n{{farmName}}-მა გახსნა წინასწარი შეკვეთა {{productTitle}}-ზე.\n\nნახვა: {{link}}\n\n— AgroBridge",
   },
+  chatMessage: {
+    subject: 'ახალი შეტყობინება: {{senderName}}',
+    text: 'გამარჯობა, {{name}}!\n\n{{senderName}}-მა მოგწერათ AgroBridge-ის ჩატში:\n\n„{{preview}}“\n\nჩატის გახსნა: {{link}}\n\n— AgroBridge',
+  },
+
 };
 
 export const EMAIL_TEMPLATES: Record<Locale, Record<EmailTemplateKey, EmailTemplate>> = {

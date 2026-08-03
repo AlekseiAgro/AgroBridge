@@ -55,4 +55,28 @@ describe('NotificationsService', () => {
       }),
     ).resolves.toBeUndefined();
   });
+
+  it('sends a localized chat message email', async () => {
+    await service.notifyChatMessage({
+      recipient: {
+        email: 'buyer@example.com',
+        locale: 'ru',
+        displayName: 'Buyer',
+      },
+      senderName: 'Nino',
+      preview: 'Hello from the farm',
+      conversationId: 'c1',
+    });
+
+    expect(mail.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'buyer@example.com',
+        subject: expect.stringContaining('Nino'),
+        text: expect.stringContaining('Hello from the farm'),
+      }),
+    );
+    expect(mail.send.mock.calls[0][0].text).toContain(
+      'http://localhost:3000/ru/dashboard/chat/c1',
+    );
+  });
 });

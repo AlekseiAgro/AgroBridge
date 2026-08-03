@@ -150,7 +150,7 @@ Drivers:
 - `MAIL_DRIVER=smtp` — send via SMTP (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM`)
 - Links use `WEB_PUBLIC_URL`
 
-Chat messages are intentionally not emailed yet (too noisy for MVP).
+Chat messages email the recipient (skipped if they recently opened the thread).
 
 ## Deploy (Docker)
 

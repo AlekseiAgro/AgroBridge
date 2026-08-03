@@ -17,10 +17,15 @@ describe('ChatService', () => {
       findUniqueOrThrow: jest.fn(),
       count: jest.fn(),
     },
+    purchaseRequest: { findUnique: jest.fn() },
   };
 
   const translationService = {
     translateMessage: jest.fn(),
+  };
+
+  const notifications = {
+    notifyChatMessage: jest.fn().mockResolvedValue(undefined),
   };
 
   let service: ChatService;
@@ -35,7 +40,11 @@ describe('ChatService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new ChatService(prisma as never, translationService as never);
+    service = new ChatService(
+      prisma as never,
+      translationService as never,
+      notifications as never,
+    );
   });
 
   it('requires rfqId or farmerId', async () => {

@@ -14,11 +14,16 @@ import type {
 } from '@agrobridge/shared';
 import { canTrade } from '@agrobridge/shared';
 import { LocaleCode, Prisma, UserRole } from '@prisma/client';
+import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TranslationService } from '../translation/translation.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+
+/** Skip email if the peer opened the chat within this window (likely online). */
+const CHAT_EMAIL_ACTIVE_WINDOW_MS = 2 * 60 * 1000;
+const CHAT_EMAIL_PREVIEW_MAX = 180;
 
 const participantSelect = {
   id: true,
@@ -61,6 +66,7 @@ export class ChatService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly translationService: TranslationService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async createOrGet(
@@ -213,7 +219,61 @@ export class ChatService {
       include: { translations: true },
     });
 
+    void this.notifyPeerAboutMessage(user, conversation, text).catch(() => undefined);
+
     return this.toMessageView(full, user);
+  }
+
+  private async notifyPeerAboutMessage(
+    sender: AuthenticatedUser,
+    conversation: ConversationReadState & {
+      farmerId: string;
+      buyerId: string;
+    },
+    text: string,
+  ): Promise<void> {
+    const peerId =
+      conversation.farmerId === sender.id ? conversation.buyerId : conversation.farmerId;
+    const peerLastReadAt =
+      conversation.farmerId === peerId
+        ? conversation.farmerLastReadAt
+        : conversation.buyerLastReadAt;
+
+    if (
+      peerLastReadAt &&
+      Date.now() - peerLastReadAt.getTime() < CHAT_EMAIL_ACTIVE_WINDOW_MS
+    ) {
+      return;
+    }
+
+    const peer = await this.prisma.user.findUnique({
+      where: { id: peerId },
+      select: {
+        email: true,
+        locale: true,
+        displayName: true,
+        blockedAt: true,
+      },
+    });
+    if (!peer || peer.blockedAt) {
+      return;
+    }
+
+    const preview =
+      text.length > CHAT_EMAIL_PREVIEW_MAX
+        ? `${text.slice(0, CHAT_EMAIL_PREVIEW_MAX - 1)}…`
+        : text;
+
+    await this.notifications.notifyChatMessage({
+      recipient: {
+        email: peer.email,
+        locale: peer.locale,
+        displayName: peer.displayName,
+      },
+      senderName: sender.displayName?.trim() || sender.email,
+      preview,
+      conversationId: conversation.id,
+    });
   }
 
   private async markRead(user: AuthenticatedUser, conversation: ConversationReadState) {

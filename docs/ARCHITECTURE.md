@@ -86,7 +86,7 @@
 - Templates are locale-aware (`ka|en|ru|de|fr|it|es`) with English fallback.
 - Events: welcome, RFQ lifecycle, product moderation decisions.
 - Failures are logged and never block the primary API action.
-- Chat per-message email is deferred (noise / preference settings later).
+- Chat messages email the recipient via `notifyChatMessage` (fire-and-forget; skipped if the peer opened the thread within the last 2 minutes).
 
 ## Out of scope for early MVP
 

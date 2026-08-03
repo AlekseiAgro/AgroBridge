@@ -287,6 +287,21 @@ export class NotificationsService {
     });
   }
 
+  async notifyChatMessage(params: {
+    recipient: MailRecipient;
+    senderName: string;
+    preview: string;
+    conversationId: string;
+  }): Promise<void> {
+    const locale = this.localeOf(params.recipient.locale);
+    await this.sendTemplate(params.recipient, 'chatMessage', {
+      name: this.displayName(params.recipient),
+      senderName: params.senderName,
+      preview: params.preview,
+      link: this.appLink(locale, `/dashboard/chat/${params.conversationId}`),
+    });
+  }
+
   private async sendTemplate(
     recipient: MailRecipient,
     key: Parameters<typeof renderEmailTemplate>[1],
