@@ -1868,19 +1868,6 @@ body {
   font-size: 0.85rem;
 }
 
-.profile-settings {
-  display: grid;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.profile-edit-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.55rem 0.75rem;
-}
-
 .profile-edit-row__label {
   color: var(--brand-deep);
   font-weight: 600;
@@ -1893,6 +1880,54 @@ body {
 
 .profile-edit-form {
   max-width: 28rem;
+}
+
+.edit-profile__name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.3rem;
+}
+
+.edit-profile__name-row .user-card__name {
+  margin: 0;
+}
+
+.edit-profile__pencil {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.edit-profile__pencil:hover,
+.edit-profile__pencil[aria-expanded='true'] {
+  color: var(--brand-deep);
+  background: rgba(47, 107, 58, 0.1);
+  border-color: rgba(47, 107, 58, 0.18);
+}
+
+.edit-profile__panel {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.85rem;
+  max-width: 28rem;
+}
+
+.edit-profile__email {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: start;
 }
 
 .user-card__name {

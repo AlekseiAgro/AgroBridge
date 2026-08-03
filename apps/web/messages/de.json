@@ -725,7 +725,8 @@
     "changeEmailCodeSent": "Code an {email} gesendet. Danach müssen Sie die neue Adresse {newEmail} bestätigen.",
     "changeEmailConfirmSubmit": "E-Mail-Änderung bestätigen",
     "changeEmailCancel": "Abbrechen",
-    "changeEmailError": "E-Mail konnte nicht geändert werden. Bitte erneut versuchen."
+    "changeEmailError": "E-Mail konnte nicht geändert werden. Bitte erneut versuchen.",
+    "editProfile": "Profil bearbeiten"
   },
   "rating": {
     "title": "Partner bewerten",
