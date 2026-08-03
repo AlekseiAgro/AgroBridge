@@ -1,19 +1,17 @@
 import type { AuthTokenResponse, BuyerType, Locale, PublicUser, SellerType } from '@agrobridge/shared';
 import {
   DEFAULT_LOCALE,
-  isBuyerType,
   isLocale,
   isRegisterableRole,
-  isSellerType,
 } from '@agrobridge/shared';
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import {
-  BuyerType as PrismaBuyerType,
   LocaleCode,
   SellerType as PrismaSellerType,
+  BuyerType as PrismaBuyerType,
   UserRole,
 } from '@prisma/client';
 import { NotificationsService } from '../mail/notifications.service';
@@ -38,27 +36,6 @@ export class AuthService {
       throw new ConflictException('Invalid role for registration');
     }
 
-    // Every marketplace account can buy and sell. Role is a starting preference only.
-    let sellerType: PrismaSellerType;
-    let buyerType: PrismaBuyerType;
-    if (dto.role === 'farmer') {
-      if (!dto.sellerType || !isSellerType(dto.sellerType)) {
-        throw new BadRequestException('Seller type is required for farmers');
-      }
-      sellerType = dto.sellerType as PrismaSellerType;
-      buyerType = (
-        dto.buyerType && isBuyerType(dto.buyerType) ? dto.buyerType : 'individual'
-      ) as PrismaBuyerType;
-    } else {
-      if (!dto.buyerType || !isBuyerType(dto.buyerType)) {
-        throw new BadRequestException('Buyer type is required for buyers');
-      }
-      buyerType = dto.buyerType as PrismaBuyerType;
-      sellerType = (
-        dto.sellerType && isSellerType(dto.sellerType) ? dto.sellerType : 'privateFarmer'
-      ) as PrismaSellerType;
-    }
-
     const email = dto.email.trim().toLowerCase();
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -68,13 +45,14 @@ export class AuthService {
     const locale = this.resolveLocale(dto.locale);
     const passwordHash = await bcrypt.hash(dto.password, 12);
 
+    // Role is for registration stats (seller vs buyer). Seller/buyer subtypes are filled later in the cabinet.
     const user = await this.prisma.user.create({
       data: {
         email,
         passwordHash,
         role: dto.role as UserRole,
-        sellerType,
-        buyerType,
+        sellerType: null,
+        buyerType: null,
         locale: locale as LocaleCode,
         displayName: dto.displayName?.trim() || null,
       },

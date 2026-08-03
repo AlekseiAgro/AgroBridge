@@ -1,4 +1,4 @@
-import { isBuyerType, isLocale, isRegisterableRole, isSellerType } from '@agrobridge/shared';
+import { isLocale, isRegisterableRole } from '@agrobridge/shared';
 import {
   IsEmail,
   IsOptional,
@@ -6,7 +6,6 @@ import {
   MaxLength,
   MinLength,
   Validate,
-  ValidateIf,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
@@ -33,28 +32,6 @@ class LocaleConstraint implements ValidatorConstraintInterface {
   }
 }
 
-@ValidatorConstraint({ name: 'sellerType', async: false })
-class SellerTypeConstraint implements ValidatorConstraintInterface {
-  validate(value: unknown) {
-    return typeof value === 'string' && isSellerType(value);
-  }
-
-  defaultMessage() {
-    return 'sellerType must be privateFarmer or company';
-  }
-}
-
-@ValidatorConstraint({ name: 'buyerType', async: false })
-class BuyerTypeConstraint implements ValidatorConstraintInterface {
-  validate(value: unknown) {
-    return typeof value === 'string' && isBuyerType(value);
-  }
-
-  defaultMessage() {
-    return 'buyerType must be individual or company';
-  }
-}
-
 export class RegisterDto {
   @IsEmail()
   @MaxLength(255)
@@ -65,21 +42,10 @@ export class RegisterDto {
   @MaxLength(128)
   password!: string;
 
+  /** Seller (farmer) or buyer — used for registration stats. Profile subtypes are set later in the cabinet. */
   @IsString()
   @Validate(RegisterableRoleConstraint)
   role!: string;
-
-  /** Required when registering as a farmer/seller; optional otherwise (defaults applied). */
-  @ValidateIf((dto: RegisterDto) => dto.role === 'farmer' || dto.sellerType != null)
-  @IsString()
-  @Validate(SellerTypeConstraint)
-  sellerType?: string;
-
-  /** Required when registering as a buyer; optional otherwise (defaults applied). */
-  @ValidateIf((dto: RegisterDto) => dto.role === 'buyer' || dto.buyerType != null)
-  @IsString()
-  @Validate(BuyerTypeConstraint)
-  buyerType?: string;
 
   @IsOptional()
   @IsString()

@@ -55,7 +55,8 @@
       "company": "Unternehmen"
     },
     "dualCapabilityHint": "Mit einem Konto können Sie Produkte verkaufen und Kaufanfragen stellen. Wählen Sie, womit Sie vor allem starten.",
-    "registerEmailVerifyHint": "Nach der Registrierung senden wir einen Bestätigungscode. Das Konto öffnet sich nach der E-Mail-Prüfung."
+    "registerEmailVerifyHint": "Nach der Registrierung senden wir einen Bestätigungscode. Das Konto öffnet sich nach der E-Mail-Prüfung.",
+    "roleHint": "Wählen Sie Verkäufer oder Käufer. Wir nutzen das für Registrierungsstatistiken."
   },
   "account": {
     "title": "Ihr Konto",
