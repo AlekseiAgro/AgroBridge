@@ -9,7 +9,6 @@ import {
   PRODUCT_CATEGORIES,
   PRODUCT_UNITS,
   SEASON_MONTHS,
-  attributeFieldsForCategory,
   computeProductQualityScore,
   defaultUnitForCategory,
   type Carrier,
@@ -96,7 +95,6 @@ export function ProductForm({ mode, initial }: Props) {
   );
   const [minQuantity, setMinQuantity] = useState(numberString(initial?.minQuantity));
   const [maxQuantity, setMaxQuantity] = useState(numberString(initial?.maxQuantity));
-  const [attributes, setAttributes] = useState<Record<string, unknown>>(initial?.attributes ?? {});
   const [packagingTypes, setPackagingTypes] = useState<PackagingType[]>(
     initial?.packagingTypes ?? [],
   );
@@ -127,7 +125,6 @@ export function ProductForm({ mode, initial }: Props) {
   const [preorderEnabled, setPreorderEnabled] = useState(initial?.preorderEnabled ?? false);
 
   const suggestedUnit = useMemo(() => defaultUnitForCategory(category) ?? '', [category]);
-  const attributeFields = useMemo(() => attributeFieldsForCategory(category), [category]);
   const packagingWeights = useMemo(() => commaValues(packagingWeightsText), [packagingWeightsText]);
   const qualityScore = useMemo(
     () =>
@@ -148,7 +145,7 @@ export function ProductForm({ mode, initial }: Props) {
         maxAnnualProduction: numberOrNull(maxAnnualProduction),
         minQuantity: numberOrNull(minQuantity),
         maxQuantity: numberOrNull(maxQuantity),
-        attributes,
+        attributes: {},
         packagingTypes,
         packagingWeights,
         certificateCount: initial?.certificates.length ?? 0,
@@ -168,7 +165,6 @@ export function ProductForm({ mode, initial }: Props) {
         farmExportMarkets: initial?.farm?.exportMarkets,
       }),
     [
-      attributes,
       carriers,
       category,
       country,
@@ -260,11 +256,7 @@ export function ProductForm({ mode, initial }: Props) {
       maxAnnualProduction: parsedMaxAnnualProduction,
       minQuantity: parsedMinQuantity,
       maxQuantity: parsedMaxQuantity,
-      attributes: Object.fromEntries(
-        attributeFields
-          .map((field) => [field.key, attributes[field.key]] as const)
-          .filter(([, value]) => value !== undefined && value !== ''),
-      ),
+      attributes: {},
       packagingTypes,
       packagingWeights,
       palletSize: palletSize.trim(),
@@ -459,70 +451,6 @@ export function ProductForm({ mode, initial }: Props) {
                 : t('noUnit'),
           })}
         </p>
-      </fieldset>
-
-      <fieldset className="field-group product-form__section">
-        <legend className="section-title">{t('sections.attributes')}</legend>
-        <p className="page__subtitle">{t('attributesHint')}</p>
-        <div className="field-row">
-          {attributeFields.map((field) => (
-            <label className="field" key={field.key}>
-              <span>{t(`attributes.${field.key}`)}</span>
-              {field.type === 'boolean' ? (
-                <select
-                  value={
-                    typeof attributes[field.key] === 'boolean' ? String(attributes[field.key]) : ''
-                  }
-                  onChange={(event) =>
-                    setAttributes((current) => ({
-                      ...current,
-                      [field.key]:
-                        event.target.value === '' ? undefined : event.target.value === 'true',
-                    }))
-                  }
-                >
-                  <option value="">{t('notSpecified')}</option>
-                  <option value="true">{t('yes')}</option>
-                  <option value="false">{t('no')}</option>
-                </select>
-              ) : field.type === 'select' ? (
-                <select
-                  value={String(attributes[field.key] ?? '')}
-                  onChange={(event) =>
-                    setAttributes((current) => ({
-                      ...current,
-                      [field.key]: event.target.value || undefined,
-                    }))
-                  }
-                >
-                  <option value="">{t('notSpecified')}</option>
-                  {field.options?.map((option) => (
-                    <option key={option} value={option}>
-                      {t(`attributeOptions.${option}`)}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type={field.type === 'number' ? 'number' : 'text'}
-                  step={field.type === 'number' ? '0.01' : undefined}
-                  value={String(attributes[field.key] ?? '')}
-                  onChange={(event) =>
-                    setAttributes((current) => ({
-                      ...current,
-                      [field.key]:
-                        field.type === 'number'
-                          ? event.target.value
-                            ? Number(event.target.value)
-                            : undefined
-                          : event.target.value,
-                    }))
-                  }
-                />
-              )}
-            </label>
-          ))}
-        </div>
       </fieldset>
 
       <fieldset className="field-group product-form__section">
