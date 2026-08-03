@@ -245,7 +245,8 @@ export class ProductsService {
           }),
         )
       : false;
-    return this.toDetail(product, sellerRating, watching);
+    const isCardOwner = Boolean(viewer && product.farm.ownerId === viewer.id);
+    return this.toDetail(product, sellerRating, watching, isCardOwner);
   }
 
   async listMine(user: AuthenticatedUser): Promise<ProductSummary[]> {
@@ -321,7 +322,7 @@ export class ProductsService {
       include: productDetailInclude,
     });
 
-    return this.toDetail(product);
+    return this.toDetail(product, null, false, true);
   }
 
   async update(user: AuthenticatedUser, id: string, dto: UpdateProductDto): Promise<ProductDetail> {
@@ -531,7 +532,7 @@ export class ProductsService {
       isPublic: updated.isPublished && updated.moderationStatus === PrismaModerationStatus.approved,
     });
 
-    return this.toDetail(updated);
+    return this.toDetail(updated, null, false, true);
   }
 
   async getWatchStatus(
@@ -1041,8 +1042,9 @@ export class ProductsService {
     product: ProductWithOwnerAndImages,
     sellerRating?: RatingSummary | null,
     watching = false,
+    isOwner = false,
   ): ProductDetail {
-    return mapProductDetail(product, sellerRating, watching);
+    return mapProductDetail(product, sellerRating, watching, isOwner);
   }
 
   private normalizeHarvestInput(

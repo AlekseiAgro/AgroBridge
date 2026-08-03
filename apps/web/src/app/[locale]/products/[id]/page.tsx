@@ -8,6 +8,7 @@ import { HarvestWatchButton } from '@/components/HarvestWatchButton';
 import { MarketInsightButton } from '@/components/MarketInsightButton';
 import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
+import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
 import { RfqRequestForm } from '@/components/RfqRequestForm';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -123,7 +124,13 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
         ) : null}
 
-        <ProductQualityWidget score={product.qualityScore} />
+        {product.isOwner ? (
+          <ProductQualityWidget score={product.qualityScore} showGuidance />
+        ) : (
+          <div className="product-quality-summary product-quality-summary--detail">
+            <QualityScoreChip score={product.qualityScore} showTier />
+          </div>
+        )}
 
         <div className="product-detail-sections">
           <section className="product-detail-section">

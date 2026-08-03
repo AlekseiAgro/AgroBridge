@@ -296,12 +296,25 @@ export function mapProductDetail(
   product: ProductRowSlice & { createdAt: Date; updatedAt: Date },
   sellerRating?: RatingSummary | null,
   watching = false,
+  isOwner = false,
 ): ProductDetail {
+  const summary = mapProductSummary(product, sellerRating);
+  const qualityScore = isOwner
+    ? summary.qualityScore
+    : {
+        score: summary.qualityScore.score,
+        tier: summary.qualityScore.tier,
+        checklist: [],
+        suggestions: [],
+      };
+
   return {
-    ...mapProductSummary(product, sellerRating),
+    ...summary,
+    qualityScore,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
     watching,
+    isOwner,
     videos: mapProductVideos(product.videos),
     certificates: mapProductCertificates(product.certificates),
   };

@@ -214,6 +214,8 @@ export type ProductDetail = ProductSummary & {
   updatedAt: string;
   /** Whether the current viewer watches harvest/preorder alerts for this product. */
   watching?: boolean;
+  /** True when the authenticated viewer owns this listing's farm. */
+  isOwner?: boolean;
   videos: ProductVideo[];
   certificates: ProductCertificate[];
 };

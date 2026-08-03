@@ -2266,6 +2266,10 @@ body {
   margin-top: 0.55rem;
 }
 
+.product-quality-summary--detail {
+  margin: 1rem 0 0.25rem;
+}
+
 .quality-score-chip-wrap {
   display: inline-flex;
   flex-wrap: wrap;
