@@ -185,7 +185,6 @@ export function OriginPlaceInput({ value, country, onChange, placeholder }: Prop
           {t('originPlaceSearching')}
         </p>
       ) : null}
-      {enabled ? <p className="place-autocomplete__hint">{t('originPlaceHint')}</p> : null}
     </div>
   );
 }
