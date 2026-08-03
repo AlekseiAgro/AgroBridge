@@ -30,4 +30,5 @@ export type EmailTemplateKey =
   | 'accountDeletionCode'
   | 'emailChangeCode'
   | 'harvestAvailable'
-  | 'harvestPreorderOpen';
+  | 'harvestPreorderOpen'
+  | 'chatMessage';
