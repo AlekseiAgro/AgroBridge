@@ -2624,6 +2624,17 @@ body {
   gap: 1rem;
 }
 
+.product-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.product-form__actions .button {
+  min-width: 8.5rem;
+}
+
 .product-form__section {
   display: grid;
   gap: 0.85rem;
