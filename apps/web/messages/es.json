@@ -129,7 +129,6 @@
     },
     "allRegions": "Todas las regiones",
     "optional": "(opcional)",
-    "filtersHint": "La búsqueda abarca todas las categorías y regiones. Categoría y región son filtros opcionales.",
     "searchPlaceholder": "Nombre o descripción del producto",
     "availableQuantity": "Cantidad disponible",
     "sellerRating": "Valoración del vendedor",
