@@ -434,7 +434,10 @@
       "accept": "Accept quote",
       "decline": "Decline",
       "withdraw": "Withdraw quote"
-    }
+    },
+    "floatingLead": "Can you supply this?",
+    "floatingText": "Publish your product offer and reach buyers looking for it.",
+    "floatingCta": "List your product"
   },
   "roleHubs": {
     "buyers": {

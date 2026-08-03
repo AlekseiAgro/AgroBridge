@@ -2,6 +2,7 @@ import type { PurchaseRequestSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PurchaseRequestFilters } from '@/components/PurchaseRequestFilters';
 import { PurchaseRequestList } from '@/components/PurchaseRequestList';
+import { RequestsSellCta } from '@/components/RequestsSellCta';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
@@ -74,6 +75,7 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
           <PurchaseRequestList items={items} emptyLabel={t('boardEmpty')} />
         ) : null}
       </main>
+      <RequestsSellCta />
       <SiteFooter />
     </div>
   );

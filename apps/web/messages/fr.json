@@ -434,7 +434,10 @@
       "accept": "Accepter l'offre",
       "decline": "Refuser",
       "withdraw": "Retirer l'offre"
-    }
+    },
+    "floatingLead": "Vous pouvez fournir cela ?",
+    "floatingText": "Publiez votre offre produit pour atteindre les acheteurs intéressés.",
+    "floatingCta": "Mettre en ligne mon produit"
   },
   "roleHubs": {
     "buyers": {

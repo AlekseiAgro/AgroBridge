@@ -2,11 +2,11 @@ import { getTranslations } from 'next-intl/server';
 import { FloatingCta } from '@/components/FloatingCta';
 import { getCurrentUser } from '@/lib/session';
 
-export async function CatalogPurchaseCta() {
-  const t = await getTranslations('catalog');
+export async function RequestsSellCta() {
+  const t = await getTranslations('purchaseRequests');
   const user = await getCurrentUser();
-  const isBuyer = user?.role === 'buyer' || user?.role === 'admin';
-  const href = isBuyer ? '/requests/new' : user ? '/buyers' : '/register';
+  const isFarmer = user?.role === 'farmer' || user?.role === 'admin';
+  const href = isFarmer ? '/dashboard/products/new' : user ? '/sellers' : '/register';
 
   return (
     <FloatingCta
@@ -14,6 +14,7 @@ export async function CatalogPurchaseCta() {
       text={t('floatingText')}
       cta={t('floatingCta')}
       href={href}
+      variant="accent"
     />
   );
 }

@@ -434,7 +434,10 @@
       "accept": "Angebot annehmen",
       "decline": "Ablehnen",
       "withdraw": "Angebot zurückziehen"
-    }
+    },
+    "floatingLead": "Können Sie das liefern?",
+    "floatingText": "Veröffentlichen Sie Ihr Angebot und erreichen Sie interessierte Käufer.",
+    "floatingCta": "Eigenes Produkt listen"
   },
   "roleHubs": {
     "buyers": {
