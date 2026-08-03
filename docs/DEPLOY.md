@@ -2,11 +2,13 @@
 
 This guide covers a single-host Docker deploy (VPS) using `docker-compose.prod.yml`.
 
+For **agrobrid.ge** now and a later domain move, see [`docs/DOMAIN.md`](DOMAIN.md).
+
 ## What you need
 
 - A Linux host with Docker + Docker Compose
-- A domain (or IP) for the web app, and preferably a separate host/path for the API
-- TLS (HTTPS) in front of the containers (Caddy, Nginx, Traefik, or a cloud load balancer)
+- Domain DNS for the web app + API subdomain
+- TLS (HTTPS) in front of the containers — use [`deploy/Caddyfile`](../deploy/Caddyfile) or Nginx/Traefik
 
 Auth cookies are `secure` when `NODE_ENV=production`, so **login will not stick on plain HTTP**.
 
@@ -16,7 +18,7 @@ Auth cookies are `secure` when `NODE_ENV=production`, so **login will not stick 
 cp .env.production.example .env.production
 ```
 
-Set at least:
+The example is pre-filled for **agrobrid.ge** / **api.agrobrid.ge**. Change secrets at minimum:
 
 | Variable | Purpose |
 |----------|---------|
@@ -30,7 +32,7 @@ Set at least:
 Optional production upgrades:
 
 - `MAIL_DRIVER=smtp` + SMTP_* for real email
-- `STORAGE_DRIVER=s3` + S3_* for durable media (R2/S3)
+- `STORAGE_DRIVER=s3` + S3_* for durable media (R2/S3) — recommended before any domain move
 - `TRANSLATION_PROVIDER=openai` + `OPENAI_API_KEY` for chat translation
 
 ## 2. Build and start
@@ -49,8 +51,8 @@ Services:
 Health:
 
 ```bash
-curl -sS "$API_PUBLIC_URL/api/health"
-curl -sS -o /dev/null -w '%{http_code}\n' "$WEB_PUBLIC_URL"
+curl -sS https://api.agrobrid.ge/api/health
+curl -sS -o /dev/null -w '%{http_code}\n' https://agrobrid.ge
 ```
 
 ## 3. Seed demo data (optional)
@@ -62,24 +64,26 @@ docker compose -f docker-compose.prod.yml --env-file .env.production exec api \
 
 Demo passwords come from seed / env (`ADMIN_PASSWORD`, farmers/buyers `DemoPass123` in the built-in demo seed).
 
-## 4. Reverse proxy sketch
+## 4. Reverse proxy (agrobrid.ge)
 
-Point HTTPS to containers:
+Point HTTPS to containers (see `deploy/Caddyfile`):
 
-- `https://app.example.com` → `web:3000`
-- `https://api.example.com` → `api:3001`
+- `https://agrobrid.ge` → `127.0.0.1:3000` (web)
+- `https://api.agrobrid.ge` → `127.0.0.1:3001` (api)
 
-Or same host with path routing (`/api` → api). If web and API share a site origin, set `WEB_ORIGIN` and `NEXT_PUBLIC_API_URL` accordingly.
+Do **not** mount Nest at `https://agrobrid.ge/api` — Next.js already owns `/api/*` as BFF routes.
 
 ## 5. Production checklist
 
-- [ ] HTTPS enabled; `WEB_*` / `API_*` / `NEXT_PUBLIC_API_URL` use `https://`
+- [ ] DNS for `agrobrid.ge` and `api.agrobrid.ge`
+- [ ] HTTPS enabled; env URLs use `https://`
 - [ ] Strong `JWT_SECRET` and `POSTGRES_PASSWORD`
 - [ ] `SUPPORT_EMAIL` reaches a monitored inbox
 - [ ] SMTP configured if you need real mail (otherwise console logs only)
 - [ ] Prefer S3/R2 for uploads if the container filesystem is ephemeral
 - [ ] Backups for the Postgres volume
 - [ ] Change or disable demo admin credentials after first login
+- [ ] Read [`docs/DOMAIN.md`](DOMAIN.md) before planning a domain move
 
 ## Local infra only
 

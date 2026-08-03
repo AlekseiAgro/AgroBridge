@@ -154,18 +154,21 @@ Chat messages are intentionally not emailed yet (too noisy for MVP).
 
 ## Deploy (Docker)
 
-Single-host production compose (web + api + Postgres + Redis):
+Single-host production compose (web + api + Postgres + Redis).
+
+Configured by default for **agrobrid.ge** (API on **api.agrobrid.ge**). Domain is env-only — see [`docs/DOMAIN.md`](docs/DOMAIN.md) to move later without code changes.
 
 ```bash
 cp .env.production.example .env.production
-# fill WEB_ORIGIN, API URLs, JWT_SECRET, POSTGRES_PASSWORD, SUPPORT_EMAIL
+# set JWT_SECRET, POSTGRES_PASSWORD, SUPPORT_EMAIL (URLs already use agrobrid.ge)
 pnpm docker:prod:up
+# TLS proxy: deploy/Caddyfile
 ```
 
-Details and reverse-proxy notes: [`docs/DEPLOY.md`](docs/DEPLOY.md).
+Details: [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Next implementation steps
 
-1. Point a real domain + HTTPS reverse proxy at the Docker stack
+1. Point DNS for `agrobrid.ge` + `api.agrobrid.ge`, enable HTTPS (`deploy/Caddyfile`)
 2. Turn on SMTP + S3/R2 for mail and durable uploads
 3. Payment / order confirmation flow (product)
