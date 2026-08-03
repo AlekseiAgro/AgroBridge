@@ -41,7 +41,13 @@
     "noAccount": "No account yet?",
     "hasAccount": "Already registered?",
     "goRegister": "Sign up",
-    "goLogin": "Log in"
+    "goLogin": "Log in",
+    "sellerType": "I am registering as",
+    "sellerTypeHint": "Required for sellers. Choose whether you trade as a private farmer or a company.",
+    "sellerTypes": {
+      "privateFarmer": "Private farmer",
+      "company": "Company"
+    }
   },
   "account": {
     "title": "Your account",

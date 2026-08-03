@@ -1,4 +1,4 @@
-import { isLocale, isRegisterableRole } from '@agrobridge/shared';
+import { isLocale, isRegisterableRole, isSellerType } from '@agrobridge/shared';
 import {
   IsEmail,
   IsOptional,
@@ -6,6 +6,7 @@ import {
   MaxLength,
   MinLength,
   Validate,
+  ValidateIf,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
@@ -32,6 +33,17 @@ class LocaleConstraint implements ValidatorConstraintInterface {
   }
 }
 
+@ValidatorConstraint({ name: 'sellerType', async: false })
+class SellerTypeConstraint implements ValidatorConstraintInterface {
+  validate(value: unknown) {
+    return typeof value === 'string' && isSellerType(value);
+  }
+
+  defaultMessage() {
+    return 'sellerType must be privateFarmer or company';
+  }
+}
+
 export class RegisterDto {
   @IsEmail()
   @MaxLength(255)
@@ -45,6 +57,12 @@ export class RegisterDto {
   @IsString()
   @Validate(RegisterableRoleConstraint)
   role!: string;
+
+  /** Required when registering as a farmer/seller. */
+  @ValidateIf((dto: RegisterDto) => dto.role === 'farmer')
+  @IsString()
+  @Validate(SellerTypeConstraint)
+  sellerType?: string;
 
   @IsOptional()
   @IsString()

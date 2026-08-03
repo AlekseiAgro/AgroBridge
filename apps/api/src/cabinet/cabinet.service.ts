@@ -94,6 +94,7 @@ export class CabinetService {
         id: dbUser.id,
         email: dbUser.email,
         role: dbUser.role,
+        sellerType: dbUser.sellerType,
         locale: dbUser.locale,
         displayName: dbUser.displayName,
         rating,

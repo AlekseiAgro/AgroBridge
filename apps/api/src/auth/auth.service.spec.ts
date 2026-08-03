@@ -1,4 +1,4 @@
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -47,6 +47,7 @@ describe('AuthService', () => {
       id: 'user_1',
       email: 'farmer@example.com',
       role: 'farmer',
+      sellerType: 'privateFarmer',
       locale: 'ka',
       displayName: 'Nino',
       passwordHash: 'hash',
@@ -56,6 +57,7 @@ describe('AuthService', () => {
       email: 'Farmer@Example.com',
       password: 'password1',
       role: 'farmer',
+      sellerType: 'privateFarmer',
       displayName: 'Nino',
       locale: 'ka',
     });
@@ -65,17 +67,37 @@ describe('AuthService', () => {
       id: 'user_1',
       email: 'farmer@example.com',
       role: 'farmer',
+      sellerType: 'privateFarmer',
       locale: 'ka',
       displayName: 'Nino',
       rating: { average: null, count: 0 },
     });
-    expect(prisma.user.create).toHaveBeenCalled();
+    expect(prisma.user.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          sellerType: 'privateFarmer',
+          role: 'farmer',
+        }),
+      }),
+    );
     expect(notifications.notifyWelcome).toHaveBeenCalledWith({
       email: 'farmer@example.com',
       locale: 'ka',
       displayName: 'Nino',
       role: 'farmer',
     });
+  });
+
+  it('requires seller type for farmers', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.register({
+        email: 'farmer@example.com',
+        password: 'password1',
+        role: 'farmer',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('rejects duplicate email', async () => {
@@ -86,6 +108,7 @@ describe('AuthService', () => {
         email: 'farmer@example.com',
         password: 'password1',
         role: 'farmer',
+        sellerType: 'privateFarmer',
       }),
     ).rejects.toBeInstanceOf(ConflictException);
   });

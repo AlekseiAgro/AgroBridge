@@ -635,7 +635,13 @@ async function upsertUser(params: {
   displayName: string;
   locale: LocaleCode;
   passwordHash: string;
+  sellerType?: 'privateFarmer' | 'company' | null;
 }) {
+  const sellerType =
+    params.role === UserRole.farmer
+      ? (params.sellerType ?? 'privateFarmer')
+      : null;
+
   return prisma.user.upsert({
     where: { email: params.email },
     update: {
@@ -643,6 +649,7 @@ async function upsertUser(params: {
       displayName: params.displayName,
       locale: params.locale,
       passwordHash: params.passwordHash,
+      sellerType,
     },
     create: {
       email: params.email,
@@ -650,6 +657,7 @@ async function upsertUser(params: {
       displayName: params.displayName,
       locale: params.locale,
       passwordHash: params.passwordHash,
+      sellerType,
     },
   });
 }
@@ -697,6 +705,7 @@ async function seedFarmer(
     displayName: farmer.displayName,
     locale: farmer.locale,
     passwordHash,
+    sellerType: index % 2 === 0 ? 'privateFarmer' : 'company',
   });
 
   const farm = await prisma.farm.upsert({

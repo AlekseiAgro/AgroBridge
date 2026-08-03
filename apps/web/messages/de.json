@@ -41,7 +41,13 @@
     "noAccount": "Noch kein Konto?",
     "hasAccount": "Bereits registriert?",
     "goRegister": "Registrieren",
-    "goLogin": "Anmelden"
+    "goLogin": "Anmelden",
+    "sellerType": "Verkäufertyp",
+    "sellerTypeHint": "Erforderlich für Verkäufer. Privater Landwirt oder Unternehmen.",
+    "sellerTypes": {
+      "privateFarmer": "Privater Landwirt",
+      "company": "Unternehmen"
+    }
   },
   "account": {
     "title": "Ihr Konto",

@@ -41,7 +41,13 @@
     "noAccount": "Ещё нет аккаунта?",
     "hasAccount": "Уже зарегистрированы?",
     "goRegister": "Регистрация",
-    "goLogin": "Войти"
+    "goLogin": "Войти",
+    "sellerType": "Тип продавца",
+    "sellerTypeHint": "Обязательно для продавца. Укажите, вы частный фермер или компания.",
+    "sellerTypes": {
+      "privateFarmer": "Частный фермер",
+      "company": "Компания"
+    }
   },
   "account": {
     "title": "Ваш аккаунт",

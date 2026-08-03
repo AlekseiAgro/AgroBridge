@@ -1,14 +1,10 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import type { AuthTokenResponse, Locale, PublicUser, SellerType } from '@agrobridge/shared';
+import { DEFAULT_LOCALE, isLocale, isRegisterableRole, isSellerType } from '@agrobridge/shared';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import type { AuthTokenResponse, Locale, PublicUser } from '@agrobridge/shared';
-import { DEFAULT_LOCALE, isLocale, isRegisterableRole } from '@agrobridge/shared';
-import { LocaleCode, UserRole } from '@prisma/client';
+import { LocaleCode, SellerType as PrismaSellerType, UserRole } from '@prisma/client';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
@@ -29,6 +25,14 @@ export class AuthService {
       throw new ConflictException('Invalid role for registration');
     }
 
+    let sellerType: PrismaSellerType | null = null;
+    if (dto.role === 'farmer') {
+      if (!dto.sellerType || !isSellerType(dto.sellerType)) {
+        throw new BadRequestException('Seller type is required for farmers');
+      }
+      sellerType = dto.sellerType as PrismaSellerType;
+    }
+
     const email = dto.email.trim().toLowerCase();
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -43,6 +47,7 @@ export class AuthService {
         email,
         passwordHash,
         role: dto.role as UserRole,
+        sellerType,
         locale: locale as LocaleCode,
         displayName: dto.displayName?.trim() || null,
       },
@@ -116,6 +121,7 @@ export class AuthService {
     id: string;
     email: string;
     role: UserRole;
+    sellerType?: PrismaSellerType | null;
     locale: LocaleCode;
     displayName: string | null;
   }): AuthenticatedUser {
@@ -123,6 +129,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       role: user.role,
+      sellerType: (user.sellerType as SellerType | null | undefined) ?? null,
       locale: user.locale as Locale,
       displayName: user.displayName,
     };
@@ -144,6 +151,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       role: user.role,
+      sellerType: user.sellerType,
       locale: user.locale,
       displayName: user.displayName,
       rating: { average, count },

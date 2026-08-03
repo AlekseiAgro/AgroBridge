@@ -41,7 +41,12 @@ export default async function AccountPage({ params }: Props) {
           <div>
             <h2 className="user-card__name">{user.displayName || t('noDisplayName')}</h2>
             <p className="user-card__meta">
-              {ta(roleKey)} · {user.email}
+              {ta(roleKey)}
+              {user.sellerType
+                ? ` · ${ta(`sellerTypes.${user.sellerType}`)}`
+                : ''}
+              {' · '}
+              {user.email}
             </p>
             <p className="user-card__meta">{t('memberSince', { date: memberSince })}</p>
             <p className="user-card__meta">

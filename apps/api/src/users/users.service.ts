@@ -59,6 +59,7 @@ export class UsersService {
       id: user.id,
       displayName: user.displayName,
       role: user.role,
+      sellerType: user.sellerType,
       memberSince: user.createdAt.toISOString(),
       rating,
       completedDeals: completedAsBuyer + completedAsSeller,

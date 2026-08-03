@@ -13,6 +13,11 @@ enum UserRole {
   admin
 }
 
+enum SellerType {
+  privateFarmer
+  company
+}
+
 enum LocaleCode {
   ka
   en
@@ -78,17 +83,18 @@ enum DocumentReviewStatus {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  email         String     @unique
+  id            String      @id @default(cuid())
+  email         String      @unique
   passwordHash  String?
   role          UserRole
-  locale        LocaleCode @default(en)
+  sellerType    SellerType?
+  locale        LocaleCode  @default(en)
   displayName   String?
   blockedAt     DateTime?
   blockedReason String?
   blockedById   String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   blockedBy                    User?             @relation("BlockedByAdmin", fields: [blockedById], references: [id], onDelete: SetNull)
   blockedUsers                 User[]            @relation("BlockedByAdmin")

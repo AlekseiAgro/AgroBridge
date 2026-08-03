@@ -1,6 +1,11 @@
 'use client';
 
-import { REGISTERABLE_ROLES, type RegisterableRole } from '@agrobridge/shared';
+import {
+  REGISTERABLE_ROLES,
+  SELLER_TYPES,
+  type RegisterableRole,
+  type SellerType,
+} from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
@@ -18,6 +23,7 @@ export function AuthForm({ mode }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [role, setRole] = useState<RegisterableRole>('farmer');
+  const [sellerType, setSellerType] = useState<SellerType>('privateFarmer');
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,6 +42,7 @@ export function AuthForm({ mode }: Props) {
             password: String(form.get('password') ?? ''),
             displayName: String(form.get('displayName') ?? ''),
             role,
+            ...(role === 'farmer' ? { sellerType } : {}),
             locale,
           };
 
@@ -86,6 +93,26 @@ export function AuthForm({ mode }: Props) {
               </label>
             ))}
           </fieldset>
+
+          {role === 'farmer' ? (
+            <fieldset className="role-fieldset">
+              <legend>{t('sellerType')}</legend>
+              <p className="product-list__meta">{t('sellerTypeHint')}</p>
+              {SELLER_TYPES.map((value) => (
+                <label key={value} className="role-option">
+                  <input
+                    type="radio"
+                    name="sellerType"
+                    value={value}
+                    checked={sellerType === value}
+                    onChange={() => setSellerType(value)}
+                    required
+                  />
+                  <span>{t(`sellerTypes.${value}`)}</span>
+                </label>
+              ))}
+            </fieldset>
+          ) : null}
         </>
       ) : null}
 

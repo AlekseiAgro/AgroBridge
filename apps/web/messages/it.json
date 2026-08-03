@@ -41,7 +41,13 @@
     "noAccount": "Non hai ancora un account?",
     "hasAccount": "Sei già registrato?",
     "goRegister": "Registrati",
-    "goLogin": "Accedi"
+    "goLogin": "Accedi",
+    "sellerType": "Tipo di venditore",
+    "sellerTypeHint": "Obbligatorio per i venditori. Agricoltore privato o azienda.",
+    "sellerTypes": {
+      "privateFarmer": "Agricoltore privato",
+      "company": "Azienda"
+    }
   },
   "account": {
     "title": "Il tuo account",
