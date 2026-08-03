@@ -939,5 +939,13 @@
       "grasp": "GRASP",
       "other": "Certificate"
     }
+  },
+  "marketInsight": {
+    "button": "AI Market Insight",
+    "title": "Market insight",
+    "close": "Close",
+    "loading": "Preparing a short market note…",
+    "error": "Could not load market insight.",
+    "disclaimer": "Indicative note based on listing details. Not financial or trading advice."
   }
 }

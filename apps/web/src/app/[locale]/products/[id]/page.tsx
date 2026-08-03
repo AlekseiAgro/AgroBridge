@@ -5,6 +5,7 @@ import { CertificateBadges } from '@/components/CertificateBadges';
 import { HarvestPlanSummary } from '@/components/HarvestPlanSummary';
 import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
 import { HarvestWatchButton } from '@/components/HarvestWatchButton';
+import { MarketInsightButton } from '@/components/MarketInsightButton';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
 import { RatingStars } from '@/components/RatingStars';
 import { RfqRequestForm } from '@/components/RfqRequestForm';
@@ -86,8 +87,10 @@ export default async function ProductDetailPage({ params }: Props) {
             size="sm"
           />
         </div>
-        <CertificateBadges badges={product.certificateBadges} />
-
+        <div className="product-insight-row">
+          <CertificateBadges badges={product.certificateBadges} />
+          <MarketInsightButton productId={product.id} />
+        </div>
         {product.images.length > 0 ? (
           <div className="product-gallery">
             {product.images.map((image) => (

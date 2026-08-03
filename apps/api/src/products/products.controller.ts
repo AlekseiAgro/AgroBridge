@@ -29,11 +29,15 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 import { CatalogQueryDto } from './dto/catalog-query.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { MarketInsightService } from './market-insight.service';
 import { ProductsService } from './products.service';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly marketInsight: MarketInsightService,
+  ) {}
 
   @Get()
   catalog(@Query() query: CatalogQueryDto) {
@@ -45,6 +49,11 @@ export class ProductsController {
   @Roles('farmer', 'admin')
   listMine(@CurrentUser() user: AuthenticatedUser) {
     return this.productsService.listMine(user);
+  }
+
+  @Get(':id/market-insight')
+  getMarketInsight(@Param('id') id: string, @Query('locale') locale?: string) {
+    return this.marketInsight.forProduct(id, locale);
   }
 
   @Get(':id')
