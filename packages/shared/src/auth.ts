@@ -33,6 +33,15 @@ export function isBuyerType(value: string): value is BuyerType {
   return (BUYER_TYPES as readonly string[]).includes(value);
 }
 
+/** Avatar image limits (same as product images). */
+export const USER_AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+export const USER_AVATAR_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
+export type UserAvatarMimeType = (typeof USER_AVATAR_MIME_TYPES)[number];
+
+export function isUserAvatarMimeType(value: string): value is UserAvatarMimeType {
+  return (USER_AVATAR_MIME_TYPES as readonly string[]).includes(value);
+}
+
 export type PublicUser = {
   id: string;
   email: string;
@@ -41,6 +50,7 @@ export type PublicUser = {
   buyerType: BuyerType | null;
   locale: Locale;
   displayName: string | null;
+  avatarUrl: string | null;
   emailVerified: boolean;
   rating: RatingSummary;
 };

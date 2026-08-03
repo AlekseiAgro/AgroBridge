@@ -7,6 +7,7 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { formatMemberSinceMonthYear } from '@/lib/member-since';
+import { toPublicMediaUrl } from '@/lib/product-image';
 import { formatRegionLabel } from '@/lib/region';
 import { getCurrentUser } from '@/lib/session';
 
@@ -47,7 +48,12 @@ export default async function PublicUserProfilePage({ params }: Props) {
         <section className="user-card profile-card">
           <div className="user-card__identity">
             <div className="user-card__avatar" aria-hidden>
-              {initial}
+              {profile.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={toPublicMediaUrl(profile.avatarUrl)} alt="" />
+              ) : (
+                initial
+              )}
             </div>
             <div>
               <h1 className="user-card__name">{name}</h1>

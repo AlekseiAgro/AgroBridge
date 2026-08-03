@@ -77,6 +77,7 @@ describe('AuthService', () => {
       buyerType: null,
       locale: 'ka',
       displayName: 'Nino',
+      avatarUrl: null,
       emailVerified: false,
       rating: { average: null, count: 0 },
     });

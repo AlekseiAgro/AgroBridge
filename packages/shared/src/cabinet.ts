@@ -11,6 +11,7 @@ export type CabinetUserCard = {
   buyerType: BuyerType | null;
   locale: Locale;
   displayName: string | null;
+  avatarUrl: string | null;
   rating: RatingSummary;
   memberSince: string;
 };

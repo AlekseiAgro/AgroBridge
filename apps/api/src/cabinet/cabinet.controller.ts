@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import { USER_AVATAR_MAX_BYTES } from '@agrobridge/shared';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -17,6 +29,25 @@ export class CabinetController {
   @Get('overview')
   overview(@CurrentUser() user: AuthenticatedUser) {
     return this.cabinetService.overview(user);
+  }
+
+  @Post('me/avatar')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: USER_AVATAR_MAX_BYTES },
+    }),
+  )
+  uploadAvatar(
+    @CurrentUser() user: AuthenticatedUser,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.cabinetService.uploadAvatar(user, file);
+  }
+
+  @Delete('me/avatar')
+  removeAvatar(@CurrentUser() user: AuthenticatedUser) {
+    return this.cabinetService.removeAvatar(user);
   }
 
   @Post('me/delete/request')

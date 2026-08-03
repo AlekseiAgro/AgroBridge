@@ -15,5 +15,7 @@ export type AuthenticatedUser = {
   buyerType: BuyerType | null;
   locale: Locale;
   displayName: string | null;
+  avatarUrl: string | null;
   emailVerified: boolean;
 };
+

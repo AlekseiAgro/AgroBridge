@@ -40,6 +40,7 @@ describe('VerificationService', () => {
     displayName: 'Farmer',
     sellerType: 'privateFarmer' as const,
     buyerType: 'individual' as const,
+    avatarUrl: null,
     emailVerified: false,
   };
 

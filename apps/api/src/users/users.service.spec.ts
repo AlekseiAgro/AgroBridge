@@ -31,7 +31,10 @@ describe('UsersService', () => {
       id: 'u1',
       email: 'secret@example.com',
       displayName: 'Elena',
+      avatarUrl: null,
       role: 'buyer',
+      sellerType: null,
+      buyerType: 'individual',
       createdAt: new Date('2026-03-15T10:00:00.000Z'),
       farm: null,
     });
@@ -43,7 +46,10 @@ describe('UsersService', () => {
     expect(profile).toEqual({
       id: 'u1',
       displayName: 'Elena',
+      avatarUrl: null,
       role: 'buyer',
+      sellerType: null,
+      buyerType: 'individual',
       memberSince: '2026-03-15T10:00:00.000Z',
       rating: { average: 4.5, count: 2 },
       completedDeals: 3,

@@ -698,7 +698,14 @@
     "deleteAccountConfirmSubmit": "Confirm deletion",
     "deleteAccountCancel": "Cancel",
     "deleteAccountConfirm": "Delete your AgroBridge account permanently? This cannot be undone.",
-    "deleteAccountError": "Could not delete the account. Please try again."
+    "deleteAccountError": "Could not delete the account. Please try again.",
+    "avatarUpload": "Upload photo",
+    "avatarChange": "Change photo",
+    "avatarRemove": "Remove photo",
+    "avatarUploading": "Uploading…",
+    "avatarUploadError": "Could not upload the photo. Use JPEG, PNG, or WebP up to 5 MB.",
+    "avatarRemoveError": "Could not remove the photo.",
+    "avatarRemoveConfirm": "Remove your profile photo?"
   },
   "rating": {
     "title": "Rate your partner",

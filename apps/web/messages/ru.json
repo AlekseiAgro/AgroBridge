@@ -698,7 +698,14 @@
     "deleteAccountConfirmSubmit": "Подтвердить удаление",
     "deleteAccountCancel": "Отмена",
     "deleteAccountConfirm": "Удалить аккаунт AgroBridge навсегда? Это действие нельзя отменить.",
-    "deleteAccountError": "Не удалось удалить аккаунт. Попробуйте ещё раз."
+    "deleteAccountError": "Не удалось удалить аккаунт. Попробуйте ещё раз.",
+    "avatarUpload": "Загрузить фото",
+    "avatarChange": "Сменить фото",
+    "avatarRemove": "Удалить фото",
+    "avatarUploading": "Загрузка…",
+    "avatarUploadError": "Не удалось загрузить фото. Используйте JPEG, PNG или WebP до 5 МБ.",
+    "avatarRemoveError": "Не удалось удалить фото.",
+    "avatarRemoveConfirm": "Удалить фото профиля?"
   },
   "rating": {
     "title": "Оцените партнёра",

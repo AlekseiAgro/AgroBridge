@@ -11,6 +11,7 @@ describe('CabinetService account deletion', () => {
   const prisma = {
     user: {
       findUnique: jest.fn(),
+      update: jest.fn(),
       delete: jest.fn(),
     },
     farm: {
@@ -24,7 +25,10 @@ describe('CabinetService account deletion', () => {
   };
 
   const ratings = { summaryForUser: jest.fn() };
-  const storage = { delete: jest.fn().mockResolvedValue(undefined) };
+  const storage = {
+    upload: jest.fn(),
+    delete: jest.fn().mockResolvedValue(undefined),
+  };
   const notifications = {
     notifyAccountDeletionCode: jest.fn().mockResolvedValue(undefined),
   };
@@ -44,6 +48,7 @@ describe('CabinetService account deletion', () => {
     buyerType: 'individual' as const,
     locale: 'en' as const,
     displayName: 'Nino',
+    avatarUrl: null,
     emailVerified: true,
   };
 
@@ -105,6 +110,7 @@ describe('CabinetService account deletion', () => {
       locale: 'en',
       displayName: 'Nino',
       passwordHash,
+      avatarKey: 'users/user_1/avatar.jpg',
     });
     prisma.verificationCode.findFirst.mockResolvedValue({
       id: 'c1',
@@ -127,6 +133,7 @@ describe('CabinetService account deletion', () => {
       ok: true,
     });
     expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: 'user_1' } });
+    expect(storage.delete).toHaveBeenCalledWith('users/user_1/avatar.jpg');
     expect(storage.delete).toHaveBeenCalledWith('docs/id.pdf');
     expect(storage.delete).toHaveBeenCalledWith('img/1.jpg');
   });
@@ -143,6 +150,45 @@ describe('CabinetService account deletion', () => {
 
     await expect(
       service.confirmAccountDeletion(farmer, 'password1', '000000'),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('uploads an avatar and replaces the previous file', async () => {
+    prisma.user.findUnique.mockResolvedValue({ avatarKey: 'users/user_1/old.webp' });
+    storage.upload.mockResolvedValue({
+      key: 'users/user_1/new.webp',
+      url: '/api/uploads/users/user_1/new.webp',
+    });
+    prisma.user.update.mockResolvedValue({});
+
+    await expect(
+      service.uploadAvatar(farmer, {
+        mimetype: 'image/webp',
+        size: 1200,
+        buffer: Buffer.from('x'),
+        originalname: 'photo.webp',
+      } as Express.Multer.File),
+    ).resolves.toEqual({ avatarUrl: '/api/uploads/users/user_1/new.webp' });
+
+    expect(storage.upload).toHaveBeenCalled();
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'user_1' },
+      data: {
+        avatarUrl: '/api/uploads/users/user_1/new.webp',
+        avatarKey: 'users/user_1/new.webp',
+      },
+    });
+    expect(storage.delete).toHaveBeenCalledWith('users/user_1/old.webp');
+  });
+
+  it('rejects unsupported avatar types', async () => {
+    await expect(
+      service.uploadAvatar(farmer, {
+        mimetype: 'image/gif',
+        size: 100,
+        buffer: Buffer.from('x'),
+        originalname: 'x.gif',
+      } as Express.Multer.File),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

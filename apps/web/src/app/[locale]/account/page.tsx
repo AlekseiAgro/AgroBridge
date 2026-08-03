@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CabinetShell } from '@/components/CabinetShell';
 import { DeleteAccountButton } from '@/components/DeleteAccountButton';
 import { RatingStars } from '@/components/RatingStars';
+import { UserAvatarEditor } from '@/components/UserAvatarEditor';
 import { Link } from '@/i18n/navigation';
 import { formatMemberSinceMonthYear } from '@/lib/member-since';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -32,9 +33,10 @@ export default async function AccountPage({ params }: Props) {
     <CabinetShell title={t('title')} subtitle={t('subtitle')}>
       <section className="user-card">
         <div className="user-card__identity">
-          <div className="user-card__avatar" aria-hidden>
-            {(user.displayName || user.email).slice(0, 1).toUpperCase()}
-          </div>
+          <UserAvatarEditor
+            avatarUrl={user.avatarUrl}
+            fallbackInitial={(user.displayName || user.email).slice(0, 1).toUpperCase()}
+          />
           <div>
             <h2 className="user-card__name">{user.displayName || t('noDisplayName')}</h2>
             <p className="user-card__meta">

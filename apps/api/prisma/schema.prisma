@@ -134,6 +134,8 @@ model User {
   buyerType        BuyerType?
   locale           LocaleCode  @default(en)
   displayName      String?
+  avatarUrl        String?
+  avatarKey        String?
   emailVerifiedAt  DateTime?
   phone            String?
   phoneVerifiedAt  DateTime?
