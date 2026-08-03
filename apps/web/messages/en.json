@@ -725,7 +725,8 @@
     "changeEmailCodeSent": "Code sent to {email}. After confirmation you must verify the new address {newEmail}.",
     "changeEmailConfirmSubmit": "Confirm email change",
     "changeEmailCancel": "Cancel",
-    "changeEmailError": "Could not change the email. Please try again."
+    "changeEmailError": "Could not change the email. Please try again.",
+    "editProfile": "Edit profile"
   },
   "rating": {
     "title": "Rate your partner",

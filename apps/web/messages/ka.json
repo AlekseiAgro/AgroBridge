@@ -725,7 +725,8 @@
     "changeEmailCodeSent": "კოდი გაიგზავნა {email}-ზე. დადასტურების შემდეგ უნდა დაადასტუროთ ახალი მისამართი {newEmail}.",
     "changeEmailConfirmSubmit": "ელფოსტის შეცვლის დადასტურება",
     "changeEmailCancel": "გაუქმება",
-    "changeEmailError": "ელფოსტის შეცვლა ვერ მოხერხდა. სცადეთ თავიდან."
+    "changeEmailError": "ელფოსტის შეცვლა ვერ მოხერხდა. სცადეთ თავიდან.",
+    "editProfile": "პროფილის რედაქტირება"
   },
   "rating": {
     "title": "შეაფასეთ პარტნიორი",

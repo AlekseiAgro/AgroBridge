@@ -725,7 +725,8 @@
     "changeEmailCodeSent": "Код отправлен на {email}. После подтверждения нужно подтвердить новый адрес {newEmail}.",
     "changeEmailConfirmSubmit": "Подтвердить смену email",
     "changeEmailCancel": "Отмена",
-    "changeEmailError": "Не удалось сменить email. Попробуйте ещё раз."
+    "changeEmailError": "Не удалось сменить email. Попробуйте ещё раз.",
+    "editProfile": "Редактировать профиль"
   },
   "rating": {
     "title": "Оцените партнёра",
