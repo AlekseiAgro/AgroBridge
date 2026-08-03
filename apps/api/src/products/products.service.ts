@@ -13,6 +13,7 @@ import {
   type ProductImage,
   type ProductSummary,
   type RatingSummary,
+  type VerificationStatus,
 } from '@agrobridge/shared';
 import { ModerationStatus as PrismaModerationStatus, Prisma } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -37,7 +38,13 @@ const imageOrderBy: Prisma.ProductImageOrderByWithRelationInput[] = [
 
 const productListInclude = {
   farm: {
-    select: { id: true, name: true, region: true, ownerId: true },
+    select: {
+      id: true,
+      name: true,
+      region: true,
+      ownerId: true,
+      verificationStatus: true,
+    },
   },
   images: {
     orderBy: imageOrderBy,
@@ -51,6 +58,7 @@ const productDetailInclude = {
       name: true,
       region: true,
       ownerId: true,
+      verificationStatus: true,
     },
   },
   images: {
@@ -561,6 +569,8 @@ export class ProductsService {
         id: product.farm.id,
         name: product.farm.name,
         region: product.farm.region,
+        verificationStatus: product.farm.verificationStatus as VerificationStatus,
+        verified: product.farm.verificationStatus === 'approved',
         sellerRating: sellerRating ?? { average: null, count: 0 },
       },
     };

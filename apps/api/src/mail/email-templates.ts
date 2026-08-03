@@ -51,6 +51,10 @@ const en: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "New purchase request: {{title}}",
     text: "Hello {{name}},\n\n{{buyerName}} published a purchase request matching your alert.\n\n{{title}} — {{quantity}}{{unit}}{{categoryPart}}.\n\nView request: {{link}}\n\nManage alerts: {{settingsLink}}\n\n— AgroBridge",
   },
+  verificationCode: {
+    subject: "Your AgroBridge verification code",
+    text: "Hello {{name}},\n\nYour verification code is {{code}}.\nIt expires in 10 minutes.\n\n— AgroBridge",
+  },
 };
 
 const ru: Record<EmailTemplateKey, EmailTemplate> = {
@@ -97,6 +101,10 @@ const ru: Record<EmailTemplateKey, EmailTemplate> = {
   newPurchaseRequest: {
     subject: "Новый запрос на покупку: {{title}}",
     text: "Здравствуйте, {{name}}!\n\n{{buyerName}} опубликовал(а) запрос на покупку по вашей подписке.\n\n{{title}} — {{quantity}}{{unit}}{{categoryPart}}.\n\nОткрыть запрос: {{link}}\n\nНастройки подписки: {{settingsLink}}\n\n— AgroBridge",
+  },
+  verificationCode: {
+    subject: "Код подтверждения AgroBridge",
+    text: "Здравствуйте, {{name}}!\n\nВаш код подтверждения: {{code}}.\nОн действует 10 минут.\n\n— AgroBridge",
   },
 };
 
@@ -145,6 +153,10 @@ const de: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Neue Kaufanfrage: {{title}}",
     text: "Hallo {{name}},\n\n{{buyerName}} hat eine Kaufanfrage passend zu Ihrem Alert veröffentlicht.\n\n{{title}} — {{quantity}}{{unit}}{{categoryPart}}.\n\nAnfrage öffnen: {{link}}\n\nAlerts verwalten: {{settingsLink}}\n\n— AgroBridge",
   },
+  verificationCode: {
+    subject: "Ihr AgroBridge-Bestätigungscode",
+    text: "Hallo {{name}},\n\nIhr Bestätigungscode lautet {{code}}.\nEr ist 10 Minuten gültig.\n\n— AgroBridge",
+  },
 };
 
 const fr: Record<EmailTemplateKey, EmailTemplate> = {
@@ -191,6 +203,10 @@ const fr: Record<EmailTemplateKey, EmailTemplate> = {
   newPurchaseRequest: {
     subject: "Nouvelle demande d’achat : {{title}}",
     text: "Bonjour {{name}},\n\n{{buyerName}} a publié une demande d’achat correspondant à votre alerte.\n\n{{title}} — {{quantity}}{{unit}}{{categoryPart}}.\n\nVoir la demande : {{link}}\n\nGérer les alertes : {{settingsLink}}\n\n— AgroBridge",
+  },
+  verificationCode: {
+    subject: "Votre code de vérification AgroBridge",
+    text: "Bonjour {{name}},\n\nVotre code de vérification est {{code}}.\nIl expire dans 10 minutes.\n\n— AgroBridge",
   },
 };
 
@@ -239,6 +255,10 @@ const it: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Nuova richiesta di acquisto: {{title}}",
     text: "Ciao {{name}},\n\n{{buyerName}} ha pubblicato una richiesta di acquisto corrispondente al tuo avviso.\n\n{{title}} — {{quantity}}{{unit}}{{categoryPart}}.\n\nVedi richiesta: {{link}}\n\nGestisci avvisi: {{settingsLink}}\n\n— AgroBridge",
   },
+  verificationCode: {
+    subject: "Il tuo codice di verifica AgroBridge",
+    text: "Ciao {{name}},\n\nIl tuo codice di verifica è {{code}}.\nScade tra 10 minuti.\n\n— AgroBridge",
+  },
 };
 
 const es: Record<EmailTemplateKey, EmailTemplate> = {
@@ -286,6 +306,10 @@ const es: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Nueva solicitud de compra: {{title}}",
     text: "Hola {{name}},\n\n{{buyerName}} publicó una solicitud de compra de tu alerta.\n\n{{title}} — {{quantity}}{{unit}}{{categoryPart}}.\n\nVer solicitud: {{link}}\n\nGestionar alertas: {{settingsLink}}\n\n— AgroBridge",
   },
+  verificationCode: {
+    subject: "Tu código de verificación de AgroBridge",
+    text: "Hola {{name}},\n\nTu código de verificación es {{code}}.\nCaduca en 10 minutos.\n\n— AgroBridge",
+  },
 };
 
 const ka: Record<EmailTemplateKey, EmailTemplate> = {
@@ -332,6 +356,10 @@ const ka: Record<EmailTemplateKey, EmailTemplate> = {
   newPurchaseRequest: {
     subject: "ახალი შესყიდვის მოთხოვნა: {{title}}",
     text: "გამარჯობა, {{name}}!\n\n{{buyerName}}-მა გამოაქვეყნა თქვენს გაფრთხილებასთან შესაბამისი შესყიდვის მოთხოვნა.\n\n{{title}} — {{quantity}}{{unit}}{{categoryPart}}.\n\nმოთხოვნის ნახვა: {{link}}\n\nგაფრთხილებების მართვა: {{settingsLink}}\n\n— AgroBridge",
+  },
+  verificationCode: {
+    subject: "AgroBridge-ის ვერიფიკაციის კოდი",
+    text: "გამარჯობა, {{name}}!\n\nთქვენი ვერიფიკაციის კოდია {{code}}.\nმოქმედებს 10 წუთი.\n\n— AgroBridge",
   },
 };
 

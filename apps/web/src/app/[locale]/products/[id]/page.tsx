@@ -5,6 +5,7 @@ import { RatingStars } from '@/components/RatingStars';
 import { RfqRequestForm } from '@/components/RfqRequestForm';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
@@ -53,6 +54,7 @@ export default async function ProductDetailPage({ params }: Props) {
         <h1>{product.title}</h1>
         <p className="page__subtitle">
           <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
+          <VerifiedBadge verified={product.farm.verified} />
           {product.farm.region
             ? ` · ${formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region}`
             : ''}

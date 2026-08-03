@@ -76,6 +76,7 @@ enum PurchaseQuoteStatus {
 }
 
 enum VerificationStatus {
+  unverified
   pending
   approved
   rejected
@@ -87,36 +88,51 @@ enum DocumentReviewStatus {
   rejected
 }
 
-model User {
-  id            String      @id @default(cuid())
-  email         String      @unique
-  passwordHash  String?
-  role          UserRole
-  sellerType    SellerType?
-  buyerType     BuyerType?
-  locale        LocaleCode  @default(en)
-  displayName   String?
-  blockedAt     DateTime?
-  blockedReason String?
-  blockedById   String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+enum FarmDocumentKind {
+  idCard
+  businessRegistration
+  other
+}
 
-  blockedBy                    User?             @relation("BlockedByAdmin", fields: [blockedById], references: [id], onDelete: SetNull)
-  blockedUsers                 User[]            @relation("BlockedByAdmin")
+enum VerificationChannel {
+  email
+  sms
+}
+
+model User {
+  id               String      @id @default(cuid())
+  email            String      @unique
+  passwordHash     String?
+  role             UserRole
+  sellerType       SellerType?
+  buyerType        BuyerType?
+  locale           LocaleCode  @default(en)
+  displayName      String?
+  emailVerifiedAt  DateTime?
+  phone            String?
+  phoneVerifiedAt  DateTime?
+  blockedAt        DateTime?
+  blockedReason    String?
+  blockedById      String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  blockedBy                    User?              @relation("BlockedByAdmin", fields: [blockedById], references: [id], onDelete: SetNull)
+  blockedUsers                 User[]             @relation("BlockedByAdmin")
   farm                         Farm?
-  conversationsAsFarmer        Conversation[]    @relation("FarmerConversations")
-  conversationsAsBuyer         Conversation[]    @relation("BuyerConversations")
+  conversationsAsFarmer        Conversation[]     @relation("FarmerConversations")
+  conversationsAsBuyer         Conversation[]     @relation("BuyerConversations")
   messages                     Message[]
-  rfqsAsBuyer                  Rfq[]             @relation("BuyerRfqs")
-  purchaseRequests             PurchaseRequest[] @relation("BuyerPurchaseRequests")
-  moderatedProducts            Product[]         @relation("ProductModerator")
-  moderatedPurchaseRequests    PurchaseRequest[] @relation("PurchaseRequestModerator")
-  verifiedFarms                Farm[]            @relation("FarmVerifier")
-  reviewedDocuments            FarmDocument[]    @relation("DocumentReviewer")
-  ratingsGiven                 Rating[]          @relation("RatingsGiven")
-  ratingsReceived              Rating[]          @relation("RatingsReceived")
+  rfqsAsBuyer                  Rfq[]              @relation("BuyerRfqs")
+  purchaseRequests             PurchaseRequest[]  @relation("BuyerPurchaseRequests")
+  moderatedProducts            Product[]          @relation("ProductModerator")
+  moderatedPurchaseRequests    PurchaseRequest[]  @relation("PurchaseRequestModerator")
+  verifiedFarms                Farm[]             @relation("FarmVerifier")
+  reviewedDocuments            FarmDocument[]     @relation("DocumentReviewer")
+  ratingsGiven                 Rating[]           @relation("RatingsGiven")
+  ratingsReceived              Rating[]           @relation("RatingsReceived")
   alertSubscription            AlertSubscription?
+  verificationCodes            VerificationCode[]
 
   @@index([blockedAt])
   @@index([createdAt])
@@ -142,17 +158,21 @@ model AlertSubscription {
 }
 
 model Farm {
-  id                 String             @id @default(cuid())
-  ownerId            String             @unique
-  name               String
-  region             String?
-  description        String?
-  verificationStatus VerificationStatus @default(pending)
-  verificationNote   String?
-  verifiedAt         DateTime?
-  verifiedById       String?
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  id                         String             @id @default(cuid())
+  ownerId                    String             @unique
+  name                       String
+  region                     String?
+  description                String?
+  verificationStatus         VerificationStatus @default(unverified)
+  verificationNote           String?
+  verifiedAt                 DateTime?
+  verifiedById               String?
+  companyRegistrationNumber  String?
+  companyRegistryName        String?
+  companyRegistryCheckedAt   DateTime?
+  companyRegistryValid       Boolean?
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
 
   owner           User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   verifiedBy      User?           @relation("FarmVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
@@ -172,6 +192,7 @@ model FarmDocument {
   url          String
   key          String
   mimeType     String
+  kind         FarmDocumentKind     @default(other)
   reviewStatus DocumentReviewStatus @default(pending)
   reviewNote   String?
   reviewedAt   DateTime?
@@ -183,8 +204,25 @@ model FarmDocument {
   reviewedBy User? @relation("DocumentReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
 
   @@index([farmId, reviewStatus])
+  @@index([farmId, kind])
   @@index([reviewStatus, createdAt])
   @@map("farm_documents")
+}
+
+model VerificationCode {
+  id          String              @id @default(cuid())
+  userId      String
+  channel     VerificationChannel
+  destination String
+  codeHash    String
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, channel, createdAt])
+  @@map("verification_codes")
 }
 
 model CategoryConfig {

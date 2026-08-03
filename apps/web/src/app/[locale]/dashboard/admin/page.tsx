@@ -258,7 +258,7 @@ async function FarmsSection({
   const farms = await apiRequestAuthed<AdminFarm[]>(
     `/admin/farms?status=${encodeURIComponent(status || 'pending')}`,
   );
-  const tabs = ['pending', 'approved', 'rejected'] as const;
+  const tabs = ['unverified', 'pending', 'approved', 'rejected'] as const;
 
   return (
     <>
@@ -307,6 +307,8 @@ async function FarmsSection({
                         <a href={toPublicMediaUrl(doc.url)} target="_blank" rel="noreferrer">
                           {doc.title}
                         </a>
+                        {' · '}
+                        {t(`farms.docKinds.${doc.kind}`)}
                         {' · '}
                         {t(`farms.docStatus.${doc.reviewStatus}`)}
                         <div style={{ marginTop: '0.5rem' }}>

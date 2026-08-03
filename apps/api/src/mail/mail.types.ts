@@ -25,4 +25,5 @@ export type EmailTemplateKey =
   | 'productApproved'
   | 'productRejected'
   | 'newProductListing'
-  | 'newPurchaseRequest';
+  | 'newPurchaseRequest'
+  | 'verificationCode';

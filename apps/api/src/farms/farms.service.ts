@@ -16,10 +16,12 @@ import type {
 import {
   FARM_DOCUMENT_MAX_BYTES,
   FARM_DOCUMENT_MAX_COUNT,
+  isFarmDocumentKind,
   isFarmDocumentMimeType,
 } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
+  FarmDocumentKind,
   ModerationStatus as PrismaModerationStatus,
   VerificationStatus as PrismaVerificationStatus,
 } from '@prisma/client';
@@ -158,6 +160,8 @@ export class FarmsService {
       createdAt: farm.createdAt.toISOString(),
       verificationNote: farm.verificationNote,
       verifiedAt: farm.verifiedAt?.toISOString() ?? null,
+      companyRegistrationNumber: farm.companyRegistrationNumber,
+      companyRegistryValid: farm.companyRegistryValid,
       documents: farm.documents.map((doc) => this.toDocument(doc)),
       products: farm.products.map((product) =>
         this.toProductSummary(product, farm, sellerRating),
@@ -179,7 +183,7 @@ export class FarmsService {
         name: dto.name.trim(),
         region: dto.region?.trim() || null,
         description: dto.description?.trim() || null,
-        verificationStatus: PrismaVerificationStatus.pending,
+        verificationStatus: PrismaVerificationStatus.unverified,
       },
     });
 
@@ -220,6 +224,7 @@ export class FarmsService {
     user: AuthenticatedUser,
     title: string,
     file?: Express.Multer.File,
+    kindRaw?: string,
   ): Promise<FarmDocument> {
     const farm = await this.requireOwnFarm(user);
     if (!file) {
@@ -231,6 +236,9 @@ export class FarmsService {
     if (file.size > FARM_DOCUMENT_MAX_BYTES) {
       throw new BadRequestException('Document is too large');
     }
+
+    const kind =
+      kindRaw && isFarmDocumentKind(kindRaw) ? kindRaw : ('other' as const);
 
     const count = await this.prisma.farmDocument.count({ where: { farmId: farm.id } });
     if (count >= FARM_DOCUMENT_MAX_COUNT) {
@@ -257,6 +265,7 @@ export class FarmsService {
         url: stored.url,
         key: stored.key,
         mimeType: file.mimetype,
+        kind: kind as FarmDocumentKind,
         reviewStatus: DocumentReviewStatus.pending,
       },
     });
@@ -299,6 +308,7 @@ export class FarmsService {
     fileName: string;
     url: string;
     mimeType: string;
+    kind: FarmDocumentKind;
     reviewStatus: DocumentReviewStatus;
     reviewNote: string | null;
     reviewedAt: Date | null;
@@ -311,6 +321,7 @@ export class FarmsService {
       fileName: doc.fileName,
       url: doc.url,
       mimeType: doc.mimeType,
+      kind: doc.kind,
       reviewStatus: doc.reviewStatus,
       reviewNote: doc.reviewNote,
       reviewedAt: doc.reviewedAt?.toISOString() ?? null,
@@ -327,12 +338,14 @@ export class FarmsService {
     owner: { id: string; displayName: string | null };
     _count: { products: number };
   }): FarmSummary {
+    const verificationStatus = farm.verificationStatus as VerificationStatus;
     return {
       id: farm.id,
       name: farm.name,
       region: farm.region,
       description: farm.description,
-      verificationStatus: farm.verificationStatus as VerificationStatus,
+      verificationStatus,
+      verified: verificationStatus === 'approved',
       owner: farm.owner,
       productCount: farm._count.products,
     };
@@ -357,9 +370,16 @@ export class FarmsService {
         isPrimary: boolean;
       }>;
     },
-    farm: { id: string; name: string; region: string | null },
+    farm: {
+      id: string;
+      name: string;
+      region: string | null;
+      verificationStatus?: PrismaVerificationStatus | VerificationStatus;
+    },
     sellerRating?: RatingSummary | null,
   ) {
+    const verificationStatus = (farm.verificationStatus ??
+      'unverified') as VerificationStatus;
     return {
       id: product.id,
       title: product.title,
@@ -386,6 +406,8 @@ export class FarmsService {
         id: farm.id,
         name: farm.name,
         region: farm.region,
+        verificationStatus,
+        verified: verificationStatus === 'approved',
         sellerRating: sellerRating ?? { average: null, count: 0 },
       },
     };

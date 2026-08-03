@@ -85,6 +85,8 @@ export type FarmSummary = {
   region: string | null;
   description: string | null;
   verificationStatus: VerificationStatus;
+  /** True when verificationStatus === 'approved' (public Verified badge). */
+  verified: boolean;
   owner: {
     id: string;
     displayName: string | null;
@@ -96,6 +98,8 @@ export type FarmDetail = FarmSummary & {
   createdAt: string;
   verificationNote: string | null;
   verifiedAt: string | null;
+  companyRegistrationNumber?: string | null;
+  companyRegistryValid?: boolean | null;
   documents?: FarmDocument[];
   products: ProductSummary[];
 };
@@ -142,6 +146,8 @@ export type ProductSummary = {
     id: string;
     name: string;
     region: string | null;
+    verificationStatus: VerificationStatus;
+    verified: boolean;
     /** Aggregate deal rating of the farm owner (seller). */
     sellerRating: RatingSummary;
   };

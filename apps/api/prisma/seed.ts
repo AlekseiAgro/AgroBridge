@@ -637,6 +637,9 @@ async function upsertUser(params: {
   passwordHash: string;
   sellerType?: 'privateFarmer' | 'company' | null;
   buyerType?: 'individual' | 'company' | null;
+  emailVerifiedAt?: Date | null;
+  phone?: string | null;
+  phoneVerifiedAt?: Date | null;
 }) {
   const sellerType =
     params.role === UserRole.farmer
@@ -656,6 +659,9 @@ async function upsertUser(params: {
       passwordHash: params.passwordHash,
       sellerType,
       buyerType,
+      emailVerifiedAt: params.emailVerifiedAt ?? undefined,
+      phone: params.phone ?? undefined,
+      phoneVerifiedAt: params.phoneVerifiedAt ?? undefined,
     },
     create: {
       email: params.email,
@@ -665,6 +671,9 @@ async function upsertUser(params: {
       passwordHash: params.passwordHash,
       sellerType,
       buyerType,
+      emailVerifiedAt: params.emailVerifiedAt ?? null,
+      phone: params.phone ?? null,
+      phoneVerifiedAt: params.phoneVerifiedAt ?? null,
     },
   });
 }
@@ -706,14 +715,23 @@ async function seedFarmer(
   adminId: string,
   index: number,
 ) {
+  const sellerType = index % 2 === 0 ? 'privateFarmer' : 'company';
+  const pendingReview = index === 0 && category === 'fruits';
+  const verifiedNow = new Date();
   const user = await upsertUser({
     email: farmer.email,
     role: UserRole.farmer,
     displayName: farmer.displayName,
     locale: farmer.locale,
     passwordHash,
-    sellerType: index % 2 === 0 ? 'privateFarmer' : 'company',
+    sellerType,
+    emailVerifiedAt: verifiedNow,
+    phone: `+99555500${String(1000 + index).slice(-4)}`,
+    phoneVerifiedAt: verifiedNow,
   });
+
+  const companyRegistrationNumber =
+    sellerType === 'company' ? `40${String(1000000 + index).slice(-7)}` : null;
 
   const farm = await prisma.farm.upsert({
     where: { ownerId: user.id },
@@ -721,55 +739,68 @@ async function seedFarmer(
       name: farmer.farmName,
       region: farmer.region,
       description: farmer.farmDescription,
-      verificationStatus:
-        index === 0 && category === 'fruits'
-          ? VerificationStatus.pending
-          : VerificationStatus.approved,
-      verificationNote: null,
-      verifiedAt:
-        index === 0 && category === 'fruits' ? null : new Date(),
-      verifiedById: index === 0 && category === 'fruits' ? null : adminId,
+      verificationStatus: pendingReview
+        ? VerificationStatus.pending
+        : VerificationStatus.approved,
+      verificationNote: pendingReview
+        ? 'Awaiting moderator review of ID document'
+        : sellerType === 'company'
+          ? 'Verified via email, SMS, and company registry check'
+          : 'Verified via email, SMS, and ID document review',
+      verifiedAt: pendingReview ? null : verifiedNow,
+      verifiedById: pendingReview ? null : adminId,
+      companyRegistrationNumber,
+      companyRegistryName:
+        sellerType === 'company' ? `Registry stub company ${companyRegistrationNumber}` : null,
+      companyRegistryCheckedAt: sellerType === 'company' ? verifiedNow : null,
+      companyRegistryValid: sellerType === 'company' ? true : null,
     },
     create: {
       ownerId: user.id,
       name: farmer.farmName,
       region: farmer.region,
       description: farmer.farmDescription,
-      verificationStatus:
-        index === 0 && category === 'fruits'
-          ? VerificationStatus.pending
-          : VerificationStatus.approved,
-      verifiedAt:
-        index === 0 && category === 'fruits' ? null : new Date(),
-      verifiedById: index === 0 && category === 'fruits' ? null : adminId,
+      verificationStatus: pendingReview
+        ? VerificationStatus.pending
+        : VerificationStatus.approved,
+      verificationNote: pendingReview
+        ? 'Awaiting moderator review of ID document'
+        : null,
+      verifiedAt: pendingReview ? null : verifiedNow,
+      verifiedById: pendingReview ? null : adminId,
+      companyRegistrationNumber,
+      companyRegistryName:
+        sellerType === 'company' ? `Registry stub company ${companyRegistrationNumber}` : null,
+      companyRegistryCheckedAt: sellerType === 'company' ? verifiedNow : null,
+      companyRegistryValid: sellerType === 'company' ? true : null,
     },
   });
 
-  // Demo verification document for the pending farm (and a few approved ones).
+  // Demo verification document for the pending private farmer (and a few approved ones).
   if (index === 0) {
     await prisma.farmDocument.deleteMany({ where: { farmId: farm.id } });
-    const key = `farms/${farm.id}/documents/demo-registration.txt`;
+    const key = `farms/${farm.id}/documents/demo-id-card.txt`;
     const absolute = join(UPLOADS_DIR, key);
     await mkdir(dirname(absolute), { recursive: true });
     await writeFile(
       absolute,
-      `Demo registration document for ${farmer.farmName}\n`,
+      `Demo ID card document for ${farmer.farmName}\n`,
       'utf8',
     );
     await prisma.farmDocument.create({
       data: {
         farmId: farm.id,
-        title: 'Farm registration certificate',
-        fileName: 'registration.txt',
+        title: 'ID card',
+        fileName: 'id-card.txt',
         url: `/api/uploads/${key}`,
         key,
         mimeType: 'application/pdf',
-        reviewStatus:
-          category === 'fruits'
-            ? DocumentReviewStatus.pending
-            : DocumentReviewStatus.approved,
-        reviewedAt: category === 'fruits' ? null : new Date(),
-        reviewedById: category === 'fruits' ? null : adminId,
+        kind: 'idCard',
+        reviewStatus: pendingReview
+          ? DocumentReviewStatus.pending
+          : DocumentReviewStatus.approved,
+        reviewedAt: pendingReview ? null : verifiedNow,
+        reviewedById: pendingReview ? null : adminId,
       },
     });
   }

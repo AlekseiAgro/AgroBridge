@@ -5,6 +5,7 @@ import { CatalogPurchaseCta } from '@/components/CatalogPurchaseCta';
 import { RatingStars } from '@/components/RatingStars';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
 import { getProductCardImage } from '@/lib/product-image';
@@ -83,6 +84,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                     </Link>
                     <p className="product-list__meta">
                       <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
+                      <VerifiedBadge verified={product.farm.verified} />
                       {product.farm.region
                         ? ` · ${formatRegionLabel(product.farm.region, tr) ?? product.farm.region}`
                         : ''}

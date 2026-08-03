@@ -1,7 +1,7 @@
 'use client';
 
-import type { FarmDocument } from '@agrobridge/shared';
-import { FARM_DOCUMENT_MAX_COUNT } from '@agrobridge/shared';
+import type { FarmDocument, FarmDocumentKind } from '@agrobridge/shared';
+import { FARM_DOCUMENT_KINDS, FARM_DOCUMENT_MAX_COUNT } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
@@ -16,6 +16,7 @@ export function FarmDocumentsManager({ initialDocuments }: Props) {
   const router = useRouter();
   const [documents, setDocuments] = useState(initialDocuments);
   const [title, setTitle] = useState('');
+  const [kind, setKind] = useState<FarmDocumentKind>('other');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +27,7 @@ export function FarmDocumentsManager({ initialDocuments }: Props) {
     try {
       const body = new FormData();
       body.set('title', title.trim() || file.name);
+      body.set('kind', kind);
       body.set('file', file);
       const response = await fetch('/api/farms/me/documents', {
         method: 'POST',
@@ -83,7 +85,8 @@ export function FarmDocumentsManager({ initialDocuments }: Props) {
             <li key={doc.id} className="product-list__item">
               <p className="product-list__title">{doc.title}</p>
               <p className="product-list__meta">
-                {doc.fileName} · {t(`documents.status.${doc.reviewStatus}`)}
+                {t(`documents.kinds.${doc.kind}`)} · {doc.fileName} ·{' '}
+                {t(`documents.status.${doc.reviewStatus}`)}
               </p>
               {doc.reviewNote ? (
                 <p className="form-error">
@@ -122,6 +125,19 @@ export function FarmDocumentsManager({ initialDocuments }: Props) {
               onChange={(event) => setTitle(event.target.value)}
               placeholder={t('documents.titlePlaceholder')}
             />
+          </label>
+          <label className="field">
+            <span>{t('documents.kindField')}</span>
+            <select
+              value={kind}
+              onChange={(event) => setKind(event.target.value as FarmDocumentKind)}
+            >
+              {FARM_DOCUMENT_KINDS.map((value) => (
+                <option key={value} value={value}>
+                  {t(`documents.kinds.${value}`)}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="product-images__upload">
             <span>{pending ? t('pleaseWait') : t('documents.upload')}</span>

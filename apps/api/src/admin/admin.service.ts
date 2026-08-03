@@ -31,6 +31,7 @@ import {
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
+import { VerificationService } from '../verification/verification.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { BlockUserDto, RejectProductDto, ReviewNoteDto, UpdateCategoryDto } from './dto/admin.dto';
 
@@ -58,6 +59,7 @@ export class AdminService {
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
     private readonly subscriptions: SubscriptionsService,
+    private readonly verification: VerificationService,
   ) {}
 
   async stats(): Promise<AdminStats> {
@@ -485,7 +487,10 @@ export class AdminService {
     approve: boolean,
     dto: ReviewNoteDto,
   ): Promise<FarmDocument> {
-    const existing = await this.prisma.farmDocument.findUnique({ where: { id: documentId } });
+    const existing = await this.prisma.farmDocument.findUnique({
+      where: { id: documentId },
+      include: { farm: { select: { ownerId: true } } },
+    });
     if (!existing) {
       throw new NotFoundException('Document not found');
     }
@@ -506,6 +511,10 @@ export class AdminService {
             reviewedById: admin.id,
           },
     });
+
+    if (approve && existing.kind === 'idCard') {
+      await this.verification.tryCompleteVerification(existing.farm.ownerId);
+    }
 
     return this.toFarmDocument(doc);
   }
@@ -730,6 +739,7 @@ export class AdminService {
     fileName: string;
     url: string;
     mimeType: string;
+    kind: FarmDocument['kind'];
     reviewStatus: DocumentReviewStatus;
     reviewNote: string | null;
     reviewedAt: Date | null;
@@ -742,6 +752,7 @@ export class AdminService {
       fileName: doc.fileName,
       url: doc.url,
       mimeType: doc.mimeType,
+      kind: doc.kind,
       reviewStatus: doc.reviewStatus,
       reviewNote: doc.reviewNote,
       reviewedAt: doc.reviewedAt?.toISOString() ?? null,
@@ -771,6 +782,7 @@ export class AdminService {
       fileName: string;
       url: string;
       mimeType: string;
+      kind: FarmDocument['kind'];
       reviewStatus: DocumentReviewStatus;
       reviewNote: string | null;
       reviewedAt: Date | null;

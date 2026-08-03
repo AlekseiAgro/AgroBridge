@@ -57,9 +57,10 @@ export class FarmsController {
   uploadDocument(
     @CurrentUser() user: AuthenticatedUser,
     @Body('title') title: string,
+    @Body('kind') kind: string,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.farmsService.uploadDocument(user, title ?? '', file);
+    return this.farmsService.uploadDocument(user, title ?? '', file, kind);
   }
 
   @Delete('me/documents/:documentId')

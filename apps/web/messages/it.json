@@ -155,10 +155,64 @@
     "regionUnknown": "Regione non specificata",
     "regionPlaceholder": "Seleziona una regione",
     "verification": {
-      "label": "Verifica",
-      "pending": "In revisione",
-      "approved": "Produttore verificato",
-      "rejected": "Verifica rifiutata"
+      "label": "Verification",
+      "badge": "Verified",
+      "badgeHint": "This producer completed voluntary AgroBridge verification.",
+      "title": "Voluntary producer verification",
+      "subtitle": "Recommended. Completing email, SMS, and identity checks shows a Verified badge to buyers. Listing products does not require verification.",
+      "statusLabel": "Current status",
+      "doneHint": "Buyers can see your Verified badge on the catalog and farm page.",
+      "genericError": "Could not complete this verification step.",
+      "unknownPath": "Set your seller type (private farmer or company) during registration to continue identity verification.",
+      "farmStatus": {
+        "unverified": "Not verified yet",
+        "pending": "Pending moderator review",
+        "approved": "Verified producer",
+        "rejected": "Verification rejected"
+      },
+      "stepStatus": {
+        "todo": "To do",
+        "done": "Done",
+        "pending_review": "Awaiting review",
+        "rejected": "Rejected"
+      },
+      "email": {
+        "title": "1. Confirm email",
+        "send": "Send email code",
+        "code": "Email code",
+        "confirm": "Confirm email",
+        "sent": "Code sent to {destination} (check API console/mail logs in demo).",
+        "confirmed": "Email confirmed."
+      },
+      "phone": {
+        "title": "2. Confirm phone (SMS)",
+        "number": "Phone number",
+        "send": "Send SMS code",
+        "code": "SMS code",
+        "confirm": "Confirm phone",
+        "sent": "SMS code sent to {destination} (logged to API console in demo).",
+        "confirmed": "Phone confirmed."
+      },
+      "company": {
+        "title": "3. Company registry check",
+        "number": "Georgian company identification code",
+        "check": "Check registry",
+        "hint": "Enter the 9-digit identification code from Georgian public company databases.",
+        "matched": "Registry match: {name}"
+      },
+      "private": {
+        "title": "3. ID card review",
+        "hint": "Upload a clear photo or scan of your ID card. A moderator will review it manually.",
+        "upload": "Upload ID card",
+        "idTitle": "ID card",
+        "submit": "Submit for moderator review",
+        "uploaded": "ID document uploaded.",
+        "submitted": "Submitted for moderator review."
+      },
+      "pending": "Pending review",
+      "approved": "Verified producer",
+      "rejected": "Verification rejected",
+      "unverified": "Not verified yet"
     },
     "documents": {
       "title": "Documenti di verifica",
@@ -177,6 +231,12 @@
         "pending": "In revisione",
         "approved": "Approvato",
         "rejected": "Rifiutato"
+      },
+      "kindField": "Document type",
+      "kinds": {
+        "idCard": "ID card",
+        "businessRegistration": "Business registration",
+        "other": "Other"
       }
     }
   },
@@ -365,19 +425,26 @@
       "approveDoc": "Approva documento",
       "rejectDoc": "Rifiuta documento",
       "tabs": {
-        "pending": "In attesa",
-        "approved": "Verificati",
-        "rejected": "Rifiutati"
+        "pending": "Pending",
+        "approved": "Verified",
+        "rejected": "Rejected",
+        "unverified": "Unverified"
       },
       "status": {
-        "pending": "Verifica in attesa",
-        "approved": "Verificato",
-        "rejected": "Rifiutato"
+        "pending": "Pending verification",
+        "approved": "Verified",
+        "rejected": "Rejected",
+        "unverified": "Not verified"
       },
       "docStatus": {
         "pending": "In attesa",
         "approved": "Approvato",
         "rejected": "Rifiutato"
+      },
+      "docKinds": {
+        "idCard": "ID card",
+        "businessRegistration": "Business registration",
+        "other": "Other"
       }
     },
     "users": {

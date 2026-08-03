@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { RatingStars } from '@/components/RatingStars';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getProductCardImage } from '@/lib/product-image';
@@ -44,7 +45,10 @@ export default async function FarmDetailPage({ params }: Props) {
     <div className="page">
       <SiteHeader />
       <main className="page__main">
-        <h1>{farm.name}</h1>
+        <h1 className="farm-title-row">
+          {farm.name}
+          <VerifiedBadge verified={farm.verified} />
+        </h1>
         <p className="page__subtitle">
           {formatRegionLabel(farm.region, tr) || t('regionUnknown')}
           {' · '}

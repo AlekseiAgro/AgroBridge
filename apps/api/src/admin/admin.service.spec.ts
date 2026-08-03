@@ -37,6 +37,7 @@ describe('AdminService', () => {
       prisma as never,
       notifications as never,
       { notifyNewProduct: jest.fn().mockResolvedValue(undefined) } as never,
+      { tryCompleteVerification: jest.fn().mockResolvedValue(undefined) } as never,
     );
   });
 

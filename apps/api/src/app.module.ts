@@ -13,11 +13,13 @@ import { ProductsModule } from './products/products.module';
 import { RatingsModule } from './ratings/ratings.module';
 import { PurchaseRequestsModule } from './purchase-requests/purchase-requests.module';
 import { RfqsModule } from './rfqs/rfqs.module';
+import { SmsModule } from './sms/sms.module';
 import { StorageModule } from './storage/storage.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { SupportModule } from './support/support.module';
 import { TranslationModule } from './translation/translation.module';
 import { UsersModule } from './users/users.module';
+import { VerificationModule } from './verification/verification.module';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { UsersModule } from './users/users.module';
     PrismaModule,
     StorageModule,
     MailModule,
+    SmsModule,
     HealthModule,
     AuthModule,
     FarmsModule,
@@ -35,6 +38,7 @@ import { UsersModule } from './users/users.module';
     RfqsModule,
     PurchaseRequestsModule,
     SubscriptionsModule,
+    VerificationModule,
     TranslationModule,
     ChatModule,
     AdminModule,

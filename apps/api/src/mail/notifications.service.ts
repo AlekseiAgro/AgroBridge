@@ -203,6 +203,17 @@ export class NotificationsService {
     });
   }
 
+  async notifyVerificationCode(params: {
+    user: MailRecipient;
+    code: string;
+    channel: 'email' | 'sms';
+  }): Promise<void> {
+    await this.sendTemplate(params.user, 'verificationCode', {
+      name: this.displayName(params.user),
+      code: params.code,
+    });
+  }
+
   private async sendTemplate(
     recipient: MailRecipient,
     key: Parameters<typeof renderEmailTemplate>[1],
