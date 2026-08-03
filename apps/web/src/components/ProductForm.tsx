@@ -20,7 +20,7 @@ import {
   type SeasonMonth,
 } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useMemo, useState, type ReactNode } from 'react';
 import { OriginPlaceInput } from '@/components/OriginPlaceInput';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
 import { useRouter } from '@/i18n/navigation';
@@ -28,6 +28,8 @@ import { useRouter } from '@/i18n/navigation';
 type Props = {
   mode: 'create' | 'edit';
   initial?: ProductDetail | null;
+  /** Rendered under the quality widget and above the form sections (e.g. media uploads). */
+  leading?: ReactNode;
 };
 
 function parseOptionalQuantity(value: FormDataEntryValue | null): number | null {
@@ -71,7 +73,7 @@ function toggleValue<T extends string>(values: T[], value: T): T[] {
   return values.includes(value) ? values.filter((item) => item !== value) : [...values, value];
 }
 
-export function ProductForm({ mode, initial }: Props) {
+export function ProductForm({ mode, initial, leading }: Props) {
   const t = useTranslations('product');
   const th = useTranslations('harvest');
   const tc = useTranslations('catalog');
@@ -316,9 +318,10 @@ export function ProductForm({ mode, initial }: Props) {
   }
 
   return (
-    <form className="auth-form product-form" onSubmit={onSubmit}>
+    <div className="product-editor">
       <ProductQualityWidget score={qualityScore} />
-
+      {leading}
+      <form className="auth-form product-form" onSubmit={onSubmit}>
       <fieldset className="field-group product-form__section">
         <legend className="section-title">{t('sections.basics')}</legend>
         <div className="field-row">
@@ -748,6 +751,7 @@ export function ProductForm({ mode, initial }: Props) {
       <button className="button button--primary" type="submit" disabled={pending}>
         {pending ? t('pleaseWait') : mode === 'create' ? t('createSubmit') : t('saveSubmit')}
       </button>
-    </form>
+      </form>
+    </div>
   );
 }
