@@ -152,7 +152,20 @@ Drivers:
 
 Chat messages are intentionally not emailed yet (too noisy for MVP).
 
+## Deploy (Docker)
+
+Single-host production compose (web + api + Postgres + Redis):
+
+```bash
+cp .env.production.example .env.production
+# fill WEB_ORIGIN, API URLs, JWT_SECRET, POSTGRES_PASSWORD, SUPPORT_EMAIL
+pnpm docker:prod:up
+```
+
+Details and reverse-proxy notes: [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
 ## Next implementation steps
 
-1. Payment / order confirmation flow
-2. Chat unread digests (optional)
+1. Point a real domain + HTTPS reverse proxy at the Docker stack
+2. Turn on SMTP + S3/R2 for mail and durable uploads
+3. Payment / order confirmation flow (product)
