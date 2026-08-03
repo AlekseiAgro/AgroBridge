@@ -110,15 +110,32 @@ NEXT_PUBLIC_API_URL=https://${{api.RAILWAY_PUBLIC_DOMAIN}}/api
 
 Generate a public domain for `web`.
 
-## 4. Seed demo data (optional)
+## 4. Admin login + optional demo seed
 
-In the `api` service → **Settings** → one-off command / shell (or Railway CLI):
+Set API variables:
 
 ```bash
-TS_NODE_PROJECT=./prisma/tsconfig.json node --require ts-node/register/transpile-only ./prisma/seed.ts
+ADMIN_EMAIL=your@email.com
+ADMIN_PASSWORD=<strong-password>
+ADMIN_DISPLAY_NAME=AgroBridge Admin
 ```
 
-(If the shell cwd is `/app/apps/api` inside the container.)
+Redeploy `api` — on start it runs `prisma/ensure-admin.cjs` and upserts that admin (email marked verified).
+
+Or create/update immediately in the API shell (`cwd` is usually `/app/apps/api`):
+
+```bash
+node ./prisma/ensure-admin.cjs
+```
+
+Full demo seed (optional):
+
+```bash
+# slash in path: .bin/prisma
+./node_modules/.bin/prisma db seed
+# fallback:
+/app/node_modules/.bin/prisma db seed
+```
 
 ## 5. Point agrobrid.ge (Cloudflare)
 

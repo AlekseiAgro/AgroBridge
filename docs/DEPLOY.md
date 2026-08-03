@@ -56,14 +56,27 @@ curl -sS https://api.agrobrid.ge/api/health
 curl -sS -o /dev/null -w '%{http_code}\n' https://agrobrid.ge
 ```
 
-## 3. Seed demo data (optional)
+## 3. Admin login + optional demo seed
+
+Set `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env.production`. On every API start the container upserts that admin (verified email) via `prisma/ensure-admin.cjs`.
+
+To create/update the admin **immediately** without waiting for redeploy, from inside the API container (`/app/apps/api`):
 
 ```bash
-docker compose -f docker-compose.prod.yml --env-file .env.production exec api \
-  ./node_modules/.bin/prisma db seed
+# note the slash: .bin/prisma  (not .bin.prisma)
+./node_modules/.bin/prisma db seed
+# or only the admin account:
+node ./prisma/ensure-admin.cjs
 ```
 
-Demo passwords come from seed / env (`ADMIN_PASSWORD`, farmers/buyers `DemoPass123` in the built-in demo seed).
+If `./node_modules/.bin/prisma` is missing, try:
+
+```bash
+/app/node_modules/.bin/prisma db seed
+node ./prisma/ensure-admin.cjs
+```
+
+Full demo catalog seed (farmers/buyers/`DemoPass123`) still uses `prisma db seed`.
 
 ## 4. Reverse proxy (agrobrid.ge)
 

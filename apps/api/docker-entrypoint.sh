@@ -15,5 +15,10 @@ fi
 echo "Running Prisma migrations..."
 "$PRISMA" migrate deploy
 
+if [ -n "${ADMIN_PASSWORD:-}" ]; then
+  echo "Ensuring admin account from ADMIN_EMAIL / ADMIN_PASSWORD..."
+  node ./prisma/ensure-admin.cjs
+fi
+
 echo "Starting AgroBridge API..."
 exec node dist/main.js
