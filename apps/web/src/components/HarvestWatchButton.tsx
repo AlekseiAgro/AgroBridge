@@ -23,9 +23,11 @@ export function HarvestWatchButton({
 
   if (!isLoggedIn) {
     return (
-      <p className="auth-card__footer">
-        <Link href="/login">{t('loginToWatch')}</Link>
-      </p>
+      <div className="harvest-watch">
+        <Link href="/login" className="button button--primary harvest-watch__login">
+          {t('loginToWatch')}
+        </Link>
+      </div>
     );
   }
 

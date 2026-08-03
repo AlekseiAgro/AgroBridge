@@ -406,9 +406,11 @@ export default async function ProductDetailPage({ params }: Props) {
             />
           </div>
         ) : !user ? (
-          <p className="auth-card__footer" style={{ marginTop: '1.5rem' }}>
-            <Link href="/login">{tr('loginToRequest')}</Link>
-          </p>
+          <div className="product-login-cta">
+            <Link href="/login" className="button button--primary">
+              {tr('loginToRequest')}
+            </Link>
+          </div>
         ) : null}
       </main>
       <SiteFooter />
