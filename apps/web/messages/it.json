@@ -949,20 +949,20 @@
   },
   "opportunity": {
     "tiers": {
-      "excellent": "Excellent Opportunity",
-      "good": "Good Opportunity",
-      "fair": "Fair Opportunity",
-      "watch": "Watch Opportunity"
+      "excellent": "Ottima opportunità",
+      "good": "Buona opportunità",
+      "fair": "Opportunità discreta",
+      "watch": "Opportunità da monitorare"
     },
     "tooltip": {
-      "highDemand": "High demand in {markets}.",
-      "steadyDemand": "Steady demand in {markets}.",
-      "limitedSupply": "Supply limited.",
-      "availableSupply": "Supply is available.",
-      "priceRiseThreeWeeks": "Price growth expected in the next three weeks.",
-      "priceRiseWeeks": "Price growth expected in the next {weeks} weeks.",
-      "priceRiseSoon": "Price growth is expected soon.",
-      "priceStable": "Recent price move about +{percent}%."
+      "highDemand": "Alta domanda in {markets}.",
+      "steadyDemand": "Domanda stabile in {markets}.",
+      "limitedSupply": "Offerta limitata.",
+      "availableSupply": "Offerta disponibile.",
+      "priceRiseThreeWeeks": "Aumento dei prezzi previsto nelle prossime tre settimane.",
+      "priceRiseWeeks": "Aumento dei prezzi previsto nelle prossime {weeks} settimane.",
+      "priceRiseSoon": "Presto è previsto un aumento dei prezzi.",
+      "priceStable": "Variazione recente dei prezzi di circa +{percent}%."
     }
   }
 }

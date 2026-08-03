@@ -949,10 +949,10 @@
   },
   "opportunity": {
     "tiers": {
-      "excellent": "Excellent Opportunity",
-      "good": "Good Opportunity",
-      "fair": "Fair Opportunity",
-      "watch": "Watch Opportunity"
+      "excellent": "Отличная возможность",
+      "good": "Хорошая возможность",
+      "fair": "Умеренная возможность",
+      "watch": "Следить за рынком"
     },
     "tooltip": {
       "highDemand": "Высокий спрос в {markets}.",

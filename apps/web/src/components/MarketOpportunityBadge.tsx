@@ -33,15 +33,130 @@ const MARKET_LABELS: Record<string, Record<string, string>> = {
     Germany: 'გერმანიაში',
     Netherlands: 'ნიდერლანდებში',
     Poland: 'პოლონეთში',
+    France: 'საფრანგეთში',
+    Italy: 'იტალიაში',
+    Spain: 'ესპანეთში',
+    UK: 'გაერთიანებულ სამეფოში',
+    UAE: 'არაბთა გაერთიანებულ საამიროებში',
+    Japan: 'იაპონიაში',
+    Switzerland: 'შვეიცარიაში',
+    Scandinavia: 'სკანდინავიაში',
+    Romania: 'რუმინეთში',
+    Czechia: 'ჩეხეთში',
+    Kazakhstan: 'ყაზახეთში',
+    Armenia: 'სომხეთში',
+    Azerbaijan: 'აზერბაიჯანში',
+    Israel: 'ისრაელში',
+    'Baltic states': 'ბალტიისპირეთის ქვეყნებში',
+  },
+  de: {
+    Germany: 'Deutschland',
+    Netherlands: 'den Niederlanden',
+    Poland: 'Polen',
+    France: 'Frankreich',
+    Italy: 'Italien',
+    Spain: 'Spanien',
+    UK: 'Großbritannien',
+    UAE: 'den VAE',
+    Japan: 'Japan',
+    Switzerland: 'der Schweiz',
+    Scandinavia: 'Skandinavien',
+    Romania: 'Rumänien',
+    Czechia: 'Tschechien',
+    Kazakhstan: 'Kasachstan',
+    Armenia: 'Armenien',
+    Azerbaijan: 'Aserbaidschan',
+    Israel: 'Israel',
+    'Baltic states': 'den baltischen Staaten',
+  },
+  fr: {
+    Germany: 'Allemagne',
+    Netherlands: 'Pays-Bas',
+    Poland: 'Pologne',
+    France: 'France',
+    Italy: 'Italie',
+    Spain: 'Espagne',
+    UK: 'Royaume-Uni',
+    UAE: 'Émirats arabes unis',
+    Japan: 'Japon',
+    Switzerland: 'Suisse',
+    Scandinavia: 'Scandinavie',
+    Romania: 'Roumanie',
+    Czechia: 'Tchéquie',
+    Kazakhstan: 'Kazakhstan',
+    Armenia: 'Arménie',
+    Azerbaijan: 'Azerbaïdjan',
+    Israel: 'Israël',
+    'Baltic states': 'pays baltes',
+  },
+  it: {
+    Germany: 'Germania',
+    Netherlands: 'Paesi Bassi',
+    Poland: 'Polonia',
+    France: 'Francia',
+    Italy: 'Italia',
+    Spain: 'Spagna',
+    UK: 'Regno Unito',
+    UAE: 'Emirati Arabi Uniti',
+    Japan: 'Giappone',
+    Switzerland: 'Svizzera',
+    Scandinavia: 'Scandinavia',
+    Romania: 'Romania',
+    Czechia: 'Cechia',
+    Kazakhstan: 'Kazakistan',
+    Armenia: 'Armenia',
+    Azerbaijan: 'Azerbaigian',
+    Israel: 'Israele',
+    'Baltic states': 'Paesi baltici',
+  },
+  es: {
+    Germany: 'Alemania',
+    Netherlands: 'Países Bajos',
+    Poland: 'Polonia',
+    France: 'Francia',
+    Italy: 'Italia',
+    Spain: 'España',
+    UK: 'Reino Unido',
+    UAE: 'EAU',
+    Japan: 'Japón',
+    Switzerland: 'Suiza',
+    Scandinavia: 'Escandinavia',
+    Romania: 'Rumanía',
+    Czechia: 'Chequia',
+    Kazakhstan: 'Kazajistán',
+    Armenia: 'Armenia',
+    Azerbaijan: 'Azerbaiyán',
+    Israel: 'Israel',
+    'Baltic states': 'países bálticos',
   },
 };
 
 function joinMarkets(markets: string[], locale: string): string {
   const map = MARKET_LABELS[locale] ?? {};
   const labels = markets.map((market) => map[market] ?? market);
+  if (labels.length <= 1) return labels[0] ?? '';
   if (locale === 'ru') return labels.join(' и ');
   if (locale === 'ka') return labels.join(' და ');
-  if (labels.length <= 1) return labels[0] ?? '';
+  if (locale === 'de') {
+    return labels.length === 2
+      ? `${labels[0]} und ${labels[1]}`
+      : `${labels.slice(0, -1).join(', ')} und ${labels[labels.length - 1]}`;
+  }
+  if (locale === 'fr') {
+    return labels.length === 2
+      ? `${labels[0]} et ${labels[1]}`
+      : `${labels.slice(0, -1).join(', ')} et ${labels[labels.length - 1]}`;
+  }
+  if (locale === 'it') {
+    return labels.length === 2
+      ? `${labels[0]} e ${labels[1]}`
+      : `${labels.slice(0, -1).join(', ')} e ${labels[labels.length - 1]}`;
+  }
+  if (locale === 'es') {
+    return labels.length === 2
+      ? `${labels[0]} y ${labels[1]}`
+      : `${labels.slice(0, -1).join(', ')} y ${labels[labels.length - 1]}`;
+  }
   return `${labels.slice(0, -1).join(', ')} and ${labels[labels.length - 1]}`;
 }
 

@@ -949,10 +949,10 @@
   },
   "opportunity": {
     "tiers": {
-      "excellent": "Excellent Opportunity",
-      "good": "Good Opportunity",
-      "fair": "Fair Opportunity",
-      "watch": "Watch Opportunity"
+      "excellent": "შესანიშნავი შესაძლებლობა",
+      "good": "კარგი შესაძლებლობა",
+      "fair": "საშუალო შესაძლებლობა",
+      "watch": "დაკვირვების ღირსი"
     },
     "tooltip": {
       "highDemand": "მაღალი მოთხოვნა {markets}.",
