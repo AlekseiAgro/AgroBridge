@@ -105,12 +105,10 @@ Generate a public domain for `web`.
 In the `api` service → **Settings** → one-off command / shell (or Railway CLI):
 
 ```bash
-node --require ts-node/register/transpile-only ./prisma/seed.ts
+TS_NODE_PROJECT=./prisma/tsconfig.json node --require ts-node/register/transpile-only ./prisma/seed.ts
 ```
 
 (If the shell cwd is `/app/apps/api` inside the container.)
-
-Older images may still reference `ts-node` on PATH; use the `node --require ...` form above.
 
 ## 5. Point agrobrid.ge (Cloudflare)
 
