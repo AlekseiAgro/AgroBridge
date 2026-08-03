@@ -80,7 +80,8 @@
     "purchaseRequests": "Richieste di acquisto",
     "forBuyers": "Sono un acquirente",
     "forSellers": "Sono un venditore",
-    "subscriptions": "Avvisi"
+    "subscriptions": "Avvisi",
+    "chatUnread": "Chat, {count} non letti"
   },
   "footer": {
     "tagline": "Colleghiamo le aziende georgiane con acquirenti in tutto il mondo.",
@@ -536,7 +537,8 @@
       "completed": "Tradotto",
       "failed": "Traduzione non riuscita",
       "none": "Originale"
-    }
+    },
+    "unreadCount": "{count} non letti"
   },
   "admin": {
     "title": "Pannello di amministrazione",

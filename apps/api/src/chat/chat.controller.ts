@@ -20,6 +20,11 @@ export class ChatController {
     return this.chatService.listMine(user);
   }
 
+  @Get('unread-count')
+  unreadCount(@CurrentUser() user: AuthenticatedUser) {
+    return this.chatService.unreadTotal(user);
+  }
+
   @Post()
   createOrGet(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateConversationDto) {
     return this.chatService.createOrGet(user, dto);

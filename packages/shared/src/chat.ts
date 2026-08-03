@@ -30,8 +30,13 @@ export type ConversationSummary = {
   updatedAt: string;
   peer: ChatParticipant;
   lastMessage: ChatMessageView | null;
+  unreadCount: number;
 };
 
 export type ConversationDetail = ConversationSummary & {
   messages: ChatMessageView[];
+};
+
+export type UnreadMessagesCount = {
+  count: number;
 };

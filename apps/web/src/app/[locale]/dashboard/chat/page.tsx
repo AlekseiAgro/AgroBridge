@@ -33,6 +33,11 @@ export default async function ChatListPage({ params }: Props) {
                 <div className="product-list__item-main">
                   <Link href={`/dashboard/chat/${item.id}`} className="product-list__title">
                     {item.peer.displayName || item.peer.role}
+                    {item.unreadCount > 0 ? (
+                      <span className="chat-nav-link__badge" aria-label={t('unreadCount', { count: item.unreadCount })}>
+                        {item.unreadCount > 99 ? '99+' : item.unreadCount}
+                      </span>
+                    ) : null}
                   </Link>
                   <p className="product-list__meta">
                     {item.peer.locale.toUpperCase()}

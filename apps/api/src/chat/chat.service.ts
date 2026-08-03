@@ -10,6 +10,7 @@ import type {
   ConversationSummary,
   Locale,
   TranslationStatus,
+  UnreadMessagesCount,
 } from '@agrobridge/shared';
 import { canTrade } from '@agrobridge/shared';
 import { LocaleCode, Prisma, UserRole } from '@prisma/client';
@@ -45,6 +46,14 @@ type MessageEntity = {
     translatedText: string | null;
     status: 'pending' | 'completed' | 'failed';
   }>;
+};
+
+type ConversationReadState = {
+  id: string;
+  farmerId: string;
+  buyerId: string;
+  farmerLastReadAt: Date | null;
+  buyerLastReadAt: Date | null;
 };
 
 @Injectable()
@@ -95,6 +104,8 @@ export class ChatService {
       },
     });
 
+    const unreadById = await this.unreadCountsByConversation(user.id, conversations);
+
     return conversations.map((conversation) => {
       const peer = conversation.farmerId === user.id ? conversation.buyer : conversation.farmer;
       const last = conversation.messages[0]
@@ -107,12 +118,37 @@ export class ChatService {
         updatedAt: conversation.updatedAt.toISOString(),
         peer: this.toParticipant(peer),
         lastMessage: last,
+        unreadCount: unreadById.get(conversation.id) ?? 0,
       };
     });
   }
 
+  async unreadTotal(user: AuthenticatedUser): Promise<UnreadMessagesCount> {
+    const conversations = await this.prisma.conversation.findMany({
+      where: {
+        OR: [{ farmerId: user.id }, { buyerId: user.id }],
+      },
+      select: {
+        id: true,
+        farmerId: true,
+        buyerId: true,
+        farmerLastReadAt: true,
+        buyerLastReadAt: true,
+      },
+    });
+
+    const unreadById = await this.unreadCountsByConversation(user.id, conversations);
+    let count = 0;
+    for (const value of unreadById.values()) {
+      count += value;
+    }
+    return { count };
+  }
+
   async getById(user: AuthenticatedUser, id: string): Promise<ConversationDetail> {
     const conversation = await this.requireConversation(user, id);
+    await this.markRead(user, conversation);
+
     const messages = await this.prisma.message.findMany({
       where: { conversationId: id },
       orderBy: { createdAt: 'asc' },
@@ -130,6 +166,7 @@ export class ChatService {
       lastMessage: messages.length
         ? this.toMessageView(messages[messages.length - 1], user)
         : null,
+      unreadCount: 0,
       messages: messages.map((message) => this.toMessageView(message, user)),
     };
   }
@@ -177,6 +214,62 @@ export class ChatService {
     });
 
     return this.toMessageView(full, user);
+  }
+
+  private async markRead(user: AuthenticatedUser, conversation: ConversationReadState) {
+    const now = new Date();
+    if (conversation.farmerId === user.id) {
+      await this.prisma.conversation.update({
+        where: { id: conversation.id },
+        data: { farmerLastReadAt: now },
+      });
+      return;
+    }
+    if (conversation.buyerId === user.id) {
+      await this.prisma.conversation.update({
+        where: { id: conversation.id },
+        data: { buyerLastReadAt: now },
+      });
+    }
+  }
+
+  private async unreadCountsByConversation(
+    userId: string,
+    conversations: ConversationReadState[],
+  ): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    for (const conversation of conversations) {
+      counts.set(conversation.id, 0);
+    }
+    if (conversations.length === 0) {
+      return counts;
+    }
+
+    const peerMessages = await this.prisma.message.findMany({
+      where: {
+        conversationId: { in: conversations.map((item) => item.id) },
+        senderId: { not: userId },
+      },
+      select: {
+        conversationId: true,
+        createdAt: true,
+      },
+    });
+
+    const byId = new Map(conversations.map((item) => [item.id, item]));
+    for (const message of peerMessages) {
+      const conversation = byId.get(message.conversationId);
+      if (!conversation) continue;
+      const lastReadAt =
+        conversation.farmerId === userId
+          ? conversation.farmerLastReadAt
+          : conversation.buyerLastReadAt;
+      if (!lastReadAt || message.createdAt > lastReadAt) {
+        counts.set(message.conversationId, (counts.get(message.conversationId) ?? 0) + 1);
+      }
+    }
+
+    return counts;
   }
 
   private async resolveParticipants(user: AuthenticatedUser, dto: CreateConversationDto) {

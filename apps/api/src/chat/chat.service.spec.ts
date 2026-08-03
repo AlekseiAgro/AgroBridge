@@ -13,8 +13,9 @@ describe('ChatService', () => {
     },
     message: {
       create: jest.fn(),
-      findMany: jest.fn(),
+      findMany: jest.fn().mockResolvedValue([]),
       findUniqueOrThrow: jest.fn(),
+      count: jest.fn(),
     },
   };
 

@@ -80,7 +80,8 @@
     "purchaseRequests": "Purchase requests",
     "forBuyers": "I'm a buyer",
     "forSellers": "I'm a seller",
-    "subscriptions": "Alerts"
+    "subscriptions": "Alerts",
+    "chatUnread": "Chat, {count} unread"
   },
   "footer": {
     "tagline": "Connecting Georgian farms with buyers worldwide.",
@@ -536,7 +537,8 @@
       "completed": "Translated",
       "failed": "Translation failed",
       "none": "Original"
-    }
+    },
+    "unreadCount": "{count} unread"
   },
   "admin": {
     "title": "Admin panel",

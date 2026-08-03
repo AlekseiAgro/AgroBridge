@@ -80,7 +80,8 @@
     "purchaseRequests": "Demandes d'achat",
     "forBuyers": "Je suis acheteur",
     "forSellers": "Je suis vendeur",
-    "subscriptions": "Alertes"
+    "subscriptions": "Alertes",
+    "chatUnread": "Chat, {count} non lus"
   },
   "footer": {
     "tagline": "Nous relions les fermes géorgiennes aux acheteurs du monde entier.",
@@ -536,7 +537,8 @@
       "completed": "Traduit",
       "failed": "Échec de traduction",
       "none": "Original"
-    }
+    },
+    "unreadCount": "{count} non lus"
   },
   "admin": {
     "title": "Panneau d’administration",
