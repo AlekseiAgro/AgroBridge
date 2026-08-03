@@ -443,6 +443,24 @@ body {
   border-color: #7e2f25;
 }
 
+.button--danger-quiet {
+  background: transparent;
+  border-color: rgba(155, 59, 47, 0.35);
+  color: #8a4034;
+}
+
+.button--danger-quiet:hover {
+  background: rgba(155, 59, 47, 0.06);
+  border-color: rgba(155, 59, 47, 0.55);
+  color: #7e2f25;
+}
+
+.cabinet-danger {
+  margin-top: 3.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--line);
+}
+
 .cabinet-danger__trigger {
   display: grid;
   gap: 0.55rem;
@@ -453,8 +471,9 @@ body {
 .cabinet-danger__hint {
   margin: 0;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   line-height: 1.45;
+  opacity: 0.9;
 }
 
 .button--accent {

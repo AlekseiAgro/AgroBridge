@@ -86,7 +86,7 @@ export function DeleteAccountButton({ email }: { email: string }) {
   if (!open) {
     return (
       <div className="cabinet-danger__trigger">
-        <button className="button button--danger" type="button" onClick={() => setOpen(true)}>
+        <button className="button button--danger-quiet" type="button" onClick={() => setOpen(true)}>
           {t('deleteAccount')}
         </button>
         <p className="cabinet-danger__hint">{t('deleteAccountHint')}</p>
