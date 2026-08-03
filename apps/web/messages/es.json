@@ -319,7 +319,7 @@
       "kinds": {
         "overview": "Product overview",
         "closeup": "Close-up",
-        "packaging": "Packaging",
+        "packaging": "Embalaje",
         "harvest": "Harvest",
         "field": "Field or farm",
         "other": "Other"
@@ -339,7 +339,7 @@
       "basics": "Product basics",
       "volume": "Available volume",
       "attributes": "Product characteristics",
-      "packaging": "Packaging",
+      "packaging": "Embalaje",
       "logistics": "Logistics and delivery",
       "pricing": "Pricing",
       "farmStory": "About the farm"
@@ -401,19 +401,19 @@
       "ground": "Ground",
       "flakes": "Flakes"
     },
-    "packagingTypesLabel": "Packaging types",
+    "packagingTypesLabel": "Tipos de embalaje",
     "packagingTypes": {
-      "carton": "Carton",
-      "woodenBox": "Wooden box",
-      "plasticCrate": "Plastic crate",
-      "pallet": "Pallet",
-      "bag": "Bag",
-      "bulk": "Bulk",
-      "other": "Other"
+      "carton": "Caja de cartón",
+      "woodenBox": "Caja de madera",
+      "plasticCrate": "Caja de plástico",
+      "pallet": "Palé",
+      "bag": "Saco",
+      "bulk": "A granel",
+      "other": "Otro"
     },
-    "packagingWeights": "Packaging weights",
-    "packagingWeightsPlaceholder": "Comma separated, e.g. 5 kg, 10 kg",
-    "palletSize": "Pallet size",
+    "packagingWeights": "Pesos de embalaje",
+    "packagingWeightsPlaceholder": "Separados por comas, p. ej. 5 kg, 10 kg",
+    "palletSize": "Tamaño de palé",
     "incoterms": "Incoterms",
     "carriers": "Carriers",
     "customDelivery": "Custom delivery terms",
@@ -464,7 +464,8 @@
       }
     },
     "loadError": "No se pudieron cargar tus productos.",
-    "sellerFallback": "Vendedor"
+    "sellerFallback": "Vendedor",
+    "packagingWeightQuick": "{value} kg"
   },
   "rfq": {
     "requestTitle": "Solicitar cotización",
@@ -980,7 +981,7 @@
       "seasonality": "Add season or harvest dates",
       "volume": "Complete stock and production volumes",
       "attributes": "Complete product characteristics",
-      "packaging": "Add packaging types and weights",
+      "packaging": "Añade tipos y pesos de embalaje",
       "certificates": "Upload a certificate",
       "logistics": "Describe delivery and logistics",
       "pricing": "Add a starting price or pricing terms",

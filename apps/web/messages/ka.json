@@ -319,7 +319,7 @@
       "kinds": {
         "overview": "Product overview",
         "closeup": "Close-up",
-        "packaging": "Packaging",
+        "packaging": "შეფუთვა",
         "harvest": "Harvest",
         "field": "Field or farm",
         "other": "Other"
@@ -339,7 +339,7 @@
       "basics": "Product basics",
       "volume": "Available volume",
       "attributes": "Product characteristics",
-      "packaging": "Packaging",
+      "packaging": "შეფუთვა",
       "logistics": "Logistics and delivery",
       "pricing": "Pricing",
       "farmStory": "About the farm"
@@ -401,19 +401,19 @@
       "ground": "Ground",
       "flakes": "Flakes"
     },
-    "packagingTypesLabel": "Packaging types",
+    "packagingTypesLabel": "შეფუთვის ტიპები",
     "packagingTypes": {
-      "carton": "Carton",
-      "woodenBox": "Wooden box",
-      "plasticCrate": "Plastic crate",
-      "pallet": "Pallet",
-      "bag": "Bag",
-      "bulk": "Bulk",
-      "other": "Other"
+      "carton": "მუყაოს ყუთი",
+      "woodenBox": "ხის ყუთი",
+      "plasticCrate": "პლასტმასის კონტეინერი",
+      "pallet": "პალეტი",
+      "bag": "ტომარა",
+      "bulk": "ნაყარი",
+      "other": "სხვა"
     },
-    "packagingWeights": "Packaging weights",
-    "packagingWeightsPlaceholder": "Comma separated, e.g. 5 kg, 10 kg",
-    "palletSize": "Pallet size",
+    "packagingWeights": "შეფუთვის წონა",
+    "packagingWeightsPlaceholder": "მძიმეებით გამოყოფილი, მაგ. 5 კგ, 10 კგ",
+    "palletSize": "პალეტის ზომა",
     "incoterms": "Incoterms",
     "carriers": "Carriers",
     "customDelivery": "Custom delivery terms",
@@ -464,7 +464,8 @@
       }
     },
     "loadError": "თქვენი პროდუქტების ჩატვირთვა ვერ მოხერხდა.",
-    "sellerFallback": "გამყიდველი"
+    "sellerFallback": "გამყიდველი",
+    "packagingWeightQuick": "{value} კგ"
   },
   "rfq": {
     "requestTitle": "ფასის მოთხოვნა",
@@ -980,7 +981,7 @@
       "seasonality": "Add season or harvest dates",
       "volume": "Complete stock and production volumes",
       "attributes": "Complete product characteristics",
-      "packaging": "Add packaging types and weights",
+      "packaging": "დაამატეთ შეფუთვის ტიპები და წონა",
       "certificates": "Upload a certificate",
       "logistics": "Describe delivery and logistics",
       "pricing": "Add a starting price or pricing terms",

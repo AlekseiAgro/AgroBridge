@@ -476,20 +476,23 @@ export function ProductForm({ mode, initial }: Props) {
           />
         </label>
         <div className="product-form__quick-values">
-          {['5 kg', '10 kg', '15 kg'].map((weight) => (
-            <button
-              key={weight}
-              type="button"
-              className="button button--ghost product-form__quick-button"
-              onClick={() =>
-                setPackagingWeightsText((current) =>
-                  [...new Set([...commaValues(current), weight])].join(', '),
-                )
-              }
-            >
-              + {weight}
-            </button>
-          ))}
+          {['5', '10', '15'].map((weight) => {
+            const weightLabel = t('packagingWeightQuick', { value: weight });
+            return (
+              <button
+                key={weight}
+                type="button"
+                className="button button--ghost product-form__quick-button"
+                onClick={() =>
+                  setPackagingWeightsText((current) =>
+                    [...new Set([...commaValues(current), weightLabel])].join(', '),
+                  )
+                }
+              >
+                + {weightLabel}
+              </button>
+            );
+          })}
         </div>
         <label className="field">
           <span>{t('palletSize')}</span>
