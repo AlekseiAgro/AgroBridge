@@ -8,6 +8,7 @@ const apiOrigin = (
 ).replace(/\/api\/?$/, '');
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   transpilePackages: ['@agrobridge/shared'],
   async rewrites() {
     return [
