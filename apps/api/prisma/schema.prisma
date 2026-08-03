@@ -1,0 +1,563 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  farmer
+  buyer
+  admin
+}
+
+enum SellerType {
+  privateFarmer
+  company
+}
+
+enum BuyerType {
+  individual
+  company
+}
+
+enum LocaleCode {
+  ka
+  en
+  ru
+  de
+  fr
+  it
+  es
+}
+
+enum MessageTranslationStatus {
+  pending
+  completed
+  failed
+}
+
+enum RfqStatus {
+  pending
+  offered
+  accepted
+  completed
+  declined
+  cancelled
+}
+
+enum CurrencyCode {
+  GEL
+  EUR
+  USD
+}
+
+enum ModerationStatus {
+  draft
+  pending
+  approved
+  rejected
+}
+
+enum PurchaseRequestStatus {
+  open
+  closed
+  cancelled
+  fulfilled
+}
+
+enum PurchaseQuoteStatus {
+  pending
+  accepted
+  declined
+  withdrawn
+}
+
+enum VerificationStatus {
+  unverified
+  pending
+  approved
+  rejected
+}
+
+enum DocumentReviewStatus {
+  pending
+  approved
+  rejected
+}
+
+enum FarmDocumentKind {
+  idCard
+  businessRegistration
+  other
+}
+
+enum VerificationChannel {
+  email
+  sms
+}
+
+enum HarvestStatus {
+  growing
+  available
+  limited
+  soldOut
+}
+
+enum ProductImageKind {
+  overview
+  closeup
+  packaging
+  harvest
+  field
+  other
+}
+
+enum CertificateType {
+  globalGap
+  organic
+  haccp
+  iso
+  grasp
+  other
+}
+
+model User {
+  id               String      @id @default(cuid())
+  email            String      @unique
+  passwordHash     String?
+  role             UserRole
+  sellerType       SellerType?
+  buyerType        BuyerType?
+  locale           LocaleCode  @default(en)
+  displayName      String?
+  emailVerifiedAt  DateTime?
+  phone            String?
+  phoneVerifiedAt  DateTime?
+  blockedAt        DateTime?
+  blockedReason    String?
+  blockedById      String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  blockedBy                    User?              @relation("BlockedByAdmin", fields: [blockedById], references: [id], onDelete: SetNull)
+  blockedUsers                 User[]             @relation("BlockedByAdmin")
+  farm                         Farm?
+  conversationsAsFarmer        Conversation[]     @relation("FarmerConversations")
+  conversationsAsBuyer         Conversation[]     @relation("BuyerConversations")
+  messages                     Message[]
+  rfqsAsBuyer                  Rfq[]              @relation("BuyerRfqs")
+  purchaseRequests             PurchaseRequest[]  @relation("BuyerPurchaseRequests")
+  moderatedProducts            Product[]          @relation("ProductModerator")
+  moderatedPurchaseRequests    PurchaseRequest[]  @relation("PurchaseRequestModerator")
+  verifiedFarms                Farm[]             @relation("FarmVerifier")
+  reviewedDocuments            FarmDocument[]         @relation("DocumentReviewer")
+  reviewedCertificates         ProductCertificate[]   @relation("CertificateReviewer")
+  ratingsGiven                 Rating[]               @relation("RatingsGiven")
+  ratingsReceived              Rating[]               @relation("RatingsReceived")
+  alertSubscription            AlertSubscription?
+  verificationCodes            VerificationCode[]
+  harvestWatches               HarvestWatch[]
+
+  @@index([blockedAt])
+  @@index([createdAt])
+}
+
+/// Opt-in alerts for new catalog products and/or purchase requests.
+/// When allCategories/allRegions are true, the matching arrays are ignored.
+model AlertSubscription {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  notifyProducts         Boolean  @default(false)
+  notifyPurchaseRequests Boolean  @default(false)
+  allCategories          Boolean  @default(true)
+  categories             String[] @default([])
+  allRegions             Boolean  @default(true)
+  regions                String[] @default([])
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("alert_subscriptions")
+}
+
+model Farm {
+  id                         String             @id @default(cuid())
+  ownerId                    String             @unique
+  name                       String
+  region                     String?
+  description                String?
+  verificationStatus         VerificationStatus @default(unverified)
+  verificationNote           String?
+  verifiedAt                 DateTime?
+  verifiedById               String?
+  companyRegistrationNumber  String?
+  companyRegistryName        String?
+  companyRegistryCheckedAt   DateTime?
+  companyRegistryValid       Boolean?
+  foundedYear                Int?
+  farmSizeHectares           Decimal?           @db.Decimal(12, 2)
+  ownershipType              String?
+  exportMarkets              String[]           @default([])
+  history                    String?
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+
+  owner           User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  verifiedBy      User?           @relation("FarmVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
+  products        Product[]
+  rfqs            Rfq[]
+  purchaseQuotes  PurchaseQuote[]
+  documents       FarmDocument[]
+
+  @@index([verificationStatus])
+}
+
+model FarmDocument {
+  id           String               @id @default(cuid())
+  farmId       String
+  title        String
+  fileName     String
+  url          String
+  key          String
+  mimeType     String
+  kind         FarmDocumentKind     @default(other)
+  reviewStatus DocumentReviewStatus @default(pending)
+  reviewNote   String?
+  reviewedAt   DateTime?
+  reviewedById String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  farm       Farm  @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  reviewedBy User? @relation("DocumentReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([farmId, reviewStatus])
+  @@index([farmId, kind])
+  @@index([reviewStatus, createdAt])
+  @@map("farm_documents")
+}
+
+model VerificationCode {
+  id          String              @id @default(cuid())
+  userId      String
+  channel     VerificationChannel
+  destination String
+  codeHash    String
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, channel, createdAt])
+  @@map("verification_codes")
+}
+
+model CategoryConfig {
+  id        String   @id
+  enabled   Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled, sortOrder])
+  @@map("category_configs")
+}
+
+model Product {
+  id                   String           @id @default(cuid())
+  farmId               String
+  title                String
+  description          String?
+  category             String?
+  variety              String?
+  country              String?          @default("Georgia")
+  originPlace          String?
+  unit                 String?
+  minQuantity          Decimal?         @db.Decimal(12, 2)
+  maxQuantity          Decimal?         @db.Decimal(12, 2)
+  currentStock         Decimal?         @db.Decimal(12, 2)
+  monthlyProduction    Decimal?         @db.Decimal(12, 2)
+  maxAnnualProduction  Decimal?         @db.Decimal(12, 2)
+  seasonMonths         Int[]            @default([])
+  harvestStartAt       DateTime?
+  harvestEndAt         DateTime?
+  forecastQuantity     Decimal?         @db.Decimal(12, 2)
+  harvestStatus        HarvestStatus?
+  preorderEnabled      Boolean          @default(false)
+  attributes           Json             @default("{}")
+  packagingTypes       String[]         @default([])
+  packagingWeights     String[]         @default([])
+  palletSize           String?
+  incoterms            String[]         @default([])
+  carriers             String[]         @default([])
+  customDelivery       String?
+  nearestPort          String?
+  deliveryAvailable    Boolean          @default(false)
+  leadTimeDays         Int?
+  priceFrom            Decimal?         @db.Decimal(12, 2)
+  priceCurrency        String?
+  priceNegotiable      Boolean          @default(false)
+  priceDependsOnVolume Boolean          @default(false)
+  isPublished          Boolean          @default(false)
+  moderationStatus     ModerationStatus @default(draft)
+  moderationNote       String?
+  moderatedAt          DateTime?
+  moderatedById        String?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  farm           Farm                 @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  moderatedBy    User?                @relation("ProductModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  rfqs           Rfq[]
+  images         ProductImage[]
+  videos         ProductVideo[]
+  certificates   ProductCertificate[]
+  harvestWatches HarvestWatch[]
+
+  @@index([farmId])
+  @@index([isPublished])
+  @@index([moderationStatus])
+  @@index([isPublished, moderationStatus])
+  @@index([harvestStatus])
+  @@index([preorderEnabled])
+}
+
+/// Buyer opt-in alerts when a product becomes available or opens pre-orders.
+model HarvestWatch {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId, createdAt])
+  @@map("harvest_watches")
+}
+
+model ProductImage {
+  id        String           @id @default(cuid())
+  productId String
+  url       String
+  key       String
+  sortOrder Int              @default(0)
+  isPrimary Boolean          @default(false)
+  kind      ProductImageKind @default(other)
+  createdAt DateTime         @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, sortOrder])
+  @@map("product_images")
+}
+
+model ProductVideo {
+  id              String   @id @default(cuid())
+  productId       String
+  url             String
+  key             String
+  fileName        String
+  mimeType        String
+  sizeBytes       Int
+  durationSeconds Int?
+  createdAt       DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, createdAt])
+  @@map("product_videos")
+}
+
+model ProductCertificate {
+  id           String               @id @default(cuid())
+  productId    String
+  type         CertificateType
+  title        String
+  fileName     String
+  url          String
+  key          String
+  mimeType     String
+  sizeBytes    Int
+  reviewStatus DocumentReviewStatus @default(pending)
+  reviewNote   String?
+  reviewedAt   DateTime?
+  reviewedById String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  reviewedBy User?   @relation("CertificateReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([productId, reviewStatus])
+  @@index([reviewStatus, createdAt])
+  @@map("product_certificates")
+}
+
+model Rfq {
+  id          String    @id @default(cuid())
+  productId   String
+  farmId      String
+  buyerId     String
+  quantity    String
+  unit        String?
+  message     String?
+  status      RfqStatus @default(pending)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  product Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  farm    Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  buyer   User      @relation("BuyerRfqs", fields: [buyerId], references: [id], onDelete: Cascade)
+  offer   RfqOffer?
+  ratings Rating[]
+
+  @@index([buyerId, createdAt])
+  @@index([farmId, status, createdAt])
+  @@index([productId])
+}
+
+/// Mutual deal rating: buyer rates seller (farm owner), seller rates buyer.
+/// Allowed only after the RFQ reaches status `completed`.
+model Rating {
+  id         String   @id @default(cuid())
+  rfqId      String
+  fromUserId String
+  toUserId   String
+  score      Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  rfq      Rfq  @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  fromUser User @relation("RatingsGiven", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User @relation("RatingsReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([rfqId, fromUserId])
+  @@index([toUserId])
+  @@index([fromUserId])
+  @@map("ratings")
+}
+
+model RfqOffer {
+  id          String       @id @default(cuid())
+  rfqId       String       @unique
+  priceAmount Decimal      @db.Decimal(12, 2)
+  currency    CurrencyCode
+  quantity    String?
+  unit        String?
+  message     String?
+  validUntil  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  rfq Rfq @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+}
+
+/// Open purchase need published by a buyer for any matching farmer to quote.
+model PurchaseRequest {
+  id                  String                @id @default(cuid())
+  buyerId             String
+  title               String
+  category            String
+  quantity            String
+  unit                String?
+  variety             String?
+  packaging           String?
+  destinationCountry  String?
+  message             String?
+  status              PurchaseRequestStatus @default(open)
+  moderationNote      String?
+  moderatedAt         DateTime?
+  moderatedById       String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+
+  buyer       User            @relation("BuyerPurchaseRequests", fields: [buyerId], references: [id], onDelete: Cascade)
+  moderatedBy User?           @relation("PurchaseRequestModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
+  quotes      PurchaseQuote[]
+
+  @@index([status, createdAt])
+  @@index([buyerId, createdAt])
+  @@index([category, status])
+  @@map("purchase_requests")
+}
+
+model PurchaseQuote {
+  id          String              @id @default(cuid())
+  requestId   String
+  farmId      String
+  priceAmount Decimal             @db.Decimal(12, 2)
+  currency    CurrencyCode
+  quantity    String?
+  unit        String?
+  message     String?
+  validUntil  DateTime?
+  status      PurchaseQuoteStatus @default(pending)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  request PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  farm    Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, farmId])
+  @@index([farmId, createdAt])
+  @@index([requestId, status])
+  @@map("purchase_quotes")
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  farmerId  String
+  buyerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  farmer   User      @relation("FarmerConversations", fields: [farmerId], references: [id], onDelete: Cascade)
+  buyer    User      @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([farmerId, buyerId])
+  @@index([farmerId])
+  @@index([buyerId])
+}
+
+/// Original message text is stored as source of truth.
+/// Translations are cached per target locale for the recipient.
+model Message {
+  id             String     @id @default(cuid())
+  conversationId String
+  senderId       String
+  sourceLocale   LocaleCode
+  sourceText     String
+  createdAt      DateTime   @default(now())
+
+  conversation Conversation         @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User                 @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  translations MessageTranslation[]
+
+  @@index([conversationId, createdAt])
+}
+
+model MessageTranslation {
+  id             String                   @id @default(cuid())
+  messageId      String
+  targetLocale   LocaleCode
+  translatedText String?
+  status         MessageTranslationStatus @default(pending)
+  provider       String?
+  error          String?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, targetLocale])
+  @@index([status])
+}

@@ -1,0 +1,20 @@
+{
+  "name": "agrobridge",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "db:generate": "pnpm --filter @agrobridge/api db:generate",
+    "db:migrate": "pnpm --filter @agrobridge/api db:migrate",
+    "db:seed": "pnpm --filter @agrobridge/api db:seed",
+    "db:studio": "pnpm --filter @agrobridge/api db:studio"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6",
+    "turbo": "^2.10.8",
+    "typescript": "^5.9.3"
+  }
+}
