@@ -63,20 +63,14 @@ Set `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env.production`. On every API start th
 To create/update the admin **immediately** without waiting for redeploy, from inside the API container (`/app/apps/api`):
 
 ```bash
-# note the slash: .bin/prisma  (not .bin.prisma)
+# admin account only (recommended):
+node ./prisma/ensure-admin.cjs
+
+# full demo catalog (farmers/buyers / DemoPass123):
 ./node_modules/.bin/prisma db seed
-# or only the admin account:
-node ./prisma/ensure-admin.cjs
-```
-
-If `./node_modules/.bin/prisma` is missing, try:
-
-```bash
+# if local bin missing:
 /app/node_modules/.bin/prisma db seed
-node ./prisma/ensure-admin.cjs
 ```
-
-Full demo catalog seed (farmers/buyers/`DemoPass123`) still uses `prisma db seed`.
 
 ## 4. Reverse proxy (agrobrid.ge)
 
