@@ -32,6 +32,12 @@ export class RfqsController {
     return this.rfqsService.listInbox(user);
   }
 
+  @Get('completed')
+  @Roles('farmer', 'buyer', 'admin')
+  listCompleted(@CurrentUser() user: AuthenticatedUser) {
+    return this.rfqsService.listCompleted(user);
+  }
+
   @Get('inbox/unread-count')
   @Roles('farmer', 'buyer', 'admin')
   pendingInboxCount(@CurrentUser() user: AuthenticatedUser) {

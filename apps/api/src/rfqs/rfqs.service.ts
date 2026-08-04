@@ -138,6 +138,22 @@ export class RfqsService {
     return items.map((item) => this.toSummary(item, user));
   }
 
+  /** Completed deals where the user is buyer or seller. */
+  async listCompleted(user: AuthenticatedUser): Promise<RfqSummary[]> {
+    this.assertFarmer(user);
+
+    const items = await this.prisma.rfq.findMany({
+      where: {
+        status: PrismaRfqStatus.completed,
+        OR: [{ buyerId: user.id }, { product: { ownerUserId: user.id } }],
+      },
+      orderBy: [{ completedAt: 'desc' }, { updatedAt: 'desc' }],
+      include: rfqInclude,
+    });
+
+    return items.map((item) => this.toSummary(item, user));
+  }
+
   /** Count of incoming RFQs still waiting for the farmer to respond. */
   async pendingInboxCount(user: AuthenticatedUser): Promise<{ count: number }> {
     this.assertFarmer(user);

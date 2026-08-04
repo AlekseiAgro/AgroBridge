@@ -785,6 +785,16 @@
       "selling": "Verkauf",
       "market": "Marktplatz",
       "account": "Konto"
+    },
+    "deals": {
+      "title": "Abgeschlossene Deals",
+      "subtitle": "Ihre abgeschlossenen Deals mit Bewertungen und Reviews beider Seiten.",
+      "empty": "Noch keine abgeschlossenen Deals.",
+      "buyerRating": "Bewertung des Käufers",
+      "sellerRating": "Bewertung des Verkäufers",
+      "buyerRatingPending": "Der Käufer hat noch keine Bewertung abgegeben.",
+      "sellerRatingPending": "Der Verkäufer hat noch keine Bewertung abgegeben.",
+      "noComment": "Kein schriftlicher Kommentar."
     }
   },
   "rating": {

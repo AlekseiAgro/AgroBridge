@@ -785,6 +785,16 @@
       "selling": "Selling",
       "market": "Marketplace",
       "account": "Account"
+    },
+    "deals": {
+      "title": "Completed deals",
+      "subtitle": "Your finished deals with ratings and reviews from both sides.",
+      "empty": "You have no completed deals yet.",
+      "buyerRating": "Buyer rating",
+      "sellerRating": "Seller rating",
+      "buyerRatingPending": "The buyer has not left a rating yet.",
+      "sellerRatingPending": "The seller has not left a rating yet.",
+      "noComment": "No written review."
     }
   },
   "rating": {
