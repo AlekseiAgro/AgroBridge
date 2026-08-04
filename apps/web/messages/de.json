@@ -539,7 +539,15 @@
       "failed": "Übersetzung fehlgeschlagen",
       "none": "Original"
     },
-    "unreadCount": "{count} ungelesen"
+    "unreadCount": "{count} ungelesen",
+    "selectConversation": "Wählen Sie eine Unterhaltung, um zu schreiben.",
+    "backToList": "Alle Chats",
+    "you": "Sie",
+    "delivery": {
+      "sent": "Gesendet",
+      "delivered": "Zugestellt",
+      "read": "Gelesen"
+    }
   },
   "admin": {
     "title": "Admin-Bereich",

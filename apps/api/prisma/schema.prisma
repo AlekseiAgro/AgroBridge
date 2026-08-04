@@ -537,13 +537,15 @@ model PurchaseQuote {
 }
 
 model Conversation {
-  id               String    @id @default(cuid())
-  farmerId         String
-  buyerId          String
-  farmerLastReadAt DateTime?
-  buyerLastReadAt  DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id                     String    @id @default(cuid())
+  farmerId               String
+  buyerId                String
+  farmerLastReadAt       DateTime?
+  buyerLastReadAt        DateTime?
+  farmerLastDeliveredAt  DateTime?
+  buyerLastDeliveredAt   DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
   farmer   User      @relation("FarmerConversations", fields: [farmerId], references: [id], onDelete: Cascade)
   buyer    User      @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)

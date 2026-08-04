@@ -10,6 +10,7 @@ describe('ChatService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn().mockResolvedValue({ count: 0 }),
     },
     message: {
       create: jest.fn(),
@@ -96,10 +97,12 @@ describe('ChatService', () => {
       buyerId: buyer.id,
       farmerLastReadAt: null,
       buyerLastReadAt: null,
+      farmerLastDeliveredAt: null,
+      buyerLastDeliveredAt: null,
       createdAt: new Date('2026-01-01'),
       updatedAt: new Date('2026-01-01'),
-      farmer: { id: farmer.id, displayName: 'Farmer', role: 'farmer', locale: 'ru' },
-      buyer: { id: buyer.id, displayName: 'Buyer', role: 'buyer', locale: 'en' },
+      farmer: { id: farmer.id, displayName: 'Farmer', role: 'farmer', locale: 'ru', avatarUrl: null },
+      buyer: { id: buyer.id, displayName: 'Buyer', role: 'buyer', locale: 'en', avatarUrl: null },
     });
     prisma.conversation.update.mockResolvedValue({});
     prisma.message.findMany.mockResolvedValue([]);
@@ -125,6 +128,8 @@ describe('ChatService', () => {
         buyerId: buyer.id,
         farmerLastReadAt: null,
         buyerLastReadAt: null,
+        farmerLastDeliveredAt: null,
+        buyerLastDeliveredAt: null,
         createdAt: new Date('2026-01-01'),
         updatedAt: new Date('2026-01-01'),
         farmer: {
@@ -132,12 +137,14 @@ describe('ChatService', () => {
           displayName: 'Farmer',
           role: 'farmer',
           locale: 'ru',
+          avatarUrl: null,
         },
         buyer: {
           id: buyer.id,
           displayName: 'Buyer',
           role: 'buyer',
           locale: 'en',
+          avatarUrl: null,
         },
       };
     }
@@ -192,6 +199,7 @@ describe('ChatService', () => {
         displayText: '[en→ru] Hello',
         translationStatus: 'completed',
         canShowOriginal: true,
+        deliveryStatus: null,
       });
     });
 
@@ -241,6 +249,7 @@ describe('ChatService', () => {
         sourceLocale: 'ka',
         displayText: '[ka→ru] გამარჯობა',
         canShowOriginal: true,
+        deliveryStatus: null,
       });
     });
 
@@ -267,6 +276,7 @@ describe('ChatService', () => {
         displayText: 'Привет',
         translationStatus: 'none',
         canShowOriginal: false,
+        deliveryStatus: null,
       });
     });
 
@@ -298,6 +308,33 @@ describe('ChatService', () => {
         displayText: 'Цена',
         translationStatus: 'none',
         canShowOriginal: false,
+        deliveryStatus: 'sent',
+      });
+    });
+
+    it('marks own messages read when peer read cursor covers them', async () => {
+      const fixture = conversationFixture();
+      fixture.buyerLastReadAt = new Date('2026-01-03');
+      fixture.buyerLastDeliveredAt = new Date('2026-01-03');
+      prisma.conversation.findUnique.mockResolvedValue(fixture);
+      prisma.conversation.update.mockResolvedValue({});
+      prisma.message.findMany.mockResolvedValue([
+        {
+          id: 'm1',
+          conversationId: 'conv1',
+          senderId: farmer.id,
+          sourceLocale: 'ru',
+          sourceText: 'Цена',
+          createdAt: new Date('2026-01-02'),
+          translations: [],
+        },
+      ]);
+
+      const detail = await service.getById(farmer, 'conv1', 'ru');
+
+      expect(detail.messages[0]).toMatchObject({
+        isMine: true,
+        deliveryStatus: 'read',
       });
     });
 
@@ -346,6 +383,7 @@ describe('ChatService', () => {
         displayText: 'Offer?',
         translationStatus: 'none',
         canShowOriginal: false,
+        deliveryStatus: 'sent',
       });
     });
   });

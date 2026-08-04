@@ -9,6 +9,7 @@ import type {
   ConversationDetail,
   ConversationSummary,
   Locale,
+  MessageDeliveryStatus,
   TranslationStatus,
   UnreadMessagesCount,
 } from '@agrobridge/shared';
@@ -32,6 +33,7 @@ const participantSelect = {
   displayName: true,
   role: true,
   locale: true,
+  avatarUrl: true,
 } satisfies Prisma.UserSelect;
 
 type Participant = {
@@ -39,6 +41,7 @@ type Participant = {
   displayName: string | null;
   role: UserRole;
   locale: LocaleCode;
+  avatarUrl: string | null;
 };
 
 type MessageEntity = {
@@ -61,6 +64,13 @@ type ConversationReadState = {
   buyerId: string;
   farmerLastReadAt: Date | null;
   buyerLastReadAt: Date | null;
+  farmerLastDeliveredAt?: Date | null;
+  buyerLastDeliveredAt?: Date | null;
+};
+
+type PeerDeliveryCursors = {
+  deliveredAt: Date | null;
+  readAt: Date | null;
 };
 
 @Injectable()
@@ -112,12 +122,18 @@ export class ChatService {
       },
     });
 
+    await this.markDelivered(
+      user,
+      conversations.map((item) => item.id),
+    );
+
     const unreadById = await this.unreadCountsByConversation(user.id, conversations);
 
     return conversations.map((conversation) => {
       const peer = conversation.farmerId === user.id ? conversation.buyer : conversation.farmer;
+      const peerCursors = this.peerDeliveryCursors(conversation, user.id);
       const last = conversation.messages[0]
-        ? this.toMessageView(conversation.messages[0], user)
+        ? this.toMessageView(conversation.messages[0], user, peerCursors)
         : null;
 
       return {
@@ -173,6 +189,9 @@ export class ChatService {
 
     const peer =
       conversation.farmerId === viewer.id ? conversation.buyer : conversation.farmer;
+    // After markRead, peer still has the previous cursors for *their* side;
+    // for own-message ticks we need the peer's delivery/read cursors.
+    const peerCursors = this.peerDeliveryCursors(conversation, viewer.id);
 
     return {
       id: conversation.id,
@@ -180,10 +199,10 @@ export class ChatService {
       updatedAt: conversation.updatedAt.toISOString(),
       peer: this.toParticipant(peer),
       lastMessage: messages.length
-        ? this.toMessageView(messages[messages.length - 1], viewer)
+        ? this.toMessageView(messages[messages.length - 1], viewer, peerCursors)
         : null,
       unreadCount: 0,
-      messages: messages.map((message) => this.toMessageView(message, viewer)),
+      messages: messages.map((message) => this.toMessageView(message, viewer, peerCursors)),
     };
   }
 
@@ -238,7 +257,7 @@ export class ChatService {
 
     void this.notifyPeerAboutMessage(sender, conversation, text).catch(() => undefined);
 
-    return this.toMessageView(full, sender);
+    return this.toMessageView(full, sender, this.peerDeliveryCursors(conversation, sender.id));
   }
 
   private async notifyPeerAboutMessage(
@@ -293,21 +312,60 @@ export class ChatService {
     });
   }
 
+  private async markDelivered(user: AuthenticatedUser, conversationIds: string[]) {
+    if (conversationIds.length === 0) return;
+    const now = new Date();
+    await this.prisma.conversation.updateMany({
+      where: { id: { in: conversationIds }, farmerId: user.id },
+      data: { farmerLastDeliveredAt: now },
+    });
+    await this.prisma.conversation.updateMany({
+      where: { id: { in: conversationIds }, buyerId: user.id },
+      data: { buyerLastDeliveredAt: now },
+    });
+  }
+
   private async markRead(user: AuthenticatedUser, conversation: ConversationReadState) {
     const now = new Date();
     if (conversation.farmerId === user.id) {
       await this.prisma.conversation.update({
         where: { id: conversation.id },
-        data: { farmerLastReadAt: now },
+        data: { farmerLastReadAt: now, farmerLastDeliveredAt: now },
       });
       return;
     }
     if (conversation.buyerId === user.id) {
       await this.prisma.conversation.update({
         where: { id: conversation.id },
-        data: { buyerLastReadAt: now },
+        data: { buyerLastReadAt: now, buyerLastDeliveredAt: now },
       });
     }
+  }
+
+  private peerDeliveryCursors(
+    conversation: ConversationReadState,
+    viewerId: string,
+  ): PeerDeliveryCursors {
+    const peerIsFarmer = conversation.farmerId !== viewerId;
+    return {
+      deliveredAt: peerIsFarmer
+        ? conversation.farmerLastDeliveredAt ?? null
+        : conversation.buyerLastDeliveredAt ?? null,
+      readAt: peerIsFarmer ? conversation.farmerLastReadAt : conversation.buyerLastReadAt,
+    };
+  }
+
+  private resolveDeliveryStatus(
+    messageCreatedAt: Date,
+    cursors: PeerDeliveryCursors,
+  ): MessageDeliveryStatus {
+    if (cursors.readAt && messageCreatedAt.getTime() <= cursors.readAt.getTime()) {
+      return 'read';
+    }
+    if (cursors.deliveredAt && messageCreatedAt.getTime() <= cursors.deliveredAt.getTime()) {
+      return 'delivered';
+    }
+    return 'sent';
   }
 
   private async unreadCountsByConversation(
@@ -452,8 +510,9 @@ export class ChatService {
     return {
       id: user.id,
       displayName: user.displayName,
-      role: user.role,
+      role: user.role as 'farmer' | 'buyer' | 'admin',
       locale: user.locale as Locale,
+      avatarUrl: user.avatarUrl,
     };
   }
 
@@ -520,13 +579,20 @@ export class ChatService {
     return refreshed as MessageEntity[];
   }
 
-  private toMessageView(message: MessageEntity, viewer: AuthenticatedUser): ChatMessageView {
+  private toMessageView(
+    message: MessageEntity,
+    viewer: AuthenticatedUser,
+    peerCursors: PeerDeliveryCursors = { deliveredAt: null, readAt: null },
+  ): ChatMessageView {
     const isMine = message.senderId === viewer.id;
     const viewerLocale = viewer.locale;
     const sourceLocale = detectMessageLocale(
       message.sourceText,
       message.sourceLocale as Locale,
     );
+    const deliveryStatus = isMine
+      ? this.resolveDeliveryStatus(message.createdAt, peerCursors)
+      : null;
 
     if (isMine) {
       return {
@@ -540,6 +606,7 @@ export class ChatService {
         translationStatus: 'none',
         isMine,
         canShowOriginal: false,
+        deliveryStatus,
       };
     }
 
@@ -555,6 +622,7 @@ export class ChatService {
         translationStatus: 'none',
         isMine,
         canShowOriginal: false,
+        deliveryStatus: null,
       };
     }
 
@@ -573,6 +641,7 @@ export class ChatService {
         translationStatus: 'pending',
         isMine,
         canShowOriginal: false,
+        deliveryStatus: null,
       };
     }
 
@@ -595,6 +664,7 @@ export class ChatService {
       translationStatus: status,
       isMine,
       canShowOriginal,
+      deliveryStatus: null,
     };
   }
 }

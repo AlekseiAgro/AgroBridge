@@ -539,7 +539,15 @@
       "failed": "Traduzione non riuscita",
       "none": "Originale"
     },
-    "unreadCount": "{count} non letti"
+    "unreadCount": "{count} non letti",
+    "selectConversation": "Seleziona una conversazione per iniziare a scrivere.",
+    "backToList": "Tutte le chat",
+    "you": "Tu",
+    "delivery": {
+      "sent": "Inviato",
+      "delivered": "Consegnato",
+      "read": "Letto"
+    }
   },
   "admin": {
     "title": "Pannello di amministrazione",
