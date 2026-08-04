@@ -2,7 +2,7 @@
 
 import type { UserNotificationItem } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 
 type Props = {
@@ -15,6 +15,10 @@ export function UserNotificationsList({ initial }: Props) {
   const router = useRouter();
   const [items, setItems] = useState(initial);
   const [pendingId, setPendingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setItems(initial);
+  }, [initial]);
 
   async function markRead(id: string) {
     setPendingId(id);

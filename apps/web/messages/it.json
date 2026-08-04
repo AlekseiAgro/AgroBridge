@@ -958,7 +958,7 @@
     "title": "Abbonamenti agli avvisi",
     "subtitle": "Avvisi email attivi per catalogo, richieste di acquisto e aggiornamenti sul raccolto.",
     "activeTitle": "Abbonamenti attivi",
-    "activeHint": "Cosa è già abilitato per le email sull’indirizzo dell’account.",
+    "activeHint": "Già attivo: canali email e avvisi sul raccolto per prodotto.",
     "activeAlertsEmpty": "Nessun avviso email attivo per catalogo o richieste di acquisto.",
     "harvestWatchesTitle": "Avvisi sul raccolto",
     "harvestWatchesHint": "Prodotti per cui chiedi un’email quando diventano disponibili o aprono il preordine.",
@@ -984,7 +984,12 @@
     "inboxTitle": "Avvisi ricevuti",
     "inboxHint": "Avvisi quando un raccolto seguito diventa disponibile o apre il preordine.",
     "inboxEmpty": "Ancora nessun avviso sul raccolto.",
-    "markRead": "Segna come letto"
+    "markRead": "Segna come letto",
+    "activeEmailTitle": "Avvisi email per catalogo e richieste di acquisto",
+    "browseCatalog": "Apri il catalogo e attiva gli avvisi sulla scheda prodotto",
+    "partialLoadError": "Parte dei dati degli abbonamenti non è stata caricata. Aggiorna la pagina o riprova più tardi.",
+    "pageError": "Impossibile aprire la pagina degli abbonamenti.",
+    "retry": "Riprova"
   },
   "harvest": {
     "title": "Harvest plan",

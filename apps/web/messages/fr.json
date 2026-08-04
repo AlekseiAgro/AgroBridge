@@ -958,7 +958,7 @@
     "title": "Abonnements d’alertes",
     "subtitle": "Alertes e-mail actives pour le catalogue, les demandes d’achat et les mises à jour de récolte.",
     "activeTitle": "Abonnements actifs",
-    "activeHint": "Ce qui est déjà activé pour les e-mails vers l’adresse du compte.",
+    "activeHint": "Déjà activé : canaux e-mail et alertes de récolte par produit.",
     "activeAlertsEmpty": "Aucune alerte e-mail active pour le catalogue ou les demandes d’achat.",
     "harvestWatchesTitle": "Alertes de récolte",
     "harvestWatchesHint": "Produits pour lesquels vous demandez un e-mail à la disponibilité ou à l’ouverture de précommande.",
@@ -984,7 +984,12 @@
     "inboxTitle": "Alertes reçues",
     "inboxHint": "Alertes quand une récolte suivie devient disponible ou ouvre la précommande.",
     "inboxEmpty": "Pas encore d’alertes de récolte.",
-    "markRead": "Marquer lu"
+    "markRead": "Marquer lu",
+    "activeEmailTitle": "Alertes e-mail catalogue et demandes d’achat",
+    "browseCatalog": "Ouvrir le catalogue et activer les alertes sur une fiche produit",
+    "partialLoadError": "Une partie des abonnements n’a pas pu être chargée. Actualisez la page ou réessayez plus tard.",
+    "pageError": "Impossible d’ouvrir la page des abonnements.",
+    "retry": "Réessayer"
   },
   "harvest": {
     "title": "Harvest plan",

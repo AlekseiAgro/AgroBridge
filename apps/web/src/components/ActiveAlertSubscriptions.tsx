@@ -10,12 +10,28 @@ export async function ActiveAlertSubscriptions({ subscription }: Props) {
   const tc = await getTranslations('catalog');
   const tr = await getTranslations();
 
+  function categoryName(category: string): string {
+    try {
+      return tc(`categories.${category}`);
+    } catch {
+      return category;
+    }
+  }
+
+  function regionName(region: string): string {
+    try {
+      return tr(`regions.${region}`);
+    } catch {
+      return region;
+    }
+  }
+
   const categoryLabel = subscription.allCategories
     ? t('allCategories')
-    : subscription.categories.map((category) => tc(`categories.${category}`)).join(', ');
+    : subscription.categories.map(categoryName).join(', ') || t('customCategories');
   const regionLabel = subscription.allRegions
     ? t('allRegions')
-    : subscription.regions.map((region) => tr(`regions.${region}`)).join(', ');
+    : subscription.regions.map(regionName).join(', ') || t('customRegions');
 
   const items: { key: string; title: string; meta: string }[] = [];
   if (subscription.notifyProducts) {
