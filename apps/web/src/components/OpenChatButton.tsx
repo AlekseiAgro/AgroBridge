@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 
@@ -22,6 +22,7 @@ export function OpenChatButton({
   variant = 'primary',
 }: Props) {
   const t = useTranslations('chat');
+  const locale = useLocale();
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export function OpenChatButton({
     setPending(true);
     setError(null);
     try {
-      const payload: Record<string, string> = {};
+      const payload: Record<string, string> = { locale };
       if (rfqId) payload.rfqId = rfqId;
       if (purchaseRequestId) payload.purchaseRequestId = purchaseRequestId;
       if (farmerId) payload.farmerId = farmerId;

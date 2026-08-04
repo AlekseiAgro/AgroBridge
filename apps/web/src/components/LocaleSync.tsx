@@ -30,9 +30,16 @@ export function LocaleSync({ profileLocale }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ locale: uiLocale as Locale }),
       credentials: 'same-origin',
-    }).catch(() => {
-      lastSynced.current = null;
-    });
+    })
+      .then((response) => {
+        // fetch only rejects on network errors; 401/403/500 must reset so we retry.
+        if (!response.ok) {
+          lastSynced.current = null;
+        }
+      })
+      .catch(() => {
+        lastSynced.current = null;
+      });
   }, [uiLocale, profileLocale]);
 
   return null;

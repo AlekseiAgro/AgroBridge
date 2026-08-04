@@ -21,7 +21,6 @@ export function ChatRoom({ conversationId, initial }: Props) {
   const [showOriginalIds, setShowOriginalIds] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    // Opening a thread marks it read on the server — refresh nav badges.
     requestChatUnreadRefresh();
 
     const timer = window.setInterval(async () => {
@@ -105,9 +104,10 @@ export function ChatRoom({ conversationId, initial }: Props) {
         {messages.map((message) => {
           const showOriginal = !!showOriginalIds[message.id];
           const canToggleOriginal =
-            !message.isMine &&
-            (message.translationStatus === 'completed' ||
-              message.sourceText !== message.displayText);
+            message.canShowOriginal ||
+            (!message.isMine &&
+              message.sourceText !== message.displayText &&
+              Boolean(message.displayText));
           return (
             <article
               key={message.id}
@@ -121,21 +121,21 @@ export function ChatRoom({ conversationId, initial }: Props) {
                 {!message.isMine && message.translationStatus !== 'none' ? (
                   <span>· {t(`translation.${message.translationStatus}`)}</span>
                 ) : null}
-                {canToggleOriginal ? (
-                  <button
-                    type="button"
-                    className="text-link chat-bubble__toggle"
-                    onClick={() =>
-                      setShowOriginalIds((current) => ({
-                        ...current,
-                        [message.id]: !current[message.id],
-                      }))
-                    }
-                  >
-                    {showOriginal ? t('showTranslation') : t('showOriginal')}
-                  </button>
-                ) : null}
               </div>
+              {canToggleOriginal ? (
+                <button
+                  type="button"
+                  className="chat-bubble__toggle"
+                  onClick={() =>
+                    setShowOriginalIds((current) => ({
+                      ...current,
+                      [message.id]: !current[message.id],
+                    }))
+                  }
+                >
+                  {showOriginal ? t('showTranslation') : t('showOriginal')}
+                </button>
+              ) : null}
             </article>
           );
         })}
