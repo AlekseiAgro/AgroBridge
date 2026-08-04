@@ -17,7 +17,6 @@ export default function SubscriptionsError({ error, reset }: Props) {
 
   return (
     <main className="cabinet-page cabinet-page--narrow">
-      <h1>{t('title')}</h1>
       <p className="form-error">{t('pageError')}</p>
       <button type="button" className="button button--primary" onClick={() => reset()}>
         {t('retry')}
