@@ -22,6 +22,8 @@ export type ChatMessageView = {
   displayText: string;
   translationStatus: TranslationStatus;
   isMine: boolean;
+  /** True when the viewer can toggle between translation and original. */
+  canShowOriginal: boolean;
 };
 
 export type ConversationSummary = {

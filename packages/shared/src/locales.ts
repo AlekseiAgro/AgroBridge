@@ -21,3 +21,19 @@ export const LOCALE_LABELS: Record<Locale, string> = {
 export function isLocale(value: string): value is Locale {
   return (LOCALES as readonly string[]).includes(value);
 }
+
+/**
+ * Infer the writing language of a chat message from its script.
+ * Latin-script languages (en/de/fr/it/es) cannot be separated reliably here,
+ * so they fall back to the declared UI locale of the sender.
+ */
+export function detectMessageLocale(text: string, fallback: Locale): Locale {
+  const sample = text.normalize('NFC');
+  if (/[\u10A0-\u10FF]/.test(sample)) {
+    return 'ka';
+  }
+  if (/[\u0400-\u04FF]/.test(sample)) {
+    return 'ru';
+  }
+  return isLocale(fallback) ? fallback : DEFAULT_LOCALE;
+}

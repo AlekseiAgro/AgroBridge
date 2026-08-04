@@ -12,7 +12,7 @@ import type {
   TranslationStatus,
   UnreadMessagesCount,
 } from '@agrobridge/shared';
-import { canTrade, isLocale } from '@agrobridge/shared';
+import { canTrade, detectMessageLocale, isLocale } from '@agrobridge/shared';
 import { LocaleCode, Prisma, UserRole } from '@prisma/client';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -192,19 +192,20 @@ export class ChatService {
     conversationId: string,
     dto: SendMessageDto,
   ): Promise<ChatMessageView> {
-    const sourceLocale =
-      dto.sourceLocale && isLocale(dto.sourceLocale) ? dto.sourceLocale : user.locale;
-    const sender =
-      sourceLocale !== user.locale
-        ? await this.resolveViewerLocale(user, sourceLocale)
-        : user;
-
-    const conversation = await this.requireConversation(sender, conversationId);
     const text = dto.text.trim();
     if (!text) {
       throw new BadRequestException('Message text is required');
     }
 
+    const declaredSource =
+      dto.sourceLocale && isLocale(dto.sourceLocale) ? dto.sourceLocale : user.locale;
+    const sourceLocale = detectMessageLocale(text, declaredSource);
+    const sender =
+      declaredSource !== user.locale
+        ? await this.resolveViewerLocale(user, declaredSource)
+        : user;
+
+    const conversation = await this.requireConversation(sender, conversationId);
     const peer =
       conversation.farmerId === sender.id ? conversation.buyer : conversation.farmer;
     const targetLocale = peer.locale as Locale;
@@ -476,13 +477,17 @@ export class ChatService {
     messages: MessageEntity[],
     viewer: AuthenticatedUser,
   ): Promise<MessageEntity[]> {
-    const viewerLocale = viewer.locale as LocaleCode;
+    const viewerLocale = viewer.locale;
     const needing = messages
       .filter((message) => {
         if (message.senderId === viewer.id) return false;
-        if (message.sourceLocale === viewerLocale) return false;
+        const sourceLocale = detectMessageLocale(
+          message.sourceText,
+          message.sourceLocale as Locale,
+        );
+        if (sourceLocale === viewerLocale) return false;
         const existing = message.translations.find(
-          (item) => item.targetLocale === viewerLocale,
+          (item) => item.targetLocale === (viewerLocale as LocaleCode),
         );
         return !(existing?.status === 'completed' && existing.translatedText);
       })
@@ -493,14 +498,18 @@ export class ChatService {
     }
 
     await Promise.all(
-      needing.map((message) =>
-        this.translationService.translateMessage({
+      needing.map((message) => {
+        const sourceLocale = detectMessageLocale(
+          message.sourceText,
+          message.sourceLocale as Locale,
+        );
+        return this.translationService.translateMessage({
           messageId: message.id,
           sourceText: message.sourceText,
-          sourceLocale: message.sourceLocale as Locale,
-          targetLocale: viewer.locale,
-        }),
-      ),
+          sourceLocale,
+          targetLocale: viewerLocale,
+        });
+      }),
     );
 
     const refreshed = await this.prisma.message.findMany({
@@ -514,50 +523,78 @@ export class ChatService {
   private toMessageView(message: MessageEntity, viewer: AuthenticatedUser): ChatMessageView {
     const isMine = message.senderId === viewer.id;
     const viewerLocale = viewer.locale;
+    const sourceLocale = detectMessageLocale(
+      message.sourceText,
+      message.sourceLocale as Locale,
+    );
 
-    if (isMine || message.sourceLocale === viewerLocale) {
+    if (isMine) {
       return {
         id: message.id,
         conversationId: message.conversationId,
         senderId: message.senderId,
         createdAt: message.createdAt.toISOString(),
-        sourceLocale: message.sourceLocale as Locale,
+        sourceLocale,
         sourceText: message.sourceText,
         displayText: message.sourceText,
         translationStatus: 'none',
         isMine,
+        canShowOriginal: false,
       };
     }
 
-    const translation = message.translations.find((item) => item.targetLocale === viewerLocale);
+    if (sourceLocale === viewerLocale) {
+      return {
+        id: message.id,
+        conversationId: message.conversationId,
+        senderId: message.senderId,
+        createdAt: message.createdAt.toISOString(),
+        sourceLocale,
+        sourceText: message.sourceText,
+        displayText: message.sourceText,
+        translationStatus: 'none',
+        isMine,
+        canShowOriginal: false,
+      };
+    }
+
+    const translation = message.translations.find(
+      (item) => item.targetLocale === (viewerLocale as LocaleCode),
+    );
     if (!translation) {
       return {
         id: message.id,
         conversationId: message.conversationId,
         senderId: message.senderId,
         createdAt: message.createdAt.toISOString(),
-        sourceLocale: message.sourceLocale as Locale,
+        sourceLocale,
         sourceText: message.sourceText,
         displayText: message.sourceText,
         translationStatus: 'pending',
         isMine,
+        canShowOriginal: false,
       };
     }
 
     const status = translation.status as TranslationStatus;
+    const translated =
+      status === 'completed' && translation.translatedText
+        ? translation.translatedText
+        : null;
+    const displayText = translated ?? message.sourceText;
+    const canShowOriginal = Boolean(translated && translated !== message.sourceText);
+
     return {
       id: message.id,
       conversationId: message.conversationId,
       senderId: message.senderId,
       createdAt: message.createdAt.toISOString(),
-      sourceLocale: message.sourceLocale as Locale,
+      sourceLocale,
       sourceText: message.sourceText,
-      displayText:
-        status === 'completed' && translation.translatedText
-          ? translation.translatedText
-          : message.sourceText,
+      displayText,
       translationStatus: status,
       isMine,
+      canShowOriginal,
     };
   }
 }

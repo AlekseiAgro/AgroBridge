@@ -191,6 +191,56 @@ describe('ChatService', () => {
         sourceText: 'Hello',
         displayText: '[en→ru] Hello',
         translationStatus: 'completed',
+        canShowOriginal: true,
+      });
+    });
+
+    it('detects Georgian script even when sourceLocale was saved as ru', async () => {
+      prisma.conversation.findUnique.mockResolvedValue(conversationFixture());
+      prisma.conversation.update.mockResolvedValue({});
+      prisma.message.findMany
+        .mockResolvedValueOnce([
+          {
+            id: 'm1',
+            conversationId: 'conv1',
+            senderId: buyer.id,
+            sourceLocale: 'ru',
+            sourceText: 'გამარჯობა',
+            createdAt: new Date('2026-01-02'),
+            translations: [],
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            id: 'm1',
+            conversationId: 'conv1',
+            senderId: buyer.id,
+            sourceLocale: 'ru',
+            sourceText: 'გამარჯობა',
+            createdAt: new Date('2026-01-02'),
+            translations: [
+              {
+                targetLocale: 'ru',
+                translatedText: '[ka→ru] გამარჯობა',
+                status: 'completed',
+              },
+            ],
+          },
+        ]);
+      translationService.translateMessage.mockResolvedValue({});
+
+      const detail = await service.getById(farmer, 'conv1', 'ru');
+
+      expect(translationService.translateMessage).toHaveBeenCalledWith({
+        messageId: 'm1',
+        sourceText: 'გამარჯობა',
+        sourceLocale: 'ka',
+        targetLocale: 'ru',
+      });
+      expect(detail.messages[0]).toMatchObject({
+        sourceLocale: 'ka',
+        displayText: '[ka→ru] გამარჯობა',
+        canShowOriginal: true,
       });
     });
 
@@ -216,6 +266,7 @@ describe('ChatService', () => {
         isMine: false,
         displayText: 'Привет',
         translationStatus: 'none',
+        canShowOriginal: false,
       });
     });
 
@@ -246,6 +297,7 @@ describe('ChatService', () => {
         isMine: true,
         displayText: 'Цена',
         translationStatus: 'none',
+        canShowOriginal: false,
       });
     });
 
@@ -293,6 +345,7 @@ describe('ChatService', () => {
         isMine: true,
         displayText: 'Offer?',
         translationStatus: 'none',
+        canShowOriginal: false,
       });
     });
   });
