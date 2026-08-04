@@ -958,7 +958,7 @@
     "title": "Alert subscriptions",
     "subtitle": "Your active email alerts for catalog listings, purchase requests, and harvest updates.",
     "activeTitle": "Active subscriptions",
-    "activeHint": "What is already enabled for emails to your account address.",
+    "activeHint": "What is already on: email channels and harvest watches for products.",
     "activeAlertsEmpty": "No active email alerts for catalog listings or purchase requests.",
     "harvestWatchesTitle": "Harvest alerts",
     "harvestWatchesHint": "Products you asked to be notified about when they become available or open for pre-order.",
@@ -984,7 +984,12 @@
     "inboxTitle": "Inbox alerts",
     "inboxHint": "Alerts when a watched harvest becomes available or opens for pre-order.",
     "inboxEmpty": "No harvest alerts yet.",
-    "markRead": "Mark read"
+    "markRead": "Mark read",
+    "activeEmailTitle": "Email alerts for catalog and purchase requests",
+    "browseCatalog": "Open the catalog and enable alerts on a product page",
+    "partialLoadError": "Some subscription data failed to load. Refresh the page or try again later.",
+    "pageError": "Could not open the subscriptions page.",
+    "retry": "Retry"
   },
   "harvest": {
     "title": "Harvest plan",

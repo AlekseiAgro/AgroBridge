@@ -958,7 +958,7 @@
     "title": "Suscripciones de alertas",
     "subtitle": "Alertas por email activas del catálogo, solicitudes de compra y actualizaciones de cosecha.",
     "activeTitle": "Suscripciones activas",
-    "activeHint": "Qué ya está activado para correos a la dirección de la cuenta.",
+    "activeHint": "Ya activo: canales de email y alertas de cosecha por producto.",
     "activeAlertsEmpty": "No hay alertas por email activas del catálogo o solicitudes de compra.",
     "harvestWatchesTitle": "Alertas de cosecha",
     "harvestWatchesHint": "Productos sobre los que pediste aviso al estar disponibles o abrir preventa.",
@@ -984,7 +984,12 @@
     "inboxTitle": "Alertas recibidas",
     "inboxHint": "Avisos cuando una cosecha seguida pasa a disponible o abre preventa.",
     "inboxEmpty": "Aún no hay alertas de cosecha.",
-    "markRead": "Marcar leído"
+    "markRead": "Marcar leído",
+    "activeEmailTitle": "Alertas por email de catálogo y solicitudes de compra",
+    "browseCatalog": "Abrir el catálogo y activar alertas en la ficha del producto",
+    "partialLoadError": "Parte de los datos de suscripción no se cargó. Actualiza la página o inténtalo más tarde.",
+    "pageError": "No se pudo abrir la página de suscripciones.",
+    "retry": "Reintentar"
   },
   "harvest": {
     "title": "Harvest plan",

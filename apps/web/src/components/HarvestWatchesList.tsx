@@ -2,7 +2,7 @@
 
 import type { HarvestWatchItem } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 import { formatProductTitle } from '@/lib/product-title';
 
@@ -18,6 +18,10 @@ export function HarvestWatchesList({ initial }: Props) {
   const [items, setItems] = useState(initial);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setItems(initial);
+  }, [initial]);
 
   async function unwatch(productId: string) {
     setPendingId(productId);

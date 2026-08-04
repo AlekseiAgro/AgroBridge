@@ -385,21 +385,29 @@ export class NotificationsService {
   }
 
   async listMine(userId: string, limit = 30): Promise<UserNotificationItem[]> {
-    const rows = await this.prisma.userNotification.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      take: Math.min(Math.max(limit, 1), 100),
-    });
-    return rows.map((row) => ({
-      id: row.id,
-      type: row.type,
-      productId: row.productId,
-      title: row.title,
-      body: row.body,
-      href: row.href,
-      readAt: row.readAt?.toISOString() ?? null,
-      createdAt: row.createdAt.toISOString(),
-    }));
+    try {
+      const rows = await this.prisma.userNotification.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        take: Math.min(Math.max(limit, 1), 100),
+      });
+      return rows.map((row) => ({
+        id: row.id,
+        type: row.type,
+        productId: row.productId,
+        title: row.title,
+        body: row.body,
+        href: row.href,
+        readAt: row.readAt?.toISOString() ?? null,
+        createdAt: row.createdAt.toISOString(),
+      }));
+    } catch (error) {
+      this.logger.error(
+        `Failed to list notifications for ${userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      return [];
+    }
   }
 
   async markRead(userId: string, id: string): Promise<UserNotificationItem | null> {

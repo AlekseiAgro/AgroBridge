@@ -255,34 +255,38 @@ export class ProductsService {
   }
 
   async listMyWatches(user: AuthenticatedUser): Promise<HarvestWatchItem[]> {
-    const watches = await this.prisma.harvestWatch.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        product: {
-          select: {
-            id: true,
-            title: true,
-            harvestStatus: true,
-            preorderEnabled: true,
-            farm: { select: { name: true } },
+    try {
+      const watches = await this.prisma.harvestWatch.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          product: {
+            select: {
+              id: true,
+              title: true,
+              harvestStatus: true,
+              preorderEnabled: true,
+              farm: { select: { name: true } },
+            },
           },
         },
-      },
-    });
+      });
 
-    return watches.map((watch) => ({
-      id: watch.id,
-      productId: watch.product.id,
-      productTitle: watch.product.title,
-      farmName: watch.product.farm?.name ?? null,
-      harvestStatus:
-        watch.product.harvestStatus && isHarvestStatus(watch.product.harvestStatus)
-          ? watch.product.harvestStatus
-          : null,
-      preorderEnabled: watch.product.preorderEnabled,
-      createdAt: watch.createdAt.toISOString(),
-    }));
+      return watches.map((watch) => ({
+        id: watch.id,
+        productId: watch.product.id,
+        productTitle: watch.product.title,
+        farmName: watch.product.farm?.name ?? null,
+        harvestStatus:
+          watch.product.harvestStatus && isHarvestStatus(watch.product.harvestStatus)
+            ? watch.product.harvestStatus
+            : null,
+        preorderEnabled: watch.product.preorderEnabled,
+        createdAt: watch.createdAt.toISOString(),
+      }));
+    } catch {
+      return [];
+    }
   }
 
   async listMine(user: AuthenticatedUser): Promise<ProductSummary[]> {
