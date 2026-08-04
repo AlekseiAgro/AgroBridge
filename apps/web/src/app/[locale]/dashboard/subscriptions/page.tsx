@@ -69,7 +69,6 @@ export default async function SubscriptionsPage({ params }: Props) {
 
       <section className="cabinet-section">
         <h2 className="section-title">{t('activeTitle')}</h2>
-        <p className="page__subtitle">{t('activeHint')}</p>
 
         <h3 className="subscriptions-subtitle">{t('activeEmailTitle')}</h3>
         <ActiveAlertSubscriptions subscription={subscription} />
