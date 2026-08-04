@@ -476,7 +476,9 @@
     "loadError": "No se pudieron cargar tus productos.",
     "sellerFallback": "Vendedor",
     "messageSeller": "Escribir al vendedor",
-    "packagingWeightQuick": "{value} kg"
+    "packagingWeightQuick": "{value} kg",
+    "publishedLiveHint": "Los cambios ya están visibles en el catálogo. No hace falta nueva moderación.",
+    "publishLiveHint": "«Guardar» deja un borrador. «Publicar» actualiza el anuncio en el catálogo de inmediato."
   },
   "rfq": {
     "requestTitle": "Solicitar cotización",

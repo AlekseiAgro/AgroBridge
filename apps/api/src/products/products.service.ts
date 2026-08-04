@@ -467,6 +467,12 @@ export class ProductsService {
       moderatedAt = null;
       moderatedById = null;
     } else if (
+      // Already-approved live listings stay public after edits — no re-moderation.
+      product.isPublished &&
+      product.moderationStatus === PrismaModerationStatus.approved
+    ) {
+      moderationStatus = PrismaModerationStatus.approved;
+    } else if (
       !product.isPublished ||
       contentChanged ||
       product.moderationStatus === PrismaModerationStatus.rejected ||
@@ -977,10 +983,8 @@ export class ProductsService {
       return false;
     }
 
-    if (
-      product.moderationStatus === PrismaModerationStatus.approved ||
-      product.moderationStatus === PrismaModerationStatus.rejected
-    ) {
+    // Approved listings stay live when media changes; only rejected cards re-enter moderation.
+    if (product.moderationStatus === PrismaModerationStatus.rejected) {
       await tx.product.update({
         where: { id: product.id },
         data: {

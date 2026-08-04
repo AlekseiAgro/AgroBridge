@@ -476,7 +476,9 @@
     "loadError": "Impossible de charger vos produits.",
     "sellerFallback": "Vendeur",
     "messageSeller": "Écrire au vendeur",
-    "packagingWeightQuick": "{value} kg"
+    "packagingWeightQuick": "{value} kg",
+    "publishedLiveHint": "Les modifications sont immédiatement visibles dans le catalogue. Pas de nouvelle modération.",
+    "publishLiveHint": "« Enregistrer » conserve un brouillon. « Publier » met à jour l’annonce en ligne immédiatement."
   },
   "rfq": {
     "requestTitle": "Demander un devis",

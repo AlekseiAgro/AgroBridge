@@ -189,4 +189,88 @@ describe('ProductsService', () => {
     };
     expect(arg.where.AND.some((clause) => Array.isArray(clause.OR))).toBe(true);
   });
+
+  it('keeps approved published products live after content edits', async () => {
+    const farmer = {
+      id: 'u1',
+      email: 'f@example.com',
+      role: 'farmer' as const,
+      locale: 'en' as const,
+      displayName: null,
+      sellerType: null,
+      buyerType: null,
+    };
+    const existing = {
+      id: 'p1',
+      ownerUserId: 'u1',
+      farmId: null,
+      title: 'Hazelnuts',
+      description: 'Old',
+      category: null,
+      variety: null,
+      country: null,
+      originPlace: null,
+      unit: null,
+      minQuantity: null,
+      maxQuantity: null,
+      currentStock: null,
+      monthlyProduction: null,
+      maxAnnualProduction: null,
+      seasonMonths: [],
+      harvestStartAt: null,
+      harvestEndAt: null,
+      forecastQuantity: null,
+      harvestStatus: null,
+      preorderEnabled: false,
+      attributes: {},
+      packagingTypes: [],
+      packagingWeights: [],
+      palletSize: null,
+      incoterms: [],
+      carriers: [],
+      customDelivery: null,
+      nearestPort: null,
+      deliveryAvailable: false,
+      leadTimeDays: null,
+      priceFrom: null,
+      priceCurrency: null,
+      priceNegotiable: false,
+      priceDependsOnVolume: false,
+      isPublished: true,
+      moderationStatus: 'approved',
+      moderationNote: null,
+      moderatedAt: new Date('2026-01-01T00:00:00.000Z'),
+      moderatedById: 'admin1',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      owner: { id: 'u1', displayName: null, avatarUrl: null },
+      farm: null,
+      images: [],
+      videos: [],
+      certificates: [],
+    };
+    prisma.product.findUnique.mockResolvedValue(existing);
+    prisma.product.update.mockResolvedValue({
+      ...existing,
+      title: 'Updated hazelnuts',
+      description: 'New',
+      moderationStatus: 'approved',
+    });
+
+    await service.update(farmer, 'p1', {
+      title: 'Updated hazelnuts',
+      description: 'New',
+      isPublished: true,
+    });
+
+    expect(prisma.product.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          title: 'Updated hazelnuts',
+          isPublished: true,
+          moderationStatus: 'approved',
+        }),
+      }),
+    );
+  });
 });

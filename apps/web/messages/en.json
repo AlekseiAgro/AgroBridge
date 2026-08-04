@@ -476,7 +476,9 @@
     "loadError": "Could not load your products.",
     "sellerFallback": "Seller",
     "messageSeller": "Message seller",
-    "packagingWeightQuick": "{value} kg"
+    "packagingWeightQuick": "{value} kg",
+    "publishedLiveHint": "Changes are live in the catalog. No new moderation is required.",
+    "publishLiveHint": "Save keeps a draft. Publish updates the live catalog listing immediately."
   },
   "rfq": {
     "requestTitle": "Request a quote",

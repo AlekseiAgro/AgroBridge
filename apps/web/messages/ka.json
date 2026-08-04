@@ -476,7 +476,9 @@
     "loadError": "თქვენი პროდუქტების ჩატვირთვა ვერ მოხერხდა.",
     "sellerFallback": "გამყიდველი",
     "messageSeller": "გამყიდველთან ჩატი",
-    "packagingWeightQuick": "{value} კგ"
+    "packagingWeightQuick": "{value} კგ",
+    "publishedLiveHint": "ცვლილებები უკვე ჩანს კატალოგში. ხელახალი მოდერაცია საჭირო არ არის.",
+    "publishLiveHint": "„შენახვა“ ტოვებს მონახაზს. „გამოქვეყნება“ მაშინვე განაახლებს განცხადებას კატალოგში."
   },
   "rfq": {
     "requestTitle": "ფასის მოთხოვნა",

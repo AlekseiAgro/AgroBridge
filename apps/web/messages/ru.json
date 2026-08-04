@@ -476,7 +476,9 @@
     "loadError": "Не удалось загрузить ваши товары.",
     "sellerFallback": "Продавец",
     "messageSeller": "Написать продавцу",
-    "packagingWeightQuick": "{value} кг"
+    "packagingWeightQuick": "{value} кг",
+    "publishedLiveHint": "Изменения сразу видны в каталоге. Повторная модерация не нужна.",
+    "publishLiveHint": "«Сохранить» оставляет черновик. «Опубликовать» сразу обновляет объявление в каталоге."
   },
   "rfq": {
     "requestTitle": "Запросить цену",

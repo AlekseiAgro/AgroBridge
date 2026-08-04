@@ -476,7 +476,9 @@
     "loadError": "Ihre Produkte konnten nicht geladen werden.",
     "sellerFallback": "Verkäufer",
     "messageSeller": "Verkäufer anschreiben",
-    "packagingWeightQuick": "{value} kg"
+    "packagingWeightQuick": "{value} kg",
+    "publishedLiveHint": "Änderungen sind sofort im Katalog sichtbar. Keine erneute Moderation nötig.",
+    "publishLiveHint": "„Speichern“ behält einen Entwurf. „Veröffentlichen“ aktualisiert die Live-Anzeige sofort."
   },
   "rfq": {
     "requestTitle": "Preis anfragen",
