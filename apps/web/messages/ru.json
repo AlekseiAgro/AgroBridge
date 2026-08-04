@@ -779,7 +779,13 @@
     "changeEmailConfirmSubmit": "Подтвердить смену email",
     "changeEmailCancel": "Отмена",
     "changeEmailError": "Не удалось сменить email. Попробуйте ещё раз.",
-    "editProfile": "Редактировать профиль"
+    "editProfile": "Редактировать профиль",
+    "navGroups": {
+      "activity": "Сейчас",
+      "selling": "Продажи",
+      "market": "Рынок",
+      "account": "Аккаунт"
+    }
   },
   "rating": {
     "title": "Оцените партнёра",

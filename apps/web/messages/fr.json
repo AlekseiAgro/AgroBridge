@@ -779,7 +779,13 @@
     "changeEmailConfirmSubmit": "Confirmer le changement d’e-mail",
     "changeEmailCancel": "Annuler",
     "changeEmailError": "Impossible de changer l’e-mail. Réessayez.",
-    "editProfile": "Modifier le profil"
+    "editProfile": "Modifier le profil",
+    "navGroups": {
+      "activity": "À traiter",
+      "selling": "Ventes",
+      "market": "Marché",
+      "account": "Compte"
+    }
   },
   "rating": {
     "title": "Noter votre partenaire",

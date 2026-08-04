@@ -779,7 +779,13 @@
     "changeEmailConfirmSubmit": "ელფოსტის შეცვლის დადასტურება",
     "changeEmailCancel": "გაუქმება",
     "changeEmailError": "ელფოსტის შეცვლა ვერ მოხერხდა. სცადეთ თავიდან.",
-    "editProfile": "პროფილის რედაქტირება"
+    "editProfile": "პროფილის რედაქტირება",
+    "navGroups": {
+      "activity": "ახლა",
+      "selling": "გაყიდვები",
+      "market": "ბაზარი",
+      "account": "ანგარიში"
+    }
   },
   "rating": {
     "title": "შეაფასეთ პარტნიორი",

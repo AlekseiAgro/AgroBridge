@@ -779,7 +779,13 @@
     "changeEmailConfirmSubmit": "E-Mail-Änderung bestätigen",
     "changeEmailCancel": "Abbrechen",
     "changeEmailError": "E-Mail konnte nicht geändert werden. Bitte erneut versuchen.",
-    "editProfile": "Profil bearbeiten"
+    "editProfile": "Profil bearbeiten",
+    "navGroups": {
+      "activity": "Jetzt wichtig",
+      "selling": "Verkauf",
+      "market": "Marktplatz",
+      "account": "Konto"
+    }
   },
   "rating": {
     "title": "Partner bewerten",

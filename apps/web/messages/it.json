@@ -779,7 +779,13 @@
     "changeEmailConfirmSubmit": "Conferma cambio email",
     "changeEmailCancel": "Annulla",
     "changeEmailError": "Impossibile cambiare l’email. Riprova.",
-    "editProfile": "Modifica profilo"
+    "editProfile": "Modifica profilo",
+    "navGroups": {
+      "activity": "Ora",
+      "selling": "Vendite",
+      "market": "Mercato",
+      "account": "Account"
+    }
   },
   "rating": {
     "title": "Valuta il partner",

@@ -779,7 +779,13 @@
     "changeEmailConfirmSubmit": "Confirm email change",
     "changeEmailCancel": "Cancel",
     "changeEmailError": "Could not change the email. Please try again.",
-    "editProfile": "Edit profile"
+    "editProfile": "Edit profile",
+    "navGroups": {
+      "activity": "Needs attention",
+      "selling": "Selling",
+      "market": "Marketplace",
+      "account": "Account"
+    }
   },
   "rating": {
     "title": "Rate your partner",
