@@ -473,6 +473,7 @@
     },
     "loadError": "თქვენი პროდუქტების ჩატვირთვა ვერ მოხერხდა.",
     "sellerFallback": "გამყიდველი",
+    "messageSeller": "გამყიდველთან ჩატი",
     "packagingWeightQuick": "{value} კგ"
   },
   "rfq": {
