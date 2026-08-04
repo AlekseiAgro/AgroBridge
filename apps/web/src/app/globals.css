@@ -1614,8 +1614,17 @@ body {
   background: none;
   border: 0;
   padding: 0;
+  margin-left: 0.15rem;
   cursor: pointer;
   font: inherit;
+  font-weight: 650;
+  color: var(--brand-deep);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.chat-bubble__toggle:hover {
+  color: var(--brand);
 }
 
 .chat-composer {

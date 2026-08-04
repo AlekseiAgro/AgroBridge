@@ -1,7 +1,7 @@
 'use client';
 
 import type { ChatMessageView, ConversationDetail } from '@agrobridge/shared';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { FormEvent, useEffect, useState } from 'react';
 import { requestChatUnreadRefresh } from '@/components/ChatNavLink';
 
@@ -12,6 +12,7 @@ type Props = {
 
 export function ChatRoom({ conversationId, initial }: Props) {
   const t = useTranslations('chat');
+  const locale = useLocale();
   const [messages, setMessages] = useState<ChatMessageView[]>(initial.messages);
   const [peerName] = useState(initial.peer.displayName || initial.peer.role);
   const [text, setText] = useState('');
@@ -25,10 +26,13 @@ export function ChatRoom({ conversationId, initial }: Props) {
 
     const timer = window.setInterval(async () => {
       try {
-        const response = await fetch(`/api/conversations/${conversationId}`, {
-          cache: 'no-store',
-          credentials: 'same-origin',
-        });
+        const response = await fetch(
+          `/api/conversations/${conversationId}?locale=${encodeURIComponent(locale)}`,
+          {
+            cache: 'no-store',
+            credentials: 'same-origin',
+          },
+        );
         if (!response.ok) return;
         const data = (await response.json()) as ConversationDetail;
         setMessages(data.messages);
@@ -39,7 +43,30 @@ export function ChatRoom({ conversationId, initial }: Props) {
     }, 4000);
 
     return () => window.clearInterval(timer);
-  }, [conversationId]);
+  }, [conversationId, locale]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch(
+          `/api/conversations/${conversationId}?locale=${encodeURIComponent(locale)}`,
+          {
+            cache: 'no-store',
+            credentials: 'same-origin',
+          },
+        );
+        if (!response.ok || cancelled) return;
+        const data = (await response.json()) as ConversationDetail;
+        if (!cancelled) setMessages(data.messages);
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [conversationId, locale]);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -51,7 +78,7 @@ export function ChatRoom({ conversationId, initial }: Props) {
       const response = await fetch(`/api/conversations/${conversationId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, sourceLocale: locale }),
       });
       const data = (await response.json()) as ChatMessageView & { message?: string };
       if (!response.ok) {
@@ -77,6 +104,10 @@ export function ChatRoom({ conversationId, initial }: Props) {
         {messages.length === 0 ? <p className="empty-state">{t('emptyThread')}</p> : null}
         {messages.map((message) => {
           const showOriginal = !!showOriginalIds[message.id];
+          const canToggleOriginal =
+            !message.isMine &&
+            (message.translationStatus === 'completed' ||
+              message.sourceText !== message.displayText);
           return (
             <article
               key={message.id}
@@ -88,23 +119,21 @@ export function ChatRoom({ conversationId, initial }: Props) {
               <div className="chat-bubble__meta">
                 <span>{new Date(message.createdAt).toLocaleString()}</span>
                 {!message.isMine && message.translationStatus !== 'none' ? (
-                  <>
-                    <span>· {t(`translation.${message.translationStatus}`)}</span>
-                    {message.sourceText !== message.displayText ? (
-                      <button
-                        type="button"
-                        className="text-link chat-bubble__toggle"
-                        onClick={() =>
-                          setShowOriginalIds((current) => ({
-                            ...current,
-                            [message.id]: !current[message.id],
-                          }))
-                        }
-                      >
-                        {showOriginal ? t('showTranslation') : t('showOriginal')}
-                      </button>
-                    ) : null}
-                  </>
+                  <span>· {t(`translation.${message.translationStatus}`)}</span>
+                ) : null}
+                {canToggleOriginal ? (
+                  <button
+                    type="button"
+                    className="text-link chat-bubble__toggle"
+                    onClick={() =>
+                      setShowOriginalIds((current) => ({
+                        ...current,
+                        [message.id]: !current[message.id],
+                      }))
+                    }
+                  >
+                    {showOriginal ? t('showTranslation') : t('showOriginal')}
+                  </button>
                 ) : null}
               </div>
             </article>

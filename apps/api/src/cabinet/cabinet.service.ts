@@ -9,10 +9,13 @@ import {
 import {
   USER_AVATAR_MAX_BYTES,
   canTrade,
+  isLocale,
   isUserAvatarMimeType,
   type CabinetOverview,
+  type Locale,
 } from '@agrobridge/shared';
 import {
+  LocaleCode,
   ModerationStatus as PrismaModerationStatus,
   RfqStatus as PrismaRfqStatus,
   VerificationChannel,
@@ -224,6 +227,23 @@ export class CabinetService {
       data: { displayName },
     });
     return { displayName };
+  }
+
+  async updateLocale(
+    user: AuthenticatedUser,
+    localeRaw: string,
+  ): Promise<{ locale: Locale }> {
+    if (!isLocale(localeRaw)) {
+      throw new BadRequestException('Invalid locale');
+    }
+    if (user.locale === localeRaw) {
+      return { locale: localeRaw };
+    }
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { locale: localeRaw as LocaleCode },
+    });
+    return { locale: localeRaw };
   }
 
   async requestEmailChange(

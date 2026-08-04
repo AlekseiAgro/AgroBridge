@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { ChatNavLink } from '@/components/ChatNavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { LocaleSync } from '@/components/LocaleSync';
 import { LogoutButton } from '@/components/LogoutButton';
 import { Link } from '@/i18n/navigation';
 import { getUnreadMessagesCount } from '@/lib/chat-unread';
@@ -24,6 +25,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
 
   return (
     <div className="cabinet">
+      {user ? <LocaleSync profileLocale={user.locale} /> : null}
       <aside className="cabinet__sidebar">
         <Link href="/" className="cabinet__brand">
           AgroBridge

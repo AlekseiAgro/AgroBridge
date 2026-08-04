@@ -5,10 +5,15 @@ import { apiRequestAuthed } from '@/lib/server-api';
 
 type Params = { params: Promise<{ id: string }> };
 
-export async function GET(_request: Request, { params }: Params) {
+export async function GET(request: Request, { params }: Params) {
   try {
     const { id } = await params;
-    const conversation = await apiRequestAuthed<ConversationDetail>(`/conversations/${id}`);
+    const locale = new URL(request.url).searchParams.get('locale');
+    const path =
+      locale && locale.trim()
+        ? `/conversations/${id}?locale=${encodeURIComponent(locale.trim())}`
+        : `/conversations/${id}`;
+    const conversation = await apiRequestAuthed<ConversationDetail>(path);
     return NextResponse.json(conversation);
   } catch (error) {
     if (error instanceof ApiError) {

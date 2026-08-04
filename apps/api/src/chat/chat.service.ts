@@ -12,7 +12,7 @@ import type {
   TranslationStatus,
   UnreadMessagesCount,
 } from '@agrobridge/shared';
-import { canTrade } from '@agrobridge/shared';
+import { canTrade, isLocale } from '@agrobridge/shared';
 import { LocaleCode, Prisma, UserRole } from '@prisma/client';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -24,6 +24,8 @@ import { SendMessageDto } from './dto/send-message.dto';
 /** Skip email if the peer opened the chat within this window (likely online). */
 const CHAT_EMAIL_ACTIVE_WINDOW_MS = 2 * 60 * 1000;
 const CHAT_EMAIL_PREVIEW_MAX = 180;
+/** Translate at most this many missing messages per conversation load (newest first). */
+const TRANSLATION_BACKFILL_LIMIT = 24;
 
 const participantSelect = {
   id: true,
@@ -151,18 +153,26 @@ export class ChatService {
     return { count };
   }
 
-  async getById(user: AuthenticatedUser, id: string): Promise<ConversationDetail> {
-    const conversation = await this.requireConversation(user, id);
-    await this.markRead(user, conversation);
+  async getById(
+    user: AuthenticatedUser,
+    id: string,
+    preferredLocale?: string,
+  ): Promise<ConversationDetail> {
+    const viewer = await this.resolveViewerLocale(user, preferredLocale);
+    const conversation = await this.requireConversation(viewer, id);
+    await this.markRead(viewer, conversation);
 
-    const messages = await this.prisma.message.findMany({
-      where: { conversationId: id },
-      orderBy: { createdAt: 'asc' },
-      include: { translations: true },
-    });
+    const messages = await this.ensureViewerTranslations(
+      await this.prisma.message.findMany({
+        where: { conversationId: id },
+        orderBy: { createdAt: 'asc' },
+        include: { translations: true },
+      }),
+      viewer,
+    );
 
     const peer =
-      conversation.farmerId === user.id ? conversation.buyer : conversation.farmer;
+      conversation.farmerId === viewer.id ? conversation.buyer : conversation.farmer;
 
     return {
       id: conversation.id,
@@ -170,10 +180,10 @@ export class ChatService {
       updatedAt: conversation.updatedAt.toISOString(),
       peer: this.toParticipant(peer),
       lastMessage: messages.length
-        ? this.toMessageView(messages[messages.length - 1], user)
+        ? this.toMessageView(messages[messages.length - 1], viewer)
         : null,
       unreadCount: 0,
-      messages: messages.map((message) => this.toMessageView(message, user)),
+      messages: messages.map((message) => this.toMessageView(message, viewer)),
     };
   }
 
@@ -182,21 +192,27 @@ export class ChatService {
     conversationId: string,
     dto: SendMessageDto,
   ): Promise<ChatMessageView> {
-    const conversation = await this.requireConversation(user, conversationId);
+    const sourceLocale =
+      dto.sourceLocale && isLocale(dto.sourceLocale) ? dto.sourceLocale : user.locale;
+    const sender =
+      sourceLocale !== user.locale
+        ? await this.resolveViewerLocale(user, sourceLocale)
+        : user;
+
+    const conversation = await this.requireConversation(sender, conversationId);
     const text = dto.text.trim();
     if (!text) {
       throw new BadRequestException('Message text is required');
     }
 
     const peer =
-      conversation.farmerId === user.id ? conversation.buyer : conversation.farmer;
-    const sourceLocale = user.locale;
+      conversation.farmerId === sender.id ? conversation.buyer : conversation.farmer;
     const targetLocale = peer.locale as Locale;
 
     const message = await this.prisma.message.create({
       data: {
         conversationId,
-        senderId: user.id,
+        senderId: sender.id,
         sourceLocale: sourceLocale as LocaleCode,
         sourceText: text,
       },
@@ -219,9 +235,9 @@ export class ChatService {
       include: { translations: true },
     });
 
-    void this.notifyPeerAboutMessage(user, conversation, text).catch(() => undefined);
+    void this.notifyPeerAboutMessage(sender, conversation, text).catch(() => undefined);
 
-    return this.toMessageView(full, user);
+    return this.toMessageView(full, sender);
   }
 
   private async notifyPeerAboutMessage(
@@ -438,6 +454,61 @@ export class ChatService {
       role: user.role,
       locale: user.locale as Locale,
     };
+  }
+
+  private async resolveViewerLocale(
+    user: AuthenticatedUser,
+    preferredLocale?: string,
+  ): Promise<AuthenticatedUser> {
+    if (!preferredLocale || !isLocale(preferredLocale) || preferredLocale === user.locale) {
+      return user;
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { locale: preferredLocale as LocaleCode },
+    });
+
+    return { ...user, locale: preferredLocale };
+  }
+
+  private async ensureViewerTranslations(
+    messages: MessageEntity[],
+    viewer: AuthenticatedUser,
+  ): Promise<MessageEntity[]> {
+    const viewerLocale = viewer.locale as LocaleCode;
+    const needing = messages
+      .filter((message) => {
+        if (message.senderId === viewer.id) return false;
+        if (message.sourceLocale === viewerLocale) return false;
+        const existing = message.translations.find(
+          (item) => item.targetLocale === viewerLocale,
+        );
+        return !(existing?.status === 'completed' && existing.translatedText);
+      })
+      .slice(-TRANSLATION_BACKFILL_LIMIT);
+
+    if (needing.length === 0) {
+      return messages;
+    }
+
+    await Promise.all(
+      needing.map((message) =>
+        this.translationService.translateMessage({
+          messageId: message.id,
+          sourceText: message.sourceText,
+          sourceLocale: message.sourceLocale as Locale,
+          targetLocale: viewer.locale,
+        }),
+      ),
+    );
+
+    const refreshed = await this.prisma.message.findMany({
+      where: { conversationId: messages[0]!.conversationId },
+      orderBy: { createdAt: 'asc' },
+      include: { translations: true },
+    });
+    return refreshed as MessageEntity[];
   }
 
   private toMessageView(message: MessageEntity, viewer: AuthenticatedUser): ChatMessageView {

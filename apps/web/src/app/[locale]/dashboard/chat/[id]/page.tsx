@@ -22,7 +22,9 @@ export default async function ChatDetailPage({ params }: Props) {
 
   let conversation: ConversationDetail;
   try {
-    conversation = await apiRequestAuthed<ConversationDetail>(`/conversations/${id}`);
+    conversation = await apiRequestAuthed<ConversationDetail>(
+      `/conversations/${id}?locale=${encodeURIComponent(locale)}`,
+    );
   } catch (error) {
     if (error instanceof ApiError && (error.status === 404 || error.status === 403)) {
       notFound();
