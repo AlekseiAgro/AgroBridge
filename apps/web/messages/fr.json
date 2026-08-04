@@ -785,6 +785,16 @@
       "selling": "Ventes",
       "market": "Marché",
       "account": "Compte"
+    },
+    "deals": {
+      "title": "Affaires terminées",
+      "subtitle": "Vos affaires terminées avec les notes et avis des deux parties.",
+      "empty": "Pas encore d’affaires terminées.",
+      "buyerRating": "Note de l’acheteur",
+      "sellerRating": "Note du vendeur",
+      "buyerRatingPending": "L’acheteur n’a pas encore noté.",
+      "sellerRatingPending": "Le vendeur n’a pas encore noté.",
+      "noComment": "Pas d’avis écrit."
     }
   },
   "rating": {

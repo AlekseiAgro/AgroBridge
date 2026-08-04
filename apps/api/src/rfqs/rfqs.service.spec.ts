@@ -132,6 +132,19 @@ describe('RfqsService', () => {
     });
   });
 
+  it('lists completed deals for buyer or seller', async () => {
+    prisma.rfq.findMany.mockResolvedValue([]);
+    await expect(service.listCompleted(farmer)).resolves.toEqual([]);
+    expect(prisma.rfq.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          status: 'completed',
+          OR: [{ buyerId: farmer.id }, { product: { ownerUserId: farmer.id } }],
+        },
+      }),
+    );
+  });
+
   it('deletes cancelled inbox RFQs for the seller', async () => {
     prisma.rfq.findUnique.mockResolvedValue({
       id: 'rfq1',

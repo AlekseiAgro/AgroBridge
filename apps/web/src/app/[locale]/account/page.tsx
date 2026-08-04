@@ -45,7 +45,7 @@ export default async function AccountPage({ params }: Props) {
       key: 'completedDeals',
       value: activity.completedDeals,
       label: t('stats.completedDeals'),
-      href: `${dealsBase}?status=completed`,
+      href: '/dashboard/deals',
     },
     {
       key: 'openRequests',

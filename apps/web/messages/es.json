@@ -785,6 +785,16 @@
       "selling": "Ventas",
       "market": "Mercado",
       "account": "Cuenta"
+    },
+    "deals": {
+      "title": "Tratos completados",
+      "subtitle": "Tus tratos finalizados con valoraciones y reseñas de ambas partes.",
+      "empty": "Aún no hay tratos completados.",
+      "buyerRating": "Valoración del comprador",
+      "sellerRating": "Valoración del vendedor",
+      "buyerRatingPending": "El comprador aún no ha valorado.",
+      "sellerRatingPending": "El vendedor aún no ha valorado.",
+      "noComment": "Sin reseña escrita."
     }
   },
   "rating": {

@@ -1619,6 +1619,69 @@ body {
   margin-top: 0;
 }
 
+.completed-deals {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.completed-deals__item {
+  padding: 1.05rem 1.15rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 0.95rem;
+  background: var(--surface);
+  display: grid;
+  gap: 1rem;
+}
+
+.completed-deals__ratings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.completed-deals__rating-block {
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.75rem;
+  background: rgba(47, 107, 58, 0.05);
+  border: 1px solid rgba(47, 107, 58, 0.12);
+}
+
+.completed-deals__rating-label {
+  margin: 0 0 0.4rem;
+  color: var(--brand-deep);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.completed-deals__review {
+  margin: 0.45rem 0 0;
+  line-height: 1.45;
+  font-size: 0.94rem;
+}
+
+.completed-deals__review--muted {
+  color: var(--muted);
+}
+
+.completed-deals__rate {
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--line);
+}
+
+.completed-deals__rate .section-title {
+  margin-top: 0.35rem;
+  font-size: 1.15rem;
+}
+
+@media (max-width: 720px) {
+  .completed-deals__ratings {
+    grid-template-columns: 1fr;
+  }
+}
+
 .eyebrow {
   margin: 0 0 0.5rem;
   color: var(--muted);

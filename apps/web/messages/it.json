@@ -785,6 +785,16 @@
       "selling": "Vendite",
       "market": "Mercato",
       "account": "Account"
+    },
+    "deals": {
+      "title": "Affari completati",
+      "subtitle": "I tuoi affari conclusi con valutazioni e recensioni di entrambe le parti.",
+      "empty": "Nessun affare completato.",
+      "buyerRating": "Valutazione dell'acquirente",
+      "sellerRating": "Valutazione del venditore",
+      "buyerRatingPending": "L'acquirente non ha ancora valutato.",
+      "sellerRatingPending": "Il venditore non ha ancora valutato.",
+      "noComment": "Nessuna recensione scritta."
     }
   },
   "rating": {
