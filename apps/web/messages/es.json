@@ -253,7 +253,8 @@
       "uploadError": "No se pudo subir la foto.",
       "deleteError": "No se pudo eliminar la foto.",
       "primaryError": "No se pudo actualizar la portada.",
-      "maxReached": "Se alcanzó el límite de {max} fotos."
+      "maxReached": "Se alcanzó el límite de {max} fotos.",
+      "formEmpty": "Puedes añadir hasta 3 fotos ahora o más tarde en esta página."
     },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",

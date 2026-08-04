@@ -253,7 +253,8 @@
       "uploadError": "Foto konnte nicht hochgeladen werden.",
       "deleteError": "Foto konnte nicht gelöscht werden.",
       "primaryError": "Titelbild konnte nicht aktualisiert werden.",
-      "maxReached": "Limit von {max} Fotos erreicht."
+      "maxReached": "Limit von {max} Fotos erreicht.",
+      "formEmpty": "Sie können jetzt bis zu 3 Fotos hinzufügen oder später auf dieser Seite."
     },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",

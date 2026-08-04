@@ -253,7 +253,8 @@
       "uploadError": "Impossibile caricare la foto.",
       "deleteError": "Impossibile eliminare la foto.",
       "primaryError": "Impossibile aggiornare la copertina.",
-      "maxReached": "Raggiunto il limite di {max} foto."
+      "maxReached": "Raggiunto il limite di {max} foto.",
+      "formEmpty": "Puoi aggiungere fino a 3 foto ora oppure più tardi da questa pagina."
     },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",

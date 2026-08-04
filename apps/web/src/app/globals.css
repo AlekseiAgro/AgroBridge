@@ -1495,6 +1495,15 @@ body {
   overflow: hidden;
 }
 
+.farm-form-photos {
+  margin-top: 0.5rem;
+  padding-top: 0.35rem;
+}
+
+.farm-form-photos .section-title {
+  margin-top: 0.5rem;
+}
+
 .product-list__title {
   margin: 0;
   color: var(--brand-deep);
