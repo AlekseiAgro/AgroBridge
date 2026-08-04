@@ -12,10 +12,12 @@ import { getCurrentUser } from '@/lib/session';
 
 type Props = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ filter?: string }>;
 };
 
-export default async function DashboardProductsPage({ params }: Props) {
+export default async function DashboardProductsPage({ params, searchParams }: Props) {
   const { locale } = await params;
+  const { filter } = await searchParams;
   setRequestLocale(locale);
 
   const user = await getCurrentUser();
@@ -32,6 +34,14 @@ export default async function DashboardProductsPage({ params }: Props) {
     products = await apiRequestAuthed<ProductSummary[]>('/products/mine');
   } catch {
     error = t('loadError');
+  }
+
+  if (filter === 'published') {
+    products = products.filter(
+      (product) => product.isPublished && product.moderationStatus === 'approved',
+    );
+  } else if (filter === 'pending') {
+    products = products.filter((product) => product.moderationStatus === 'pending');
   }
 
   return (
