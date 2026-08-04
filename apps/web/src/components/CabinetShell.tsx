@@ -18,6 +18,7 @@ type Props = {
 export async function CabinetShell({ children, title, subtitle }: Props) {
   const t = await getTranslations('nav');
   const tc = await getTranslations('cabinet');
+  const tCatalog = await getTranslations('catalog');
   const tp = await getTranslations('purchaseRequests');
   const user = await getCurrentUser();
   const trader = Boolean(user && canTrade(user.role));
@@ -33,6 +34,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
         <p className="cabinet__eyebrow">{tc('shellLabel')}</p>
         <nav className="cabinet__nav">
           <Link href="/account">{tc('overview')}</Link>
+          <Link href="/catalog">{tCatalog('title')}</Link>
           {trader ? (
             <>
               <Link href="/dashboard/farm">{t('myFarm')}</Link>
