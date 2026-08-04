@@ -473,6 +473,7 @@
     },
     "loadError": "Ihre Produkte konnten nicht geladen werden.",
     "sellerFallback": "Verkäufer",
+    "messageSeller": "Verkäufer anschreiben",
     "packagingWeightQuick": "{value} kg"
   },
   "rfq": {

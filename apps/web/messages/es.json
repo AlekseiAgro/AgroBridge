@@ -473,6 +473,7 @@
     },
     "loadError": "No se pudieron cargar tus productos.",
     "sellerFallback": "Vendedor",
+    "messageSeller": "Escribir al vendedor",
     "packagingWeightQuick": "{value} kg"
   },
   "rfq": {

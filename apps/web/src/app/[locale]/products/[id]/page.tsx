@@ -7,6 +7,7 @@ import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
 import { HarvestWatchButton } from '@/components/HarvestWatchButton';
 import { MarketInsightButton } from '@/components/MarketInsightButton';
 import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
+import { OpenChatButton } from '@/components/OpenChatButton';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
@@ -65,45 +66,70 @@ export default async function ProductDetailPage({ params }: Props) {
     <div className="page">
       <SiteHeader />
       <main className="page__main">
-        <p className="eyebrow">
-          <Link href="/catalog">{tc('title')}</Link>
-        </p>
-        <h1 className="farm-title-row">
-          {formatProductTitle(product.title, locale)}
-          <HarvestStatusBadge
-            status={product.harvestStatus}
-            preorderEnabled={product.preorderEnabled}
-          />
-        </h1>
-        <div className="product-opportunity-row">
-          <MarketOpportunityBadge opportunity={product.opportunity} />
-        </div>
-        <p className="page__subtitle">
-          {product.farm ? (
-            <>
-              <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
-              <VerifiedBadge verified={product.farm.verified} />
-              {product.farm.region
-                ? ` · ${formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region}`
-                : ''}
-            </>
-          ) : (
-            <Link href={`/users/${product.owner.id}`}>
-              {product.owner.displayName?.trim() || t('sellerFallback')}
-            </Link>
-          )}
-        </p>
-        <div className="product-list__rating product-list__rating--detail">
-          <span className="product-list__rating-label">{tc('sellerRating')}</span>
-          <RatingStars
-            value={product.sellerRating?.average ?? null}
-            count={product.sellerRating?.count ?? 0}
-            size="sm"
-          />
-        </div>
-        <div className="product-insight-row">
-          <CertificateBadges badges={product.certificateBadges} />
-          <MarketInsightButton productId={product.id} />
+        <div className="product-detail-header">
+          <div className="product-detail-header__main">
+            <p className="eyebrow">
+              <Link href="/catalog">{tc('title')}</Link>
+            </p>
+            <h1 className="farm-title-row">
+              {formatProductTitle(product.title, locale)}
+              <HarvestStatusBadge
+                status={product.harvestStatus}
+                preorderEnabled={product.preorderEnabled}
+              />
+            </h1>
+            <div className="product-opportunity-row">
+              <MarketOpportunityBadge opportunity={product.opportunity} />
+            </div>
+            <p className="page__subtitle">
+              {product.farm ? (
+                <>
+                  <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
+                  <VerifiedBadge verified={product.farm.verified} />
+                  {product.farm.region
+                    ? ` · ${formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region}`
+                    : ''}
+                </>
+              ) : (
+                <Link href={`/users/${product.owner.id}`}>
+                  {product.owner.displayName?.trim() || t('sellerFallback')}
+                </Link>
+              )}
+            </p>
+            <div className="product-list__rating product-list__rating--detail">
+              <span className="product-list__rating-label">{tc('sellerRating')}</span>
+              <RatingStars
+                value={product.sellerRating?.average ?? null}
+                count={product.sellerRating?.count ?? 0}
+                size="sm"
+              />
+            </div>
+            <div className="product-insight-row">
+              <CertificateBadges badges={product.certificateBadges} />
+              <MarketInsightButton productId={product.id} />
+            </div>
+          </div>
+          {!product.isOwner ? (
+            <div className="product-detail-header__actions">
+              {user ? (
+                <OpenChatButton
+                  farmerId={product.ownerUserId}
+                  label={t('messageSeller')}
+                  variant="ghost"
+                />
+              ) : (
+                <Link
+                  href={`/login?next=${encodeURIComponent(`/products/${product.id}`)}`}
+                  className="button button--ghost"
+                >
+                  {t('messageSeller')}
+                </Link>
+              )}
+              <a href="#request-quote" className="button button--primary">
+                {tr('submitRequest')}
+              </a>
+            </div>
+          ) : null}
         </div>
         {product.images.length > 0 ? (
           <div className="product-gallery">
@@ -393,7 +419,7 @@ export default async function ProductDetailPage({ params }: Props) {
         </section>
 
         {canRequest ? (
-          <div style={{ marginTop: '1.75rem' }}>
+          <div id="request-quote" className="product-request-anchor" style={{ marginTop: '1.75rem' }}>
             <RfqRequestForm
               productId={product.id}
               defaultUnit={product.unit}
@@ -401,8 +427,11 @@ export default async function ProductDetailPage({ params }: Props) {
             />
           </div>
         ) : !user ? (
-          <div className="product-login-cta">
-            <Link href="/login" className="button button--primary">
+          <div id="request-quote" className="product-login-cta product-request-anchor">
+            <Link
+              href={`/login?next=${encodeURIComponent(`/products/${product.id}`)}`}
+              className="button button--primary"
+            >
               {tr('loginToRequest')}
             </Link>
           </div>
