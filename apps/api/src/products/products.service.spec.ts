@@ -23,6 +23,12 @@ describe('ProductsService', () => {
       update: jest.fn(),
       updateMany: jest.fn(),
     },
+    harvestWatch: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      upsert: jest.fn(),
+      deleteMany: jest.fn(),
+    },
     $transaction: jest.fn(),
   };
 
@@ -272,5 +278,48 @@ describe('ProductsService', () => {
         }),
       }),
     );
+  });
+
+  it('lists harvest watches for the current user', async () => {
+    const createdAt = new Date('2026-08-01T10:00:00.000Z');
+    prisma.harvestWatch.findMany.mockResolvedValue([
+      {
+        id: 'w1',
+        createdAt,
+        product: {
+          id: 'p1',
+          title: 'Hazelnuts',
+          harvestStatus: 'growing',
+          preorderEnabled: true,
+          farm: { name: 'Kakheti Farm' },
+        },
+      },
+    ]);
+
+    const result = await service.listMyWatches({
+      id: 'u1',
+      email: 'buyer@example.com',
+      role: 'buyer',
+      locale: 'en',
+      displayName: null,
+    });
+
+    expect(prisma.harvestWatch.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId: 'u1' },
+        orderBy: { createdAt: 'desc' },
+      }),
+    );
+    expect(result).toEqual([
+      {
+        id: 'w1',
+        productId: 'p1',
+        productTitle: 'Hazelnuts',
+        farmName: 'Kakheti Farm',
+        harvestStatus: 'growing',
+        preorderEnabled: true,
+        createdAt: createdAt.toISOString(),
+      },
+    ]);
   });
 });
