@@ -20,4 +20,9 @@ export class RatingsController {
   summary(@Param('id') id: string) {
     return this.ratingsService.summaryForUser(id);
   }
+
+  @Get('users/:id/ratings')
+  list(@Param('id') id: string) {
+    return this.ratingsService.listForUser(id);
+  }
 }

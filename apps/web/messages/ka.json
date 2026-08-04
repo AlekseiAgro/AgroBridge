@@ -933,7 +933,13 @@
     "viewPublicProfile": "საჯარო პროფილის გახსნა",
     "backToCabinet": "პირად კაბინეტში",
     "buyer": "მყიდველი",
-    "seller": "გამყიდველი"
+    "seller": "გამყიდველი",
+    "reviewsTitle": "შეფასებები: {name}",
+    "reviewsSubtitle": "შეფასებები დასრულებული გარიგებებიდან AgroBridge-ზე.",
+    "reviewsEmpty": "შეფასებები ჯერ არ არის.",
+    "reviewsNoComment": "ტექსტური კომენტარი არ არის.",
+    "backToProfile": "პროფილზე დაბრუნება",
+    "viewReviews": "შეფასებების ნახვა"
   },
   "subscriptions": {
     "title": "გაფრთხილებების გამოწერა",

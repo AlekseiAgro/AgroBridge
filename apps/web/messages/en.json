@@ -933,7 +933,13 @@
     "viewPublicProfile": "View public profile",
     "backToCabinet": "Back to my cabinet",
     "buyer": "Buyer",
-    "seller": "Seller"
+    "seller": "Seller",
+    "reviewsTitle": "Reviews for {name}",
+    "reviewsSubtitle": "Ratings from completed deals on AgroBridge.",
+    "reviewsEmpty": "No reviews yet.",
+    "reviewsNoComment": "No written comment.",
+    "backToProfile": "Back to profile",
+    "viewReviews": "View reviews"
   },
   "subscriptions": {
     "title": "Alert subscriptions",

@@ -60,7 +60,12 @@ export default async function FarmDetailPage({ params }: Props) {
           </Link>
         </p>
         <div className="farm-rating">
-          <RatingStars value={ownerRating.average} count={ownerRating.count} size="sm" />
+          <RatingStars
+            value={ownerRating.average}
+            count={ownerRating.count}
+            size="sm"
+            reviewsHref={`/users/${farm.owner.id}/reviews`}
+          />
         </div>
         {farm.photos.length > 0 ? (
           <div className="product-gallery">

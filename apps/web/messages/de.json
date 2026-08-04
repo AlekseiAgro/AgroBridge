@@ -933,7 +933,13 @@
     "viewPublicProfile": "Öffentliches Profil öffnen",
     "backToCabinet": "Zurück zum Kabinett",
     "buyer": "Käufer",
-    "seller": "Verkäufer"
+    "seller": "Verkäufer",
+    "reviewsTitle": "Bewertungen für {name}",
+    "reviewsSubtitle": "Bewertungen aus abgeschlossenen Deals auf AgroBridge.",
+    "reviewsEmpty": "Noch keine Bewertungen.",
+    "reviewsNoComment": "Kein Kommentar.",
+    "backToProfile": "Zurück zum Profil",
+    "viewReviews": "Bewertungen ansehen"
   },
   "subscriptions": {
     "title": "Alert-Abos",
