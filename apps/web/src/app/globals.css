@@ -1861,6 +1861,10 @@ body {
   font-weight: 700;
 }
 
+.chat-delivery--delivered {
+  color: #c4a014;
+}
+
 .chat-delivery--read {
   color: var(--brand);
 }

@@ -28,16 +28,14 @@ function DeliveryTicks({ status }: { status: MessageDeliveryStatus }) {
   const t = useTranslations('chat');
   const label = t(`delivery.${status}`);
   const marks = status === 'sent' ? '✓' : '✓✓';
+  const className =
+    status === 'read'
+      ? 'chat-delivery chat-delivery--read'
+      : status === 'delivered'
+        ? 'chat-delivery chat-delivery--delivered'
+        : 'chat-delivery';
   return (
-    <span
-      className={
-        status === 'read'
-          ? 'chat-delivery chat-delivery--read'
-          : 'chat-delivery'
-      }
-      title={label}
-      aria-label={label}
-    >
+    <span className={className} title={label} aria-label={label}>
       {marks}
     </span>
   );
