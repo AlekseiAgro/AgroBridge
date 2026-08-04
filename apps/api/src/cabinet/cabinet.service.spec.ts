@@ -20,6 +20,17 @@ describe('CabinetService', () => {
     },
     product: {
       findMany: jest.fn(),
+      count: jest.fn(),
+    },
+    rfq: {
+      count: jest.fn(),
+      findMany: jest.fn(),
+    },
+    purchaseRequest: {
+      count: jest.fn(),
+    },
+    conversation: {
+      count: jest.fn(),
     },
     verificationCode: {
       create: jest.fn(),
@@ -69,6 +80,42 @@ describe('CabinetService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('includes open purchase requests in openRequests activity', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      ...farmer,
+      avatarUrl: null,
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      farm: null,
+    });
+    ratings.summaryForUser.mockResolvedValue({
+      average: 0,
+      count: 0,
+    });
+    prisma.rfq.count
+      .mockResolvedValueOnce(0) // completed as buyer
+      .mockResolvedValueOnce(0) // completed as seller
+      .mockResolvedValueOnce(2) // open buyer RFQs
+      .mockResolvedValueOnce(1); // open inbox RFQs
+    prisma.purchaseRequest.count.mockResolvedValue(3);
+    prisma.conversation.count.mockResolvedValue(0);
+    prisma.product.count.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
+    prisma.rfq.findMany.mockResolvedValue([]);
+
+    await expect(service.overview(farmer)).resolves.toEqual(
+      expect.objectContaining({
+        activity: expect.objectContaining({
+          openRequests: 6,
+        }),
+      }),
+    );
+    expect(prisma.purchaseRequest.count).toHaveBeenCalledWith({
+      where: {
+        buyerId: farmer.id,
+        status: 'open',
+      },
+    });
   });
 
   it('refuses to delete admin accounts', async () => {

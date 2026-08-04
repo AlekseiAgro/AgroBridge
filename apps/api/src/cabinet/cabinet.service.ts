@@ -17,6 +17,7 @@ import {
 import {
   LocaleCode,
   ModerationStatus as PrismaModerationStatus,
+  PurchaseRequestStatus as PrismaPurchaseRequestStatus,
   RfqStatus as PrismaRfqStatus,
   VerificationChannel,
 } from '@prisma/client';
@@ -58,6 +59,7 @@ export class CabinetService {
       completedAsSeller,
       openBuyerRequests,
       openInboxRequests,
+      openPurchaseRequests,
       conversations,
       publishedProducts,
       pendingModeration,
@@ -90,6 +92,14 @@ export class CabinetService {
             where: {
               product: { ownerUserId: user.id },
               status: { in: [PrismaRfqStatus.pending, PrismaRfqStatus.offered, PrismaRfqStatus.accepted] },
+            },
+          })
+        : Promise.resolve(0),
+      trader
+        ? this.prisma.purchaseRequest.count({
+            where: {
+              buyerId: user.id,
+              status: PrismaPurchaseRequestStatus.open,
             },
           })
         : Promise.resolve(0),
@@ -134,7 +144,7 @@ export class CabinetService {
       },
       activity: {
         completedDeals: completedAsBuyer + completedAsSeller,
-        openRequests: openBuyerRequests + openInboxRequests,
+        openRequests: openBuyerRequests + openInboxRequests + openPurchaseRequests,
         conversations,
         unreadMessages,
         publishedProducts,
