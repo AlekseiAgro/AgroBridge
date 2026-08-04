@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { requestInboxUnreadRefresh } from '@/components/InboxNavLink';
 import { useRouter } from '@/i18n/navigation';
 
 type Action = 'accept' | 'decline' | 'cancel' | 'complete';
@@ -28,6 +29,7 @@ export function RfqActionButton({ rfqId, action, variant = 'ghost' }: Props) {
         setError(data.message ?? t('genericError'));
         return;
       }
+      requestInboxUnreadRefresh();
       router.refresh();
     } catch {
       setError(t('genericError'));

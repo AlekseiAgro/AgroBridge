@@ -81,7 +81,8 @@
     "forBuyers": "Sono un acquirente",
     "forSellers": "Sono un venditore",
     "subscriptions": "Avvisi",
-    "chatUnread": "Chat, {count} non letti"
+    "chatUnread": "Chat, {count} non letti",
+    "inboxUnread": "Richieste in arrivo, {count} in sospeso"
   },
   "footer": {
     "tagline": "Colleghiamo le aziende georgiane con acquirenti in tutto il mondo.",

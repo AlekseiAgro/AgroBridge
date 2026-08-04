@@ -81,7 +81,8 @@
     "forBuyers": "I'm a buyer",
     "forSellers": "I'm a seller",
     "subscriptions": "Alerts",
-    "chatUnread": "Chat, {count} unread"
+    "chatUnread": "Chat, {count} unread",
+    "inboxUnread": "Incoming requests, {count} pending"
   },
   "footer": {
     "tagline": "Connecting Georgian farms with buyers worldwide.",

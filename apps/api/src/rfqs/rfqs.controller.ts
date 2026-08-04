@@ -32,6 +32,12 @@ export class RfqsController {
     return this.rfqsService.listInbox(user);
   }
 
+  @Get('inbox/unread-count')
+  @Roles('farmer', 'buyer', 'admin')
+  pendingInboxCount(@CurrentUser() user: AuthenticatedUser) {
+    return this.rfqsService.pendingInboxCount(user);
+  }
+
   @Get(':id')
   @Roles('buyer', 'farmer', 'admin')
   getById(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {

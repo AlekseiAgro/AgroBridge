@@ -3,6 +3,7 @@
 import { CURRENCIES, PRODUCT_UNITS } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
+import { requestInboxUnreadRefresh } from '@/components/InboxNavLink';
 import { useRouter } from '@/i18n/navigation';
 
 type Props = {
@@ -43,6 +44,7 @@ export function RfqOfferForm({ rfqId, defaultQuantity, defaultUnit }: Props) {
         setError(data.message ?? t('genericError'));
         return;
       }
+      requestInboxUnreadRefresh();
       router.refresh();
     } catch {
       setError(t('genericError'));

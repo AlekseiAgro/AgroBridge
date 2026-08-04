@@ -2,11 +2,13 @@ import { canTrade } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { ChatNavLink } from '@/components/ChatNavLink';
+import { InboxNavLink } from '@/components/InboxNavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LocaleSync } from '@/components/LocaleSync';
 import { LogoutButton } from '@/components/LogoutButton';
 import { Link } from '@/i18n/navigation';
 import { getUnreadMessagesCount } from '@/lib/chat-unread';
+import { getPendingInboxCount } from '@/lib/inbox-unread';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -23,6 +25,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
   const user = await getCurrentUser();
   const trader = Boolean(user && canTrade(user.role));
   const unreadCount = user ? await getUnreadMessagesCount() : 0;
+  const pendingInboxCount = trader ? await getPendingInboxCount() : 0;
 
   return (
     <div className="cabinet">
@@ -39,7 +42,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
             <>
               <Link href="/dashboard/farm">{t('myFarm')}</Link>
               <Link href="/dashboard/products">{t('myProducts')}</Link>
-              <Link href="/dashboard/inbox">{t('inbox')}</Link>
+              <InboxNavLink initialCount={pendingInboxCount} />
               <Link href="/requests">{t('purchaseRequests')}</Link>
               <Link href="/dashboard/purchase-requests">{tp('mineTitle')}</Link>
               <Link href="/dashboard/rfqs">{t('myRequests')}</Link>

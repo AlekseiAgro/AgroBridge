@@ -81,7 +81,8 @@
     "forBuyers": "Ich bin Käufer",
     "forSellers": "Ich bin Verkäufer",
     "subscriptions": "Alerts",
-    "chatUnread": "Chat, {count} ungelesen"
+    "chatUnread": "Chat, {count} ungelesen",
+    "inboxUnread": "Eingehende Anfragen, {count} ausstehend"
   },
   "footer": {
     "tagline": "Wir verbinden georgische Betriebe mit Käufern weltweit.",

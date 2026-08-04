@@ -34,6 +34,11 @@ export type RfqOfferView = {
   createdAt: string;
 };
 
+/** Pending incoming RFQs awaiting a farmer response (nav badge). */
+export type PendingInboxCount = {
+  count: number;
+};
+
 export type RfqDealParticipant = {
   id: string;
   displayName: string | null;
