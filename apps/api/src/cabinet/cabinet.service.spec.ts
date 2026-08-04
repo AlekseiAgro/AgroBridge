@@ -37,12 +37,16 @@ describe('CabinetService', () => {
     notifyAccountDeletionCode: jest.fn().mockResolvedValue(undefined),
     notifyEmailChangeCode: jest.fn().mockResolvedValue(undefined),
   };
+  const chat = {
+    unreadTotal: jest.fn().mockResolvedValue({ count: 0 }),
+  };
 
   const service = new CabinetService(
     prisma as never,
     ratings as never,
     storage as never,
     notifications as never,
+    chat as never,
   );
 
   const farmer = {

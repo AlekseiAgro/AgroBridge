@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { ChatNavLink } from '@/components/ChatNavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link } from '@/i18n/navigation';
+import { getUnreadMessagesCount } from '@/lib/chat-unread';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 export async function SiteHeader({ tone = 'default' }: Props) {
   const t = await getTranslations('nav');
   const user = await getCurrentUser();
+  const unreadCount = user ? await getUnreadMessagesCount() : 0;
 
   return (
     <header className={tone === 'light' ? 'site-header site-header--light' : 'site-header'}>
@@ -25,7 +27,7 @@ export async function SiteHeader({ tone = 'default' }: Props) {
           {t('forSellers')}
         </Link>
         <Link href="/how-it-works">{t('howItWorks')}</Link>
-        {user ? <ChatNavLink /> : null}
+        {user ? <ChatNavLink initialCount={unreadCount} /> : null}
         {user?.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
         {user ? (
           <Link href="/account">{t('account')}</Link>

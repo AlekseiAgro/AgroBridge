@@ -874,27 +874,53 @@ body {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
+}
+
+.chat-nav-link__label {
+  line-height: 1.2;
 }
 
 .chat-nav-link__badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.2rem;
-  height: 1.2rem;
-  padding: 0 0.3rem;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
   border-radius: 999px;
-  background: #c45c26;
+  background: #c62828;
   color: #fff;
-  font-size: 0.68rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 750;
   line-height: 1;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95);
+}
+
+.chat-nav-link--has-unread .chat-nav-link__label {
+  font-weight: 700;
 }
 
 .site-header--light .chat-nav-link__badge {
-  background: #f0a060;
-  color: #2a1a10;
+  background: #ff6b4a;
+  color: #fff;
+  box-shadow: 0 0 0 2px rgba(20, 40, 24, 0.35);
+}
+
+.cabinet__chat-button.chat-nav-link {
+  padding: 0.45rem 0.75rem;
+}
+
+.activity-summary__unread {
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+
+.activity-summary__link strong {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem;
 }
 
 .site-header__role-link {

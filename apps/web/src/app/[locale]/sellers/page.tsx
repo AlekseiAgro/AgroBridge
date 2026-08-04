@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RoleHub } from '@/components/RoleHub';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
+import { getUnreadMessagesCount } from '@/lib/chat-unread';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -17,6 +18,7 @@ export default async function SellersHubPage({ params }: Props) {
   const tn = await getTranslations('nav');
   const user = await getCurrentUser();
   const trader = Boolean(user && canTrade(user.role));
+  const chatUnreadCount = user ? await getUnreadMessagesCount() : 0;
 
   const asideLinks = trader
     ? [
@@ -58,6 +60,7 @@ export default async function SellersHubPage({ params }: Props) {
           ]}
           asideNote={t('asideNote')}
           asideLinks={asideLinks}
+          chatUnreadCount={chatUnreadCount}
         />
       </main>
       <SiteFooter />

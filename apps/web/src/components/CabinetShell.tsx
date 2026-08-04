@@ -5,6 +5,7 @@ import { ChatNavLink } from '@/components/ChatNavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LogoutButton } from '@/components/LogoutButton';
 import { Link } from '@/i18n/navigation';
+import { getUnreadMessagesCount } from '@/lib/chat-unread';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -19,6 +20,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
   const tp = await getTranslations('purchaseRequests');
   const user = await getCurrentUser();
   const trader = Boolean(user && canTrade(user.role));
+  const unreadCount = user ? await getUnreadMessagesCount() : 0;
 
   return (
     <div className="cabinet">
@@ -39,7 +41,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
               <Link href="/dashboard/rfqs">{t('myRequests')}</Link>
             </>
           ) : null}
-          {user ? <ChatNavLink /> : null}
+          {user ? <ChatNavLink initialCount={unreadCount} /> : null}
           {user ? <Link href="/dashboard/subscriptions">{t('subscriptions')}</Link> : null}
           {user?.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
           <Link href="/buyers">{t('forBuyers')}</Link>
@@ -58,6 +60,12 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
             {subtitle ? <p className="cabinet__subtitle">{subtitle}</p> : null}
           </div>
           <div className="cabinet__top-actions">
+            {user ? (
+              <ChatNavLink
+                className="button button--ghost cabinet__chat-button"
+                initialCount={unreadCount}
+              />
+            ) : null}
             <span className="cabinet__user-chip">
               {user?.displayName || user?.email || tc('guest')}
             </span>

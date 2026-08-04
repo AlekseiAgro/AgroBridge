@@ -3,6 +3,7 @@
 import type { ChatMessageView, ConversationDetail } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { FormEvent, useEffect, useState } from 'react';
+import { requestChatUnreadRefresh } from '@/components/ChatNavLink';
 
 type Props = {
   conversationId: string;
@@ -19,14 +20,19 @@ export function ChatRoom({ conversationId, initial }: Props) {
   const [showOriginalIds, setShowOriginalIds] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
+    // Opening a thread marks it read on the server — refresh nav badges.
+    requestChatUnreadRefresh();
+
     const timer = window.setInterval(async () => {
       try {
         const response = await fetch(`/api/conversations/${conversationId}`, {
           cache: 'no-store',
+          credentials: 'same-origin',
         });
         if (!response.ok) return;
         const data = (await response.json()) as ConversationDetail;
         setMessages(data.messages);
+        requestChatUnreadRefresh();
       } catch {
         // ignore polling errors
       }

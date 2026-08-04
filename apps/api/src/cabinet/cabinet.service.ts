@@ -20,6 +20,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { createHash, randomInt } from 'crypto';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { ChatService } from '../chat/chat.service';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
@@ -34,6 +35,7 @@ export class CabinetService {
     private readonly ratings: RatingsService,
     private readonly storage: StorageService,
     private readonly notifications: NotificationsService,
+    private readonly chat: ChatService,
   ) {}
 
   async overview(user: AuthenticatedUser): Promise<CabinetOverview> {
@@ -57,6 +59,7 @@ export class CabinetService {
       publishedProducts,
       pendingModeration,
       awaitingMyRating,
+      unreadMessages,
     ] = await Promise.all([
       trader
         ? this.prisma.rfq.count({
@@ -110,6 +113,7 @@ export class CabinetService {
           })
         : Promise.resolve(0),
       this.countAwaitingRating(user.id),
+      this.chat.unreadTotal(user).then((result) => result.count),
     ]);
 
     return {
@@ -129,6 +133,7 @@ export class CabinetService {
         completedDeals: completedAsBuyer + completedAsSeller,
         openRequests: openBuyerRequests + openInboxRequests,
         conversations,
+        unreadMessages,
         publishedProducts,
         pendingModeration,
         awaitingMyRating,
