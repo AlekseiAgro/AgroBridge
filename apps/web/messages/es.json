@@ -1026,7 +1026,8 @@
       "11": "Nov",
       "12": "Dec"
     },
-    "ownerWatchHint": "Este es tu anuncio, no necesitas alertas de cosecha aquí."
+    "ownerWatchHint": "Este es tu anuncio, no necesitas alertas de cosecha aquí.",
+    "forecastUnitHint": "Usa la unidad de Datos básicos ({unit})."
   },
   "quality": {
     "title": "Calidad de la ficha del producto",

@@ -1026,7 +1026,8 @@
       "11": "Nov",
       "12": "Dec"
     },
-    "ownerWatchHint": "Das ist Ihr Angebot – Erntebenachrichtigungen sind hier nicht nötig."
+    "ownerWatchHint": "Das ist Ihr Angebot – Erntebenachrichtigungen sind hier nicht nötig.",
+    "forecastUnitHint": "Verwendet die Einheit aus den Basisdaten ({unit})."
   },
   "quality": {
     "title": "Produktkarten-Qualität",

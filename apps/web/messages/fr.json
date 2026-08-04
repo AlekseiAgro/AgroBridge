@@ -1026,7 +1026,8 @@
       "11": "Nov",
       "12": "Dec"
     },
-    "ownerWatchHint": "C’est votre annonce : les alertes de récolte ne sont pas nécessaires ici."
+    "ownerWatchHint": "C’est votre annonce : les alertes de récolte ne sont pas nécessaires ici.",
+    "forecastUnitHint": "Utilise l’unité des Informations de base ({unit})."
   },
   "quality": {
     "title": "Qualité de la fiche produit",

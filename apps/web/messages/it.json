@@ -1026,7 +1026,8 @@
       "11": "Nov",
       "12": "Dec"
     },
-    "ownerWatchHint": "Questo è il tuo annuncio: qui non servono avvisi sul raccolto."
+    "ownerWatchHint": "Questo è il tuo annuncio: qui non servono avvisi sul raccolto.",
+    "forecastUnitHint": "Usa l’unità da Dati principali ({unit})."
   },
   "quality": {
     "title": "Qualità della scheda prodotto",

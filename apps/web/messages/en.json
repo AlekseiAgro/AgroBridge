@@ -1026,7 +1026,8 @@
       "11": "Nov",
       "12": "Dec"
     },
-    "ownerWatchHint": "You own this listing, so harvest alerts are not needed here."
+    "ownerWatchHint": "You own this listing, so harvest alerts are not needed here.",
+    "forecastUnitHint": "Uses the unit from Basics ({unit})."
   },
   "quality": {
     "title": "Product card quality",
