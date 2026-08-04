@@ -29,6 +29,52 @@ export default async function AccountPage({ params }: Props) {
   const trader = canTrade(user.role);
   const roleKey = `roles.${user.role}` as 'roles.farmer' | 'roles.buyer' | 'roles.admin';
   const memberSince = formatMemberSinceMonthYear(user.memberSince, locale);
+  const dealsBase = user.role === 'farmer' ? '/dashboard/inbox' : '/dashboard/rfqs';
+
+  const cards: Array<{ key: string; value: number; label: string; href: string }> = [
+    {
+      key: 'completedDeals',
+      value: activity.completedDeals,
+      label: t('stats.completedDeals'),
+      href: `${dealsBase}?status=completed`,
+    },
+    {
+      key: 'openRequests',
+      value: activity.openRequests,
+      label: t('stats.openRequests'),
+      href: `${dealsBase}?status=open`,
+    },
+    {
+      key: 'conversations',
+      value: activity.conversations,
+      label: t('stats.conversations'),
+      href: '/dashboard/chat',
+    },
+  ];
+
+  if (trader) {
+    cards.push(
+      {
+        key: 'publishedProducts',
+        value: activity.publishedProducts,
+        label: t('stats.publishedProducts'),
+        href: '/dashboard/products?filter=published',
+      },
+      {
+        key: 'pendingModeration',
+        value: activity.pendingModeration,
+        label: t('stats.pendingModeration'),
+        href: '/dashboard/products?filter=pending',
+      },
+    );
+  }
+
+  cards.push({
+    key: 'awaitingMyRating',
+    value: activity.awaitingMyRating,
+    label: t('stats.awaitingMyRating'),
+    href: `${dealsBase}?needsRating=1`,
+  });
 
   return (
     <CabinetShell title={t('title')} subtitle={t('subtitle')}>
@@ -69,34 +115,14 @@ export default async function AccountPage({ params }: Props) {
           {t('activityTitle')}
         </h2>
         <ul className="activity-summary__grid">
-          <li>
-            <strong>{activity.completedDeals}</strong>
-            <span>{t('stats.completedDeals')}</span>
-          </li>
-          <li>
-            <strong>{activity.openRequests}</strong>
-            <span>{t('stats.openRequests')}</span>
-          </li>
-          <li>
-            <strong>{activity.conversations}</strong>
-            <span>{t('stats.conversations')}</span>
-          </li>
-          {trader ? (
-            <>
-              <li>
-                <strong>{activity.publishedProducts}</strong>
-                <span>{t('stats.publishedProducts')}</span>
-              </li>
-              <li>
-                <strong>{activity.pendingModeration}</strong>
-                <span>{t('stats.pendingModeration')}</span>
-              </li>
-            </>
-          ) : null}
-          <li>
-            <strong>{activity.awaitingMyRating}</strong>
-            <span>{t('stats.awaitingMyRating')}</span>
-          </li>
+          {cards.map((card) => (
+            <li key={card.key}>
+              <Link href={card.href} className="activity-summary__link">
+                <strong>{card.value}</strong>
+                <span>{card.label}</span>
+              </Link>
+            </li>
+          ))}
         </ul>
       </section>
 
