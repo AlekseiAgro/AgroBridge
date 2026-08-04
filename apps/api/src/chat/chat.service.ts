@@ -90,7 +90,7 @@ export class ChatService {
       update: {},
     });
 
-    return this.getById(user, conversation.id);
+    return this.getById(user, conversation.id, dto.locale);
   }
 
   async listMine(user: AuthenticatedUser): Promise<ConversationSummary[]> {

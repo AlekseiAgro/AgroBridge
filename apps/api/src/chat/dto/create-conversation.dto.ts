@@ -1,4 +1,25 @@
-import { IsOptional, IsString, MaxLength, MinLength, ValidateIf } from 'class-validator';
+import { isLocale } from '@agrobridge/shared';
+import {
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+  Validate,
+  ValidateIf,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
+
+@ValidatorConstraint({ name: 'conversationLocaleCode', async: false })
+class LocaleConstraint implements ValidatorConstraintInterface {
+  validate(value: unknown) {
+    return typeof value === 'string' && isLocale(value);
+  }
+
+  defaultMessage() {
+    return 'locale must be one of ka, en, ru, de, fr, it, es';
+  }
+}
 
 export class CreateConversationDto {
   @ValidateIf(
@@ -27,4 +48,10 @@ export class CreateConversationDto {
   @IsString()
   @MaxLength(64)
   buyerId?: string;
+
+  /** Active UI language of the opener; used when loading the new conversation. */
+  @IsOptional()
+  @IsString()
+  @Validate(LocaleConstraint)
+  locale?: string;
 }

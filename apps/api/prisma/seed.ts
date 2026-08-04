@@ -958,6 +958,8 @@ async function main() {
     });
   }
 
+  // Buyers must be email-verified: chat + LocaleSync (cabinet/me/locale) require EmailVerifiedGuard.
+  const buyersVerifiedAt = new Date();
   for (const [index, buyer] of BUYERS.entries()) {
     await upsertUser({
       email: buyer.email,
@@ -966,6 +968,7 @@ async function main() {
       locale: buyer.locale,
       passwordHash: demoPasswordHash,
       buyerType: index % 2 === 0 ? 'individual' : 'company',
+      emailVerifiedAt: buyersVerifiedAt,
     });
   }
   console.log(`Buyers ready: ${BUYERS.length}`);
