@@ -1604,6 +1604,20 @@ body {
   font-size: 1.35rem;
 }
 
+.cabinet-section--nested {
+  margin-top: 2.25rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.cabinet-section--nested .section-title {
+  margin-top: 0;
+}
+
+.cabinet-section--nested .page__subtitle {
+  margin-top: 0;
+}
+
 .eyebrow {
   margin: 0 0 0.5rem;
   color: var(--muted);
