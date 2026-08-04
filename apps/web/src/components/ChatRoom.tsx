@@ -7,7 +7,7 @@ import type {
   MessageDeliveryStatus,
 } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { ChatAvatar } from '@/components/ChatAvatar';
 import { requestChatUnreadRefresh } from '@/components/ChatNavLink';
 
@@ -109,7 +109,7 @@ export function ChatRoom({ conversationId, initial, viewer, peer }: Props) {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    if (!text.trim()) return;
+    if (!text.trim() || pending) return;
 
     setPending(true);
     setError(null);
@@ -131,6 +131,12 @@ export function ChatRoom({ conversationId, initial, viewer, peer }: Props) {
     } finally {
       setPending(false);
     }
+  }
+
+  function onComposerKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== 'Enter' || event.shiftKey) return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
   }
 
   return (
@@ -186,6 +192,7 @@ export function ChatRoom({ conversationId, initial, viewer, peer }: Props) {
             rows={2}
             value={text}
             onChange={(event) => setText(event.target.value)}
+            onKeyDown={onComposerKeyDown}
             onFocus={(event) => {
               event.currentTarget.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             }}
