@@ -10,6 +10,7 @@ describe('RfqsService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      count: jest.fn(),
     },
     rfqOffer: { create: jest.fn() },
   };
@@ -116,5 +117,17 @@ describe('RfqsService', () => {
     });
 
     await expect(service.accept(buyer, 'rfq1')).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('counts pending inbox RFQs for the farmer', async () => {
+    prisma.rfq.count.mockResolvedValue(3);
+
+    await expect(service.pendingInboxCount(farmer)).resolves.toEqual({ count: 3 });
+    expect(prisma.rfq.count).toHaveBeenCalledWith({
+      where: {
+        product: { ownerUserId: farmer.id },
+        status: 'pending',
+      },
+    });
   });
 });

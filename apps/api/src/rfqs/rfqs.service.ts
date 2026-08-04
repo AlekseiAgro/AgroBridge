@@ -138,6 +138,20 @@ export class RfqsService {
     return items.map((item) => this.toSummary(item, user));
   }
 
+  /** Count of incoming RFQs still waiting for the farmer to respond. */
+  async pendingInboxCount(user: AuthenticatedUser): Promise<{ count: number }> {
+    this.assertFarmer(user);
+
+    const count = await this.prisma.rfq.count({
+      where: {
+        product: { ownerUserId: user.id },
+        status: PrismaRfqStatus.pending,
+      },
+    });
+
+    return { count };
+  }
+
   async getById(user: AuthenticatedUser, id: string): Promise<RfqSummary> {
     const rfq = await this.requireAccessibleRfq(user, id);
     return this.toSummary(rfq, user);

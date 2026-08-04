@@ -81,7 +81,8 @@
     "forBuyers": "Je suis acheteur",
     "forSellers": "Je suis vendeur",
     "subscriptions": "Alertes",
-    "chatUnread": "Chat, {count} non lus"
+    "chatUnread": "Chat, {count} non lus",
+    "inboxUnread": "Demandes reçues, {count} en attente"
   },
   "footer": {
     "tagline": "Nous relions les fermes géorgiennes aux acheteurs du monde entier.",

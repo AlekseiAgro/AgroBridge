@@ -81,7 +81,8 @@
     "forBuyers": "Soy comprador",
     "forSellers": "Soy vendedor",
     "subscriptions": "Alertas",
-    "chatUnread": "Chat, {count} sin leer"
+    "chatUnread": "Chat, {count} sin leer",
+    "inboxUnread": "Solicitudes entrantes, {count} pendientes"
   },
   "footer": {
     "tagline": "Conectamos granjas georgianas con compradores de todo el mundo.",
