@@ -478,7 +478,7 @@
     "messageSeller": "Scrivi al venditore",
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Le modifiche sono subito visibili nel catalogo. Non serve una nuova moderazione.",
-    "publishLiveHint": "«Salva» lascia una bozza. «Pubblica» aggiorna subito l’annuncio nel catalogo."
+    "publishLiveHint": "«Salva» e «Pubblica» aggiornano subito l’annuncio nel catalogo (senza ritirarlo)."
   },
   "rfq": {
     "requestTitle": "Richiedi un preventivo",
@@ -980,7 +980,11 @@
     "save": "Salva avvisi",
     "saved": "Impostazioni salvate.",
     "pleaseWait": "Salvataggio…",
-    "genericError": "Impossibile salvare le impostazioni."
+    "genericError": "Impossibile salvare le impostazioni.",
+    "inboxTitle": "Avvisi ricevuti",
+    "inboxHint": "Avvisi quando un raccolto seguito diventa disponibile o apre il preordine.",
+    "inboxEmpty": "Ancora nessun avviso sul raccolto.",
+    "markRead": "Segna come letto"
   },
   "harvest": {
     "title": "Harvest plan",

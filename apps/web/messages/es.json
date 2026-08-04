@@ -478,7 +478,7 @@
     "messageSeller": "Escribir al vendedor",
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Los cambios ya están visibles en el catálogo. No hace falta nueva moderación.",
-    "publishLiveHint": "«Guardar» deja un borrador. «Publicar» actualiza el anuncio en el catálogo de inmediato."
+    "publishLiveHint": "«Guardar» y «Publicar» actualizan el anuncio en el catálogo de inmediato (sin despublicar)."
   },
   "rfq": {
     "requestTitle": "Solicitar cotización",
@@ -980,7 +980,11 @@
     "save": "Guardar alertas",
     "saved": "Ajustes de alerta guardados.",
     "pleaseWait": "Guardando…",
-    "genericError": "No se pudieron guardar los ajustes."
+    "genericError": "No se pudieron guardar los ajustes.",
+    "inboxTitle": "Alertas recibidas",
+    "inboxHint": "Avisos cuando una cosecha seguida pasa a disponible o abre preventa.",
+    "inboxEmpty": "Aún no hay alertas de cosecha.",
+    "markRead": "Marcar leído"
   },
   "harvest": {
     "title": "Harvest plan",

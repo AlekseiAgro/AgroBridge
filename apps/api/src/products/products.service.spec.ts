@@ -322,4 +322,66 @@ describe('ProductsService', () => {
       },
     ]);
   });
+
+  it('notifies watchers when a listing becomes public with available harvest', async () => {
+    const notifications = {
+      notifyHarvestAvailable: jest.fn().mockResolvedValue(undefined),
+      notifyHarvestPreorderOpen: jest.fn().mockResolvedValue(undefined),
+      notifyProductPendingModeration: jest.fn().mockResolvedValue(undefined),
+    };
+    const localService = new ProductsService(
+      prisma as never,
+      storage as never,
+      ratings as never,
+      { enabledIds: jest.fn().mockResolvedValue(null) } as never,
+      notifications as never,
+    );
+
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      ownerUserId: 'farmer1',
+      title: 'Hazelnuts',
+      harvestStatus: 'available',
+      preorderEnabled: true,
+      isPublished: true,
+      moderationStatus: 'approved',
+      owner: { id: 'farmer1', displayName: 'Nino', email: 'n@example.com' },
+      farm: { name: 'Kakheti Farm' },
+      images: [],
+      videos: [],
+      certificates: [],
+    });
+    prisma.harvestWatch.findMany.mockResolvedValue([
+      {
+        user: {
+          id: 'buyer1',
+          email: 'buyer@example.com',
+          locale: 'ru',
+          displayName: 'Buyer',
+          blockedAt: null,
+        },
+      },
+    ]);
+
+    await localService.dispatchHarvestWatchNotifications({
+      productId: 'p1',
+      previousStatus: 'available',
+      previousPreorder: true,
+      wasPublic: false,
+    });
+
+    expect(notifications.notifyHarvestAvailable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        productId: 'p1',
+        harvestStatus: 'available',
+        user: expect.objectContaining({ id: 'buyer1' }),
+      }),
+    );
+    expect(notifications.notifyHarvestPreorderOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        productId: 'p1',
+        user: expect.objectContaining({ id: 'buyer1' }),
+      }),
+    );
+  });
 });

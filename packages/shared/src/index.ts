@@ -19,4 +19,5 @@ export * from './cabinet';
 export * from './support';
 export * from './user-profile';
 export * from './subscription';
+export * from './notification';
 export * from './places';

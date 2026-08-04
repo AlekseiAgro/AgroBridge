@@ -31,6 +31,7 @@ import {
 } from '@prisma/client';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProductsService } from '../products/products.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { VerificationService } from '../verification/verification.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -61,6 +62,7 @@ export class AdminService {
     private readonly notifications: NotificationsService,
     private readonly subscriptions: SubscriptionsService,
     private readonly verification: VerificationService,
+    private readonly products: ProductsService,
   ) {}
 
   async stats(): Promise<AdminStats> {
@@ -183,7 +185,9 @@ export class AdminService {
   }
 
   async approve(user: AuthenticatedUser, id: string): Promise<ModeratedProduct> {
-    await this.requireProduct(id);
+    const existing = await this.requireProduct(id);
+    const wasPublic =
+      existing.isPublished && existing.moderationStatus === PrismaModerationStatus.approved;
 
     const product = await this.prisma.product.update({
       where: { id },
@@ -210,6 +214,13 @@ export class AdminService {
       region: product.farm?.region ?? null,
       farmName: product.farm?.name || product.owner.displayName?.trim() || product.owner.email,
       ownerUserId: product.owner.id,
+    });
+
+    await this.products.dispatchHarvestWatchNotifications({
+      productId: product.id,
+      previousStatus: existing.harvestStatus,
+      previousPreorder: existing.preorderEnabled,
+      wasPublic,
     });
 
     return this.toModerated(product);

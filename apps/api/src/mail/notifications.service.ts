@@ -1,10 +1,63 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { UserNotificationType as PrismaUserNotificationType } from '@prisma/client';
 import type { Locale } from '@agrobridge/shared';
-import { DEFAULT_LOCALE, isLocale, localizeProductTitle } from '@agrobridge/shared';
+import {
+  DEFAULT_LOCALE,
+  isHarvestStatus,
+  isLocale,
+  localizeProductTitle,
+  type UserNotificationItem,
+} from '@agrobridge/shared';
+import { PrismaService } from '../prisma/prisma.service';
 import { renderEmailTemplate } from './email-templates';
 import { MailService } from './mail.service';
 import type { MailRecipient } from './mail.types';
+
+const HARVEST_STATUS_LABELS: Record<Locale, Record<string, string>> = {
+  en: {
+    growing: 'growing',
+    available: 'available',
+    limited: 'limited',
+    soldOut: 'sold out',
+  },
+  ru: {
+    growing: 'растёт',
+    available: 'доступно',
+    limited: 'ограничено',
+    soldOut: 'распродано',
+  },
+  ka: {
+    growing: 'იზრდება',
+    available: 'ხელმისაწვდომია',
+    limited: 'შეზღუდულია',
+    soldOut: 'გაყიდულია',
+  },
+  de: {
+    growing: 'wächst',
+    available: 'verfügbar',
+    limited: 'begrenzt',
+    soldOut: 'ausverkauft',
+  },
+  fr: {
+    growing: 'en croissance',
+    available: 'disponible',
+    limited: 'limité',
+    soldOut: 'épuisé',
+  },
+  it: {
+    growing: 'in crescita',
+    available: 'disponibile',
+    limited: 'limitato',
+    soldOut: 'esaurito',
+  },
+  es: {
+    growing: 'en crecimiento',
+    available: 'disponible',
+    limited: 'limitado',
+    soldOut: 'agotado',
+  },
+};
 
 @Injectable()
 export class NotificationsService {
@@ -14,6 +67,7 @@ export class NotificationsService {
   constructor(
     private readonly mail: MailService,
     private readonly config: ConfigService,
+    private readonly prisma: PrismaService,
   ) {
     this.webPublicUrl = (
       this.config.get<string>('WEB_PUBLIC_URL') ??
@@ -274,34 +328,124 @@ export class NotificationsService {
   }
 
   async notifyHarvestAvailable(params: {
-    user: MailRecipient;
+    user: MailRecipient & { id: string };
     productId: string;
     productTitle: string;
     farmName: string;
     harvestStatus: string;
   }): Promise<void> {
     const locale = this.localeOf(params.user.locale);
+    const localizedTitle = localizeProductTitle(params.productTitle, locale);
+    const statusLabel = this.harvestStatusLabel(params.harvestStatus, locale);
+    const href = `/products/${params.productId}`;
+
+    await this.createUserNotification({
+      userId: params.user.id,
+      type: PrismaUserNotificationType.harvestAvailable,
+      productId: params.productId,
+      title: localizedTitle,
+      body: this.harvestAvailableBody(locale, params.farmName, statusLabel),
+      href,
+    });
+
     await this.sendTemplate(params.user, 'harvestAvailable', {
       name: this.displayName(params.user),
       productTitle: params.productTitle,
       farmName: params.farmName,
-      statusLabel: params.harvestStatus,
-      link: this.appLink(locale, `/products/${params.productId}`),
+      statusLabel,
+      link: this.appLink(locale, href),
     });
   }
 
   async notifyHarvestPreorderOpen(params: {
-    user: MailRecipient;
+    user: MailRecipient & { id: string };
     productId: string;
     productTitle: string;
     farmName: string;
   }): Promise<void> {
     const locale = this.localeOf(params.user.locale);
+    const localizedTitle = localizeProductTitle(params.productTitle, locale);
+    const href = `/products/${params.productId}`;
+
+    await this.createUserNotification({
+      userId: params.user.id,
+      type: PrismaUserNotificationType.harvestPreorderOpen,
+      productId: params.productId,
+      title: localizedTitle,
+      body: this.harvestPreorderBody(locale, params.farmName),
+      href,
+    });
+
     await this.sendTemplate(params.user, 'harvestPreorderOpen', {
       name: this.displayName(params.user),
       productTitle: params.productTitle,
       farmName: params.farmName,
-      link: this.appLink(locale, `/products/${params.productId}`),
+      link: this.appLink(locale, href),
+    });
+  }
+
+  async listMine(userId: string, limit = 30): Promise<UserNotificationItem[]> {
+    const rows = await this.prisma.userNotification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: Math.min(Math.max(limit, 1), 100),
+    });
+    return rows.map((row) => ({
+      id: row.id,
+      type: row.type,
+      productId: row.productId,
+      title: row.title,
+      body: row.body,
+      href: row.href,
+      readAt: row.readAt?.toISOString() ?? null,
+      createdAt: row.createdAt.toISOString(),
+    }));
+  }
+
+  async markRead(userId: string, id: string): Promise<UserNotificationItem | null> {
+    const existing = await this.prisma.userNotification.findFirst({
+      where: { id, userId },
+    });
+    if (!existing) return null;
+    if (existing.readAt) {
+      return {
+        id: existing.id,
+        type: existing.type,
+        productId: existing.productId,
+        title: existing.title,
+        body: existing.body,
+        href: existing.href,
+        readAt: existing.readAt.toISOString(),
+        createdAt: existing.createdAt.toISOString(),
+      };
+    }
+    const updated = await this.prisma.userNotification.update({
+      where: { id },
+      data: { readAt: new Date() },
+    });
+    return {
+      id: updated.id,
+      type: updated.type,
+      productId: updated.productId,
+      title: updated.title,
+      body: updated.body,
+      href: updated.href,
+      readAt: updated.readAt?.toISOString() ?? null,
+      createdAt: updated.createdAt.toISOString(),
+    };
+  }
+
+  async markAllRead(userId: string): Promise<{ ok: true }> {
+    await this.prisma.userNotification.updateMany({
+      where: { userId, readAt: null },
+      data: { readAt: new Date() },
+    });
+    return { ok: true };
+  }
+
+  async unreadCount(userId: string): Promise<number> {
+    return this.prisma.userNotification.count({
+      where: { userId, readAt: null },
     });
   }
 
@@ -318,6 +462,78 @@ export class NotificationsService {
       preview: params.preview,
       link: this.appLink(locale, `/dashboard/chat/${params.conversationId}`),
     });
+  }
+
+  private async createUserNotification(params: {
+    userId: string;
+    type: PrismaUserNotificationType;
+    productId: string | null;
+    title: string;
+    body: string;
+    href: string;
+  }): Promise<void> {
+    try {
+      await this.prisma.userNotification.create({
+        data: {
+          userId: params.userId,
+          type: params.type,
+          productId: params.productId,
+          title: params.title,
+          body: params.body,
+          href: params.href,
+        },
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to create in-app notification for ${params.userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
+  }
+
+  private harvestStatusLabel(status: string, locale: Locale): string {
+    if (isHarvestStatus(status)) {
+      return HARVEST_STATUS_LABELS[locale][status] ?? status;
+    }
+    return status;
+  }
+
+  private harvestAvailableBody(locale: Locale, farmName: string, statusLabel: string): string {
+    switch (locale) {
+      case 'ru':
+        return `${farmName}: урожай теперь «${statusLabel}».`;
+      case 'ka':
+        return `${farmName}: მოსავალი ახლა «${statusLabel}».`;
+      case 'de':
+        return `${farmName}: Ernte ist jetzt ${statusLabel}.`;
+      case 'fr':
+        return `${farmName} : la récolte est maintenant ${statusLabel}.`;
+      case 'it':
+        return `${farmName}: il raccolto ora è ${statusLabel}.`;
+      case 'es':
+        return `${farmName}: la cosecha ahora está ${statusLabel}.`;
+      default:
+        return `${farmName}: harvest is now ${statusLabel}.`;
+    }
+  }
+
+  private harvestPreorderBody(locale: Locale, farmName: string): string {
+    switch (locale) {
+      case 'ru':
+        return `${farmName}: открыт предзаказ.`;
+      case 'ka':
+        return `${farmName}: გაიხსნა წინასწარი შეკვეთა.`;
+      case 'de':
+        return `${farmName}: Vorverkauf ist geöffnet.`;
+      case 'fr':
+        return `${farmName} : précommandes ouvertes.`;
+      case 'it':
+        return `${farmName}: preordini aperti.`;
+      case 'es':
+        return `${farmName}: preventa abierta.`;
+      default:
+        return `${farmName}: pre-orders are now open.`;
+    }
   }
 
   private async sendTemplate(

@@ -478,7 +478,7 @@
     "messageSeller": "Écrire au vendeur",
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Les modifications sont immédiatement visibles dans le catalogue. Pas de nouvelle modération.",
-    "publishLiveHint": "« Enregistrer » conserve un brouillon. « Publier » met à jour l’annonce en ligne immédiatement."
+    "publishLiveHint": "« Enregistrer » et « Publier » mettent à jour l’annonce en ligne immédiatement (sans dépublication)."
   },
   "rfq": {
     "requestTitle": "Demander un devis",
@@ -980,7 +980,11 @@
     "save": "Enregistrer les alertes",
     "saved": "Paramètres d’alerte enregistrés.",
     "pleaseWait": "Enregistrement…",
-    "genericError": "Impossible d’enregistrer les paramètres."
+    "genericError": "Impossible d’enregistrer les paramètres.",
+    "inboxTitle": "Alertes reçues",
+    "inboxHint": "Alertes quand une récolte suivie devient disponible ou ouvre la précommande.",
+    "inboxEmpty": "Pas encore d’alertes de récolte.",
+    "markRead": "Marquer lu"
   },
   "harvest": {
     "title": "Harvest plan",

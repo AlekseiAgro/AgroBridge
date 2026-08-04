@@ -1,8 +1,9 @@
-import type { AlertSubscription, HarvestWatchItem } from '@agrobridge/shared';
+import type { AlertSubscription, HarvestWatchItem, UserNotificationItem } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ActiveAlertSubscriptions } from '@/components/ActiveAlertSubscriptions';
 import { AlertSubscriptionForm } from '@/components/AlertSubscriptionForm';
 import { HarvestWatchesList } from '@/components/HarvestWatchesList';
+import { UserNotificationsList } from '@/components/UserNotificationsList';
 import { redirect } from '@/i18n/navigation';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
@@ -21,9 +22,10 @@ export default async function SubscriptionsPage({ params }: Props) {
   }
 
   const t = await getTranslations('subscriptions');
-  const [subscription, watches] = await Promise.all([
+  const [subscription, watches, inbox] = await Promise.all([
     apiRequestAuthed<AlertSubscription>('/subscriptions/alerts'),
     apiRequestAuthed<HarvestWatchItem[]>('/products/watches'),
+    apiRequestAuthed<UserNotificationItem[]>('/notifications?limit=30'),
   ]);
 
   return (
@@ -32,6 +34,12 @@ export default async function SubscriptionsPage({ params }: Props) {
       <p className="page__subtitle">{t('subtitle')}</p>
 
       <section className="cabinet-section">
+        <h2 className="section-title">{t('inboxTitle')}</h2>
+        <p className="page__subtitle">{t('inboxHint')}</p>
+        <UserNotificationsList initial={inbox} />
+      </section>
+
+      <section className="cabinet-section cabinet-section--nested">
         <h2 className="section-title">{t('activeTitle')}</h2>
         <p className="page__subtitle">{t('activeHint')}</p>
         <ActiveAlertSubscriptions subscription={subscription} />

@@ -1663,6 +1663,36 @@ body {
   flex: 1 1 14rem;
 }
 
+.user-notifications {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.user-notifications__item {
+  padding: 0.95rem 1.05rem;
+  border: 1px solid var(--line);
+  border-radius: 0.95rem;
+  background: var(--surface);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.user-notifications__item--unread {
+  border-color: color-mix(in srgb, var(--accent, #2f6b4f) 45%, var(--line));
+  background: color-mix(in srgb, var(--accent, #2f6b4f) 6%, var(--surface));
+}
+
+.user-notifications__main {
+  min-width: 0;
+  flex: 1 1 14rem;
+}
+
 .completed-deals {
   list-style: none;
   margin: 0;

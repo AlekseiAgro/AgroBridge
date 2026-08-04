@@ -478,7 +478,7 @@
     "messageSeller": "Verkäufer anschreiben",
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Änderungen sind sofort im Katalog sichtbar. Keine erneute Moderation nötig.",
-    "publishLiveHint": "„Speichern“ behält einen Entwurf. „Veröffentlichen“ aktualisiert die Live-Anzeige sofort."
+    "publishLiveHint": "„Speichern“ und „Veröffentlichen“ aktualisieren die Live-Anzeige sofort (ohne Rücknahme)."
   },
   "rfq": {
     "requestTitle": "Preis anfragen",
@@ -980,7 +980,11 @@
     "save": "Alerts speichern",
     "saved": "Alert-Einstellungen gespeichert.",
     "pleaseWait": "Speichern…",
-    "genericError": "Einstellungen konnten nicht gespeichert werden."
+    "genericError": "Einstellungen konnten nicht gespeichert werden.",
+    "inboxTitle": "Eingegangene Alerts",
+    "inboxHint": "Benachrichtigungen, wenn eine beobachtete Ernte verfügbar wird oder Vorverkauf öffnet.",
+    "inboxEmpty": "Noch keine Ernte-Alerts.",
+    "markRead": "Als gelesen"
   },
   "harvest": {
     "title": "Harvest plan",
