@@ -478,7 +478,7 @@
     "messageSeller": "Message seller",
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Changes are live in the catalog. No new moderation is required.",
-    "publishLiveHint": "Save keeps a draft. Publish updates the live catalog listing immediately."
+    "publishLiveHint": "Save and Publish both update the live catalog listing immediately (without unpublishing)."
   },
   "rfq": {
     "requestTitle": "Request a quote",
@@ -980,7 +980,11 @@
     "save": "Save alerts",
     "saved": "Alert settings saved.",
     "pleaseWait": "Saving…",
-    "genericError": "Could not save alert settings."
+    "genericError": "Could not save alert settings.",
+    "inboxTitle": "Inbox alerts",
+    "inboxHint": "Alerts when a watched harvest becomes available or opens for pre-order.",
+    "inboxEmpty": "No harvest alerts yet.",
+    "markRead": "Mark read"
   },
   "harvest": {
     "title": "Harvest plan",

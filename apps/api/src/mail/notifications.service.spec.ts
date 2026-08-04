@@ -19,6 +19,16 @@ describe('NotificationsService', () => {
           return undefined;
         },
       } as ConfigService,
+      {
+        userNotification: {
+          create: jest.fn().mockResolvedValue({}),
+          findMany: jest.fn().mockResolvedValue([]),
+          findFirst: jest.fn(),
+          update: jest.fn(),
+          updateMany: jest.fn(),
+          count: jest.fn().mockResolvedValue(0),
+        },
+      } as never,
     );
   });
 

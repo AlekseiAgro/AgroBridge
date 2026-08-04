@@ -293,8 +293,9 @@ export function ProductForm({ mode, initial, leading }: Props) {
       forecastQuantity,
       harvestStatus: harvestStatus || null,
       preorderEnabled,
-      // Save keeps a draft; Publish submits the card for admin moderation.
-      isPublished: intent === 'publish',
+      isPublished:
+        intent === 'publish' ||
+        Boolean(initial?.isPublished && initial?.moderationStatus === 'approved'),
     };
 
     try {

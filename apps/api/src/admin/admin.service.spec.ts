@@ -38,6 +38,7 @@ describe('AdminService', () => {
       notifications as never,
       { notifyNewProduct: jest.fn().mockResolvedValue(undefined) } as never,
       { tryCompleteVerification: jest.fn().mockResolvedValue(undefined) } as never,
+      { dispatchHarvestWatchNotifications: jest.fn().mockResolvedValue(undefined) } as never,
     );
   });
 

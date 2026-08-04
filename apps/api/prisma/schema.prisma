@@ -165,9 +165,34 @@ model User {
   alertSubscription            AlertSubscription?
   verificationCodes            VerificationCode[]
   harvestWatches               HarvestWatch[]
+  notifications                UserNotification[]
 
   @@index([blockedAt])
   @@index([createdAt])
+}
+
+enum UserNotificationType {
+  harvestAvailable
+  harvestPreorderOpen
+}
+
+/// In-app cabinet alerts (harvest watches and related events).
+model UserNotification {
+  id        String                @id @default(cuid())
+  userId    String
+  type      UserNotificationType
+  productId String?
+  title     String
+  body      String
+  href      String
+  readAt    DateTime?
+  createdAt DateTime              @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+  @@map("user_notifications")
 }
 
 /// Opt-in alerts for new catalog products and/or purchase requests.

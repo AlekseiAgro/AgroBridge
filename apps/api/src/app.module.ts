@@ -21,6 +21,7 @@ import { TranslationModule } from './translation/translation.module';
 import { PlacesModule } from './places/places.module';
 import { UsersModule } from './users/users.module';
 import { VerificationModule } from './verification/verification.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { VerificationModule } from './verification/verification.module';
     UsersModule,
     CabinetModule,
     SupportModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

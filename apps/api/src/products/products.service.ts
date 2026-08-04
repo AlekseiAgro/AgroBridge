@@ -518,6 +518,8 @@ export class ProductsService {
 
     const previousStatus = product.harvestStatus;
     const previousPreorder = product.preorderEnabled;
+    const wasPublic =
+      product.isPublished && product.moderationStatus === PrismaModerationStatus.approved;
 
     const updated = await this.prisma.product.update({
       where: { id: product.id },
@@ -575,6 +577,7 @@ export class ProductsService {
       previousPreorder,
       nextStatus: updated.harvestStatus,
       nextPreorder: updated.preorderEnabled,
+      wasPublic,
       isPublic: updated.isPublished && updated.moderationStatus === PrismaModerationStatus.approved,
     });
 
@@ -1287,22 +1290,58 @@ export class ProductsService {
     return product;
   }
 
+  /**
+   * Notify harvest watchers after a listing becomes public (e.g. admin approve)
+   * or after harvest fields change on an already-public card.
+   */
+  async dispatchHarvestWatchNotifications(params: {
+    productId: string;
+    previousStatus: PrismaHarvestStatus | null;
+    previousPreorder: boolean;
+    wasPublic: boolean;
+  }): Promise<void> {
+    const product = await this.prisma.product.findUnique({
+      where: { id: params.productId },
+      include: productDetailInclude,
+    });
+    if (!product) return;
+
+    await this.notifyHarvestWatchersIfNeeded({
+      product,
+      previousStatus: params.previousStatus,
+      previousPreorder: params.previousPreorder,
+      nextStatus: product.harvestStatus,
+      nextPreorder: product.preorderEnabled,
+      wasPublic: params.wasPublic,
+      isPublic:
+        product.isPublished && product.moderationStatus === PrismaModerationStatus.approved,
+    });
+  }
+
   private async notifyHarvestWatchersIfNeeded(params: {
     product: ProductWithOwnerAndImages;
     previousStatus: PrismaHarvestStatus | null;
     previousPreorder: boolean;
     nextStatus: PrismaHarvestStatus | null;
     nextPreorder: boolean;
+    wasPublic: boolean;
     isPublic: boolean;
   }) {
     if (!params.isPublic) return;
 
-    const becameAvailable =
-      params.nextStatus !== params.previousStatus &&
-      (params.nextStatus === PrismaHarvestStatus.available ||
-        params.nextStatus === PrismaHarvestStatus.limited);
+    const becamePublic = !params.wasPublic && params.isPublic;
+    const statusIsSellable =
+      params.nextStatus === PrismaHarvestStatus.available ||
+      params.nextStatus === PrismaHarvestStatus.limited;
 
-    const preorderOpened = !params.previousPreorder && params.nextPreorder === true;
+    // Also fire when a card with sellable status / preorder first becomes public
+    // (e.g. save-as-draft then publish, or admin approval), not only on field diffs.
+    const becameAvailable =
+      statusIsSellable &&
+      (params.nextStatus !== params.previousStatus || becamePublic);
+
+    const preorderOpened =
+      params.nextPreorder === true && (!params.previousPreorder || becamePublic);
 
     if (!becameAvailable && !preorderOpened) return;
 
