@@ -598,7 +598,9 @@
         "pending": "Pending",
         "approved": "Verified",
         "rejected": "Rejected",
-        "unverified": "Unverified"
+        "unverified": "Unverified",
+        "all": "Tous",
+        "documents": "Documents en revue"
       },
       "status": {
         "pending": "Pending verification",
@@ -630,7 +632,14 @@
         "farmer": "Vendeur",
         "buyer": "Acheteur",
         "admin": "Admin"
-      }
+      },
+      "filters": {
+        "all": "Tous",
+        "blocked": "Bloqués",
+        "last7": "7 derniers jours",
+        "last30": "30 derniers jours"
+      },
+      "registeredOn": "Inscrits le {date}"
     },
     "requests": {
       "empty": "Aucune demande dans cette file.",
@@ -652,6 +661,11 @@
       "kinds": {
         "rfq": "RFQ produit",
         "purchase_request": "Demande d’achat"
+      },
+      "tabs": {
+        "all": "Tous",
+        "completed": "Terminés",
+        "accepted": "En cours"
       }
     },
     "categories": {

@@ -598,7 +598,9 @@
         "pending": "На проверке",
         "approved": "Verified",
         "rejected": "Отклонены",
-        "unverified": "Не проверены"
+        "unverified": "Не проверены",
+        "all": "Все",
+        "documents": "Документы на проверке"
       },
       "status": {
         "pending": "Ожидает верификации",
@@ -630,7 +632,14 @@
         "farmer": "Продавец",
         "buyer": "Покупатель",
         "admin": "Админ"
-      }
+      },
+      "filters": {
+        "all": "Все",
+        "blocked": "Заблокированные",
+        "last7": "За 7 дней",
+        "last30": "За 30 дней"
+      },
+      "registeredOn": "Регистрации за {date}"
     },
     "requests": {
       "empty": "В этой очереди нет запросов.",
@@ -652,6 +661,11 @@
       "kinds": {
         "rfq": "Запрос по товару",
         "purchase_request": "Запрос на покупку"
+      },
+      "tabs": {
+        "all": "Все",
+        "completed": "Завершённые",
+        "accepted": "В работе"
       }
     },
     "categories": {

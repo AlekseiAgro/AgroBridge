@@ -598,7 +598,9 @@
         "pending": "Pending",
         "approved": "Verified",
         "rejected": "Rejected",
-        "unverified": "Unverified"
+        "unverified": "Unverified",
+        "all": "Todos",
+        "documents": "Documentos en revisión"
       },
       "status": {
         "pending": "Pending verification",
@@ -630,7 +632,14 @@
         "farmer": "Vendedor",
         "buyer": "Comprador",
         "admin": "Admin"
-      }
+      },
+      "filters": {
+        "all": "Todos",
+        "blocked": "Bloqueados",
+        "last7": "Últimos 7 días",
+        "last30": "Últimos 30 días"
+      },
+      "registeredOn": "Registrados el {date}"
     },
     "requests": {
       "empty": "No hay solicitudes en esta cola.",
@@ -652,6 +661,11 @@
       "kinds": {
         "rfq": "RFQ de producto",
         "purchase_request": "Solicitud de compra"
+      },
+      "tabs": {
+        "all": "Todos",
+        "completed": "Completados",
+        "accepted": "En curso"
       }
     },
     "categories": {
