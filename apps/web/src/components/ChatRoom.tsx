@@ -1,24 +1,67 @@
 'use client';
 
-import type { ChatMessageView, ConversationDetail } from '@agrobridge/shared';
+import type {
+  ChatMessageView,
+  ChatParticipant,
+  ConversationDetail,
+  MessageDeliveryStatus,
+} from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
+import { ChatAvatar } from '@/components/ChatAvatar';
 import { requestChatUnreadRefresh } from '@/components/ChatNavLink';
+
+type Viewer = {
+  id: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+};
 
 type Props = {
   conversationId: string;
   initial: ConversationDetail;
+  viewer: Viewer;
+  peer: ChatParticipant;
 };
 
-export function ChatRoom({ conversationId, initial }: Props) {
+function DeliveryTicks({ status }: { status: MessageDeliveryStatus }) {
+  const t = useTranslations('chat');
+  const label = t(`delivery.${status}`);
+  const marks = status === 'sent' ? '✓' : '✓✓';
+  return (
+    <span
+      className={
+        status === 'read'
+          ? 'chat-delivery chat-delivery--read'
+          : 'chat-delivery'
+      }
+      title={label}
+      aria-label={label}
+    >
+      {marks}
+    </span>
+  );
+}
+
+export function ChatRoom({ conversationId, initial, viewer, peer }: Props) {
   const t = useTranslations('chat');
   const locale = useLocale();
   const [messages, setMessages] = useState<ChatMessageView[]>(initial.messages);
-  const [peerName] = useState(initial.peer.displayName || initial.peer.role);
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [showOriginalIds, setShowOriginalIds] = useState<Record<string, boolean>>({});
+  const threadRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setMessages(initial.messages);
+  }, [initial]);
+
+  useEffect(() => {
+    const node = threadRef.current;
+    if (!node) return;
+    node.scrollTop = node.scrollHeight;
+  }, [messages]);
 
   useEffect(() => {
     requestChatUnreadRefresh();
@@ -95,11 +138,7 @@ export function ChatRoom({ conversationId, initial }: Props) {
 
   return (
     <div className="chat-room">
-      <p className="page__subtitle">
-        {t('chattingWith', { name: peerName })} · {t('aiHint')}
-      </p>
-
-      <div className="chat-thread">
+      <div className="chat-thread" ref={threadRef}>
         {messages.length === 0 ? <p className="empty-state">{t('emptyThread')}</p> : null}
         {messages.map((message) => {
           const showOriginal = !!showOriginalIds[message.id];
@@ -108,33 +147,60 @@ export function ChatRoom({ conversationId, initial }: Props) {
             (!message.isMine &&
               message.sourceText !== message.displayText &&
               Boolean(message.displayText));
+          const authorName = message.isMine
+            ? viewer.displayName || t('you')
+            : peer.displayName || peer.role;
+          const authorAvatar = message.isMine ? viewer.avatarUrl : peer.avatarUrl;
+          const timeLabel = new Date(message.createdAt).toLocaleString();
+
           return (
             <article
               key={message.id}
-              className={`chat-bubble ${message.isMine ? 'chat-bubble--mine' : 'chat-bubble--peer'}`}
+              className={
+                message.isMine ? 'chat-row chat-row--mine' : 'chat-row chat-row--peer'
+              }
             >
-              <p className="chat-bubble__text">
-                {showOriginal ? message.sourceText : message.displayText}
-              </p>
-              <div className="chat-bubble__meta">
-                <span>{new Date(message.createdAt).toLocaleString()}</span>
-                {!message.isMine && message.translationStatus !== 'none' ? (
-                  <span>· {t(`translation.${message.translationStatus}`)}</span>
-                ) : null}
-              </div>
-              {canToggleOriginal ? (
-                <button
-                  type="button"
-                  className="chat-bubble__toggle"
-                  onClick={() =>
-                    setShowOriginalIds((current) => ({
-                      ...current,
-                      [message.id]: !current[message.id],
-                    }))
+              {!message.isMine ? (
+                <ChatAvatar name={authorName} avatarUrl={authorAvatar} />
+              ) : null}
+              <div className="chat-row__stack">
+                <div
+                  className={
+                    message.isMine
+                      ? 'chat-bubble chat-bubble--mine'
+                      : 'chat-bubble chat-bubble--peer'
                   }
                 >
-                  {showOriginal ? t('showTranslation') : t('showOriginal')}
-                </button>
+                  <p className="chat-bubble__text">
+                    {showOriginal ? message.sourceText : message.displayText}
+                  </p>
+                </div>
+                <div className="chat-row__meta">
+                  <span>{timeLabel}</span>
+                  {!message.isMine && message.translationStatus !== 'none' ? (
+                    <span>· {t(`translation.${message.translationStatus}`)}</span>
+                  ) : null}
+                  {message.isMine && message.deliveryStatus ? (
+                    <DeliveryTicks status={message.deliveryStatus} />
+                  ) : null}
+                </div>
+                {canToggleOriginal ? (
+                  <button
+                    type="button"
+                    className="chat-bubble__toggle"
+                    onClick={() =>
+                      setShowOriginalIds((current) => ({
+                        ...current,
+                        [message.id]: !current[message.id],
+                      }))
+                    }
+                  >
+                    {showOriginal ? t('showTranslation') : t('showOriginal')}
+                  </button>
+                ) : null}
+              </div>
+              {message.isMine ? (
+                <ChatAvatar name={authorName} avatarUrl={authorAvatar} />
               ) : null}
             </article>
           );
@@ -142,10 +208,10 @@ export function ChatRoom({ conversationId, initial }: Props) {
       </div>
 
       <form className="chat-composer" onSubmit={onSubmit}>
-        <label className="field">
+        <label className="field chat-composer__field">
           <span className="sr-only">{t('message')}</span>
           <textarea
-            rows={3}
+            rows={2}
             value={text}
             onChange={(event) => setText(event.target.value)}
             placeholder={t('messagePlaceholder')}

@@ -1,8 +1,8 @@
-import type { ConversationDetail } from '@agrobridge/shared';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import type { ConversationDetail, ConversationSummary } from '@agrobridge/shared';
+import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { ChatRoom } from '@/components/ChatRoom';
-import { Link, redirect } from '@/i18n/navigation';
+import { ChatWorkspace } from '@/components/ChatWorkspace';
+import { redirect } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
@@ -16,9 +16,10 @@ export default async function ChatDetailPage({ params }: Props) {
   setRequestLocale(locale);
 
   const user = await getCurrentUser();
-  if (!user) redirect({ href: '/login', locale });
-
-  const t = await getTranslations('chat');
+  if (!user) {
+    redirect({ href: '/login', locale });
+    return null;
+  }
 
   let conversation: ConversationDetail;
   try {
@@ -32,17 +33,19 @@ export default async function ChatDetailPage({ params }: Props) {
     throw error;
   }
 
+  const items = await apiRequestAuthed<ConversationSummary[]>('/conversations');
+
   return (
-    <main className="cabinet-page cabinet-page--narrow">
-        <p className="eyebrow">
-          <Link href="/dashboard/chat">{t('listTitle')}</Link>
-        </p>
-        <h1>
-          <Link href={`/users/${conversation.peer.id}`} className="profile-link">
-            {conversation.peer.displayName || t('conversation')}
-          </Link>
-        </h1>
-        <ChatRoom conversationId={conversation.id} initial={conversation} />
+    <main className="cabinet-page cabinet-page--chat">
+      <ChatWorkspace
+        conversations={items}
+        active={conversation}
+        viewer={{
+          id: user.id,
+          displayName: user.displayName,
+          avatarUrl: user.avatarUrl,
+        }}
+      />
     </main>
   );
 }

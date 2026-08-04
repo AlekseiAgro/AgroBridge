@@ -4,11 +4,16 @@ export const TRANSLATION_STATUSES = ['pending', 'completed', 'failed', 'none'] a
 
 export type TranslationStatus = (typeof TRANSLATION_STATUSES)[number];
 
+export const MESSAGE_DELIVERY_STATUSES = ['sent', 'delivered', 'read'] as const;
+
+export type MessageDeliveryStatus = (typeof MESSAGE_DELIVERY_STATUSES)[number];
+
 export type ChatParticipant = {
   id: string;
   displayName: string | null;
   role: 'farmer' | 'buyer' | 'admin';
   locale: Locale;
+  avatarUrl: string | null;
 };
 
 export type ChatMessageView = {
@@ -24,6 +29,8 @@ export type ChatMessageView = {
   isMine: boolean;
   /** True when the viewer can toggle between translation and original. */
   canShowOriginal: boolean;
+  /** Delivery/read state for the viewer's own messages; null for peer messages. */
+  deliveryStatus: MessageDeliveryStatus | null;
 };
 
 export type ConversationSummary = {

@@ -539,7 +539,15 @@
       "failed": "Translation failed",
       "none": "Original"
     },
-    "unreadCount": "{count} unread"
+    "unreadCount": "{count} unread",
+    "selectConversation": "Select a conversation to start messaging.",
+    "backToList": "All chats",
+    "you": "You",
+    "delivery": {
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read"
+    }
   },
   "admin": {
     "title": "Admin panel",
