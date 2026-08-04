@@ -515,7 +515,9 @@
       "decline": "Refuser",
       "cancel": "Annuler la demande",
       "complete": "Marquer le deal comme terminé"
-    }
+    },
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer vraiment cette demande ? Cette action est irréversible."
   },
   "chat": {
     "listTitle": "Messages",

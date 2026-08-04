@@ -515,7 +515,9 @@
       "decline": "Decline",
       "cancel": "Cancel request",
       "complete": "Mark deal completed"
-    }
+    },
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this request? This cannot be undone."
   },
   "chat": {
     "listTitle": "Messages",

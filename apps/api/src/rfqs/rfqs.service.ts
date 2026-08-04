@@ -294,6 +294,19 @@ export class RfqsService {
     return this.getById(user, id);
   }
 
+  /** Seller permanently removes a buyer-cancelled request from the inbox. */
+  async removeFromInbox(user: AuthenticatedUser, id: string): Promise<{ ok: true }> {
+    this.assertFarmer(user);
+    const rfq = await this.requireSellerOwnedRfq(user, id);
+
+    if (rfq.status !== PrismaRfqStatus.cancelled) {
+      throw new BadRequestException('Only cancelled requests can be deleted from the inbox');
+    }
+
+    await this.prisma.rfq.delete({ where: { id: rfq.id } });
+    return { ok: true };
+  }
+
   async complete(user: AuthenticatedUser, id: string): Promise<RfqSummary> {
     const rfq = await this.requireAccessibleRfq(user, id);
     const isBuyer = rfq.buyerId === user.id;

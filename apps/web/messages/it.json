@@ -485,7 +485,7 @@
     "message": "Messaggio",
     "messagePlaceholder": "Tempi di consegna, qualità, imballaggio…",
     "submitRequest": "Invia richiesta",
-    "pleaseWait": "Attendere…",
+    "pleaseWait": "Attendi…",
     "genericError": "Qualcosa è andato storto. Riprova.",
     "loginToRequest": "Accedi come acquirente per richiedere un preventivo",
     "mineTitle": "Le mie richieste",
@@ -515,7 +515,9 @@
       "decline": "Rifiuta",
       "cancel": "Annulla richiesta",
       "complete": "Segna trattativa completata"
-    }
+    },
+    "delete": "Elimina",
+    "deleteConfirm": "Eliminare davvero questa richiesta? L'azione non si può annullare."
   },
   "chat": {
     "listTitle": "Messaggi",

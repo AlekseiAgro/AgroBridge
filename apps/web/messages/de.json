@@ -515,7 +515,9 @@
       "decline": "Ablehnen",
       "cancel": "Anfrage stornieren",
       "complete": "Deal als abgeschlossen markieren"
-    }
+    },
+    "delete": "Löschen",
+    "deleteConfirm": "Diese Anfrage wirklich löschen? Das kann nicht rückgängig gemacht werden."
   },
   "chat": {
     "listTitle": "Nachrichten",
