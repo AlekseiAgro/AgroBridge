@@ -115,7 +115,11 @@ export default async function AccountPage({ params }: Props) {
         </div>
         <div className="user-card__rating">
           <p className="user-card__rating-label">{t('rating')}</p>
-          <RatingStars value={user.rating.average} count={user.rating.count} />
+          <RatingStars
+            value={user.rating.average}
+            count={user.rating.count}
+            reviewsHref={`/users/${user.id}/reviews`}
+          />
           <p className="user-card__rating-hint">{t('ratingHint')}</p>
         </div>
       </section>

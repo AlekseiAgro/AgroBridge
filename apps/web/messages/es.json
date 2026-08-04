@@ -933,7 +933,13 @@
     "viewPublicProfile": "Ver perfil público",
     "backToCabinet": "Volver al panel",
     "buyer": "Comprador",
-    "seller": "Vendedor"
+    "seller": "Vendedor",
+    "reviewsTitle": "Reseñas de {name}",
+    "reviewsSubtitle": "Valoraciones de tratos completados en AgroBridge.",
+    "reviewsEmpty": "Aún no hay reseñas.",
+    "reviewsNoComment": "Sin comentario escrito.",
+    "backToProfile": "Volver al perfil",
+    "viewReviews": "Ver reseñas"
   },
   "subscriptions": {
     "title": "Suscripciones de alertas",

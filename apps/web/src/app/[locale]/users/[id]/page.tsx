@@ -71,7 +71,11 @@ export default async function PublicUserProfilePage({ params }: Props) {
           </div>
           <div className="user-card__rating">
             <p className="user-card__rating-label">{t('rating')}</p>
-            <RatingStars value={profile.rating.average} count={profile.rating.count} />
+            <RatingStars
+              value={profile.rating.average}
+              count={profile.rating.count}
+              reviewsHref={`/users/${profile.id}/reviews`}
+            />
             <p className="user-card__rating-hint">{t('ratingHint')}</p>
           </div>
         </section>
@@ -92,8 +96,17 @@ export default async function PublicUserProfilePage({ params }: Props) {
               <span>{t('ratingAverage')}</span>
             </li>
             <li>
-              <strong>{profile.rating.count}</strong>
-              <span>{t('ratingCount')}</span>
+              {profile.rating.count > 0 ? (
+                <Link href={`/users/${profile.id}/reviews`} className="activity-summary__link">
+                  <strong>{profile.rating.count}</strong>
+                  <span>{t('ratingCount')}</span>
+                </Link>
+              ) : (
+                <>
+                  <strong>{profile.rating.count}</strong>
+                  <span>{t('ratingCount')}</span>
+                </>
+              )}
             </li>
           </ul>
         </section>

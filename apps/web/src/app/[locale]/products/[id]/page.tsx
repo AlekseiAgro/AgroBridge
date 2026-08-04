@@ -102,6 +102,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 value={product.sellerRating?.average ?? null}
                 count={product.sellerRating?.count ?? 0}
                 size="sm"
+                reviewsHref={`/users/${product.owner.id}/reviews`}
               />
             </div>
             <div className="product-insight-row">

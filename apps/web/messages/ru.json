@@ -933,7 +933,13 @@
     "viewPublicProfile": "Открыть публичный профиль",
     "backToCabinet": "В личный кабинет",
     "buyer": "Покупатель",
-    "seller": "Продавец"
+    "seller": "Продавец",
+    "reviewsTitle": "Отзывы о пользователе {name}",
+    "reviewsSubtitle": "Оценки по завершённым сделкам на AgroBridge.",
+    "reviewsEmpty": "Отзывов пока нет.",
+    "reviewsNoComment": "Без текстового комментария.",
+    "backToProfile": "К профилю",
+    "viewReviews": "Смотреть отзывы"
   },
   "subscriptions": {
     "title": "Подписки на уведомления",

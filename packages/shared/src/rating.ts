@@ -16,6 +16,22 @@ export type RatingView = {
   createdAt: string;
 };
 
+/** Public review left for a user after a completed deal. */
+export type PublicRatingReview = {
+  id: string;
+  score: number;
+  comment: string | null;
+  createdAt: string;
+  fromUser: {
+    id: string;
+    displayName: string | null;
+  };
+};
+
+export type PublicRatingReviews = {
+  items: PublicRatingReview[];
+};
+
 export type CreateRatingInput = {
   rfqId: string;
   score: number;

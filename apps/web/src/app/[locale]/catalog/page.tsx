@@ -134,6 +134,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                         value={rating?.average ?? null}
                         count={rating?.count ?? 0}
                         size="sm"
+                        reviewsHref={`/users/${product.owner.id}/reviews`}
                       />
                     </div>
                     {quantity ? (

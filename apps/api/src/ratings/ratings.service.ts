@@ -5,7 +5,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { RatingSummary, RatingView } from '@agrobridge/shared';
+import type {
+  PublicRatingReview,
+  PublicRatingReviews,
+  RatingSummary,
+  RatingView,
+} from '@agrobridge/shared';
 import { RfqStatus as PrismaRfqStatus } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../prisma/prisma.service';
@@ -67,6 +72,37 @@ export class RatingsService {
     return map.get(userId) ?? { average: null, count: 0 };
   }
 
+  async listForUser(userId: string): Promise<PublicRatingReviews> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const ratings = await this.prisma.rating.findMany({
+      where: { toUserId: userId },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        score: true,
+        comment: true,
+        createdAt: true,
+        fromUser: {
+          select: {
+            id: true,
+            displayName: true,
+          },
+        },
+      },
+    });
+
+    return {
+      items: ratings.map((rating) => this.toPublicReview(rating)),
+    };
+  }
+
   async summariesForUsers(userIds: string[]): Promise<Map<string, RatingSummary>> {
     const uniqueIds = [...new Set(userIds.filter(Boolean))];
     const result = new Map<string, RatingSummary>();
@@ -94,6 +130,25 @@ export class RatingsService {
     }
 
     return result;
+  }
+
+  private toPublicReview(rating: {
+    id: string;
+    score: number;
+    comment: string | null;
+    createdAt: Date;
+    fromUser: { id: string; displayName: string | null };
+  }): PublicRatingReview {
+    return {
+      id: rating.id,
+      score: rating.score,
+      comment: rating.comment,
+      createdAt: rating.createdAt.toISOString(),
+      fromUser: {
+        id: rating.fromUser.id,
+        displayName: rating.fromUser.displayName,
+      },
+    };
   }
 
   private toView(rating: {
