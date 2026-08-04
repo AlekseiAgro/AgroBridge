@@ -476,7 +476,9 @@
     "loadError": "Impossibile caricare i tuoi prodotti.",
     "sellerFallback": "Venditore",
     "messageSeller": "Scrivi al venditore",
-    "packagingWeightQuick": "{value} kg"
+    "packagingWeightQuick": "{value} kg",
+    "publishedLiveHint": "Le modifiche sono subito visibili nel catalogo. Non serve una nuova moderazione.",
+    "publishLiveHint": "«Salva» lascia una bozza. «Pubblica» aggiorna subito l’annuncio nel catalogo."
   },
   "rfq": {
     "requestTitle": "Richiedi un preventivo",

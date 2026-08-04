@@ -319,7 +319,14 @@ export function ProductForm({ mode, initial, leading }: Props) {
       if (mode === 'create' && data.id) {
         router.replace(`/dashboard/products/${data.id}/edit`);
       } else {
-        setSuccess(intent === 'publish' ? t('publishedPendingHint') : t('savedDraftHint'));
+        const wasApproved = initial?.moderationStatus === 'approved' && initial?.isPublished;
+        setSuccess(
+          intent === 'publish'
+            ? wasApproved
+              ? t('publishedLiveHint')
+              : t('publishedPendingHint')
+            : t('savedDraftHint'),
+        );
         router.refresh();
       }
     } catch {
@@ -779,7 +786,11 @@ export function ProductForm({ mode, initial, leading }: Props) {
           {pending && lastIntent === 'publish' ? t('pleaseWait') : t('publish')}
         </button>
       </div>
-      <p className="field-hint">{t('publishHint')}</p>
+      <p className="field-hint">
+        {initial?.moderationStatus === 'approved' && initial?.isPublished
+          ? t('publishLiveHint')
+          : t('publishHint')}
+      </p>
       </form>
     </div>
   );
