@@ -3019,10 +3019,8 @@ body {
     width: 100%;
     flex-direction: row;
     flex-wrap: wrap;
-    margin-top: 0.15rem;
-    padding: 0.85rem 0 0;
-    border-left: 0;
-    border-top: 1px solid var(--line);
+    margin-top: 0.35rem;
+    padding: 0;
   }
 
   .product-detail-header__actions > div {
