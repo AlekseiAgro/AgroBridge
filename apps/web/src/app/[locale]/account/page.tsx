@@ -1,6 +1,7 @@
 import type { CabinetOverview } from '@agrobridge/shared';
 import { canTrade } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { ChatUnreadBadge } from '@/components/ChatNavLink';
 import { CabinetShell } from '@/components/CabinetShell';
 import { DeleteAccountButton } from '@/components/DeleteAccountButton';
 import { EditProfileControl } from '@/components/EditProfileControl';
@@ -31,7 +32,13 @@ export default async function AccountPage({ params }: Props) {
   const memberSince = formatMemberSinceMonthYear(user.memberSince, locale);
   const dealsBase = user.role === 'farmer' ? '/dashboard/inbox' : '/dashboard/rfqs';
 
-  const cards: Array<{ key: string; value: number; label: string; href: string }> = [
+  const cards: Array<{
+    key: string;
+    value: number;
+    label: string;
+    href: string;
+    unreadBadge?: number;
+  }> = [
     {
       key: 'completedDeals',
       value: activity.completedDeals,
@@ -49,6 +56,7 @@ export default async function AccountPage({ params }: Props) {
       value: activity.conversations,
       label: t('stats.conversations'),
       href: '/dashboard/chat',
+      unreadBadge: activity.unreadMessages,
     },
   ];
 
@@ -118,7 +126,12 @@ export default async function AccountPage({ params }: Props) {
           {cards.map((card) => (
             <li key={card.key}>
               <Link href={card.href} className="activity-summary__link">
-                <strong>{card.value}</strong>
+                <strong>
+                  {card.value}
+                  {card.unreadBadge ? (
+                    <ChatUnreadBadge count={card.unreadBadge} className="activity-summary__unread" />
+                  ) : null}
+                </strong>
                 <span>{card.label}</span>
               </Link>
             </li>

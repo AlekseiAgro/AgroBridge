@@ -1,4 +1,5 @@
 import { Link } from '@/i18n/navigation';
+import { ChatNavLink } from '@/components/ChatNavLink';
 
 export type RoleHubPath = {
   href: string;
@@ -16,9 +17,18 @@ type Props = {
   paths: [RoleHubPath, RoleHubPath];
   asideNote?: string;
   asideLinks?: Array<{ href: string; label: string }>;
+  chatUnreadCount?: number;
 };
 
-export function RoleHub({ eyebrow, title, lead, paths, asideNote, asideLinks }: Props) {
+export function RoleHub({
+  eyebrow,
+  title,
+  lead,
+  paths,
+  asideNote,
+  asideLinks,
+  chatUnreadCount = 0,
+}: Props) {
   return (
     <section className="role-hub">
       <header className="role-hub__intro">
@@ -53,11 +63,20 @@ export function RoleHub({ eyebrow, title, lead, paths, asideNote, asideLinks }: 
           {asideNote ? <p className="role-hub__aside-note">{asideNote}</p> : null}
           {asideLinks && asideLinks.length > 0 ? (
             <div className="role-hub__aside-links">
-              {asideLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="button button--ghost">
-                  {link.label}
-                </Link>
-              ))}
+              {asideLinks.map((link) =>
+                link.href === '/dashboard/chat' ? (
+                  <ChatNavLink
+                    key={link.href}
+                    className="button button--ghost"
+                    label={link.label}
+                    initialCount={chatUnreadCount}
+                  />
+                ) : (
+                  <Link key={link.href} href={link.href} className="button button--ghost">
+                    {link.label}
+                  </Link>
+                ),
+              )}
             </div>
           ) : null}
         </footer>

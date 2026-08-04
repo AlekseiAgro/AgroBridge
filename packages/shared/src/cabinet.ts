@@ -20,6 +20,7 @@ export type CabinetActivitySummary = {
   completedDeals: number;
   openRequests: number;
   conversations: number;
+  unreadMessages: number;
   publishedProducts: number;
   pendingModeration: number;
   awaitingMyRating: number;
