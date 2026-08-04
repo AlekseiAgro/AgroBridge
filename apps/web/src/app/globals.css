@@ -1319,6 +1319,57 @@ body {
   background: var(--surface);
 }
 
+.product-list__item--cancelled {
+  background: linear-gradient(180deg, rgba(120, 90, 70, 0.08), rgba(120, 90, 70, 0.14));
+  border-color: rgba(120, 90, 70, 0.28);
+}
+
+.product-list__item--cancelled .product-list__title {
+  color: #5c4a3d;
+}
+
+.product-list__item--cancelled .product-list__meta {
+  color: #7a6555;
+}
+
+.product-list__item-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.rfq-delete-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  padding: 0;
+  border: 1px solid rgba(120, 90, 70, 0.28);
+  border-radius: 0.7rem;
+  background: rgba(255, 255, 255, 0.72);
+  color: #8a4b3a;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+.rfq-delete-button:hover:not(:disabled) {
+  background: rgba(196, 78, 54, 0.12);
+  border-color: rgba(196, 78, 54, 0.4);
+  color: #a33b28;
+}
+
+.rfq-delete-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.rfq-delete-button__icon {
+  display: block;
+}
+
 .product-list__item--with-media {
   display: grid;
   grid-template-columns: 7.5rem minmax(0, 1fr);

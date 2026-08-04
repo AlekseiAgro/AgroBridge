@@ -515,7 +515,9 @@
       "decline": "Rechazar",
       "cancel": "Cancelar solicitud",
       "complete": "Marcar operación completada"
-    }
+    },
+    "delete": "Eliminar",
+    "deleteConfirm": "¿Seguro que quieres eliminar esta solicitud? No se puede deshacer."
   },
   "chat": {
     "listTitle": "Mensajes",

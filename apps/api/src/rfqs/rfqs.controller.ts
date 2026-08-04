@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -42,6 +42,12 @@ export class RfqsController {
   @Roles('buyer', 'farmer', 'admin')
   getById(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.rfqsService.getById(user, id);
+  }
+
+  @Delete(':id')
+  @Roles('farmer', 'buyer', 'admin')
+  removeFromInbox(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.rfqsService.removeFromInbox(user, id);
   }
 
   @Post(':id/offer')

@@ -29,7 +29,12 @@ export default async function FarmerInboxPage({ params, searchParams }: Props) {
     <main className="cabinet-page">
         <h1>{t('inboxTitle')}</h1>
         <p className="page__subtitle">{t('inboxSubtitle')}</p>
-        <RfqList items={items} emptyLabel={t('inboxEmpty')} detailBasePath="/dashboard/inbox" />
+        <RfqList
+          items={items}
+          emptyLabel={t('inboxEmpty')}
+          detailBasePath="/dashboard/inbox"
+          allowDeleteCancelled
+        />
     </main>
   );
 }

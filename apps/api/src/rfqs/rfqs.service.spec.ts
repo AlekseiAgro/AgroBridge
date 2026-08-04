@@ -11,6 +11,7 @@ describe('RfqsService', () => {
       findUnique: jest.fn(),
       update: jest.fn(),
       count: jest.fn(),
+      delete: jest.fn(),
     },
     rfqOffer: { create: jest.fn() },
   };
@@ -129,5 +130,82 @@ describe('RfqsService', () => {
         status: 'pending',
       },
     });
+  });
+
+  it('deletes cancelled inbox RFQs for the seller', async () => {
+    prisma.rfq.findUnique.mockResolvedValue({
+      id: 'rfq1',
+      buyerId: buyer.id,
+      status: 'cancelled',
+      product: {
+        id: 'p1',
+        title: 'Hazelnuts',
+        ownerUserId: farmer.id,
+        owner: {
+          id: farmer.id,
+          email: farmer.email,
+          locale: farmer.locale,
+          displayName: farmer.displayName,
+        },
+      },
+      farm: null,
+      buyer: {
+        id: buyer.id,
+        displayName: 'Buyer',
+        email: buyer.email,
+        locale: buyer.locale,
+      },
+      offer: null,
+      ratings: [],
+      quantity: '100',
+      unit: 'kg',
+      message: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      completedAt: null,
+    });
+    prisma.rfq.delete.mockResolvedValue({});
+
+    await expect(service.removeFromInbox(farmer, 'rfq1')).resolves.toEqual({ ok: true });
+    expect(prisma.rfq.delete).toHaveBeenCalledWith({ where: { id: 'rfq1' } });
+  });
+
+  it('rejects deleting non-cancelled inbox RFQs', async () => {
+    prisma.rfq.findUnique.mockResolvedValue({
+      id: 'rfq1',
+      buyerId: buyer.id,
+      status: 'pending',
+      product: {
+        id: 'p1',
+        title: 'Hazelnuts',
+        ownerUserId: farmer.id,
+        owner: {
+          id: farmer.id,
+          email: farmer.email,
+          locale: farmer.locale,
+          displayName: farmer.displayName,
+        },
+      },
+      farm: null,
+      buyer: {
+        id: buyer.id,
+        displayName: 'Buyer',
+        email: buyer.email,
+        locale: buyer.locale,
+      },
+      offer: null,
+      ratings: [],
+      quantity: '100',
+      unit: 'kg',
+      message: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      completedAt: null,
+    });
+
+    await expect(service.removeFromInbox(farmer, 'rfq1')).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(prisma.rfq.delete).not.toHaveBeenCalled();
   });
 });
