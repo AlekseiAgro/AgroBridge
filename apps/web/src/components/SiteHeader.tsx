@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { ChatNavLink } from '@/components/ChatNavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { LocaleSync } from '@/components/LocaleSync';
 import { Link } from '@/i18n/navigation';
 import { getUnreadMessagesCount } from '@/lib/chat-unread';
 import { getCurrentUser } from '@/lib/session';
@@ -15,7 +16,9 @@ export async function SiteHeader({ tone = 'default' }: Props) {
   const unreadCount = user ? await getUnreadMessagesCount() : 0;
 
   return (
-    <header className={tone === 'light' ? 'site-header site-header--light' : 'site-header'}>
+    <>
+      {user ? <LocaleSync profileLocale={user.locale} /> : null}
+      <header className={tone === 'light' ? 'site-header site-header--light' : 'site-header'}>
       <Link href="/" className="auth-brand">
         AgroBridge
       </Link>
@@ -40,5 +43,6 @@ export async function SiteHeader({ tone = 'default' }: Props) {
         <LanguageSwitcher />
       </nav>
     </header>
+    </>
   );
 }

@@ -25,6 +25,7 @@ import {
   ConfirmAccountDeletionDto,
   RequestAccountDeletionDto,
 } from './dto/delete-account.dto';
+import { UpdateLocaleDto } from './dto/update-locale.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Controller('cabinet')
@@ -40,6 +41,11 @@ export class CabinetController {
   @Patch('me/profile')
   updateProfile(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateProfileDto) {
     return this.cabinetService.updateProfile(user, dto.displayName);
+  }
+
+  @Patch('me/locale')
+  updateLocale(@CurrentUser() user: AuthenticatedUser, @Body() dto: UpdateLocaleDto) {
+    return this.cabinetService.updateLocale(user, dto.locale);
   }
 
   @Post('me/email/request')
