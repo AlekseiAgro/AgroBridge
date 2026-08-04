@@ -415,6 +415,7 @@ export default async function ProductDetailPage({ params }: Props) {
             productId={product.id}
             initialWatching={Boolean(product.watching)}
             isLoggedIn={Boolean(user)}
+            isOwner={Boolean(product.isOwner)}
           />
         </section>
 

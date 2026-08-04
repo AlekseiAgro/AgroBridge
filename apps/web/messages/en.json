@@ -1006,7 +1006,8 @@
       "10": "Oct",
       "11": "Nov",
       "12": "Dec"
-    }
+    },
+    "ownerWatchHint": "You own this listing, so harvest alerts are not needed here."
   },
   "quality": {
     "title": "Product card quality",

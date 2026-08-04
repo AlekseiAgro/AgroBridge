@@ -1006,7 +1006,8 @@
       "10": "Oct",
       "11": "Nov",
       "12": "Dec"
-    }
+    },
+    "ownerWatchHint": "Este es tu anuncio, no necesitas alertas de cosecha aquí."
   },
   "quality": {
     "title": "Calidad de la ficha del producto",
