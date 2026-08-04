@@ -103,7 +103,6 @@ export class ChatService {
       where: {
         OR: [{ farmerId: user.id }, { buyerId: user.id }],
       },
-      orderBy: { updatedAt: 'desc' },
       include: {
         farmer: { select: participantSelect },
         buyer: { select: participantSelect },
@@ -124,7 +123,15 @@ export class ChatService {
 
     const unreadById = await this.unreadCountsByConversation(user.id, conversations);
 
-    return conversations.map((conversation) => {
+    // Sort by last message time (newest dialogues first). Do not use conversation.updatedAt —
+    // read/delivery cursor updates would reshuffle the list when opening a chat.
+    const sorted = [...conversations].sort((left, right) => {
+      const leftTime = left.messages[0]?.createdAt?.getTime() ?? left.createdAt.getTime();
+      const rightTime = right.messages[0]?.createdAt?.getTime() ?? right.createdAt.getTime();
+      return rightTime - leftTime;
+    });
+
+    return sorted.map((conversation) => {
       const peer = conversation.farmerId === user.id ? conversation.buyer : conversation.farmer;
       const peerCursors = this.peerDeliveryCursors(conversation, user.id);
       const last = conversation.messages[0]

@@ -75,6 +75,78 @@ describe('ChatService', () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
+  it('listMine sorts by last message time, newest first', async () => {
+    prisma.conversation.findMany.mockResolvedValue([
+      {
+        id: 'old',
+        farmerId: farmer.id,
+        buyerId: buyer.id,
+        farmerLastReadAt: null,
+        buyerLastReadAt: null,
+        farmerLastDeliveredAt: null,
+        buyerLastDeliveredAt: null,
+        createdAt: new Date('2026-01-01'),
+        updatedAt: new Date('2026-08-04T12:00:00Z'), // recently touched by read cursor
+        farmer: { id: farmer.id, displayName: 'Farmer', role: 'farmer', locale: 'ru', avatarUrl: null },
+        buyer: { id: buyer.id, displayName: 'Buyer', role: 'buyer', locale: 'en', avatarUrl: null },
+        messages: [
+          {
+            id: 'm-old',
+            conversationId: 'old',
+            senderId: buyer.id,
+            sourceLocale: 'en',
+            sourceText: 'old',
+            createdAt: new Date('2026-01-02'),
+            translations: [],
+          },
+        ],
+      },
+      {
+        id: 'new',
+        farmerId: farmer.id,
+        buyerId: 'buyer2',
+        farmerLastReadAt: null,
+        buyerLastReadAt: null,
+        farmerLastDeliveredAt: null,
+        buyerLastDeliveredAt: null,
+        createdAt: new Date('2026-01-01'),
+        updatedAt: new Date('2026-01-03'),
+        farmer: { id: farmer.id, displayName: 'Farmer', role: 'farmer', locale: 'ru', avatarUrl: null },
+        buyer: { id: 'buyer2', displayName: 'Gabriel', role: 'buyer', locale: 'en', avatarUrl: null },
+        messages: [
+          {
+            id: 'm-new',
+            conversationId: 'new',
+            senderId: farmer.id,
+            sourceLocale: 'ru',
+            sourceText: 'new',
+            createdAt: new Date('2026-08-04T11:00:00Z'),
+            translations: [],
+          },
+        ],
+      },
+      {
+        id: 'empty',
+        farmerId: farmer.id,
+        buyerId: 'buyer3',
+        farmerLastReadAt: null,
+        buyerLastReadAt: null,
+        farmerLastDeliveredAt: null,
+        buyerLastDeliveredAt: null,
+        createdAt: new Date('2026-02-01'),
+        updatedAt: new Date('2026-08-04T13:00:00Z'),
+        farmer: { id: farmer.id, displayName: 'Farmer', role: 'farmer', locale: 'ru', avatarUrl: null },
+        buyer: { id: 'buyer3', displayName: 'Sophie', role: 'buyer', locale: 'en', avatarUrl: null },
+        messages: [],
+      },
+    ]);
+    prisma.message.findMany.mockResolvedValue([]);
+
+    const items = await service.listMine(farmer);
+
+    expect(items.map((item) => item.id)).toEqual(['new', 'empty', 'old']);
+  });
+
   it('passes opener locale into createOrGet → getById', async () => {
     prisma.user.findUnique.mockResolvedValue({
       id: farmer.id,
