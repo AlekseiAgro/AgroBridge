@@ -10,14 +10,12 @@ import type {
   ConversationSummary,
   Locale,
   MessageDeliveryStatus,
-  TranslationStatus,
   UnreadMessagesCount,
 } from '@agrobridge/shared';
 import { canTrade, detectMessageLocale, isLocale } from '@agrobridge/shared';
 import { LocaleCode, Prisma, UserRole } from '@prisma/client';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { TranslationService } from '../translation/translation.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -25,8 +23,6 @@ import { SendMessageDto } from './dto/send-message.dto';
 /** Skip email if the peer opened the chat within this window (likely online). */
 const CHAT_EMAIL_ACTIVE_WINDOW_MS = 2 * 60 * 1000;
 const CHAT_EMAIL_PREVIEW_MAX = 180;
-/** Translate at most this many missing messages per conversation load (newest first). */
-const TRANSLATION_BACKFILL_LIMIT = 24;
 
 const participantSelect = {
   id: true,
@@ -77,7 +73,6 @@ type PeerDeliveryCursors = {
 export class ChatService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly translationService: TranslationService,
     private readonly notifications: NotificationsService,
   ) {}
 
@@ -178,14 +173,11 @@ export class ChatService {
     const conversation = await this.requireConversation(viewer, id);
     await this.markRead(viewer, conversation);
 
-    const messages = await this.ensureViewerTranslations(
-      await this.prisma.message.findMany({
-        where: { conversationId: id },
-        orderBy: { createdAt: 'asc' },
-        include: { translations: true },
-      }),
-      viewer,
-    );
+    const messages = await this.prisma.message.findMany({
+      where: { conversationId: id },
+      orderBy: { createdAt: 'asc' },
+      include: { translations: true },
+    });
 
     const peer =
       conversation.farmerId === viewer.id ? conversation.buyer : conversation.farmer;
@@ -225,9 +217,6 @@ export class ChatService {
         : user;
 
     const conversation = await this.requireConversation(sender, conversationId);
-    const peer =
-      conversation.farmerId === sender.id ? conversation.buyer : conversation.farmer;
-    const targetLocale = peer.locale as Locale;
 
     const message = await this.prisma.message.create({
       data: {
@@ -243,12 +232,7 @@ export class ChatService {
       data: { updatedAt: new Date() },
     });
 
-    await this.translationService.translateMessage({
-      messageId: message.id,
-      sourceText: text,
-      sourceLocale,
-      targetLocale,
-    });
+    // AI translation is temporarily disabled — store and show source text only.
 
     const full = await this.prisma.message.findUniqueOrThrow({
       where: { id: message.id },
@@ -532,60 +516,12 @@ export class ChatService {
     return { ...user, locale: preferredLocale };
   }
 
-  private async ensureViewerTranslations(
-    messages: MessageEntity[],
-    viewer: AuthenticatedUser,
-  ): Promise<MessageEntity[]> {
-    const viewerLocale = viewer.locale;
-    const needing = messages
-      .filter((message) => {
-        if (message.senderId === viewer.id) return false;
-        const sourceLocale = detectMessageLocale(
-          message.sourceText,
-          message.sourceLocale as Locale,
-        );
-        if (sourceLocale === viewerLocale) return false;
-        const existing = message.translations.find(
-          (item) => item.targetLocale === (viewerLocale as LocaleCode),
-        );
-        return !(existing?.status === 'completed' && existing.translatedText);
-      })
-      .slice(-TRANSLATION_BACKFILL_LIMIT);
-
-    if (needing.length === 0) {
-      return messages;
-    }
-
-    await Promise.all(
-      needing.map((message) => {
-        const sourceLocale = detectMessageLocale(
-          message.sourceText,
-          message.sourceLocale as Locale,
-        );
-        return this.translationService.translateMessage({
-          messageId: message.id,
-          sourceText: message.sourceText,
-          sourceLocale,
-          targetLocale: viewerLocale,
-        });
-      }),
-    );
-
-    const refreshed = await this.prisma.message.findMany({
-      where: { conversationId: messages[0]!.conversationId },
-      orderBy: { createdAt: 'asc' },
-      include: { translations: true },
-    });
-    return refreshed as MessageEntity[];
-  }
-
   private toMessageView(
     message: MessageEntity,
     viewer: AuthenticatedUser,
     peerCursors: PeerDeliveryCursors = { deliveredAt: null, readAt: null },
   ): ChatMessageView {
     const isMine = message.senderId === viewer.id;
-    const viewerLocale = viewer.locale;
     const sourceLocale = detectMessageLocale(
       message.sourceText,
       message.sourceLocale as Locale,
@@ -594,65 +530,7 @@ export class ChatService {
       ? this.resolveDeliveryStatus(message.createdAt, peerCursors)
       : null;
 
-    if (isMine) {
-      return {
-        id: message.id,
-        conversationId: message.conversationId,
-        senderId: message.senderId,
-        createdAt: message.createdAt.toISOString(),
-        sourceLocale,
-        sourceText: message.sourceText,
-        displayText: message.sourceText,
-        translationStatus: 'none',
-        isMine,
-        canShowOriginal: false,
-        deliveryStatus,
-      };
-    }
-
-    if (sourceLocale === viewerLocale) {
-      return {
-        id: message.id,
-        conversationId: message.conversationId,
-        senderId: message.senderId,
-        createdAt: message.createdAt.toISOString(),
-        sourceLocale,
-        sourceText: message.sourceText,
-        displayText: message.sourceText,
-        translationStatus: 'none',
-        isMine,
-        canShowOriginal: false,
-        deliveryStatus: null,
-      };
-    }
-
-    const translation = message.translations.find(
-      (item) => item.targetLocale === (viewerLocale as LocaleCode),
-    );
-    if (!translation) {
-      return {
-        id: message.id,
-        conversationId: message.conversationId,
-        senderId: message.senderId,
-        createdAt: message.createdAt.toISOString(),
-        sourceLocale,
-        sourceText: message.sourceText,
-        displayText: message.sourceText,
-        translationStatus: 'pending',
-        isMine,
-        canShowOriginal: false,
-        deliveryStatus: null,
-      };
-    }
-
-    const status = translation.status as TranslationStatus;
-    const translated =
-      status === 'completed' && translation.translatedText
-        ? translation.translatedText
-        : null;
-    const displayText = translated ?? message.sourceText;
-    const canShowOriginal = Boolean(translated && translated !== message.sourceText);
-
+    // AI translation temporarily disabled: always surface the original text.
     return {
       id: message.id,
       conversationId: message.conversationId,
@@ -660,11 +538,11 @@ export class ChatService {
       createdAt: message.createdAt.toISOString(),
       sourceLocale,
       sourceText: message.sourceText,
-      displayText,
-      translationStatus: status,
+      displayText: message.sourceText,
+      translationStatus: 'none',
       isMine,
-      canShowOriginal,
-      deliveryStatus: null,
+      canShowOriginal: false,
+      deliveryStatus,
     };
   }
 }

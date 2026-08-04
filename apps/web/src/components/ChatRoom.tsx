@@ -48,7 +48,6 @@ export function ChatRoom({ conversationId, initial, viewer, peer }: Props) {
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [showOriginalIds, setShowOriginalIds] = useState<Record<string, boolean>>({});
   const threadRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -139,12 +138,6 @@ export function ChatRoom({ conversationId, initial, viewer, peer }: Props) {
       <div className="chat-thread" ref={threadRef}>
         {messages.length === 0 ? <p className="empty-state">{t('emptyThread')}</p> : null}
         {messages.map((message) => {
-          const showOriginal = !!showOriginalIds[message.id];
-          const canToggleOriginal =
-            message.canShowOriginal ||
-            (!message.isMine &&
-              message.sourceText !== message.displayText &&
-              Boolean(message.displayText));
           const authorName = message.isMine
             ? viewer.displayName || t('you')
             : peer.displayName || peer.role;
@@ -169,33 +162,14 @@ export function ChatRoom({ conversationId, initial, viewer, peer }: Props) {
                       : 'chat-bubble chat-bubble--peer'
                   }
                 >
-                  <p className="chat-bubble__text">
-                    {showOriginal ? message.sourceText : message.displayText}
-                  </p>
+                  <p className="chat-bubble__text">{message.sourceText}</p>
                 </div>
                 <div className="chat-row__meta">
                   <span>{timeLabel}</span>
-                  {!message.isMine && message.translationStatus !== 'none' ? (
-                    <span>· {t(`translation.${message.translationStatus}`)}</span>
-                  ) : null}
                   {message.isMine && message.deliveryStatus ? (
                     <DeliveryTicks status={message.deliveryStatus} />
                   ) : null}
                 </div>
-                {canToggleOriginal ? (
-                  <button
-                    type="button"
-                    className="chat-bubble__toggle"
-                    onClick={() =>
-                      setShowOriginalIds((current) => ({
-                        ...current,
-                        [message.id]: !current[message.id],
-                      }))
-                    }
-                  >
-                    {showOriginal ? t('showTranslation') : t('showOriginal')}
-                  </button>
-                ) : null}
               </div>
               {message.isMine ? (
                 <ChatAvatar name={authorName} avatarUrl={authorAvatar} />
