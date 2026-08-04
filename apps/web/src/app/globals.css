@@ -907,10 +907,6 @@ body {
   box-shadow: 0 0 0 2px rgba(20, 40, 24, 0.35);
 }
 
-.cabinet__chat-button.chat-nav-link {
-  padding: 0.45rem 0.75rem;
-}
-
 .activity-summary__unread {
   margin-left: 0.4rem;
   vertical-align: middle;
