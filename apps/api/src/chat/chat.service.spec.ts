@@ -21,10 +21,6 @@ describe('ChatService', () => {
     purchaseRequest: { findUnique: jest.fn() },
   };
 
-  const translationService = {
-    translateMessage: jest.fn(),
-  };
-
   const notifications = {
     notifyChatMessage: jest.fn().mockResolvedValue(undefined),
   };
@@ -59,7 +55,6 @@ describe('ChatService', () => {
     jest.clearAllMocks();
     service = new ChatService(
       prisma as never,
-      translationService as never,
       notifications as never,
     );
   });
@@ -120,7 +115,7 @@ describe('ChatService', () => {
     expect(detail.messages).toEqual([]);
   });
 
-  describe('translation views', () => {
+  describe('message views', () => {
     function conversationFixture() {
       return {
         id: 'conv1',
@@ -149,111 +144,7 @@ describe('ChatService', () => {
       };
     }
 
-    it('getById backfills and shows completed translation for viewer UI locale', async () => {
-      prisma.conversation.findUnique.mockResolvedValue(conversationFixture());
-      prisma.conversation.update.mockResolvedValue({});
-      prisma.message.findMany
-        .mockResolvedValueOnce([
-          {
-            id: 'm1',
-            conversationId: 'conv1',
-            senderId: buyer.id,
-            sourceLocale: 'en',
-            sourceText: 'Hello',
-            createdAt: new Date('2026-01-02'),
-            translations: [],
-          },
-        ])
-        .mockResolvedValueOnce([
-          {
-            id: 'm1',
-            conversationId: 'conv1',
-            senderId: buyer.id,
-            sourceLocale: 'en',
-            sourceText: 'Hello',
-            createdAt: new Date('2026-01-02'),
-            translations: [
-              {
-                targetLocale: 'ru',
-                translatedText: '[en→ru] Hello',
-                status: 'completed',
-              },
-            ],
-          },
-        ]);
-      translationService.translateMessage.mockResolvedValue({});
-
-      const detail = await service.getById(farmer, 'conv1', 'ru');
-
-      expect(translationService.translateMessage).toHaveBeenCalledWith({
-        messageId: 'm1',
-        sourceText: 'Hello',
-        sourceLocale: 'en',
-        targetLocale: 'ru',
-      });
-      expect(detail.messages).toHaveLength(1);
-      expect(detail.messages[0]).toMatchObject({
-        isMine: false,
-        sourceLocale: 'en',
-        sourceText: 'Hello',
-        displayText: '[en→ru] Hello',
-        translationStatus: 'completed',
-        canShowOriginal: true,
-        deliveryStatus: null,
-      });
-    });
-
-    it('detects Georgian script even when sourceLocale was saved as ru', async () => {
-      prisma.conversation.findUnique.mockResolvedValue(conversationFixture());
-      prisma.conversation.update.mockResolvedValue({});
-      prisma.message.findMany
-        .mockResolvedValueOnce([
-          {
-            id: 'm1',
-            conversationId: 'conv1',
-            senderId: buyer.id,
-            sourceLocale: 'ru',
-            sourceText: 'გამარჯობა',
-            createdAt: new Date('2026-01-02'),
-            translations: [],
-          },
-        ])
-        .mockResolvedValueOnce([
-          {
-            id: 'm1',
-            conversationId: 'conv1',
-            senderId: buyer.id,
-            sourceLocale: 'ru',
-            sourceText: 'გამარჯობა',
-            createdAt: new Date('2026-01-02'),
-            translations: [
-              {
-                targetLocale: 'ru',
-                translatedText: '[ka→ru] გამარჯობა',
-                status: 'completed',
-              },
-            ],
-          },
-        ]);
-      translationService.translateMessage.mockResolvedValue({});
-
-      const detail = await service.getById(farmer, 'conv1', 'ru');
-
-      expect(translationService.translateMessage).toHaveBeenCalledWith({
-        messageId: 'm1',
-        sourceText: 'გამარჯობა',
-        sourceLocale: 'ka',
-        targetLocale: 'ru',
-      });
-      expect(detail.messages[0]).toMatchObject({
-        sourceLocale: 'ka',
-        displayText: '[ka→ru] გამარჯობა',
-        canShowOriginal: true,
-        deliveryStatus: null,
-      });
-    });
-
-    it('skips translation UI when sourceLocale matches viewer locale', async () => {
+    it('getById returns original source text without AI translation', async () => {
       prisma.conversation.findUnique.mockResolvedValue(conversationFixture());
       prisma.conversation.update.mockResolvedValue({});
       prisma.message.findMany.mockResolvedValue([
@@ -261,40 +152,13 @@ describe('ChatService', () => {
           id: 'm1',
           conversationId: 'conv1',
           senderId: buyer.id,
-          sourceLocale: 'ru',
-          sourceText: 'Привет',
-          createdAt: new Date('2026-01-02'),
-          translations: [],
-        },
-      ]);
-
-      const detail = await service.getById(farmer, 'conv1', 'ru');
-
-      expect(translationService.translateMessage).not.toHaveBeenCalled();
-      expect(detail.messages[0]).toMatchObject({
-        isMine: false,
-        displayText: 'Привет',
-        translationStatus: 'none',
-        canShowOriginal: false,
-        deliveryStatus: null,
-      });
-    });
-
-    it('never marks own messages as translated (no Show original for sender)', async () => {
-      prisma.conversation.findUnique.mockResolvedValue(conversationFixture());
-      prisma.conversation.update.mockResolvedValue({});
-      prisma.message.findMany.mockResolvedValue([
-        {
-          id: 'm1',
-          conversationId: 'conv1',
-          senderId: farmer.id,
-          sourceLocale: 'ru',
-          sourceText: 'Цена',
+          sourceLocale: 'en',
+          sourceText: 'Hello',
           createdAt: new Date('2026-01-02'),
           translations: [
             {
-              targetLocale: 'en',
-              translatedText: '[ru→en] Цена',
+              targetLocale: 'ru',
+              translatedText: '[en→ru] Hello',
               status: 'completed',
             },
           ],
@@ -303,12 +167,39 @@ describe('ChatService', () => {
 
       const detail = await service.getById(farmer, 'conv1', 'ru');
 
+      expect(detail.messages).toHaveLength(1);
       expect(detail.messages[0]).toMatchObject({
-        isMine: true,
-        displayText: 'Цена',
+        isMine: false,
+        sourceText: 'Hello',
+        displayText: 'Hello',
         translationStatus: 'none',
         canShowOriginal: false,
-        deliveryStatus: 'sent',
+        deliveryStatus: null,
+      });
+    });
+
+    it('detects Georgian script for sourceLocale metadata', async () => {
+      prisma.conversation.findUnique.mockResolvedValue(conversationFixture());
+      prisma.conversation.update.mockResolvedValue({});
+      prisma.message.findMany.mockResolvedValue([
+        {
+          id: 'm1',
+          conversationId: 'conv1',
+          senderId: buyer.id,
+          sourceLocale: 'ru',
+          sourceText: 'გამარჯობა',
+          createdAt: new Date('2026-01-02'),
+          translations: [],
+        },
+      ]);
+
+      const detail = await service.getById(farmer, 'conv1', 'ru');
+
+      expect(detail.messages[0]).toMatchObject({
+        sourceLocale: 'ka',
+        displayText: 'გამარჯობა',
+        canShowOriginal: false,
+        deliveryStatus: null,
       });
     });
 
@@ -338,7 +229,7 @@ describe('ChatService', () => {
       });
     });
 
-    it('sendMessage translates into peer DB locale using sourceLocale from UI', async () => {
+    it('sendMessage stores source text without translating', async () => {
       prisma.conversation.findUnique.mockResolvedValue(conversationFixture());
       prisma.message.create.mockResolvedValue({
         id: 'm2',
@@ -349,7 +240,6 @@ describe('ChatService', () => {
         createdAt: new Date('2026-01-03'),
       });
       prisma.conversation.update.mockResolvedValue({});
-      translationService.translateMessage.mockResolvedValue({});
       prisma.message.findUniqueOrThrow.mockResolvedValue({
         id: 'm2',
         conversationId: 'conv1',
@@ -357,13 +247,7 @@ describe('ChatService', () => {
         sourceLocale: 'en',
         sourceText: 'Offer?',
         createdAt: new Date('2026-01-03'),
-        translations: [
-          {
-            targetLocale: 'ru',
-            translatedText: '[en→ru] Offer?',
-            status: 'completed',
-          },
-        ],
+        translations: [],
       });
 
       const view = await service.sendMessage(buyer, 'conv1', {
@@ -371,13 +255,6 @@ describe('ChatService', () => {
         sourceLocale: 'en',
       });
 
-      expect(translationService.translateMessage).toHaveBeenCalledWith({
-        messageId: 'm2',
-        sourceText: 'Offer?',
-        sourceLocale: 'en',
-        targetLocale: 'ru',
-      });
-      // Sender always sees their own original (toggle is peer-only).
       expect(view).toMatchObject({
         isMine: true,
         displayText: 'Offer?',

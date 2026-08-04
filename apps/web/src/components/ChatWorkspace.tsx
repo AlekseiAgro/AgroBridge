@@ -91,7 +91,6 @@ export async function ChatWorkspace({ conversations, active, viewer }: Props) {
                 <Link href={`/users/${active.peer.id}`} className="chat-messenger__peer-name">
                   {active.peer.displayName || t('conversation')}
                 </Link>
-                <p className="chat-messenger__pane-hint">{t('aiHint')}</p>
               </div>
             </header>
             <ChatRoom

@@ -518,7 +518,7 @@
   },
   "chat": {
     "listTitle": "Mensajes",
-    "listSubtitle": "Escribe en tu idioma — la IA traduce para tu interlocutor.",
+    "listSubtitle": "Chatea con tus socios comerciales.",
     "listEmpty": "Aún no hay conversaciones. Abre el chat desde una solicitud de cotización.",
     "noMessagesYet": "Sin mensajes aún",
     "conversation": "Conversación",
@@ -526,10 +526,10 @@
     "pleaseWait": "Espera…",
     "genericError": "Algo salió mal. Inténtalo de nuevo.",
     "chattingWith": "Chat con {name}",
-    "aiHint": "Traducción con IA activada",
+    "aiHint": "",
     "emptyThread": "Escribe el primer mensaje.",
     "message": "Mensaje",
-    "messagePlaceholder": "Escribe en tu idioma…",
+    "messagePlaceholder": "Escribe un mensaje…",
     "send": "Enviar",
     "showOriginal": "Ver original",
     "showTranslation": "Ver traducción",
@@ -710,7 +710,7 @@
       },
       "connect": {
         "title": "Conéctate con un socio comercial",
-        "text": "Los compradores publican solicitudes de compra o piden cotizaciones de productos del catálogo. Los agricultores responden con ofertas y el chat traduce al idioma de cada uno."
+        "text": "Los compradores publican solicitudes de compra o piden presupuestos de productos del catálogo. Los agricultores responden con ofertas y ambas partes chatean directamente en el gabinete."
       },
       "agree": {
         "title": "Acuerda los términos de suministro",
