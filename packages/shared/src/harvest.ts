@@ -41,3 +41,14 @@ export type HarvestWatchStatus = {
   watching: boolean;
   productId: string;
 };
+
+/** Active harvest-alert watch owned by the current user. */
+export type HarvestWatchItem = {
+  id: string;
+  productId: string;
+  productTitle: string;
+  farmName: string | null;
+  harvestStatus: HarvestStatus | null;
+  preorderEnabled: boolean;
+  createdAt: string;
+};

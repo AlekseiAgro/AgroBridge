@@ -1628,6 +1628,41 @@ body {
   margin-top: 0;
 }
 
+.active-subscriptions,
+.harvest-watches__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.active-subscriptions__item,
+.harvest-watches__item {
+  padding: 0.95rem 1.05rem;
+  border: 1px solid var(--line);
+  border-radius: 0.95rem;
+  background: var(--surface);
+}
+
+.active-subscriptions__title {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+}
+
+.harvest-watches__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.harvest-watches__main {
+  min-width: 0;
+  flex: 1 1 14rem;
+}
+
 .completed-deals {
   list-style: none;
   margin: 0;

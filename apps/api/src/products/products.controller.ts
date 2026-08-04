@@ -52,6 +52,12 @@ export class ProductsController {
     return this.productsService.listMine(user);
   }
 
+  @Get('watches')
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard)
+  listWatches(@CurrentUser() user: AuthenticatedUser) {
+    return this.productsService.listMyWatches(user);
+  }
+
   @Get(':id/market-insight')
   getMarketInsight(@Param('id') id: string, @Query('locale') locale?: string) {
     return this.marketInsight.forProduct(id, locale);
