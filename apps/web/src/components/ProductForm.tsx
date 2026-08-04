@@ -717,15 +717,33 @@ export function ProductForm({ mode, initial, leading }: Props) {
 
         <label className="field">
           <span>{th('forecast')}</span>
-          <input
-            name="forecastQuantity"
-            type="number"
-            min={0.01}
-            step="0.01"
-            inputMode="decimal"
-            placeholder={th('forecastPlaceholder')}
-            defaultValue={initial?.forecastQuantity ?? ''}
-          />
+          <div className="field-with-suffix">
+            <input
+              name="forecastQuantity"
+              type="number"
+              min={0.01}
+              step="0.01"
+              inputMode="decimal"
+              placeholder={th('forecastPlaceholder')}
+              defaultValue={initial?.forecastQuantity ?? ''}
+            />
+            <span className="field-with-suffix__unit" aria-hidden={!(unit || suggestedUnit)}>
+              {unit
+                ? t(`units.${unit as ProductUnit}`)
+                : suggestedUnit
+                  ? t(`units.${suggestedUnit as ProductUnit}`)
+                  : '—'}
+            </span>
+          </div>
+          <p className="field-hint">
+            {th('forecastUnitHint', {
+              unit: unit
+                ? t(`units.${unit as ProductUnit}`)
+                : suggestedUnit
+                  ? t(`units.${suggestedUnit as ProductUnit}`)
+                  : t('noUnit'),
+            })}
+          </p>
         </label>
 
         <label className="field">
