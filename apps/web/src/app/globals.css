@@ -2315,6 +2315,24 @@ body {
   gap: 0.35rem;
 }
 
+.cabinet__nav-group {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(31, 74, 40, 0.1);
+}
+
+.cabinet__nav-label {
+  margin: 0 0 0.1rem;
+  padding: 0 0.7rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .cabinet__nav a {
   padding: 0.55rem 0.7rem;
   border-radius: 0.55rem;

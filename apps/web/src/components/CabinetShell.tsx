@@ -35,21 +35,43 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
           AgroBridge
         </Link>
         <p className="cabinet__eyebrow">{tc('shellLabel')}</p>
-        <nav className="cabinet__nav">
+        <nav className="cabinet__nav" aria-label={tc('shellLabel')}>
           <Link href="/account">{tc('overview')}</Link>
-          <Link href="/catalog">{tCatalog('title')}</Link>
-          {trader ? (
-            <>
-              <Link href="/dashboard/farm">{t('myFarm')}</Link>
-              <Link href="/dashboard/products">{t('myProducts')}</Link>
-              <InboxNavLink initialCount={pendingInboxCount} />
-              <Link href="/requests">{t('purchaseRequests')}</Link>
-              <Link href="/dashboard/purchase-requests">{tp('mineTitle')}</Link>
-            </>
+
+          {trader || user ? (
+            <div className="cabinet__nav-group">
+              <p className="cabinet__nav-label">{tc('navGroups.activity')}</p>
+              {trader ? <InboxNavLink initialCount={pendingInboxCount} /> : null}
+              {user ? <ChatNavLink initialCount={unreadCount} /> : null}
+            </div>
           ) : null}
-          {user ? <ChatNavLink initialCount={unreadCount} /> : null}
-          {user ? <Link href="/dashboard/subscriptions">{t('subscriptions')}</Link> : null}
-          {user?.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
+
+          {trader ? (
+            <div className="cabinet__nav-group">
+              <p className="cabinet__nav-label">{tc('navGroups.selling')}</p>
+              <Link href="/dashboard/products">{t('myProducts')}</Link>
+              <Link href="/dashboard/farm">{t('myFarm')}</Link>
+            </div>
+          ) : null}
+
+          <div className="cabinet__nav-group">
+            <p className="cabinet__nav-label">{tc('navGroups.market')}</p>
+            <Link href="/catalog">{tCatalog('title')}</Link>
+            {trader ? (
+              <>
+                <Link href="/requests">{t('purchaseRequests')}</Link>
+                <Link href="/dashboard/purchase-requests">{tp('mineTitle')}</Link>
+              </>
+            ) : null}
+          </div>
+
+          {user ? (
+            <div className="cabinet__nav-group">
+              <p className="cabinet__nav-label">{tc('navGroups.account')}</p>
+              <Link href="/dashboard/subscriptions">{t('subscriptions')}</Link>
+              {user.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
+            </div>
+          ) : null}
         </nav>
         <div className="cabinet__sidebar-foot">
           <LanguageSwitcher />
