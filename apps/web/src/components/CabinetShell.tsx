@@ -60,12 +60,6 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
             {subtitle ? <p className="cabinet__subtitle">{subtitle}</p> : null}
           </div>
           <div className="cabinet__top-actions">
-            {user ? (
-              <ChatNavLink
-                className="button button--ghost cabinet__chat-button"
-                initialCount={unreadCount}
-              />
-            ) : null}
             <span className="cabinet__user-chip">
               {user?.displayName || user?.email || tc('guest')}
             </span>
