@@ -3,8 +3,13 @@
 import type { HarvestWatchItem } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
+import { RatingStars } from '@/components/RatingStars';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link, useRouter } from '@/i18n/navigation';
+import { formatRegionLabel } from '@/lib/region';
 import { formatProductTitle } from '@/lib/product-title';
+import { toPublicMediaUrl } from '@/lib/product-image';
 
 type Props = {
   initial: HarvestWatchItem[];
@@ -13,6 +18,9 @@ type Props = {
 export function HarvestWatchesList({ initial }: Props) {
   const t = useTranslations('subscriptions');
   const th = useTranslations('harvest');
+  const tc = useTranslations('catalog');
+  const tp = useTranslations('product');
+  const tr = useTranslations();
   const locale = useLocale();
   const router = useRouter();
   const [items, setItems] = useState(initial);
@@ -51,32 +59,63 @@ export function HarvestWatchesList({ initial }: Props) {
   return (
     <div className="harvest-watches">
       <ul className="harvest-watches__list">
-        {items.map((item) => (
-          <li key={item.id} className="harvest-watches__item">
-            <div className="harvest-watches__main">
-              <Link href={`/products/${item.productId}`} className="product-list__title">
-                {formatProductTitle(item.productTitle, locale)}
-              </Link>
-              <p className="product-list__meta">
-                {item.farmName ? `${item.farmName} · ` : null}
-                {item.harvestStatus
-                  ? th(`status.${item.harvestStatus}`)
-                  : th('statusUnset')}
-                {item.preorderEnabled ? ` · ${th('preorderBadge')}` : null}
-              </p>
-            </div>
-            <button
-              type="button"
-              className="button button--ghost"
-              disabled={pendingId === item.productId}
-              onClick={() => {
-                void unwatch(item.productId);
-              }}
-            >
-              {pendingId === item.productId ? t('pleaseWait') : th('unwatch')}
-            </button>
-          </li>
-        ))}
+        {items.map((item) => {
+          const imageUrl = item.imageUrl ? toPublicMediaUrl(item.imageUrl) : null;
+          const ownerLabel = item.owner.displayName?.trim() || tp('sellerFallback');
+          return (
+            <li key={item.id} className="harvest-watches__item product-list__item--with-media">
+              {imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={imageUrl} alt="" className="product-list__media" />
+              ) : (
+                <div className="product-list__media product-list__media--empty" aria-hidden />
+              )}
+              <div className="harvest-watches__body">
+                <Link href={`/products/${item.productId}`} className="product-list__title">
+                  {formatProductTitle(item.productTitle, locale)}
+                </Link>
+                <p className="product-list__meta">
+                  {item.farm ? (
+                    <>
+                      <Link href={`/farms/${item.farm.id}`}>{item.farm.name}</Link>
+                      <VerifiedBadge verified={item.farm.verified} />
+                      {item.farm.region
+                        ? ` · ${formatRegionLabel(item.farm.region, tr) ?? item.farm.region}`
+                        : null}
+                      {' · '}
+                    </>
+                  ) : null}
+                  <Link href={`/users/${item.owner.id}`}>{ownerLabel}</Link>
+                </p>
+                <div className="product-list__rating">
+                  <span className="product-list__rating-label">{tc('sellerRating')}</span>
+                  <RatingStars
+                    value={item.sellerRating.average}
+                    count={item.sellerRating.count}
+                    size="sm"
+                    reviewsHref={`/users/${item.owner.id}/reviews`}
+                  />
+                </div>
+                <HarvestStatusBadge
+                  status={item.harvestStatus}
+                  preorderEnabled={item.preorderEnabled}
+                />
+                <div className="harvest-watches__actions">
+                  <button
+                    type="button"
+                    className="button button--ghost"
+                    disabled={pendingId === item.productId}
+                    onClick={() => {
+                      void unwatch(item.productId);
+                    }}
+                  >
+                    {pendingId === item.productId ? t('pleaseWait') : th('unwatch')}
+                  </button>
+                </div>
+              </div>
+            </li>
+          );
+        })}
       </ul>
       {error ? <p className="form-error">{error}</p> : null}
     </div>

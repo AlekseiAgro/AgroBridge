@@ -291,10 +291,21 @@ describe('ProductsService', () => {
           title: 'Hazelnuts',
           harvestStatus: 'growing',
           preorderEnabled: true,
-          farm: { name: 'Kakheti Farm' },
+          ownerUserId: 'seller1',
+          owner: { id: 'seller1', displayName: 'Nino' },
+          farm: {
+            id: 'f1',
+            name: 'Kakheti Farm',
+            region: 'kakheti',
+            verificationStatus: 'approved',
+          },
+          images: [{ url: 'https://cdn.example/p1.jpg' }],
         },
       },
     ]);
+    ratings.summariesForUsers.mockResolvedValue(
+      new Map([['seller1', { average: 4.5, count: 3 }]]),
+    );
 
     const result = await service.listMyWatches({
       id: 'u1',
@@ -315,10 +326,18 @@ describe('ProductsService', () => {
         id: 'w1',
         productId: 'p1',
         productTitle: 'Hazelnuts',
-        farmName: 'Kakheti Farm',
         harvestStatus: 'growing',
         preorderEnabled: true,
         createdAt: createdAt.toISOString(),
+        imageUrl: 'https://cdn.example/p1.jpg',
+        owner: { id: 'seller1', displayName: 'Nino' },
+        sellerRating: { average: 4.5, count: 3 },
+        farm: {
+          id: 'f1',
+          name: 'Kakheti Farm',
+          region: 'kakheti',
+          verified: true,
+        },
       },
     ]);
   });

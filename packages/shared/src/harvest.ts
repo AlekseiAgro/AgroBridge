@@ -1,3 +1,5 @@
+import type { RatingSummary } from './rating';
+
 export const HARVEST_STATUSES = [
   'growing',
   'available',
@@ -47,8 +49,19 @@ export type HarvestWatchItem = {
   id: string;
   productId: string;
   productTitle: string;
-  farmName: string | null;
   harvestStatus: HarvestStatus | null;
   preorderEnabled: boolean;
   createdAt: string;
+  imageUrl: string | null;
+  owner: {
+    id: string;
+    displayName: string | null;
+  };
+  sellerRating: RatingSummary;
+  farm: {
+    id: string;
+    name: string;
+    region: string | null;
+    verified: boolean;
+  } | null;
 };

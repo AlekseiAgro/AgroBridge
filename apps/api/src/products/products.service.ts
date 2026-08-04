@@ -266,23 +266,53 @@ export class ProductsService {
               title: true,
               harvestStatus: true,
               preorderEnabled: true,
-              farm: { select: { name: true } },
+              ownerUserId: true,
+              owner: { select: productOwnerSelect },
+              farm: {
+                select: {
+                  id: true,
+                  name: true,
+                  region: true,
+                  verificationStatus: true,
+                },
+              },
+              images: {
+                orderBy: imageOrderBy,
+                take: 1,
+                select: { url: true },
+              },
             },
           },
         },
       });
 
+      const ownerIds = [...new Set(watches.map((watch) => watch.product.ownerUserId))];
+      const ratings = await this.ratings.summariesForUsers(ownerIds);
+
       return watches.map((watch) => ({
         id: watch.id,
         productId: watch.product.id,
         productTitle: watch.product.title,
-        farmName: watch.product.farm?.name ?? null,
         harvestStatus:
           watch.product.harvestStatus && isHarvestStatus(watch.product.harvestStatus)
             ? watch.product.harvestStatus
             : null,
         preorderEnabled: watch.product.preorderEnabled,
         createdAt: watch.createdAt.toISOString(),
+        imageUrl: watch.product.images[0]?.url ?? null,
+        owner: {
+          id: watch.product.owner.id,
+          displayName: watch.product.owner.displayName,
+        },
+        sellerRating: ratings.get(watch.product.ownerUserId) ?? { average: null, count: 0 },
+        farm: watch.product.farm
+          ? {
+              id: watch.product.farm.id,
+              name: watch.product.farm.name,
+              region: watch.product.farm.region,
+              verified: watch.product.farm.verificationStatus === 'approved',
+            }
+          : null,
       }));
     } catch {
       return [];
