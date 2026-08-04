@@ -1006,7 +1006,8 @@
       "10": "Oct",
       "11": "Nov",
       "12": "Dec"
-    }
+    },
+    "ownerWatchHint": "Questo è il tuo annuncio: qui non servono avvisi sul raccolto."
   },
   "quality": {
     "title": "Qualità della scheda prodotto",

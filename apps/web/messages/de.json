@@ -1006,7 +1006,8 @@
       "10": "Oct",
       "11": "Nov",
       "12": "Dec"
-    }
+    },
+    "ownerWatchHint": "Das ist Ihr Angebot – Erntebenachrichtigungen sind hier nicht nötig."
   },
   "quality": {
     "title": "Produktkarten-Qualität",

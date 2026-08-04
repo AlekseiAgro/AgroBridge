@@ -396,6 +396,7 @@ body {
   border: 1px solid transparent;
   text-decoration: none;
   font-weight: 600;
+  cursor: pointer;
   transition:
     background-color 160ms ease,
     color 160ms ease,
@@ -2896,6 +2897,7 @@ body {
   margin-top: 0.75rem;
 }
 
+.harvest-watch__button,
 .harvest-watch__login,
 .product-login-cta .button {
   width: fit-content;

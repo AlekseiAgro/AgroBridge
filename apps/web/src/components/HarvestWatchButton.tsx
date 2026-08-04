@@ -8,12 +8,14 @@ type Props = {
   productId: string;
   initialWatching?: boolean;
   isLoggedIn: boolean;
+  isOwner?: boolean;
 };
 
 export function HarvestWatchButton({
   productId,
   initialWatching = false,
   isLoggedIn,
+  isOwner = false,
 }: Props) {
   const t = useTranslations('harvest');
   const router = useRouter();
@@ -27,6 +29,14 @@ export function HarvestWatchButton({
         <Link href="/login" className="button button--primary harvest-watch__login">
           {t('loginToWatch')}
         </Link>
+      </div>
+    );
+  }
+
+  if (isOwner) {
+    return (
+      <div className="harvest-watch">
+        <p className="page__subtitle">{t('ownerWatchHint')}</p>
       </div>
     );
   }
@@ -56,9 +66,11 @@ export function HarvestWatchButton({
     <div className="harvest-watch">
       <button
         type="button"
-        className={watching ? 'button button--ghost' : 'button'}
+        className={watching ? 'button button--ghost harvest-watch__button' : 'button button--primary harvest-watch__button'}
         disabled={pending}
-        onClick={toggle}
+        onClick={() => {
+          void toggle();
+        }}
       >
         {pending ? t('pleaseWait') : watching ? t('unwatch') : t('watch')}
       </button>
