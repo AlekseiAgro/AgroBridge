@@ -111,6 +111,9 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
           {!product.isOwner ? (
             <div className="product-detail-header__actions">
+              <a href="#request-quote" className="button button--primary">
+                {tr('submitRequest')}
+              </a>
               {user ? (
                 <OpenChatButton
                   farmerId={product.ownerUserId}
@@ -125,9 +128,6 @@ export default async function ProductDetailPage({ params }: Props) {
                   {t('messageSeller')}
                 </Link>
               )}
-              <a href="#request-quote" className="button button--primary">
-                {tr('submitRequest')}
-              </a>
             </div>
           ) : null}
         </div>
