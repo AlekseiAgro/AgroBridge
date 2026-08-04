@@ -43,7 +43,7 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
       </p>
       <PurchaseRequestList items={items} emptyLabel={t('mineEmpty')} />
 
-      <section className="cabinet-section cabinet-section--nested">
+      <section id="my-requests" className="cabinet-section cabinet-section--nested">
         <h2 className="section-title">{tn('myRequests')}</h2>
         <p className="page__subtitle">{tr('mineSubtitle')}</p>
         <RfqList items={rfqs} emptyLabel={tr('mineEmpty')} detailBasePath="/dashboard/rfqs" />
