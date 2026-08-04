@@ -46,10 +46,8 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
             </>
           ) : null}
           {user ? <ChatNavLink initialCount={unreadCount} /> : null}
-          {user ? <Link href="/dashboard/subscriptions">{t('subscriptions')}</Link> : null}
+          {user ? <Link href="/dashboard/subscriptions">{t('subscriptions')} /> : null}
           {user?.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
-          <Link href="/buyers">{t('forBuyers')}</Link>
-          <Link href="/sellers">{t('forSellers')}</Link>
         </nav>
         <div className="cabinet__sidebar-foot">
           <LanguageSwitcher />
