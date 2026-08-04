@@ -65,8 +65,6 @@ export default async function SubscriptionsPage({ params }: Props) {
 
   return (
     <main className="cabinet-page cabinet-page--narrow">
-      <h1>{t('title')}</h1>
-      <p className="page__subtitle">{t('subtitle')}</p>
       {loadError ? <p className="form-error">{loadError}</p> : null}
 
       <section className="cabinet-section">
