@@ -23,6 +23,7 @@ import {
 import {
   DocumentReviewStatus,
   ModerationStatus as PrismaModerationStatus,
+  Prisma,
   PurchaseRequestStatus,
   RfqStatus,
   UserRole,
@@ -246,6 +247,8 @@ export class AdminService {
     role?: string;
     blocked?: string;
     q?: string;
+    registeredWithin?: string;
+    registeredOn?: string;
   }): Promise<AdminUser[]> {
     const role =
       params?.role && Object.values(UserRole).includes(params.role as UserRole)
@@ -254,6 +257,20 @@ export class AdminService {
     const blocked =
       params?.blocked === 'true' ? true : params?.blocked === 'false' ? false : undefined;
     const q = params?.q?.trim();
+    const withinDays = Number(params?.registeredWithin);
+    const registeredOn = params?.registeredOn?.trim();
+
+    let createdAtFilter: Prisma.DateTimeFilter | undefined;
+    if (registeredOn && /^\d{4}-\d{2}-\d{2}$/.test(registeredOn)) {
+      const start = new Date(`${registeredOn}T00:00:00.000Z`);
+      const end = new Date(start);
+      end.setUTCDate(end.getUTCDate() + 1);
+      createdAtFilter = { gte: start, lt: end };
+    } else if (Number.isFinite(withinDays) && withinDays > 0) {
+      const since = new Date();
+      since.setUTCDate(since.getUTCDate() - withinDays);
+      createdAtFilter = { gte: since };
+    }
 
     const users = await this.prisma.user.findMany({
       where: {
@@ -263,6 +280,7 @@ export class AdminService {
           : blocked === false
             ? { blockedAt: null }
             : {}),
+        ...(createdAtFilter ? { createdAt: createdAtFilter } : {}),
         ...(q
           ? {
               OR: [
@@ -420,14 +438,23 @@ export class AdminService {
   }
 
   async listFarms(status?: string): Promise<AdminFarm[]> {
+    const wantsDocuments = status === 'documents';
+    const wantsAll = !status || status === 'all';
     const verificationStatus =
+      !wantsDocuments &&
+      !wantsAll &&
       status &&
       Object.values(PrismaVerificationStatus).includes(status as PrismaVerificationStatus)
         ? (status as PrismaVerificationStatus)
         : undefined;
 
     const farms = await this.prisma.farm.findMany({
-      where: verificationStatus ? { verificationStatus } : undefined,
+      where: {
+        ...(verificationStatus ? { verificationStatus } : {}),
+        ...(wantsDocuments
+          ? { documents: { some: { reviewStatus: DocumentReviewStatus.pending } } }
+          : {}),
+      },
       orderBy: [{ verificationStatus: 'asc' }, { updatedAt: 'desc' }],
       include: {
         owner: {
@@ -604,11 +631,19 @@ export class AdminService {
     };
   }
 
-  async listDeals(): Promise<AdminDeal[]> {
+  async listDeals(status?: string): Promise<AdminDeal[]> {
+    const wantsCompleted = status === 'completed';
+    const wantsInProgress = status === 'accepted' || status === 'in_progress';
+    const rfqStatuses = wantsCompleted
+      ? [RfqStatus.completed]
+      : wantsInProgress
+        ? [RfqStatus.accepted]
+        : [RfqStatus.completed, RfqStatus.accepted];
+
     const [rfqs, fulfilledRequests] = await Promise.all([
       this.prisma.rfq.findMany({
         where: {
-          status: { in: [RfqStatus.completed, RfqStatus.accepted] },
+          status: { in: rfqStatuses },
         },
         orderBy: { updatedAt: 'desc' },
         take: 100,
@@ -627,26 +662,28 @@ export class AdminService {
           },
         },
       }),
-      this.prisma.purchaseRequest.findMany({
-        where: { status: PurchaseRequestStatus.fulfilled },
-        orderBy: { updatedAt: 'desc' },
-        take: 100,
-        include: {
-          buyer: { select: { id: true, email: true, displayName: true } },
-          quotes: {
-            where: { status: 'accepted' },
-            take: 1,
+      wantsInProgress
+        ? Promise.resolve([])
+        : this.prisma.purchaseRequest.findMany({
+            where: { status: PurchaseRequestStatus.fulfilled },
+            orderBy: { updatedAt: 'desc' },
+            take: 100,
             include: {
-              farm: {
-                select: {
-                  name: true,
-                  owner: { select: { id: true, email: true, displayName: true } },
+              buyer: { select: { id: true, email: true, displayName: true } },
+              quotes: {
+                where: { status: 'accepted' },
+                take: 1,
+                include: {
+                  farm: {
+                    select: {
+                      name: true,
+                      owner: { select: { id: true, email: true, displayName: true } },
+                    },
+                  },
                 },
               },
             },
-          },
-        },
-      }),
+          }),
     ]);
 
     const deals: AdminDeal[] = [

@@ -598,7 +598,9 @@
         "pending": "Pending",
         "approved": "Verified",
         "rejected": "Rejected",
-        "unverified": "Unverified"
+        "unverified": "Unverified",
+        "all": "All",
+        "documents": "Pending documents"
       },
       "status": {
         "pending": "Pending verification",
@@ -630,7 +632,14 @@
         "farmer": "Seller",
         "buyer": "Buyer",
         "admin": "Admin"
-      }
+      },
+      "filters": {
+        "all": "All",
+        "blocked": "Blocked",
+        "last7": "Last 7 days",
+        "last30": "Last 30 days"
+      },
+      "registeredOn": "Registered on {date}"
     },
     "requests": {
       "empty": "No purchase requests in this queue.",
@@ -652,6 +661,11 @@
       "kinds": {
         "rfq": "Product RFQ",
         "purchase_request": "Purchase request"
+      },
+      "tabs": {
+        "all": "All",
+        "completed": "Completed",
+        "accepted": "In progress"
       }
     },
     "categories": {

@@ -57,8 +57,16 @@ export class AdminController {
     @Query('role') role?: string,
     @Query('blocked') blocked?: string,
     @Query('q') q?: string,
+    @Query('registeredWithin') registeredWithin?: string,
+    @Query('registeredOn') registeredOn?: string,
   ) {
-    return this.adminService.listUsers({ role, blocked, q });
+    return this.adminService.listUsers({
+      role,
+      blocked,
+      q,
+      registeredWithin,
+      registeredOn,
+    });
   }
 
   @Post('users/:id/block')
@@ -131,8 +139,8 @@ export class AdminController {
   }
 
   @Get('deals')
-  listDeals() {
-    return this.adminService.listDeals();
+  listDeals(@Query('status') status?: string) {
+    return this.adminService.listDeals(status);
   }
 
   @Get('categories')
