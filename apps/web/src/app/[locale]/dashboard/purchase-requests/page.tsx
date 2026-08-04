@@ -1,6 +1,7 @@
-import type { PurchaseRequestSummary } from '@agrobridge/shared';
+import type { PurchaseRequestSummary, RfqSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PurchaseRequestList } from '@/components/PurchaseRequestList';
+import { RfqList } from '@/components/RfqList';
 import { Link, redirect } from '@/i18n/navigation';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
@@ -17,7 +18,12 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
   if (!user) redirect({ href: '/login', locale });
 
   const t = await getTranslations('purchaseRequests');
-  const items = await apiRequestAuthed<PurchaseRequestSummary[]>('/purchase-requests/mine');
+  const tn = await getTranslations('nav');
+  const tr = await getTranslations('rfq');
+  const [items, rfqs] = await Promise.all([
+    apiRequestAuthed<PurchaseRequestSummary[]>('/purchase-requests/mine'),
+    apiRequestAuthed<RfqSummary[]>('/rfqs/mine'),
+  ]);
 
   return (
     <main className="cabinet-page">
@@ -33,9 +39,15 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
       <p className="eyebrow">
         <Link href="/requests">{t('boardTitle')}</Link>
         {' · '}
-        <Link href="/dashboard/rfqs">{t('productRfqsLink')}</Link>
+        <Link href="/catalog">{tr('browseCatalog')}</Link>
       </p>
       <PurchaseRequestList items={items} emptyLabel={t('mineEmpty')} />
+
+      <section className="cabinet-section cabinet-section--nested">
+        <h2 className="section-title">{tn('myRequests')}</h2>
+        <p className="page__subtitle">{tr('mineSubtitle')}</p>
+        <RfqList items={rfqs} emptyLabel={tr('mineEmpty')} detailBasePath="/dashboard/rfqs" />
+      </section>
     </main>
   );
 }

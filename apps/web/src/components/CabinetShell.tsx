@@ -45,7 +45,6 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
               <InboxNavLink initialCount={pendingInboxCount} />
               <Link href="/requests">{t('purchaseRequests')}</Link>
               <Link href="/dashboard/purchase-requests">{tp('mineTitle')}</Link>
-              <Link href="/dashboard/rfqs">{t('myRequests')}</Link>
             </>
           ) : null}
           {user ? <ChatNavLink initialCount={unreadCount} /> : null}
