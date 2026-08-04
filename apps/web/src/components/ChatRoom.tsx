@@ -214,6 +214,9 @@ export function ChatRoom({ conversationId, initial, viewer, peer }: Props) {
             rows={2}
             value={text}
             onChange={(event) => setText(event.target.value)}
+            onFocus={(event) => {
+              event.currentTarget.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }}
             placeholder={t('messagePlaceholder')}
             required
           />
