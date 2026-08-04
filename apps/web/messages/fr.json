@@ -253,7 +253,8 @@
       "uploadError": "Impossible de téléverser la photo.",
       "deleteError": "Impossible de supprimer la photo.",
       "primaryError": "Impossible de mettre à jour la couverture.",
-      "maxReached": "Limite de {max} photos atteinte."
+      "maxReached": "Limite de {max} photos atteinte.",
+      "formEmpty": "Vous pouvez ajouter jusqu’à 3 photos maintenant, ou plus tard depuis cette page."
     },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",

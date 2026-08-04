@@ -253,7 +253,8 @@
       "uploadError": "Could not upload the photo.",
       "deleteError": "Could not delete the photo.",
       "primaryError": "Could not update the cover photo.",
-      "maxReached": "Photo limit of {max} reached."
+      "maxReached": "Photo limit of {max} reached.",
+      "formEmpty": "You can add up to 3 photos now, or later from this page."
     },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",

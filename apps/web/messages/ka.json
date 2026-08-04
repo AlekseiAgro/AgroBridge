@@ -253,7 +253,8 @@
       "uploadError": "ფოტოს ატვირთვა ვერ მოხერხდა.",
       "deleteError": "ფოტოს წაშლა ვერ მოხერხდა.",
       "primaryError": "ყდის განახლება ვერ მოხერხდა.",
-      "maxReached": "მიღწეულია {max} ფოტოს ლიმიტი."
+      "maxReached": "მიღწეულია {max} ფოტოს ლიმიტი.",
+      "formEmpty": "შეგიძლიათ ახლავე დაამატოთ 3 ფოტომდე ან მოგვიანებით ამ გვერდიდან."
     },
     "foundedYear": "Founded year",
     "farmSizeHectares": "Farm size (hectares)",
