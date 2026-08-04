@@ -1,9 +1,9 @@
 import type { RfqSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CompletedDealsList } from '@/components/CompletedDealsList';
-import { Link, redirect } from '@/i18n/navigation';
+import { Link } from '@/i18n/navigation';
+import { requireVerifiedUser } from '@/lib/require-verified-user';
 import { apiRequestAuthed } from '@/lib/server-api';
-import { getCurrentUser } from '@/lib/session';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -13,9 +13,7 @@ export default async function CompletedDealsPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const user = await getCurrentUser();
-  if (!user) redirect({ href: '/login', locale });
-
+  const user = await requireVerifiedUser(locale, '/dashboard/deals');
   const t = await getTranslations('cabinet');
   const items = await apiRequestAuthed<RfqSummary[]>('/rfqs/completed');
 
