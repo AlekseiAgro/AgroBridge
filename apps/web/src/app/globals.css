@@ -2933,7 +2933,7 @@ body {
 .product-detail-header {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 1.15rem 1.75rem;
   margin-bottom: 0.55rem;
@@ -2951,9 +2951,8 @@ body {
   gap: 0.6rem;
   flex: 0 0 13.75rem;
   width: 13.75rem;
-  margin: 0 0 0.1rem;
-  padding: 0.15rem 0 0.15rem 1.1rem;
-  border-left: 1px solid var(--line);
+  margin: 0.85rem 0 0;
+  padding: 0;
 }
 
 .product-detail-header__actions > div {
@@ -3020,10 +3019,8 @@ body {
     width: 100%;
     flex-direction: row;
     flex-wrap: wrap;
-    margin-top: 0.15rem;
-    padding: 0.85rem 0 0;
-    border-left: 0;
-    border-top: 1px solid var(--line);
+    margin-top: 0.35rem;
+    padding: 0;
   }
 
   .product-detail-header__actions > div {
