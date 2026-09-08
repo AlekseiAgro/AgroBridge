@@ -29,6 +29,7 @@ import {
   UserRole,
   VerificationStatus as PrismaVerificationStatus,
 } from '@prisma/client';
+import { farmDocumentFileUrl } from '../farms/farm-document-url';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProductsService } from '../products/products.service';
@@ -797,7 +798,6 @@ export class AdminService {
     farmId: string;
     title: string;
     fileName: string;
-    url: string;
     mimeType: string;
     kind: FarmDocument['kind'];
     reviewStatus: DocumentReviewStatus;
@@ -810,7 +810,7 @@ export class AdminService {
       farmId: doc.farmId,
       title: doc.title,
       fileName: doc.fileName,
-      url: doc.url,
+      url: farmDocumentFileUrl(doc.id),
       mimeType: doc.mimeType,
       kind: doc.kind,
       reviewStatus: doc.reviewStatus,

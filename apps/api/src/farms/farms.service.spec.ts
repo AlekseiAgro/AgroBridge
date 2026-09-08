@@ -1,4 +1,5 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import type { AuthenticatedUser } from '../auth/auth.types';
 import { FarmsService } from './farms.service';
 
 describe('FarmsService', () => {
@@ -21,6 +22,10 @@ describe('FarmsService', () => {
       delete: jest.fn(),
       update: jest.fn(),
       updateMany: jest.fn(),
+    },
+    farmDocument: {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
     },
     product: {
       updateMany: jest.fn(),
@@ -132,5 +137,104 @@ describe('FarmsService', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
 
     expect(storage.upload).not.toHaveBeenCalled();
+  });
+
+  describe('getDocumentDownload', () => {
+    const storedDocument = {
+      key: 'farms/farm1/documents/9f0e.bin',
+      fileName: 'id-card.pdf',
+      mimeType: 'application/pdf',
+      farm: { ownerId: 'owner1' },
+    };
+
+    const user = (id: string, role: AuthenticatedUser['role']): AuthenticatedUser =>
+      ({ id, email: `${id}@example.com`, role, locale: 'en' }) as AuthenticatedUser;
+
+    it('returns the stored key for the farm owner', async () => {
+      prisma.farmDocument.findUnique.mockResolvedValue(storedDocument);
+
+      await expect(service.getDocumentDownload(user('owner1', 'farmer'), 'doc1')).resolves.toEqual({
+        key: storedDocument.key,
+        fileName: storedDocument.fileName,
+        mimeType: storedDocument.mimeType,
+      });
+    });
+
+    it('returns the stored key for an admin', async () => {
+      prisma.farmDocument.findUnique.mockResolvedValue(storedDocument);
+
+      await expect(
+        service.getDocumentDownload(user('admin1', 'admin'), 'doc1'),
+      ).resolves.toMatchObject({ key: storedDocument.key });
+    });
+
+    it('denies a farmer who owns a different farm', async () => {
+      prisma.farmDocument.findUnique.mockResolvedValue(storedDocument);
+
+      await expect(
+        service.getDocumentDownload(user('farmer2', 'farmer'), 'doc1'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('denies a buyer', async () => {
+      prisma.farmDocument.findUnique.mockResolvedValue(storedDocument);
+
+      await expect(
+        service.getDocumentDownload(user('buyer1', 'buyer'), 'doc1'),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('denies an unknown document with the same error as an unauthorized one', async () => {
+      prisma.farmDocument.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.getDocumentDownload(user('owner1', 'farmer'), 'missing'),
+      ).rejects.toThrow('Document not found');
+    });
+
+    it('never derives the storage key from the requested id', async () => {
+      prisma.farmDocument.findUnique.mockResolvedValue(storedDocument);
+
+      const result = await service.getDocumentDownload(
+        user('owner1', 'farmer'),
+        '../../../etc/passwd',
+      );
+
+      expect(result.key).toBe(storedDocument.key);
+      expect(prisma.farmDocument.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { id: '../../../etc/passwd' } }),
+      );
+    });
+  });
+
+  it('exposes documents through the private download path, not the storage url', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
+    prisma.farmDocument.findMany.mockResolvedValue([
+      {
+        id: 'doc1',
+        farmId: 'farm1',
+        title: 'ID card',
+        fileName: 'id.pdf',
+        url: '/api/uploads/farms/farm1/documents/9f0e.bin',
+        key: 'farms/farm1/documents/9f0e.bin',
+        mimeType: 'application/pdf',
+        kind: 'idCard',
+        reviewStatus: 'pending',
+        reviewNote: null,
+        reviewedAt: null,
+        createdAt: new Date(),
+      },
+    ]);
+
+    const [document] = await service.listMyDocuments({
+      id: 'u1',
+      email: 'f@example.com',
+      role: 'farmer',
+      locale: 'ka',
+      displayName: 'Nino',
+    } as AuthenticatedUser);
+
+    expect(document.url).toBe('/api/farms/documents/doc1/file');
+    expect(document.url).not.toContain('/api/uploads/');
   });
 });

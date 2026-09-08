@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -7,12 +8,14 @@ import {
   BadRequestException,
   Injectable,
   Logger,
+  NotFoundException,
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
-import { promises as fs } from 'fs';
+import { createReadStream, existsSync, promises as fs } from 'fs';
 import { dirname, extname, join, resolve, sep } from 'path';
+import type { Readable } from 'stream';
 import { STORAGE_DRIVER, type StorageDriver } from './storage.constants';
 
 export type StoredObject = {
@@ -134,6 +137,33 @@ export class StorageService implements OnModuleInit {
         Key: key,
       }),
     );
+  }
+
+  /** Reads a stored object by its storage key. Callers must authorize access first. */
+  async openReadStream(key: string): Promise<Readable> {
+    if (this.driver === STORAGE_DRIVER.LOCAL) {
+      const absolute = this.resolveLocalPath(key);
+      if (!existsSync(absolute)) {
+        throw new NotFoundException('File not found');
+      }
+      return createReadStream(absolute);
+    }
+
+    try {
+      const result = await this.s3Client!.send(
+        new GetObjectCommand({ Bucket: this.s3Bucket!, Key: key }),
+      );
+      if (!result.Body) {
+        throw new NotFoundException('File not found');
+      }
+      return result.Body as Readable;
+    } catch (error) {
+      const name = (error as { name?: string }).name;
+      if (name === 'NoSuchKey' || name === 'NotFound') {
+        throw new NotFoundException('File not found');
+      }
+      throw error;
+    }
   }
 
   resolveLocalPath(key: string): string {
