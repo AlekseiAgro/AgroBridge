@@ -1,0 +1,21 @@
+# Optional 301 redirects from a previous AgroBridge hostname.
+# Import after the primary site blocks, with OLD_* and the new WEB_HOST/API_HOST set:
+#
+#   export WEB_HOST=new-domain.example
+#   export API_HOST=api.new-domain.example
+#   export OLD_WEB_HOST=agrobrid.ge
+#   export OLD_API_HOST=api.agrobrid.ge
+#   caddy run --config deploy/Caddyfile.redirects --adapter caddyfile
+#
+# Do not run this file alone — it only redirects. Prefer concatenating:
+#
+#   cat deploy/Caddyfile deploy/Caddyfile.redirects > /tmp/Caddyfile.cutover
+#   caddy run --config /tmp/Caddyfile.cutover --adapter caddyfile
+
+{$OLD_WEB_HOST} {
+	redir https://{$WEB_HOST}{uri} permanent
+}
+
+{$OLD_API_HOST} {
+	redir https://{$API_HOST}{uri} permanent
+}

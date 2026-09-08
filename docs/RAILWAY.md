@@ -9,7 +9,8 @@ Railway replaces a single VPS: you run **four services** in one project.
 | `api` | NestJS (`apps/api`) |
 | `web` | Next.js (`apps/web`) |
 
-Custom domain later: `agrobrid.ge` → web, `api.agrobrid.ge` → api (Cloudflare CNAME, not an A→IP).
+Custom domain: apex → web, `api.` + apex → api (Cloudflare CNAME, not an A→IP).
+Current production host is `agrobrid.ge`. To move: [`docs/DOMAIN.md`](DOMAIN.md) and `./scripts/domain-cutover.sh <new-apex>`.
 
 ## 1. Create the project (your current screen)
 
@@ -138,12 +139,12 @@ Full demo seed (optional):
 node ./prisma/run-seed.cjs
 ```
 
-## 5. Point agrobrid.ge (Cloudflare)
+## 5. Point a custom domain (Cloudflare)
 
-After Railway domains work:
+After Railway’s `*.up.railway.app` domains work, attach your apex (today: `agrobrid.ge`):
 
-1. Railway → `web` → Custom Domain → `agrobrid.ge` (and optionally `www`).
-2. Railway → `api` → Custom Domain → `api.agrobrid.ge`.
+1. Railway → `web` → Custom Domain → apex (and optionally `www`).
+2. Railway → `api` → Custom Domain → `api.` + apex.
 3. Cloudflare DNS (follow Railway’s CNAME target exactly), usually:
 
 | Type | Name | Target | Proxy |
@@ -160,6 +161,8 @@ WEB_PUBLIC_URL=https://agrobrid.ge
 API_PUBLIC_URL=https://api.agrobrid.ge
 NEXT_PUBLIC_API_URL=https://api.agrobrid.ge/api
 ```
+
+To move off `agrobrid.ge`, run `./scripts/domain-cutover.sh <new-apex>` and follow [`docs/DOMAIN.md`](DOMAIN.md). `NEXT_PUBLIC_API_URL` is a **build-time** web variable — redeploy `web` after it changes. During cutover, `WEB_ORIGIN` can list both the old and new https origins.
 
 ## 6. Backups later
 
