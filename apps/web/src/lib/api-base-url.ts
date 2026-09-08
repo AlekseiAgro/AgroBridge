@@ -13,10 +13,23 @@
  * only our own infrastructure can hold, which is exactly what the API's `TRUST_PROXY`
  * setting trusts.
  */
+const INTERNAL_URL = process.env.API_INTERNAL_URL?.trim();
+
 const SERVER_API_URL =
-  process.env.API_INTERNAL_URL?.trim() ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  'http://localhost:3001/api';
+  INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
+// Falling back in production is a silent security regression, so say so at boot. The build
+// runs this module too, where the variable is legitimately absent (it is read at runtime).
+if (
+  !INTERNAL_URL &&
+  process.env.NODE_ENV === 'production' &&
+  process.env.NEXT_PHASE !== 'phase-production-build'
+) {
+  console.warn(
+    '[api] API_INTERNAL_URL is not set: server-side calls go through the public API URL, ' +
+      'so the API cannot tell visitors apart and rate limits apply to everyone at once.',
+  );
+}
 
 export function serverApiUrl(): string {
   return SERVER_API_URL;
