@@ -12,7 +12,9 @@
 
 - Next.js App Router, TypeScript, Tailwind CSS.
 - Locale-prefixed routes via `next-intl`: `/ka`, `/en`, `/ru`, `/de`, `/fr`, `/it`, `/es`.
-- Talks to the API over HTTP (`NEXT_PUBLIC_API_URL`).
+- Talks to the API over HTTP: the browser uses `NEXT_PUBLIC_API_URL`, the server uses the
+  private `API_INTERNAL_URL` so the API can still identify the visitor
+  (see [`RATE_LIMITING.md`](RATE_LIMITING.md)).
 
 ### `apps/api`
 

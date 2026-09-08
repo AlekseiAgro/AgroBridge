@@ -52,31 +52,48 @@ IPv4-mapped IPv6 addresses (`::ffff:1.2.3.4`) are folded onto the plain IPv4 for
 `X-Forwarded-For` is attacker-controlled. Only the entries appended by proxies we run may be
 trusted, so the API sets Express' `trust proxy` explicitly.
 
-Requests arrive by two routes with different chain lengths: straight from the browser
-through Caddy or the Railway edge, and relayed by a Next.js BFF route handler, which adds a
-hop. A fixed hop count cannot be right for both, so the production default is a trust *list*
-— `loopback,linklocal,uniquelocal` — and Express walks the chain from the right, skipping
-addresses that belong to our own infrastructure. Both routes then resolve to the real
-visitor. This is not forgeable from the public internet: a client cannot present a private
-source address, and the closest proxy always appends the true peer address last.
+Every rate-limited endpoint is reached through a Next.js BFF route handler, so the shape of
+that one path is what matters:
+
+```
+browser → Cloudflare → Railway edge → web (Next.js)
+                                       └─ private network → api
+```
+
+The web tier resolves the visitor from `CF-Connecting-IP` (Cloudflare overwrites whatever
+the client sent) and relays **one** address as `X-Forwarded-For`. The API believes it
+because the request arrives from a private peer: Railway's private network uses `fd12::/16`
+and, on dual-stack environments, `10.0.0.0/8`; Compose uses its bridge network. Hence the
+production default `loopback,linklocal,uniquelocal` — a trust *list*, not a hop count, since
+the count varies while the peer range does not.
+
+This is what `API_INTERNAL_URL` is for. Point the web tier at the public API hostname
+instead and the request re-enters through Cloudflare and the Railway edge, the peer becomes
+public, the relayed address is discarded, and every visitor collapses into a single bucket.
 
 | Deployment | Correct value |
 |---|---|
 | Local development (no proxy) | `0` (default) |
 | `docker-compose.prod.yml` behind `deploy/Caddyfile` | default |
 | Cloudflare proxying (orange cloud) in front of Caddy | default |
-| Railway, web tier reaching the API over a public URL | default plus the web tier's egress address |
+| Railway with `API_INTERNAL_URL` set to the private address | default |
 
 `TRUST_PROXY` accepts either a hop count (`1`) or a comma-separated list of keywords and
 addresses (`loopback,uniquelocal,203.0.113.7`), and the API refuses to start on a malformed
-value. Trusting too little only makes limits stricter (several clients share a bucket);
-trusting too much lets a client forge its own address. Account-scoped protections do not
-depend on the address at all, so a misconfigured value can never disable the
-verification-code attempt cap.
+value or on one that matches every address (`0.0.0.0/0`, `::/0`). Trusting too little only
+makes limits stricter (several clients share a bucket); trusting too much lets a client
+forge its own address. Account-scoped protections do not depend on the address at all, so a
+misconfigured value can never disable the verification-code attempt cap.
 
-The BFF route handlers relay the visitor's chain via `forwardedForOf` in
-`apps/web/src/lib/client-address.ts`; without that every visitor using those endpoints would
-share the Next.js server's bucket.
+Requests sent straight to the public API hostname keep resolving to the Railway edge rather
+than to the caller. That is the safe direction — nobody can claim someone else's address —
+and it costs nothing today because the browser only ever reaches those endpoints through
+the BFF, while the per-account limits that stop guessing apply either way.
+
+Spoofing is covered on both hops. A client that sends its own `X-Forwarded-For` or
+`CF-Connecting-IP` is overwritten by Cloudflare and ignored by `visitorAddressOf` in
+`apps/web/src/lib/client-address.ts`, which reads only headers a proxy wrote. A client that
+reaches the API directly cannot be a private peer, so nothing it forwards is read.
 
 The boot log prints the effective trust setting and the effective limits.
 
@@ -158,4 +175,14 @@ warning instead of failing:
 ```bash
 TEST_DATABASE_URL=postgresql://agrobridge:agrobridge@localhost:5432/agrobridge_test \
   pnpm --filter @agrobridge/api test
+```
+
+`scripts/verify-bff-client-ip.sh` checks the deployed topology end to end — two visitors
+through the BFF, spoofing attempts, code sending, authenticated routes — against a running
+web and API pair. Run it after a deploy that changes anything about proxies or
+`API_INTERNAL_URL`; the counter-key assertions need database access and the API's
+`JWT_SECRET`:
+
+```bash
+WEB=https://agrobridge.ge API=https://api.agrobridge.ge scripts/verify-bff-client-ip.sh
 ```
