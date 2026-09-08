@@ -49,14 +49,8 @@ export class UploadsController {
     return this.serveLocalFile(`farms/${farmId}/photos/${filename}`, filename, res);
   }
 
-  @Get('farms/:farmId/documents/:filename')
-  async serveFarmDocument(
-    @Param('farmId') farmId: string,
-    @Param('filename') filename: string,
-    @Res() res: Response,
-  ) {
-    return this.serveLocalFile(`farms/${farmId}/documents/${filename}`, filename, res);
-  }
+  // Farm verification documents are intentionally absent here: they are private and
+  // served by FarmDocumentsController behind owner/admin authorization.
 
   private serveLocalFile(key: string, filename: string, res: Response) {
     if (this.storage.getDriver() !== STORAGE_DRIVER.LOCAL) {

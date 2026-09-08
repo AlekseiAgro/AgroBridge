@@ -1,3 +1,4 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { StorageService } from './storage.service';
@@ -33,5 +34,39 @@ describe('StorageService', () => {
     );
 
     expect(() => service.resolveLocalPath('../secret.txt')).toThrow();
+  });
+
+  it('rejects path traversal when opening a read stream', async () => {
+    const root = join('/tmp', 'agrobridge-uploads-test');
+    const service = new StorageService(
+      {
+        get: (key: string) => {
+          if (key === 'STORAGE_DRIVER') return 'local';
+          if (key === 'STORAGE_LOCAL_DIR') return root;
+          return undefined;
+        },
+      } as ConfigService,
+    );
+
+    await expect(service.openReadStream('farms/../../etc/passwd')).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+  });
+
+  it('reports a missing local object as not found', async () => {
+    const root = join('/tmp', 'agrobridge-uploads-test');
+    const service = new StorageService(
+      {
+        get: (key: string) => {
+          if (key === 'STORAGE_DRIVER') return 'local';
+          if (key === 'STORAGE_LOCAL_DIR') return root;
+          return undefined;
+        },
+      } as ConfigService,
+    );
+
+    await expect(
+      service.openReadStream('farms/farm1/documents/does-not-exist.bin'),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 });
