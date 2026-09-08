@@ -10,14 +10,14 @@ describe('parseCorsOrigins', () => {
   });
 
   it('parses a single origin', () => {
-    expect(parseCorsOrigins('https://agrobrid.ge')).toEqual([
-      'https://agrobrid.ge',
+    expect(parseCorsOrigins('https://agrobridge.ge')).toEqual([
+      'https://agrobridge.ge',
     ]);
   });
 
   it('parses dual origins and trims whitespace', () => {
     expect(
-      parseCorsOrigins('https://agrobrid.ge, https://new-domain.example'),
-    ).toEqual(['https://agrobrid.ge', 'https://new-domain.example']);
+      parseCorsOrigins('https://agrobrid.ge, https://agrobridge.ge'),
+    ).toEqual(['https://agrobrid.ge', 'https://agrobridge.ge']);
   });
 });

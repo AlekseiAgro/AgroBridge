@@ -10,7 +10,7 @@ Railway replaces a single VPS: you run **four services** in one project.
 | `web` | Next.js (`apps/web`) |
 
 Custom domain: apex → web, `api.` + apex → api (Cloudflare CNAME, not an A→IP).
-Current production host is `agrobrid.ge`. To move: [`docs/DOMAIN.md`](DOMAIN.md) and `./scripts/domain-cutover.sh <new-apex>`.
+Production target is `agrobridge.ge` (cutover from `agrobrid.ge`: [`docs/DOMAIN.md`](DOMAIN.md)).
 
 ## 1. Create the project (your current screen)
 
@@ -57,7 +57,7 @@ JWT_SECRET=<generate a long random string>
 JWT_EXPIRES_SECONDS=604800
 SUPPORT_EMAIL=gabo.m0619@gmail.com
 MAIL_DRIVER=console
-MAIL_FROM=AgroBridge <noreply@agrobrid.ge>
+MAIL_FROM=AgroBridge <noreply@agrobridge.ge>
 # To send real emails (verification codes), switch to SMTP and set credentials:
 # MAIL_DRIVER=smtp
 # SMTP_HOST=smtp.resend.com
@@ -139,12 +139,12 @@ Full demo seed (optional):
 node ./prisma/run-seed.cjs
 ```
 
-## 5. Point a custom domain (Cloudflare)
+## 5. Point agrobridge.ge (Cloudflare)
 
-After Railway’s `*.up.railway.app` domains work, attach your apex (today: `agrobrid.ge`):
+After Railway’s `*.up.railway.app` domains work, attach the apex:
 
-1. Railway → `web` → Custom Domain → apex (and optionally `www`).
-2. Railway → `api` → Custom Domain → `api.` + apex.
+1. Railway → `web` → Custom Domain → `agrobridge.ge` (and optionally `www`).
+2. Railway → `api` → Custom Domain → `api.agrobridge.ge`.
 3. Cloudflare DNS (follow Railway’s CNAME target exactly), usually:
 
 | Type | Name | Target | Proxy |
@@ -153,16 +153,25 @@ After Railway’s `*.up.railway.app` domains work, attach your apex (today: `agr
 | CNAME | `www` | Railway web hostname / redirect | |
 | CNAME | `api` | Railway api hostname | DNS only recommended at first |
 
-4. Update Railway variables to the real domains and **redeploy web**:
+4. Update Railway variables and **redeploy web**:
+
+Cutover (keep old CORS origin until 301s settle):
 
 ```bash
-WEB_ORIGIN=https://agrobrid.ge
-WEB_PUBLIC_URL=https://agrobrid.ge
-API_PUBLIC_URL=https://api.agrobrid.ge
-NEXT_PUBLIC_API_URL=https://api.agrobrid.ge/api
+WEB_ORIGIN=https://agrobrid.ge,https://agrobridge.ge
+WEB_PUBLIC_URL=https://agrobridge.ge
+API_PUBLIC_URL=https://api.agrobridge.ge
+NEXT_PUBLIC_API_URL=https://api.agrobridge.ge/api
+MAIL_FROM=AgroBridge <noreply@agrobridge.ge>
 ```
 
-To move off `agrobrid.ge`, run `./scripts/domain-cutover.sh <new-apex>` and follow [`docs/DOMAIN.md`](DOMAIN.md). `NEXT_PUBLIC_API_URL` is a **build-time** web variable — redeploy `web` after it changes. During cutover, `WEB_ORIGIN` can list both the old and new https origins.
+Final (after redirects):
+
+```bash
+WEB_ORIGIN=https://agrobridge.ge
+```
+
+`NEXT_PUBLIC_API_URL` is a **build-time** web variable — redeploy `web` after it changes. Redirect `agrobrid.ge` → `agrobridge.ge` and `api.agrobrid.ge` → `api.agrobridge.ge` (Cloudflare Redirect Rule or Caddy). Full checklist: [`docs/DOMAIN.md`](DOMAIN.md).
 
 ## 6. Backups later
 

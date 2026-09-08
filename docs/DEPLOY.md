@@ -2,7 +2,7 @@
 
 This guide covers a single-host Docker deploy (VPS) using `docker-compose.prod.yml`.
 
-Current production host is **agrobrid.ge**. Domain moves are env + DNS — see [`docs/DOMAIN.md`](DOMAIN.md) and `./scripts/domain-cutover.sh <new-apex>`.
+Production target is **agrobridge.ge** (cutover from **agrobrid.ge**). See [`docs/DOMAIN.md`](DOMAIN.md).
 
 ## What you need
 
@@ -18,7 +18,7 @@ Auth cookies are `secure` when `NODE_ENV=production`, so **login will not stick 
 cp .env.production.example .env.production
 ```
 
-The example is pre-filled for the current production hosts **agrobrid.ge** / **api.agrobrid.ge**. Change secrets at minimum:
+The example is pre-filled for **agrobridge.ge** / **api.agrobridge.ge**. Change secrets at minimum:
 
 | Variable | Purpose |
 |----------|---------|
@@ -52,8 +52,8 @@ Services:
 Health:
 
 ```bash
-curl -sS https://api.agrobrid.ge/api/health
-curl -sS -o /dev/null -w '%{http_code}\n' https://agrobrid.ge
+curl -sS https://api.agrobridge.ge/api/health
+curl -sS -o /dev/null -w '%{http_code}\n' https://agrobridge.ge
 ```
 
 ## 3. Admin login + optional demo seed
@@ -74,7 +74,7 @@ node ./prisma/ensure-admin.cjs
 
 ## 4. Reverse proxy
 
-Point HTTPS to containers (see `deploy/Caddyfile`; override `WEB_HOST` / `API_HOST` when the apex is not `agrobrid.ge`):
+Point HTTPS to containers (see `deploy/Caddyfile`; defaults are `agrobridge.ge` / `api.agrobridge.ge`):
 
 - `https://<apex>` → `127.0.0.1:3000` (web)
 - `https://api.<apex>` → `127.0.0.1:3001` (api)
