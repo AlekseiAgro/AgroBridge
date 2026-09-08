@@ -130,8 +130,36 @@ describe('rate limiting over HTTP', () => {
   });
 
   it('resolves the visitor behind the BFF relay with the production trust list', async () => {
-    // What a browser request through Caddy and a Next.js route handler looks like: the
-    // visitor first, then the web tier's private address appended by our own relay.
+    // What a BFF request looks like once the web tier reaches us over the private network:
+    // the peer is an address only our own infrastructure holds, and it relays exactly one
+    // entry — the visitor it resolved.
+    app = await buildApp({
+      trustProxy: ['loopback', 'linklocal', 'uniquelocal'],
+      env: { RATE_LIMIT_LOGIN_MAX: '1' },
+    });
+    const server = app.getHttpServer();
+
+    await request(server)
+      .post('/api/auth/login')
+      .set('X-Forwarded-For', '203.0.113.1')
+      .send(CREDENTIALS)
+      .expect(401);
+    await request(server)
+      .post('/api/auth/login')
+      .set('X-Forwarded-For', '203.0.113.1')
+      .send(CREDENTIALS)
+      .expect(429);
+
+    // Another visitor relayed by the same web tier is counted separately.
+    await request(server)
+      .post('/api/auth/login')
+      .set('X-Forwarded-For', '203.0.113.2')
+      .send(CREDENTIALS)
+      .expect(401);
+  });
+
+  it('reads past infrastructure hops when a relay adds its own address', async () => {
+    // Compose puts Caddy in front, so the chain can still end in a private address.
     app = await buildApp({
       trustProxy: ['loopback', 'linklocal', 'uniquelocal'],
       env: { RATE_LIMIT_LOGIN_MAX: '1' },
@@ -145,16 +173,31 @@ describe('rate limiting over HTTP', () => {
       .expect(401);
     await request(server)
       .post('/api/auth/login')
-      .set('X-Forwarded-For', '203.0.113.1, 10.1.2.3')
-      .send(CREDENTIALS)
-      .expect(429);
-
-    // Another visitor relayed by the same web tier is counted separately.
-    await request(server)
-      .post('/api/auth/login')
       .set('X-Forwarded-For', '203.0.113.2, 10.1.2.3')
       .send(CREDENTIALS)
       .expect(401);
+  });
+
+  it('ignores entries a client prepended to the relayed address', async () => {
+    app = await buildApp({
+      trustProxy: ['loopback', 'linklocal', 'uniquelocal'],
+      env: { RATE_LIMIT_LOGIN_MAX: '1' },
+    });
+    const server = app.getHttpServer();
+
+    await request(server)
+      .post('/api/auth/login')
+      .set('X-Forwarded-For', '203.0.113.1')
+      .send(CREDENTIALS)
+      .expect(401);
+
+    // Claiming to be someone else in front of the relayed entry buys nothing: the address
+    // appended last still wins, so the attacker only ever spends its own budget.
+    await request(server)
+      .post('/api/auth/login')
+      .set('X-Forwarded-For', '198.51.100.9, 203.0.113.1')
+      .send(CREDENTIALS)
+      .expect(429);
   });
 
   it('ignores a forged X-Forwarded-For when no proxy is trusted', async () => {

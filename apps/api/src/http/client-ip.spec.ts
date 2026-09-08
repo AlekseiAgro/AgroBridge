@@ -37,6 +37,27 @@ describe('resolveTrustProxy', () => {
     }
   });
 
+  it('refuses ranges covering every address, which any client could claim to be', () => {
+    for (const value of [
+      '0.0.0.0/0',
+      '::/0',
+      '0.0.0.0',
+      '::',
+      'loopback,0.0.0.0/0',
+      '10.0.0.0/0',
+    ]) {
+      expect(() => resolveTrustProxy({ TRUST_PROXY: value } as NodeJS.ProcessEnv)).toThrow(
+        /would trust every address/,
+      );
+    }
+  });
+
+  it('still accepts the private ranges the BFF reaches us from', () => {
+    expect(
+      resolveTrustProxy({ TRUST_PROXY: 'fd12::/16,10.0.0.0/8' } as NodeJS.ProcessEnv),
+    ).toEqual(['fd12::/16', '10.0.0.0/8']);
+  });
+
   it('describes both forms for the boot log', () => {
     expect(describeTrustProxy(2)).toBe('2 hop(s)');
     expect(describeTrustProxy(['loopback', 'uniquelocal'])).toBe('loopback, uniquelocal');
