@@ -110,7 +110,7 @@ Statuses: `pending` → `offered` → `accepted` | `declined` (or `cancelled` wh
 - Farmer submits a product for review (`Submit for moderation`)
 - Statuses: `draft` → `pending` → `approved` | `rejected`
 - Public catalog shows only **approved + published** products
-- Admin desk: `/{locale}/dashboard/admin` (e.g. `/en/dashboard/admin` or `https://agrobrid.ge/en/dashboard/admin`)
+- Admin desk: `/{locale}/dashboard/admin` (e.g. `/en/dashboard/admin` or `https://agrobridge.ge/en/dashboard/admin`)
 - Product review queue: `/{locale}/dashboard/admin?section=products&status=pending`
 - Admins are emailed when a listing enters moderation
 - Production admin: set `ADMIN_EMAIL` / `ADMIN_PASSWORD` on the API service; the container upserts that account on start (`prisma/ensure-admin.cjs`)
@@ -160,7 +160,7 @@ Chat messages email the recipient (skipped if they recently opened the thread).
 
 Single-host production compose (web + api + Postgres + Redis).
 
-Configured by default for **agrobrid.ge** (API on **api.agrobrid.ge**). Domain is env-only — see [`docs/DOMAIN.md`](docs/DOMAIN.md) to move later without code changes.
+Configured by default for **agrobridge.ge** (API on **api.agrobridge.ge**). Domain is env-only — see [`docs/DOMAIN.md`](docs/DOMAIN.md).
 
 **Hosting options**
 
@@ -175,6 +175,6 @@ pnpm docker:prod:up
 
 ## Next implementation steps
 
-1. Deploy on Railway ([`docs/RAILWAY.md`](docs/RAILWAY.md)) or a VPS, then attach `agrobrid.ge`
+1. Deploy on Railway ([`docs/RAILWAY.md`](docs/RAILWAY.md)) or a VPS, then attach `agrobridge.ge` ([`docs/DOMAIN.md`](docs/DOMAIN.md))
 2. Turn on SMTP + S3/R2 for mail and durable uploads
 3. Payment / order confirmation flow (product)

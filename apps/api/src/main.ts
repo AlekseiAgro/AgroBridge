@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { parseCorsOrigins } from './http/cors-origins';
 
 function assertProductionSecrets() {
   if (process.env.NODE_ENV !== 'production') return;
@@ -20,7 +21,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
   app.enableCors({
-    origin: process.env.WEB_ORIGIN?.split(',') ?? ['http://localhost:3000'],
+    origin: parseCorsOrigins(process.env.WEB_ORIGIN),
     credentials: true,
   });
   app.useGlobalPipes(

@@ -2,7 +2,7 @@
 
 This guide covers a single-host Docker deploy (VPS) using `docker-compose.prod.yml`.
 
-For **agrobrid.ge** now and a later domain move, see [`docs/DOMAIN.md`](DOMAIN.md).
+Production host is **agrobridge.ge**. See [`docs/DOMAIN.md`](DOMAIN.md).
 
 ## What you need
 
@@ -18,7 +18,7 @@ Auth cookies are `secure` when `NODE_ENV=production`, so **login will not stick 
 cp .env.production.example .env.production
 ```
 
-The example is pre-filled for **agrobrid.ge** / **api.agrobrid.ge**. Change secrets at minimum:
+The example is pre-filled for **agrobridge.ge** / **api.agrobridge.ge**. Change secrets at minimum:
 
 | Variable | Purpose |
 |----------|---------|
@@ -52,8 +52,8 @@ Services:
 Health:
 
 ```bash
-curl -sS https://api.agrobrid.ge/api/health
-curl -sS -o /dev/null -w '%{http_code}\n' https://agrobrid.ge
+curl -sS https://api.agrobridge.ge/api/health
+curl -sS -o /dev/null -w '%{http_code}\n' https://agrobridge.ge
 ```
 
 ## 3. Admin login + optional demo seed
@@ -72,18 +72,18 @@ node ./prisma/ensure-admin.cjs
 /app/node_modules/.bin/prisma db seed
 ```
 
-## 4. Reverse proxy (agrobrid.ge)
+## 4. Reverse proxy
 
-Point HTTPS to containers (see `deploy/Caddyfile`):
+Point HTTPS to containers (see `deploy/Caddyfile`; defaults are `agrobridge.ge` / `api.agrobridge.ge`):
 
-- `https://agrobrid.ge` → `127.0.0.1:3000` (web)
-- `https://api.agrobrid.ge` → `127.0.0.1:3001` (api)
+- `https://<apex>` → `127.0.0.1:3000` (web)
+- `https://api.<apex>` → `127.0.0.1:3001` (api)
 
-Do **not** mount Nest at `https://agrobrid.ge/api` — Next.js already owns `/api/*` as BFF routes.
+Do **not** mount Nest at `https://<apex>/api` — Next.js already owns `/api/*` as BFF routes.
 
 ## 5. Production checklist
 
-- [ ] DNS for `agrobrid.ge` and `api.agrobrid.ge`
+- [ ] DNS for the web apex and `api.` subdomain (see [`docs/DOMAIN.md`](DOMAIN.md))
 - [ ] HTTPS enabled; env URLs use `https://`
 - [ ] Strong `JWT_SECRET` and `POSTGRES_PASSWORD`
 - [ ] `SUPPORT_EMAIL` reaches a monitored inbox

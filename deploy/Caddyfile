@@ -1,29 +1,19 @@
-# Caddy reverse proxy for AgroBridge on agrobrid.ge
-# Install Caddy on the VPS, point DNS, then:
-#   caddy run --config deploy/Caddyfile
+# Caddy reverse proxy for AgroBridge (VPS).
+# Hostnames come from env so a domain move does not require editing this file:
 #
-# To move domains later: change the site addresses below + update .env.production
-# (WEB_*, API_*, NEXT_PUBLIC_API_URL) and rebuild/restart web.
+#   export WEB_HOST=agrobridge.ge
+#   export API_HOST=api.agrobridge.ge
+#   caddy run --config deploy/Caddyfile --adapter caddyfile
+#
+# Defaults are the current production hosts.
+# Optional 301 from another hostname: see deploy/Caddyfile.redirects
 
-agrobrid.ge {
+{$WEB_HOST:agrobridge.ge} {
 	encode gzip
 	reverse_proxy 127.0.0.1:3000
 }
 
-api.agrobrid.ge {
+{$API_HOST:api.agrobridge.ge} {
 	encode gzip
 	reverse_proxy 127.0.0.1:3001
 }
-
-# Domain migration example (keep old host redirecting while cutover completes):
-# new-domain.example {
-# 	encode gzip
-# 	reverse_proxy 127.0.0.1:3000
-# }
-# api.new-domain.example {
-# 	encode gzip
-# 	reverse_proxy 127.0.0.1:3001
-# }
-# agrobrid.ge {
-# 	redir https://new-domain.example{uri} permanent
-# }

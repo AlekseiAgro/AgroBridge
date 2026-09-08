@@ -9,7 +9,8 @@ Railway replaces a single VPS: you run **four services** in one project.
 | `api` | NestJS (`apps/api`) |
 | `web` | Next.js (`apps/web`) |
 
-Custom domain later: `agrobrid.ge` → web, `api.agrobrid.ge` → api (Cloudflare CNAME, not an A→IP).
+Custom domain: apex → web, `api.` + apex → api (Cloudflare CNAME, not an A→IP).
+Production host is `agrobridge.ge` ([`docs/DOMAIN.md`](DOMAIN.md)).
 
 ## 1. Create the project (your current screen)
 
@@ -56,7 +57,7 @@ JWT_SECRET=<generate a long random string>
 JWT_EXPIRES_SECONDS=604800
 SUPPORT_EMAIL=gabo.m0619@gmail.com
 MAIL_DRIVER=console
-MAIL_FROM=AgroBridge <noreply@agrobrid.ge>
+MAIL_FROM=AgroBridge <noreply@agrobridge.ge>
 # To send real emails (verification codes), switch to SMTP and set credentials:
 # MAIL_DRIVER=smtp
 # SMTP_HOST=smtp.resend.com
@@ -138,12 +139,12 @@ Full demo seed (optional):
 node ./prisma/run-seed.cjs
 ```
 
-## 5. Point agrobrid.ge (Cloudflare)
+## 5. Point agrobridge.ge (Cloudflare)
 
-After Railway domains work:
+After Railway’s `*.up.railway.app` domains work, attach the apex:
 
-1. Railway → `web` → Custom Domain → `agrobrid.ge` (and optionally `www`).
-2. Railway → `api` → Custom Domain → `api.agrobrid.ge`.
+1. Railway → `web` → Custom Domain → `agrobridge.ge` (and optionally `www`).
+2. Railway → `api` → Custom Domain → `api.agrobridge.ge`.
 3. Cloudflare DNS (follow Railway’s CNAME target exactly), usually:
 
 | Type | Name | Target | Proxy |
@@ -152,14 +153,17 @@ After Railway domains work:
 | CNAME | `www` | Railway web hostname / redirect | |
 | CNAME | `api` | Railway api hostname | DNS only recommended at first |
 
-4. Update Railway variables to the real domains and **redeploy web**:
+4. Update Railway variables to the public hosts and **redeploy web**:
 
 ```bash
-WEB_ORIGIN=https://agrobrid.ge
-WEB_PUBLIC_URL=https://agrobrid.ge
-API_PUBLIC_URL=https://api.agrobrid.ge
-NEXT_PUBLIC_API_URL=https://api.agrobrid.ge/api
+WEB_ORIGIN=https://agrobridge.ge
+WEB_PUBLIC_URL=https://agrobridge.ge
+API_PUBLIC_URL=https://api.agrobridge.ge
+NEXT_PUBLIC_API_URL=https://api.agrobridge.ge/api
+MAIL_FROM=AgroBridge <noreply@agrobridge.ge>
 ```
+
+`NEXT_PUBLIC_API_URL` is a **build-time** web variable — redeploy `web` after it changes. Optional 301 from the previous names `agrobrid.ge` / `api.agrobrid.ge` can stay in Cloudflare. See [`docs/DOMAIN.md`](DOMAIN.md).
 
 ## 6. Backups later
 
