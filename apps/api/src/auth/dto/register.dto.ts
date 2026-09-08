@@ -1,5 +1,8 @@
 import { isLocale, isRegisterableRole } from '@agrobridge/shared';
+import { Transform } from 'class-transformer';
 import {
+  Equals,
+  IsBoolean,
   IsEmail,
   IsOptional,
   IsString,
@@ -56,4 +59,11 @@ export class RegisterDto {
   @IsString()
   @Validate(LocaleConstraint)
   locale?: string;
+
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  @Equals(true, {
+    message: 'You must accept the Terms of Use, Privacy Policy, and Marketplace Rules',
+  })
+  acceptedLegal!: boolean;
 }

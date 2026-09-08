@@ -56,7 +56,9 @@
     },
     "dualCapabilityHint": "Con un solo account puoi vendere prodotti e pubblicare richieste di acquisto. Scegli da dove preferisci iniziare.",
     "registerEmailVerifyHint": "Dopo la registrazione inviamo un codice di conferma. L’account si apre dopo la verifica dell’email.",
-    "roleHint": "Scegli venditore o acquirente. Lo usiamo per le statistiche di registrazione."
+    "roleHint": "Scegli venditore o acquirente. Lo usiamo per le statistiche di registrazione.",
+    "acceptLegal": "Accetto i <terms>Termini di utilizzo</terms>, l’<privacy>Informativa sulla privacy</privacy> e le <rules>Regole del marketplace</rules>.",
+    "acceptLegalRequired": "Accetta i Termini di utilizzo, l’Informativa sulla privacy e le Regole del marketplace."
   },
   "account": {
     "title": "Il tuo account",
@@ -89,7 +91,12 @@
     "explore": "Esplora",
     "account": "Account",
     "support": "Assistenza",
-    "copyright": "© {year} AgroBridge"
+    "copyright": "© {year} AgroBridge",
+    "legal": "Note legali",
+    "privacy": "Privacy",
+    "terms": "Termini di utilizzo",
+    "cookies": "Cookie",
+    "rules": "Regole del marketplace"
   },
   "support": {
     "title": "Assistenza",

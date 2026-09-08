@@ -1,0 +1,291 @@
+{
+  "nav": "Legal",
+  "updatedLabel": "Last updated: {date}",
+  "updatedDate": "8 September 2026",
+  "operator": "These documents apply to the AgroBridge platform at agrobridge.ge, operated from Georgia. They are not a substitute for independent legal advice.",
+  "contactLead": "Questions: use the Support page or email {email}.",
+  "indexTitle": "Legal",
+  "indexSubtitle": "How AgroBridge handles accounts, marketplace activity, and cookies.",
+  "cookieNotice": "We use essential cookies to keep you signed in and to remember your language. See the Cookie Policy.",
+  "cookieNoticeOk": "OK",
+  "cookieNoticePolicy": "Cookie Policy",
+  "docs": {
+    "privacy": {
+      "title": "Privacy Policy",
+      "description": "How AgroBridge collects, uses, and stores personal data for this B2B marketplace.",
+      "sections": [
+        {
+          "title": "1. Who we are",
+          "body": [
+            "AgroBridge is an online B2B marketplace that connects Georgian agricultural producers with professional buyers in Georgia and abroad. The platform is available at https://agrobridge.ge (the “Platform”).",
+            "The operator of the Platform (“we”, “us”) processes personal data to provide accounts, listings, quote requests, chat, verification, and related notices. For operator identity, registered address, and data-protection contact details, write via Support or {email}."
+          ]
+        },
+        {
+          "title": "2. Scope",
+          "body": [
+            "This policy describes processing of personal data of registered users and visitors who submit a support request. It covers farmers/producers, buyers, and administrators.",
+            "Business names, farm profiles, product listings, and similar commercial information that you choose to publish are shown to other users as part of the marketplace. Chat and quote requests are visible to the other party in that thread.",
+            "Processing is carried out in line with the Law of Georgia on Personal Data Protection. Where the GDPR applies to you as an EU/EEA data subject, we also describe those rights below."
+          ]
+        },
+        {
+          "title": "3. Data we collect",
+          "body": [
+            "Account: email address, password (stored as a hash), display name, role (farmer or buyer), language, optional seller/buyer type, avatar, and timestamps such as email or phone verification.",
+            "Verification and farm records: phone number, email confirmation codes, producer verification steps, company identification codes you submit, farm documents and photos, product photos, videos, certificates, harvest windows, and related listing fields.",
+            "Marketplace activity: quote requests (RFQs) and offers, purchase requests and quotes, chat messages and optional translations, ratings and reviews, harvest watches, alert subscriptions, and in-platform notifications.",
+            "Support: name, email, subject, and message if you contact us through the Support form.",
+            "Technical: authentication cookies, language preference, and ordinary server logs (for example IP address, user agent, and time) needed to operate, secure, and debug the Platform."
+          ]
+        },
+        {
+          "title": "4. Why we use data and legal bases",
+          "body": [
+            "To perform the contract for the Platform: create and secure your account, publish and moderate listings, run RFQs and purchase requests, deliver chat and notifications, and provide the cabinet.",
+            "Legitimate interests: prevent abuse and fraud, keep the service stable, improve features, and send operational notices about your account or listings.",
+            "Consent: where you opt into alert subscriptions or harvest watches, or where you ask us to process a support request. You may withdraw marketing-style alerts in the cabinet; essential service messages may continue.",
+            "Legal obligation: retain or disclose information if required by Georgian (or other applicable) law, including to competent authorities.",
+            "Place-of-origin suggestions may call Google’s Places API when you type a settlement. That query is processed under Google’s terms. Optional AI translation of chat, if enabled by configuration, is sent to the translation provider solely to produce a translation for the other party."
+          ]
+        },
+        {
+          "title": "5. Who can see data and processors",
+          "body": [
+            "Other users see the profile, farm, listing, and rating information you publish, and the messages or requests you send them. Administrators see content needed to moderate listings, documents, and reports.",
+            "We use infrastructure and processors that host the application, database, file storage (local disk or object storage such as S3/R2), email delivery (SMTP), and, if configured, Google Places and a translation provider.",
+            "We do not sell personal data. We do not run a payment service; we do not collect card numbers."
+          ]
+        },
+        {
+          "title": "6. International transfers",
+          "body": [
+            "The Platform is operated for Georgian producers and international buyers. Hosting, email, or optional APIs may process data outside Georgia, including in the EU or other countries.",
+            "Where GDPR restricted transfers apply, we rely on the provider’s appropriate safeguards (for example standard contractual clauses) and only use those services as needed to run the Platform."
+          ]
+        },
+        {
+          "title": "7. Retention",
+          "body": [
+            "We keep account and marketplace records while your account is active and for a reasonable period after closure or inactivity, so we can handle disputes, security, and legal duties.",
+            "You may request account deletion from the cabinet. We then delete or irreversibly anonymise personal data we do not need to keep (for example legal claims, security logs, or financial/tax records if they exist later). Public listings and messages already seen by another user may remain in that user’s history in redacted form if deletion would break an existing deal record.",
+            "Support emails and server logs are kept only as long as needed for the request or for security."
+          ]
+        },
+        {
+          "title": "8. Security",
+          "body": [
+            "Passwords are hashed. Session tokens are stored in an HTTP-only cookie. Access to administration tools is limited to admin accounts. No method of transmission or storage is completely secure; you must also keep your password confidential."
+          ]
+        },
+        {
+          "title": "9. Your rights",
+          "body": [
+            "Depending on applicable law (including the Law of Georgia on Personal Data Protection and, where it applies, the GDPR), you may request access, correction, deletion, restriction, objection, or portability of your personal data, and you may complain to a supervisory authority.",
+            "In Georgia, the supervisory authority is the Personal Data Protection Service. EU/EEA users may also contact their local data protection authority.",
+            "To exercise rights, use Support or {email}. We may need to verify that the request comes from the account holder."
+          ]
+        },
+        {
+          "title": "10. Children",
+          "body": [
+            "The Platform is for persons 18 years or older acting in a trade or professional capacity. We do not knowingly collect data from children."
+          ]
+        },
+        {
+          "title": "11. Changes",
+          "body": [
+            "We may update this policy when the Platform or the law changes. The “Last updated” date at the top will change. Material changes may also be announced in the cabinet or by email."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "description": "The contract between you and AgroBridge for use of the B2B marketplace.",
+      "sections": [
+        {
+          "title": "1. Agreement",
+          "body": [
+            "These Terms of Use (“Terms”) govern access to AgroBridge at https://agrobridge.ge. By creating an account or using the Platform you agree to these Terms, the Privacy Policy, the Cookie Policy, and the Marketplace Rules.",
+            "If you use the Platform for an organisation, you confirm that you have authority to bind that organisation."
+          ]
+        },
+        {
+          "title": "2. B2B service, not consumer retail",
+          "body": [
+            "AgroBridge is a business-to-business matching and communication service for agricultural trade. You act as a professional (producer, trader, buyer, or similar), not as a consumer shopping for household use.",
+            "Consumer-protection rules that apply only to consumer distance contracts generally do not apply to your use of the Platform. Mandatory law that cannot be waived still applies."
+          ]
+        },
+        {
+          "title": "3. Eligibility and accounts",
+          "body": [
+            "You must be at least 18 and able to enter a contract. You must provide an accurate email and keep credentials secure. You are responsible for activity under your account.",
+            "We may require email verification before you use the cabinet, and additional producer verification (phone, documents, company registry data) before certain selling features. We may refuse, suspend, or close accounts that are incomplete, misleading, abusive, or unlawful.",
+            "One natural person or organisation should not create multiple accounts to evade moderation, ratings, or blocks."
+          ]
+        },
+        {
+          "title": "4. Your content",
+          "body": [
+            "You retain ownership of listings, photos, videos, documents, chat messages, and other material you upload (“User Content”). You grant us a worldwide, non-exclusive licence to host, store, reproduce, and display that content on the Platform so the marketplace can function (including thumbnails, translations of interface labels, and moderation).",
+            "You confirm that you have the rights to the User Content, that it is accurate to the best of your knowledge, and that it does not infringe third-party rights or applicable law (including food, phytosanitary, labelling, and advertising rules).",
+            "We may refuse, edit, hide, or remove User Content that violates these Terms or the Marketplace Rules, including by returning a listing to moderation."
+          ]
+        },
+        {
+          "title": "5. Quotes, requests, and deals",
+          "body": [
+            "RFQs, offers, purchase requests, and chat are tools for users to negotiate. Unless we say otherwise in writing, AgroBridge is not a party to the supply contract between a seller and a buyer, does not hold goods, and does not process payments.",
+            "An offer or request on the Platform is not automatically a binding sale. Binding terms exist only between the users, under the law they choose or that otherwise applies, including quantity, quality, Incoterms, price, and delivery.",
+            "Ratings after a completed deal reflect user opinions. They are not an endorsement by AgroBridge."
+          ]
+        },
+        {
+          "title": "6. Acceptable use",
+          "body": [
+            "You may not: misuse another user’s data; scrape the catalog in a way that overloads the service; post malware or spam; impersonate others; list illegal, counterfeit, or unsafe goods; or interfere with moderation or security.",
+            "We may rate-limit, block, or report conduct to authorities where we reasonably believe it is required or justified."
+          ]
+        },
+        {
+          "title": "7. Platform availability",
+          "body": [
+            "We aim for continuous availability but do not guarantee uninterrupted or error-free operation. Features such as AI chat translation may be switched off. Harvest forecasts and “market insight” notes are indicative only and are not financial, trading, or agronomic advice."
+          ]
+        },
+        {
+          "title": "8. Disclaimers and liability",
+          "body": [
+            "The Platform is provided “as is”. To the fullest extent permitted by law, we disclaim implied warranties of merchantability, fitness for a particular purpose, and non-infringement.",
+            "We are not liable for the quality, legality, or delivery of products, for customs or phytosanitary clearance, for other users’ statements, or for deals concluded off-platform.",
+            "To the fullest extent permitted by law, our aggregate liability arising out of the Platform is limited to one hundred (100) GEL, except for death or personal injury caused by our negligence, fraud, or other liability that cannot be limited."
+          ]
+        },
+        {
+          "title": "9. Termination",
+          "body": [
+            "You may stop using the Platform and request deletion of your account as described in the cabinet and the Privacy Policy.",
+            "We may suspend or terminate access if you materially breach these Terms, if required by law, or if we discontinue the service. Sections that by nature should survive (including User Content licences already exercised, disclaimers, and liability limits) remain in effect."
+          ]
+        },
+        {
+          "title": "10. Governing law",
+          "body": [
+            "These Terms are governed by the law of Georgia, excluding conflict-of-law rules. Courts of Georgia have exclusive jurisdiction, unless mandatory law gives you a right to sue in another forum."
+          ]
+        },
+        {
+          "title": "11. Changes",
+          "body": [
+            "We may update these Terms. Continued use after the updated date constitutes acceptance, except where mandatory law requires a different process. The current version is always published on this page."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "description": "Cookies and similar technologies used by AgroBridge.",
+      "sections": [
+        {
+          "title": "1. What we use",
+          "body": [
+            "Cookies are small files stored on your device. AgroBridge uses them only as needed to run a signed-in B2B service and to remember your language. We do not currently use advertising or cross-site tracking cookies, and we do not run a third-party analytics pixel on the public site.",
+            "We also use the browser’s localStorage to remember that you dismissed the cookie notice (key: agrobridge_cookie_notice_ack). That is not used to identify you across sites."
+          ]
+        },
+        {
+          "title": "2. Essential cookies",
+          "body": [
+            "agrobridge_token: HTTP-only session cookie set after you log in or register. It authenticates you to the Platform, is sent only to AgroBridge, uses the SameSite=Lax attribute, is marked Secure in production, and expires after about seven days (or when you log out).",
+            "NEXT_LOCALE: language preference cookie set by the internationalisation library so the site can keep your selected language (ka, en, ru, de, fr, it, or es).",
+            "These cookies are strictly necessary. The service cannot keep you signed in or consistently localised without them. Consent is not required for strictly necessary cookies under applicable EU/Georgian rules, but we still explain them here."
+          ]
+        },
+        {
+          "title": "3. Third parties",
+          "body": [
+            "If you use settlement autocomplete for product origin, the browser calls our API, which may query Google Places. Google may set its own cookies or logs according to Google’s policies.",
+            "Transactional email (verification codes, RFQ notices, harvest alerts) is sent through our mail driver (console in development, SMTP in production). The SMTP provider processes the recipient address to deliver the message.",
+            "If AI chat translation is enabled, message text is sent to the configured translation provider. It is not used here for advertising."
+          ]
+        },
+        {
+          "title": "4. How to control cookies",
+          "body": [
+            "You can delete cookies in your browser settings. If you block the session cookie, you will not stay logged in. Blocking the locale cookie may reset the language to the default on later visits.",
+            "For more detail on personal data, see the Privacy Policy."
+          ]
+        },
+        {
+          "title": "5. Changes",
+          "body": [
+            "If we later add non-essential cookies (for example analytics), we will update this policy and, where required, request consent before setting them."
+          ]
+        }
+      ]
+    },
+    "rules": {
+      "title": "Marketplace Rules and Disclaimer",
+      "description": "How the AgroBridge marketplace works, user duties, and limits of our role.",
+      "sections": [
+        {
+          "title": "1. Our role",
+          "body": [
+            "AgroBridge provides software for professional buyers and sellers to discover each other, publish listings and purchase requests, exchange quotes, chat, and leave ratings. We are not the seller or buyer of the goods, not a broker with authority to bind you, not a warehouse, and not a payment or escrow institution.",
+            "Nothing on the Platform is an offer by AgroBridge to sell agricultural products."
+          ]
+        },
+        {
+          "title": "2. Information is user-generated",
+          "body": [
+            "Titles, descriptions, prices, volumes, harvest dates, certificates, photos, and similar data are supplied by users. We may moderate listings (including hiding unpublished or rejected items) but we do not independently laboratory-test products or guarantee that a listing is complete or current.",
+            "Harvest status, forecast volume, and any “market insight” or quality score are decision-support hints based on data the seller entered. They are not a promise of supply, price, or market outcome, and they are not investment or trading advice."
+          ]
+        },
+        {
+          "title": "3. Contracts, delivery, and compliance",
+          "body": [
+            "Quantity, quality specifications, packaging, Incoterms, transport, insurance, phytosanitary certificates, export/import licences, customs, taxes, and payment terms are for the parties to agree in their own contract.",
+            "Each party is responsible for complying with Georgian and destination-country law applicable to their goods and to their business (including food safety and sanctions). AgroBridge does not arrange logistics or customs clearance."
+          ]
+        },
+        {
+          "title": "4. Fair dealing on the Platform",
+          "body": [
+            "Sellers must not list goods they cannot supply, use another farm’s photos as their own without rights, or evade moderation by trivial edits. Buyers must not send RFQs or purchase requests in bad faith.",
+            "Do not post content that is defamatory, discriminatory, or that reveals another person’s identity documents beyond what verification requires.",
+            "Cancelled or declined requests must not be used to harass the other party. Sellers may remove some cancelled inbox items as the product allows; that does not delete the other party’s legal claims, if any."
+          ]
+        },
+        {
+          "title": "5. Prohibited listings",
+          "body": [
+            "You may not list items that are illegal to trade, that require licences you do not hold, or that mislead as to origin, organic status, or certification. We may remove such listings and suspend the account."
+          ]
+        },
+        {
+          "title": "6. Disputes between users",
+          "body": [
+            "If a deal goes wrong, you must resolve it with the other party (and, if needed, through the courts or arbitration you have agreed). AgroBridge may, at its discretion, review a report for Terms violations; we are not a court and we do not award damages between users.",
+            "Ratings should reflect a real completed deal and must not be fake or extorted."
+          ]
+        },
+        {
+          "title": "7. Disclaimer",
+          "body": [
+            "To the fullest extent permitted by law, AgroBridge is not liable for loss of profit, loss of goods, failed export, missed harvest windows, or reliance on catalog data or insight widgets.",
+            "Use of the Platform is at your own commercial risk. Keep your own records of contracts, invoices, and certificates outside the chat thread."
+          ]
+        },
+        {
+          "title": "8. Relation to other documents",
+          "body": [
+            "These rules sit together with the Terms of Use and Privacy Policy. If there is a conflict, the Terms of Use prevail on contract issues and the Privacy Policy prevails on personal-data issues."
+          ]
+        }
+      ]
+    }
+  }
+}

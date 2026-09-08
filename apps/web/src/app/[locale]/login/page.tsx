@@ -23,6 +23,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
   }
 
   const t = await getTranslations('auth');
+  const tf = await getTranslations('footer');
 
   return (
     <div className="auth-page">
@@ -42,6 +43,11 @@ export default async function LoginPage({ params, searchParams }: Props) {
           <Link href={next ? `/register?next=${encodeURIComponent(nextPath)}` : '/register'}>
             {t('goRegister')}
           </Link>
+        </p>
+        <p className="auth-card__legal">
+          <Link href="/legal/privacy">{tf('privacy')}</Link>
+          {' · '}
+          <Link href="/legal/terms">{tf('terms')}</Link>
         </p>
       </main>
     </div>

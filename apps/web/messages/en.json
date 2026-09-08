@@ -56,7 +56,9 @@
     },
     "dualCapabilityHint": "One account can both sell products and post purchase requests. Pick how you mainly start.",
     "registerEmailVerifyHint": "After sign-up we email a confirmation code. You can open your account once the address is verified.",
-    "roleHint": "Choose seller or buyer. We use this for registration statistics."
+    "roleHint": "Choose seller or buyer. We use this for registration statistics.",
+    "acceptLegal": "I agree to the <terms>Terms of Use</terms>, <privacy>Privacy Policy</privacy>, and <rules>Marketplace Rules</rules>.",
+    "acceptLegalRequired": "Please accept the Terms of Use, Privacy Policy, and Marketplace Rules."
   },
   "account": {
     "title": "Your account",
@@ -89,7 +91,12 @@
     "explore": "Explore",
     "account": "Account",
     "support": "Support",
-    "copyright": "© {year} AgroBridge"
+    "copyright": "© {year} AgroBridge",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "cookies": "Cookie Policy",
+    "rules": "Marketplace Rules"
   },
   "support": {
     "title": "Support",

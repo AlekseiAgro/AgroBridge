@@ -143,6 +143,7 @@ model User {
   blockedAt        DateTime?
   blockedReason    String?
   blockedById      String?
+  legalAcceptedAt  DateTime?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
