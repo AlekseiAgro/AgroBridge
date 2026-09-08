@@ -160,7 +160,7 @@ Chat messages email the recipient (skipped if they recently opened the thread).
 
 Single-host production compose (web + api + Postgres + Redis).
 
-Configured by default for **agrobridge.ge** (API on **api.agrobridge.ge**). Previous host `agrobrid.ge` should 301 to the new apex — see [`docs/DOMAIN.md`](docs/DOMAIN.md).
+Configured by default for **agrobridge.ge** (API on **api.agrobridge.ge**). Domain is env-only — see [`docs/DOMAIN.md`](docs/DOMAIN.md).
 
 **Hosting options**
 

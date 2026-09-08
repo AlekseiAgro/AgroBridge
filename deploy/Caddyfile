@@ -5,9 +5,8 @@
 #   export API_HOST=api.agrobridge.ge
 #   caddy run --config deploy/Caddyfile --adapter caddyfile
 #
-# Defaults are the current production hosts (agrobridge.ge).
-# Previous host agrobrid.ge: see deploy/Caddyfile.redirects
-# Generate ready-to-paste values: ./scripts/domain-cutover.sh agrobridge.ge
+# Defaults are the current production hosts.
+# Optional 301 from another hostname: see deploy/Caddyfile.redirects
 
 {$WEB_HOST:agrobridge.ge} {
 	encode gzip

@@ -3,7 +3,7 @@
 # Does not change production — it only prints the cutover checklist.
 set -euo pipefail
 
-OLD_DOMAIN="${OLD_DOMAIN:-agrobrid.ge}"
+OLD_DOMAIN="${OLD_DOMAIN:-agrobridge.ge}"
 INCLUDE_WWW=0
 NEW_DOMAIN=""
 
@@ -15,8 +15,8 @@ Print Railway / .env.production values, Caddy hostnames, and DNS rows
 for moving the site + API off the current production domain.
 
 Examples:
-  ./scripts/domain-cutover.sh agrobridge.ge
-  ./scripts/domain-cutover.sh --old agrobrid.ge --www example.com
+  ./scripts/domain-cutover.sh new-domain.example
+  ./scripts/domain-cutover.sh --old agrobridge.ge --www new-domain.example
 
 Environment:
   OLD_DOMAIN   Default previous apex (also set with --old)

@@ -17,7 +17,7 @@ describe('parseCorsOrigins', () => {
 
   it('parses dual origins and trims whitespace', () => {
     expect(
-      parseCorsOrigins('https://agrobrid.ge, https://agrobridge.ge'),
-    ).toEqual(['https://agrobrid.ge', 'https://agrobridge.ge']);
+      parseCorsOrigins('https://agrobridge.ge, https://www.agrobridge.ge'),
+    ).toEqual(['https://agrobridge.ge', 'https://www.agrobridge.ge']);
   });
 });

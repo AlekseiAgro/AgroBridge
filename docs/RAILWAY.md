@@ -10,7 +10,7 @@ Railway replaces a single VPS: you run **four services** in one project.
 | `web` | Next.js (`apps/web`) |
 
 Custom domain: apex → web, `api.` + apex → api (Cloudflare CNAME, not an A→IP).
-Production target is `agrobridge.ge` (cutover from `agrobrid.ge`: [`docs/DOMAIN.md`](DOMAIN.md)).
+Production host is `agrobridge.ge` ([`docs/DOMAIN.md`](DOMAIN.md)).
 
 ## 1. Create the project (your current screen)
 
@@ -153,25 +153,17 @@ After Railway’s `*.up.railway.app` domains work, attach the apex:
 | CNAME | `www` | Railway web hostname / redirect | |
 | CNAME | `api` | Railway api hostname | DNS only recommended at first |
 
-4. Update Railway variables and **redeploy web**:
-
-Cutover (keep old CORS origin until 301s settle):
+4. Update Railway variables to the public hosts and **redeploy web**:
 
 ```bash
-WEB_ORIGIN=https://agrobrid.ge,https://agrobridge.ge
+WEB_ORIGIN=https://agrobridge.ge
 WEB_PUBLIC_URL=https://agrobridge.ge
 API_PUBLIC_URL=https://api.agrobridge.ge
 NEXT_PUBLIC_API_URL=https://api.agrobridge.ge/api
 MAIL_FROM=AgroBridge <noreply@agrobridge.ge>
 ```
 
-Final (after redirects):
-
-```bash
-WEB_ORIGIN=https://agrobridge.ge
-```
-
-`NEXT_PUBLIC_API_URL` is a **build-time** web variable — redeploy `web` after it changes. Redirect `agrobrid.ge` → `agrobridge.ge` and `api.agrobrid.ge` → `api.agrobridge.ge` (Cloudflare Redirect Rule or Caddy). Full checklist: [`docs/DOMAIN.md`](DOMAIN.md).
+`NEXT_PUBLIC_API_URL` is a **build-time** web variable — redeploy `web` after it changes. Optional 301 from the previous names `agrobrid.ge` / `api.agrobrid.ge` can stay in Cloudflare. See [`docs/DOMAIN.md`](DOMAIN.md).
 
 ## 6. Backups later
 

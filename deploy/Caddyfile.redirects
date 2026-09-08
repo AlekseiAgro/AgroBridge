@@ -1,12 +1,12 @@
-# Optional 301 redirects from the previous AgroBridge hostname (agrobrid.ge).
+# Optional 301 redirects from a previous hostname.
 # Concatenate with the primary Caddyfile:
 #
 #   export WEB_HOST=agrobridge.ge
 #   export API_HOST=api.agrobridge.ge
-#   export OLD_WEB_HOST=agrobrid.ge
-#   export OLD_API_HOST=api.agrobrid.ge
-#   cat deploy/Caddyfile deploy/Caddyfile.redirects > /tmp/Caddyfile.cutover
-#   caddy run --config /tmp/Caddyfile.cutover --adapter caddyfile
+#   export OLD_WEB_HOST=previous.example
+#   export OLD_API_HOST=api.previous.example
+#   cat deploy/Caddyfile deploy/Caddyfile.redirects > /tmp/Caddyfile.redirects-combined
+#   caddy run --config /tmp/Caddyfile.redirects-combined --adapter caddyfile
 #
 # Do not run this file alone — it only redirects.
 

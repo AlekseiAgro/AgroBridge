@@ -2,7 +2,7 @@
 
 This guide covers a single-host Docker deploy (VPS) using `docker-compose.prod.yml`.
 
-Production target is **agrobridge.ge** (cutover from **agrobrid.ge**). See [`docs/DOMAIN.md`](DOMAIN.md).
+Production host is **agrobridge.ge**. See [`docs/DOMAIN.md`](DOMAIN.md).
 
 ## What you need
 
