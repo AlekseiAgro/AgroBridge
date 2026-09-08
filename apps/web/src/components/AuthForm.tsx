@@ -7,7 +7,7 @@ import {
 } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
-import { useRouter } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { safeNextPath } from '@/lib/safe-next-path';
 
 type Mode = 'login' | 'register';
@@ -34,6 +34,13 @@ export function AuthForm({ mode, nextPath }: Props) {
     setPending(true);
 
     const form = new FormData(event.currentTarget);
+    const acceptedLegal = form.get('acceptedLegal') === 'on';
+    if (mode === 'register' && !acceptedLegal) {
+      setError(t('acceptLegalRequired'));
+      setPending(false);
+      return;
+    }
+
     const payload =
       mode === 'login'
         ? {
@@ -46,6 +53,7 @@ export function AuthForm({ mode, nextPath }: Props) {
             displayName: String(form.get('displayName') ?? ''),
             role,
             locale,
+            acceptedLegal,
           };
 
     try {
@@ -121,6 +129,19 @@ export function AuthForm({ mode, nextPath }: Props) {
       </label>
 
       {error ? <p className="form-error">{error}</p> : null}
+
+      {mode === 'register' ? (
+        <label className="legal-consent">
+          <input name="acceptedLegal" type="checkbox" required />
+          <span>
+            {t.rich('acceptLegal', {
+              terms: (chunks) => <Link href="/legal/terms">{chunks}</Link>,
+              privacy: (chunks) => <Link href="/legal/privacy">{chunks}</Link>,
+              rules: (chunks) => <Link href="/legal/rules">{chunks}</Link>,
+            })}
+          </span>
+        </label>
+      ) : null}
 
       <button className="button button--primary" type="submit" disabled={pending}>
         {pending ? t('pleaseWait') : mode === 'login' ? t('loginSubmit') : t('registerSubmit')}

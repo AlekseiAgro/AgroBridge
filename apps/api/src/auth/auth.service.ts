@@ -4,7 +4,7 @@ import {
   isLocale,
   isRegisterableRole,
 } from '@agrobridge/shared';
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -36,6 +36,12 @@ export class AuthService {
       throw new ConflictException('Invalid role for registration');
     }
 
+    if (dto.acceptedLegal !== true) {
+      throw new BadRequestException(
+        'You must accept the Terms of Use, Privacy Policy, and Marketplace Rules',
+      );
+    }
+
     const email = dto.email.trim().toLowerCase();
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -55,6 +61,7 @@ export class AuthService {
         buyerType: null,
         locale: locale as LocaleCode,
         displayName: dto.displayName?.trim() || null,
+        legalAcceptedAt: new Date(),
       },
     });
 

@@ -4,6 +4,7 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { Source_Sans_3, Fraunces, Noto_Sans_Georgian } from 'next/font/google';
 import { routing } from '@/i18n/routing';
+import { CookieNotice } from '@/components/CookieNotice';
 import '../globals.css';
 
 const sans = Source_Sans_3({
@@ -54,7 +55,10 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale}>
       <body className={`${sans.variable} ${georgian.variable} ${display.variable} antialiased`}>
-        <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider messages={messages}>
+          {children}
+          <CookieNotice />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

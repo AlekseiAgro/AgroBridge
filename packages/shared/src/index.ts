@@ -17,6 +17,7 @@ export * from './chat';
 export * from './rating';
 export * from './cabinet';
 export * from './support';
+export * from './legal';
 export * from './user-profile';
 export * from './subscription';
 export * from './notification';

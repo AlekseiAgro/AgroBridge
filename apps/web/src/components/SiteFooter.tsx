@@ -30,6 +30,14 @@ export async function SiteFooter() {
             <Link href="/support">{t('support')}</Link>
           </nav>
 
+          <nav className="site-footer__col" aria-label={t('legal')}>
+            <p className="site-footer__heading">{t('legal')}</p>
+            <Link href="/legal/privacy">{t('privacy')}</Link>
+            <Link href="/legal/terms">{t('terms')}</Link>
+            <Link href="/legal/cookies">{t('cookies')}</Link>
+            <Link href="/legal/rules">{t('rules')}</Link>
+          </nav>
+
           <nav className="site-footer__col" aria-label={t('account')}>
             <p className="site-footer__heading">{t('account')}</p>
             {user ? (

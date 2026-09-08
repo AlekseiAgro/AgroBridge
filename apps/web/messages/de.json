@@ -56,7 +56,9 @@
     },
     "dualCapabilityHint": "Mit einem Konto können Sie Produkte verkaufen und Kaufanfragen stellen. Wählen Sie, womit Sie vor allem starten.",
     "registerEmailVerifyHint": "Nach der Registrierung senden wir einen Bestätigungscode. Das Konto öffnet sich nach der E-Mail-Prüfung.",
-    "roleHint": "Wählen Sie Verkäufer oder Käufer. Wir nutzen das für Registrierungsstatistiken."
+    "roleHint": "Wählen Sie Verkäufer oder Käufer. Wir nutzen das für Registrierungsstatistiken.",
+    "acceptLegal": "Ich stimme den <terms>Nutzungsbedingungen</terms>, der <privacy>Datenschutzerklärung</privacy> und den <rules>Marktplatzregeln</rules> zu.",
+    "acceptLegalRequired": "Bitte stimmen Sie den Nutzungsbedingungen, der Datenschutzerklärung und den Marktplatzregeln zu."
   },
   "account": {
     "title": "Ihr Konto",
@@ -89,7 +91,12 @@
     "explore": "Entdecken",
     "account": "Konto",
     "support": "Support",
-    "copyright": "© {year} AgroBridge"
+    "copyright": "© {year} AgroBridge",
+    "legal": "Rechtliches",
+    "privacy": "Datenschutz",
+    "terms": "Nutzungsbedingungen",
+    "cookies": "Cookie-Richtlinie",
+    "rules": "Marktplatzregeln"
   },
   "support": {
     "title": "Support",

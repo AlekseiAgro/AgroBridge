@@ -1,4 +1,4 @@
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -66,6 +66,7 @@ describe('AuthService', () => {
       role: 'farmer',
       displayName: 'Nino',
       locale: 'ka',
+      acceptedLegal: true,
     });
 
     expect(result.accessToken).toBe('test-token');
@@ -87,6 +88,7 @@ describe('AuthService', () => {
           sellerType: null,
           buyerType: null,
           role: 'farmer',
+          legalAcceptedAt: expect.any(Date),
         }),
       }),
     );
@@ -121,6 +123,7 @@ describe('AuthService', () => {
       role: 'buyer',
       displayName: 'Elena',
       locale: 'en',
+      acceptedLegal: true,
     });
 
     expect(result.user.role).toBe('buyer');
@@ -138,6 +141,18 @@ describe('AuthService', () => {
     );
   });
 
+  it('rejects registration without legal acceptance', async () => {
+    await expect(
+      service.register({
+        email: 'farmer@example.com',
+        password: 'password1',
+        role: 'farmer',
+        acceptedLegal: false,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.user.create).not.toHaveBeenCalled();
+  });
+
   it('rejects duplicate email', async () => {
     prisma.user.findUnique.mockResolvedValue({ id: 'existing' });
 
@@ -146,6 +161,7 @@ describe('AuthService', () => {
         email: 'farmer@example.com',
         password: 'password1',
         role: 'farmer',
+        acceptedLegal: true,
       }),
     ).rejects.toBeInstanceOf(ConflictException);
   });
