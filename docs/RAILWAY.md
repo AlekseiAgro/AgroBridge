@@ -54,9 +54,11 @@ If Build Logs still say `using build driver railpack`, the builder is still Rail
 NODE_ENV=production
 JWT_SECRET=<generate a long random string>
 JWT_EXPIRES_SECONDS=604800
-# Railway's edge proxy is the only hop in front of the container. Raise this only if you
-# add another proxy (e.g. Cloudflare orange cloud). See docs/RATE_LIMITING.md.
-TRUST_PROXY_HOPS=1
+# Which X-Forwarded-For entries to believe. The default (loopback + private ranges) already
+# covers Railway's edge proxy; add the web service's egress address if it reaches the API
+# over a public URL, otherwise every visitor using a BFF route shares one bucket.
+# See docs/RATE_LIMITING.md.
+# TRUST_PROXY=loopback,linklocal,uniquelocal
 SUPPORT_EMAIL=gabo.m0619@gmail.com
 MAIL_DRIVER=console
 MAIL_FROM=AgroBridge <noreply@agrobrid.ge>

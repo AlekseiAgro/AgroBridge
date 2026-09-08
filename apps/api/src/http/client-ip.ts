@@ -6,37 +6,75 @@ const MAX_TRUST_PROXY_HOPS = 10;
 /** Shared bucket for callers whose address cannot be resolved. */
 export const UNKNOWN_IP = 'unknown';
 
+/**
+ * Loopback plus the private ranges: everything our own infrastructure can occupy, and
+ * nothing a client on the public internet can present as its source address.
+ */
+const DEFAULT_TRUSTED_PROXIES = ['loopback', 'linklocal', 'uniquelocal'];
+
+const PROXY_KEYWORDS = new Set(DEFAULT_TRUSTED_PROXIES);
+const ADDRESS_PATTERN = /^[0-9a-f.:/]+$/i;
+
 type IpBearingRequest = {
   ip?: string;
   socket?: { remoteAddress?: string | null } | null;
 };
 
 /**
- * Number of reverse proxies in front of the API, used as Express' `trust proxy` setting.
+ * Express `trust proxy` setting: which `X-Forwarded-For` entries may be believed.
  *
- * `X-Forwarded-For` is attacker-controlled, so only the entries appended by proxies we
- * actually run may be trusted. One hop matches both supported deployments (Caddy in
- * `deploy/Caddyfile` and the Railway edge). Add a hop for every extra proxy — with
- * Cloudflare proxying enabled in front of Caddy the correct value is 2. Too low a value
- * groups many clients behind one bucket (limits get stricter); too high a value lets a
- * client forge its own address, so the default errs on the low side.
+ * The header is attacker-controlled, so only entries appended by infrastructure we run
+ * count. Requests reach the API two ways — straight from the browser through Caddy or the
+ * Railway edge, and relayed by the Next.js BFF routes, which add a hop — so the default is
+ * a trust *list* rather than a hop count: walking the chain from the right and skipping our
+ * own addresses resolves the real visitor in both cases. A hostile client cannot exploit
+ * this because the closest proxy always appends the true peer address last.
+ *
+ * `TRUST_PROXY` overrides it, taking either a hop count (`1`) or a comma-separated list of
+ * keywords and addresses (`loopback,uniquelocal,203.0.113.7`). Add the web tier's egress
+ * address when it reaches the API over a public route (for example on Railway), otherwise
+ * every visitor arriving through a BFF route shares one bucket.
  */
-export function resolveTrustProxyHops(env: NodeJS.ProcessEnv): number {
-  const raw = env.TRUST_PROXY_HOPS?.trim();
+export function resolveTrustProxy(env: NodeJS.ProcessEnv): number | string[] {
+  const raw = env.TRUST_PROXY?.trim();
   if (!raw) {
-    return env.NODE_ENV === 'production' ? 1 : 0;
+    return env.NODE_ENV === 'production' ? [...DEFAULT_TRUSTED_PROXIES] : 0;
   }
-  const parsed = Number(raw);
-  if (!Number.isInteger(parsed) || parsed < 0 || parsed > MAX_TRUST_PROXY_HOPS) {
-    throw new Error(
-      `TRUST_PROXY_HOPS must be an integer between 0 and ${MAX_TRUST_PROXY_HOPS} (got "${raw}")`,
-    );
+
+  if (/^\d+$/.test(raw)) {
+    const hops = Number(raw);
+    if (hops > MAX_TRUST_PROXY_HOPS) {
+      throw new Error(
+        `TRUST_PROXY hop count must not exceed ${MAX_TRUST_PROXY_HOPS} (got "${raw}")`,
+      );
+    }
+    return hops;
   }
-  return parsed;
+
+  const entries = raw
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
+  if (entries.length === 0) {
+    throw new Error(`TRUST_PROXY must be a hop count or a list of proxies (got "${raw}")`);
+  }
+  for (const entry of entries) {
+    if (!PROXY_KEYWORDS.has(entry) && !ADDRESS_PATTERN.test(entry)) {
+      throw new Error(
+        `TRUST_PROXY entry "${entry}" is not a keyword (${DEFAULT_TRUSTED_PROXIES.join(', ')}) or an address/CIDR`,
+      );
+    }
+  }
+  return entries;
+}
+
+/** Human-readable form of the setting for the boot log. */
+export function describeTrustProxy(setting: number | string[]): string {
+  return Array.isArray(setting) ? setting.join(', ') : `${setting} hop(s)`;
 }
 
 /**
- * Client address as resolved by Express from the configured number of trusted hops.
+ * Client address as resolved by Express from the trusted proxies.
  * Requests with no resolvable address share a single bucket rather than escaping limits.
  */
 export function clientIpOf(request: IpBearingRequest): string {

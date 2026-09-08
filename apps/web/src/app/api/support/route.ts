@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { SupportRequestResponse } from '@agrobridge/shared';
 import { ApiError, apiRequest } from '@/lib/api';
+import { forwardedForOf } from '@/lib/client-address';
 
 export async function POST(request: Request) {
   try {
@@ -8,6 +9,7 @@ export async function POST(request: Request) {
     const result = await apiRequest<SupportRequestResponse>('/support', {
       method: 'POST',
       body,
+      forwardedFor: forwardedForOf(request),
     });
     return NextResponse.json(result);
   } catch (error) {

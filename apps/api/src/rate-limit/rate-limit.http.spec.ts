@@ -23,11 +23,11 @@ const SUPPORT_REQUEST = {
 
 /**
  * Exercises the real HTTP pipeline: validation, the throttling services and the 429 filter.
- * `trustProxyHops` mirrors the production `trust proxy` setting, which decides whether an
+ * `trustProxy` mirrors the production `trust proxy` setting, which decides whether an
  * `X-Forwarded-For` header is believed at all.
  */
 async function buildApp(options: {
-  trustProxyHops: number;
+  trustProxy: number | string[];
   env?: Record<string, string>;
 }): Promise<NestExpressApplication> {
   const { service: rateLimit } = createTestRateLimit(options.env ?? {});
@@ -60,7 +60,7 @@ async function buildApp(options: {
   }).compile();
 
   const app = moduleRef.createNestApplication<NestExpressApplication>();
-  app.set('trust proxy', options.trustProxyHops);
+  app.set('trust proxy', options.trustProxy);
   app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }),
@@ -78,7 +78,7 @@ describe('rate limiting over HTTP', () => {
   });
 
   it('answers 429 with Retry-After once login attempts run out', async () => {
-    app = await buildApp({ trustProxyHops: 0, env: { RATE_LIMIT_LOGIN_MAX: '2' } });
+    app = await buildApp({ trustProxy: 0, env: { RATE_LIMIT_LOGIN_MAX: '2' } });
     const server = app.getHttpServer();
 
     await request(server).post('/api/auth/login').send(CREDENTIALS).expect(401);
@@ -96,7 +96,7 @@ describe('rate limiting over HTTP', () => {
   });
 
   it('answers 429 for a flood of support submissions', async () => {
-    app = await buildApp({ trustProxyHops: 0, env: { RATE_LIMIT_SUPPORT_IP_MAX: '2' } });
+    app = await buildApp({ trustProxy: 0, env: { RATE_LIMIT_SUPPORT_IP_MAX: '2' } });
     const server = app.getHttpServer();
 
     await request(server).post('/api/support').send(SUPPORT_REQUEST).expect(201);
@@ -107,7 +107,7 @@ describe('rate limiting over HTTP', () => {
   });
 
   it('separates clients by forwarded address when a proxy is trusted', async () => {
-    app = await buildApp({ trustProxyHops: 1, env: { RATE_LIMIT_LOGIN_MAX: '1' } });
+    app = await buildApp({ trustProxy: 1, env: { RATE_LIMIT_LOGIN_MAX: '1' } });
     const server = app.getHttpServer();
 
     await request(server)
@@ -129,8 +129,36 @@ describe('rate limiting over HTTP', () => {
       .expect(401);
   });
 
+  it('resolves the visitor behind the BFF relay with the production trust list', async () => {
+    // What a browser request through Caddy and a Next.js route handler looks like: the
+    // visitor first, then the web tier's private address appended by our own relay.
+    app = await buildApp({
+      trustProxy: ['loopback', 'linklocal', 'uniquelocal'],
+      env: { RATE_LIMIT_LOGIN_MAX: '1' },
+    });
+    const server = app.getHttpServer();
+
+    await request(server)
+      .post('/api/auth/login')
+      .set('X-Forwarded-For', '203.0.113.1, 10.1.2.3')
+      .send(CREDENTIALS)
+      .expect(401);
+    await request(server)
+      .post('/api/auth/login')
+      .set('X-Forwarded-For', '203.0.113.1, 10.1.2.3')
+      .send(CREDENTIALS)
+      .expect(429);
+
+    // Another visitor relayed by the same web tier is counted separately.
+    await request(server)
+      .post('/api/auth/login')
+      .set('X-Forwarded-For', '203.0.113.2, 10.1.2.3')
+      .send(CREDENTIALS)
+      .expect(401);
+  });
+
   it('ignores a forged X-Forwarded-For when no proxy is trusted', async () => {
-    app = await buildApp({ trustProxyHops: 0, env: { RATE_LIMIT_LOGIN_MAX: '2' } });
+    app = await buildApp({ trustProxy: 0, env: { RATE_LIMIT_LOGIN_MAX: '2' } });
     const server = app.getHttpServer();
 
     for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -150,7 +178,7 @@ describe('rate limiting over HTTP', () => {
   });
 
   it('rejects malformed payloads before spending any budget', async () => {
-    app = await buildApp({ trustProxyHops: 0, env: { RATE_LIMIT_LOGIN_MAX: '1' } });
+    app = await buildApp({ trustProxy: 0, env: { RATE_LIMIT_LOGIN_MAX: '1' } });
     const server = app.getHttpServer();
 
     await request(server)

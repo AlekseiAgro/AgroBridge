@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api';
 import { apiRequestAuthed } from '@/lib/server-api';
+import { forwardedForOf } from '@/lib/client-address';
 
 export async function POST(request: Request) {
   try {
@@ -8,6 +9,7 @@ export async function POST(request: Request) {
     const result = await apiRequestAuthed<{ ok: true }>('/cabinet/me/delete/confirm', {
       method: 'POST',
       body,
+      forwardedFor: forwardedForOf(request),
     });
     return NextResponse.json(result);
   } catch (error) {

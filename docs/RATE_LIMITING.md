@@ -47,25 +47,38 @@ comes from `RATE_LIMIT_KEY_SECRET`, falling back to `JWT_SECRET`.
 Emails are lower-cased and trimmed before hashing, so `A@x.io` and ` a@x.io ` share a bucket.
 IPv4-mapped IPv6 addresses (`::ffff:1.2.3.4`) are folded onto the plain IPv4 form.
 
-## Client address and `TRUST_PROXY_HOPS`
+## Client address and `TRUST_PROXY`
 
 `X-Forwarded-For` is attacker-controlled. Only the entries appended by proxies we run may be
-trusted, so the API sets Express' `trust proxy` to an explicit hop count:
+trusted, so the API sets Express' `trust proxy` explicitly.
+
+Requests arrive by two routes with different chain lengths: straight from the browser
+through Caddy or the Railway edge, and relayed by a Next.js BFF route handler, which adds a
+hop. A fixed hop count cannot be right for both, so the production default is a trust *list*
+— `loopback,linklocal,uniquelocal` — and Express walks the chain from the right, skipping
+addresses that belong to our own infrastructure. Both routes then resolve to the real
+visitor. This is not forgeable from the public internet: a client cannot present a private
+source address, and the closest proxy always appends the true peer address last.
 
 | Deployment | Correct value |
 |---|---|
-| Local development (no proxy) | `0` |
-| `docker-compose.prod.yml` behind `deploy/Caddyfile` | `1` |
-| Railway (edge proxy in front of the container) | `1` |
-| Cloudflare proxying (orange cloud) in front of Caddy | `2` |
+| Local development (no proxy) | `0` (default) |
+| `docker-compose.prod.yml` behind `deploy/Caddyfile` | default |
+| Cloudflare proxying (orange cloud) in front of Caddy | default |
+| Railway, web tier reaching the API over a public URL | default plus the web tier's egress address |
 
-`TRUST_PROXY_HOPS` defaults to `1` in production and `0` elsewhere, and the API refuses to
-start on a non-integer or out-of-range value. Setting it too low only makes limits stricter
-(several clients share a bucket); setting it too high lets a client forge its own address,
-so when in doubt keep it low. Account-scoped protections do not depend on the address at
-all, so a misconfigured hop count can never disable the verification-code attempt cap.
+`TRUST_PROXY` accepts either a hop count (`1`) or a comma-separated list of keywords and
+addresses (`loopback,uniquelocal,203.0.113.7`), and the API refuses to start on a malformed
+value. Trusting too little only makes limits stricter (several clients share a bucket);
+trusting too much lets a client forge its own address. Account-scoped protections do not
+depend on the address at all, so a misconfigured value can never disable the
+verification-code attempt cap.
 
-The boot log prints the effective hop count and the effective limits.
+The BFF route handlers relay the visitor's chain via `forwardedForOf` in
+`apps/web/src/lib/client-address.ts`; without that every visitor using those endpoints would
+share the Next.js server's bucket.
+
+The boot log prints the effective trust setting and the effective limits.
 
 ## Limits
 

@@ -16,6 +16,8 @@ type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   token?: string | null;
+  /** Visitor address chain to relay; see `forwardedForOf` in `lib/client-address`. */
+  forwardedFor?: string | null;
 };
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -29,6 +31,10 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   if (options.token) {
     headers.Authorization = `Bearer ${options.token}`;
+  }
+
+  if (options.forwardedFor) {
+    headers['X-Forwarded-For'] = options.forwardedFor;
   }
 
   const response = await fetch(`${API_URL}${path}`, {

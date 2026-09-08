@@ -1,27 +1,45 @@
-import { clientIpOf, resolveTrustProxyHops, UNKNOWN_IP } from './client-ip';
+import { clientIpOf, describeTrustProxy, resolveTrustProxy, UNKNOWN_IP } from './client-ip';
 
-describe('resolveTrustProxyHops', () => {
+describe('resolveTrustProxy', () => {
   it('trusts nothing in development', () => {
-    expect(resolveTrustProxyHops({} as NodeJS.ProcessEnv)).toBe(0);
+    expect(resolveTrustProxy({} as NodeJS.ProcessEnv)).toBe(0);
   });
 
-  it('trusts the single documented proxy in production', () => {
-    expect(resolveTrustProxyHops({ NODE_ENV: 'production' } as NodeJS.ProcessEnv)).toBe(1);
+  it('trusts our own infrastructure ranges in production', () => {
+    expect(resolveTrustProxy({ NODE_ENV: 'production' } as NodeJS.ProcessEnv)).toEqual([
+      'loopback',
+      'linklocal',
+      'uniquelocal',
+    ]);
   });
 
-  it('honours an explicit depth', () => {
+  it('honours an explicit hop count', () => {
     expect(
-      resolveTrustProxyHops({ NODE_ENV: 'production', TRUST_PROXY_HOPS: '2' } as NodeJS.ProcessEnv),
+      resolveTrustProxy({ NODE_ENV: 'production', TRUST_PROXY: '2' } as NodeJS.ProcessEnv),
     ).toBe(2);
-    expect(resolveTrustProxyHops({ TRUST_PROXY_HOPS: '0' } as NodeJS.ProcessEnv)).toBe(0);
+    expect(resolveTrustProxy({ TRUST_PROXY: '0' } as NodeJS.ProcessEnv)).toBe(0);
+  });
+
+  it('honours an explicit proxy list', () => {
+    expect(
+      resolveTrustProxy({ TRUST_PROXY: 'loopback, 203.0.113.7 ' } as NodeJS.ProcessEnv),
+    ).toEqual(['loopback', '203.0.113.7']);
+    expect(resolveTrustProxy({ TRUST_PROXY: '10.0.0.0/8' } as NodeJS.ProcessEnv)).toEqual([
+      '10.0.0.0/8',
+    ]);
   });
 
   it('refuses values that would trust a forged header chain', () => {
-    for (const value of ['-1', '99', 'true', 'many', '1.5']) {
-      expect(() =>
-        resolveTrustProxyHops({ TRUST_PROXY_HOPS: value } as NodeJS.ProcessEnv),
-      ).toThrow(/TRUST_PROXY_HOPS/);
+    for (const value of ['-1', '99', 'true', 'many', ',', 'loopback,nonsense']) {
+      expect(() => resolveTrustProxy({ TRUST_PROXY: value } as NodeJS.ProcessEnv)).toThrow(
+        /TRUST_PROXY/,
+      );
     }
+  });
+
+  it('describes both forms for the boot log', () => {
+    expect(describeTrustProxy(2)).toBe('2 hop(s)');
+    expect(describeTrustProxy(['loopback', 'uniquelocal'])).toBe('loopback, uniquelocal');
   });
 });
 
