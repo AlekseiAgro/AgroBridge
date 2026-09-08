@@ -14,17 +14,24 @@ export type SmsMessage = {
 export class SmsService {
   private readonly logger = new Logger(SmsService.name);
   private readonly driver: string;
+  private readonly redactBodies: boolean;
 
   constructor(private readonly config: ConfigService) {
     this.driver = (this.config.get<string>('SMS_DRIVER') ?? 'console').toLowerCase();
+    // Message bodies contain verification codes, so they stay out of production logs.
+    this.redactBodies = this.config.get<string>('NODE_ENV') === 'production';
   }
 
   async send(message: SmsMessage): Promise<void> {
     if (this.driver === 'console') {
-      this.logger.log(`[console-sms] to=${message.to} text=${JSON.stringify(message.text)}`);
+      this.logger.log(`[console-sms] to=${message.to} ${this.body(message.text)}`);
       return;
     }
     this.logger.warn(`SMS driver "${this.driver}" is not configured; logging instead`);
-    this.logger.log(`[fallback-sms] to=${message.to} text=${JSON.stringify(message.text)}`);
+    this.logger.log(`[fallback-sms] to=${message.to} ${this.body(message.text)}`);
+  }
+
+  private body(text: string): string {
+    return this.redactBodies ? '(text omitted)' : `text=${JSON.stringify(text)}`;
   }
 }

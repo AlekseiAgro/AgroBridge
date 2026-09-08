@@ -18,7 +18,8 @@
 
 - NestJS modular API under global prefix `/api`.
 - Prisma + PostgreSQL for persistence.
-- Redis reserved for translation jobs and rate limiting (not wired in step 1).
+- Redis reserved for translation jobs (not wired yet). Rate limiting is Postgres-backed —
+  see [`RATE_LIMITING.md`](RATE_LIMITING.md) for why.
 
 ### `packages/shared`
 

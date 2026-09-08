@@ -54,6 +54,9 @@ If Build Logs still say `using build driver railpack`, the builder is still Rail
 NODE_ENV=production
 JWT_SECRET=<generate a long random string>
 JWT_EXPIRES_SECONDS=604800
+# Railway's edge proxy is the only hop in front of the container. Raise this only if you
+# add another proxy (e.g. Cloudflare orange cloud). See docs/RATE_LIMITING.md.
+TRUST_PROXY_HOPS=1
 SUPPORT_EMAIL=gabo.m0619@gmail.com
 MAIL_DRIVER=console
 MAIL_FROM=AgroBridge <noreply@agrobrid.ge>
@@ -71,6 +74,7 @@ TRANSLATION_PROVIDER=mock
 STORAGE_DRIVER=local
 
 # Link Railway Postgres / Redis (reference variables):
+# Postgres is required: it also stores the rate-limit counters. Redis stays unused for now.
 DATABASE_URL=${{Postgres.DATABASE_URL}}
 REDIS_URL=${{Redis.REDIS_URL}}
 

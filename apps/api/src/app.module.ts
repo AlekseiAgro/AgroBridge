@@ -10,6 +10,7 @@ import { HealthModule } from './health/health.module';
 import { MailModule } from './mail/mail.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
+import { RateLimitModule } from './rate-limit/rate-limit.module';
 import { RatingsModule } from './ratings/ratings.module';
 import { PurchaseRequestsModule } from './purchase-requests/purchase-requests.module';
 import { RfqsModule } from './rfqs/rfqs.module';
@@ -29,6 +30,7 @@ import { NotificationsModule } from './notifications/notifications.module';
       isGlobal: true,
     }),
     PrismaModule,
+    RateLimitModule,
     StorageModule,
     MailModule,
     SmsModule,

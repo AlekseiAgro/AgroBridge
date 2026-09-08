@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ClientIp } from '../http/client-ip';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './current-user.decorator';
 import { LoginDto } from './dto/login.dto';
@@ -11,13 +12,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  register(@Body() dto: RegisterDto, @ClientIp() ip: string) {
+    return this.authService.register(dto, ip);
   }
 
   @Post('login')
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  login(@Body() dto: LoginDto, @ClientIp() ip: string) {
+    return this.authService.login(dto, ip);
   }
 
   @Get('me')

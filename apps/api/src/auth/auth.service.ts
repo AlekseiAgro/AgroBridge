@@ -1,9 +1,11 @@
-import type { AuthTokenResponse, BuyerType, Locale, PublicUser, SellerType } from '@agrobridge/shared';
-import {
-  DEFAULT_LOCALE,
-  isLocale,
-  isRegisterableRole,
+import type {
+  AuthTokenResponse,
+  BuyerType,
+  Locale,
+  PublicUser,
+  SellerType,
 } from '@agrobridge/shared';
+import { DEFAULT_LOCALE, isLocale, isRegisterableRole } from '@agrobridge/shared';
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -14,8 +16,10 @@ import {
   BuyerType as PrismaBuyerType,
   UserRole,
 } from '@prisma/client';
+import { UNKNOWN_IP } from '../http/client-ip';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { RateLimitService, type RateLimitRequest } from '../rate-limit/rate-limit.service';
 import { VerificationService } from '../verification/verification.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -29,12 +33,16 @@ export class AuthService {
     private readonly config: ConfigService,
     private readonly notifications: NotificationsService,
     private readonly verification: VerificationService,
+    private readonly rateLimit: RateLimitService,
   ) {}
 
-  async register(dto: RegisterDto): Promise<AuthTokenResponse> {
+  async register(dto: RegisterDto, ip?: string | null): Promise<AuthTokenResponse> {
     if (!isRegisterableRole(dto.role)) {
       throw new ConflictException('Invalid role for registration');
     }
+
+    // Charged before the duplicate-email check so probing for existing accounts costs quota.
+    await this.rateLimit.consume(this.registerRules(ip));
 
     const email = dto.email.trim().toLowerCase();
     const existing = await this.prisma.user.findUnique({ where: { email } });
@@ -70,13 +78,18 @@ export class AuthService {
       })
       .catch(() => undefined);
 
-    void this.verification.sendEmailCode(authUser).catch(() => undefined);
+    void this.verification.sendEmailCode(authUser, ip).catch(() => undefined);
 
     return this.issueToken(authUser);
   }
 
-  async login(dto: LoginDto): Promise<AuthTokenResponse> {
+  async login(dto: LoginDto, ip?: string | null): Promise<AuthTokenResponse> {
     const email = dto.email.trim().toLowerCase();
+
+    // Counted up front: an attempt that is never answered must still cost the attacker.
+    const accountRule = this.loginAccountRule(ip, email);
+    await this.rateLimit.consume([accountRule, this.loginIpRule(ip)]);
+
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (!user?.passwordHash) {
@@ -94,7 +107,43 @@ export class AuthService {
       );
     }
 
+    // A correct password clears the budget, so a few typos never lock out the real owner.
+    // The wider per-IP counter is deliberately left alone: one account the attacker does
+    // own must not buy them a fresh spraying budget.
+    await this.rateLimit.reset([accountRule]);
+
     return this.issueToken(this.toAuthenticatedUser(user));
+  }
+
+  /**
+   * Keyed on IP *and* email so a stranger cannot lock a victim out of their own account
+   * from a foreign address, while still stopping a password guesser cold.
+   */
+  private loginAccountRule(ip: string | null | undefined, email: string): RateLimitRequest {
+    return {
+      action: 'auth.login',
+      scope: { ip: ip ?? UNKNOWN_IP, email },
+      ...this.rateLimit.limits.policy('loginPerAccount'),
+    };
+  }
+
+  /** Catches spraying that walks through many different emails from one address. */
+  private loginIpRule(ip: string | null | undefined): RateLimitRequest {
+    return {
+      action: 'auth.login.ip',
+      scope: { ip: ip ?? UNKNOWN_IP },
+      ...this.rateLimit.limits.policy('loginPerIp'),
+    };
+  }
+
+  private registerRules(ip: string | null | undefined): RateLimitRequest[] {
+    return [
+      {
+        action: 'auth.register.ip',
+        scope: { ip: ip ?? UNKNOWN_IP },
+        ...this.rateLimit.limits.policy('registerPerIp'),
+      },
+    ];
   }
 
   async getMe(userId: string): Promise<PublicUser> {

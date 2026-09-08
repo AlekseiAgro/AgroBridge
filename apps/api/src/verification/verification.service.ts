@@ -12,14 +12,12 @@ import {
   VerificationChannel,
   VerificationStatus,
 } from '@prisma/client';
-import { createHash, randomInt } from 'crypto';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SmsService } from '../sms/sms.service';
 import { GeorgiaCompanyRegistryService } from './georgia-company-registry.service';
-
-const CODE_TTL_MS = 10 * 60 * 1000;
+import { VerificationCodeService } from './verification-code.service';
 
 @Injectable()
 export class VerificationService {
@@ -28,6 +26,7 @@ export class VerificationService {
     private readonly notifications: NotificationsService,
     private readonly sms: SmsService,
     private readonly registry: GeorgiaCompanyRegistryService,
+    private readonly codes: VerificationCodeService,
   ) {}
 
   async getStatus(user: AuthenticatedUser): Promise<ProducerVerificationStatus> {
@@ -104,13 +103,21 @@ export class VerificationService {
     };
   }
 
-  async sendEmailCode(user: AuthenticatedUser): Promise<{ sent: true; destination: string }> {
+  async sendEmailCode(
+    user: AuthenticatedUser,
+    ip?: string | null,
+  ): Promise<{ sent: true; destination: string }> {
     this.assertProducer(user);
     const dbUser = await this.requireUser(user.id);
     if (dbUser.emailVerifiedAt) {
       throw new BadRequestException('Email is already verified');
     }
-    const code = await this.issueCode(user.id, VerificationChannel.email, dbUser.email);
+    const code = await this.codes.issue({
+      userId: user.id,
+      channel: VerificationChannel.email,
+      destination: dbUser.email,
+      ip,
+    });
     try {
       await this.notifications.notifyVerificationCode({
         user: {
@@ -136,9 +143,15 @@ export class VerificationService {
   async confirmEmailCode(
     user: AuthenticatedUser,
     code: string,
+    ip?: string | null,
   ): Promise<ProducerVerificationStatus> {
     this.assertProducer(user);
-    await this.consumeCode(user.id, VerificationChannel.email, code);
+    await this.codes.consume({
+      userId: user.id,
+      channel: VerificationChannel.email,
+      code,
+      ip,
+    });
     await this.prisma.user.update({
       where: { id: user.id },
       data: { emailVerifiedAt: new Date() },
@@ -150,6 +163,7 @@ export class VerificationService {
   async sendSmsCode(
     user: AuthenticatedUser,
     phoneRaw: string,
+    ip?: string | null,
   ): Promise<{ sent: true; destination: string }> {
     this.assertProducer(user);
     const phone = this.normalizePhone(phoneRaw);
@@ -157,6 +171,14 @@ export class VerificationService {
     if (dbUser.phoneVerifiedAt && dbUser.phone === phone) {
       throw new BadRequestException('Phone is already verified');
     }
+
+    // Throttle before touching the profile so a blocked request cannot reset phoneVerifiedAt.
+    const code = await this.codes.issue({
+      userId: user.id,
+      channel: VerificationChannel.sms,
+      destination: phone,
+      ip,
+    });
 
     await this.prisma.user.update({
       where: { id: user.id },
@@ -166,7 +188,6 @@ export class VerificationService {
       },
     });
 
-    const code = await this.issueCode(user.id, VerificationChannel.sms, phone);
     await this.sms.send({
       to: phone,
       text: `AgroBridge verification code: ${code}`,
@@ -177,9 +198,15 @@ export class VerificationService {
   async confirmSmsCode(
     user: AuthenticatedUser,
     code: string,
+    ip?: string | null,
   ): Promise<ProducerVerificationStatus> {
     this.assertProducer(user);
-    await this.consumeCode(user.id, VerificationChannel.sms, code);
+    await this.codes.consume({
+      userId: user.id,
+      channel: VerificationChannel.sms,
+      code,
+      ip,
+    });
     await this.prisma.user.update({
       where: { id: user.id },
       data: { phoneVerifiedAt: new Date() },
@@ -313,62 +340,6 @@ export class VerificationService {
         });
       }
     }
-  }
-
-  private async issueCode(
-    userId: string,
-    channel: VerificationChannel,
-    destination: string,
-  ): Promise<string> {
-    const code = String(randomInt(100000, 999999));
-    const codeHash = this.hashCode(code);
-    const expiresAt = new Date(Date.now() + CODE_TTL_MS);
-
-    await this.prisma.verificationCode.create({
-      data: {
-        userId,
-        channel,
-        destination,
-        codeHash,
-        expiresAt,
-      },
-    });
-
-    return code;
-  }
-
-  private async consumeCode(
-    userId: string,
-    channel: VerificationChannel,
-    code: string,
-  ): Promise<void> {
-    const trimmed = code.trim();
-    if (!/^\d{6}$/.test(trimmed)) {
-      throw new BadRequestException('Enter the 6-digit verification code');
-    }
-
-    const latest = await this.prisma.verificationCode.findFirst({
-      where: {
-        userId,
-        channel,
-        consumedAt: null,
-        expiresAt: { gt: new Date() },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    if (!latest || latest.codeHash !== this.hashCode(trimmed)) {
-      throw new BadRequestException('Invalid or expired verification code');
-    }
-
-    await this.prisma.verificationCode.update({
-      where: { id: latest.id },
-      data: { consumedAt: new Date() },
-    });
-  }
-
-  private hashCode(code: string): string {
-    return createHash('sha256').update(code).digest('hex');
   }
 
   private normalizePhone(value: string): string {

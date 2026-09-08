@@ -22,15 +22,13 @@ import {
   VerificationChannel,
 } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { createHash, randomInt } from 'crypto';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { ChatService } from '../chat/chat.service';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
 import { StorageService } from '../storage/storage.service';
-
-const CODE_TTL_MS = 10 * 60 * 1000;
+import { VerificationCodeService } from '../verification/verification-code.service';
 
 @Injectable()
 export class CabinetService {
@@ -40,6 +38,7 @@ export class CabinetService {
     private readonly storage: StorageService,
     private readonly notifications: NotificationsService,
     private readonly chat: ChatService,
+    private readonly codes: VerificationCodeService,
   ) {}
 
   async overview(user: AuthenticatedUser): Promise<CabinetOverview> {
@@ -260,6 +259,7 @@ export class CabinetService {
     user: AuthenticatedUser,
     password: string,
     newEmailRaw: string,
+    ip?: string | null,
   ): Promise<{ sent: true; destination: string; newEmail: string }> {
     const dbUser = await this.requireUserWithPassword(user.id);
     await this.assertPassword(dbUser.passwordHash, password);
@@ -280,16 +280,12 @@ export class CabinetService {
       throw new ConflictException('Email is already registered');
     }
 
-    const code = String(randomInt(100000, 999999));
-    await this.prisma.verificationCode.create({
-      data: {
-        userId: user.id,
-        channel: VerificationChannel.emailChange,
-        // Store the intended new email; the code itself is mailed to the old address.
-        destination: newEmail,
-        codeHash: this.hashCode(code),
-        expiresAt: new Date(Date.now() + CODE_TTL_MS),
-      },
+    const code = await this.codes.issue({
+      userId: user.id,
+      channel: VerificationChannel.emailChange,
+      // Store the intended new email; the code itself is mailed to the old address.
+      destination: newEmail,
+      ip,
     });
 
     try {
@@ -319,11 +315,18 @@ export class CabinetService {
     user: AuthenticatedUser,
     password: string,
     code: string,
+    ip?: string | null,
   ): Promise<{ ok: true; email: string }> {
     const dbUser = await this.requireUserWithPassword(user.id);
     await this.assertPassword(dbUser.passwordHash, password);
 
-    const latest = await this.consumeCode(user.id, VerificationChannel.emailChange, code);
+    const latest = await this.codes.consume({
+      userId: user.id,
+      channel: VerificationChannel.emailChange,
+      code,
+      ip,
+      invalidMessage: 'Invalid or expired confirmation code',
+    });
     const newEmail = latest.destination.trim().toLowerCase();
 
     if (!newEmail || newEmail === dbUser.email) {
@@ -352,20 +355,17 @@ export class CabinetService {
   async requestAccountDeletion(
     user: AuthenticatedUser,
     password: string,
+    ip?: string | null,
   ): Promise<{ sent: true; destination: string }> {
     this.assertDeletable(user);
     const dbUser = await this.requireUserWithPassword(user.id);
     await this.assertPassword(dbUser.passwordHash, password);
 
-    const code = String(randomInt(100000, 999999));
-    await this.prisma.verificationCode.create({
-      data: {
-        userId: user.id,
-        channel: VerificationChannel.accountDeletion,
-        destination: dbUser.email,
-        codeHash: this.hashCode(code),
-        expiresAt: new Date(Date.now() + CODE_TTL_MS),
-      },
+    const code = await this.codes.issue({
+      userId: user.id,
+      channel: VerificationChannel.accountDeletion,
+      destination: dbUser.email,
+      ip,
     });
 
     try {
@@ -394,11 +394,18 @@ export class CabinetService {
     user: AuthenticatedUser,
     password: string,
     code: string,
+    ip?: string | null,
   ): Promise<{ ok: true }> {
     this.assertDeletable(user);
     const dbUser = await this.requireUserWithPassword(user.id);
     await this.assertPassword(dbUser.passwordHash, password);
-    await this.consumeCode(user.id, VerificationChannel.accountDeletion, code);
+    await this.codes.consume({
+      userId: user.id,
+      channel: VerificationChannel.accountDeletion,
+      code,
+      ip,
+      invalidMessage: 'Invalid or expired confirmation code',
+    });
 
     const [avatarUser, farm, ownedProducts] = await Promise.all([
       this.prisma.user.findUnique({
@@ -480,38 +487,6 @@ export class CabinetService {
     if (!valid) {
       throw new UnauthorizedException('Incorrect password');
     }
-  }
-
-  private async consumeCode(userId: string, channel: VerificationChannel, code: string) {
-    const trimmed = code.trim();
-    if (!/^\d{6}$/.test(trimmed)) {
-      throw new BadRequestException('Enter the 6-digit confirmation code from your email');
-    }
-
-    const latest = await this.prisma.verificationCode.findFirst({
-      where: {
-        userId,
-        channel,
-        consumedAt: null,
-        expiresAt: { gt: new Date() },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    if (!latest || latest.codeHash !== this.hashCode(trimmed)) {
-      throw new BadRequestException('Invalid or expired confirmation code');
-    }
-
-    await this.prisma.verificationCode.update({
-      where: { id: latest.id },
-      data: { consumedAt: new Date() },
-    });
-
-    return latest;
-  }
-
-  private hashCode(code: string): string {
-    return createHash('sha256').update(code).digest('hex');
   }
 
   private async countAwaitingRating(userId: string) {

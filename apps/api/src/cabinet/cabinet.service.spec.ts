@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { createHash } from 'crypto';
+import { RateLimitExceededException } from '../rate-limit/rate-limit-exceeded.exception';
 import { CabinetService } from './cabinet.service';
 
 describe('CabinetService', () => {
@@ -32,11 +32,13 @@ describe('CabinetService', () => {
     conversation: {
       count: jest.fn(),
     },
-    verificationCode: {
-      create: jest.fn(),
-      findFirst: jest.fn(),
-      update: jest.fn(),
-    },
+  };
+
+  // The code lifecycle itself (attempt cap, atomicity, replay) is covered against a real
+  // database in verification/verification-code.service.integration.spec.ts.
+  const codes = {
+    issue: jest.fn().mockResolvedValue('123456'),
+    consume: jest.fn().mockResolvedValue({ id: 'c1', destination: 'new@example.com' }),
   };
 
   const ratings = { summaryForUser: jest.fn() };
@@ -58,6 +60,7 @@ describe('CabinetService', () => {
     storage as never,
     notifications as never,
     chat as never,
+    codes as never,
   );
 
   const farmer = {
@@ -80,6 +83,8 @@ describe('CabinetService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    codes.issue.mockResolvedValue('123456');
+    codes.consume.mockResolvedValue({ id: 'c1', destination: 'new@example.com' });
   });
 
   it('includes open purchase requests in openRequests activity', async () => {
@@ -146,19 +151,23 @@ describe('CabinetService', () => {
       displayName: 'Nino',
       passwordHash,
     });
-    prisma.verificationCode.create.mockResolvedValue({ id: 'c1' });
 
     await expect(service.requestAccountDeletion(farmer, 'password1')).resolves.toEqual({
       sent: true,
       destination: 'farmer@example.com',
     });
     expect(notifications.notifyAccountDeletionCode).toHaveBeenCalled();
-    expect(prisma.verificationCode.create).toHaveBeenCalled();
+    expect(codes.issue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user_1',
+        channel: 'accountDeletion',
+        destination: 'farmer@example.com',
+      }),
+    );
   });
 
   it('deletes the account after password and code confirmation', async () => {
     const code = '123456';
-    const codeHash = createHash('sha256').update(code).digest('hex');
 
     prisma.user.findUnique.mockResolvedValue({
       id: 'user_1',
@@ -168,11 +177,6 @@ describe('CabinetService', () => {
       passwordHash,
       avatarKey: 'users/user_1/avatar.jpg',
     });
-    prisma.verificationCode.findFirst.mockResolvedValue({
-      id: 'c1',
-      codeHash,
-    });
-    prisma.verificationCode.update.mockResolvedValue({ id: 'c1' });
     prisma.farm.findUnique.mockResolvedValue({
       documents: [{ key: 'docs/id.pdf' }],
       images: [{ key: 'farms/1/photos/a.jpg' }],
@@ -204,11 +208,14 @@ describe('CabinetService', () => {
       displayName: 'Nino',
       passwordHash,
     });
-    prisma.verificationCode.findFirst.mockResolvedValue(null);
+    codes.consume.mockRejectedValue(
+      new BadRequestException('Invalid or expired confirmation code'),
+    );
 
     await expect(
       service.confirmAccountDeletion(farmer, 'password1', '000000'),
     ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.user.delete).not.toHaveBeenCalled();
   });
 
   it('uploads an avatar and replaces the previous file', async () => {
@@ -271,7 +278,6 @@ describe('CabinetService', () => {
         passwordHash,
       })
       .mockResolvedValueOnce(null);
-    prisma.verificationCode.create.mockResolvedValue({ id: 'c1' });
 
     await expect(
       service.requestEmailChange(farmer, 'password1', 'New@Example.com'),
@@ -287,12 +293,10 @@ describe('CabinetService', () => {
         newEmail: 'new@example.com',
       }),
     );
-    expect(prisma.verificationCode.create).toHaveBeenCalledWith(
+    expect(codes.issue).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          channel: 'emailChange',
-          destination: 'new@example.com',
-        }),
+        channel: 'emailChange',
+        destination: 'new@example.com',
       }),
     );
   });
@@ -315,7 +319,6 @@ describe('CabinetService', () => {
 
   it('confirms email change and clears verification', async () => {
     const code = '654321';
-    const codeHash = createHash('sha256').update(code).digest('hex');
     prisma.user.findUnique
       .mockResolvedValueOnce({
         id: 'user_1',
@@ -325,12 +328,6 @@ describe('CabinetService', () => {
         passwordHash,
       })
       .mockResolvedValueOnce(null);
-    prisma.verificationCode.findFirst.mockResolvedValue({
-      id: 'c1',
-      codeHash,
-      destination: 'new@example.com',
-    });
-    prisma.verificationCode.update.mockResolvedValue({ id: 'c1' });
     prisma.user.update.mockResolvedValue({});
 
     await expect(service.confirmEmailChange(farmer, 'password1', code)).resolves.toEqual({
@@ -343,6 +340,48 @@ describe('CabinetService', () => {
         email: 'new@example.com',
         emailVerifiedAt: null,
       },
+    });
+  });
+
+  describe('confirmation-code protection', () => {
+    beforeEach(() => {
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'user_1',
+        email: 'farmer@example.com',
+        locale: 'en',
+        displayName: 'Nino',
+        passwordHash,
+      });
+    });
+
+    it('reports the caller address so per-IP limits apply to cabinet codes', async () => {
+      await service.requestAccountDeletion(farmer, 'password1', '203.0.113.44');
+      expect(codes.issue).toHaveBeenCalledWith(
+        expect.objectContaining({ ip: '203.0.113.44' }),
+      );
+
+      await service.confirmEmailChange(farmer, 'password1', '654321', '203.0.113.44');
+      expect(codes.consume).toHaveBeenCalledWith(
+        expect.objectContaining({ ip: '203.0.113.44', channel: 'emailChange' }),
+      );
+    });
+
+    it('propagates throttling instead of sending another code', async () => {
+      codes.issue.mockRejectedValue(new RateLimitExceededException(60));
+
+      await expect(
+        service.requestAccountDeletion(farmer, 'password1', '203.0.113.44'),
+      ).rejects.toBeInstanceOf(RateLimitExceededException);
+      expect(notifications.notifyAccountDeletionCode).not.toHaveBeenCalled();
+    });
+
+    it('refuses deletion when the challenge is out of attempts', async () => {
+      codes.consume.mockRejectedValue(new RateLimitExceededException(60));
+
+      await expect(
+        service.confirmAccountDeletion(farmer, 'password1', '000000', '203.0.113.44'),
+      ).rejects.toBeInstanceOf(RateLimitExceededException);
+      expect(prisma.user.delete).not.toHaveBeenCalled();
     });
   });
 });
