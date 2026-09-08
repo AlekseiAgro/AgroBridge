@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server';
 import type { ProducerVerificationStatus } from '@agrobridge/shared';
 import { ApiError } from '@/lib/api';
 import { apiRequestAuthed } from '@/lib/server-api';
-import { forwardedForOf } from '@/lib/client-address';
+import { visitorAddressOf } from '@/lib/client-address';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
     const data = await apiRequestAuthed<ProducerVerificationStatus>(
       '/verification/phone/confirm',
-      { method: 'POST', body, forwardedFor: forwardedForOf(request) },
+      { method: 'POST', body, forwardedFor: visitorAddressOf(request) },
     );
     return NextResponse.json(data);
   } catch (error) {

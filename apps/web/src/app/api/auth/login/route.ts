@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { AuthTokenResponse } from '@agrobridge/shared';
 import { ApiError, apiRequest } from '@/lib/api';
 import { setAuthCookie } from '@/lib/auth-cookie';
-import { forwardedForOf } from '@/lib/client-address';
+import { visitorAddressOf } from '@/lib/client-address';
 
 export async function POST(request: Request) {
   try {
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const result = await apiRequest<AuthTokenResponse>('/auth/login', {
       method: 'POST',
       body,
-      forwardedFor: forwardedForOf(request),
+      forwardedFor: visitorAddressOf(request),
     });
 
     await setAuthCookie(result.accessToken);

@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api';
 import { apiRequestAuthed } from '@/lib/server-api';
-import { forwardedForOf } from '@/lib/client-address';
+import { visitorAddressOf } from '@/lib/client-address';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const result = await apiRequestAuthed<{ ok: true; email: string }>(
       '/cabinet/me/email/confirm',
-      { method: 'POST', body, forwardedFor: forwardedForOf(request) },
+      { method: 'POST', body, forwardedFor: visitorAddressOf(request) },
     );
     return NextResponse.json(result);
   } catch (error) {
