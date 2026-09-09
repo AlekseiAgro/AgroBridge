@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { RateLimitExceededException } from '../rate-limit/rate-limit-exceeded.exception';
 import { VerificationService } from './verification.service';
 
 describe('VerificationService', () => {
@@ -11,11 +12,13 @@ describe('VerificationService', () => {
       findUnique: jest.fn(),
       update: jest.fn(),
     },
-    verificationCode: {
-      create: jest.fn(),
-      findFirst: jest.fn(),
-      update: jest.fn(),
-    },
+  };
+
+  // Issue/consume semantics are covered against a real database in
+  // verification-code.service.integration.spec.ts; here we only check the wiring.
+  const codes = {
+    issue: jest.fn().mockResolvedValue('123456'),
+    consume: jest.fn().mockResolvedValue({ id: 'c1', destination: 'farmer@example.com' }),
   };
 
   const notifications = {
@@ -48,11 +51,14 @@ describe('VerificationService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    codes.issue.mockResolvedValue('123456');
+    codes.consume.mockResolvedValue({ id: 'c1', destination: 'farmer@example.com' });
     service = new VerificationService(
       prisma as never,
       notifications as never,
       sms as never,
       registry as never,
+      codes as never,
     );
   });
 
@@ -67,7 +73,6 @@ describe('VerificationService', () => {
       phoneVerifiedAt: null,
       sellerType: 'privateFarmer',
     });
-    prisma.verificationCode.create.mockResolvedValue({ id: 'c1' });
 
     const result = await service.sendEmailCode({
       ...farmer,
@@ -88,12 +93,16 @@ describe('VerificationService', () => {
       phoneVerifiedAt: null,
       sellerType: 'privateFarmer',
     });
-    prisma.verificationCode.create.mockResolvedValue({ id: 'c1' });
 
-    const result = await service.sendEmailCode(farmer);
+    const result = await service.sendEmailCode(farmer, '203.0.113.7');
     expect(result.sent).toBe(true);
     expect(notifications.notifyVerificationCode).toHaveBeenCalled();
-    expect(prisma.verificationCode.create).toHaveBeenCalled();
+    expect(codes.issue).toHaveBeenCalledWith({
+      userId: 'u1',
+      channel: 'email',
+      destination: 'farmer@example.com',
+      ip: '203.0.113.7',
+    });
   });
 
   it('rejects invalid phone numbers', async () => {
@@ -106,5 +115,73 @@ describe('VerificationService', () => {
     await expect(service.sendSmsCode(farmer, 'abc')).rejects.toBeInstanceOf(
       BadRequestException,
     );
+  });
+
+  it('stops sending mail once the code budget is spent', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      locale: 'en',
+      displayName: 'Farmer',
+      emailVerifiedAt: null,
+    });
+    codes.issue.mockRejectedValue(new RateLimitExceededException(60));
+
+    await expect(service.sendEmailCode(farmer, '203.0.113.7')).rejects.toBeInstanceOf(
+      RateLimitExceededException,
+    );
+    expect(notifications.notifyVerificationCode).not.toHaveBeenCalled();
+  });
+
+  it('leaves the verified phone alone when an SMS request is throttled', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      phone: '+995500000000',
+      phoneVerifiedAt: new Date(),
+    });
+    codes.issue.mockRejectedValue(new RateLimitExceededException(60));
+
+    await expect(
+      service.sendSmsCode(farmer, '+995511111111', '203.0.113.7'),
+    ).rejects.toBeInstanceOf(RateLimitExceededException);
+    expect(prisma.user.update).not.toHaveBeenCalled();
+    expect(sms.send).not.toHaveBeenCalled();
+  });
+
+  it('marks the email verified only after the challenge is consumed', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      locale: 'en',
+      displayName: 'Farmer',
+      emailVerifiedAt: null,
+      phoneVerifiedAt: null,
+      sellerType: 'privateFarmer',
+    });
+    prisma.farm.findUnique.mockResolvedValue(null);
+    prisma.user.update.mockResolvedValue({});
+
+    await service.confirmEmailCode(farmer, '123456', '203.0.113.7');
+
+    expect(codes.consume).toHaveBeenCalledWith({
+      userId: 'u1',
+      channel: 'email',
+      code: '123456',
+      ip: '203.0.113.7',
+    });
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'u1' },
+      data: { emailVerifiedAt: expect.any(Date) },
+    });
+  });
+
+  it('does not verify the email when the code is rejected', async () => {
+    codes.consume.mockRejectedValue(new BadRequestException('Invalid or expired verification code'));
+
+    await expect(
+      service.confirmEmailCode(farmer, '000000', '203.0.113.7'),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.user.update).not.toHaveBeenCalled();
   });
 });

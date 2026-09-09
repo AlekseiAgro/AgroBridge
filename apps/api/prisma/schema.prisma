@@ -295,12 +295,29 @@ model VerificationCode {
   codeHash    String
   expiresAt   DateTime
   consumedAt  DateTime?
+  // Set when a newer code supersedes this one, so only one challenge is ever guessable.
+  invalidatedAt DateTime?
+  // Failed guesses against this challenge; incremented atomically, capped by the service.
+  attempts    Int                 @default(0)
   createdAt   DateTime            @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, channel, createdAt])
   @@map("verification_codes")
+}
+
+/// Fixed-window counters backing HTTP/action rate limiting. Stored in Postgres so the
+/// limits hold across API replicas and restarts; `key` is an opaque HMAC-derived string.
+model RateLimitCounter {
+  key       String   @id
+  count     Int      @default(0)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([expiresAt])
+  @@map("rate_limit_counters")
 }
 
 model CategoryConfig {

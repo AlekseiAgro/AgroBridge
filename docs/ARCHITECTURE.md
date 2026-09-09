@@ -12,13 +12,16 @@
 
 - Next.js App Router, TypeScript, Tailwind CSS.
 - Locale-prefixed routes via `next-intl`: `/ka`, `/en`, `/ru`, `/de`, `/fr`, `/it`, `/es`.
-- Talks to the API over HTTP (`NEXT_PUBLIC_API_URL`).
+- Talks to the API over HTTP: the browser uses `NEXT_PUBLIC_API_URL`, the server uses the
+  private `API_INTERNAL_URL` so the API can still identify the visitor
+  (see [`RATE_LIMITING.md`](RATE_LIMITING.md)).
 
 ### `apps/api`
 
 - NestJS modular API under global prefix `/api`.
 - Prisma + PostgreSQL for persistence.
-- Redis reserved for translation jobs and rate limiting (not wired in step 1).
+- Redis reserved for translation jobs (not wired yet). Rate limiting is Postgres-backed —
+  see [`RATE_LIMITING.md`](RATE_LIMITING.md) for why.
 
 ### `packages/shared`
 

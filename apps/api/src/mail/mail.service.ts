@@ -13,11 +13,13 @@ export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
   private readonly driver: 'console' | 'smtp';
   private readonly from: string;
+  private readonly redactBodies: boolean;
   private transporter?: Transporter;
 
   constructor(private readonly config: ConfigService) {
     const configured = (this.config.get<string>('MAIL_DRIVER') ?? 'console').toLowerCase();
     this.driver = configured === 'smtp' ? 'smtp' : 'console';
+    this.redactBodies = this.config.get<string>('NODE_ENV') === 'production';
     this.from =
       this.config.get<string>('MAIL_FROM') ?? 'AgroBridge <noreply@agrobridge.local>';
   }
@@ -55,8 +57,11 @@ export class MailService implements OnModuleInit {
 
   async send(message: MailMessage): Promise<void> {
     if (!this.transporter) {
+      const header = `[console-mail] to=${message.to} subject=${JSON.stringify(message.subject)}${message.replyTo ? ` replyTo=${message.replyTo}` : ''}`;
+      // Bodies carry verification codes. Printing them is a development convenience only;
+      // if this driver is ever reached in production the code must not reach the logs.
       this.logger.log(
-        `[console-mail] to=${message.to} subject=${JSON.stringify(message.subject)}${message.replyTo ? ` replyTo=${message.replyTo}` : ''}\n${message.text}`,
+        this.redactBodies ? `${header} (body omitted)` : `${header}\n${message.text}`,
       );
       return;
     }

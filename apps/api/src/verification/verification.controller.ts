@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ClientIp } from '../http/client-ip';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -25,25 +26,37 @@ export class VerificationController {
   }
 
   @Post('email/send-code')
-  sendEmailCode(@CurrentUser() user: AuthenticatedUser) {
-    return this.verificationService.sendEmailCode(user);
+  sendEmailCode(@CurrentUser() user: AuthenticatedUser, @ClientIp() ip: string) {
+    return this.verificationService.sendEmailCode(user, ip);
   }
 
   @Post('email/confirm')
-  confirmEmail(@CurrentUser() user: AuthenticatedUser, @Body() dto: ConfirmCodeDto) {
-    return this.verificationService.confirmEmailCode(user, dto.code);
+  confirmEmail(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: ConfirmCodeDto,
+    @ClientIp() ip: string,
+  ) {
+    return this.verificationService.confirmEmailCode(user, dto.code, ip);
   }
 
   @Post('phone/send-code')
   @UseGuards(EmailVerifiedGuard)
-  sendSmsCode(@CurrentUser() user: AuthenticatedUser, @Body() dto: SendSmsCodeDto) {
-    return this.verificationService.sendSmsCode(user, dto.phone);
+  sendSmsCode(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: SendSmsCodeDto,
+    @ClientIp() ip: string,
+  ) {
+    return this.verificationService.sendSmsCode(user, dto.phone, ip);
   }
 
   @Post('phone/confirm')
   @UseGuards(EmailVerifiedGuard)
-  confirmSms(@CurrentUser() user: AuthenticatedUser, @Body() dto: ConfirmCodeDto) {
-    return this.verificationService.confirmSmsCode(user, dto.code);
+  confirmSms(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: ConfirmCodeDto,
+    @ClientIp() ip: string,
+  ) {
+    return this.verificationService.confirmSmsCode(user, dto.code, ip);
   }
 
   @Post('company/registry')

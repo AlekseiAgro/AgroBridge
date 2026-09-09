@@ -25,9 +25,11 @@ The example is pre-filled for **agrobrid.ge** / **api.agrobrid.ge**. Change secr
 | `WEB_ORIGIN` / `WEB_PUBLIC_URL` | Public web URL (CORS + email links) |
 | `API_PUBLIC_URL` | Public API origin (uploaded media URLs) |
 | `NEXT_PUBLIC_API_URL` | Browser/API base, usually `$API_PUBLIC_URL/api` |
+| `API_INTERNAL_URL` | Private API address the Next.js server calls. Compose: `http://api:3001/api`. Railway: `http://${{api.RAILWAY_PRIVATE_DOMAIN}}:8080/api` (Railway injects `PORT=8080`; do not override it). Server-only; sending server-side traffic through the public hostname breaks per-visitor rate limiting |
 | `POSTGRES_PASSWORD` | Database password |
 | `JWT_SECRET` | Long random secret (API refuses weak defaults in production) |
 | `SUPPORT_EMAIL` | Inbox for `/support` form |
+| `TRUST_PROXY` | Which `X-Forwarded-For` entries the API believes; wrong values break IP rate limiting. Defaults to our own private ranges in production, which is where the Next.js server calls from. See [`docs/RATE_LIMITING.md`](RATE_LIMITING.md) |
 
 Optional production upgrades:
 
@@ -86,6 +88,7 @@ Do **not** mount Nest at `https://agrobrid.ge/api` — Next.js already owns `/ap
 - [ ] DNS for `agrobrid.ge` and `api.agrobrid.ge`
 - [ ] HTTPS enabled; env URLs use `https://`
 - [ ] Strong `JWT_SECRET` and `POSTGRES_PASSWORD`
+- [ ] Client addresses resolve correctly through the proxy chain (check the API boot log for the trusted-proxy setting)
 - [ ] `SUPPORT_EMAIL` reaches a monitored inbox
 - [ ] SMTP configured if you need real mail (otherwise console logs only)
 - [ ] Prefer S3/R2 for uploads if the container filesystem is ephemeral

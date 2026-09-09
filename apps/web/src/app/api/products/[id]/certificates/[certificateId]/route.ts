@@ -1,8 +1,9 @@
 import type { ProductDetail } from '@agrobridge/shared';
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth-cookie';
+import { serverApiUrl } from '@/lib/api-base-url';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
+const API_URL = serverApiUrl();
 
 type Params = { params: Promise<{ id: string; certificateId: string }> };
 

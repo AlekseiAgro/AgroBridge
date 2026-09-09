@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
+import { serverApiUrl } from './api-base-url';
 
 export class ApiError extends Error {
   status: number;
@@ -16,6 +16,8 @@ type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   token?: string | null;
+  /** Visitor address to relay; see `visitorAddressOf` in `lib/client-address`. */
+  forwardedFor?: string | null;
 };
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -31,7 +33,11 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     headers.Authorization = `Bearer ${options.token}`;
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
+  if (options.forwardedFor) {
+    headers['X-Forwarded-For'] = options.forwardedFor;
+  }
+
+  const response = await fetch(`${serverApiUrl()}${path}`, {
     method: options.method ?? 'GET',
     headers,
     body: options.body === undefined ? undefined : JSON.stringify(options.body),

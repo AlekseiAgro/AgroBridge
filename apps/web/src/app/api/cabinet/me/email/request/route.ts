@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api';
 import { apiRequestAuthed } from '@/lib/server-api';
+import { visitorAddressOf } from '@/lib/client-address';
 
 export async function POST(request: Request) {
   try {
@@ -9,7 +10,11 @@ export async function POST(request: Request) {
       sent: true;
       destination: string;
       newEmail: string;
-    }>('/cabinet/me/email/request', { method: 'POST', body });
+    }>('/cabinet/me/email/request', {
+      method: 'POST',
+      body,
+      forwardedFor: visitorAddressOf(request),
+    });
     return NextResponse.json(result);
   } catch (error) {
     if (error instanceof ApiError) {

@@ -114,6 +114,9 @@ services:
       PORT: 3000
       HOSTNAME: 0.0.0.0
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      # Server-side calls stay on the compose network, so the API sees a peer it can trust
+      # and keeps per-visitor rate limits. Never exposed to the browser.
+      API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:3001/api}
     ports:
       - '${WEB_HOST_PORT:-3000}:3000'
     networks:

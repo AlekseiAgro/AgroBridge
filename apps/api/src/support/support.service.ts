@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SUPPORT_EMAIL, type SupportRequestResponse } from '@agrobridge/shared';
+import { UNKNOWN_IP } from '../http/client-ip';
 import { MailService } from '../mail/mail.service';
+import { RateLimitService } from '../rate-limit/rate-limit.service';
 import type { CreateSupportRequestDto } from './dto/create-support-request.dto';
 
 @Injectable()
@@ -12,16 +14,30 @@ export class SupportService {
   constructor(
     private readonly mail: MailService,
     private readonly config: ConfigService,
+    private readonly rateLimit: RateLimitService,
   ) {
-    this.supportEmail =
-      this.config.get<string>('SUPPORT_EMAIL')?.trim() || SUPPORT_EMAIL;
+    this.supportEmail = this.config.get<string>('SUPPORT_EMAIL')?.trim() || SUPPORT_EMAIL;
   }
 
-  async submit(dto: CreateSupportRequestDto): Promise<SupportRequestResponse> {
+  async submit(dto: CreateSupportRequestDto, ip?: string | null): Promise<SupportRequestResponse> {
     const name = dto.name.trim();
     const email = dto.email.trim();
     const subject = dto.subject.trim();
     const message = dto.message.trim();
+
+    // The form is unauthenticated and sends mail on our behalf, so it is spam relay bait.
+    await this.rateLimit.consume([
+      {
+        action: 'support.submit.ip',
+        scope: { ip: ip ?? UNKNOWN_IP },
+        ...this.rateLimit.limits.policy('supportPerIp'),
+      },
+      {
+        action: 'support.submit.email',
+        scope: { email },
+        ...this.rateLimit.limits.policy('supportPerEmail'),
+      },
+    ]);
 
     const text = [
       'New AgroBridge support request',

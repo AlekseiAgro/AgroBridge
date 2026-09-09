@@ -6,6 +6,7 @@ export async function apiRequestAuthed<T>(
   options: {
     method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
     body?: unknown;
+    forwardedFor?: string | null;
   } = {},
 ): Promise<T> {
   const token = await getAuthToken();

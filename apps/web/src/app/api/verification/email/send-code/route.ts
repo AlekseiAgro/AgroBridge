@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { ApiError } from '@/lib/api';
+import { visitorAddressOf } from '@/lib/client-address';
 import { apiRequestAuthed } from '@/lib/server-api';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const data = await apiRequestAuthed<{ sent: true; destination: string }>(
       '/verification/email/send-code',
-      { method: 'POST', body: {} },
+      { method: 'POST', body: {}, forwardedFor: visitorAddressOf(request) },
     );
     return NextResponse.json(data);
   } catch (error) {

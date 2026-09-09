@@ -12,6 +12,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { USER_AVATAR_MAX_BYTES } from '@agrobridge/shared';
+import { ClientIp } from '../http/client-ip';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -52,16 +53,18 @@ export class CabinetController {
   requestEmailChange(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: RequestEmailChangeDto,
+    @ClientIp() ip: string,
   ) {
-    return this.cabinetService.requestEmailChange(user, dto.password, dto.newEmail);
+    return this.cabinetService.requestEmailChange(user, dto.password, dto.newEmail, ip);
   }
 
   @Post('me/email/confirm')
   confirmEmailChange(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: ConfirmEmailChangeDto,
+    @ClientIp() ip: string,
   ) {
-    return this.cabinetService.confirmEmailChange(user, dto.password, dto.code);
+    return this.cabinetService.confirmEmailChange(user, dto.password, dto.code, ip);
   }
 
   @Post('me/avatar')
@@ -87,15 +90,17 @@ export class CabinetController {
   requestDeletion(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: RequestAccountDeletionDto,
+    @ClientIp() ip: string,
   ) {
-    return this.cabinetService.requestAccountDeletion(user, dto.password);
+    return this.cabinetService.requestAccountDeletion(user, dto.password, ip);
   }
 
   @Post('me/delete/confirm')
   confirmDeletion(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: ConfirmAccountDeletionDto,
+    @ClientIp() ip: string,
   ) {
-    return this.cabinetService.confirmAccountDeletion(user, dto.password, dto.code);
+    return this.cabinetService.confirmAccountDeletion(user, dto.password, dto.code, ip);
   }
 }
