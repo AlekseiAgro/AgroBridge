@@ -186,7 +186,14 @@
       "statusLabel": "Current status",
       "doneHint": "Buyers can see your Verified badge on the catalog and farm page.",
       "genericError": "Could not complete this verification step.",
-      "unknownPath": "Set your seller type (private farmer or company) during registration to continue identity verification.",
+      "unknownPath": "Elija si vende como agricultor particular o como empresa para continuar la verificación de identidad.",
+      "sellerType": {
+        "title": "Tipo de vendedor",
+        "hint": "Elija cómo vende. Eso determina qué documento de identidad se exige.",
+        "identityTitle": "3. Verificación de identidad",
+        "saved": "Tipo de vendedor guardado.",
+        "locked": "Tras la verificación no se puede cambiar el tipo de vendedor."
+      },
       "farmStatus": {
         "unverified": "Not verified yet",
         "pending": "Pending moderator review",
@@ -217,20 +224,24 @@
         "confirmed": "Phone confirmed."
       },
       "company": {
-        "title": "3. Company registry check",
+        "title": "3. Company verification",
         "number": "Georgian company identification code",
         "check": "Check registry",
         "hint": "Enter the 9-digit identification code from Georgian public company databases.",
-        "matched": "Registry match: {name}"
+        "matched": "Registry match: {name}",
+        "documentHint": "Suba el certificado de registro de la empresa. El tipo de documento se asigna automáticamente.",
+        "upload": "Subir registro de empresa",
+        "docTitle": "Registro de empresa",
+        "uploaded": "Documento de registro de empresa subido."
       },
       "private": {
-        "title": "3. ID card review",
-        "hint": "Upload a clear photo or scan of your ID card. A moderator will review it manually.",
-        "upload": "Upload ID card",
-        "idTitle": "ID card",
-        "submit": "Submit for moderator review",
-        "uploaded": "ID document uploaded.",
-        "submitted": "Submitted for moderator review."
+        "title": "3. Revisión del DNI",
+        "hint": "Se exige un DNI. El tipo de documento se asigna automáticamente. Un moderador lo revisará.",
+        "upload": "Subir DNI",
+        "idTitle": "DNI",
+        "submit": "Enviar a revisión del moderador",
+        "uploaded": "Documento de identidad subido.",
+        "submitted": "Enviado a revisión del moderador."
       },
       "pending": "Pending review",
       "approved": "Verified producer",
@@ -238,8 +249,8 @@
       "unverified": "Not verified yet"
     },
     "documents": {
-      "title": "Documentos de verificación",
-      "subtitle": "Sube documentos de registro (hasta {max}).",
+      "title": "Documentos adicionales",
+      "subtitle": "Papeles extra opcionales (hasta {max}). El DNI y el registro de empresa se suben en la sección de verificación de arriba.",
       "empty": "Aún no hay documentos.",
       "titleField": "Título del documento",
       "titlePlaceholder": "Certificado de registro",
@@ -255,11 +266,11 @@
         "approved": "Aprobado",
         "rejected": "Rechazado"
       },
-      "kindField": "Document type",
+      "kindField": "Tipo de documento",
       "kinds": {
-        "idCard": "ID card",
-        "businessRegistration": "Business registration",
-        "other": "Other"
+        "idCard": "DNI",
+        "businessRegistration": "Registro de empresa",
+        "other": "Otro"
       }
     },
     "photos": {

@@ -207,4 +207,82 @@ describe('VerificationService', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(prisma.user.update).not.toHaveBeenCalled();
   });
+
+  it('stores seller type on the user and returns the matching verification path', async () => {
+    prisma.farm.findUnique.mockResolvedValue({
+      verificationStatus: 'unverified',
+      verificationNote: null,
+      companyRegistrationNumber: null,
+      companyRegistryName: null,
+      companyRegistryValid: null,
+      documents: [],
+    });
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      locale: 'en',
+      displayName: 'Farmer',
+      emailVerifiedAt: new Date(),
+      phone: null,
+      phoneVerifiedAt: null,
+      sellerType: 'company',
+    });
+    prisma.user.update.mockResolvedValue({});
+
+    const status = await service.setSellerType(farmer, 'company');
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'u1' },
+      data: { sellerType: 'company' },
+    });
+    expect(status.path).toBe('company');
+    expect(status.sellerType).toBe('company');
+  });
+
+  it('stores privateFarmer seller type and returns that verification path', async () => {
+    prisma.farm.findUnique.mockResolvedValue({
+      verificationStatus: 'unverified',
+      verificationNote: null,
+      companyRegistrationNumber: null,
+      companyRegistryName: null,
+      companyRegistryValid: null,
+      documents: [],
+    });
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      locale: 'en',
+      displayName: 'Farmer',
+      emailVerifiedAt: new Date(),
+      phone: null,
+      phoneVerifiedAt: null,
+      sellerType: 'privateFarmer',
+    });
+    prisma.user.update.mockResolvedValue({});
+
+    const status = await service.setSellerType(farmer, 'privateFarmer');
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'u1' },
+      data: { sellerType: 'privateFarmer' },
+    });
+    expect(status.path).toBe('privateFarmer');
+    expect(status.sellerType).toBe('privateFarmer');
+  });
+
+  it('rejects seller type changes after the farm is verified', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ verificationStatus: 'approved' });
+
+    await expect(service.setSellerType(farmer, 'privateFarmer')).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(prisma.user.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects an invalid seller type before writing', async () => {
+    await expect(service.setSellerType(farmer, 'cooperative')).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(prisma.user.update).not.toHaveBeenCalled();
+  });
 });

@@ -5,7 +5,7 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { canTrade, type ProducerVerificationStatus, type SellerType } from '@agrobridge/shared';
+import { canTrade, isSellerType, type ProducerVerificationStatus, type SellerType } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
   FarmDocumentKind,
@@ -207,6 +207,31 @@ export class VerificationService {
       data: { phoneVerifiedAt: new Date() },
     });
     await this.tryCompleteVerification(user.id);
+    return this.getStatus(user);
+  }
+
+  async setSellerType(
+    user: AuthenticatedUser,
+    sellerTypeRaw: string,
+  ): Promise<ProducerVerificationStatus> {
+    this.assertProducer(user);
+    if (!isSellerType(sellerTypeRaw)) {
+      throw new BadRequestException('Seller type is invalid');
+    }
+
+    const farm = await this.prisma.farm.findUnique({
+      where: { ownerId: user.id },
+      select: { verificationStatus: true },
+    });
+    if (farm?.verificationStatus === VerificationStatus.approved) {
+      throw new BadRequestException('Seller type cannot be changed after verification');
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { sellerType: sellerTypeRaw },
+    });
+
     return this.getStatus(user);
   }
 

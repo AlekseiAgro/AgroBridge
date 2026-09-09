@@ -10,6 +10,7 @@ import {
   CompanyRegistryDto,
   ConfirmCodeDto,
   SendSmsCodeDto,
+  SetSellerTypeDto,
 } from './dto/verification.dto';
 import { VerificationService } from './verification.service';
 
@@ -57,6 +58,15 @@ export class VerificationController {
     @ClientIp() ip: string,
   ) {
     return this.verificationService.confirmSmsCode(user, dto.code, ip);
+  }
+
+  @Post('seller-type')
+  @UseGuards(EmailVerifiedGuard)
+  setSellerType(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: SetSellerTypeDto,
+  ) {
+    return this.verificationService.setSellerType(user, dto.sellerType);
   }
 
   @Post('company/registry')
