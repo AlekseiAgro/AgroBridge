@@ -298,13 +298,9 @@ export class CabinetService {
         code,
         newEmail,
       });
-    } catch (error) {
-      const detail =
-        error instanceof Error
-          ? error.message.replace(/\s+/g, ' ').trim().slice(0, 180)
-          : 'unknown mail error';
+    } catch {
       throw new ServiceUnavailableException(
-        `Could not send the email change confirmation (${detail}). Check SMTP settings and try again.`,
+        'Could not send the email change confirmation. Please try again later.',
       );
     }
 
@@ -377,13 +373,9 @@ export class CabinetService {
         },
         code,
       });
-    } catch (error) {
-      const detail =
-        error instanceof Error
-          ? error.message.replace(/\s+/g, ' ').trim().slice(0, 180)
-          : 'unknown mail error';
+    } catch {
       throw new ServiceUnavailableException(
-        `Could not send the deletion confirmation email (${detail}). Check SMTP settings and try again.`,
+        'Could not send the deletion confirmation email. Please try again later.',
       );
     }
 

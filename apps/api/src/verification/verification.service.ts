@@ -13,6 +13,7 @@ import {
   VerificationStatus,
 } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { MAIL_UNAVAILABLE_CLIENT_MESSAGE } from '../mail/mail.config';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SmsService } from '../sms/sms.service';
@@ -128,14 +129,8 @@ export class VerificationService {
         code,
         channel: 'email',
       });
-    } catch (error) {
-      const detail =
-        error instanceof Error
-          ? error.message.replace(/\s+/g, ' ').trim().slice(0, 180)
-          : 'unknown mail error';
-      throw new ServiceUnavailableException(
-        `Could not send the verification email (${detail}). Check SMTP settings and try again.`,
-      );
+    } catch {
+      throw new ServiceUnavailableException(MAIL_UNAVAILABLE_CLIENT_MESSAGE);
     }
     return { sent: true, destination: dbUser.email };
   }

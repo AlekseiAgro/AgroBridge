@@ -59,7 +59,9 @@ services:
       API_PUBLIC_URL: ${API_PUBLIC_URL:?set API_PUBLIC_URL}
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
       JWT_EXPIRES_SECONDS: ${JWT_EXPIRES_SECONDS:-604800}
-      MAIL_DRIVER: ${MAIL_DRIVER:-console}
+      # production NODE_ENV refuses MAIL_DRIVER=console unless MAIL_ALLOW_CONSOLE=true
+      MAIL_DRIVER: ${MAIL_DRIVER:-smtp}
+      MAIL_ALLOW_CONSOLE: ${MAIL_ALLOW_CONSOLE:-}
       MAIL_FROM: ${MAIL_FROM:-AgroBridge <noreply@example.com>}
       SUPPORT_EMAIL: ${SUPPORT_EMAIL:-}
       SMTP_HOST: ${SMTP_HOST:-}
