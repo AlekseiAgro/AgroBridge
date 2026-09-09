@@ -336,7 +336,7 @@ export function computeProductQualityScore(input: QualityScoreInput): ProductQua
     {
       id: 'certificates',
       weight: 10,
-      done: input.certificateCount > 0,
+      done: input.approvedCertificateCount > 0,
       earned: 0,
       suggestion: 'certificates',
     },
