@@ -189,7 +189,7 @@
       "unknownPath": "Wählen Sie, ob Sie als privater Landwirt oder als Unternehmen verkaufen, um die Identitätsprüfung fortzusetzen.",
       "sellerType": {
         "title": "Verkäufertyp",
-        "hint": "Wählen Sie, wie Sie verkaufen. Davon hängt ab, welches Identitätsdokument erforderlich ist.",
+        "hint": "Wählen Sie den Verkäufertyp. Davon hängt das Dokument ab, das zur Identitätsbestätigung erforderlich ist.",
         "identityTitle": "3. Identitätsprüfung",
         "saved": "Verkäufertyp gespeichert.",
         "locked": "Sobald die Prüfung begonnen hat, kann der Verkäufertyp nicht mehr geändert werden."
@@ -229,14 +229,14 @@
         "check": "Check registry",
         "hint": "Enter the 9-digit identification code from Georgian public company databases.",
         "matched": "Registry match: {name}",
-        "documentHint": "Laden Sie Ihre Firmenregistrierungsbescheinigung hoch. Der Dokumenttyp wird automatisch gesetzt.",
+        "documentHint": "Laden Sie Ihre Firmenregistrierungsbescheinigung hoch, um das Unternehmen zu bestätigen.",
         "upload": "Firmenregistrierung hochladen",
         "docTitle": "Firmenregistrierung",
         "uploaded": "Dokument zur Firmenregistrierung hochgeladen."
       },
       "private": {
-        "title": "3. Prüfung des Personalausweises",
-        "hint": "Ein Personalausweis ist erforderlich. Der Dokumenttyp wird automatisch gesetzt. Ein Moderator prüft ihn.",
+        "title": "3. Identitätsprüfung",
+        "hint": "Laden Sie einen Personalausweis hoch, um Ihre Identität zu bestätigen.",
         "upload": "Personalausweis hochladen",
         "idTitle": "Personalausweis",
         "submit": "Zur Prüfung durch den Moderator senden",

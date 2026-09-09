@@ -189,7 +189,7 @@
       "unknownPath": "Choose whether you sell as a private farmer or a company to continue identity verification.",
       "sellerType": {
         "title": "Seller type",
-        "hint": "Choose how you sell. This decides which identity document is required.",
+        "hint": "Choose your seller type. This determines the document required to confirm your identity.",
         "identityTitle": "3. Identity verification",
         "saved": "Seller type saved.",
         "locked": "Seller type is locked after verification has started."
@@ -229,14 +229,14 @@
         "check": "Check registry",
         "hint": "Enter the 9-digit identification code from Georgian public company databases.",
         "matched": "Registry match: {name}",
-        "documentHint": "Upload your company registration certificate. The document type is set automatically.",
+        "documentHint": "Upload your company registration certificate to confirm the company.",
         "upload": "Upload company registration",
         "docTitle": "Company registration",
         "uploaded": "Company registration document uploaded."
       },
       "private": {
-        "title": "3. ID card review",
-        "hint": "An ID card is required. The document type is set automatically. A moderator will review it.",
+        "title": "3. Identity verification",
+        "hint": "Upload an ID card to confirm your identity.",
         "upload": "Upload ID card",
         "idTitle": "ID card",
         "submit": "Submit for moderator review",
