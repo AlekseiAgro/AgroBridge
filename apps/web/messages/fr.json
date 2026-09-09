@@ -189,7 +189,7 @@
       "unknownPath": "Choisissez si vous vendez en tant qu’agriculteur privé ou en tant qu’entreprise pour continuer la vérification d’identité.",
       "sellerType": {
         "title": "Type de vendeur",
-        "hint": "Choisissez comment vous vendez. Cela détermine le document d’identité requis.",
+        "hint": "Choisissez le type de vendeur. Cela détermine le document nécessaire pour confirmer votre identité.",
         "identityTitle": "3. Vérification d’identité",
         "saved": "Type de vendeur enregistré.",
         "locked": "Une fois la vérification commencée, le type de vendeur ne peut plus être modifié."
@@ -229,14 +229,14 @@
         "check": "Check registry",
         "hint": "Enter the 9-digit identification code from Georgian public company databases.",
         "matched": "Registry match: {name}",
-        "documentHint": "Téléversez le certificat d’immatriculation de l’entreprise. Le type de document est défini automatiquement.",
+        "documentHint": "Téléversez le certificat d’immatriculation de l’entreprise pour confirmer l’organisation.",
         "upload": "Téléverser l’immatriculation",
         "docTitle": "Immatriculation d’entreprise",
         "uploaded": "Document d’immatriculation téléversé."
       },
       "private": {
-        "title": "3. Contrôle de la pièce d’identité",
-        "hint": "Une pièce d’identité est obligatoire. Le type de document est défini automatiquement. Un modérateur la vérifiera.",
+        "title": "3. Vérification d’identité",
+        "hint": "Téléversez une pièce d’identité pour confirmer votre identité.",
         "upload": "Téléverser la pièce d’identité",
         "idTitle": "Pièce d’identité",
         "submit": "Envoyer au modérateur",

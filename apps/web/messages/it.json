@@ -189,7 +189,7 @@
       "unknownPath": "Scegli se vendi come agricoltore privato o come azienda per continuare la verifica dell’identità.",
       "sellerType": {
         "title": "Tipo di venditore",
-        "hint": "Scegli come vendi. Da questo dipende il documento di identità richiesto.",
+        "hint": "Scegli il tipo di venditore. Da questo dipende il documento necessario per confermare l’identità.",
         "identityTitle": "3. Verifica dell’identità",
         "saved": "Tipo di venditore salvato.",
         "locked": "Dopo l’inizio della verifica il tipo di venditore non può essere modificato."
@@ -229,14 +229,14 @@
         "check": "Check registry",
         "hint": "Enter the 9-digit identification code from Georgian public company databases.",
         "matched": "Registry match: {name}",
-        "documentHint": "Carica il certificato di registrazione dell’azienda. Il tipo di documento viene impostato automaticamente.",
+        "documentHint": "Carica il certificato di registrazione dell’azienda per confermare l’organizzazione.",
         "upload": "Carica registrazione aziendale",
         "docTitle": "Registrazione aziendale",
         "uploaded": "Documento di registrazione aziendale caricato."
       },
       "private": {
-        "title": "3. Controllo della carta d’identità",
-        "hint": "È richiesta la carta d’identità. Il tipo di documento viene impostato automaticamente. Un moderatore la controllerà.",
+        "title": "3. Verifica dell’identità",
+        "hint": "Carica la carta d’identità per confermare l’identità.",
         "upload": "Carica carta d’identità",
         "idTitle": "Carta d’identità",
         "submit": "Invia al moderatore",

@@ -189,7 +189,7 @@
       "unknownPath": "Elija si vende como agricultor particular o como empresa para continuar la verificación de identidad.",
       "sellerType": {
         "title": "Tipo de vendedor",
-        "hint": "Elija cómo vende. Eso determina qué documento de identidad se exige.",
+        "hint": "Elija el tipo de vendedor. De ello depende el documento necesario para confirmar su identidad.",
         "identityTitle": "3. Verificación de identidad",
         "saved": "Tipo de vendedor guardado.",
         "locked": "Tras iniciar la verificación no se puede cambiar el tipo de vendedor."
@@ -229,14 +229,14 @@
         "check": "Check registry",
         "hint": "Enter the 9-digit identification code from Georgian public company databases.",
         "matched": "Registry match: {name}",
-        "documentHint": "Suba el certificado de registro de la empresa. El tipo de documento se asigna automáticamente.",
+        "documentHint": "Suba el certificado de registro de la empresa para confirmar la organización.",
         "upload": "Subir registro de empresa",
         "docTitle": "Registro de empresa",
         "uploaded": "Documento de registro de empresa subido."
       },
       "private": {
-        "title": "3. Revisión del DNI",
-        "hint": "Se exige un DNI. El tipo de documento se asigna automáticamente. Un moderador lo revisará.",
+        "title": "3. Verificación de identidad",
+        "hint": "Suba un DNI para confirmar su identidad.",
         "upload": "Subir DNI",
         "idTitle": "DNI",
         "submit": "Enviar a revisión del moderador",
