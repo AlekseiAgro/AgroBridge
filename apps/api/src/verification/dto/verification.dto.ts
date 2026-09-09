@@ -8,9 +8,14 @@ export class ConfirmCodeDto {
 
 export class SendSmsCodeDto {
   @IsString()
-  @MinLength(9)
-  @MaxLength(20)
+  @MinLength(4)
+  @MaxLength(32)
   phone!: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Za-z]{2}$/)
+  country?: string;
 }
 
 export class CompanyRegistryDto {

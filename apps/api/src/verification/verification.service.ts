@@ -5,7 +5,7 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { canTrade, isSellerType, type ProducerVerificationStatus, type SellerType } from '@agrobridge/shared';
+import { canTrade, isSellerType, normalizeInternationalPhone, type ProducerVerificationStatus, type SellerType } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
   FarmDocumentKind,
@@ -14,6 +14,11 @@ import {
 } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { MAIL_UNAVAILABLE_CLIENT_MESSAGE } from '../mail/mail.config';
+import {
+  SMS_INVALID_PHONE_CLIENT_MESSAGE,
+  SMS_UNAVAILABLE_CLIENT_MESSAGE,
+  SmsDeliveryError,
+} from '../sms/sms.errors';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SmsService } from '../sms/sms.service';
@@ -165,9 +170,10 @@ export class VerificationService {
     user: AuthenticatedUser,
     phoneRaw: string,
     ip?: string | null,
+    country?: string | null,
   ): Promise<{ sent: true; destination: string }> {
     this.assertProducer(user);
-    const phone = this.normalizePhone(phoneRaw);
+    const phone = this.normalizePhone(phoneRaw, country);
     const dbUser = await this.requireUser(user.id);
     if (dbUser.phoneVerifiedAt && dbUser.phone === phone) {
       throw new BadRequestException('Phone is already verified');
@@ -189,10 +195,20 @@ export class VerificationService {
       },
     });
 
-    await this.sms.send({
-      to: phone,
-      text: `AgroBridge verification code: ${code}`,
-    });
+    try {
+      await this.sms.send({
+        to: phone,
+        text: `AgroBridge verification code: ${code}`,
+      });
+    } catch (error) {
+      if (error instanceof SmsDeliveryError) {
+        if (error.kind === 'invalid_destination' || error.kind === 'rejected') {
+          throw new BadRequestException(SMS_INVALID_PHONE_CLIENT_MESSAGE);
+        }
+        throw new ServiceUnavailableException(SMS_UNAVAILABLE_CLIENT_MESSAGE);
+      }
+      throw new ServiceUnavailableException(SMS_UNAVAILABLE_CLIENT_MESSAGE);
+    }
     return { sent: true, destination: phone };
   }
 
@@ -433,12 +449,12 @@ export class VerificationService {
     );
   }
 
-  private normalizePhone(value: string): string {
-    const trimmed = value.trim().replace(/[()\s-]/g, '');
-    if (!/^\+?[0-9]{9,15}$/.test(trimmed)) {
-      throw new BadRequestException('Enter a valid phone number with country code');
+  private normalizePhone(value: string, country?: string | null): string {
+    const e164 = normalizeInternationalPhone(value, country);
+    if (!e164) {
+      throw new BadRequestException(SMS_INVALID_PHONE_CLIENT_MESSAGE);
     }
-    return trimmed.startsWith('+') ? trimmed : `+${trimmed}`;
+    return e164;
   }
 
   private assertProducer(user: AuthenticatedUser) {

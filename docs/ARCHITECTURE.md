@@ -90,6 +90,15 @@
 - Drivers: `console` (dev/default), `resend` (HTTPS to `api.resend.com`), or `smtp` via nodemailer (legacy).
 - `MAIL_DRIVER=resend` requires `RESEND_API_KEY` and `MAIL_FROM` at boot. `MAIL_DRIVER=smtp` requires `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `MAIL_FROM`. Missing values fail startup; the service never falls back to console.
 - `NODE_ENV=production` rejects `MAIL_DRIVER=console` unless `MAIL_ALLOW_CONSOLE=true` (explicit staging override).
+
+## SMS notifications
+
+- `SmsModule` provides `SmsService` (global). Drivers: `console` (dev/default) or `infobip` (HTTPS to the account Base URL `/sms/2/text/advanced`).
+- OTP generation, hashing, TTL, attempts, invalidation, and rate limits remain in `VerificationCodeService` / PostgreSQL. Infobip is the delivery transport only.
+- `SMS_DRIVER=infobip` requires `INFOBIP_API_KEY`, `INFOBIP_BASE_URL`, and `INFOBIP_SENDER` at boot. Missing values fail startup; there is no silent console fallback.
+- `NODE_ENV=production` rejects `SMS_DRIVER=console` unless `SMS_ALLOW_CONSOLE=true`.
+- Infobip uses a 12s HTTPS timeout and **does not retry** a send, to avoid duplicate OTP SMS on ambiguous timeouts.
+- Logs mask phone numbers and omit OTP bodies in production. API keys are never logged.
 - Resend uses a 10s HTTP timeout and retries transient failures (timeouts, 429, 5xx) up to 3 attempts. SMTP keeps TLS 1.2+, STARTTLS on 587 / SMTPS on 465, 10–20s timeouts, and the same retry budget.
 - Templates are locale-aware (`ka|en|ru|de|fr|it|es`) with English fallback.
 - Events: welcome, RFQ lifecycle, product moderation (pending → admins; approved/rejected → farmer).

@@ -1,6 +1,7 @@
 import { BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 import { RateLimitExceededException } from '../rate-limit/rate-limit-exceeded.exception';
 import { VerificationService } from './verification.service';
+import { SmsDeliveryError } from '../sms/sms.errors';
 
 describe('VerificationService', () => {
   const prisma = {
@@ -140,6 +141,42 @@ describe('VerificationService', () => {
     );
   });
 
+  it('accepts a Georgian national number when the country is provided', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      phone: null,
+      phoneVerifiedAt: null,
+    });
+    prisma.user.update.mockResolvedValue({});
+    codes.issue.mockResolvedValue('123456');
+
+    const result = await service.sendSmsCode(farmer, '555 12 34 56', '203.0.113.7', 'GE');
+
+    expect(result.destination).toBe('+995555123456');
+    expect(sms.send).toHaveBeenCalledWith(
+      expect.objectContaining({ to: '+995555123456' }),
+    );
+  });
+
+  it('maps SMS provider failures to a generic unavailable error', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      phone: null,
+      phoneVerifiedAt: null,
+    });
+    prisma.user.update.mockResolvedValue({});
+    codes.issue.mockResolvedValue('123456');
+    sms.send.mockRejectedValueOnce(
+      new SmsDeliveryError('timeout', 'Could not send the SMS. Please try again later.'),
+    );
+
+    await expect(
+      service.sendSmsCode(farmer, '+995555123456', '203.0.113.7'),
+    ).rejects.toBeInstanceOf(ServiceUnavailableException);
+  });
+
   it('stops sending mail once the code budget is spent', async () => {
     prisma.user.findUnique.mockResolvedValue({
       id: 'u1',
@@ -166,7 +203,7 @@ describe('VerificationService', () => {
     codes.issue.mockRejectedValue(new RateLimitExceededException(60));
 
     await expect(
-      service.sendSmsCode(farmer, '+995511111111', '203.0.113.7'),
+      service.sendSmsCode(farmer, '+995555123456', '203.0.113.7'),
     ).rejects.toBeInstanceOf(RateLimitExceededException);
     expect(prisma.user.update).not.toHaveBeenCalled();
     expect(sms.send).not.toHaveBeenCalled();

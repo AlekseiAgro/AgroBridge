@@ -4,6 +4,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { describeTrustProxy, resolveTrustProxy } from './http/client-ip';
 import { resolveMailConfig } from './mail/mail.config';
+import { resolveSmsConfig } from './sms/sms.config';
 import { RateLimitConfig } from './rate-limit/rate-limit.config';
 import { RateLimitExceededFilter } from './rate-limit/rate-limit-exceeded.filter';
 
@@ -20,9 +21,14 @@ function assertMailConfig() {
   resolveMailConfig({ get: (key: string) => process.env[key] });
 }
 
+function assertSmsConfig() {
+  resolveSmsConfig({ get: (key: string) => process.env[key] });
+}
+
 async function bootstrap() {
   assertProductionSecrets();
   assertMailConfig();
+  assertSmsConfig();
 
   // Throws on a malformed value rather than silently trusting a forged X-Forwarded-For.
   const trustProxy = resolveTrustProxy(process.env);

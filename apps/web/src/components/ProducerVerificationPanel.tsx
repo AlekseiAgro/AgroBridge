@@ -1,10 +1,17 @@
 'use client';
 
 import type { FarmDocument, ProducerVerificationStatus, SellerType } from '@agrobridge/shared';
-import { SELLER_TYPES } from '@agrobridge/shared';
+import {
+  DEFAULT_PHONE_COUNTRY,
+  normalizeInternationalPhone,
+  parseStoredPhone,
+  SELLER_TYPES,
+  type CountryCode,
+} from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, useMemo, useRef, useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
+import { PhoneNumberField } from '@/components/PhoneNumberField';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 
 type Props = {
@@ -36,14 +43,41 @@ async function postJson<T>(url: string, body?: Record<string, unknown>): Promise
   return (data ?? {}) as T;
 }
 
+function mapVerificationError(
+  err: unknown,
+  t: ReturnType<typeof useTranslations<'farm.verification'>>,
+): string {
+  const message = err instanceof Error ? err.message : '';
+  if (!message) {
+    return t('genericError');
+  }
+  if (message === t('phone.invalid')) {
+    return message;
+  }
+  if (/valid phone number/i.test(message)) {
+    return t('phone.invalid');
+  }
+  if (/already verified/i.test(message)) {
+    return t('phone.alreadyVerified');
+  }
+  if (/could not send the sms/i.test(message)) {
+    return t('phone.unavailable');
+  }
+  return message;
+}
+
 export function ProducerVerificationPanel({ initial }: Props) {
   const t = useTranslations('farm.verification');
   const tAuth = useTranslations('auth');
   const tFarm = useTranslations('farm');
   const router = useRouter();
   const [status, setStatus] = useState(initial);
+  const initialPhone = useMemo(() => parseStoredPhone(initial.phone), [initial.phone]);
   const [emailCode, setEmailCode] = useState('');
-  const [phone, setPhone] = useState(initial.phone ?? '');
+  const [phoneCountry, setPhoneCountry] = useState<CountryCode>(
+    initialPhone?.country ?? DEFAULT_PHONE_COUNTRY,
+  );
+  const [phoneNational, setPhoneNational] = useState(initialPhone?.nationalNumber ?? '');
   const [smsCode, setSmsCode] = useState('');
   const [registrationNumber, setRegistrationNumber] = useState(
     initial.companyRegistrationNumber ?? '',
@@ -68,7 +102,7 @@ export function ProducerVerificationPanel({ initial }: Props) {
     try {
       await action();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('genericError'));
+      setError(mapVerificationError(err, t));
     } finally {
       setPending(false);
     }
@@ -96,8 +130,13 @@ export function ProducerVerificationPanel({ initial }: Props) {
   async function sendSmsCode(event: FormEvent) {
     event.preventDefault();
     await run(async () => {
+      const e164 = normalizeInternationalPhone(phoneNational, phoneCountry);
+      if (!e164) {
+        throw new Error(t('phone.invalid'));
+      }
       const result = await postJson<{ destination: string }>('/api/verification/phone/send-code', {
-        phone,
+        phone: e164,
+        country: phoneCountry,
       });
       setMessage(t('phone.sent', { destination: result.destination }));
     });
@@ -249,16 +288,16 @@ export function ProducerVerificationPanel({ initial }: Props) {
           </div>
           {status.steps.phone === 'todo' ? (
             <div className="moderation-actions">
-              <form className="verification-inline-form" onSubmit={sendSmsCode}>
-                <label className="field">
-                  <span>{t('phone.number')}</span>
-                  <input
-                    value={phone}
-                    onChange={(event) => setPhone(event.target.value)}
-                    placeholder="+9955…"
-                    required
-                  />
-                </label>
+              <form className="verification-phone-form" onSubmit={sendSmsCode}>
+                <PhoneNumberField
+                  country={phoneCountry}
+                  national={phoneNational}
+                  disabled={pending}
+                  onChange={({ country, national }) => {
+                    setPhoneCountry(country);
+                    setPhoneNational(national);
+                  }}
+                />
                 <button className="button button--ghost" type="submit" disabled={pending}>
                   {t('phone.send')}
                 </button>

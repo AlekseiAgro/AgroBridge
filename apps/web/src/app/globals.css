@@ -3044,6 +3044,56 @@ body {
   margin-bottom: 0.65rem;
 }
 
+.verification-phone-form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.verification-phone {
+  display: grid;
+  gap: 0.65rem;
+}
+
+@media (min-width: 720px) {
+  .verification-phone {
+    grid-template-columns: minmax(12rem, 0.9fr) minmax(0, 1.4fr);
+    align-items: start;
+  }
+}
+
+.verification-phone__input {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+}
+
+.verification-phone__code {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  background: var(--surface-strong);
+  color: var(--brand-deep);
+  font-weight: 700;
+  border-right: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.verification-phone__input input {
+  border: 0;
+  border-radius: 0;
+  min-height: 2.7rem;
+  background: transparent;
+}
+
+.verification-phone-form > .button {
+  justify-self: start;
+}
+
 .verification-inline-form {
   display: grid;
   gap: 0.65rem;
