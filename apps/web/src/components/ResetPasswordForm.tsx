@@ -2,7 +2,6 @@
 
 import { FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
 
 type Props = {
   token: string;
@@ -53,14 +52,7 @@ export function ResetPasswordForm({ token }: Props) {
   }
 
   if (done) {
-    return (
-      <div>
-        <p className="form-success">{t('resetPasswordSuccess')}</p>
-        <p className="auth-card__footer">
-          <Link href="/login">{t('backToLogin')}</Link>
-        </p>
-      </div>
-    );
+    return <p className="form-success">{t('resetPasswordSuccess')}</p>;
   }
 
   return (
