@@ -186,7 +186,14 @@
       "statusLabel": "Current status",
       "doneHint": "Buyers can see your Verified badge on the catalog and farm page.",
       "genericError": "Could not complete this verification step.",
-      "unknownPath": "Set your seller type (private farmer or company) during registration to continue identity verification.",
+      "unknownPath": "Scegli se vendi come agricoltore privato o come azienda per continuare la verifica dell’identità.",
+      "sellerType": {
+        "title": "Tipo di venditore",
+        "hint": "Scegli come vendi. Da questo dipende il documento di identità richiesto.",
+        "identityTitle": "3. Verifica dell’identità",
+        "saved": "Tipo di venditore salvato.",
+        "locked": "Dopo l’inizio della verifica il tipo di venditore non può essere modificato."
+      },
       "farmStatus": {
         "unverified": "Not verified yet",
         "pending": "Pending moderator review",
@@ -217,20 +224,24 @@
         "confirmed": "Phone confirmed."
       },
       "company": {
-        "title": "3. Company registry check",
+        "title": "3. Company verification",
         "number": "Georgian company identification code",
         "check": "Check registry",
         "hint": "Enter the 9-digit identification code from Georgian public company databases.",
-        "matched": "Registry match: {name}"
+        "matched": "Registry match: {name}",
+        "documentHint": "Carica il certificato di registrazione dell’azienda. Il tipo di documento viene impostato automaticamente.",
+        "upload": "Carica registrazione aziendale",
+        "docTitle": "Registrazione aziendale",
+        "uploaded": "Documento di registrazione aziendale caricato."
       },
       "private": {
-        "title": "3. ID card review",
-        "hint": "Upload a clear photo or scan of your ID card. A moderator will review it manually.",
-        "upload": "Upload ID card",
-        "idTitle": "ID card",
-        "submit": "Submit for moderator review",
-        "uploaded": "ID document uploaded.",
-        "submitted": "Submitted for moderator review."
+        "title": "3. Controllo della carta d’identità",
+        "hint": "È richiesta la carta d’identità. Il tipo di documento viene impostato automaticamente. Un moderatore la controllerà.",
+        "upload": "Carica carta d’identità",
+        "idTitle": "Carta d’identità",
+        "submit": "Invia al moderatore",
+        "uploaded": "Documento di identità caricato.",
+        "submitted": "Inviato al controllo del moderatore."
       },
       "pending": "Pending review",
       "approved": "Verified producer",
@@ -238,8 +249,8 @@
       "unverified": "Not verified yet"
     },
     "documents": {
-      "title": "Documenti di verifica",
-      "subtitle": "Carica i documenti di registrazione (fino a {max}).",
+      "title": "Documenti aggiuntivi",
+      "subtitle": "Documenti extra facoltativi (fino a {max}). Carta d’identità e registrazione aziendale si caricano nella sezione di verifica sopra.",
       "empty": "Nessun documento.",
       "titleField": "Titolo del documento",
       "titlePlaceholder": "Certificato di registrazione",
@@ -255,11 +266,11 @@
         "approved": "Approvato",
         "rejected": "Rifiutato"
       },
-      "kindField": "Document type",
+      "kindField": "Tipo di documento",
       "kinds": {
-        "idCard": "ID card",
-        "businessRegistration": "Business registration",
-        "other": "Other"
+        "idCard": "Carta d’identità",
+        "businessRegistration": "Registrazione aziendale",
+        "other": "Altro"
       }
     },
     "photos": {

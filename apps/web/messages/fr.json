@@ -186,7 +186,14 @@
       "statusLabel": "Current status",
       "doneHint": "Buyers can see your Verified badge on the catalog and farm page.",
       "genericError": "Could not complete this verification step.",
-      "unknownPath": "Set your seller type (private farmer or company) during registration to continue identity verification.",
+      "unknownPath": "Choisissez si vous vendez en tant qu’agriculteur privé ou en tant qu’entreprise pour continuer la vérification d’identité.",
+      "sellerType": {
+        "title": "Type de vendeur",
+        "hint": "Choisissez comment vous vendez. Cela détermine le document d’identité requis.",
+        "identityTitle": "3. Vérification d’identité",
+        "saved": "Type de vendeur enregistré.",
+        "locked": "Une fois la vérification commencée, le type de vendeur ne peut plus être modifié."
+      },
       "farmStatus": {
         "unverified": "Not verified yet",
         "pending": "Pending moderator review",
@@ -217,20 +224,24 @@
         "confirmed": "Phone confirmed."
       },
       "company": {
-        "title": "3. Company registry check",
+        "title": "3. Company verification",
         "number": "Georgian company identification code",
         "check": "Check registry",
         "hint": "Enter the 9-digit identification code from Georgian public company databases.",
-        "matched": "Registry match: {name}"
+        "matched": "Registry match: {name}",
+        "documentHint": "Téléversez le certificat d’immatriculation de l’entreprise. Le type de document est défini automatiquement.",
+        "upload": "Téléverser l’immatriculation",
+        "docTitle": "Immatriculation d’entreprise",
+        "uploaded": "Document d’immatriculation téléversé."
       },
       "private": {
-        "title": "3. ID card review",
-        "hint": "Upload a clear photo or scan of your ID card. A moderator will review it manually.",
-        "upload": "Upload ID card",
-        "idTitle": "ID card",
-        "submit": "Submit for moderator review",
-        "uploaded": "ID document uploaded.",
-        "submitted": "Submitted for moderator review."
+        "title": "3. Contrôle de la pièce d’identité",
+        "hint": "Une pièce d’identité est obligatoire. Le type de document est défini automatiquement. Un modérateur la vérifiera.",
+        "upload": "Téléverser la pièce d’identité",
+        "idTitle": "Pièce d’identité",
+        "submit": "Envoyer au modérateur",
+        "uploaded": "Pièce d’identité téléversée.",
+        "submitted": "Envoyé pour contrôle par un modérateur."
       },
       "pending": "Pending review",
       "approved": "Verified producer",
@@ -238,12 +249,12 @@
       "unverified": "Not verified yet"
     },
     "documents": {
-      "title": "Documents de vérification",
-      "subtitle": "Téléversez les documents d’enregistrement (jusqu’à {max}).",
+      "title": "Documents supplémentaires",
+      "subtitle": "Pièces extra facultatives (jusqu’à {max}). La pièce d’identité et l’enregistrement d’entreprise se téléversent dans la section de vérification ci-dessus.",
       "empty": "Aucun document.",
       "titleField": "Titre du document",
       "titlePlaceholder": "Certificat d’enregistrement",
-      "upload": "Téléverser",
+      "upload": "Téléverser un document",
       "open": "Ouvrir",
       "delete": "Supprimer",
       "deleteConfirm": "Supprimer ce document ?",
@@ -255,11 +266,11 @@
         "approved": "Approuvé",
         "rejected": "Refusé"
       },
-      "kindField": "Document type",
+      "kindField": "Type de document",
       "kinds": {
-        "idCard": "ID card",
-        "businessRegistration": "Business registration",
-        "other": "Other"
+        "idCard": "Pièce d’identité",
+        "businessRegistration": "Immatriculation d’entreprise",
+        "other": "Autre"
       }
     },
     "photos": {

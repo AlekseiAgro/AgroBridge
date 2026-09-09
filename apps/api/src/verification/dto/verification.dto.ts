@@ -20,6 +20,12 @@ export class CompanyRegistryDto {
   registrationNumber!: string;
 }
 
+export class SetSellerTypeDto {
+  @IsString()
+  @Matches(/^(privateFarmer|company)$/)
+  sellerType!: 'privateFarmer' | 'company';
+}
+
 export class OptionalNoteDto {
   @IsOptional()
   @IsString()

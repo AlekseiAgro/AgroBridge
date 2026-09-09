@@ -359,6 +359,58 @@ describe('FarmsService', () => {
     expect(document.url).not.toContain('/api/uploads/');
   });
 
+  it('stores company registration uploads with kind businessRegistration', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
+    prisma.farmDocument.count.mockResolvedValue(0);
+    storage.upload.mockResolvedValue({
+      key: 'farms/farm1/documents/reg.pdf',
+      url: '',
+    });
+    prisma.farmDocument.create.mockResolvedValue({
+      id: 'doc2',
+      farmId: 'farm1',
+      title: 'Company registration',
+      fileName: 'reg.pdf',
+      url: '',
+      key: 'farms/farm1/documents/reg.pdf',
+      mimeType: 'application/pdf',
+      kind: 'businessRegistration',
+      reviewStatus: 'pending',
+      reviewNote: null,
+      reviewedAt: null,
+      createdAt: new Date(),
+    });
+
+    const document = await service.uploadDocument(
+      {
+        id: 'u1',
+        email: 'f@example.com',
+        role: 'farmer',
+        locale: 'ka',
+        displayName: 'Nino',
+      } as AuthenticatedUser,
+      'Company registration',
+      {
+        buffer: Buffer.from('pdf'),
+        mimetype: 'application/pdf',
+        originalname: 'reg.pdf',
+        size: 1024,
+      } as Express.Multer.File,
+      'businessRegistration',
+    );
+
+    expect(prisma.farmDocument.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          kind: 'businessRegistration',
+          key: 'farms/farm1/documents/reg.pdf',
+        }),
+      }),
+    );
+    expect(document.kind).toBe('businessRegistration');
+    expect(document.url).toBe('/api/farms/documents/doc2/file');
+  });
+
   it('deletes verification documents from private storage', async () => {
     prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
     prisma.farmDocument.findFirst.mockResolvedValue({

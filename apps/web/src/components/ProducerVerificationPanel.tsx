@@ -1,8 +1,9 @@
 'use client';
 
-import type { FarmDocument, ProducerVerificationStatus } from '@agrobridge/shared';
+import type { FarmDocument, ProducerVerificationStatus, SellerType } from '@agrobridge/shared';
+import { SELLER_TYPES } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 
@@ -37,6 +38,7 @@ async function postJson<T>(url: string, body?: Record<string, unknown>): Promise
 
 export function ProducerVerificationPanel({ initial }: Props) {
   const t = useTranslations('farm.verification');
+  const tAuth = useTranslations('auth');
   const tFarm = useTranslations('farm');
   const router = useRouter();
   const [status, setStatus] = useState(initial);
@@ -49,6 +51,10 @@ export function ProducerVerificationPanel({ initial }: Props) {
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const privateFileRef = useRef<HTMLInputElement>(null);
+  const companyFileRef = useRef<HTMLInputElement>(null);
+
+  const sellerTypeLocked = status.sellerTypeLocked;
 
   function applyStatus(next: ProducerVerificationStatus) {
     setStatus(next);
@@ -109,6 +115,19 @@ export function ProducerVerificationPanel({ initial }: Props) {
     });
   }
 
+  async function saveSellerType(sellerType: SellerType) {
+    if (sellerTypeLocked || pending || status.sellerType === sellerType) {
+      return;
+    }
+    await run(async () => {
+      const next = await postJson<ProducerVerificationStatus>('/api/verification/seller-type', {
+        sellerType,
+      });
+      applyStatus(next);
+      setMessage(t('sellerType.saved'));
+    });
+  }
+
   async function checkCompany(event: FormEvent) {
     event.preventDefault();
     await run(async () => {
@@ -120,12 +139,16 @@ export function ProducerVerificationPanel({ initial }: Props) {
     });
   }
 
-  async function uploadIdCard(file: File | null) {
+  async function uploadVerificationDocument(
+    file: File | null,
+    kind: 'idCard' | 'businessRegistration',
+    input: HTMLInputElement | null,
+  ) {
     if (!file) return;
     await run(async () => {
       const body = new FormData();
-      body.set('title', t('private.idTitle'));
-      body.set('kind', 'idCard');
+      body.set('title', kind === 'idCard' ? t('private.idTitle') : t('company.docTitle'));
+      body.set('kind', kind);
       body.set('file', file);
       const response = await fetch('/api/farms/me/documents', { method: 'POST', body });
       const data = (await response.json()) as FarmDocument & { message?: string };
@@ -140,8 +163,11 @@ export function ProducerVerificationPanel({ initial }: Props) {
         throw new Error(next.message ?? t('genericError'));
       }
       applyStatus(next);
-      setMessage(t('private.uploaded'));
+      setMessage(kind === 'idCard' ? t('private.uploaded') : t('company.uploaded'));
     });
+    if (input) {
+      input.value = '';
+    }
   }
 
   async function submitPrivateReview() {
@@ -154,6 +180,13 @@ export function ProducerVerificationPanel({ initial }: Props) {
 
   const stepLabel = (step: 'done' | 'todo' | 'pending_review' | 'rejected') =>
     t(`stepStatus.${step}`);
+
+  const identityTitle =
+    status.path === 'company'
+      ? t('company.title')
+      : status.path === 'privateFarmer'
+        ? t('private.title')
+        : t('sellerType.identityTitle');
 
   return (
     <section className="verification-panel" style={{ marginTop: '2rem' }}>
@@ -254,31 +287,97 @@ export function ProducerVerificationPanel({ initial }: Props) {
 
         <li className="verification-steps__item">
           <div className="verification-steps__head">
-            <strong>
-              {status.path === 'company' ? t('company.title') : t('private.title')}
-            </strong>
+            <strong>{identityTitle}</strong>
             <span>{stepLabel(status.steps.identity)}</span>
           </div>
 
-          {status.path === 'company' && status.steps.identity !== 'done' ? (
-            <form className="verification-inline-form" onSubmit={checkCompany}>
-              <label className="field">
-                <span>{t('company.number')}</span>
+          <fieldset className="verification-seller-type" disabled={pending || sellerTypeLocked}>
+            <legend className="verification-seller-type__legend">{t('sellerType.title')}</legend>
+            <p className="page__subtitle">{t('sellerType.hint')}</p>
+            <div
+              className="verification-seller-type__options"
+              role="radiogroup"
+              aria-label={t('sellerType.title')}
+            >
+              {SELLER_TYPES.map((value) => {
+                const selected = status.sellerType === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    className={
+                      selected
+                        ? 'verification-seller-type__option is-selected'
+                        : 'verification-seller-type__option'
+                    }
+                    disabled={pending || sellerTypeLocked}
+                    onClick={() => void saveSellerType(value)}
+                  >
+                    {tAuth(`sellerTypes.${value}`)}
+                  </button>
+                );
+              })}
+            </div>
+            {status.path === 'unknown' ? (
+              <p className="page__subtitle">{t('unknownPath')}</p>
+            ) : null}
+            {sellerTypeLocked ? (
+              <p className="product-list__meta">{t('sellerType.locked')}</p>
+            ) : null}
+          </fieldset>
+
+          {status.path === 'company' && !status.verified ? (
+            <div className="verification-identity">
+              <p className="page__subtitle">{t('company.documentHint')}</p>
+              <label className={pending ? 'verification-upload is-pending' : 'verification-upload'}>
+                <span className="button button--primary" aria-hidden="true">
+                  {pending ? tFarm('pleaseWait') : t('company.upload')}
+                </span>
                 <input
-                  value={registrationNumber}
-                  onChange={(event) => setRegistrationNumber(event.target.value)}
-                  placeholder="123456789"
-                  required
+                  ref={companyFileRef}
+                  type="file"
+                  accept=".pdf,image/jpeg,image/png,image/webp"
+                  disabled={pending}
+                  aria-label={t('company.upload')}
+                  onChange={(event) =>
+                    void uploadVerificationDocument(
+                      event.target.files?.[0] ?? null,
+                      'businessRegistration',
+                      companyFileRef.current,
+                    )
+                  }
                 />
               </label>
-              <button className="button" type="submit" disabled={pending}>
-                {t('company.check')}
-              </button>
-              <p className="page__subtitle">{t('company.hint')}</p>
-            </form>
+              {status.steps.identity !== 'done' ? (
+                <form className="verification-inline-form" onSubmit={checkCompany}>
+                  <label className="field">
+                    <span>{t('company.number')}</span>
+                    <input
+                      value={registrationNumber}
+                      onChange={(event) => setRegistrationNumber(event.target.value)}
+                      placeholder="123456789"
+                      required
+                    />
+                  </label>
+                  <button className="button button--primary" type="submit" disabled={pending}>
+                    {t('company.check')}
+                  </button>
+                  <p className="page__subtitle">{t('company.hint')}</p>
+                </form>
+              ) : (
+                <p className="product-list__meta">
+                  {status.companyRegistryName}
+                  {status.companyRegistrationNumber
+                    ? ` · ${status.companyRegistrationNumber}`
+                    : ''}
+                </p>
+              )}
+            </div>
           ) : null}
 
-          {status.path === 'company' && status.steps.identity === 'done' ? (
+          {status.path === 'company' && status.verified && status.companyRegistryName ? (
             <p className="product-list__meta">
               {status.companyRegistryName}
               {status.companyRegistrationNumber
@@ -288,32 +387,38 @@ export function ProducerVerificationPanel({ initial }: Props) {
           ) : null}
 
           {status.path === 'privateFarmer' && status.steps.identity !== 'done' ? (
-            <div className="moderation-actions">
+            <div className="verification-identity">
               <p className="page__subtitle">{t('private.hint')}</p>
-              <label className="product-images__upload">
-                <span>{pending ? tFarm('pleaseWait') : t('private.upload')}</span>
+              <label className={pending ? 'verification-upload is-pending' : 'verification-upload'}>
+                <span className="button button--primary" aria-hidden="true">
+                  {pending ? tFarm('pleaseWait') : t('private.upload')}
+                </span>
                 <input
+                  ref={privateFileRef}
                   type="file"
                   accept=".pdf,image/jpeg,image/png,image/webp"
                   disabled={pending}
-                  onChange={(event) => uploadIdCard(event.target.files?.[0] ?? null)}
+                  aria-label={t('private.upload')}
+                  onChange={(event) =>
+                    void uploadVerificationDocument(
+                      event.target.files?.[0] ?? null,
+                      'idCard',
+                      privateFileRef.current,
+                    )
+                  }
                 />
               </label>
               {status.hasPendingIdDocument || status.hasApprovedIdDocument ? (
                 <button
                   type="button"
-                  className="button"
+                  className="button button--primary"
                   disabled={pending || status.steps.identity === 'pending_review'}
-                  onClick={submitPrivateReview}
+                  onClick={() => void submitPrivateReview()}
                 >
                   {t('private.submit')}
                 </button>
               ) : null}
             </div>
-          ) : null}
-
-          {status.path === 'unknown' ? (
-            <p className="form-error">{t('unknownPath')}</p>
           ) : null}
         </li>
       </ol>

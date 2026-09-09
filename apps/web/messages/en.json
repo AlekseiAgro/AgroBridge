@@ -186,7 +186,14 @@
       "statusLabel": "Current status",
       "doneHint": "Buyers can see your Verified badge on the catalog and farm page.",
       "genericError": "Could not complete this verification step.",
-      "unknownPath": "Set your seller type (private farmer or company) during registration to continue identity verification.",
+      "unknownPath": "Choose whether you sell as a private farmer or a company to continue identity verification.",
+      "sellerType": {
+        "title": "Seller type",
+        "hint": "Choose how you sell. This decides which identity document is required.",
+        "identityTitle": "3. Identity verification",
+        "saved": "Seller type saved.",
+        "locked": "Seller type is locked after verification has started."
+      },
       "farmStatus": {
         "unverified": "Not verified yet",
         "pending": "Pending moderator review",
@@ -217,15 +224,19 @@
         "confirmed": "Phone confirmed."
       },
       "company": {
-        "title": "3. Company registry check",
+        "title": "3. Company verification",
         "number": "Georgian company identification code",
         "check": "Check registry",
         "hint": "Enter the 9-digit identification code from Georgian public company databases.",
-        "matched": "Registry match: {name}"
+        "matched": "Registry match: {name}",
+        "documentHint": "Upload your company registration certificate. The document type is set automatically.",
+        "upload": "Upload company registration",
+        "docTitle": "Company registration",
+        "uploaded": "Company registration document uploaded."
       },
       "private": {
         "title": "3. ID card review",
-        "hint": "Upload a clear photo or scan of your ID card. A moderator will review it manually.",
+        "hint": "An ID card is required. The document type is set automatically. A moderator will review it.",
         "upload": "Upload ID card",
         "idTitle": "ID card",
         "submit": "Submit for moderator review",
@@ -238,8 +249,8 @@
       "unverified": "Not verified yet"
     },
     "documents": {
-      "title": "Verification documents",
-      "subtitle": "Upload business or farm registration papers (up to {max}).",
+      "title": "Additional documents",
+      "subtitle": "Optional extra papers (up to {max}). ID card and company registration are uploaded in the verification section above.",
       "empty": "No documents uploaded yet.",
       "titleField": "Document title",
       "titlePlaceholder": "Farm registration certificate",
