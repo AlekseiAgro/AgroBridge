@@ -207,18 +207,9 @@ export class AdminService {
       include: productOwnerInclude,
     });
 
-    await this.prisma.productCertificate.updateMany({
-      where: {
-        productId: product.id,
-        reviewStatus: DocumentReviewStatus.pending,
-      },
-      data: {
-        reviewStatus: DocumentReviewStatus.approved,
-        reviewNote: null,
-        reviewedAt: new Date(),
-        reviewedById: user.id,
-      },
-    });
+    // ProductCertificate.reviewStatus is independent of listing moderation
+    // (same DocumentReviewStatus pattern as FarmDocument). Approving a listing
+    // must not silently approve unseen certificate files. Use reviewCertificate.
 
     await this.notifications.notifyProductApproved({
       farmer: product.owner,

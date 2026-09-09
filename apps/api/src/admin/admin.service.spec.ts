@@ -77,7 +77,7 @@ describe('AdminService', () => {
     await expect(service.approve(admin, 'missing')).rejects.toBeInstanceOf(NotFoundException);
   });
 
-  it('approves pending certificates when a listing is approved', async () => {
+  it('does not approve pending certificates when a listing is approved', async () => {
     prisma.product.findUnique.mockResolvedValue({
       id: 'p1',
       isPublished: false,
@@ -100,17 +100,11 @@ describe('AdminService', () => {
       owner: { id: 'u1', email: 'f@example.com', displayName: 'Nino', locale: 'en' },
       farm: null,
     });
-    prisma.productCertificate.updateMany.mockResolvedValue({ count: 1 });
 
     await service.approve(admin, 'p1');
 
-    expect(prisma.productCertificate.updateMany).toHaveBeenCalledWith({
-      where: { productId: 'p1', reviewStatus: 'pending' },
-      data: expect.objectContaining({
-        reviewStatus: 'approved',
-        reviewedById: 'admin1',
-      }),
-    });
+    expect(prisma.productCertificate.updateMany).not.toHaveBeenCalled();
+    expect(prisma.productCertificate.update).not.toHaveBeenCalled();
   });
 
   it('lets an admin approve or reject a certificate without exposing a storage URL', async () => {
@@ -130,6 +124,28 @@ describe('AdminService', () => {
     const result = await service.reviewCertificate(admin, 'c1', true, {});
     expect(result.url).toBe('/api/products/p1/certificates/c1/file');
     expect(result.reviewStatus).toBe('approved');
+  });
+
+  it('lets an admin reject a certificate independently of the listing', async () => {
+    prisma.productCertificate.findUnique.mockResolvedValue({ id: 'c1', productId: 'p1' });
+    prisma.productCertificate.update.mockResolvedValue({
+      id: 'c1',
+      productId: 'p1',
+      type: 'organic',
+      title: 'Organic',
+      fileName: 'organic.pdf',
+      mimeType: 'application/pdf',
+      reviewStatus: 'rejected',
+      reviewNote: 'illegible scan',
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    });
+
+    const result = await service.reviewCertificate(admin, 'c1', false, {
+      note: 'illegible scan',
+    });
+    expect(result.reviewStatus).toBe('rejected');
+    expect(result.reviewNote).toBe('illegible scan');
+    expect(prisma.product.update).not.toHaveBeenCalled();
   });
 
   it('rejects a path-like certificate id on review', async () => {
