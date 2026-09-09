@@ -25,9 +25,11 @@ describe('FarmsService', () => {
     },
     farmDocument: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       findMany: jest.fn(),
       count: jest.fn(),
       create: jest.fn(),
+      delete: jest.fn(),
     },
     product: {
       updateMany: jest.fn(),
@@ -355,5 +357,32 @@ describe('FarmsService', () => {
     );
     expect(document.url).toBe('/api/farms/documents/doc1/file');
     expect(document.url).not.toContain('/api/uploads/');
+  });
+
+  it('deletes verification documents from private storage', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
+    prisma.farmDocument.findFirst.mockResolvedValue({
+      id: 'doc1',
+      farmId: 'farm1',
+      key: 'farms/farm1/documents/abc.pdf',
+    });
+    prisma.farmDocument.delete.mockResolvedValue({});
+
+    await service.removeDocument(
+      {
+        id: 'u1',
+        email: 'f@example.com',
+        role: 'farmer',
+        locale: 'ka',
+        displayName: 'Nino',
+      } as AuthenticatedUser,
+      'doc1',
+    );
+
+    expect(storage.delete).toHaveBeenCalledWith(
+      'farms/farm1/documents/abc.pdf',
+      'private',
+    );
+    expect(prisma.farmDocument.delete).toHaveBeenCalledWith({ where: { id: 'doc1' } });
   });
 });

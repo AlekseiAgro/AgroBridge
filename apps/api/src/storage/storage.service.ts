@@ -22,6 +22,7 @@ import {
   type StorageVisibility,
 } from './storage.constants';
 import {
+  resolveObjectVisibility,
   resolveS3Buckets,
   resolveS3PublicBaseUrl,
   s3BucketForVisibility,
@@ -111,24 +112,25 @@ export class StorageService implements OnModuleInit {
   }): Promise<StoredObject> {
     const extension = this.extensionFor(params.mimeType, params.originalName);
     const key = `${params.folder.replace(/^\/+|\/+$/g, '')}/${randomUUID()}${extension}`;
+    const visibility = this.requireMatchingVisibility(key, params.visibility);
 
     if (this.driver === STORAGE_DRIVER.LOCAL) {
       const absolute = this.resolveLocalPath(key);
       await fs.mkdir(dirname(absolute), { recursive: true });
       await fs.writeFile(absolute, params.buffer);
-      return { key, url: this.urlFor(key, params.visibility) };
+      return { key, url: this.urlFor(key, visibility) };
     }
 
     await this.s3Client!.send(
       new PutObjectCommand({
-        Bucket: s3BucketForVisibility(params.visibility, this.s3Buckets!),
+        Bucket: this.s3BucketFor(visibility),
         Key: key,
         Body: params.buffer,
         ContentType: params.mimeType,
       }),
     );
 
-    return { key, url: this.urlFor(key, params.visibility) };
+    return { key, url: this.urlFor(key, visibility) };
   }
 
   /** Public objects get a fetchable URL; private objects never do. */
@@ -141,10 +143,14 @@ export class StorageService implements OnModuleInit {
     });
   }
 
-  async delete(key: string): Promise<void> {
+  async delete(key: string, visibility?: StorageVisibility): Promise<void> {
     if (!key) {
       return;
     }
+
+    const resolved = visibility
+      ? this.requireMatchingVisibility(key, visibility)
+      : resolveObjectVisibility(key);
 
     if (this.driver === STORAGE_DRIVER.LOCAL) {
       const absolute = this.resolveLocalPath(key);
@@ -160,14 +166,22 @@ export class StorageService implements OnModuleInit {
 
     await this.s3Client!.send(
       new DeleteObjectCommand({
-        Bucket: s3BucketForVisibility(visibilityFromStorageKey(key), this.s3Buckets!),
+        Bucket: this.s3BucketFor(resolved),
         Key: key,
       }),
     );
   }
 
-  /** Reads a stored object by its storage key. Callers must authorize access first. */
-  async openReadStream(key: string): Promise<Readable> {
+  /**
+   * Reads a stored object by its storage key. Callers must authorize access first.
+   * Farm verification downloads must pass `visibility: 'private'` so the object is
+   * always fetched from `S3_PRIVATE_BUCKET`, never the public media bucket.
+   */
+  async openReadStream(key: string, visibility?: StorageVisibility): Promise<Readable> {
+    const resolved = visibility
+      ? this.requireMatchingVisibility(key, visibility)
+      : resolveObjectVisibility(key);
+
     if (this.driver === STORAGE_DRIVER.LOCAL) {
       const absolute = this.resolveLocalPath(key);
       if (!existsSync(absolute)) {
@@ -179,7 +193,7 @@ export class StorageService implements OnModuleInit {
     try {
       const result = await this.s3Client!.send(
         new GetObjectCommand({
-          Bucket: s3BucketForVisibility(visibilityFromStorageKey(key), this.s3Buckets!),
+          Bucket: this.s3BucketFor(resolved),
           Key: key,
         }),
       );
@@ -188,6 +202,9 @@ export class StorageService implements OnModuleInit {
       }
       return result.Body as Readable;
     } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
       const name = (error as { name?: string }).name;
       if (name === 'NoSuchKey' || name === 'NotFound') {
         throw new NotFoundException('File not found');
@@ -205,6 +222,25 @@ export class StorageService implements OnModuleInit {
       throw new BadRequestException('Invalid storage key');
     }
     return absolute;
+  }
+
+  /**
+   * Farm verification keys always map to the private bucket. A caller that asks
+   * for the opposite visibility is rejected before any S3 call.
+   */
+  private requireMatchingVisibility(
+    key: string,
+    requested: StorageVisibility,
+  ): StorageVisibility {
+    const fromKey = visibilityFromStorageKey(key);
+    if (fromKey !== requested) {
+      throw new BadRequestException('Storage visibility does not match object key');
+    }
+    return requested;
+  }
+
+  private s3BucketFor(visibility: StorageVisibility): string {
+    return s3BucketForVisibility(visibility, this.s3Buckets!);
   }
 
   private extensionFor(mimeType: string, originalName: string): string {

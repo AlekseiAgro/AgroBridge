@@ -33,6 +33,7 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
 import { StorageService } from '../storage/storage.service';
+import { STORAGE_VISIBILITY } from '../storage/storage.constants';
 import {
   mapProductSummary,
   sanitizeStringArray,
@@ -467,7 +468,7 @@ export class FarmsService {
       throw new NotFoundException('Document not found');
     }
 
-    await this.storage.delete(doc.key);
+    await this.storage.delete(doc.key, STORAGE_VISIBILITY.PRIVATE);
     await this.prisma.farmDocument.delete({ where: { id: doc.id } });
   }
 

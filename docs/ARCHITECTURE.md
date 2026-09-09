@@ -80,7 +80,7 @@
 - `StorageService` abstracts drivers:
   - `local` — writes under `STORAGE_LOCAL_DIR` and serves public media via `/api/uploads/...`
   - `s3` — AWS S3 / Cloudflare R2; public media uses `S3_PUBLIC_BUCKET` (or legacy `S3_BUCKET`) and `STORAGE_PUBLIC_BASE_URL/{key}`; private farm documents use `S3_PRIVATE_BUCKET` and never receive a public URL
-- Farm verification documents (`idCard`, `businessRegistration`, `other`) stay private: Browser → Web BFF → API (`JWT` + `EmailVerified` + owner/admin) → `openReadStream(key)`.
+- Farm verification documents (`idCard`, `businessRegistration`, `other`) stay private: Browser → Web BFF → API (`JWT` + `EmailVerified` + owner/admin) → `openReadStream(key, 'private')` from `S3_PRIVATE_BUCKET` (no public custom domain). New uploads never receive a public URL.
 - `ProductCertificate` currently uploads as `visibility: 'public'` (separate policy; pending certificates can appear in public product JSON).
 - Image changes on a published product reset moderation to `pending`.
 

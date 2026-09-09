@@ -3,6 +3,7 @@ import {
   STORAGE_VISIBILITY,
 } from './storage.constants';
 import {
+  resolveObjectVisibility,
   resolveS3Buckets,
   resolveS3PublicBaseUrl,
   s3BucketForVisibility,
@@ -31,6 +32,24 @@ describe('visibilityFromStorageKey', () => {
   });
 });
 
+describe('resolveObjectVisibility', () => {
+  it('forces farm verification keys to private even if a caller asks for public', () => {
+    expect(
+      resolveObjectVisibility('farms/farm1/documents/abc.pdf', STORAGE_VISIBILITY.PUBLIC),
+    ).toBe(STORAGE_VISIBILITY.PRIVATE);
+    expect(resolveObjectVisibility('farms/farm1/documents/abc.pdf')).toBe(
+      STORAGE_VISIBILITY.PRIVATE,
+    );
+  });
+
+  it('keeps public media on the public side', () => {
+    expect(resolveObjectVisibility('farms/farm1/photos/a.jpg', STORAGE_VISIBILITY.PUBLIC)).toBe(
+      STORAGE_VISIBILITY.PUBLIC,
+    );
+    expect(resolveObjectVisibility('products/p1/a.jpg')).toBe(STORAGE_VISIBILITY.PUBLIC);
+  });
+});
+
 describe('storedObjectUrl', () => {
   it('never emits a public URL for private objects, including when a CDN base is set', () => {
     expect(
@@ -46,7 +65,7 @@ describe('storedObjectUrl', () => {
         key: 'farms/farm1/documents/abc.pdf',
         visibility: STORAGE_VISIBILITY.PRIVATE,
         driver: STORAGE_DRIVER.S3,
-        publicBaseUrl: 'https://cdn.example.com',
+        publicBaseUrl: 'https://media.agrobridge.ge',
       }),
     ).toBe('');
   });
@@ -129,12 +148,14 @@ describe('resolveS3Buckets', () => {
     ).toThrow(/different/);
   });
 
-  it('selects the bucket from visibility, not a single public bucket', () => {
+  it('selects agrobridge-public vs agrobridge-private from visibility', () => {
     const buckets = resolveS3Buckets({
-      publicBucket: 'public-media',
-      privateBucket: 'private-docs',
+      publicBucket: 'agrobridge-public',
+      privateBucket: 'agrobridge-private',
     });
-    expect(s3BucketForVisibility(STORAGE_VISIBILITY.PUBLIC, buckets)).toBe('public-media');
-    expect(s3BucketForVisibility(STORAGE_VISIBILITY.PRIVATE, buckets)).toBe('private-docs');
+    expect(s3BucketForVisibility(STORAGE_VISIBILITY.PUBLIC, buckets)).toBe('agrobridge-public');
+    expect(s3BucketForVisibility(STORAGE_VISIBILITY.PRIVATE, buckets)).toBe(
+      'agrobridge-private',
+    );
   });
 });

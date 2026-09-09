@@ -8,15 +8,34 @@ import {
 /** Farm verification objects live under this key prefix. All other keys are public media. */
 const PRIVATE_DOCUMENT_KEY_RE = /(?:^|\/)farms\/[^/]+\/documents\//;
 
+export function isPrivateFarmDocumentKey(key: string): boolean {
+  return PRIVATE_DOCUMENT_KEY_RE.test(key);
+}
+
 export function visibilityFromStorageKey(key: string): StorageVisibility {
-  return PRIVATE_DOCUMENT_KEY_RE.test(key)
+  return isPrivateFarmDocumentKey(key)
     ? STORAGE_VISIBILITY.PRIVATE
     : STORAGE_VISIBILITY.PUBLIC;
 }
 
 /**
- * Public-media origin for `STORAGE_DRIVER=s3` (future R2/CDN).
+ * Effective visibility for an object. Farm verification keys are always private so
+ * they cannot be written to or read from the public media bucket.
+ */
+export function resolveObjectVisibility(
+  key: string,
+  requested?: StorageVisibility,
+): StorageVisibility {
+  if (isPrivateFarmDocumentKey(key)) {
+    return STORAGE_VISIBILITY.PRIVATE;
+  }
+  return requested ?? STORAGE_VISIBILITY.PUBLIC;
+}
+
+/**
+ * Public-media origin for `STORAGE_DRIVER=s3` (production: media.agrobridge.ge).
  * Must not include `/api/uploads` — that path is the local/legacy Web rewrite.
+ * Private farm documents never use this origin.
  */
 export function resolveS3PublicBaseUrl(raw?: string): string {
   const value = (raw ?? '').trim().replace(/\/$/, '');
@@ -57,8 +76,7 @@ export type S3BucketPair = {
 
 /**
  * Public and private objects must never share a bucket. `S3_BUCKET` remains the
- * public-bucket fallback so existing docs keep working when we later set
- * `STORAGE_DRIVER=s3`.
+ * public-bucket fallback. Farm verification documents always use `S3_PRIVATE_BUCKET`.
  */
 export function resolveS3Buckets(params: {
   publicBucket?: string;

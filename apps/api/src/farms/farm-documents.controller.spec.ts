@@ -141,7 +141,7 @@ describe('FarmDocumentsController (server-side authorization)', () => {
       .set('Authorization', `Bearer ${tokenFor('owner')}`)
       .expect(200);
 
-    expect(storage.openReadStream).toHaveBeenCalledWith(DOCUMENT_KEY);
+    expect(storage.openReadStream).toHaveBeenCalledWith(DOCUMENT_KEY, 'private');
     expect(response.headers['content-type']).toBe('application/pdf');
     expect(response.headers['content-disposition']).toBe(
       'attachment; filename="passport scan.pdf"; filename*=UTF-8\'\'passport%20scan.pdf',
@@ -157,7 +157,7 @@ describe('FarmDocumentsController (server-side authorization)', () => {
       .set('Authorization', `Bearer ${tokenFor('admin')}`)
       .expect(200);
 
-    expect(storage.openReadStream).toHaveBeenCalledWith(DOCUMENT_KEY);
+    expect(storage.openReadStream).toHaveBeenCalledWith(DOCUMENT_KEY, 'private');
   });
 
   it('denies a farmer who does not own the farm (IDOR)', async () => {
@@ -224,7 +224,23 @@ describe('FarmDocumentsController (server-side authorization)', () => {
       .expect(200);
 
     expect(storage.openReadStream).toHaveBeenCalledTimes(1);
-    expect(storage.openReadStream).toHaveBeenCalledWith(DOCUMENT_KEY);
+    expect(storage.openReadStream).toHaveBeenCalledWith(DOCUMENT_KEY, 'private');
+  });
+
+  it('does not stream a public media key through the private document endpoint', async () => {
+    prisma.farmDocument.findUnique.mockResolvedValue({
+      key: 'farms/farm1/photos/a.jpg',
+      fileName: 'farm.jpg',
+      mimeType: 'image/jpeg',
+      farm: { ownerId: USERS.owner.id },
+    });
+
+    await request(app.getHttpServer())
+      .get(`/api/farms/documents/${DOCUMENT_ID}/file`)
+      .set('Authorization', `Bearer ${tokenFor('owner')}`)
+      .expect(404);
+
+    expect(storage.openReadStream).not.toHaveBeenCalled();
   });
 
   it('falls back to application/octet-stream for a non-allowlisted MIME type', async () => {
