@@ -8,6 +8,8 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { StorageService } from '../storage/storage.service';
+import { STORAGE_VISIBILITY } from '../storage/storage.constants';
+import { isPrivateFarmDocumentKey } from '../storage/storage-location';
 import { isFarmDocumentId } from './farm-document-url';
 import { FarmsService } from './farms.service';
 
@@ -52,7 +54,14 @@ export class FarmDocumentsController {
     }
 
     const document = await this.farmsService.getDocumentDownload(user, documentId);
-    const stream = await this.storage.openReadStream(document.key);
+    if (!isPrivateFarmDocumentKey(document.key)) {
+      throw new NotFoundException('Document not found');
+    }
+
+    const stream = await this.storage.openReadStream(
+      document.key,
+      STORAGE_VISIBILITY.PRIVATE,
+    );
 
     res.setHeader(
       'Content-Type',

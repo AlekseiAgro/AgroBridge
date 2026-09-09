@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { mkdtemp, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
+import { Readable } from 'stream';
 import { StorageService } from './storage.service';
 
 function localConfig(
@@ -247,5 +248,168 @@ describe('StorageService', () => {
     } finally {
       await rm(root, { recursive: true, force: true });
     }
+  });
+
+  it('refuses to upload a farm verification document as public media', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'agrobridge-uploads-'));
+    const service = new StorageService(localConfig(root));
+    try {
+      await expect(
+        service.upload({
+          buffer: Buffer.from('%PDF'),
+          mimeType: 'application/pdf',
+          originalName: 'id-card.pdf',
+          folder: 'farms/farm1/documents',
+          visibility: 'public',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('StorageService s3 bucket selection', () => {
+  const PUBLIC_BUCKET = 'agrobridge-public';
+  const PRIVATE_BUCKET = 'agrobridge-private';
+  const PUBLIC_BASE = 'https://media.agrobridge.ge';
+
+  function s3Service() {
+    const service = new StorageService(
+      s3Config({
+        STORAGE_DRIVER: 's3',
+        S3_PUBLIC_BUCKET: PUBLIC_BUCKET,
+        S3_PRIVATE_BUCKET: PRIVATE_BUCKET,
+        STORAGE_PUBLIC_BASE_URL: PUBLIC_BASE,
+        S3_ENDPOINT: 'https://example.r2.cloudflarestorage.com',
+        S3_ACCESS_KEY_ID: 'id',
+        S3_SECRET_ACCESS_KEY: 'secret',
+      }),
+    );
+    const send = jest.fn();
+    (service as unknown as { s3Client: { send: typeof send } }).s3Client = { send };
+    return { service, send };
+  }
+
+  function sentInput(send: jest.Mock) {
+    return send.mock.calls[0][0].input as { Bucket: string; Key: string };
+  }
+
+  it('writes farm verification documents to the private bucket without a public URL', async () => {
+    const { service, send } = s3Service();
+    send.mockResolvedValue({});
+
+    const stored = await service.upload({
+      buffer: Buffer.from('%PDF'),
+      mimeType: 'application/pdf',
+      originalName: 'id-card.pdf',
+      folder: 'farms/farm1/documents',
+      visibility: 'private',
+    });
+
+    expect(stored.url).toBe('');
+    expect(stored.url).not.toContain(PUBLIC_BASE);
+    expect(stored.key).toMatch(/^farms\/farm1\/documents\/.+\.pdf$/);
+    expect(sentInput(send)).toEqual(
+      expect.objectContaining({
+        Bucket: PRIVATE_BUCKET,
+        Key: stored.key,
+      }),
+    );
+    expect(sentInput(send).Bucket).not.toBe(PUBLIC_BUCKET);
+  });
+
+  it('writes public farm/product/avatar media to the public bucket', async () => {
+    const cases = [
+      { folder: 'farms/farm1/photos', originalName: 'farm.jpg', mimeType: 'image/jpeg' },
+      { folder: 'products/p1', originalName: 'product.jpg', mimeType: 'image/jpeg' },
+      { folder: 'users/u1', originalName: 'me.jpg', mimeType: 'image/jpeg' },
+    ];
+
+    for (const params of cases) {
+      const { service, send } = s3Service();
+      send.mockResolvedValue({});
+      const stored = await service.upload({
+        buffer: Buffer.from('img'),
+        mimeType: params.mimeType,
+        originalName: params.originalName,
+        folder: params.folder,
+        visibility: 'public',
+      });
+      expect(stored.url).toBe(`${PUBLIC_BASE}/${stored.key}`);
+      expect(sentInput(send).Bucket).toBe(PUBLIC_BUCKET);
+      expect(sentInput(send).Bucket).not.toBe(PRIVATE_BUCKET);
+    }
+  });
+
+  it('reads private verification documents from the private bucket', async () => {
+    const { service, send } = s3Service();
+    send.mockResolvedValue({ Body: Readable.from([Buffer.from('pdf-bytes')]) });
+
+    const stream = await service.openReadStream(
+      'farms/farm1/documents/abc.pdf',
+      'private',
+    );
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+
+    expect(Buffer.concat(chunks).toString()).toBe('pdf-bytes');
+    expect(sentInput(send)).toEqual(
+      expect.objectContaining({
+        Bucket: PRIVATE_BUCKET,
+        Key: 'farms/farm1/documents/abc.pdf',
+      }),
+    );
+  });
+
+  it('does not touch S3 when private visibility is requested for a public media key', async () => {
+    const { service, send } = s3Service();
+
+    await expect(
+      service.openReadStream('farms/farm1/photos/a.jpg', 'private'),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('deletes farm verification documents from the private bucket', async () => {
+    const { service, send } = s3Service();
+    send.mockResolvedValue({});
+
+    await service.delete('farms/farm1/documents/abc.pdf', 'private');
+
+    expect(sentInput(send)).toEqual(
+      expect.objectContaining({
+        Bucket: PRIVATE_BUCKET,
+        Key: 'farms/farm1/documents/abc.pdf',
+      }),
+    );
+    expect(sentInput(send).Bucket).not.toBe(PUBLIC_BUCKET);
+  });
+
+  it('deletes public media from the public bucket', async () => {
+    const { service, send } = s3Service();
+    send.mockResolvedValue({});
+
+    await service.delete('farms/farm1/photos/a.jpg');
+
+    expect(sentInput(send).Bucket).toBe(PUBLIC_BUCKET);
+    expect(sentInput(send).Key).toBe('farms/farm1/photos/a.jpg');
+  });
+
+  it('refuses a public upload into the farm-documents key prefix before S3', async () => {
+    const { service, send } = s3Service();
+
+    await expect(
+      service.upload({
+        buffer: Buffer.from('%PDF'),
+        mimeType: 'application/pdf',
+        originalName: 'id-card.pdf',
+        folder: 'farms/farm1/documents',
+        visibility: 'public',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(send).not.toHaveBeenCalled();
   });
 });
