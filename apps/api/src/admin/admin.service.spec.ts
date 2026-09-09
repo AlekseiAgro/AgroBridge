@@ -14,6 +14,7 @@ describe('AdminService', () => {
     rfq: { count: jest.fn() },
     purchaseRequest: { count: jest.fn() },
     farmDocument: { count: jest.fn() },
+    productCertificate: { findUnique: jest.fn(), update: jest.fn(), updateMany: jest.fn() },
   };
 
   const notifications = {
@@ -74,5 +75,67 @@ describe('AdminService', () => {
   it('rejects approve for missing product', async () => {
     prisma.product.findUnique.mockResolvedValue(null);
     await expect(service.approve(admin, 'missing')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('approves pending certificates when a listing is approved', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      isPublished: false,
+      moderationStatus: 'pending',
+      harvestStatus: null,
+      preorderEnabled: false,
+    });
+    prisma.product.update.mockResolvedValue({
+      id: 'p1',
+      title: 'Hazelnuts',
+      category: null,
+      isPublished: true,
+      moderationStatus: 'approved',
+      harvestStatus: null,
+      preorderEnabled: false,
+      moderationNote: null,
+      moderatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      owner: { id: 'u1', email: 'f@example.com', displayName: 'Nino', locale: 'en' },
+      farm: null,
+    });
+    prisma.productCertificate.updateMany.mockResolvedValue({ count: 1 });
+
+    await service.approve(admin, 'p1');
+
+    expect(prisma.productCertificate.updateMany).toHaveBeenCalledWith({
+      where: { productId: 'p1', reviewStatus: 'pending' },
+      data: expect.objectContaining({
+        reviewStatus: 'approved',
+        reviewedById: 'admin1',
+      }),
+    });
+  });
+
+  it('lets an admin approve or reject a certificate without exposing a storage URL', async () => {
+    prisma.productCertificate.findUnique.mockResolvedValue({ id: 'c1', productId: 'p1' });
+    prisma.productCertificate.update.mockResolvedValue({
+      id: 'c1',
+      productId: 'p1',
+      type: 'organic',
+      title: 'Organic',
+      fileName: 'organic.pdf',
+      mimeType: 'application/pdf',
+      reviewStatus: 'approved',
+      reviewNote: null,
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    });
+
+    const result = await service.reviewCertificate(admin, 'c1', true, {});
+    expect(result.url).toBe('/api/products/p1/certificates/c1/file');
+    expect(result.reviewStatus).toBe('approved');
+  });
+
+  it('rejects a path-like certificate id on review', async () => {
+    await expect(
+      service.reviewCertificate(admin, '../etc/passwd', true, {}),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.productCertificate.findUnique).not.toHaveBeenCalled();
   });
 });

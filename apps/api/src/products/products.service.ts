@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   FARM_DOCUMENT_MAX_BYTES,
@@ -251,7 +252,7 @@ export class ProductsService {
         )
       : false;
     const isCardOwner = Boolean(viewer && product.ownerUserId === viewer.id);
-    return this.toDetail(product, sellerRating, watching, isCardOwner);
+    return this.toDetail(product, sellerRating, watching, isCardOwner, Boolean(isOwner));
   }
 
   async listMyWatches(user: AuthenticatedUser): Promise<HarvestWatchItem[]> {
@@ -396,7 +397,7 @@ export class ProductsService {
       this.queuePendingModerationEmail(product, user);
     }
 
-    return this.toDetail(product, null, false, true);
+    return this.toDetail(product, null, false, true, true);
   }
 
   async update(user: AuthenticatedUser, id: string, dto: UpdateProductDto): Promise<ProductDetail> {
@@ -622,7 +623,7 @@ export class ProductsService {
       this.queuePendingModerationEmail(updated, user);
     }
 
-    return this.toDetail(updated, null, false, true);
+    return this.toDetail(updated, null, false, true, true);
   }
 
   async getWatchStatus(
@@ -690,15 +691,29 @@ export class ProductsService {
 
     await this.prisma.product.delete({ where: { id: product.id } });
 
-    await Promise.all(
-      [...images, ...videos, ...certificates].map(async (media) => {
+    await Promise.all([
+      ...images.map(async (media) => {
         try {
           await this.storage.delete(media.key);
         } catch {
           // Best-effort cleanup; DB row is already gone.
         }
       }),
-    );
+      ...videos.map(async (media) => {
+        try {
+          await this.storage.delete(media.key);
+        } catch {
+          // Best-effort cleanup; DB row is already gone.
+        }
+      }),
+      ...certificates.map(async (media) => {
+        try {
+          await this.storage.delete(media.key, 'private');
+        } catch {
+          // Best-effort cleanup; DB row is already gone.
+        }
+      }),
+    ]);
 
     return { ok: true };
   }
@@ -905,9 +920,7 @@ export class ProductsService {
       mimeType: file.mimetype,
       originalName: file.originalname || 'certificate',
       folder: `products/${product.id}/certificates`,
-      // Existing policy (not redesigned here): product certificates are public media,
-      // unlike private farm verification documents.
-      visibility: 'public',
+      visibility: 'private',
     });
 
     let enteredPending = false;
@@ -919,7 +932,7 @@ export class ProductsService {
             type: typeRaw as PrismaCertificateType,
             title: trimmedTitle,
             fileName: file.originalname || 'certificate',
-            url: stored.url,
+            url: '',
             key: stored.key,
             mimeType: file.mimetype,
             sizeBytes: file.size,
@@ -928,7 +941,7 @@ export class ProductsService {
         enteredPending = await this.markPendingForImageChange(tx, product);
       });
     } catch (error) {
-      await this.storage.delete(stored.key).catch(() => undefined);
+      await this.storage.delete(stored.key, 'private').catch(() => undefined);
       throw error;
     }
 
@@ -957,13 +970,78 @@ export class ProductsService {
       await tx.productCertificate.delete({ where: { id: certificate.id } });
       return this.markPendingForImageChange(tx, product);
     });
-    await this.storage.delete(certificate.key).catch(() => undefined);
+    await this.storage.delete(certificate.key, 'private').catch(() => undefined);
 
     if (enteredPending) {
       this.queuePendingModerationEmail(product, user);
     }
 
     return this.getById(product.id, user);
+  }
+
+  /**
+   * Resolves a certificate file after authorization. Ownership comes from the stored
+   * product relation, never from a client-supplied storage path.
+   */
+  async getCertificateDownload(
+    productId: string,
+    certificateId: string,
+    viewer?: AuthenticatedUser | null,
+  ): Promise<{ key: string; fileName: string; mimeType: string }> {
+    const certificate = await this.prisma.productCertificate.findFirst({
+      where: { id: certificateId, productId },
+      select: {
+        key: true,
+        fileName: true,
+        mimeType: true,
+        reviewStatus: true,
+        product: {
+          select: {
+            ownerUserId: true,
+            isPublished: true,
+            moderationStatus: true,
+          },
+        },
+      },
+    });
+
+    if (!certificate) {
+      throw new NotFoundException('Certificate not found');
+    }
+
+    const product = certificate.product;
+    const isPrivileged = Boolean(
+      viewer && (viewer.role === 'admin' || product.ownerUserId === viewer.id),
+    );
+    const productIsPublic =
+      product.isPublished && product.moderationStatus === PrismaModerationStatus.approved;
+    const certificateIsApproved = certificate.reviewStatus === 'approved';
+
+    if (certificateIsApproved && productIsPublic) {
+      return {
+        key: certificate.key,
+        fileName: certificate.fileName,
+        mimeType: certificate.mimeType,
+      };
+    }
+
+    if (!viewer) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    if (!isPrivileged) {
+      throw new NotFoundException('Certificate not found');
+    }
+
+    if (viewer.role !== 'admin' && !viewer.emailVerified) {
+      throw new ForbiddenException('Confirm your email address to access your account');
+    }
+
+    return {
+      key: certificate.key,
+      fileName: certificate.fileName,
+      mimeType: certificate.mimeType,
+    };
   }
 
   async removeImage(
@@ -1202,8 +1280,15 @@ export class ProductsService {
     sellerRating?: RatingSummary | null,
     watching = false,
     isOwner = false,
+    includePrivateCertificates = false,
   ): ProductDetail {
-    return mapProductDetail(product, sellerRating, watching, isOwner);
+    return mapProductDetail(
+      product,
+      sellerRating,
+      watching,
+      isOwner,
+      includePrivateCertificates,
+    );
   }
 
   private normalizeHarvestInput(

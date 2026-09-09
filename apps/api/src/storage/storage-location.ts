@@ -5,28 +5,36 @@ import {
   type StorageVisibility,
 } from './storage.constants';
 
-/** Farm verification objects live under this key prefix. All other keys are public media. */
+/** Farm verification objects live under this key prefix. */
 const PRIVATE_DOCUMENT_KEY_RE = /(?:^|\/)farms\/[^/]+\/documents\//;
+/** Product certificates stay off the public media domain until/unless approved in-app. */
+const PRIVATE_CERTIFICATE_KEY_RE = /(?:^|\/)products\/[^/]+\/certificates\//;
 
 export function isPrivateFarmDocumentKey(key: string): boolean {
   return PRIVATE_DOCUMENT_KEY_RE.test(key);
 }
 
+export function isPrivateProductCertificateKey(key: string): boolean {
+  return PRIVATE_CERTIFICATE_KEY_RE.test(key);
+}
+
+export function isPrivateStorageKey(key: string): boolean {
+  return isPrivateFarmDocumentKey(key) || isPrivateProductCertificateKey(key);
+}
+
 export function visibilityFromStorageKey(key: string): StorageVisibility {
-  return isPrivateFarmDocumentKey(key)
-    ? STORAGE_VISIBILITY.PRIVATE
-    : STORAGE_VISIBILITY.PUBLIC;
+  return isPrivateStorageKey(key) ? STORAGE_VISIBILITY.PRIVATE : STORAGE_VISIBILITY.PUBLIC;
 }
 
 /**
- * Effective visibility for an object. Farm verification keys are always private so
- * they cannot be written to or read from the public media bucket.
+ * Effective visibility for an object. Farm verification keys and product certificate
+ * keys are always private so they cannot be written to or read from the public media bucket.
  */
 export function resolveObjectVisibility(
   key: string,
   requested?: StorageVisibility,
 ): StorageVisibility {
-  if (isPrivateFarmDocumentKey(key)) {
+  if (isPrivateStorageKey(key)) {
     return STORAGE_VISIBILITY.PRIVATE;
   }
   return requested ?? STORAGE_VISIBILITY.PUBLIC;
@@ -35,7 +43,7 @@ export function resolveObjectVisibility(
 /**
  * Public-media origin for `STORAGE_DRIVER=s3` (production: media.agrobridge.ge).
  * Must not include `/api/uploads` — that path is the local/legacy Web rewrite.
- * Private farm documents never use this origin.
+ * Private farm documents and product certificates never use this origin.
  */
 export function resolveS3PublicBaseUrl(raw?: string): string {
   const value = (raw ?? '').trim().replace(/\/$/, '');

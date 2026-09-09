@@ -174,8 +174,9 @@ export class StorageService implements OnModuleInit {
 
   /**
    * Reads a stored object by its storage key. Callers must authorize access first.
-   * Farm verification downloads must pass `visibility: 'private'` so the object is
-   * always fetched from `S3_PRIVATE_BUCKET`, never the public media bucket.
+   * Private downloads (farm verification documents, product certificates) must pass
+   * `visibility: 'private'` so the object is always fetched from `S3_PRIVATE_BUCKET`,
+   * never the public media bucket.
    */
   async openReadStream(key: string, visibility?: StorageVisibility): Promise<Readable> {
     const resolved = visibility
@@ -225,7 +226,7 @@ export class StorageService implements OnModuleInit {
   }
 
   /**
-   * Farm verification keys always map to the private bucket. A caller that asks
+   * Private object keys always map to the private bucket. A caller that asks
    * for the opposite visibility is rejected before any S3 call.
    */
   private requireMatchingVisibility(

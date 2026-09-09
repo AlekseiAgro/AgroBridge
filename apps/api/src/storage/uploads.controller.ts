@@ -22,6 +22,12 @@ const CONTENT_TYPES: Record<string, string> = {
 export class UploadsController {
   constructor(private readonly storage: StorageService) {}
 
+  @Get('products/:productId/certificates/:filename')
+  serveProductCertificate() {
+    // Product certificates are private. Do not serve them as public local media.
+    throw new NotFoundException('File not found');
+  }
+
   @Get('products/:productId/:filename')
   async serveProductImage(
     @Param('productId') productId: string,
@@ -51,6 +57,7 @@ export class UploadsController {
 
   // Farm verification documents are intentionally absent here: they are private and
   // served by FarmDocumentsController behind owner/admin authorization.
+  // Product certificates are served by ProductsController after authorization.
   // This controller is the local/legacy public-media path only (`STORAGE_DRIVER=local`).
   // Future R2 public objects are fetched from STORAGE_PUBLIC_BASE_URL/{key}.
 
