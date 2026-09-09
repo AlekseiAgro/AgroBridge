@@ -11,6 +11,7 @@ import {
 } from '@agrobridge/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { renderEmailTemplate } from './email-templates';
+import { sanitizeMailError } from './mail.config';
 import { MailService } from './mail.service';
 import type { MailRecipient } from './mail.types';
 
@@ -588,9 +589,10 @@ export class NotificationsService {
         text: rendered.text,
       });
     } catch (error) {
+      // Best-effort: do not rethrow. Callers that must fail closed (verification,
+      // email change, deletion) invoke MailService.send directly instead.
       this.logger.error(
-        `Failed to send ${key} email to ${recipient.email}`,
-        error instanceof Error ? error.stack : String(error),
+        `Failed to send ${key} email to ${recipient.email} detail=${sanitizeMailError(error)}`,
       );
     }
   }
