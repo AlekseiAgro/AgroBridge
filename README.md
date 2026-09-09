@@ -151,6 +151,7 @@ Transactional emails (locale-aware templates: ka/en/ru/de/fr/it/es):
 Drivers:
 
 - `MAIL_DRIVER=console` (default) — logs emails in the API console
+- `MAIL_DRIVER=resend` — send via Resend HTTPS (`RESEND_API_KEY`, `MAIL_FROM`). Incomplete resend config fails startup; there is no fallback to console.
 - `MAIL_DRIVER=smtp` — send via SMTP (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM`). Incomplete smtp config fails startup; there is no fallback to console. `NODE_ENV=production` also refuses `console` unless `MAIL_ALLOW_CONSOLE=true`.
 - Links use `WEB_PUBLIC_URL`
 

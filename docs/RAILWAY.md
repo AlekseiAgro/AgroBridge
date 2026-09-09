@@ -65,17 +65,20 @@ JWT_EXPIRES_SECONDS=604800
 # TRUST_PROXY=loopback,linklocal,uniquelocal
 SUPPORT_EMAIL=gabo.m0619@gmail.com
 # NODE_ENV=production + MAIL_DRIVER=console fails boot (no silent logged-only mail).
-# Staging console: MAIL_ALLOW_CONSOLE=true. Production: smtp + host/port/user/password/from.
-MAIL_DRIVER=smtp
-MAIL_FROM=AgroBridge <noreply@agrobrid.ge>
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-# SMTP_SECURE=false
-SMTP_USER=<smtp-user>
-SMTP_PASSWORD=<smtp-password>
+# Staging console: MAIL_ALLOW_CONSOLE=true.
+# Production: MAIL_DRIVER=resend + RESEND_API_KEY + MAIL_FROM (HTTPS to api.resend.com).
+# Railway outbound SMTP is blocked; do not use MAIL_DRIVER=smtp in production.
+# RESEND_API_KEY is API-service-only — never a NEXT_PUBLIC_* / web variable.
+MAIL_DRIVER=resend
+MAIL_FROM=AgroBridge <no-reply@agrobridge.ge>
+RESEND_API_KEY=<sending-only Resend API key>
 # MAIL_ALLOW_CONSOLE=true
-# Port 465: omit SMTP_SECURE or set true (SMTPS). Port 587: STARTTLS (SMTP_SECURE=false).
-# Broken/slow SMTP previously hung registration until Cloudflare returned HTML 524.
+# Unused when MAIL_DRIVER=resend (safe to remove after cutover):
+# SMTP_HOST=smtp.resend.com
+# SMTP_PORT=465
+# SMTP_SECURE=true
+# SMTP_USER=resend
+# SMTP_PASSWORD=<unused>
 TRANSLATION_PROVIDER=mock
 # Optional: product "place of origin" city/village suggestions (Places API New)
 # GOOGLE_MAPS_API_KEY=<google-maps-api-key>

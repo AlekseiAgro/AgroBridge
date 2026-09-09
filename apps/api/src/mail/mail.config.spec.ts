@@ -1,4 +1,5 @@
 import {
+  describeMailConfig,
   isTransientSmtpError,
   resolveMailConfig,
   sanitizeMailError,
@@ -11,6 +12,12 @@ const SMTP = {
   SMTP_USER: 'mailer',
   SMTP_PASSWORD: 's3cret-token-value',
   MAIL_FROM: 'AgroBridge <noreply@agrobridge.ge>',
+};
+
+const RESEND = {
+  MAIL_DRIVER: 'resend',
+  RESEND_API_KEY: 're_test_secret_key_value',
+  MAIL_FROM: 'AgroBridge <no-reply@agrobridge.ge>',
 };
 
 function reader(env: Record<string, string>) {
@@ -122,11 +129,76 @@ describe('resolveMailConfig', () => {
   });
 
   it('rejects an unknown MAIL_DRIVER instead of falling back to console', () => {
-    expect(() => resolveMailConfig(reader({ MAIL_DRIVER: 'ses' }))).toThrow(/console or smtp/);
+    expect(() => resolveMailConfig(reader({ MAIL_DRIVER: 'ses' }))).toThrow(
+      /console, smtp, or resend/,
+    );
+  });
+
+  it('fails production resend without RESEND_API_KEY instead of falling back to console', () => {
+    expect(() =>
+      resolveMailConfig(
+        reader({
+          NODE_ENV: 'production',
+          MAIL_DRIVER: 'resend',
+          MAIL_FROM: RESEND.MAIL_FROM,
+        }),
+      ),
+    ).toThrow(/RESEND_API_KEY/);
+  });
+
+  it('fails resend when RESEND_API_KEY is whitespace', () => {
+    expect(() =>
+      resolveMailConfig(reader({ ...RESEND, RESEND_API_KEY: '   ' })),
+    ).toThrow(/RESEND_API_KEY/);
+  });
+
+  it('fails resend without MAIL_FROM', () => {
+    const { MAIL_FROM: _from, ...rest } = RESEND;
+    expect(() => resolveMailConfig(reader(rest))).toThrow(/MAIL_FROM/);
+  });
+
+  it('fails resend when MAIL_FROM is whitespace', () => {
+    expect(() => resolveMailConfig(reader({ ...RESEND, MAIL_FROM: ' \t ' }))).toThrow(/MAIL_FROM/);
+  });
+
+  it('accepts a complete resend configuration without SMTP variables', () => {
+    expect(resolveMailConfig(reader({ ...RESEND, NODE_ENV: 'production' }))).toEqual({
+      driver: 'resend',
+      from: 'AgroBridge <no-reply@agrobridge.ge>',
+      redactBodies: true,
+      apiKey: 're_test_secret_key_value',
+    });
+  });
+
+  it('describes resend without the API key', () => {
+    const settings = resolveMailConfig(reader(RESEND));
+    const description = describeMailConfig(settings);
+    expect(description).toBe('Mail driver: resend');
+    expect(description).not.toContain('re_test_secret_key_value');
+    expect(description).not.toContain('RESEND_API_KEY');
+  });
+
+  it('does not mention the API key when resend config is invalid', () => {
+    try {
+      resolveMailConfig(
+        reader({
+          NODE_ENV: 'production',
+          MAIL_DRIVER: 'resend',
+          MAIL_FROM: RESEND.MAIL_FROM,
+          RESEND_API_KEY: '',
+        }),
+      );
+      throw new Error('expected resolveMailConfig to throw');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).not.toContain('re_test');
+      expect(message).toMatch(/RESEND_API_KEY/);
+    }
   });
 
   it('accepts MAIL_DRIVER case-insensitively', () => {
     expect(resolveMailConfig(reader({ ...SMTP, MAIL_DRIVER: 'SMTP' })).driver).toBe('smtp');
+    expect(resolveMailConfig(reader({ ...RESEND, MAIL_DRIVER: 'RESEND' })).driver).toBe('resend');
   });
 
   it('rejects MAIL_FROM with header-injection characters', () => {
@@ -137,6 +209,15 @@ describe('resolveMailConfig', () => {
 });
 
 describe('sanitizeMailError', () => {
+  it('redacts Bearer tokens and Resend API keys', () => {
+    const text = sanitizeMailError(
+      new Error('Authorization: Bearer re_test_secret_key_value RESEND_API_KEY=re_test_secret_key_value'),
+      ['re_test_secret_key_value'],
+    );
+    expect(text).not.toContain('re_test_secret_key_value');
+    expect(text).not.toMatch(/Bearer\s+re_/i);
+  });
+
   it('strips the SMTP password and credential-bearing URLs', () => {
     const text = sanitizeMailError(
       new Error(

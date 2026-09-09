@@ -4,15 +4,20 @@ import nodemailer, { type Transporter } from 'nodemailer';
 import {
   describeMailConfig,
   isTransientSmtpError,
+  MAIL_RETRY_DELAYS_MS,
+  MAIL_SEND_ATTEMPTS,
   resolveMailConfig,
   sanitizeMailError,
   SMTP_CONNECTION_TIMEOUT_MS,
   SMTP_GREETING_TIMEOUT_MS,
-  SMTP_RETRY_DELAYS_MS,
-  SMTP_SEND_ATTEMPTS,
   SMTP_SOCKET_TIMEOUT_MS,
   type MailSettings,
 } from './mail.config';
+import {
+  classifyResendError,
+  isTransientResendError,
+  sendResendHttp,
+} from './resend-http';
 import type { MailMessage } from './mail.types';
 
 @Injectable()
@@ -20,6 +25,7 @@ export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
   private readonly settings: MailSettings;
   private transporter?: Transporter;
+  private fetchImpl: typeof fetch = globalThis.fetch.bind(globalThis);
 
   constructor(private readonly config: ConfigService) {
     this.settings = resolveMailConfig(this.config);
@@ -49,7 +55,47 @@ export class MailService implements OnModuleInit {
       return;
     }
 
+    if (this.settings.driver === 'resend') {
+      await this.sendResend(message);
+      return;
+    }
+
     await this.sendSmtp(message);
+  }
+
+  private async sendResend(message: MailMessage): Promise<void> {
+    if (this.settings.driver !== 'resend') {
+      throw new Error('Resend transport is not configured');
+    }
+
+    const { apiKey, from } = this.settings;
+    const secrets = [apiKey];
+
+    for (let attempt = 1; attempt <= MAIL_SEND_ATTEMPTS; attempt += 1) {
+      try {
+        await sendResendHttp({
+          apiKey,
+          from,
+          message,
+          fetchImpl: this.fetchImpl,
+        });
+        this.logger.log(`Resend send ok attempt=${attempt}`);
+        return;
+      } catch (error) {
+        const safe = sanitizeMailError(error, secrets);
+        const retry = attempt < MAIL_SEND_ATTEMPTS && isTransientResendError(error);
+        const { status, classification } = classifyResendError(error);
+        this.logger.error(
+          `Resend send failed attempt=${attempt}/${MAIL_SEND_ATTEMPTS} retry=${retry} driver=resend status=${status} class=${classification} detail=${safe}`,
+        );
+        if (!retry) {
+          break;
+        }
+        await sleep(MAIL_RETRY_DELAYS_MS[attempt - 1] ?? 800);
+      }
+    }
+
+    throw new Error('Email delivery failed');
   }
 
   private async sendSmtp(message: MailMessage): Promise<void> {
@@ -60,7 +106,7 @@ export class MailService implements OnModuleInit {
 
     const secrets = this.settings.driver === 'smtp' ? [this.settings.password] : [];
 
-    for (let attempt = 1; attempt <= SMTP_SEND_ATTEMPTS; attempt += 1) {
+    for (let attempt = 1; attempt <= MAIL_SEND_ATTEMPTS; attempt += 1) {
       try {
         await transporter.sendMail({
           from: this.settings.from,
@@ -75,14 +121,14 @@ export class MailService implements OnModuleInit {
         return;
       } catch (error) {
         const safe = sanitizeMailError(error, secrets);
-        const retry = attempt < SMTP_SEND_ATTEMPTS && isTransientSmtpError(error);
+        const retry = attempt < MAIL_SEND_ATTEMPTS && isTransientSmtpError(error);
         this.logger.error(
-          `SMTP send failed attempt=${attempt}/${SMTP_SEND_ATTEMPTS} retry=${retry} to=${message.to} detail=${safe}`,
+          `SMTP send failed attempt=${attempt}/${MAIL_SEND_ATTEMPTS} retry=${retry} to=${message.to} detail=${safe}`,
         );
         if (!retry) {
           break;
         }
-        await sleep(SMTP_RETRY_DELAYS_MS[attempt - 1] ?? 800);
+        await sleep(MAIL_RETRY_DELAYS_MS[attempt - 1] ?? 800);
       }
     }
 

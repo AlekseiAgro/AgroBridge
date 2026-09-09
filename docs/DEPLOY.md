@@ -33,7 +33,7 @@ The example is pre-filled for **agrobrid.ge** / **api.agrobrid.ge**. Change secr
 
 Optional production upgrades:
 
-- `MAIL_DRIVER=smtp` plus `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` for real email. Incomplete smtp config fails API startup (no silent console fallback). `NODE_ENV=production` also refuses `MAIL_DRIVER=console` unless `MAIL_ALLOW_CONSOLE=true` (staging). Local/dev `MAIL_DRIVER=console` stays valid without SMTP_*. Optional: `SMTP_SECURE` (`true`/`false`; defaults to SMTPS on port 465, STARTTLS otherwise). To check connectivity without mailing a user: set the vars on a staging service and confirm the API boots (`Mail driver: smtp host=…`) then trigger a verification email to an address you control. Never log `SMTP_PASSWORD`, reset tokens, or verification codes.
+- `MAIL_DRIVER=resend` plus `RESEND_API_KEY` and `MAIL_FROM` for real email over HTTPS (`POST https://api.resend.com/emails`). Incomplete resend config fails API startup (no silent console fallback). `NODE_ENV=production` also refuses `MAIL_DRIVER=console` unless `MAIL_ALLOW_CONSOLE=true` (staging). Local/dev `MAIL_DRIVER=console` stays valid without `RESEND_API_KEY`. SMTP (`MAIL_DRIVER=smtp` + `SMTP_*`) remains in code for local/legacy use and is unused when the driver is `resend`. Never log `RESEND_API_KEY`, `SMTP_PASSWORD`, reset tokens, or verification codes. Never set `RESEND_API_KEY` as `NEXT_PUBLIC_*`.
 - `STORAGE_DRIVER=s3` + S3_* for durable media (R2/S3) — recommended before any domain move
 - `TRANSLATION_PROVIDER=openai` + `OPENAI_API_KEY` for chat translation
 - `GOOGLE_MAPS_API_KEY` for product origin place autocomplete (Places API New; settlements only)

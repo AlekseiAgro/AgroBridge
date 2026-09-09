@@ -1,4 +1,4 @@
-export type MailDriver = 'console' | 'smtp';
+export type MailDriver = 'console' | 'smtp' | 'resend';
 
 export type EnvReader = {
   get(key: string): string | undefined;
@@ -21,13 +21,22 @@ export type SmtpMailSettings = {
   password: string;
 };
 
-export type MailSettings = ConsoleMailSettings | SmtpMailSettings;
+export type ResendMailSettings = {
+  driver: 'resend';
+  from: string;
+  redactBodies: boolean;
+  apiKey: string;
+};
+
+export type MailSettings = ConsoleMailSettings | SmtpMailSettings | ResendMailSettings;
 
 export const SMTP_CONNECTION_TIMEOUT_MS = 10_000;
 export const SMTP_GREETING_TIMEOUT_MS = 10_000;
 export const SMTP_SOCKET_TIMEOUT_MS = 20_000;
-export const SMTP_SEND_ATTEMPTS = 3;
-export const SMTP_RETRY_DELAYS_MS = [200, 800] as const;
+export const MAIL_SEND_ATTEMPTS = 3;
+export const MAIL_RETRY_DELAYS_MS = [200, 800] as const;
+export const SMTP_SEND_ATTEMPTS = MAIL_SEND_ATTEMPTS;
+export const SMTP_RETRY_DELAYS_MS = MAIL_RETRY_DELAYS_MS;
 
 export const MAIL_UNAVAILABLE_CLIENT_MESSAGE = 'Could not send the email. Please try again later.';
 
@@ -45,8 +54,9 @@ const TRANSIENT_SMTP_CODES = new Set([
 const TRANSIENT_RESPONSE_CODES = new Set([421, 450, 451, 452]);
 
 /**
- * Reads mail settings from the environment. `MAIL_DRIVER=smtp` never falls back to console:
- * missing host, port, credentials or From fail startup with a message that contains no secrets.
+ * Reads mail settings from the environment. `MAIL_DRIVER=smtp` and `MAIL_DRIVER=resend`
+ * never fall back to console: missing required values fail startup with a message that
+ * contains no secrets.
  */
 export function resolveMailConfig(config: EnvReader): MailSettings {
   const nodeEnv = readString(config, 'NODE_ENV');
@@ -57,12 +67,16 @@ export function resolveMailConfig(config: EnvReader): MailSettings {
     // Production must deliver mail. Staging may keep console only with an explicit override.
     if (nodeEnv === 'production' && !parseFlag(readString(config, 'MAIL_ALLOW_CONSOLE'))) {
       throw new Error(
-        'MAIL_DRIVER=console is not allowed when NODE_ENV=production; set MAIL_DRIVER=smtp or MAIL_ALLOW_CONSOLE=true for staging',
+        'MAIL_DRIVER=console is not allowed when NODE_ENV=production; set MAIL_DRIVER=resend or smtp, or MAIL_ALLOW_CONSOLE=true for staging',
       );
     }
     const from = readString(config, 'MAIL_FROM') || DEFAULT_CONSOLE_FROM;
     assertSafeFrom(from);
     return { driver, from, redactBodies };
+  }
+
+  if (driver === 'resend') {
+    return resolveResendConfig(config, redactBodies);
   }
 
   const host = readString(config, 'SMTP_HOST');
@@ -110,6 +124,9 @@ export function describeMailConfig(settings: MailSettings): string {
       ? 'Mail driver: console (emails logged without bodies)'
       : 'Mail driver: console (emails logged, not sent)';
   }
+  if (settings.driver === 'resend') {
+    return 'Mail driver: resend';
+  }
   return `Mail driver: smtp host=${settings.host} port=${settings.port} secure=${settings.secure}`;
 }
 
@@ -123,8 +140,9 @@ export function sanitizeMailError(error: unknown, secrets: string[] = []): strin
     }
   }
   text = text.replace(/\/\/[^/\s]+:[^@/\s]+@/g, '//***:***@');
+  text = text.replace(/\bBearer\s+\S+/gi, 'Bearer ***');
   text = text.replace(
-    /\b(pass(?:word)?|smtp_password|api[_-]?key|authorization|bearer)\s*[=:]\s*\S+/gi,
+    /\b(pass(?:word)?|smtp_password|resend_api_key|api[_-]?key|authorization|bearer)\s*[=:]\s*\S+/gi,
     '$1=***',
   );
   text = text.replace(/([?&](?:token|code)=)[^&\s"'<>]+/gi, '$1***');
@@ -147,15 +165,30 @@ export function isTransientSmtpError(error: unknown): boolean {
   return TRANSIENT_RESPONSE_CODES.has(responseCode);
 }
 
+function resolveResendConfig(config: EnvReader, redactBodies: boolean): ResendMailSettings {
+  const from = readString(config, 'MAIL_FROM');
+  if (!from) {
+    throw new Error('MAIL_DRIVER=resend requires MAIL_FROM');
+  }
+  assertSafeFrom(from);
+
+  const apiKey = readString(config, 'RESEND_API_KEY');
+  if (!apiKey) {
+    throw new Error('MAIL_DRIVER=resend requires RESEND_API_KEY');
+  }
+
+  return { driver: 'resend', from, redactBodies, apiKey };
+}
+
 function parseDriver(raw: string): MailDriver {
   if (!raw) {
     return 'console';
   }
   const normalized = raw.toLowerCase();
-  if (normalized === 'console' || normalized === 'smtp') {
+  if (normalized === 'console' || normalized === 'smtp' || normalized === 'resend') {
     return normalized;
   }
-  throw new Error('MAIL_DRIVER must be console or smtp');
+  throw new Error('MAIL_DRIVER must be console, smtp, or resend');
 }
 
 function parseFlag(raw: string): boolean {
