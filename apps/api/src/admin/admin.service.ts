@@ -35,6 +35,7 @@ import { ProductsService } from '../products/products.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { VerificationService } from '../verification/verification.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { farmDocumentFileUrl } from '../farms/farm-document-url';
 import { BlockUserDto, RejectProductDto, ReviewNoteDto, UpdateCategoryDto } from './dto/admin.dto';
 
 const productOwnerInclude = {
@@ -797,7 +798,6 @@ export class AdminService {
     farmId: string;
     title: string;
     fileName: string;
-    url: string;
     mimeType: string;
     kind: FarmDocument['kind'];
     reviewStatus: DocumentReviewStatus;
@@ -810,7 +810,7 @@ export class AdminService {
       farmId: doc.farmId,
       title: doc.title,
       fileName: doc.fileName,
-      url: doc.url,
+      url: farmDocumentFileUrl(doc.id),
       mimeType: doc.mimeType,
       kind: doc.kind,
       reviewStatus: doc.reviewStatus,
