@@ -73,9 +73,34 @@ const SPECS = {
     windowSec: HOUR,
     maxLimit: 100,
   },
+  passwordResetRequestPerEmail: {
+    prefix: 'RATE_LIMIT_PASSWORD_RESET',
+    limit: 3,
+    windowSec: HOUR,
+    maxLimit: 20,
+  },
+  passwordResetRequestPerIp: {
+    prefix: 'RATE_LIMIT_PASSWORD_RESET_IP',
+    limit: 10,
+    windowSec: HOUR,
+    maxLimit: 200,
+  },
+  passwordResetConsumePerIp: {
+    prefix: 'RATE_LIMIT_PASSWORD_RESET_CONSUME',
+    limit: 30,
+    windowSec: 15 * MINUTE,
+    maxLimit: 500,
+  },
+  passwordChangePerAccount: {
+    prefix: 'RATE_LIMIT_PASSWORD_CHANGE',
+    limit: 5,
+    windowSec: 15 * MINUTE,
+    maxLimit: 50,
+  },
 } satisfies Record<string, PolicySpec>;
 
 const CODE_SEND_COOLDOWN_SEC_DEFAULT = 60;
+const PASSWORD_RESET_REQUEST_COOLDOWN_SEC_DEFAULT = 60;
 const CODE_MAX_ATTEMPTS_DEFAULT = 5;
 /** A six-digit code must never tolerate many guesses, whatever the environment says. */
 const CODE_MAX_ATTEMPTS_CEILING = 10;
@@ -87,6 +112,8 @@ export class RateLimitConfig {
   private readonly policies: Record<PolicyName, RateLimitPolicy>;
   /** Minimum delay between two verification codes for the same account. */
   readonly codeSendCooldown: RateLimitPolicy;
+  /** Minimum delay between two password-reset emails for the same address. */
+  readonly passwordResetRequestCooldown: RateLimitPolicy;
   /** Failed guesses tolerated by a single verification challenge before it dies. */
   readonly codeMaxAttempts: number;
 
@@ -102,6 +129,13 @@ export class RateLimitConfig {
       HOUR,
     );
     this.codeSendCooldown = { limit: 1, windowMs: cooldownSec * 1000 };
+    const resetCooldownSec = this.readInt(
+      'RATE_LIMIT_PASSWORD_RESET_COOLDOWN_SEC',
+      PASSWORD_RESET_REQUEST_COOLDOWN_SEC_DEFAULT,
+      1,
+      HOUR,
+    );
+    this.passwordResetRequestCooldown = { limit: 1, windowMs: resetCooldownSec * 1000 };
     this.codeMaxAttempts = this.readInt(
       'RATE_LIMIT_CODE_MAX_ATTEMPTS',
       CODE_MAX_ATTEMPTS_DEFAULT,
@@ -121,6 +155,9 @@ export class RateLimitConfig {
       return `${name}=${policy.limit}/${Math.round(policy.windowMs / 1000)}s`;
     });
     parts.push(`codeSendCooldown=${Math.round(this.codeSendCooldown.windowMs / 1000)}s`);
+    parts.push(
+      `passwordResetRequestCooldown=${Math.round(this.passwordResetRequestCooldown.windowMs / 1000)}s`,
+    );
     parts.push(`codeMaxAttempts=${this.codeMaxAttempts}`);
     return parts.join(' ');
   }

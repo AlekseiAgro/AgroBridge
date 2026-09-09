@@ -30,6 +30,7 @@ export type EmailTemplateKey =
   | 'verificationCode'
   | 'accountDeletionCode'
   | 'emailChangeCode'
+  | 'passwordReset'
   | 'harvestAvailable'
   | 'harvestPreorderOpen'
   | 'chatMessage';

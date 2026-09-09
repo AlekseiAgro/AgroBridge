@@ -56,7 +56,28 @@
     },
     "dualCapabilityHint": "Con una sola cuenta puedes vender productos y publicar solicitudes de compra. Elige cómo quieres empezar principalmente.",
     "registerEmailVerifyHint": "Tras registrarte enviamos un código de confirmación. La cuenta se abre cuando verifiques el correo.",
-    "roleHint": "Elige vendedor o comprador. Lo usamos para estadísticas de registro."
+    "roleHint": "Elige vendedor o comprador. Lo usamos para estadísticas de registro.",
+    "forgotPassword": "¿Olvidaste la contraseña?",
+    "forgotPasswordTitle": "Restablecer contraseña",
+    "forgotPasswordSubtitle": "Introduce el correo de tu cuenta AgroBridge.",
+    "forgotPasswordSubmit": "Enviar instrucciones",
+    "forgotPasswordSent": "Si existe una cuenta para este correo, hemos enviado las instrucciones.",
+    "resetPasswordTitle": "Elige una nueva contraseña",
+    "resetPasswordSubtitle": "Introduce una nueva contraseña para tu cuenta.",
+    "resetPasswordSubmit": "Guardar contraseña",
+    "resetPasswordSuccess": "Tu contraseña se ha actualizado. Inicia sesión con la nueva.",
+    "resetPasswordInvalid": "Este enlace no es válido o ha caducado. Solicita uno nuevo.",
+    "resetPasswordMissingToken": "Este enlace está incompleto. Solicita uno nuevo desde la página de acceso.",
+    "changePasswordTitle": "Cambiar contraseña",
+    "changePasswordHint": "Introduce tu contraseña actual y una nueva. Las demás sesiones se cerrarán.",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "confirmNewPassword": "Confirmar nueva contraseña",
+    "changePasswordSubmit": "Actualizar contraseña",
+    "passwordChanged": "Contraseña actualizada. Las demás sesiones se han cerrado.",
+    "passwordMismatch": "Las nuevas contraseñas no coinciden.",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
+    "backToLogin": "Volver al inicio de sesión"
   },
   "account": {
     "title": "Tu cuenta",
@@ -798,7 +819,8 @@
       "buyerRatingPending": "El comprador aún no ha valorado.",
       "sellerRatingPending": "El vendedor aún no ha valorado.",
       "noComment": "Sin reseña escrita."
-    }
+    },
+    "securityTitle": "Seguridad"
   },
   "rating": {
     "title": "Valora a tu partner",

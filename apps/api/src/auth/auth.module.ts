@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { EmailVerifiedGuard } from './email-verified.guard';
 import { JwtStrategy } from './jwt.strategy';
+import { PasswordResetService } from './password-reset.service';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { JwtStrategy } from './jwt.strategy';
     VerificationModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, EmailVerifiedGuard],
+  providers: [AuthService, PasswordResetService, JwtStrategy, EmailVerifiedGuard],
   exports: [AuthService, JwtModule, PassportModule, EmailVerifiedGuard],
 })
 export class AuthModule {}

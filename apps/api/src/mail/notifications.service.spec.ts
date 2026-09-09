@@ -113,4 +113,27 @@ describe('NotificationsService', () => {
       'http://localhost:3000/ru/dashboard/chat/c1',
     );
   });
+
+  it('builds password-reset links from WEB_PUBLIC_URL, not the request host', async () => {
+    await service.notifyPasswordReset({
+      email: 'farmer@example.com',
+      locale: 'ka',
+      displayName: 'Nino',
+      rawToken: 'opaque-reset-token',
+      expiresMinutes: 30,
+    });
+
+    const text = mail.send.mock.calls[0][0].text as string;
+    expect(mail.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'farmer@example.com',
+        subject: expect.stringContaining('AgroBridge'),
+      }),
+    );
+    expect(text).toContain(
+      'http://localhost:3000/ka/reset-password?token=opaque-reset-token',
+    );
+    expect(text).toContain('30');
+    expect(text).not.toContain('evil.example');
+  });
 });
