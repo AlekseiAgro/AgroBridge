@@ -6,7 +6,12 @@ export const STORAGE_DRIVER = {
 export type StorageDriver =
   (typeof STORAGE_DRIVER)[keyof typeof STORAGE_DRIVER];
 
-/** Whether an object may be addressed by a public `/api/uploads` or CDN URL. */
+/**
+ * Whether an object may be addressed by a public URL.
+ * Local public media uses `/api/uploads/{key}`.
+ * S3/R2 public media uses `STORAGE_PUBLIC_BASE_URL/{key}` in a public bucket.
+ * Private farm documents never receive a public URL.
+ */
 export const STORAGE_VISIBILITY = {
   PUBLIC: 'public',
   PRIVATE: 'private',

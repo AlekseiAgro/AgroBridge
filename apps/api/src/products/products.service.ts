@@ -905,6 +905,8 @@ export class ProductsService {
       mimeType: file.mimetype,
       originalName: file.originalname || 'certificate',
       folder: `products/${product.id}/certificates`,
+      // Existing policy (not redesigned here): product certificates are public media,
+      // unlike private farm verification documents.
       visibility: 'public',
     });
 

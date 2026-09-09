@@ -1,4 +1,5 @@
 import {
+  isFarmVerificationObjectUrl,
   isLegacyFarmDocumentUploadUrl,
   toPublicMediaUrl,
 } from '../../../web/src/lib/public-media-url';
@@ -29,7 +30,27 @@ describe('toPublicMediaUrl', () => {
 
   it('does not prefix a private storage key as /api/uploads', () => {
     const key = 'farms/farm1/documents/abc.pdf';
-    expect(toPublicMediaUrl(key)).toBe(key);
+    expect(isFarmVerificationObjectUrl(key)).toBe(true);
+    expect(toPublicMediaUrl(key)).toBe('');
     expect(toPublicMediaUrl(key)).not.toContain('/api/uploads/');
+  });
+
+  it('leaves CDN/R2 public media URLs unchanged so they skip /api/uploads', () => {
+    expect(toPublicMediaUrl('https://cdn.example.com/farms/farm1/photos/a.jpg')).toBe(
+      'https://cdn.example.com/farms/farm1/photos/a.jpg',
+    );
+    expect(toPublicMediaUrl('https://cdn.example.com/products/p1/a.jpg')).toBe(
+      'https://cdn.example.com/products/p1/a.jpg',
+    );
+    expect(toPublicMediaUrl('https://cdn.example.com/products/p1/videos/v.bin')).toBe(
+      'https://cdn.example.com/products/p1/videos/v.bin',
+    );
+    expect(toPublicMediaUrl('https://cdn.example.com/users/u1/a.webp')).toBe(
+      'https://cdn.example.com/users/u1/a.webp',
+    );
+  });
+
+  it('does not expose farm verification objects as public CDN media', () => {
+    expect(toPublicMediaUrl('https://cdn.example.com/farms/farm1/documents/abc.pdf')).toBe('');
   });
 });
