@@ -1,14 +1,9 @@
 import type { ProductCategory, ProductImage } from '@agrobridge/shared';
 import { isProductCategory } from '@agrobridge/shared';
 import { CATEGORY_MEDIA } from '@/lib/category-media';
+import { toPublicMediaUrl } from '@/lib/public-media-url';
 
-export function toPublicMediaUrl(url: string): string {
-  const match = url.match(/\/api\/uploads\/.+$/);
-  if (match) {
-    return match[0];
-  }
-  return url;
-}
+export { isLegacyFarmDocumentUploadUrl, toPublicMediaUrl } from '@/lib/public-media-url';
 
 export function getPrimaryProductImage(
   images: ProductImage[] | undefined | null,
