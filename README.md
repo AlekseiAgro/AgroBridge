@@ -151,7 +151,7 @@ Transactional emails (locale-aware templates: ka/en/ru/de/fr/it/es):
 Drivers:
 
 - `MAIL_DRIVER=console` (default) — logs emails in the API console
-- `MAIL_DRIVER=smtp` — send via SMTP (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM`)
+- `MAIL_DRIVER=smtp` — send via SMTP (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM`). Incomplete smtp config fails startup; there is no fallback to console.
 - Links use `WEB_PUBLIC_URL`
 
 Chat messages email the recipient (skipped if they recently opened the thread).

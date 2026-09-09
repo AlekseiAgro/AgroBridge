@@ -32,6 +32,23 @@ describe('NotificationsService', () => {
     );
   });
 
+  it('sends verification through the mail abstraction with a UTF-8 subject', async () => {
+    await service.notifyVerificationCode({
+      user: { email: 'farmer@example.com', locale: 'ka', displayName: 'ნინო' },
+      code: '123456',
+      channel: 'email',
+    });
+
+    expect(mail.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'farmer@example.com',
+        subject: 'AgroBridge-ის ვერიფიკაციის კოდი',
+        text: expect.stringContaining('123456'),
+      }),
+    );
+    expect(mail.send.mock.calls[0][0].text).toContain('ნინო');
+  });
+
   it('sends a localized welcome email', async () => {
     await service.notifyWelcome({
       email: 'farmer@example.com',

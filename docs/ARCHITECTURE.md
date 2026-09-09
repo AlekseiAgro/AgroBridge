@@ -86,9 +86,11 @@
 
 - `MailModule` provides `MailService` + `NotificationsService` (global).
 - Drivers: `console` (dev/default) or `smtp` via nodemailer.
+- `MAIL_DRIVER=smtp` requires `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `MAIL_FROM` at boot. Missing values fail startup; the service never falls back to console.
+- SMTP uses TLS 1.2+, STARTTLS on 587 / SMTPS on 465, 10–20s timeouts, and a few retries on transient errors only.
 - Templates are locale-aware (`ka|en|ru|de|fr|it|es`) with English fallback.
 - Events: welcome, RFQ lifecycle, product moderation (pending → admins; approved/rejected → farmer).
-- Failures are logged and never block the primary API action.
+- Template notifications (welcome, RFQ, harvest, chat, …) log delivery failures and do not fail the API action. Verification, email-change and account-deletion codes fail closed with a generic 503 that never includes SMTP details.
 - Chat messages email the recipient via `notifyChatMessage` (fire-and-forget; skipped if the peer opened the thread within the last 2 minutes).
 
 ## Out of scope for early MVP

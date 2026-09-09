@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 import { RateLimitExceededException } from '../rate-limit/rate-limit-exceeded.exception';
 import { VerificationService } from './verification.service';
 
@@ -103,6 +103,29 @@ describe('VerificationService', () => {
       destination: 'farmer@example.com',
       ip: '203.0.113.7',
     });
+  });
+
+  it('does not leak SMTP details when verification mail cannot be delivered', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      locale: 'en',
+      displayName: 'Farmer',
+      emailVerifiedAt: null,
+      phone: null,
+      phoneVerifiedAt: null,
+      sellerType: 'privateFarmer',
+    });
+    notifications.notifyVerificationCode.mockRejectedValue(
+      new Error('Invalid login SMTP_PASSWORD=s3cret-token-value'),
+    );
+
+    const error = await service.sendEmailCode(farmer, '203.0.113.7').catch((err: unknown) => err);
+    expect(error).toBeInstanceOf(ServiceUnavailableException);
+    const message = error instanceof Error ? error.message : String(error);
+    expect(message).not.toContain('s3cret-token-value');
+    expect(message).not.toContain('SMTP_PASSWORD');
+    expect(message).toContain('Please try again later');
   });
 
   it('rejects invalid phone numbers', async () => {

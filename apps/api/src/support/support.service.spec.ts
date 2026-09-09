@@ -38,6 +38,26 @@ describe('SupportService', () => {
     );
   });
 
+  it('escapes user-controlled HTML in the support message body', async () => {
+    const { service, send } = buildService();
+
+    await service.submit(
+      {
+        name: '<script>alert(1)</script>',
+        email: 'nino@example.com',
+        subject: '<img src=x>',
+        message: '<b>hello</b>',
+      },
+      '203.0.113.10',
+    );
+
+    const payload = send.mock.calls[0][0] as { html: string };
+    expect(payload.html).not.toContain('<script>');
+    expect(payload.html).not.toContain('<img');
+    expect(payload.html).not.toContain('<b>hello</b>');
+    expect(payload.html).toContain('&lt;script&gt;');
+  });
+
   it('throttles repeated submissions from one address', async () => {
     const { service, send } = buildService({ RATE_LIMIT_SUPPORT_IP_MAX: '3' });
 
