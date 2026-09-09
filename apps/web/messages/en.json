@@ -56,7 +56,28 @@
     },
     "dualCapabilityHint": "One account can both sell products and post purchase requests. Pick how you mainly start.",
     "registerEmailVerifyHint": "After sign-up we email a confirmation code. You can open your account once the address is verified.",
-    "roleHint": "Choose seller or buyer. We use this for registration statistics."
+    "roleHint": "Choose seller or buyer. We use this for registration statistics.",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordTitle": "Reset your password",
+    "forgotPasswordSubtitle": "Enter the email address for your AgroBridge account.",
+    "forgotPasswordSubmit": "Send reset instructions",
+    "forgotPasswordSent": "If an account exists for this email, we have sent reset instructions.",
+    "resetPasswordTitle": "Choose a new password",
+    "resetPasswordSubtitle": "Enter a new password for your account.",
+    "resetPasswordSubmit": "Set new password",
+    "resetPasswordSuccess": "Your password has been updated. Sign in with your new password.",
+    "resetPasswordInvalid": "This reset link is invalid or has expired. Request a new one.",
+    "resetPasswordMissingToken": "This reset link is incomplete. Request a new one from the login page.",
+    "changePasswordTitle": "Change password",
+    "changePasswordHint": "Enter your current password and a new one. Other signed-in sessions will be signed out.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "changePasswordSubmit": "Update password",
+    "passwordChanged": "Password updated. Other sessions have been signed out.",
+    "passwordMismatch": "The new passwords do not match.",
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "backToLogin": "Back to log in"
   },
   "account": {
     "title": "Your account",
@@ -798,7 +819,8 @@
       "buyerRatingPending": "The buyer has not left a rating yet.",
       "sellerRatingPending": "The seller has not left a rating yet.",
       "noComment": "No written review."
-    }
+    },
+    "securityTitle": "Security"
   },
   "rating": {
     "title": "Rate your partner",

@@ -6,7 +6,12 @@ import type {
   SellerType,
 } from '@agrobridge/shared';
 import { DEFAULT_LOCALE, isLocale, isRegisterableRole } from '@agrobridge/shared';
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -23,6 +28,7 @@ import { RateLimitService, type RateLimitRequest } from '../rate-limit/rate-limi
 import { VerificationService } from '../verification/verification.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import type { AuthenticatedUser, JwtPayload } from './auth.types';
 
 @Injectable()
@@ -80,7 +86,7 @@ export class AuthService {
 
     void this.verification.sendEmailCode(authUser, ip).catch(() => undefined);
 
-    return this.issueToken(authUser);
+    return this.issueToken(authUser, 0);
   }
 
   async login(dto: LoginDto, ip?: string | null): Promise<AuthTokenResponse> {
@@ -112,7 +118,7 @@ export class AuthService {
     // own must not buy them a fresh spraying budget.
     await this.rateLimit.reset([accountRule]);
 
-    return this.issueToken(this.toAuthenticatedUser(user));
+    return this.issueToken(this.toAuthenticatedUser(user), user.authVersion ?? 0);
   }
 
   /**
@@ -159,12 +165,56 @@ export class AuthService {
     return this.toPublicUser(this.toAuthenticatedUser(user));
   }
 
-  private async issueToken(user: AuthenticatedUser): Promise<AuthTokenResponse> {
+  async changePassword(userId: string, dto: ChangePasswordDto): Promise<AuthTokenResponse> {
+    const accountRule: RateLimitRequest = {
+      action: 'auth.password-change.account',
+      scope: { account: userId },
+      ...this.rateLimit.limits.policy('passwordChangePerAccount'),
+    };
+    await this.rateLimit.consume([accountRule]);
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.passwordHash) {
+      throw new UnauthorizedException('Incorrect password');
+    }
+
+    const valid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+    if (!valid) {
+      throw new UnauthorizedException('Incorrect password');
+    }
+
+    if (dto.currentPassword === dto.newPassword) {
+      throw new BadRequestException('Choose a different password');
+    }
+
+    const passwordHash = await bcrypt.hash(dto.newPassword, 12);
+    const now = new Date();
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const next = await tx.user.update({
+        where: { id: userId },
+        data: {
+          passwordHash,
+          authVersion: { increment: 1 },
+        },
+      });
+      await tx.passwordResetToken.updateMany({
+        where: { userId, consumedAt: null, invalidatedAt: null },
+        data: { invalidatedAt: now },
+      });
+      return next;
+    });
+
+    await this.rateLimit.reset([accountRule]);
+    return this.issueToken(this.toAuthenticatedUser(updated), updated.authVersion);
+  }
+
+  private async issueToken(user: AuthenticatedUser, authVersion = 0): Promise<AuthTokenResponse> {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       role: user.role,
       locale: user.locale,
+      ver: authVersion,
     };
 
     const expiresIn = this.config.get<string>('JWT_EXPIRES_SECONDS') ?? String(60 * 60 * 24 * 7);

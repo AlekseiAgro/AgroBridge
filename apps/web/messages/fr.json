@@ -56,7 +56,28 @@
     },
     "dualCapabilityHint": "Un seul compte permet de vendre des produits et de publier des demandes d’achat. Choisissez surtout par où commencer.",
     "registerEmailVerifyHint": "Après l’inscription, nous envoyons un code de confirmation. Le compte s’ouvre une fois l’e-mail vérifié.",
-    "roleHint": "Choisissez vendeur ou acheteur. Nous utilisons ce choix pour les statistiques d’inscription."
+    "roleHint": "Choisissez vendeur ou acheteur. Nous utilisons ce choix pour les statistiques d’inscription.",
+    "forgotPassword": "Mot de passe oublié ?",
+    "forgotPasswordTitle": "Réinitialiser le mot de passe",
+    "forgotPasswordSubtitle": "Saisissez l’adresse e-mail de votre compte AgroBridge.",
+    "forgotPasswordSubmit": "Envoyer les instructions",
+    "forgotPasswordSent": "Si un compte existe pour cet e-mail, nous avons envoyé les instructions.",
+    "resetPasswordTitle": "Choisir un nouveau mot de passe",
+    "resetPasswordSubtitle": "Saisissez un nouveau mot de passe pour votre compte.",
+    "resetPasswordSubmit": "Enregistrer le mot de passe",
+    "resetPasswordSuccess": "Votre mot de passe a été mis à jour. Connectez-vous avec le nouveau.",
+    "resetPasswordInvalid": "Ce lien est invalide ou a expiré. Demandez-en un nouveau.",
+    "resetPasswordMissingToken": "Ce lien est incomplet. Demandez-en un nouveau depuis la page de connexion.",
+    "changePasswordTitle": "Changer le mot de passe",
+    "changePasswordHint": "Saisissez votre mot de passe actuel et un nouveau. Les autres sessions seront déconnectées.",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "changePasswordSubmit": "Mettre à jour le mot de passe",
+    "passwordChanged": "Mot de passe mis à jour. Les autres sessions ont été déconnectées.",
+    "passwordMismatch": "Les nouveaux mots de passe ne correspondent pas.",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+    "backToLogin": "Retour à la connexion"
   },
   "account": {
     "title": "Votre compte",
@@ -798,7 +819,8 @@
       "buyerRatingPending": "L’acheteur n’a pas encore noté.",
       "sellerRatingPending": "Le vendeur n’a pas encore noté.",
       "noComment": "Pas d’avis écrit."
-    }
+    },
+    "securityTitle": "Sécurité"
   },
   "rating": {
     "title": "Noter votre partenaire",

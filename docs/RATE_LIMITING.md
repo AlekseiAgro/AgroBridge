@@ -118,6 +118,11 @@ locked out, while automated guessing dies immediately. Windows are fixed, not sl
 | Failed guesses per verification challenge | 5 | the challenge row |
 | `POST /api/support` | 5 per 15 min | IP |
 | `POST /api/support` | 10 per hour | normalised email |
+| `POST /api/auth/forgot-password` | 3 per hour | normalised email |
+| `POST /api/auth/forgot-password` | 10 per hour | IP |
+| `POST /api/auth/forgot-password` cooldown | 1 per 60 s | normalised email |
+| `POST /api/auth/reset-password` | 30 per 15 min | IP |
+| `POST /api/auth/change-password` | 5 per 15 min | account |
 
 A successful login clears the IP+email counter; a successful confirmation clears the
 account confirmation counter. The wide per-IP counters are never cleared by a success, so
@@ -141,6 +146,23 @@ hard ceiling, so a typo cannot silently switch a protection off, and
 - Consumption is a conditional update on `consumedAt IS NULL`, so a code can be redeemed
   exactly once even if several requests arrive simultaneously.
 - Codes are compared in constant time.
+
+## Password-reset lifecycle
+
+- Reset credentials are 32-byte cryptographically random opaque tokens (base64url), not
+  six-digit codes. Only SHA-256 of the token is stored; the raw value exists only in the
+  email link built from `WEB_PUBLIC_URL` (never from the request Host header).
+- Tokens live 30 minutes by default (`PASSWORD_RESET_TTL_SEC`) and a new request invalidates
+  any earlier unused token for that account. Postgres also enforces at most one active token
+  per user.
+- Consumption is a single conditional `UPDATE ... WHERE consumedAt IS NULL AND
+  invalidatedAt IS NULL AND expiresAt > NOW()`, so two simultaneous uses cannot both succeed.
+- `POST /auth/forgot-password` always answers `{ ok: true }` whether or not the address has
+  an account. Mail is only sent when a matching user exists, and sending is not awaited on
+  the request path.
+- After a successful reset or authenticated password change, `users.authVersion` is
+  incremented. JWTs carry `ver`; a mismatch fails validation, so previously issued sessions
+  stop working. Blocked users stay blocked; email verification and roles are not changed.
 
 ## Responses
 
@@ -166,6 +188,9 @@ subject and omit the body.
   counter under 25 parallel requests, window reset, persistence across instances.
 - `apps/api/src/verification/verification-code.service.integration.spec.ts` — full code
   lifecycle, attempt cap under 40 parallel guesses, replay, expiry, supersession.
+- `apps/api/src/auth/password-reset.service.integration.spec.ts` — reset-token lifecycle,
+  supersession, expiry, replay, concurrent consumption, JWT invalidation, enumeration-safe
+  responses.
 - `apps/api/src/rate-limit/rate-limit.http.spec.ts` — 429 body/headers and
   `X-Forwarded-For` handling with and without a trusted proxy.
 - `apps/api/src/rate-limit/rate-limit.service.spec.ts`, `.../http/client-ip.spec.ts`,

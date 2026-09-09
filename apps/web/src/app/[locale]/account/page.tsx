@@ -1,6 +1,7 @@
 import type { CabinetOverview } from '@agrobridge/shared';
 import { canTrade } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { ChangePasswordForm } from '@/components/ChangePasswordForm';
 import { ChatUnreadBadge } from '@/components/ChatNavLink';
 import { CabinetShell } from '@/components/CabinetShell';
 import { DeleteAccountButton } from '@/components/DeleteAccountButton';
@@ -143,6 +144,14 @@ export default async function AccountPage({ params }: Props) {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="cabinet-security" aria-labelledby="cabinet-security-title">
+        <h2 id="cabinet-security-title" className="section-title">
+          {t('securityTitle')}
+        </h2>
+        <p className="cabinet-security__hint">{ta('changePasswordHint')}</p>
+        <ChangePasswordForm />
       </section>
 
       {user.role !== 'admin' ? (

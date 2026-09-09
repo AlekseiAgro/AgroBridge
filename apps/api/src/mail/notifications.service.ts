@@ -327,6 +327,29 @@ export class NotificationsService {
     });
   }
 
+  async notifyPasswordReset(params: {
+    email: string;
+    locale: string;
+    displayName: string | null;
+    rawToken: string;
+    expiresMinutes: number;
+  }): Promise<void> {
+    const locale = this.localeOf(params.locale);
+    const link = this.appLink(
+      locale,
+      `/reset-password?token=${encodeURIComponent(params.rawToken)}`,
+    );
+    await this.sendTemplate(
+      { email: params.email, locale, displayName: params.displayName },
+      'passwordReset',
+      {
+        name: this.displayName(params),
+        link,
+        expiresMinutes: String(params.expiresMinutes),
+      },
+    );
+  }
+
   async notifyHarvestAvailable(params: {
     user: MailRecipient & { id: string };
     productId: string;
