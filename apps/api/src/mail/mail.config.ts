@@ -49,10 +49,17 @@ const TRANSIENT_RESPONSE_CODES = new Set([421, 450, 451, 452]);
  * missing host, port, credentials or From fail startup with a message that contains no secrets.
  */
 export function resolveMailConfig(config: EnvReader): MailSettings {
-  const redactBodies = readString(config, 'NODE_ENV') === 'production';
+  const nodeEnv = readString(config, 'NODE_ENV');
+  const redactBodies = nodeEnv === 'production';
   const driver = parseDriver(readString(config, 'MAIL_DRIVER'));
 
   if (driver === 'console') {
+    // Production must deliver mail. Staging may keep console only with an explicit override.
+    if (nodeEnv === 'production' && !parseFlag(readString(config, 'MAIL_ALLOW_CONSOLE'))) {
+      throw new Error(
+        'MAIL_DRIVER=console is not allowed when NODE_ENV=production; set MAIL_DRIVER=smtp or MAIL_ALLOW_CONSOLE=true for staging',
+      );
+    }
     const from = readString(config, 'MAIL_FROM') || DEFAULT_CONSOLE_FROM;
     assertSafeFrom(from);
     return { driver, from, redactBodies };
@@ -149,6 +156,11 @@ function parseDriver(raw: string): MailDriver {
     return normalized;
   }
   throw new Error('MAIL_DRIVER must be console or smtp');
+}
+
+function parseFlag(raw: string): boolean {
+  const normalized = raw.toLowerCase();
+  return normalized === 'true' || normalized === '1';
 }
 
 function parseSecure(raw: string, port: number): boolean {

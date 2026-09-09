@@ -64,17 +64,16 @@ JWT_EXPIRES_SECONDS=604800
 # the public API domain choose their own rate-limit identity. See docs/RATE_LIMITING.md.
 # TRUST_PROXY=loopback,linklocal,uniquelocal
 SUPPORT_EMAIL=gabo.m0619@gmail.com
-# Local/dev default. Production must set MAIL_DRIVER=smtp with SMTP_HOST, SMTP_PORT,
-# SMTP_USER, SMTP_PASSWORD and MAIL_FROM — the API refuses to boot if smtp is incomplete
-# and will not fall back to console.
-MAIL_DRIVER=console
+# NODE_ENV=production + MAIL_DRIVER=console fails boot (no silent logged-only mail).
+# Staging console: MAIL_ALLOW_CONSOLE=true. Production: smtp + host/port/user/password/from.
+MAIL_DRIVER=smtp
 MAIL_FROM=AgroBridge <noreply@agrobrid.ge>
-# MAIL_DRIVER=smtp
-# SMTP_HOST=smtp.example.com
-# SMTP_PORT=587
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
 # SMTP_SECURE=false
-# SMTP_USER=
-# SMTP_PASSWORD=
+SMTP_USER=<smtp-user>
+SMTP_PASSWORD=<smtp-password>
+# MAIL_ALLOW_CONSOLE=true
 # Port 465: omit SMTP_SECURE or set true (SMTPS). Port 587: STARTTLS (SMTP_SECURE=false).
 # Broken/slow SMTP previously hung registration until Cloudflare returned HTML 524.
 TRANSLATION_PROVIDER=mock

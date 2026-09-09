@@ -42,8 +42,8 @@ describe('MailService console driver', () => {
     expect(createTransport).not.toHaveBeenCalled();
   });
 
-  it('never prints a verification code in production', async () => {
-    await buildService({ NODE_ENV: 'production' }).send({
+  it('never prints a verification code when console is explicitly allowed in production', async () => {
+    await buildService({ NODE_ENV: 'production', MAIL_ALLOW_CONSOLE: 'true' }).send({
       to: 'farmer@example.com',
       subject: 'Verification code',
       text: 'Your AgroBridge code is 123456',

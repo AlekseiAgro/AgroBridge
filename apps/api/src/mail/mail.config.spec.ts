@@ -25,6 +25,46 @@ describe('resolveMailConfig', () => {
     });
   });
 
+  it('allows console when NODE_ENV is not production', () => {
+    expect(
+      resolveMailConfig(reader({ NODE_ENV: 'development', MAIL_DRIVER: 'console' })).driver,
+    ).toBe('console');
+    expect(resolveMailConfig(reader({ NODE_ENV: 'test', MAIL_DRIVER: 'console' })).driver).toBe(
+      'console',
+    );
+  });
+
+  it('rejects console when NODE_ENV=production', () => {
+    expect(() =>
+      resolveMailConfig(reader({ NODE_ENV: 'production', MAIL_DRIVER: 'console' })),
+    ).toThrow(/not allowed when NODE_ENV=production/);
+  });
+
+  it('allows console in production only with an explicit staging override', () => {
+    expect(
+      resolveMailConfig(
+        reader({ NODE_ENV: 'production', MAIL_DRIVER: 'console', MAIL_ALLOW_CONSOLE: 'true' }),
+      ).driver,
+    ).toBe('console');
+  });
+
+  it('does not mention SMTP credentials in the production-console error', () => {
+    try {
+      resolveMailConfig(
+        reader({
+          NODE_ENV: 'production',
+          MAIL_DRIVER: 'console',
+          SMTP_PASSWORD: 's3cret-token-value',
+        }),
+      );
+      throw new Error('expected resolveMailConfig to throw');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      expect(message).not.toContain('s3cret-token-value');
+      expect(message).not.toContain('SMTP_PASSWORD');
+    }
+  });
+
   it('fails when smtp is selected without SMTP_HOST', () => {
     expect(() =>
       resolveMailConfig(reader({ ...SMTP, SMTP_HOST: '' })),
@@ -62,6 +102,12 @@ describe('resolveMailConfig', () => {
       from: 'AgroBridge <noreply@agrobridge.ge>',
       redactBodies: false,
     });
+  });
+
+  it('accepts smtp when NODE_ENV=production', () => {
+    expect(
+      resolveMailConfig(reader({ ...SMTP, NODE_ENV: 'production' })),
+    ).toMatchObject({ driver: 'smtp', redactBodies: true });
   });
 
   it('defaults secure=true on port 465', () => {
