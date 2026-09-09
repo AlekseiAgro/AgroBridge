@@ -1,6 +1,7 @@
 import type { ProductDetail } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { ProductCertificatesManager } from '@/components/ProductCertificatesManager';
 import { ProductForm } from '@/components/ProductForm';
 import { ProductImagesManager } from '@/components/ProductImagesManager';
 import { ProductVideosManager } from '@/components/ProductVideosManager';
@@ -45,6 +46,10 @@ export default async function EditProductPage({ params }: Props) {
           <>
             <ProductImagesManager productId={product.id} initialImages={product.images} />
             <ProductVideosManager productId={product.id} initialVideos={product.videos} />
+            <ProductCertificatesManager
+              productId={product.id}
+              initialCertificates={product.certificates}
+            />
           </>
         }
       />

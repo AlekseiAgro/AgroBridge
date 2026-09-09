@@ -492,11 +492,12 @@
       "maxReached": "Video limit of {max} reached."
     },
     "certificates": {
-      "title": "Certificates",
-      "subtitle": "Upload PDF or image certificates for buyer trust and moderator review.",
+      "title": "Product certificates",
+      "subtitle": "Upload a PDF or image for moderator review. Buyers only see approved certificates. Up to {max} files.",
       "type": "Certificate type",
       "titleField": "Certificate title",
       "titlePlaceholder": "e.g. GLOBALG.A.P. 2026",
+      "titleRequired": "Enter a certificate title.",
       "file": "PDF or image",
       "fileRequired": "Choose a certificate file.",
       "upload": "Upload certificate",
@@ -505,6 +506,9 @@
       "deleteConfirm": "Delete this certificate?",
       "uploadError": "Could not upload the certificate.",
       "deleteError": "Could not delete the certificate.",
+      "open": "Open",
+      "note": "Moderator note",
+      "maxReached": "A product can have at most {max} certificates.",
       "status": {
         "pending": "Pending review",
         "approved": "Approved",
@@ -1103,7 +1107,7 @@
       "volume": "Complete stock and production volumes",
       "attributes": "Complete product characteristics",
       "packaging": "Add packaging types and weights",
-      "certificates": "Upload a certificate",
+      "certificates": "Add an approved certificate",
       "logistics": "Describe delivery and logistics",
       "pricing": "Add a starting price or pricing terms",
       "farmStory": "Complete your farm story"
