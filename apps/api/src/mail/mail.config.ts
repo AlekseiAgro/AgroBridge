@@ -29,8 +29,7 @@ export const SMTP_SOCKET_TIMEOUT_MS = 20_000;
 export const SMTP_SEND_ATTEMPTS = 3;
 export const SMTP_RETRY_DELAYS_MS = [200, 800] as const;
 
-export const MAIL_UNAVAILABLE_CLIENT_MESSAGE =
-  'Could not send the email. Please try again later.';
+export const MAIL_UNAVAILABLE_CLIENT_MESSAGE = 'Could not send the email. Please try again later.';
 
 const DEFAULT_CONSOLE_FROM = 'AgroBridge <noreply@agrobridge.local>';
 
@@ -133,12 +132,11 @@ export function isTransientSmtpError(error: unknown): boolean {
   if (!error || typeof error !== 'object') {
     return false;
   }
-  const code = 'code' in error ? String((error as { code: unknown }).code) : '';
+  const code = 'code' in error ? String(error.code) : '';
   if (TRANSIENT_SMTP_CODES.has(code)) {
     return true;
   }
-  const responseCode =
-    'responseCode' in error ? Number((error as { responseCode: unknown }).responseCode) : NaN;
+  const responseCode = 'responseCode' in error ? Number(error.responseCode) : NaN;
   return TRANSIENT_RESPONSE_CODES.has(responseCode);
 }
 

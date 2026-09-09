@@ -59,7 +59,6 @@ export class MailService implements OnModuleInit {
     }
 
     const secrets = this.settings.driver === 'smtp' ? [this.settings.password] : [];
-    let lastError: unknown;
 
     for (let attempt = 1; attempt <= SMTP_SEND_ATTEMPTS; attempt += 1) {
       try {
@@ -75,10 +74,8 @@ export class MailService implements OnModuleInit {
         this.logger.log(`SMTP send ok attempt=${attempt}`);
         return;
       } catch (error) {
-        lastError = error;
         const safe = sanitizeMailError(error, secrets);
-        const retry =
-          attempt < SMTP_SEND_ATTEMPTS && isTransientSmtpError(error);
+        const retry = attempt < SMTP_SEND_ATTEMPTS && isTransientSmtpError(error);
         this.logger.error(
           `SMTP send failed attempt=${attempt}/${SMTP_SEND_ATTEMPTS} retry=${retry} to=${message.to} detail=${safe}`,
         );
