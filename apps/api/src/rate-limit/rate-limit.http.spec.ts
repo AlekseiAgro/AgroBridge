@@ -6,6 +6,7 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AuthController } from '../auth/auth.controller';
 import { AuthService } from '../auth/auth.service';
+import { PasswordResetService } from '../auth/password-reset.service';
 import type { MailService } from '../mail/mail.service';
 import { SupportController } from '../support/support.controller';
 import { SupportService } from '../support/support.service';
@@ -47,6 +48,13 @@ async function buildApp(options: {
           { sendEmailCode: jest.fn() } as never,
           rateLimit,
         ),
+      },
+      {
+        provide: PasswordResetService,
+        useValue: {
+          requestReset: jest.fn().mockResolvedValue({ ok: true }),
+          resetPassword: jest.fn().mockResolvedValue({ ok: true }),
+        },
       },
       {
         provide: SupportService,

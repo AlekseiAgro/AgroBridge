@@ -1,4 +1,4 @@
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -11,6 +11,10 @@ describe('AuthService', () => {
     user: {
       findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
+    },
+    passwordResetToken: {
+      updateMany: jest.fn().mockResolvedValue({ count: 0 }),
     },
     rating: {
       aggregate: jest.fn().mockResolvedValue({
@@ -18,6 +22,7 @@ describe('AuthService', () => {
         _count: { _all: 0 },
       }),
     },
+    $transaction: jest.fn(),
   };
 
   const jwtService = {
@@ -52,6 +57,12 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    prisma.$transaction.mockImplementation(async (arg: unknown) => {
+      if (typeof arg === 'function') {
+        return (arg as (tx: typeof prisma) => Promise<unknown>)(prisma);
+      }
+      return undefined;
+    });
     service = buildService();
   });
 
@@ -78,6 +89,13 @@ describe('AuthService', () => {
     });
 
     expect(result.accessToken).toBe('test-token');
+    expect(jwtService.sign).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sub: 'user_1',
+        email: 'farmer@example.com',
+        ver: 0,
+      }),
+    );
     expect(result.user).toEqual({
       id: 'user_1',
       email: 'farmer@example.com',
@@ -330,6 +348,61 @@ describe('AuthService', () => {
       );
 
       await expect(signUp('d@example.com', '192.0.2.2')).resolves.toBeDefined();
+    });
+  });
+
+  describe('changePassword', () => {
+    async function storedUser(password = 'password1', authVersion = 0) {
+      return {
+        id: 'user_1',
+        email: 'farmer@example.com',
+        role: 'farmer' as const,
+        sellerType: null,
+        buyerType: null,
+        locale: 'en',
+        displayName: 'Nino',
+        avatarUrl: null,
+        passwordHash: await bcrypt.hash(password, 4),
+        emailVerifiedAt: new Date(),
+        blockedAt: null,
+        authVersion,
+      };
+    }
+
+    it('rejects the wrong current password', async () => {
+      prisma.user.findUnique.mockResolvedValue(await storedUser());
+      await expect(
+        service.changePassword('user_1', {
+          currentPassword: 'wrongpass',
+          newPassword: 'newpass12',
+        }),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
+
+    it('rejects a new password that matches the current one', async () => {
+      prisma.user.findUnique.mockResolvedValue(await storedUser());
+      await expect(
+        service.changePassword('user_1', {
+          currentPassword: 'password1',
+          newPassword: 'password1',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('issues a JWT with the incremented authVersion', async () => {
+      const user = await storedUser();
+      prisma.user.findUnique.mockResolvedValue(user);
+      prisma.user.update.mockResolvedValue({ ...user, authVersion: 1 });
+
+      const result = await service.changePassword('user_1', {
+        currentPassword: 'password1',
+        newPassword: 'newpass12',
+      });
+
+      expect(result.accessToken).toBe('test-token');
+      expect(jwtService.sign).toHaveBeenCalledWith(expect.objectContaining({ ver: 1 }));
+      expect(prisma.passwordResetToken.updateMany).toHaveBeenCalled();
     });
   });
 });

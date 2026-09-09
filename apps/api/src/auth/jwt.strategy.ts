@@ -38,6 +38,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         emailVerifiedAt: true,
         blockedAt: true,
         blockedReason: true,
+        authVersion: true,
       },
     });
 
@@ -49,6 +50,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException(
         user.blockedReason?.trim() || 'This account has been blocked',
       );
+    }
+
+    const tokenVer =
+      typeof payload.ver === 'number' && Number.isInteger(payload.ver) ? payload.ver : 0;
+    if (tokenVer !== user.authVersion) {
+      throw new UnauthorizedException('Please sign in again.');
     }
 
     return {

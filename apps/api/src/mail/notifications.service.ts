@@ -11,6 +11,7 @@ import {
 } from '@agrobridge/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { renderEmailTemplate } from './email-templates';
+import { sanitizeMailError } from './mail.config';
 import { MailService } from './mail.service';
 import type { MailRecipient } from './mail.types';
 
@@ -327,6 +328,29 @@ export class NotificationsService {
     });
   }
 
+  async notifyPasswordReset(params: {
+    email: string;
+    locale: string;
+    displayName: string | null;
+    rawToken: string;
+    expiresMinutes: number;
+  }): Promise<void> {
+    const locale = this.localeOf(params.locale);
+    const link = this.appLink(
+      locale,
+      `/reset-password?token=${encodeURIComponent(params.rawToken)}`,
+    );
+    await this.sendTemplate(
+      { email: params.email, locale, displayName: params.displayName },
+      'passwordReset',
+      {
+        name: this.displayName(params),
+        link,
+        expiresMinutes: String(params.expiresMinutes),
+      },
+    );
+  }
+
   async notifyHarvestAvailable(params: {
     user: MailRecipient & { id: string };
     productId: string;
@@ -565,9 +589,10 @@ export class NotificationsService {
         text: rendered.text,
       });
     } catch (error) {
+      // Best-effort: do not rethrow. Callers that must fail closed (verification,
+      // email change, deletion) invoke MailService.send directly instead.
       this.logger.error(
-        `Failed to send ${key} email to ${recipient.email}`,
-        error instanceof Error ? error.stack : String(error),
+        `Failed to send ${key} email to ${recipient.email} detail=${sanitizeMailError(error)}`,
       );
     }
   }

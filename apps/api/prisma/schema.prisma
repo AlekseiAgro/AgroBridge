@@ -143,6 +143,8 @@ model User {
   blockedAt        DateTime?
   blockedReason    String?
   blockedById      String?
+  /// Incremented on password reset/change so previously issued JWTs fail validation.
+  authVersion      Int         @default(0)
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
@@ -166,6 +168,7 @@ model User {
   verificationCodes            VerificationCode[]
   harvestWatches               HarvestWatch[]
   notifications                UserNotification[]
+  passwordResetTokens          PasswordResetToken[]
 
   @@index([blockedAt])
   @@index([createdAt])
@@ -305,6 +308,22 @@ model VerificationCode {
 
   @@index([userId, channel, createdAt])
   @@map("verification_codes")
+}
+
+/// One-time password-reset credential. Store SHA-256(token) only — never the raw token.
+model PasswordResetToken {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash     String    @unique
+  expiresAt     DateTime
+  consumedAt    DateTime?
+  invalidatedAt DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
 }
 
 /// Fixed-window counters backing HTTP/action rate limiting. Stored in Postgres so the

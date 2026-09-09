@@ -131,7 +131,24 @@ describe('RateLimitConfig', () => {
     const config = build({});
     expect(config.policy('loginPerAccount')).toEqual({ limit: 5, windowMs: 900_000 });
     expect(config.policy('codeSendPerAccount')).toEqual({ limit: 3, windowMs: 3_600_000 });
+    expect(config.policy('passwordResetRequestPerEmail')).toEqual({
+      limit: 3,
+      windowMs: 3_600_000,
+    });
+    expect(config.policy('passwordResetRequestPerIp')).toEqual({
+      limit: 10,
+      windowMs: 3_600_000,
+    });
+    expect(config.policy('passwordResetConsumePerIp')).toEqual({
+      limit: 30,
+      windowMs: 900_000,
+    });
+    expect(config.policy('passwordChangePerAccount')).toEqual({
+      limit: 5,
+      windowMs: 900_000,
+    });
     expect(config.codeSendCooldown).toEqual({ limit: 1, windowMs: 60_000 });
+    expect(config.passwordResetRequestCooldown).toEqual({ limit: 1, windowMs: 60_000 });
     expect(config.codeMaxAttempts).toBe(5);
   });
 

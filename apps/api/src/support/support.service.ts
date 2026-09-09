@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { SUPPORT_EMAIL, type SupportRequestResponse } from '@agrobridge/shared';
 import { UNKNOWN_IP } from '../http/client-ip';
 import { MailService } from '../mail/mail.service';
+import { sanitizeMailError } from '../mail/mail.config';
 import { RateLimitService } from '../rate-limit/rate-limit.service';
 import type { CreateSupportRequestDto } from './dto/create-support-request.dto';
 
@@ -66,7 +67,7 @@ export class SupportService {
         html,
       });
     } catch (error) {
-      this.logger.error('Failed to send support request email', error);
+      this.logger.error(`Failed to send support request email detail=${sanitizeMailError(error)}`);
       throw error;
     }
 

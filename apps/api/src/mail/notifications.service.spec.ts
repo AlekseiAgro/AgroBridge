@@ -32,6 +32,23 @@ describe('NotificationsService', () => {
     );
   });
 
+  it('sends verification through the mail abstraction with a UTF-8 subject', async () => {
+    await service.notifyVerificationCode({
+      user: { email: 'farmer@example.com', locale: 'ka', displayName: 'ნინო' },
+      code: '123456',
+      channel: 'email',
+    });
+
+    expect(mail.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'farmer@example.com',
+        subject: 'AgroBridge-ის ვერიფიკაციის კოდი',
+        text: expect.stringContaining('123456'),
+      }),
+    );
+    expect(mail.send.mock.calls[0][0].text).toContain('ნინო');
+  });
+
   it('sends a localized welcome email', async () => {
     await service.notifyWelcome({
       email: 'farmer@example.com',
@@ -112,5 +129,28 @@ describe('NotificationsService', () => {
     expect(mail.send.mock.calls[0][0].text).toContain(
       'http://localhost:3000/ru/dashboard/chat/c1',
     );
+  });
+
+  it('builds password-reset links from WEB_PUBLIC_URL, not the request host', async () => {
+    await service.notifyPasswordReset({
+      email: 'farmer@example.com',
+      locale: 'ka',
+      displayName: 'Nino',
+      rawToken: 'opaque-reset-token',
+      expiresMinutes: 30,
+    });
+
+    const text = mail.send.mock.calls[0][0].text as string;
+    expect(mail.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: 'farmer@example.com',
+        subject: expect.stringContaining('AgroBridge'),
+      }),
+    );
+    expect(text).toContain(
+      'http://localhost:3000/ka/reset-password?token=opaque-reset-token',
+    );
+    expect(text).toContain('30');
+    expect(text).not.toContain('evil.example');
   });
 });

@@ -5,6 +5,8 @@ export type JwtPayload = {
   email: string;
   role: UserRole;
   locale: Locale;
+  /** User.authVersion at issue time. Missing on tokens minted before password recovery. */
+  ver?: number;
 };
 
 export type AuthenticatedUser = {
@@ -18,4 +20,3 @@ export type AuthenticatedUser = {
   avatarUrl: string | null;
   emailVerified: boolean;
 };
-

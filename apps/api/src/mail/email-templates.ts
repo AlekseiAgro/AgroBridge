@@ -67,6 +67,10 @@ const en: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Confirm email change on AgroBridge",
     text: "Hello {{name}},\n\nWe received a request to change your AgroBridge login email to {{newEmail}}.\nYour confirmation code is {{code}}.\nIt expires in 10 minutes.\n\nIf you did not request this, ignore this email and keep your current address.\n\n— AgroBridge",
   },
+  passwordReset: {
+    subject: 'Reset your AgroBridge password',
+    text: 'Hello {{name}},\n\nWe received a request to reset the password for your AgroBridge account.\n\nSet a new password using this link (it expires in {{expiresMinutes}} minutes):\n{{link}}\n\nIf you did not request this, you can ignore this email. Your password will stay the same.\n\n— AgroBridge',
+  },
   harvestAvailable: {
     subject: "Harvest update: {{productTitle}} is {{statusLabel}}",
     text: "Hello {{name}},\n\n{{productTitle}} from {{farmName}} is now {{statusLabel}}.\n\nView listing: {{link}}\n\nManage watches from the product page.\n\n— AgroBridge",
@@ -142,6 +146,10 @@ const ru: Record<EmailTemplateKey, EmailTemplate> = {
   emailChangeCode: {
     subject: "Подтверждение смены email на AgroBridge",
     text: "Здравствуйте, {{name}}!\n\nМы получили запрос на смену email входа AgroBridge на {{newEmail}}.\nКод подтверждения: {{code}}.\nОн действует 10 минут.\n\nЕсли это были не вы — проигнорируйте письмо, текущий адрес останется без изменений.\n\n— AgroBridge",
+  },
+  passwordReset: {
+    subject: 'Сброс пароля AgroBridge',
+    text: 'Здравствуйте, {{name}}!\n\nМы получили запрос на сброс пароля вашей учётной записи AgroBridge.\n\nЗадайте новый пароль по этой ссылке (она действует {{expiresMinutes}} мин.):\n{{link}}\n\nЕсли это были не вы — просто проигнорируйте письмо. Пароль не изменится.\n\n— AgroBridge',
   },
   harvestAvailable: {
     subject: "Урожай: {{productTitle}} — {{statusLabel}}",
@@ -219,6 +227,10 @@ const de: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "E-Mail-Änderung bei AgroBridge bestätigen",
     text: "Hallo {{name}},\n\nWir haben eine Anfrage erhalten, Ihre AgroBridge-Login-E-Mail auf {{newEmail}} zu ändern.\nIhr Bestätigungscode lautet {{code}}.\nEr ist 10 Minuten gültig.\n\nWenn Sie das nicht waren, ignorieren Sie diese E-Mail.\n\n— AgroBridge",
   },
+  passwordReset: {
+    subject: 'AgroBridge-Passwort zurücksetzen',
+    text: 'Hallo {{name}},\n\nWir haben eine Anfrage zum Zurücksetzen Ihres AgroBridge-Passworts erhalten.\n\nNeues Passwort festlegen (der Link ist {{expiresMinutes}} Minuten gültig):\n{{link}}\n\nWenn Sie das nicht waren, ignorieren Sie diese E-Mail. Ihr Passwort bleibt unverändert.\n\n— AgroBridge',
+  },
   harvestAvailable: {
     subject: "Ernte-Update: {{productTitle}} ist {{statusLabel}}",
     text: "Hallo {{name}},\n\n{{productTitle}} von {{farmName}} ist jetzt {{statusLabel}}.\n\nAngebot ansehen: {{link}}\n\n— AgroBridge",
@@ -294,6 +306,10 @@ const fr: Record<EmailTemplateKey, EmailTemplate> = {
   emailChangeCode: {
     subject: "Confirmez le changement d’e-mail AgroBridge",
     text: "Bonjour {{name}},\n\nNous avons reçu une demande pour changer votre e-mail de connexion AgroBridge en {{newEmail}}.\nVotre code de confirmation est {{code}}.\nIl expire dans 10 minutes.\n\nSi vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail.\n\n— AgroBridge",
+  },
+  passwordReset: {
+    subject: 'Réinitialisez votre mot de passe AgroBridge',
+    text: 'Bonjour {{name}},\n\nNous avons reçu une demande de réinitialisation du mot de passe de votre compte AgroBridge.\n\nDéfinissez un nouveau mot de passe via ce lien (valable {{expiresMinutes}} minutes) :\n{{link}}\n\nSi vous n’êtes pas à l’origine de cette demande, ignorez cet e-mail. Votre mot de passe restera inchangé.\n\n— AgroBridge',
   },
   harvestAvailable: {
     subject: "Récolte : {{productTitle}} est {{statusLabel}}",
@@ -371,6 +387,10 @@ const it: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Conferma cambio email AgroBridge",
     text: "Ciao {{name}},\n\nAbbiamo ricevuto una richiesta di cambio dell’email di accesso AgroBridge in {{newEmail}}.\nIl codice di conferma è {{code}}.\nScade tra 10 minuti.\n\nSe non sei stato tu, ignora questa email.\n\n— AgroBridge",
   },
+  passwordReset: {
+    subject: 'Reimposta la password AgroBridge',
+    text: 'Ciao {{name}},\n\nAbbiamo ricevuto una richiesta di reimpostazione della password del tuo account AgroBridge.\n\nImposta una nuova password da questo link (scade tra {{expiresMinutes}} minuti):\n{{link}}\n\nSe non sei stato tu, ignora questa email. La password resterà invariata.\n\n— AgroBridge',
+  },
   harvestAvailable: {
     subject: "Raccolto: {{productTitle}} è {{statusLabel}}",
     text: "Ciao {{name}},\n\n{{productTitle}} di {{farmName}} è ora {{statusLabel}}.\n\nVedi l'annuncio: {{link}}\n\n— AgroBridge",
@@ -447,6 +467,10 @@ const es: Record<EmailTemplateKey, EmailTemplate> = {
     subject: "Confirma el cambio de email en AgroBridge",
     text: "Hola {{name}},\n\nRecibimos una solicitud para cambiar tu email de acceso de AgroBridge a {{newEmail}}.\nTu código de confirmación es {{code}}.\nCaduca en 10 minutos.\n\nSi no fuiste tú, ignora este correo.\n\n— AgroBridge",
   },
+  passwordReset: {
+    subject: 'Restablece tu contraseña de AgroBridge',
+    text: 'Hola {{name}},\n\nRecibimos una solicitud para restablecer la contraseña de tu cuenta AgroBridge.\n\nElige una nueva contraseña con este enlace (caduca en {{expiresMinutes}} minutos):\n{{link}}\n\nSi no fuiste tú, ignora este correo. Tu contraseña no cambiará.\n\n— AgroBridge',
+  },
   harvestAvailable: {
     subject: "Cosecha: {{productTitle}} está {{statusLabel}}",
     text: "Hola {{name}},\n\n{{productTitle}} de {{farmName}} ahora está {{statusLabel}}.\n\nVer anuncio: {{link}}\n\n— AgroBridge",
@@ -522,6 +546,10 @@ const ka: Record<EmailTemplateKey, EmailTemplate> = {
   emailChangeCode: {
     subject: "AgroBridge ელფოსტის შეცვლის დადასტურება",
     text: "გამარჯობა {{name}},\n\nმივიღეთ თქვენი AgroBridge შესვლის ელფოსტის {{newEmail}-ზე შეცვლის მოთხოვნა.\nდადასტურების კოდი: {{code}}.\nკოდი მოქმედებს 10 წუთი.\n\nთუ ეს თქვენ არ ყოფილხართ, უბრალოდ დააიგნორეთ ეს წერილი.\n\n— AgroBridge",
+  },
+  passwordReset: {
+    subject: 'AgroBridge პაროლის აღდგენა',
+    text: 'გამარჯობა {{name}},\n\nმივიღეთ თქვენი AgroBridge ანგარიშის პაროლის აღდგენის მოთხოვნა.\n\nახალი პაროლი დააყენეთ ამ ბმულით (მოქმედებს {{expiresMinutes}} წუთი):\n{{link}}\n\nთუ ეს თქვენ არ ყოფილხართ, უბრალოდ დააიგნორეთ ეს წერილი. პაროლი არ შეიცვლება.\n\n— AgroBridge',
   },
   harvestAvailable: {
     subject: "მოსავალი: {{productTitle}} — {{statusLabel}}",

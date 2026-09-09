@@ -7,7 +7,7 @@ import {
 } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
-import { useRouter } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
 import { safeNextPath } from '@/lib/safe-next-path';
 
 type Mode = 'login' | 'register';
@@ -119,6 +119,12 @@ export function AuthForm({ mode, nextPath }: Props) {
           autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
         />
       </label>
+
+      {mode === 'login' ? (
+        <p className="auth-form__forgot">
+          <Link href="/forgot-password">{t('forgotPassword')}</Link>
+        </p>
+      ) : null}
 
       {error ? <p className="form-error">{error}</p> : null}
 
