@@ -288,11 +288,10 @@ describeWithDatabase()('PasswordResetService (database)', () => {
     const login = await auth.login({ email: user.email, password: 'password1' }, '203.0.113.22');
     const oldPayload = decodePayload(login.accessToken);
 
-    const changed = await auth.changePassword(
-      user.id,
-      { currentPassword: 'password1', newPassword: 'changed99' },
-      '203.0.113.22',
-    );
+    const changed = await auth.changePassword(user.id, {
+      currentPassword: 'password1',
+      newPassword: 'changed99',
+    });
     expect(changed.accessToken).toBeDefined();
     expect(JSON.stringify(changed.user)).not.toContain('password');
 
@@ -314,11 +313,10 @@ describeWithDatabase()('PasswordResetService (database)', () => {
     const user = await createUser();
     const before = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
     await expect(
-      auth.changePassword(
-        user.id,
-        { currentPassword: 'wrongpass', newPassword: 'changed99' },
-        '203.0.113.24',
-      ),
+      auth.changePassword(user.id, {
+        currentPassword: 'wrongpass',
+        newPassword: 'changed99',
+      }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
     const after = await prisma.user.findUniqueOrThrow({ where: { id: user.id } });
     expect(after.authVersion).toBe(before.authVersion);

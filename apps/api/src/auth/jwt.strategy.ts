@@ -52,7 +52,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       );
     }
 
-    const tokenVer = typeof payload.ver === 'number' && Number.isInteger(payload.ver) ? payload.ver : 0;
+    const tokenVer =
+      typeof payload.ver === 'number' && Number.isInteger(payload.ver) ? payload.ver : 0;
     if (tokenVer !== user.authVersion) {
       throw new UnauthorizedException('Please sign in again.');
     }

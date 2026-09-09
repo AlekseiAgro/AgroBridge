@@ -106,7 +106,6 @@ describe('PasswordResetService', () => {
     it('caps spraying across many addresses from one IP', async () => {
       const service = buildService({
         RATE_LIMIT_PASSWORD_RESET_IP_MAX: '3',
-        RATE_LIMIT_PASSWORD_RESET_MAX: '50',
       });
       prisma.user.findUnique.mockResolvedValue(null);
 
@@ -122,7 +121,6 @@ describe('PasswordResetService', () => {
     it('does not let rotating IPs bypass the per-email budget', async () => {
       const service = buildService({
         RATE_LIMIT_PASSWORD_RESET_MAX: '1',
-        RATE_LIMIT_PASSWORD_RESET_IP_MAX: '50',
       });
       prisma.user.findUnique.mockResolvedValue(null);
 

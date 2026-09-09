@@ -6,7 +6,12 @@ import type {
   SellerType,
 } from '@agrobridge/shared';
 import { DEFAULT_LOCALE, isLocale, isRegisterableRole } from '@agrobridge/shared';
-import { ConflictException, Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -160,11 +165,7 @@ export class AuthService {
     return this.toPublicUser(this.toAuthenticatedUser(user));
   }
 
-  async changePassword(
-    userId: string,
-    dto: ChangePasswordDto,
-    _ip?: string | null,
-  ): Promise<AuthTokenResponse> {
+  async changePassword(userId: string, dto: ChangePasswordDto): Promise<AuthTokenResponse> {
     const accountRule: RateLimitRequest = {
       action: 'auth.password-change.account',
       scope: { account: userId },
@@ -207,10 +208,7 @@ export class AuthService {
     return this.issueToken(this.toAuthenticatedUser(updated), updated.authVersion);
   }
 
-  private async issueToken(
-    user: AuthenticatedUser,
-    authVersion = 0,
-  ): Promise<AuthTokenResponse> {
+  private async issueToken(user: AuthenticatedUser, authVersion = 0): Promise<AuthTokenResponse> {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,

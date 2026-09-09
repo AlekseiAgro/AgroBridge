@@ -20,4 +20,3 @@ export type AuthenticatedUser = {
   avatarUrl: string | null;
   emailVerified: boolean;
 };
-
