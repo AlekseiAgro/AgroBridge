@@ -1,37 +1,61 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { maskPhoneNumber } from '@agrobridge/shared';
+import {
+  describeSmsConfig,
+  resolveSmsConfig,
+  sanitizeSmsError,
+  type SmsSettings,
+} from './sms.config';
+import { SMS_UNAVAILABLE_CLIENT_MESSAGE, SmsDeliveryError } from './sms.errors';
+import { classifyInfobipFailure, sendInfobipSms } from './infobip-sms';
+import type { SmsMessage } from './sms.types';
 
-export type SmsMessage = {
-  to: string;
-  text: string;
-};
+export type { SmsMessage } from './sms.types';
 
-/**
- * SMS delivery stub. Stage-1 verification uses a console driver by default.
- * Swap to a real provider later without changing call sites.
- */
 @Injectable()
-export class SmsService {
+export class SmsService implements OnModuleInit {
   private readonly logger = new Logger(SmsService.name);
-  private readonly driver: string;
-  private readonly redactBodies: boolean;
+  private readonly settings: SmsSettings;
+  private fetchImpl: typeof fetch = globalThis.fetch.bind(globalThis);
 
   constructor(private readonly config: ConfigService) {
-    this.driver = (this.config.get<string>('SMS_DRIVER') ?? 'console').toLowerCase();
-    // Message bodies contain verification codes, so they stay out of production logs.
-    this.redactBodies = this.config.get<string>('NODE_ENV') === 'production';
+    this.settings = resolveSmsConfig(this.config);
+  }
+
+  onModuleInit() {
+    this.logger.log(describeSmsConfig(this.settings));
   }
 
   async send(message: SmsMessage): Promise<void> {
-    if (this.driver === 'console') {
-      this.logger.log(`[console-sms] to=${message.to} ${this.body(message.text)}`);
+    if (this.settings.driver === 'console') {
+      this.logger.log(
+        `[console-sms] to=${maskPhoneNumber(message.to)} ${this.body(message.text)}`,
+      );
       return;
     }
-    this.logger.warn(`SMS driver "${this.driver}" is not configured; logging instead`);
-    this.logger.log(`[fallback-sms] to=${message.to} ${this.body(message.text)}`);
+
+    try {
+      await sendInfobipSms({
+        settings: this.settings,
+        message,
+        fetchImpl: this.fetchImpl,
+      });
+      this.logger.log(`SMS accepted to=${maskPhoneNumber(message.to)}`);
+    } catch (error) {
+      const classification = classifyInfobipFailure(error);
+      const secrets = this.settings.driver === 'infobip' ? [this.settings.apiKey] : [];
+      this.logger.warn(
+        `SMS delivery failed to=${maskPhoneNumber(message.to)} kind=${classification} ${sanitizeSmsError(error, secrets)}`,
+      );
+      if (error instanceof SmsDeliveryError) {
+        throw error;
+      }
+      throw new SmsDeliveryError('unavailable', SMS_UNAVAILABLE_CLIENT_MESSAGE);
+    }
   }
 
   private body(text: string): string {
-    return this.redactBodies ? '(text omitted)' : `text=${JSON.stringify(text)}`;
+    return this.settings.redactBodies ? '(text omitted)' : `text=${JSON.stringify(text)}`;
   }
 }

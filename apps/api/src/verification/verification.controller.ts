@@ -47,7 +47,7 @@ export class VerificationController {
     @Body() dto: SendSmsCodeDto,
     @ClientIp() ip: string,
   ) {
-    return this.verificationService.sendSmsCode(user, dto.phone, ip);
+    return this.verificationService.sendSmsCode(user, dto.phone, ip, dto.country);
   }
 
   @Post('phone/confirm')

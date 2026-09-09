@@ -215,13 +215,19 @@
         "confirmed": "Email confirmed."
       },
       "phone": {
-        "title": "2. Confirm phone (SMS)",
-        "number": "Phone number",
-        "send": "Send SMS code",
-        "code": "SMS code",
-        "confirm": "Confirm phone",
-        "sent": "SMS code sent to {destination} (logged to API console in demo).",
-        "confirmed": "Phone confirmed."
+        "title": "2. Conferma il telefono (SMS)",
+        "country": "Paese / regione",
+        "number": "Numero di telefono",
+        "placeholder": "555 12 34 56",
+        "hint": "Inserisci il numero nazionale. Il prefisso {code} viene aggiunto automaticamente.",
+        "send": "Invia codice SMS",
+        "code": "Codice SMS",
+        "confirm": "Conferma telefono",
+        "sent": "Codice SMS inviato a {destination}.",
+        "confirmed": "Telefono confermato.",
+        "invalid": "Inserisci un numero di telefono valido per il Paese selezionato.",
+        "unavailable": "Impossibile inviare l’SMS. Riprova più tardi.",
+        "alreadyVerified": "Questo numero di telefono è già confermato."
       },
       "company": {
         "title": "3. Company verification",

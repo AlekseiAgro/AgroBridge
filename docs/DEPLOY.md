@@ -34,6 +34,7 @@ The example is pre-filled for **agrobrid.ge** / **api.agrobrid.ge**. Change secr
 Optional production upgrades:
 
 - `MAIL_DRIVER=resend` plus `RESEND_API_KEY` and `MAIL_FROM` for real email over HTTPS (`POST https://api.resend.com/emails`). Incomplete resend config fails API startup (no silent console fallback). `NODE_ENV=production` also refuses `MAIL_DRIVER=console` unless `MAIL_ALLOW_CONSOLE=true` (staging). Local/dev `MAIL_DRIVER=console` stays valid without `RESEND_API_KEY`. SMTP (`MAIL_DRIVER=smtp` + `SMTP_*`) remains in code for local/legacy use and is unused when the driver is `resend`. Never log `RESEND_API_KEY`, `SMTP_PASSWORD`, reset tokens, or verification codes. Never set `RESEND_API_KEY` as `NEXT_PUBLIC_*`.
+- `SMS_DRIVER=infobip` plus `INFOBIP_API_KEY`, `INFOBIP_BASE_URL`, and `INFOBIP_SENDER` for production SMS over HTTPS. OTP generation, hashing, TTL, attempts, and rate limits stay in AgroBridge PostgreSQL; Infobip is delivery only. Incomplete Infobip config fails API startup. `NODE_ENV=production` refuses `SMS_DRIVER=console` unless `SMS_ALLOW_CONSOLE=true`. Never log `INFOBIP_API_KEY`, OTP codes, or full phone numbers. Never set `INFOBIP_*` as `NEXT_PUBLIC_*`.
 - `STORAGE_DRIVER=s3` + S3_* for durable media (R2/S3) — recommended before any domain move
 - `TRANSLATION_PROVIDER=openai` + `OPENAI_API_KEY` for chat translation
 - `GOOGLE_MAPS_API_KEY` for product origin place autocomplete (Places API New; settlements only)

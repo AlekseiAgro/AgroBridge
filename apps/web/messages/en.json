@@ -216,12 +216,18 @@
       },
       "phone": {
         "title": "2. Confirm phone (SMS)",
+        "country": "Country / region",
         "number": "Phone number",
+        "placeholder": "555 12 34 56",
+        "hint": "Enter the national number. The country code {code} is added automatically.",
         "send": "Send SMS code",
         "code": "SMS code",
         "confirm": "Confirm phone",
-        "sent": "SMS code sent to {destination} (logged to API console in demo).",
-        "confirmed": "Phone confirmed."
+        "sent": "SMS code sent to {destination}.",
+        "confirmed": "Phone confirmed.",
+        "invalid": "Enter a valid phone number for the selected country.",
+        "unavailable": "Could not send the SMS. Please try again later.",
+        "alreadyVerified": "This phone number is already confirmed."
       },
       "company": {
         "title": "3. Company verification",

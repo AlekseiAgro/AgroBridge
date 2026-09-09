@@ -79,6 +79,12 @@ RESEND_API_KEY=<sending-only Resend API key>
 # SMTP_SECURE=true
 # SMTP_USER=resend
 # SMTP_PASSWORD=<unused>
+# Production SMS: Infobip is API-service-only. Never NEXT_PUBLIC_* / web variables.
+# SMS_DRIVER=infobip
+# INFOBIP_BASE_URL=https://xxxx.api.infobip.com
+# INFOBIP_SENDER=<trial or production sender from Infobip>
+# INFOBIP_API_KEY=<server-side Infobip API key>
+# SMS_ALLOW_CONSOLE=true
 TRANSLATION_PROVIDER=mock
 # Optional: product "place of origin" city/village suggestions (Places API New)
 # GOOGLE_MAPS_API_KEY=<google-maps-api-key>

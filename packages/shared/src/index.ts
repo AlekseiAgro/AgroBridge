@@ -1,4 +1,5 @@
 export * from './locales';
+export * from './phone';
 export * from './roles';
 export * from './auth';
 export * from './moderation';
