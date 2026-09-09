@@ -3,22 +3,25 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
   Query,
   Req,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import {
   FARM_DOCUMENT_MAX_BYTES,
   PRODUCT_IMAGE_MAX_BYTES,
   PRODUCT_VIDEO_MAX_BYTES,
+  isFarmDocumentMimeType,
 } from '@agrobridge/shared';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { EmailVerifiedGuard } from '../auth/email-verified.guard';
@@ -27,9 +30,14 @@ import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { attachmentHeader } from '../farms/farm-documents.controller';
+import { StorageService } from '../storage/storage.service';
+import { STORAGE_VISIBILITY } from '../storage/storage.constants';
+import { isPrivateProductCertificateKey } from '../storage/storage-location';
 import { CatalogQueryDto } from './dto/catalog-query.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { isProductCertificateId } from './product-certificate-url';
 import { MarketInsightService } from './market-insight.service';
 import { ProductsService } from './products.service';
 
@@ -38,6 +46,7 @@ export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
     private readonly marketInsight: MarketInsightService,
+    private readonly storage: StorageService,
   ) {}
 
   @Get()
@@ -179,6 +188,43 @@ export class ProductsController {
     @Param('videoId') videoId: string,
   ) {
     return this.productsService.removeVideo(user, id, videoId);
+  }
+
+  @Get(':id/certificates/:certificateId/file')
+  @UseGuards(OptionalJwtAuthGuard)
+  async downloadCertificate(
+    @Param('id') productId: string,
+    @Param('certificateId') certificateId: string,
+    @Req() req: Request & { user?: AuthenticatedUser },
+    @Res() res: Response,
+  ) {
+    if (!isProductCertificateId(productId) || !isProductCertificateId(certificateId)) {
+      throw new NotFoundException('Certificate not found');
+    }
+
+    const document = await this.productsService.getCertificateDownload(
+      productId,
+      certificateId,
+      req.user ?? null,
+    );
+    if (!isPrivateProductCertificateKey(document.key)) {
+      throw new NotFoundException('Certificate not found');
+    }
+
+    const stream = await this.storage.openReadStream(
+      document.key,
+      STORAGE_VISIBILITY.PRIVATE,
+    );
+
+    res.setHeader(
+      'Content-Type',
+      isFarmDocumentMimeType(document.mimeType) ? document.mimeType : 'application/octet-stream',
+    );
+    res.setHeader('Content-Disposition', attachmentHeader(document.fileName));
+    res.setHeader('Cache-Control', 'private, no-store, max-age=0');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    stream.pipe(res);
   }
 
   @Post(':id/certificates')

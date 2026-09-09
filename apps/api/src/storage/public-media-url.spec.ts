@@ -50,7 +50,15 @@ describe('toPublicMediaUrl', () => {
     );
   });
 
-  it('does not expose farm verification objects as public CDN media', () => {
-    expect(toPublicMediaUrl('https://cdn.example.com/farms/farm1/documents/abc.pdf')).toBe('');
+  it('does not expose product certificates as public CDN or uploads media', () => {
+    expect(toPublicMediaUrl('https://cdn.example.com/products/p1/certificates/c.pdf')).toBe('');
+    expect(toPublicMediaUrl('/api/uploads/products/p1/certificates/c.pdf')).toBe('');
+    expect(toPublicMediaUrl('products/p1/certificates/c.pdf')).toBe('');
+  });
+
+  it('leaves the authorized certificate download path unchanged', () => {
+    expect(toPublicMediaUrl('/api/products/p1/certificates/c1/file')).toBe(
+      '/api/products/p1/certificates/c1/file',
+    );
   });
 });

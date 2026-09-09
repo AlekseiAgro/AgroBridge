@@ -124,6 +124,24 @@ export class AdminController {
     return this.adminService.reviewDocument(user, id, false, dto);
   }
 
+  @Post('certificates/:id/approve')
+  approveCertificate(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: ReviewNoteDto,
+  ) {
+    return this.adminService.reviewCertificate(user, id, true, dto);
+  }
+
+  @Post('certificates/:id/reject')
+  rejectCertificate(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: ReviewNoteDto,
+  ) {
+    return this.adminService.reviewCertificate(user, id, false, dto);
+  }
+
   @Get('purchase-requests')
   listPurchaseRequests(@Query('status') status?: string) {
     return this.adminService.listPurchaseRequests(status);

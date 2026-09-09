@@ -14,6 +14,7 @@ import type {
   FarmDocument,
   ModeratedProduct,
   ModerationStatus,
+  ProductCertificate,
   VerificationStatus,
 } from '@agrobridge/shared';
 import {
@@ -36,6 +37,10 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { VerificationService } from '../verification/verification.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { farmDocumentFileUrl } from '../farms/farm-document-url';
+import {
+  isProductCertificateId,
+  productCertificateFileUrl,
+} from '../products/product-certificate-url';
 import { BlockUserDto, RejectProductDto, ReviewNoteDto, UpdateCategoryDto } from './dto/admin.dto';
 
 const productOwnerInclude = {
@@ -201,6 +206,10 @@ export class AdminService {
       },
       include: productOwnerInclude,
     });
+
+    // ProductCertificate.reviewStatus is independent of listing moderation
+    // (same DocumentReviewStatus pattern as FarmDocument). Approving a listing
+    // must not silently approve unseen certificate files. Use reviewCertificate.
 
     await this.notifications.notifyProductApproved({
       farmer: product.owner,
@@ -564,6 +573,54 @@ export class AdminService {
     }
 
     return this.toFarmDocument(doc);
+  }
+
+  async reviewCertificate(
+    admin: AuthenticatedUser,
+    certificateId: string,
+    approve: boolean,
+    dto: ReviewNoteDto,
+  ): Promise<ProductCertificate> {
+    if (!isProductCertificateId(certificateId)) {
+      throw new NotFoundException('Certificate not found');
+    }
+
+    const existing = await this.prisma.productCertificate.findUnique({
+      where: { id: certificateId },
+      select: { id: true, productId: true },
+    });
+    if (!existing) {
+      throw new NotFoundException('Certificate not found');
+    }
+
+    const cert = await this.prisma.productCertificate.update({
+      where: { id: certificateId },
+      data: approve
+        ? {
+            reviewStatus: DocumentReviewStatus.approved,
+            reviewNote: dto.note?.trim() || null,
+            reviewedAt: new Date(),
+            reviewedById: admin.id,
+          }
+        : {
+            reviewStatus: DocumentReviewStatus.rejected,
+            reviewNote: dto.note?.trim() || 'Certificate rejected',
+            reviewedAt: new Date(),
+            reviewedById: admin.id,
+          },
+    });
+
+    return {
+      id: cert.id,
+      type: cert.type,
+      title: cert.title,
+      fileName: cert.fileName,
+      url: productCertificateFileUrl(cert.productId, cert.id),
+      mimeType: cert.mimeType,
+      reviewStatus: cert.reviewStatus,
+      reviewNote: cert.reviewNote,
+      createdAt: cert.createdAt.toISOString(),
+    };
   }
 
   async listPurchaseRequests(status?: string): Promise<AdminPurchaseRequest[]> {

@@ -26,6 +26,7 @@ import {
   type VerificationStatus,
 } from '@agrobridge/shared';
 import type { Prisma } from '@prisma/client';
+import { productCertificateFileUrl } from './product-certificate-url';
 
 export type ProductFarmSlice = {
   id: string;
@@ -160,19 +161,23 @@ export function mapProductVideos(videos: ProductVideoSlice[] = []): ProductVideo
 }
 
 export function mapProductCertificates(
+  productId: string,
   certificates: ProductCertificateSlice[] = [],
+  options: { includePrivate: boolean } = { includePrivate: false },
 ): ProductCertificate[] {
-  return certificates.map((cert) => ({
-    id: cert.id,
-    type: (isCertificateType(cert.type) ? cert.type : 'other') as CertificateType,
-    title: cert.title,
-    fileName: cert.fileName,
-    url: cert.url,
-    mimeType: cert.mimeType,
-    reviewStatus: cert.reviewStatus as ProductCertificate['reviewStatus'],
-    reviewNote: cert.reviewNote,
-    createdAt: cert.createdAt.toISOString(),
-  }));
+  return certificates
+    .filter((cert) => options.includePrivate || cert.reviewStatus === 'approved')
+    .map((cert) => ({
+      id: cert.id,
+      type: (isCertificateType(cert.type) ? cert.type : 'other') as CertificateType,
+      title: cert.title,
+      fileName: cert.fileName,
+      url: productCertificateFileUrl(productId, cert.id),
+      mimeType: cert.mimeType,
+      reviewStatus: cert.reviewStatus as ProductCertificate['reviewStatus'],
+      reviewNote: options.includePrivate ? cert.reviewNote : null,
+      createdAt: cert.createdAt.toISOString(),
+    }));
 }
 
 export function toPublicQualityScore(score: ProductQualityScore): ProductQualityScore {
@@ -186,7 +191,9 @@ export function toPublicQualityScore(score: ProductQualityScore): ProductQuality
 
 export function buildQualityScore(product: ProductRowSlice): ProductQualityScore {
   const images = mapProductImages(product.images);
-  const certificates = mapProductCertificates(product.certificates);
+  const certificates = mapProductCertificates(product.id, product.certificates, {
+    includePrivate: false,
+  });
   const farm = product.farm;
   return computeProductQualityScore({
     title: product.title,
@@ -232,7 +239,9 @@ export function mapProductSummary(
   product: ProductRowSlice,
   sellerRating?: RatingSummary | null,
 ): ProductSummary {
-  const certificates = mapProductCertificates(product.certificates);
+  const certificates = mapProductCertificates(product.id, product.certificates, {
+    includePrivate: false,
+  });
   return {
     id: product.id,
     title: product.title,
@@ -275,13 +284,7 @@ export function mapProductSummary(
     moderationNote: product.moderationNote,
     images: mapProductImages(product.images),
     videoCount: product.videos?.length ?? 0,
-    certificateBadges: [
-      ...new Set(
-        certificates
-          .filter((cert) => cert.reviewStatus === 'approved' || cert.reviewStatus === 'pending')
-          .map((cert) => cert.type),
-      ),
-    ],
+    certificateBadges: [...new Set(certificates.map((cert) => cert.type))],
     // Catalog/list payloads never include fill tips — those are owner-only on detail.
     qualityScore: toPublicQualityScore(buildQualityScore(product)),
     opportunity: evaluateMarketOpportunity({
@@ -322,6 +325,7 @@ export function mapProductDetail(
   sellerRating?: RatingSummary | null,
   watching = false,
   isOwner = false,
+  includePrivateCertificates = false,
 ): ProductDetail {
   const summary = mapProductSummary(product, sellerRating);
   const qualityScore = isOwner
@@ -336,7 +340,9 @@ export function mapProductDetail(
     watching,
     isOwner,
     videos: mapProductVideos(product.videos),
-    certificates: mapProductCertificates(product.certificates),
+    certificates: mapProductCertificates(product.id, product.certificates, {
+      includePrivate: includePrivateCertificates,
+    }),
   };
 }
 

@@ -25,10 +25,12 @@ describe('visibilityFromStorageKey', () => {
     expect(visibilityFromStorageKey('users/u1/avatar.jpg')).toBe(STORAGE_VISIBILITY.PUBLIC);
   });
 
-  it('does not treat product certificates as farm verification documents', () => {
+  it('classifies product certificates as private (not public marketplace media)', () => {
     expect(visibilityFromStorageKey('products/p1/certificates/c.pdf')).toBe(
-      STORAGE_VISIBILITY.PUBLIC,
+      STORAGE_VISIBILITY.PRIVATE,
     );
+    expect(visibilityFromStorageKey('products/p1/a.jpg')).toBe(STORAGE_VISIBILITY.PUBLIC);
+    expect(visibilityFromStorageKey('products/p1/videos/v.bin')).toBe(STORAGE_VISIBILITY.PUBLIC);
   });
 });
 
@@ -47,6 +49,12 @@ describe('resolveObjectVisibility', () => {
       STORAGE_VISIBILITY.PUBLIC,
     );
     expect(resolveObjectVisibility('products/p1/a.jpg')).toBe(STORAGE_VISIBILITY.PUBLIC);
+  });
+
+  it('forces product certificate keys to private even if a caller asks for public', () => {
+    expect(
+      resolveObjectVisibility('products/p1/certificates/c.pdf', STORAGE_VISIBILITY.PUBLIC),
+    ).toBe(STORAGE_VISIBILITY.PRIVATE);
   });
 });
 

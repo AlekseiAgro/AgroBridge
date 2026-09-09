@@ -267,6 +267,42 @@ describe('StorageService', () => {
       await rm(root, { recursive: true, force: true });
     }
   });
+
+  it('refuses to upload a product certificate as public media', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'agrobridge-uploads-'));
+    const service = new StorageService(localConfig(root));
+    try {
+      await expect(
+        service.upload({
+          buffer: Buffer.from('%PDF'),
+          mimeType: 'application/pdf',
+          originalName: 'gap.pdf',
+          folder: 'products/p1/certificates',
+          visibility: 'public',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('uploads a product certificate as a private object without a public URL', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'agrobridge-uploads-'));
+    const service = new StorageService(localConfig(root));
+    try {
+      const stored = await service.upload({
+        buffer: Buffer.from('%PDF'),
+        mimeType: 'application/pdf',
+        originalName: 'gap.pdf',
+        folder: 'products/p1/certificates',
+        visibility: 'private',
+      });
+      expect(stored.key.startsWith('products/p1/certificates/')).toBe(true);
+      expect(stored.url).toBe('');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('StorageService s3 bucket selection', () => {
