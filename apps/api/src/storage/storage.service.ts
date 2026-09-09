@@ -18,10 +18,17 @@ import { dirname, extname, join, resolve, sep } from 'path';
 import type { Readable } from 'stream';
 import {
   STORAGE_DRIVER,
-  STORAGE_VISIBILITY,
   type StorageDriver,
   type StorageVisibility,
 } from './storage.constants';
+import {
+  resolveS3Buckets,
+  resolveS3PublicBaseUrl,
+  s3BucketForVisibility,
+  storedObjectUrl,
+  visibilityFromStorageKey,
+  type S3BucketPair,
+} from './storage-location';
 
 export type StoredObject = {
   key: string;
@@ -38,7 +45,7 @@ export class StorageService implements OnModuleInit {
   private readonly driver: StorageDriver;
   private readonly localDir: string;
   private readonly publicBaseUrl: string;
-  private readonly s3Bucket?: string;
+  private readonly s3Buckets?: S3BucketPair;
   private readonly s3Client?: S3Client;
 
   constructor(private readonly config: ConfigService) {
@@ -50,18 +57,17 @@ export class StorageService implements OnModuleInit {
       this.config.get<string>('STORAGE_LOCAL_DIR') ?? join(process.cwd(), 'uploads'),
     );
 
-    const apiPublic =
-      this.config.get<string>('API_PUBLIC_URL') ?? 'http://localhost:3001';
-    this.publicBaseUrl = (
-      this.config.get<string>('STORAGE_PUBLIC_BASE_URL') ??
-      `${apiPublic.replace(/\/$/, '')}/api/uploads`
-    ).replace(/\/$/, '');
+    this.publicBaseUrl = '';
 
     if (this.driver === STORAGE_DRIVER.S3) {
-      this.s3Bucket = this.config.get<string>('S3_BUCKET') ?? undefined;
-      if (!this.s3Bucket) {
-        throw new Error('S3_BUCKET is required when STORAGE_DRIVER=s3');
-      }
+      this.publicBaseUrl = resolveS3PublicBaseUrl(
+        this.config.get<string>('STORAGE_PUBLIC_BASE_URL'),
+      );
+      this.s3Buckets = resolveS3Buckets({
+        publicBucket: this.config.get<string>('S3_PUBLIC_BUCKET'),
+        legacyBucket: this.config.get<string>('S3_BUCKET'),
+        privateBucket: this.config.get<string>('S3_PRIVATE_BUCKET'),
+      });
 
       const region = this.config.get<string>('S3_REGION') ?? 'auto';
       const endpoint = this.config.get<string>('S3_ENDPOINT') ?? undefined;
@@ -86,7 +92,9 @@ export class StorageService implements OnModuleInit {
       await fs.mkdir(this.localDir, { recursive: true });
       this.logger.log(`Local storage ready at ${this.localDir}`);
     } else {
-      this.logger.log(`S3 storage ready (bucket=${this.s3Bucket})`);
+      this.logger.log(
+        `S3 storage ready (public=${this.s3Buckets!.publicBucket} private=${this.s3Buckets!.privateBucket})`,
+      );
     }
   }
 
@@ -113,7 +121,7 @@ export class StorageService implements OnModuleInit {
 
     await this.s3Client!.send(
       new PutObjectCommand({
-        Bucket: this.s3Bucket!,
+        Bucket: s3BucketForVisibility(params.visibility, this.s3Buckets!),
         Key: key,
         Body: params.buffer,
         ContentType: params.mimeType,
@@ -125,14 +133,12 @@ export class StorageService implements OnModuleInit {
 
   /** Public objects get a fetchable URL; private objects never do. */
   private urlFor(key: string, visibility: StorageVisibility): string {
-    if (visibility === STORAGE_VISIBILITY.PRIVATE) {
-      return '';
-    }
-    if (this.driver === STORAGE_DRIVER.LOCAL) {
-      // Same-origin path so the web app can proxy uploads in local/dev previews.
-      return `/api/uploads/${key}`;
-    }
-    return `${this.publicBaseUrl}/${key}`;
+    return storedObjectUrl({
+      key,
+      visibility,
+      driver: this.driver,
+      publicBaseUrl: this.publicBaseUrl,
+    });
   }
 
   async delete(key: string): Promise<void> {
@@ -154,7 +160,7 @@ export class StorageService implements OnModuleInit {
 
     await this.s3Client!.send(
       new DeleteObjectCommand({
-        Bucket: this.s3Bucket!,
+        Bucket: s3BucketForVisibility(visibilityFromStorageKey(key), this.s3Buckets!),
         Key: key,
       }),
     );
@@ -172,7 +178,10 @@ export class StorageService implements OnModuleInit {
 
     try {
       const result = await this.s3Client!.send(
-        new GetObjectCommand({ Bucket: this.s3Bucket!, Key: key }),
+        new GetObjectCommand({
+          Bucket: s3BucketForVisibility(visibilityFromStorageKey(key), this.s3Buckets!),
+          Key: key,
+        }),
       );
       if (!result.Body) {
         throw new NotFoundException('File not found');

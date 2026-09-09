@@ -51,6 +51,8 @@ export class UploadsController {
 
   // Farm verification documents are intentionally absent here: they are private and
   // served by FarmDocumentsController behind owner/admin authorization.
+  // This controller is the local/legacy public-media path only (`STORAGE_DRIVER=local`).
+  // Future R2 public objects are fetched from STORAGE_PUBLIC_BASE_URL/{key}.
 
   private serveLocalFile(key: string, filename: string, res: Response) {
     if (this.storage.getDriver() !== STORAGE_DRIVER.LOCAL) {

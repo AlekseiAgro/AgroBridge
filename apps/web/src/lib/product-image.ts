@@ -3,7 +3,7 @@ import { isProductCategory } from '@agrobridge/shared';
 import { CATEGORY_MEDIA } from '@/lib/category-media';
 import { toPublicMediaUrl } from '@/lib/public-media-url';
 
-export { isLegacyFarmDocumentUploadUrl, toPublicMediaUrl } from '@/lib/public-media-url';
+export { isFarmVerificationObjectUrl, isLegacyFarmDocumentUploadUrl, toPublicMediaUrl } from '@/lib/public-media-url';
 
 export function getPrimaryProductImage(
   images: ProductImage[] | undefined | null,
