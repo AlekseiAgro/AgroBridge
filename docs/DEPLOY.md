@@ -25,7 +25,7 @@ The example is pre-filled for **agrobrid.ge** / **api.agrobrid.ge**. Change secr
 | `WEB_ORIGIN` / `WEB_PUBLIC_URL` | Public web URL (CORS + email links) |
 | `API_PUBLIC_URL` | Public API origin (uploaded media URLs) |
 | `NEXT_PUBLIC_API_URL` | Browser/API base, usually `$API_PUBLIC_URL/api` |
-| `API_INTERNAL_URL` | Private API address the Next.js server calls (`http://api:3001/api` in Compose, `*.railway.internal` on Railway). Server-only; sending server-side traffic through the public hostname breaks per-visitor rate limiting |
+| `API_INTERNAL_URL` | Private API address the Next.js server calls. Compose: `http://api:3001/api`. Railway: `http://${{api.RAILWAY_PRIVATE_DOMAIN}}:8080/api` (Railway injects `PORT=8080`; do not override it). Server-only; sending server-side traffic through the public hostname breaks per-visitor rate limiting |
 | `POSTGRES_PASSWORD` | Database password |
 | `JWT_SECRET` | Long random secret (API refuses weak defaults in production) |
 | `SUPPORT_EMAIL` | Inbox for `/support` form |

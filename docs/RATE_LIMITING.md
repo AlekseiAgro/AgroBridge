@@ -67,7 +67,10 @@ and, on dual-stack environments, `10.0.0.0/8`; Compose uses its bridge network. 
 production default `loopback,linklocal,uniquelocal` — a trust *list*, not a hop count, since
 the count varies while the peer range does not.
 
-This is what `API_INTERNAL_URL` is for. Point the web tier at the public API hostname
+This is what `API_INTERNAL_URL` is for. On Railway set it to
+`http://${{api.RAILWAY_PRIVATE_DOMAIN}}:8080/api` — Railway injects `PORT=8080` on the API
+service, so do not override that variable (see [`RAILWAY.md`](RAILWAY.md)). On Compose the
+equivalent is `http://api:3001/api`. Point the web tier at the public API hostname
 instead and the request re-enters through Cloudflare and the Railway edge, the peer becomes
 public, the relayed address is discarded, and every visitor collapses into a single bucket.
 

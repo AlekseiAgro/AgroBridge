@@ -52,9 +52,9 @@ If Build Logs still say `using build driver railpack`, the builder is still Rail
 
 ```bash
 NODE_ENV=production
-# Pin the listening port so web can address the API on the private network (matches
-# EXPOSE 3001 in apps/api/Dockerfile).
-PORT=3001
+# Do not set PORT. Railway injects it (8080) and the target port of every attached domain
+# follows that value, so overriding it points the domains at a port nothing listens on.
+# `apps/api/src/main.ts` reads it and falls back to 3001 only off-platform.
 JWT_SECRET=<generate a long random string>
 JWT_EXPIRES_SECONDS=604800
 # Which X-Forwarded-For entries to believe. Leave unset: the default (loopback + private
@@ -114,12 +114,12 @@ The API image runs `prisma migrate deploy` on start.
 ```bash
 NODE_ENV=production
 NEXT_PUBLIC_API_URL=https://${{api.RAILWAY_PUBLIC_DOMAIN}}/api
-API_INTERNAL_URL=http://${{api.RAILWAY_PRIVATE_DOMAIN}}:3001/api
+API_INTERNAL_URL=http://${{api.RAILWAY_PRIVATE_DOMAIN}}:8080/api
 ```
 
 `NEXT_PUBLIC_API_URL` is baked at **build** time — set it before/with the first successful web build, then redeploy web if the API domain changes. It is the browser's URL only.
 
-`API_INTERNAL_URL` is read at **runtime** by the Next.js server and never reaches the browser. `${{api.RAILWAY_PRIVATE_DOMAIN}}` resolves to `api.railway.internal`; the port must match `PORT` on the `api` service. Without it, server-side calls leave Railway, cross Cloudflare and re-enter through the edge, and the API can no longer tell one visitor from another for rate limiting (docs/RATE_LIMITING.md). Use `http://`, not `https://` — the private network is already encrypted, and the API serves plain HTTP there.
+`API_INTERNAL_URL` is read at **runtime** by the Next.js server and never reaches the browser. `${{api.RAILWAY_PRIVATE_DOMAIN}}` resolves to `api.railway.internal`; `8080` is the port Railway injects into the `api` service, the same one its public domains target (confirm under **api → Settings → Networking**, where each domain shows its target port). Without it, server-side calls leave Railway, cross Cloudflare and re-enter through the edge, and the API can no longer tell one visitor from another for rate limiting (docs/RATE_LIMITING.md). Use `http://`, not `https://` — the private network is already encrypted, and the API serves plain HTTP there.
 
 Generate a public domain for `web`.
 
