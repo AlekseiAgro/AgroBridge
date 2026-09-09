@@ -5,7 +5,6 @@ import { FARM_DOCUMENT_KINDS, FARM_DOCUMENT_MAX_COUNT } from '@agrobridge/shared
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
-import { toPublicMediaUrl } from '@/lib/product-image';
 
 type Props = {
   initialDocuments: FarmDocument[];
@@ -96,7 +95,7 @@ export function FarmDocumentsManager({ initialDocuments }: Props) {
               <div className="product-list__actions">
                 <a
                   className="button button--ghost"
-                  href={toPublicMediaUrl(doc.url)}
+                  href={doc.url}
                   target="_blank"
                   rel="noreferrer"
                 >

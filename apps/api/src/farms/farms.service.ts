@@ -41,6 +41,13 @@ import {
 } from '../products/product-mapper';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
+import { farmDocumentFileUrl } from './farm-document-url';
+
+export type FarmDocumentDownload = {
+  key: string;
+  fileName: string;
+  mimeType: string;
+};
 
 const publicProductWhere = {
   isPublished: true,
@@ -418,6 +425,36 @@ export class FarmsService {
     return this.toDocument(doc);
   }
 
+  /**
+   * Resolves a verification document for download. Ownership comes from the stored
+   * farm relation, never from a client-supplied farm id or storage path.
+   */
+  async getDocumentDownload(
+    user: AuthenticatedUser,
+    documentId: string,
+  ): Promise<FarmDocumentDownload> {
+    const document = await this.prisma.farmDocument.findUnique({
+      where: { id: documentId },
+      select: {
+        key: true,
+        fileName: true,
+        mimeType: true,
+        farm: { select: { ownerId: true } },
+      },
+    });
+
+    // Unknown and unauthorized documents answer identically so ids cannot be probed.
+    if (!document || (user.role !== 'admin' && document.farm.ownerId !== user.id)) {
+      throw new NotFoundException('Document not found');
+    }
+
+    return {
+      key: document.key,
+      fileName: document.fileName,
+      mimeType: document.mimeType,
+    };
+  }
+
   async removeDocument(user: AuthenticatedUser, documentId: string): Promise<void> {
     const farm = await this.requireOwnFarm(user);
     const doc = await this.prisma.farmDocument.findFirst({
@@ -552,7 +589,6 @@ export class FarmsService {
     farmId: string;
     title: string;
     fileName: string;
-    url: string;
     mimeType: string;
     kind: FarmDocumentKind;
     reviewStatus: DocumentReviewStatus;
@@ -565,7 +601,7 @@ export class FarmsService {
       farmId: doc.farmId,
       title: doc.title,
       fileName: doc.fileName,
-      url: doc.url,
+      url: farmDocumentFileUrl(doc.id),
       mimeType: doc.mimeType,
       kind: doc.kind,
       reviewStatus: doc.reviewStatus,

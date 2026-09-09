@@ -17,7 +17,6 @@ import { RequestModerateActions } from '@/components/RequestModerateActions';
 import { UserBlockActions } from '@/components/UserBlockActions';
 import { Link, redirect } from '@/i18n/navigation';
 import { formatRegionLabel } from '@/lib/region';
-import { toPublicMediaUrl } from '@/lib/product-image';
 import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
@@ -373,7 +372,7 @@ async function FarmsSection({
                   <ul className="admin-doc-list">
                     {farm.documents.map((doc) => (
                       <li key={doc.id}>
-                        <a href={toPublicMediaUrl(doc.url)} target="_blank" rel="noreferrer">
+                        <a href={doc.url} target="_blank" rel="noreferrer">
                           {doc.title}
                         </a>
                         {' · '}
