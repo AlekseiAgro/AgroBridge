@@ -290,7 +290,9 @@ describe('MailService resend driver', () => {
   it.each([
     [429, 2],
     [500, 2],
+    [502, 2],
     [503, 2],
+    [504, 2],
   ])('retries HTTP %s then succeeds with the same payload', async (status, calls) => {
     fetchImpl
       .mockResolvedValueOnce(jsonResponse(status as number, '{"message":"try later"}'))

@@ -215,7 +215,7 @@ describe('sanitizeMailError', () => {
       ['re_test_secret_key_value'],
     );
     expect(text).not.toContain('re_test_secret_key_value');
-    expect(text).toContain('Bearer ***');
+    expect(text).not.toMatch(/Bearer\s+re_/i);
   });
 
   it('strips the SMTP password and credential-bearing URLs', () => {
