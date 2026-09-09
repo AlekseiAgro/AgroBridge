@@ -192,7 +192,7 @@
         "hint": "Wählen Sie, wie Sie verkaufen. Davon hängt ab, welches Identitätsdokument erforderlich ist.",
         "identityTitle": "3. Identitätsprüfung",
         "saved": "Verkäufertyp gespeichert.",
-        "locked": "Nach der Verifizierung kann der Verkäufertyp nicht mehr geändert werden."
+        "locked": "Sobald die Prüfung begonnen hat, kann der Verkäufertyp nicht mehr geändert werden."
       },
       "farmStatus": {
         "unverified": "Not verified yet",

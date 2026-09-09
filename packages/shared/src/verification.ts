@@ -67,6 +67,7 @@ export type ProducerVerificationStatus = {
   companyRegistryValid: boolean | null;
   hasApprovedIdDocument: boolean;
   hasPendingIdDocument: boolean;
+  sellerTypeLocked: boolean;
   path: 'company' | 'privateFarmer' | 'unknown';
   steps: {
     email: 'done' | 'todo';

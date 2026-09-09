@@ -37,21 +37,26 @@ export class VerificationService {
       where: { ownerId: user.id },
       include: {
         documents: {
-          where: { kind: FarmDocumentKind.idCard },
+          where: {
+            kind: {
+              in: [FarmDocumentKind.idCard, FarmDocumentKind.businessRegistration],
+            },
+          },
           orderBy: { createdAt: 'desc' },
         },
       },
     });
 
-    const hasApprovedIdDocument = Boolean(
-      farm?.documents.some((doc) => doc.reviewStatus === DocumentReviewStatus.approved),
+    const idDocuments = farm?.documents.filter((doc) => doc.kind === FarmDocumentKind.idCard) ?? [];
+    const hasApprovedIdDocument = idDocuments.some(
+      (doc) => doc.reviewStatus === DocumentReviewStatus.approved,
     );
-    const hasPendingIdDocument = Boolean(
-      farm?.documents.some((doc) => doc.reviewStatus === DocumentReviewStatus.pending),
+    const hasPendingIdDocument = idDocuments.some(
+      (doc) => doc.reviewStatus === DocumentReviewStatus.pending,
     );
     const hasRejectedOnly =
-      Boolean(farm?.documents.length) &&
-      farm!.documents.every((doc) => doc.reviewStatus === DocumentReviewStatus.rejected) &&
+      idDocuments.length > 0 &&
+      idDocuments.every((doc) => doc.reviewStatus === DocumentReviewStatus.rejected) &&
       !hasApprovedIdDocument &&
       !hasPendingIdDocument;
 
@@ -95,6 +100,7 @@ export class VerificationService {
       companyRegistryValid: farm?.companyRegistryValid ?? null,
       hasApprovedIdDocument,
       hasPendingIdDocument,
+      sellerTypeLocked: this.isSellerTypeChangeLocked(farm, sellerType),
       path,
       steps: {
         email: emailVerified ? 'done' : 'todo',
@@ -219,12 +225,29 @@ export class VerificationService {
       throw new BadRequestException('Seller type is invalid');
     }
 
+    const dbUser = await this.requireUser(user.id);
+    const current = (dbUser.sellerType as SellerType | null) ?? null;
+    if (current === sellerTypeRaw) {
+      return this.getStatus(user);
+    }
+
     const farm = await this.prisma.farm.findUnique({
       where: { ownerId: user.id },
-      select: { verificationStatus: true },
+      select: {
+        verificationStatus: true,
+        companyRegistryValid: true,
+        documents: {
+          where: {
+            kind: {
+              in: [FarmDocumentKind.idCard, FarmDocumentKind.businessRegistration],
+            },
+          },
+          select: { kind: true },
+        },
+      },
     });
-    if (farm?.verificationStatus === VerificationStatus.approved) {
-      throw new BadRequestException('Seller type cannot be changed after verification');
+    if (this.isSellerTypeChangeLocked(farm, current)) {
+      throw new BadRequestException('Seller type cannot be changed after verification has started');
     }
 
     await this.prisma.user.update({
@@ -360,6 +383,54 @@ export class VerificationService {
         });
       }
     }
+  }
+
+  /**
+   * First selection is allowed. Switching is locked once identity evidence or a
+   * farm verification status other than unverified exists. Email/SMS alone do not lock.
+   */
+  private isSellerTypeChangeLocked(
+    farm: {
+      verificationStatus: VerificationStatus;
+      companyRegistryValid: boolean | null;
+      documents: Array<{ kind: FarmDocumentKind }>;
+    } | null,
+    currentSellerType: SellerType | null,
+  ): boolean {
+    if (farm?.verificationStatus === VerificationStatus.approved) {
+      return true;
+    }
+    if (!currentSellerType) {
+      return false;
+    }
+    return this.hasIdentityVerificationStarted(farm);
+  }
+
+  private hasIdentityVerificationStarted(
+    farm: {
+      verificationStatus: VerificationStatus;
+      companyRegistryValid: boolean | null;
+      documents: Array<{ kind: FarmDocumentKind }>;
+    } | null,
+  ): boolean {
+    if (!farm) {
+      return false;
+    }
+    if (
+      farm.verificationStatus === VerificationStatus.pending ||
+      farm.verificationStatus === VerificationStatus.approved ||
+      farm.verificationStatus === VerificationStatus.rejected
+    ) {
+      return true;
+    }
+    if (farm.companyRegistryValid !== null) {
+      return true;
+    }
+    return farm.documents.some(
+      (doc) =>
+        doc.kind === FarmDocumentKind.idCard ||
+        doc.kind === FarmDocumentKind.businessRegistration,
+    );
   }
 
   private normalizePhone(value: string): string {

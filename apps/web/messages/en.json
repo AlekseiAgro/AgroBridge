@@ -192,7 +192,7 @@
         "hint": "Choose how you sell. This decides which identity document is required.",
         "identityTitle": "3. Identity verification",
         "saved": "Seller type saved.",
-        "locked": "Seller type is locked after verification."
+        "locked": "Seller type is locked after verification has started."
       },
       "farmStatus": {
         "unverified": "Not verified yet",

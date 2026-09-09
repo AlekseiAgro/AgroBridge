@@ -192,7 +192,7 @@
         "hint": "Choisissez comment vous vendez. Cela détermine le document d’identité requis.",
         "identityTitle": "3. Vérification d’identité",
         "saved": "Type de vendeur enregistré.",
-        "locked": "Après la vérification, le type de vendeur ne peut plus être modifié."
+        "locked": "Une fois la vérification commencée, le type de vendeur ne peut plus être modifié."
       },
       "farmStatus": {
         "unverified": "Not verified yet",

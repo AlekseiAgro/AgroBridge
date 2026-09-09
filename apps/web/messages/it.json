@@ -192,7 +192,7 @@
         "hint": "Scegli come vendi. Da questo dipende il documento di identità richiesto.",
         "identityTitle": "3. Verifica dell’identità",
         "saved": "Tipo di venditore salvato.",
-        "locked": "Dopo la verifica il tipo di venditore non può essere modificato."
+        "locked": "Dopo l’inizio della verifica il tipo di venditore non può essere modificato."
       },
       "farmStatus": {
         "unverified": "Not verified yet",

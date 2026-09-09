@@ -54,7 +54,7 @@ export function ProducerVerificationPanel({ initial }: Props) {
   const privateFileRef = useRef<HTMLInputElement>(null);
   const companyFileRef = useRef<HTMLInputElement>(null);
 
-  const sellerTypeLocked = status.verified || status.farmVerificationStatus === 'approved';
+  const sellerTypeLocked = status.sellerTypeLocked;
 
   function applyStatus(next: ProducerVerificationStatus) {
     setStatus(next);
