@@ -1,5 +1,15 @@
-import { SmsDeliveryError } from './sms.errors';
-import { sendInfobipSms, toInfobipDestination } from './infobip-sms';
+import {
+  SMS_INVALID_PHONE_CLIENT_MESSAGE,
+  SMS_UNAVAILABLE_CLIENT_MESSAGE,
+  SmsDeliveryError,
+} from './sms.errors';
+import {
+  classifyInfobipAcceptedMessage,
+  classifyInfobipHttpFailure,
+  isDestinationSpecificInfobipFailure,
+  sendInfobipSms,
+  toInfobipDestination,
+} from './infobip-sms';
 import type { InfobipSmsSettings } from './sms.config';
 
 const settings: InfobipSmsSettings = {
@@ -21,6 +31,97 @@ function jsonResponse(status: number, body: unknown): Response {
 const accepted = {
   messages: [{ to: '995555123456', status: { groupId: 1, groupName: 'PENDING' } }],
 };
+
+function expectSafeClientError(
+  error: unknown,
+  kind: SmsDeliveryError['kind'],
+  clientMessage: string,
+) {
+  expect(error).toBeInstanceOf(SmsDeliveryError);
+  const delivery = error as SmsDeliveryError;
+  expect(delivery.kind).toBe(kind);
+  expect(delivery.message).toBe(clientMessage);
+  expect(delivery.clientMessage).toBe(clientMessage);
+  expect(delivery.message).not.toContain('test-infobip-key-value');
+  expect(delivery.message).not.toContain('Authorization');
+  expect(delivery.message).not.toContain('App ');
+  expect(delivery.message).not.toContain('123456');
+}
+
+describe('Infobip error classification', () => {
+  it('treats prefix-missing and destination rejections as destination-specific', () => {
+    expect(
+      isDestinationSpecificInfobipFailure({ statusName: 'REJECTED_PREFIX_MISSING' }),
+    ).toBe(true);
+    expect(
+      isDestinationSpecificInfobipFailure({ statusName: 'REJECTED_DESTINATION' }),
+    ).toBe(true);
+    expect(
+      isDestinationSpecificInfobipFailure({
+        exceptionMessageId: 'EC_INVALID_DESTINATION_ADDRESS',
+      }),
+    ).toBe(true);
+  });
+
+  it('does not treat sender, network, DND, or account destination variants as invalid phones', () => {
+    expect(
+      isDestinationSpecificInfobipFailure({ statusName: 'REJECTED_SOURCE' }),
+    ).toBe(false);
+    expect(
+      isDestinationSpecificInfobipFailure({ statusName: 'REJECTED_NETWORK' }),
+    ).toBe(false);
+    expect(isDestinationSpecificInfobipFailure({ statusName: 'REJECTED_DND' })).toBe(
+      false,
+    );
+    expect(
+      isDestinationSpecificInfobipFailure({
+        statusName: 'REJECTED_DESTINATION_NOT_REGISTERED',
+      }),
+    ).toBe(false);
+    expect(
+      isDestinationSpecificInfobipFailure({
+        statusName: 'REJECTED_DESTINATION_BLOCKLISTED',
+      }),
+    ).toBe(false);
+    expect(isDestinationSpecificInfobipFailure({ statusName: undefined })).toBe(false);
+  });
+
+  it('maps HTTP 400/422 to invalid phone only when the provider names a destination error', () => {
+    expect(classifyInfobipHttpFailure(400, { requestError: { serviceException: { messageId: 'BAD_REQUEST', text: 'Malformed JSON' } } })).toBe(
+      'unavailable',
+    );
+    expect(
+      classifyInfobipHttpFailure(422, {
+        requestError: {
+          serviceException: { messageId: 'REJECTED_DESTINATION', text: 'bad to' },
+        },
+      }),
+    ).toBe('invalid_destination');
+  });
+
+  it('maps accepted PENDING/DELIVERED groups to success and other REJECTED names to generic failure', () => {
+    expect(classifyInfobipAcceptedMessage({ groupId: 1, groupName: 'PENDING' })).toBe(
+      'ok',
+    );
+    expect(
+      classifyInfobipAcceptedMessage({
+        groupId: 5,
+        groupName: 'REJECTED',
+        name: 'REJECTED_PREFIX_MISSING',
+      }),
+    ).toBe('invalid_destination');
+    expect(
+      classifyInfobipAcceptedMessage({
+        groupId: 5,
+        groupName: 'REJECTED',
+        name: 'REJECTED_SOURCE',
+      }),
+    ).toBe('unavailable');
+    expect(
+      classifyInfobipAcceptedMessage({ groupId: 5, groupName: 'REJECTED' }),
+    ).toBe('unavailable');
+  });
+});
 
 describe('sendInfobipSms', () => {
   it('sends an HTTPS Infobip payload with App authorization', async () => {
@@ -46,9 +147,32 @@ describe('sendInfobipSms', () => {
     expect(body.messages[0].text).toContain('123456');
   });
 
-  it('maps HTTP 400 to an invalid-destination client error without leaking the key', async () => {
+  it('keeps an existing successful PENDING response successful', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue(jsonResponse(200, accepted));
+    await expect(
+      sendInfobipSms({
+        settings,
+        message: { to: '+995555123456', text: 'AgroBridge verification code: 123456' },
+        fetchImpl,
+      }),
+    ).resolves.toBeUndefined();
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps destination rejection to an invalid-phone client error', async () => {
     const fetchImpl = jest.fn().mockResolvedValue(
-      jsonResponse(400, { requestError: { serviceException: { text: 'invalid' } } }),
+      jsonResponse(200, {
+        messages: [
+          {
+            status: {
+              groupId: 5,
+              groupName: 'REJECTED',
+              name: 'REJECTED_DESTINATION',
+              description: 'Destination address is not valid',
+            },
+          },
+        ],
+      }),
     );
 
     const error = await sendInfobipSms({
@@ -57,9 +181,174 @@ describe('sendInfobipSms', () => {
       fetchImpl,
     }).catch((err: unknown) => err);
 
-    expect(error).toBeInstanceOf(SmsDeliveryError);
-    expect((error as SmsDeliveryError).kind).toBe('invalid_destination');
-    expect((error as Error).message).not.toContain('test-infobip-key-value');
+    expectSafeClientError(error, 'invalid_destination', SMS_INVALID_PHONE_CLIENT_MESSAGE);
+    expect((error as Error).message).not.toContain('Destination address is not valid');
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps prefix-missing rejection to an invalid-phone client error', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue(
+      jsonResponse(200, {
+        messages: [
+          {
+            status: {
+              groupId: 5,
+              groupName: 'REJECTED',
+              name: 'REJECTED_PREFIX_MISSING',
+            },
+          },
+        ],
+      }),
+    );
+
+    const error = await sendInfobipSms({
+      settings,
+      message: { to: '+995555123456', text: 'code 123456' },
+      fetchImpl,
+    }).catch((err: unknown) => err);
+
+    expectSafeClientError(error, 'invalid_destination', SMS_INVALID_PHONE_CLIENT_MESSAGE);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps sender rejection to generic unavailable', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue(
+      jsonResponse(200, {
+        messages: [
+          {
+            status: {
+              groupId: 5,
+              groupName: 'REJECTED',
+              name: 'REJECTED_SOURCE',
+              description: 'Sender is not allowed',
+            },
+          },
+        ],
+      }),
+    );
+
+    const error = await sendInfobipSms({
+      settings,
+      message: { to: '+995555123456', text: 'code 123456' },
+      fetchImpl,
+    }).catch((err: unknown) => err);
+
+    expectSafeClientError(error, 'unavailable', SMS_UNAVAILABLE_CLIENT_MESSAGE);
+    expect((error as Error).message).not.toContain('Sender is not allowed');
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps network rejection to generic unavailable', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue(
+      jsonResponse(200, {
+        messages: [
+          {
+            status: {
+              groupId: 5,
+              groupName: 'REJECTED',
+              name: 'REJECTED_NETWORK',
+            },
+          },
+        ],
+      }),
+    );
+
+    const error = await sendInfobipSms({
+      settings,
+      message: { to: '+995555123456', text: 'code 123456' },
+      fetchImpl,
+    }).catch((err: unknown) => err);
+
+    expectSafeClientError(error, 'unavailable', SMS_UNAVAILABLE_CLIENT_MESSAGE);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps DND rejection to generic unavailable', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue(
+      jsonResponse(200, {
+        messages: [
+          {
+            status: {
+              groupId: 5,
+              groupName: 'REJECTED',
+              name: 'REJECTED_DND',
+            },
+          },
+        ],
+      }),
+    );
+
+    const error = await sendInfobipSms({
+      settings,
+      message: { to: '+995555123456', text: 'code 123456' },
+      fetchImpl,
+    }).catch((err: unknown) => err);
+
+    expectSafeClientError(error, 'unavailable', SMS_UNAVAILABLE_CLIENT_MESSAGE);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps unknown REJECTED status to generic unavailable', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue(
+      jsonResponse(200, {
+        messages: [{ status: { groupId: 5, groupName: 'REJECTED' } }],
+      }),
+    );
+
+    const error = await sendInfobipSms({
+      settings,
+      message: { to: '+995555123456', text: 'code 123456' },
+      fetchImpl,
+    }).catch((err: unknown) => err);
+
+    expectSafeClientError(error, 'unavailable', SMS_UNAVAILABLE_CLIENT_MESSAGE);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps HTTP 400 unrelated to destination to generic unavailable without leaking the key', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue(
+      jsonResponse(400, {
+        requestError: {
+          serviceException: {
+            messageId: 'BAD_REQUEST',
+            text: 'Request body is not valid JSON; Authorization App test-infobip-key-value',
+          },
+        },
+      }),
+    );
+
+    const error = await sendInfobipSms({
+      settings,
+      message: { to: '+995555123456', text: 'code 123456' },
+      fetchImpl,
+    }).catch((err: unknown) => err);
+
+    expectSafeClientError(error, 'unavailable', SMS_UNAVAILABLE_CLIENT_MESSAGE);
+    expect((error as Error).message).not.toContain('Request body is not valid JSON');
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps HTTP 400 destination exceptions to an invalid-phone client error', async () => {
+    const fetchImpl = jest.fn().mockResolvedValue(
+      jsonResponse(400, {
+        requestError: {
+          serviceException: {
+            messageId: 'EC_INVALID_DESTINATION_ADDRESS',
+            text: 'Invalid destination address',
+          },
+        },
+      }),
+    );
+
+    const error = await sendInfobipSms({
+      settings,
+      message: { to: '+995555123456', text: 'code 123456' },
+      fetchImpl,
+    }).catch((err: unknown) => err);
+
+    expectSafeClientError(error, 'invalid_destination', SMS_INVALID_PHONE_CLIENT_MESSAGE);
+    expect((error as Error).message).not.toContain('Invalid destination address');
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
   it('maps provider HTTP 500 to unavailable', async () => {
@@ -69,22 +358,7 @@ describe('sendInfobipSms', () => {
       message: { to: '+995555123456', text: 'code 123456' },
       fetchImpl,
     }).catch((err: unknown) => err);
-    expect(error).toBeInstanceOf(SmsDeliveryError);
-    expect((error as SmsDeliveryError).kind).toBe('unavailable');
-  });
-
-  it('maps a rejected Infobip group to a safe client error', async () => {
-    const fetchImpl = jest.fn().mockResolvedValue(
-      jsonResponse(200, {
-        messages: [{ status: { groupId: 5, groupName: 'REJECTED' } }],
-      }),
-    );
-    const error = await sendInfobipSms({
-      settings,
-      message: { to: '+995555123456', text: 'code 123456' },
-      fetchImpl,
-    }).catch((err: unknown) => err);
-    expect((error as SmsDeliveryError).kind).toBe('rejected');
+    expectSafeClientError(error, 'unavailable', SMS_UNAVAILABLE_CLIENT_MESSAGE);
   });
 
   it('treats a malformed provider body as unavailable', async () => {
@@ -96,7 +370,7 @@ describe('sendInfobipSms', () => {
       message: { to: '+995555123456', text: 'code 123456' },
       fetchImpl,
     }).catch((err: unknown) => err);
-    expect((error as SmsDeliveryError).kind).toBe('unavailable');
+    expectSafeClientError(error, 'unavailable', SMS_UNAVAILABLE_CLIENT_MESSAGE);
   });
 
   it('does not retry after a timeout, so a single user action cannot send two SMS', async () => {
@@ -117,7 +391,7 @@ describe('sendInfobipSms', () => {
       fetchImpl,
     }).catch((err: unknown) => err);
 
-    expect((error as SmsDeliveryError).kind).toBe('timeout');
+    expectSafeClientError(error, 'timeout', SMS_UNAVAILABLE_CLIENT_MESSAGE);
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
@@ -128,7 +402,7 @@ describe('sendInfobipSms', () => {
       message: { to: '+995555123456', text: 'code 123456' },
       fetchImpl,
     }).catch((err: unknown) => err);
-    expect((error as SmsDeliveryError).kind).toBe('unavailable');
+    expectSafeClientError(error, 'unavailable', SMS_UNAVAILABLE_CLIENT_MESSAGE);
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 

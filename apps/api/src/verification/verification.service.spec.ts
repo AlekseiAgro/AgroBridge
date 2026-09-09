@@ -177,6 +177,56 @@ describe('VerificationService', () => {
     ).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 
+  it('maps destination-specific SMS failures to a safe invalid-phone error', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      phone: null,
+      phoneVerifiedAt: null,
+    });
+    prisma.user.update.mockResolvedValue({});
+    codes.issue.mockResolvedValue('123456');
+    sms.send.mockRejectedValueOnce(
+      new SmsDeliveryError(
+        'invalid_destination',
+        'Enter a valid phone number with a country code.',
+      ),
+    );
+
+    const error = await service
+      .sendSmsCode(farmer, '+995555123456', '203.0.113.7')
+      .catch((err: unknown) => err);
+
+    expect(error).toBeInstanceOf(BadRequestException);
+    const message = error instanceof Error ? error.message : String(error);
+    expect(message).toBe('Enter a valid phone number with a country code.');
+    expect(message).not.toContain('REJECTED');
+    expect(message).not.toContain('Infobip');
+  });
+
+  it('maps rejected SMS delivery to generic unavailable rather than invalid phone', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      phone: null,
+      phoneVerifiedAt: null,
+    });
+    prisma.user.update.mockResolvedValue({});
+    codes.issue.mockResolvedValue('123456');
+    sms.send.mockRejectedValueOnce(
+      new SmsDeliveryError('rejected', 'Could not send the SMS. Please try again later.'),
+    );
+
+    const error = await service
+      .sendSmsCode(farmer, '+995555123456', '203.0.113.7')
+      .catch((err: unknown) => err);
+
+    expect(error).toBeInstanceOf(ServiceUnavailableException);
+    const message = error instanceof Error ? error.message : String(error);
+    expect(message).toBe('Could not send the SMS. Please try again later.');
+    expect(message).not.toContain('valid phone');
+  });
+
   it('stops sending mail once the code budget is spent', async () => {
     prisma.user.findUnique.mockResolvedValue({
       id: 'u1',

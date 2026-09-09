@@ -202,7 +202,7 @@ export class VerificationService {
       });
     } catch (error) {
       if (error instanceof SmsDeliveryError) {
-        if (error.kind === 'invalid_destination' || error.kind === 'rejected') {
+        if (error.kind === 'invalid_destination') {
           throw new BadRequestException(SMS_INVALID_PHONE_CLIENT_MESSAGE);
         }
         throw new ServiceUnavailableException(SMS_UNAVAILABLE_CLIENT_MESSAGE);
