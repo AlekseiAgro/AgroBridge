@@ -85,10 +85,10 @@
 ## Email notifications
 
 - `MailModule` provides `MailService` + `NotificationsService` (global).
-- Drivers: `console` (dev/default) or `smtp` via nodemailer.
-- `MAIL_DRIVER=smtp` requires `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `MAIL_FROM` at boot. Missing values fail startup; the service never falls back to console.
+- Drivers: `console` (dev/default), `resend` (HTTPS to `api.resend.com`), or `smtp` via nodemailer (legacy).
+- `MAIL_DRIVER=resend` requires `RESEND_API_KEY` and `MAIL_FROM` at boot. `MAIL_DRIVER=smtp` requires `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and `MAIL_FROM`. Missing values fail startup; the service never falls back to console.
 - `NODE_ENV=production` rejects `MAIL_DRIVER=console` unless `MAIL_ALLOW_CONSOLE=true` (explicit staging override).
-- SMTP uses TLS 1.2+, STARTTLS on 587 / SMTPS on 465, 10–20s timeouts, and a few retries on transient errors only.
+- Resend uses a 10s HTTP timeout and retries transient failures (timeouts, 429, 5xx) up to 3 attempts. SMTP keeps TLS 1.2+, STARTTLS on 587 / SMTPS on 465, 10–20s timeouts, and the same retry budget.
 - Templates are locale-aware (`ka|en|ru|de|fr|it|es`) with English fallback.
 - Events: welcome, RFQ lifecycle, product moderation (pending → admins; approved/rejected → farmer).
 - Template notifications (welcome, RFQ, harvest, chat, …) log delivery failures and do not fail the API action. Verification, email-change and account-deletion codes fail closed with a generic 503 that never includes SMTP details.

@@ -90,6 +90,8 @@ describe('PasswordResetService', () => {
       expect(result).toEqual({ ok: true });
       expect(JSON.stringify(result)).not.toContain(mailed.rawToken);
       expect(mailed.rawToken.length).toBeGreaterThanOrEqual(40);
+      expect(prisma.passwordResetToken.create).toHaveBeenCalledTimes(1);
+      expect(notifications.notifyPasswordReset).toHaveBeenCalledTimes(1);
     });
 
     it('treats email casing and padding as the same rate-limit bucket', async () => {
