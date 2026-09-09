@@ -741,6 +741,7 @@ export class ProductsService {
       mimeType: file.mimetype,
       originalName: file.originalname || 'image',
       folder: `products/${product.id}`,
+      visibility: 'public',
     });
 
     const isPrimary = existingCount === 0;
@@ -805,6 +806,7 @@ export class ProductsService {
       mimeType: file.mimetype,
       originalName: file.originalname || 'video',
       folder: `products/${product.id}/videos`,
+      visibility: 'public',
     });
 
     let enteredPending = false;
@@ -903,6 +905,7 @@ export class ProductsService {
       mimeType: file.mimetype,
       originalName: file.originalname || 'certificate',
       folder: `products/${product.id}/certificates`,
+      visibility: 'public',
     });
 
     let enteredPending = false;

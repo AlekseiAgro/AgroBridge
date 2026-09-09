@@ -235,7 +235,12 @@ describe('CabinetService', () => {
       } as Express.Multer.File),
     ).resolves.toEqual({ avatarUrl: '/api/uploads/users/user_1/new.webp' });
 
-    expect(storage.upload).toHaveBeenCalled();
+    expect(storage.upload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        folder: `users/${farmer.id}`,
+        visibility: 'public',
+      }),
+    );
     expect(prisma.user.update).toHaveBeenCalledWith({
       where: { id: 'user_1' },
       data: {

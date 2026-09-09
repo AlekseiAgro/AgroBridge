@@ -180,6 +180,7 @@ export class CabinetService {
       mimeType: file.mimetype,
       originalName: file.originalname,
       folder: `users/${user.id}`,
+      visibility: 'public',
     });
 
     try {

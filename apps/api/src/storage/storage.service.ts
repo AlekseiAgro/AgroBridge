@@ -16,10 +16,19 @@ import { randomUUID } from 'crypto';
 import { createReadStream, existsSync, promises as fs } from 'fs';
 import { dirname, extname, join, resolve, sep } from 'path';
 import type { Readable } from 'stream';
-import { STORAGE_DRIVER, type StorageDriver } from './storage.constants';
+import {
+  STORAGE_DRIVER,
+  STORAGE_VISIBILITY,
+  type StorageDriver,
+  type StorageVisibility,
+} from './storage.constants';
 
 export type StoredObject = {
   key: string;
+  /**
+   * Public fetch URL for `visibility: 'public'`. Empty for private objects —
+   * callers must use an authorized download path, never `/api/uploads/...`.
+   */
   url: string;
 };
 
@@ -90,6 +99,7 @@ export class StorageService implements OnModuleInit {
     mimeType: string;
     originalName: string;
     folder: string;
+    visibility: StorageVisibility;
   }): Promise<StoredObject> {
     const extension = this.extensionFor(params.mimeType, params.originalName);
     const key = `${params.folder.replace(/^\/+|\/+$/g, '')}/${randomUUID()}${extension}`;
@@ -98,8 +108,7 @@ export class StorageService implements OnModuleInit {
       const absolute = this.resolveLocalPath(key);
       await fs.mkdir(dirname(absolute), { recursive: true });
       await fs.writeFile(absolute, params.buffer);
-      // Same-origin path so the web app can proxy uploads in local/dev previews.
-      return { key, url: `/api/uploads/${key}` };
+      return { key, url: this.urlFor(key, params.visibility) };
     }
 
     await this.s3Client!.send(
@@ -111,7 +120,19 @@ export class StorageService implements OnModuleInit {
       }),
     );
 
-    return { key, url: `${this.publicBaseUrl}/${key}` };
+    return { key, url: this.urlFor(key, params.visibility) };
+  }
+
+  /** Public objects get a fetchable URL; private objects never do. */
+  private urlFor(key: string, visibility: StorageVisibility): string {
+    if (visibility === STORAGE_VISIBILITY.PRIVATE) {
+      return '';
+    }
+    if (this.driver === STORAGE_DRIVER.LOCAL) {
+      // Same-origin path so the web app can proxy uploads in local/dev previews.
+      return `/api/uploads/${key}`;
+    }
+    return `${this.publicBaseUrl}/${key}`;
   }
 
   async delete(key: string): Promise<void> {
@@ -182,12 +203,13 @@ export class StorageService implements OnModuleInit {
       'image/jpeg': '.jpg',
       'image/png': '.png',
       'image/webp': '.webp',
+      'application/pdf': '.pdf',
     };
     if (fromMime[mimeType]) {
       return fromMime[mimeType];
     }
     const fromName = extname(originalName).toLowerCase();
-    if (['.jpg', '.jpeg', '.png', '.webp'].includes(fromName)) {
+    if (['.jpg', '.jpeg', '.png', '.webp', '.pdf'].includes(fromName)) {
       return fromName === '.jpeg' ? '.jpg' : fromName;
     }
     return '.bin';

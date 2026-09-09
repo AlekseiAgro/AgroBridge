@@ -26,6 +26,8 @@ describe('FarmsService', () => {
     farmDocument: {
       findUnique: jest.fn(),
       findMany: jest.fn(),
+      count: jest.fn(),
+      create: jest.fn(),
     },
     product: {
       updateMany: jest.fn(),
@@ -139,6 +141,64 @@ describe('FarmsService', () => {
     expect(storage.upload).not.toHaveBeenCalled();
   });
 
+  it('uploads farm photos as public media', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
+    prisma.farmImage.count.mockResolvedValue(0);
+    storage.upload.mockResolvedValue({
+      key: 'farms/farm1/photos/a.jpg',
+      url: '/api/uploads/farms/farm1/photos/a.jpg',
+    });
+    prisma.farmImage.create.mockResolvedValue({ id: 'photo1' });
+    prisma.farm.findUnique
+      .mockResolvedValueOnce({ id: 'farm1', ownerId: 'u1' })
+      .mockResolvedValueOnce({
+        id: 'farm1',
+        ownerId: 'u1',
+        name: 'Test Farm',
+        region: null,
+        description: null,
+        foundedYear: null,
+        farmSizeHectares: null,
+        ownershipType: null,
+        exportMarkets: [],
+        history: null,
+        verificationStatus: 'unverified',
+        verificationNote: null,
+        verifiedAt: null,
+        companyRegistrationNumber: null,
+        companyRegistryValid: null,
+        createdAt: new Date(),
+        owner: { id: 'u1', displayName: 'Nino' },
+        documents: [],
+        images: [],
+        products: [],
+        _count: { products: 0 },
+      });
+
+    await service.uploadPhoto(
+      {
+        id: 'u1',
+        email: 'f@example.com',
+        role: 'farmer',
+        locale: 'ka',
+        displayName: 'Nino',
+      } as AuthenticatedUser,
+      {
+        buffer: Buffer.from('img'),
+        mimetype: 'image/jpeg',
+        originalname: 'farm.jpg',
+        size: 1024,
+      } as Express.Multer.File,
+    );
+
+    expect(storage.upload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        folder: 'farms/farm1/photos',
+        visibility: 'public',
+      }),
+    );
+  });
+
   describe('getDocumentDownload', () => {
     const storedDocument = {
       key: 'farms/farm1/documents/9f0e.bin',
@@ -234,6 +294,65 @@ describe('FarmsService', () => {
       displayName: 'Nino',
     } as AuthenticatedUser);
 
+    expect(document.url).toBe('/api/farms/documents/doc1/file');
+    expect(document.url).not.toContain('/api/uploads/');
+  });
+
+  it('uploads verification documents as private objects without a public storage url', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
+    prisma.farmDocument.count.mockResolvedValue(0);
+    storage.upload.mockResolvedValue({
+      key: 'farms/farm1/documents/abc.pdf',
+      url: '',
+    });
+    const created = {
+      id: 'doc1',
+      farmId: 'farm1',
+      title: 'ID card',
+      fileName: 'id.pdf',
+      url: '',
+      key: 'farms/farm1/documents/abc.pdf',
+      mimeType: 'application/pdf',
+      kind: 'idCard',
+      reviewStatus: 'pending',
+      reviewNote: null,
+      reviewedAt: null,
+      createdAt: new Date(),
+    };
+    prisma.farmDocument.create.mockResolvedValue(created);
+
+    const document = await service.uploadDocument(
+      {
+        id: 'u1',
+        email: 'f@example.com',
+        role: 'farmer',
+        locale: 'ka',
+        displayName: 'Nino',
+      } as AuthenticatedUser,
+      'ID card',
+      {
+        buffer: Buffer.from('pdf'),
+        mimetype: 'application/pdf',
+        originalname: 'id.pdf',
+        size: 1024,
+      } as Express.Multer.File,
+      'idCard',
+    );
+
+    expect(storage.upload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        folder: 'farms/farm1/documents',
+        visibility: 'private',
+      }),
+    );
+    expect(prisma.farmDocument.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          url: '',
+          key: 'farms/farm1/documents/abc.pdf',
+        }),
+      }),
+    );
     expect(document.url).toBe('/api/farms/documents/doc1/file');
     expect(document.url).not.toContain('/api/uploads/');
   });

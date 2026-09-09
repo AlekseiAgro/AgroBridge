@@ -407,6 +407,7 @@ export class FarmsService {
       mimeType: file.mimetype,
       originalName: file.originalname,
       folder: `farms/${farm.id}/documents`,
+      visibility: 'private',
     });
 
     const doc = await this.prisma.farmDocument.create({
@@ -414,6 +415,8 @@ export class FarmsService {
         farmId: farm.id,
         title: trimmedTitle,
         fileName: file.originalname,
+        // Column is leftover metadata. New private objects store no public URL;
+        // toDocument() exposes the P0-1 protected route instead.
         url: stored.url,
         key: stored.key,
         mimeType: file.mimetype,
@@ -493,6 +496,7 @@ export class FarmsService {
       mimeType: file.mimetype,
       originalName: file.originalname || 'farm-photo',
       folder: `farms/${farm.id}/photos`,
+      visibility: 'public',
     });
 
     const isPrimary = existingCount === 0;
