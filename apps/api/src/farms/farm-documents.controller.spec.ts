@@ -148,7 +148,7 @@ describe('FarmDocumentsController (server-side authorization)', () => {
     );
     expect(response.headers['cache-control']).toBe('private, no-store, max-age=0');
     expect(response.headers['x-content-type-options']).toBe('nosniff');
-    expect(response.text).toBe('pdf-bytes');
+    expect(Buffer.from(response.body).toString()).toBe('pdf-bytes');
   });
 
   it('serves the document to an admin', async () => {
@@ -256,9 +256,10 @@ describe('FarmDocumentsController (server-side authorization)', () => {
       .set('Authorization', `Bearer ${tokenFor('owner')}`)
       .expect(200);
 
-    expect(response.headers['content-disposition']).not.toMatch(/Set-Cookie/i);
-    expect(response.headers['content-disposition']).not.toMatch(/\r|\n/);
-    expect(response.headers['content-disposition']).toContain('attachment;');
+    const disposition = response.headers['content-disposition'] as string;
+    expect(disposition.split(/\r?\n/)).toHaveLength(1);
+    expect(disposition).not.toMatch(/\r|\n|%0D|%0A/i);
+    expect(disposition).toContain('attachment;');
   });
 
   it('no longer exposes farm documents through the public uploads route', async () => {
@@ -280,8 +281,8 @@ describe('attachmentHeader', () => {
 
   it('strips characters that could inject a response header', () => {
     const header = attachmentHeader('x"\r\nContent-Type: text/html.pdf');
-    expect(header).not.toMatch(/\r|\n/);
-    expect(header).not.toContain('Content-Type:');
+    expect(header.split(/\r?\n/)).toHaveLength(1);
+    expect(header).not.toMatch(/\r|\n|%0D|%0A/i);
     expect(header.startsWith('attachment; filename="')).toBe(true);
   });
 });

@@ -24,11 +24,12 @@ function encodeFileName(fileName: string): string {
  * could break out of the quoted string or inject a header.
  */
 export function attachmentHeader(fileName: string): string {
-  const ascii = fileName
+  const cleaned = fileName.replace(/[\r\n\0]/g, '_').slice(0, 255);
+  const ascii = cleaned
     .replace(/[^\x20-\x7e]/g, '_')
-    .replace(/["\\;\r\n]/g, '_')
+    .replace(/["\\;]/g, '_')
     .trim();
-  return `attachment; filename="${ascii || 'document'}"; filename*=UTF-8''${encodeFileName(fileName)}`;
+  return `attachment; filename="${ascii || 'document'}"; filename*=UTF-8''${encodeFileName(cleaned)}`;
 }
 
 @Controller('farms/documents')
