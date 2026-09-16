@@ -237,17 +237,18 @@
         "matched": "Registry match: {name}",
         "documentHint": "Upload your company registration certificate to confirm the company.",
         "upload": "Upload company registration",
-        "docTitle": "Company registration",
-        "uploaded": "Company registration document uploaded."
+        "docTitle": "Company registration"
       },
       "private": {
         "title": "3. Identity verification",
         "hint": "Upload an ID card to confirm your identity.",
         "upload": "Upload ID card",
-        "idTitle": "ID card",
-        "submit": "Submit for moderator review",
-        "uploaded": "ID document uploaded.",
-        "submitted": "Submitted for moderator review."
+        "idTitle": "ID card"
+      },
+      "review": {
+        "submitted": "Document received and sent for review.",
+        "received": "Document received. Confirm your email and phone number and it goes to the moderator automatically.",
+        "rejected": "Verification was rejected. Upload a new document and it is sent for review again automatically."
       },
       "pending": "Pending review",
       "approved": "Verified producer",

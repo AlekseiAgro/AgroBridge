@@ -60,6 +60,16 @@ const HARVEST_STATUS_LABELS: Record<Locale, Record<string, string>> = {
   },
 };
 
+const SELLER_TYPE_LABELS: Record<Locale, Record<'privateFarmer' | 'company', string>> = {
+  en: { privateFarmer: 'private farmer', company: 'company' },
+  ru: { privateFarmer: 'частный фермер', company: 'компания' },
+  ka: { privateFarmer: 'კერძო ფერმერი', company: 'კომპანია' },
+  de: { privateFarmer: 'Privatlandwirt', company: 'Unternehmen' },
+  fr: { privateFarmer: 'agriculteur privé', company: 'entreprise' },
+  it: { privateFarmer: 'agricoltore privato', company: 'azienda' },
+  es: { privateFarmer: 'agricultor privado', company: 'empresa' },
+};
+
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
@@ -231,6 +241,28 @@ export class NotificationsService {
         locale,
         `/dashboard/admin?section=products&status=pending`,
       ),
+    });
+  }
+
+  /**
+   * Admin alert for a producer verification that entered moderation. Carries only data the
+   * admin dashboard already shows: never the document, its storage key, or its URL.
+   */
+  async notifyVerificationPendingModeration(params: {
+    admin: MailRecipient;
+    farmId: string;
+    farmName: string;
+    sellerType: 'privateFarmer' | 'company';
+    submittedAt: Date;
+  }): Promise<void> {
+    const locale = this.localeOf(params.admin.locale);
+    await this.sendTemplate(params.admin, 'verificationPendingModeration', {
+      name: this.displayName(params.admin),
+      farmName: params.farmName,
+      farmId: params.farmId,
+      sellerType: SELLER_TYPE_LABELS[locale][params.sellerType],
+      submittedAt: this.formatTimestamp(params.submittedAt, locale),
+      link: this.appLink(locale, '/dashboard/admin?section=farms&status=documents'),
     });
   }
 
@@ -521,6 +553,14 @@ export class NotificationsService {
         error instanceof Error ? error.stack : String(error),
       );
     }
+  }
+
+  private formatTimestamp(value: Date, locale: Locale): string {
+    return `${new Intl.DateTimeFormat(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: 'UTC',
+    }).format(value)} UTC`;
   }
 
   private harvestStatusLabel(status: string, locale: Locale): string {

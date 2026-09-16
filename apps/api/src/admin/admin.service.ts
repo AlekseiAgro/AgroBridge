@@ -572,6 +572,10 @@ export class AdminService {
       await this.verification.tryCompleteVerification(existing.farm.ownerId);
     }
 
+    if (!approve && existing.kind !== 'other') {
+      await this.verification.syncAfterIdentityDocumentRejected(existing.farm.ownerId);
+    }
+
     return this.toFarmDocument(doc);
   }
 

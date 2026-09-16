@@ -13,8 +13,13 @@ describe('AdminService', () => {
     user: { count: jest.fn(), findMany: jest.fn() },
     rfq: { count: jest.fn() },
     purchaseRequest: { count: jest.fn() },
-    farmDocument: { count: jest.fn() },
+    farmDocument: { count: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
     productCertificate: { findUnique: jest.fn(), update: jest.fn(), updateMany: jest.fn() },
+  };
+
+  const verification = {
+    tryCompleteVerification: jest.fn().mockResolvedValue(undefined),
+    syncAfterIdentityDocumentRejected: jest.fn().mockResolvedValue(undefined),
   };
 
   const notifications = {
@@ -38,7 +43,7 @@ describe('AdminService', () => {
       prisma as never,
       notifications as never,
       { notifyNewProduct: jest.fn().mockResolvedValue(undefined) } as never,
-      { tryCompleteVerification: jest.fn().mockResolvedValue(undefined) } as never,
+      verification as never,
       { dispatchHarvestWatchNotifications: jest.fn().mockResolvedValue(undefined) } as never,
     );
   });
@@ -153,5 +158,66 @@ describe('AdminService', () => {
       service.reviewCertificate(admin, '../etc/passwd', true, {}),
     ).rejects.toBeInstanceOf(NotFoundException);
     expect(prisma.productCertificate.findUnique).not.toHaveBeenCalled();
+  });
+
+  describe('verification document review', () => {
+    const reviewedDocument = (reviewStatus: 'approved' | 'rejected') => ({
+      id: 'doc1',
+      farmId: 'farm1',
+      title: 'ID card',
+      fileName: 'id.pdf',
+      mimeType: 'application/pdf',
+      kind: 'idCard',
+      reviewStatus,
+      reviewNote: reviewStatus === 'rejected' ? 'illegible scan' : null,
+      reviewedAt: new Date('2026-09-16T10:30:00.000Z'),
+      createdAt: new Date('2026-09-16T10:00:00.000Z'),
+    });
+
+    it('re-runs verification completion when an ID card is approved', async () => {
+      prisma.farmDocument.findUnique.mockResolvedValue({
+        id: 'doc1',
+        kind: 'idCard',
+        farm: { ownerId: 'owner1' },
+      });
+      prisma.farmDocument.update.mockResolvedValue(reviewedDocument('approved'));
+
+      await service.reviewDocument(admin, 'doc1', true, {});
+
+      expect(verification.tryCompleteVerification).toHaveBeenCalledWith('owner1');
+      expect(verification.syncAfterIdentityDocumentRejected).not.toHaveBeenCalled();
+    });
+
+    it('drops the farm out of moderation when the identity document is rejected', async () => {
+      prisma.farmDocument.findUnique.mockResolvedValue({
+        id: 'doc1',
+        kind: 'idCard',
+        farm: { ownerId: 'owner1' },
+      });
+      prisma.farmDocument.update.mockResolvedValue(reviewedDocument('rejected'));
+
+      await service.reviewDocument(admin, 'doc1', false, { note: 'illegible scan' });
+
+      expect(verification.syncAfterIdentityDocumentRejected).toHaveBeenCalledWith('owner1');
+      expect(verification.tryCompleteVerification).not.toHaveBeenCalled();
+    });
+
+    it('leaves verification state alone for supporting documents', async () => {
+      prisma.farmDocument.findUnique.mockResolvedValue({
+        id: 'doc2',
+        kind: 'other',
+        farm: { ownerId: 'owner1' },
+      });
+      prisma.farmDocument.update.mockResolvedValue({
+        ...reviewedDocument('rejected'),
+        id: 'doc2',
+        kind: 'other',
+      });
+
+      await service.reviewDocument(admin, 'doc2', false, {});
+
+      expect(verification.syncAfterIdentityDocumentRejected).not.toHaveBeenCalled();
+      expect(verification.tryCompleteVerification).not.toHaveBeenCalled();
+    });
   });
 });

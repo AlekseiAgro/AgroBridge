@@ -47,6 +47,10 @@ const en: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'Product awaiting review: {{productTitle}}',
     text: 'Hello {{name}},\n\n{{sellerName}} submitted “{{productTitle}}” for moderation.\n\nOpen admin review queue: {{link}}\n\n— AgroBridge',
   },
+  verificationPendingModeration: {
+    subject: 'New producer verification request: {{farmName}}',
+    text: 'Hello {{name}},\n\nA producer submitted verification documents for review.\n\nFarm: {{farmName}} (ID {{farmId}})\nSeller type: {{sellerType}}\nSubmitted: {{submittedAt}}\n\nOpen the verification queue: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "New catalog listing: {{productTitle}}",
     text: "Hello {{name}},\n\nA new product matching your alert is in the AgroBridge catalog.\n\n{{productTitle}} from {{farmName}}{{categoryPart}}{{regionPart}}.\n\nView listing: {{link}}\n\nManage alerts: {{settingsLink}}\n\n— AgroBridge",
@@ -126,6 +130,10 @@ const ru: Record<EmailTemplateKey, EmailTemplate> = {
   productPendingModeration: {
     subject: 'Товар на модерации: {{productTitle}}',
     text: 'Здравствуйте, {{name}}!\n\n{{sellerName}} отправил(а) «{{productTitle}}» на модерацию.\n\nОткрыть очередь модерации: {{link}}\n\n— AgroBridge',
+  },
+  verificationPendingModeration: {
+    subject: 'Новая заявка на проверку производителя: {{farmName}}',
+    text: 'Здравствуйте, {{name}}!\n\nПроизводитель отправил документы на проверку.\n\nХозяйство: {{farmName}} (ID {{farmId}})\nТип продавца: {{sellerType}}\nОтправлено: {{submittedAt}}\n\nОткрыть очередь проверки: {{link}}\n\n— AgroBridge',
   },
   newProductListing: {
     subject: "Новое объявление: {{productTitle}}",
@@ -207,6 +215,10 @@ const de: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'Produkt zur Prüfung: {{productTitle}}',
     text: 'Hallo {{name}},\n\n{{sellerName}} hat „{{productTitle}}“ zur Moderation eingereicht.\n\nPrüfwarteschlange öffnen: {{link}}\n\n— AgroBridge',
   },
+  verificationPendingModeration: {
+    subject: 'Neue Produzenten-Verifizierung: {{farmName}}',
+    text: 'Hallo {{name}},\n\nEin Produzent hat Verifizierungsdokumente zur Prüfung eingereicht.\n\nBetrieb: {{farmName}} (ID {{farmId}})\nVerkäufertyp: {{sellerType}}\nEingereicht: {{submittedAt}}\n\nPrüfwarteschlange öffnen: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "Neues Angebot: {{productTitle}}",
     text: "Hallo {{name}},\n\nEin neues Produkt passend zu Ihrem Alert ist im AgroBridge-Katalog.\n\n{{productTitle}} von {{farmName}}{{categoryPart}}{{regionPart}}.\n\nAngebot öffnen: {{link}}\n\nAlerts verwalten: {{settingsLink}}\n\n— AgroBridge",
@@ -286,6 +298,10 @@ const fr: Record<EmailTemplateKey, EmailTemplate> = {
   productPendingModeration: {
     subject: 'Produit en attente de validation : {{productTitle}}',
     text: 'Bonjour {{name}},\n\n{{sellerName}} a soumis « {{productTitle}} » pour modération.\n\nOuvrir la file de modération : {{link}}\n\n— AgroBridge',
+  },
+  verificationPendingModeration: {
+    subject: 'Nouvelle demande de vérification producteur : {{farmName}}',
+    text: 'Bonjour {{name}},\n\nUn producteur a soumis des documents de vérification.\n\nExploitation : {{farmName}} (ID {{farmId}})\nType de vendeur : {{sellerType}}\nSoumis le : {{submittedAt}}\n\nOuvrir la file de vérification : {{link}}\n\n— AgroBridge',
   },
   newProductListing: {
     subject: "Nouvelle annonce : {{productTitle}}",
@@ -367,6 +383,10 @@ const it: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'Prodotto in revisione: {{productTitle}}',
     text: 'Ciao {{name}},\n\n{{sellerName}} ha inviato «{{productTitle}}» in moderazione.\n\nApri la coda di moderazione: {{link}}\n\n— AgroBridge',
   },
+  verificationPendingModeration: {
+    subject: 'Nuova richiesta di verifica produttore: {{farmName}}',
+    text: 'Ciao {{name}},\n\nUn produttore ha inviato i documenti di verifica per la revisione.\n\nAzienda agricola: {{farmName}} (ID {{farmId}})\nTipo di venditore: {{sellerType}}\nInviato: {{submittedAt}}\n\nApri la coda di verifica: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "Nuovo annuncio: {{productTitle}}",
     text: "Ciao {{name}},\n\nUn nuovo prodotto corrispondente al tuo avviso è nel catalogo AgroBridge.\n\n{{productTitle}} di {{farmName}}{{categoryPart}}{{regionPart}}.\n\nVedi annuncio: {{link}}\n\nGestisci avvisi: {{settingsLink}}\n\n— AgroBridge",
@@ -447,6 +467,10 @@ const es: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'Producto pendiente de revisión: {{productTitle}}',
     text: 'Hola {{name}},\n\n{{sellerName}} ha enviado «{{productTitle}}» a moderación.\n\nAbrir la cola de moderación: {{link}}\n\n— AgroBridge',
   },
+  verificationPendingModeration: {
+    subject: 'Nueva solicitud de verificación de productor: {{farmName}}',
+    text: 'Hola {{name}},\n\nUn productor ha enviado documentos de verificación para su revisión.\n\nGranja: {{farmName}} (ID {{farmId}})\nTipo de vendedor: {{sellerType}}\nEnviado: {{submittedAt}}\n\nAbrir la cola de verificación: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "Nuevo anuncio: {{productTitle}}",
     text: "Hola {{name}},\n\nHay un nuevo producto de tu alerta en el catálogo de AgroBridge.\n\n{{productTitle}} de {{farmName}}{{categoryPart}}{{regionPart}}.\n\nVer anuncio: {{link}}\n\nGestionar alertas: {{settingsLink}}\n\n— AgroBridge",
@@ -526,6 +550,10 @@ const ka: Record<EmailTemplateKey, EmailTemplate> = {
   productPendingModeration: {
     subject: 'პროდუქტი მოდერაციაზე: {{productTitle}}',
     text: 'გამარჯობა, {{name}}!\n\n{{sellerName}}-მა გააგზავნა „{{productTitle}}“ მოდერაციაზე.\n\nმოდერაციის რიგის გახსნა: {{link}}\n\n— AgroBridge',
+  },
+  verificationPendingModeration: {
+    subject: 'მწარმოებლის ვერიფიკაციის ახალი განაცხადი: {{farmName}}',
+    text: 'გამარჯობა, {{name}}!\n\nმწარმოებელმა გამოაგზავნა ვერიფიკაციის დოკუმენტები შესამოწმებლად.\n\nმეურნეობა: {{farmName}} (ID {{farmId}})\nგამყიდველის ტიპი: {{sellerType}}\nგაგზავნილია: {{submittedAt}}\n\nვერიფიკაციის რიგის გახსნა: {{link}}\n\n— AgroBridge',
   },
   newProductListing: {
     subject: "ახალი განცხადება: {{productTitle}}",

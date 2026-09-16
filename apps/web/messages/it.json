@@ -237,17 +237,18 @@
         "matched": "Registry match: {name}",
         "documentHint": "Carica il certificato di registrazione dell’azienda per confermare l’organizzazione.",
         "upload": "Carica registrazione aziendale",
-        "docTitle": "Registrazione aziendale",
-        "uploaded": "Documento di registrazione aziendale caricato."
+        "docTitle": "Registrazione aziendale"
       },
       "private": {
         "title": "3. Verifica dell’identità",
         "hint": "Carica la carta d’identità per confermare l’identità.",
         "upload": "Carica carta d’identità",
-        "idTitle": "Carta d’identità",
-        "submit": "Invia al moderatore",
-        "uploaded": "Documento di identità caricato.",
-        "submitted": "Inviato al controllo del moderatore."
+        "idTitle": "Carta d’identità"
+      },
+      "review": {
+        "submitted": "Documento ricevuto e inviato alla verifica.",
+        "received": "Documento ricevuto. Conferma email e telefono: verrà poi inviato automaticamente al moderatore.",
+        "rejected": "La verifica è stata rifiutata. Carica un nuovo documento: verrà inviato automaticamente a una nuova verifica."
       },
       "pending": "Pending review",
       "approved": "Verified producer",

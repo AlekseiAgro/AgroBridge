@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import type {
@@ -34,6 +35,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
 import { StorageService } from '../storage/storage.service';
 import { STORAGE_VISIBILITY } from '../storage/storage.constants';
+import { VerificationService } from '../verification/verification.service';
 import {
   mapProductSummary,
   sanitizeStringArray,
@@ -67,10 +69,13 @@ const farmImagesInclude = {
 
 @Injectable()
 export class FarmsService {
+  private readonly logger = new Logger(FarmsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly ratings: RatingsService,
     private readonly storage: StorageService,
+    private readonly verification: VerificationService,
   ) {}
 
   async list(): Promise<FarmSummary[]> {
@@ -425,6 +430,19 @@ export class FarmsService {
         reviewStatus: DocumentReviewStatus.pending,
       },
     });
+
+    // Uploading an identity document is the submission itself. The stored document must
+    // survive a failing transition or mail outage, so this never rejects the upload.
+    if (kind === FarmDocumentKind.idCard || kind === FarmDocumentKind.businessRegistration) {
+      try {
+        await this.verification.ensureIdentityReviewSubmitted(user.id);
+      } catch (error) {
+        this.logger.error(
+          `Verification submission failed after upload for farm ${farm.id}`,
+          error instanceof Error ? error.name : 'unknown error',
+        );
+      }
+    }
 
     return this.toDocument(doc);
   }

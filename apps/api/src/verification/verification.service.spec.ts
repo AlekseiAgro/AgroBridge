@@ -7,11 +7,16 @@ describe('VerificationService', () => {
   const prisma = {
     user: {
       findUnique: jest.fn(),
+      findMany: jest.fn(),
       update: jest.fn(),
     },
     farm: {
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
+    },
+    farmDocument: {
+      updateMany: jest.fn(),
     },
   };
 
@@ -24,6 +29,7 @@ describe('VerificationService', () => {
 
   const notifications = {
     notifyVerificationCode: jest.fn().mockResolvedValue(undefined),
+    notifyVerificationPendingModeration: jest.fn().mockResolvedValue(undefined),
   };
   const sms = { send: jest.fn().mockResolvedValue(undefined) };
   const registry = {
@@ -54,6 +60,11 @@ describe('VerificationService', () => {
     jest.clearAllMocks();
     codes.issue.mockResolvedValue('123456');
     codes.consume.mockResolvedValue({ id: 'c1', destination: 'farmer@example.com' });
+    prisma.farm.updateMany.mockResolvedValue({ count: 1 });
+    prisma.farmDocument.updateMany.mockResolvedValue({ count: 1 });
+    prisma.user.findMany.mockResolvedValue([
+      { email: 'admin@agrobridge.ge', locale: 'ru', displayName: 'Admin' },
+    ]);
     service = new VerificationService(
       prisma as never,
       notifications as never,
@@ -556,7 +567,7 @@ describe('VerificationService', () => {
     expect(prisma.user.update).not.toHaveBeenCalled();
   });
 
-  it('still submits private farmer review on the privateFarmer path', async () => {
+  it('replays the same idempotent transition for the legacy submit endpoint', async () => {
     const privateUser = {
       id: 'u1',
       email: 'farmer@example.com',
@@ -571,28 +582,240 @@ describe('VerificationService', () => {
     prisma.farm.findUnique.mockResolvedValue({
       id: 'farm1',
       ownerId: 'u1',
+      name: 'Kakheti Farm',
       verificationStatus: 'unverified',
       verificationNote: null,
       companyRegistrationNumber: null,
       companyRegistryName: null,
       companyRegistryValid: null,
-      documents: [{ kind: 'idCard', reviewStatus: 'pending' }],
+      documents: [
+        { id: 'doc1', kind: 'idCard', reviewStatus: 'pending', createdAt: new Date() },
+      ],
     });
-    prisma.farm.update.mockResolvedValue({});
 
     const status = await service.submitPrivateFarmerReview(farmer);
 
-    expect(prisma.farm.update).toHaveBeenCalledWith({
-      where: { id: 'farm1' },
-      data: {
-        verificationStatus: 'pending',
-        verificationNote: 'Awaiting moderator review of ID document',
-        verifiedAt: null,
-        verifiedById: null,
+    expect(prisma.farm.updateMany).toHaveBeenCalledWith({
+      where: {
+        id: 'farm1',
+        verificationStatus: { in: ['unverified', 'rejected'] },
       },
+      data: expect.objectContaining({ verificationStatus: 'pending' }),
     });
     expect(status.path).toBe('privateFarmer');
     expect(status.sellerTypeLocked).toBe(true);
+  });
+
+  describe('identity review submission', () => {
+    const submittedAt = new Date('2026-09-16T10:30:00.000Z');
+
+    const producer = (overrides: Record<string, unknown> = {}) => ({
+      id: 'u1',
+      email: 'farmer@example.com',
+      locale: 'en',
+      displayName: 'Farmer',
+      emailVerifiedAt: new Date(),
+      phone: '+995500000000',
+      phoneVerifiedAt: new Date(),
+      sellerType: 'privateFarmer',
+      ...overrides,
+    });
+
+    const farmWithPendingId = (overrides: Record<string, unknown> = {}) => ({
+      id: 'farm1',
+      ownerId: 'u1',
+      name: 'Kakheti Farm',
+      verificationStatus: 'unverified',
+      verificationNote: null,
+      companyRegistrationNumber: null,
+      companyRegistryName: null,
+      companyRegistryValid: null,
+      documents: [
+        {
+          id: 'doc1',
+          kind: 'idCard',
+          reviewStatus: 'pending',
+          createdAt: submittedAt,
+          key: 'farms/farm1/documents/secret.pdf',
+          url: '/api/uploads/farms/farm1/documents/secret.pdf',
+        },
+      ],
+      ...overrides,
+    });
+
+    it('moves the farm into moderation and notifies admins once', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(farmWithPendingId());
+
+      await service.ensureIdentityReviewSubmitted('u1');
+
+      expect(prisma.farm.updateMany).toHaveBeenCalledWith({
+        where: { id: 'farm1', verificationStatus: { in: ['unverified', 'rejected'] } },
+        data: {
+          verificationStatus: 'pending',
+          verificationNote: 'Awaiting moderator review of the verification document',
+          verifiedAt: null,
+          verifiedById: null,
+        },
+      });
+      expect(prisma.farmDocument.updateMany).toHaveBeenCalledWith({
+        where: { id: 'doc1', moderationNotifiedAt: null },
+        data: { moderationNotifiedAt: expect.any(Date) },
+      });
+      expect(notifications.notifyVerificationPendingModeration).toHaveBeenCalledTimes(1);
+      expect(notifications.notifyVerificationPendingModeration).toHaveBeenCalledWith({
+        admin: { email: 'admin@agrobridge.ge', locale: 'ru', displayName: 'Admin' },
+        farmId: 'farm1',
+        farmName: 'Kakheti Farm',
+        sellerType: 'privateFarmer',
+        submittedAt,
+      });
+    });
+
+    it('never puts document contents, storage keys, or URLs in the notification', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(farmWithPendingId());
+
+      await service.ensureIdentityReviewSubmitted('u1');
+
+      const payload = JSON.stringify(
+        notifications.notifyVerificationPendingModeration.mock.calls[0][0],
+      );
+      expect(payload).not.toContain('secret.pdf');
+      expect(payload).not.toContain('farms/farm1/documents');
+      expect(payload).not.toContain('/api/uploads/');
+    });
+
+    it('does not notify twice for the same submitted document', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(
+        farmWithPendingId({ verificationStatus: 'pending' }),
+      );
+      prisma.farmDocument.updateMany.mockResolvedValue({ count: 0 });
+
+      await service.ensureIdentityReviewSubmitted('u1');
+
+      expect(notifications.notifyVerificationPendingModeration).not.toHaveBeenCalled();
+    });
+
+    it('notifies again when a new document is uploaded after a rejection', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(
+        farmWithPendingId({
+          verificationStatus: 'rejected',
+          documents: [
+            { id: 'doc2', kind: 'idCard', reviewStatus: 'pending', createdAt: submittedAt },
+          ],
+        }),
+      );
+
+      await service.ensureIdentityReviewSubmitted('u1');
+
+      expect(prisma.farmDocument.updateMany).toHaveBeenCalledWith({
+        where: { id: 'doc2', moderationNotifiedAt: null },
+        data: { moderationNotifiedAt: expect.any(Date) },
+      });
+      expect(notifications.notifyVerificationPendingModeration).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits for email and SMS before entering the moderation queue', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer({ phoneVerifiedAt: null }));
+      prisma.farm.findUnique.mockResolvedValue(farmWithPendingId());
+
+      await service.ensureIdentityReviewSubmitted('u1');
+
+      expect(prisma.farm.updateMany).not.toHaveBeenCalled();
+      expect(notifications.notifyVerificationPendingModeration).not.toHaveBeenCalled();
+    });
+
+    it('does nothing without a pending primary document', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(farmWithPendingId({ documents: [] }));
+
+      await service.ensureIdentityReviewSubmitted('u1');
+
+      expect(prisma.farm.updateMany).not.toHaveBeenCalled();
+      expect(notifications.notifyVerificationPendingModeration).not.toHaveBeenCalled();
+    });
+
+    it('leaves an approved farm untouched', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(
+        farmWithPendingId({ verificationStatus: 'approved' }),
+      );
+
+      await service.ensureIdentityReviewSubmitted('u1');
+
+      expect(prisma.farm.updateMany).not.toHaveBeenCalled();
+      expect(notifications.notifyVerificationPendingModeration).not.toHaveBeenCalled();
+    });
+
+    it('submits automatically once the last contact channel is confirmed', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(farmWithPendingId());
+      prisma.user.update.mockResolvedValue({});
+
+      await service.confirmSmsCode(farmer, '123456', '203.0.113.7');
+
+      expect(notifications.notifyVerificationPendingModeration).toHaveBeenCalledTimes(1);
+    });
+
+    it('never writes or notifies while reading the verification status', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(
+        farmWithPendingId({ verificationStatus: 'pending' }),
+      );
+
+      const status = await service.getStatus(farmer);
+
+      expect(status.steps.identity).toBe('pending_review');
+      expect(status.hasPendingVerificationDocument).toBe(true);
+      expect(prisma.farm.update).not.toHaveBeenCalled();
+      expect(prisma.farm.updateMany).not.toHaveBeenCalled();
+      expect(prisma.farmDocument.updateMany).not.toHaveBeenCalled();
+      expect(notifications.notifyVerificationPendingModeration).not.toHaveBeenCalled();
+    });
+
+    it('keeps the upload stored when admin mail delivery fails', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(farmWithPendingId());
+      notifications.notifyVerificationPendingModeration.mockRejectedValueOnce(
+        new Error('smtp down'),
+      );
+
+      await expect(service.ensureIdentityReviewSubmitted('u1')).resolves.toBeUndefined();
+      expect(prisma.farm.updateMany).toHaveBeenCalled();
+    });
+
+    it('marks the farm rejected when the only submitted document is rejected', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(
+        farmWithPendingId({ verificationStatus: 'pending', documents: [] }),
+      );
+      prisma.farm.update.mockResolvedValue({});
+
+      await service.syncAfterIdentityDocumentRejected('u1');
+
+      expect(prisma.farm.update).toHaveBeenCalledWith({
+        where: { id: 'farm1' },
+        data: {
+          verificationStatus: 'rejected',
+          verificationNote: 'Verification document rejected',
+          verifiedAt: null,
+        },
+      });
+    });
+
+    it('stays pending while another submitted document is still in review', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(
+        farmWithPendingId({ verificationStatus: 'pending' }),
+      );
+
+      await service.syncAfterIdentityDocumentRejected('u1');
+
+      expect(prisma.farm.update).not.toHaveBeenCalled();
+    });
   });
 
   it('still checks the company registry on the company path', async () => {

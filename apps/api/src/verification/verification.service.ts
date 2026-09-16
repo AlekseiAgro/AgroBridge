@@ -2,10 +2,18 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { canTrade, isSellerType, normalizeInternationalPhone, type ProducerVerificationStatus, type SellerType } from '@agrobridge/shared';
+import {
+  canTrade,
+  isSellerType,
+  normalizeInternationalPhone,
+  PRIMARY_VERIFICATION_DOCUMENT_KIND,
+  type ProducerVerificationStatus,
+  type SellerType,
+} from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
   FarmDocumentKind,
@@ -27,6 +35,8 @@ import { VerificationCodeService } from './verification-code.service';
 
 @Injectable()
 export class VerificationService {
+  private readonly logger = new Logger(VerificationService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
@@ -73,6 +83,14 @@ export class VerificationService {
           ? 'privateFarmer'
           : 'unknown';
 
+    const primaryKind = sellerType ? PRIMARY_VERIFICATION_DOCUMENT_KIND[sellerType] : null;
+    const hasPendingVerificationDocument = Boolean(
+      primaryKind &&
+      farm?.documents.some(
+        (doc) => doc.kind === primaryKind && doc.reviewStatus === DocumentReviewStatus.pending,
+      ),
+    );
+
     let identity: ProducerVerificationStatus['steps']['identity'] = 'todo';
     if (path === 'company') {
       if (farm?.companyRegistryValid === true) identity = 'done';
@@ -105,6 +123,7 @@ export class VerificationService {
       companyRegistryValid: farm?.companyRegistryValid ?? null,
       hasApprovedIdDocument,
       hasPendingIdDocument,
+      hasPendingVerificationDocument,
       sellerTypeLocked: this.isSellerTypeChangeLocked(farm, sellerType),
       path,
       steps: {
@@ -163,6 +182,7 @@ export class VerificationService {
       data: { emailVerifiedAt: new Date() },
     });
     await this.tryCompleteVerification(user.id);
+    await this.ensureIdentityReviewSubmitted(user.id);
     return this.getStatus(user);
   }
 
@@ -229,6 +249,7 @@ export class VerificationService {
       data: { phoneVerifiedAt: new Date() },
     });
     await this.tryCompleteVerification(user.id);
+    await this.ensureIdentityReviewSubmitted(user.id);
     return this.getStatus(user);
   }
 
@@ -315,6 +336,11 @@ export class VerificationService {
     return this.getStatus(user);
   }
 
+  /**
+   * Legacy explicit submission endpoint. Uploading the identity document already
+   * submits the review, so this only validates the private-farmer preconditions and
+   * replays the same idempotent transition for API clients that still call it.
+   */
   async submitPrivateFarmerReview(
     user: AuthenticatedUser,
   ): Promise<ProducerVerificationStatus> {
@@ -345,17 +371,138 @@ export class VerificationService {
       throw new BadRequestException('Upload an ID card document before submitting');
     }
 
-    await this.prisma.farm.update({
-      where: { id: farm.id },
+    await this.ensureIdentityReviewSubmitted(user.id);
+
+    return this.getStatus(user);
+  }
+
+  /**
+   * Authoritative submission transition. Uploading a primary identity document puts the
+   * farm into moderation and notifies admins exactly once per submitted document.
+   *
+   * Only write paths call this (document upload, email/SMS confirmation). Reads such as
+   * GET /verification/me never reach it, so refreshes and polling cannot notify anyone.
+   */
+  async ensureIdentityReviewSubmitted(userId: string): Promise<void> {
+    const dbUser = await this.prisma.user.findUnique({ where: { id: userId } });
+    const sellerType = (dbUser?.sellerType as SellerType | null) ?? null;
+    if (!dbUser || !sellerType) return;
+    // Email and SMS remain mandatory before a producer enters the moderation queue.
+    if (!dbUser.emailVerifiedAt || !dbUser.phoneVerifiedAt) return;
+
+    const primaryKind = PRIMARY_VERIFICATION_DOCUMENT_KIND[sellerType] as FarmDocumentKind;
+    const farm = await this.prisma.farm.findUnique({
+      where: { ownerId: userId },
+      include: {
+        documents: {
+          where: { kind: primaryKind, reviewStatus: DocumentReviewStatus.pending },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+    if (!farm || farm.verificationStatus === VerificationStatus.approved) return;
+
+    const document = farm.documents[0];
+    if (!document) return;
+
+    await this.prisma.farm.updateMany({
+      where: {
+        id: farm.id,
+        verificationStatus: {
+          in: [VerificationStatus.unverified, VerificationStatus.rejected],
+        },
+      },
       data: {
         verificationStatus: VerificationStatus.pending,
-        verificationNote: 'Awaiting moderator review of ID document',
+        verificationNote: 'Awaiting moderator review of the verification document',
         verifiedAt: null,
         verifiedById: null,
       },
     });
 
-    return this.getStatus(user);
+    // The conditional update is the idempotency claim: only the request that flips
+    // moderationNotifiedAt from null sends the email.
+    const claimed = await this.prisma.farmDocument.updateMany({
+      where: { id: document.id, moderationNotifiedAt: null },
+      data: { moderationNotifiedAt: new Date() },
+    });
+    if (claimed.count !== 1) return;
+
+    await this.notifyAdminsVerificationPending({
+      farmId: farm.id,
+      farmName: farm.name,
+      sellerType,
+      submittedAt: document.createdAt,
+    });
+  }
+
+  /**
+   * Keeps the farm-level state consistent with the moderator's document decision so the
+   * seller never sees "pending" while the only submitted document was rejected.
+   */
+  async syncAfterIdentityDocumentRejected(userId: string): Promise<void> {
+    const dbUser = await this.prisma.user.findUnique({ where: { id: userId } });
+    const sellerType = (dbUser?.sellerType as SellerType | null) ?? null;
+    if (!dbUser || !sellerType) return;
+
+    const primaryKind = PRIMARY_VERIFICATION_DOCUMENT_KIND[sellerType] as FarmDocumentKind;
+    const farm = await this.prisma.farm.findUnique({
+      where: { ownerId: userId },
+      include: {
+        documents: {
+          where: {
+            kind: primaryKind,
+            reviewStatus: {
+              in: [DocumentReviewStatus.pending, DocumentReviewStatus.approved],
+            },
+          },
+        },
+      },
+    });
+    if (!farm || farm.verificationStatus !== VerificationStatus.pending) return;
+    if (farm.documents.length > 0) return;
+
+    await this.prisma.farm.update({
+      where: { id: farm.id },
+      data: {
+        verificationStatus: VerificationStatus.rejected,
+        verificationNote: 'Verification document rejected',
+        verifiedAt: null,
+      },
+    });
+  }
+
+  /** Best-effort: a mail failure must not undo a stored document or state transition. */
+  private async notifyAdminsVerificationPending(params: {
+    farmId: string;
+    farmName: string;
+    sellerType: SellerType;
+    submittedAt: Date;
+  }): Promise<void> {
+    try {
+      const admins = await this.prisma.user.findMany({
+        where: { role: 'admin', blockedAt: null },
+        select: { email: true, locale: true, displayName: true },
+      });
+
+      await Promise.all(
+        admins.map((admin) =>
+          this.notifications.notifyVerificationPendingModeration({
+            admin,
+            farmId: params.farmId,
+            farmName: params.farmName,
+            sellerType: params.sellerType,
+            submittedAt: params.submittedAt,
+          }),
+        ),
+      );
+    } catch (error) {
+      // Never log document contents, keys, or URLs: only the farm id and the error name.
+      this.logger.error(
+        `Failed to notify admins about verification submission for farm ${params.farmId}`,
+        error instanceof Error ? error.name : 'unknown error',
+      );
+    }
   }
 
   /** Called after admin approves farm or ID document. */
