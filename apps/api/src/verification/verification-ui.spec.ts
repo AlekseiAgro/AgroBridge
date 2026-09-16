@@ -13,11 +13,19 @@ type Messages = {
   farm: {
     verification: {
       review: Record<string, string>;
+      reason: Record<string, string>;
       private: Record<string, string>;
       company: Record<string, string>;
     };
   };
 };
+
+const REASON_CODES = [
+  'documentRejected',
+  'registryNotConfirmed',
+  'contactConfirmationRequired',
+  'moderatorRejected',
+] as const;
 
 function messages(locale: string): Messages {
   return JSON.parse(readFileSync(join(webRoot, `messages/${locale}.json`), 'utf8')) as Messages;
@@ -42,6 +50,17 @@ describe('ProducerVerificationPanel submission UI', () => {
     expect(panel).toContain("status.verified || status.steps.identity === 'done'");
   });
 
+  it('explains a refusal with a translated reason code and the moderator comment', () => {
+    expect(panel).toContain('t(`reason.${status.verificationReasonCode}`)');
+    expect(panel).toContain("t('reason.moderatorComment')");
+    expect(panel).toContain('status.moderatorComment');
+  });
+
+  it('keeps the company registry form tied to the registry check, not the whole step', () => {
+    expect(panel).toContain('status.companyRegistryValid !== true');
+    expect(panel).toContain("t('company.documentRequired')");
+  });
+
   it('still uploads identity documents through the protected farm documents route', () => {
     expect(panel).toContain("fetch('/api/farms/me/documents', { method: 'POST', body })");
     expect(panel).toContain("body.set('kind', kind)");
@@ -61,6 +80,23 @@ describe('verification review copy', () => {
     expect(verification.private.submitted).toBeUndefined();
     expect(verification.private.uploaded).toBeUndefined();
     expect(verification.company.uploaded).toBeUndefined();
+  });
+
+  it.each(LOCALES)('%s translates every verification reason code', (locale) => {
+    const verification = messages(locale).farm.verification;
+
+    expect(Object.keys(verification.reason).sort()).toEqual(
+      ['label', 'moderatorComment', ...REASON_CODES].sort(),
+    );
+    for (const value of Object.values(verification.reason)) {
+      expect(value.trim().length).toBeGreaterThan(0);
+    }
+    expect(verification.company.documentRequired.trim().length).toBeGreaterThan(0);
+  });
+
+  it('keeps every locale on its own reason wording', () => {
+    const rejected = LOCALES.map((locale) => messages(locale).farm.verification.reason.documentRejected);
+    expect(new Set(rejected).size).toBe(LOCALES.length);
   });
 
   it('uses the agreed Russian wording for a submitted document', () => {

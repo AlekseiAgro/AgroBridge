@@ -487,6 +487,18 @@ export class FarmsService {
       throw new NotFoundException('Document not found');
     }
 
+    // An approved producer must keep the evidence its badge rests on. Without this the seller
+    // could end up verified with no verification document at all.
+    if (
+      isPrimaryVerificationDocumentKind(doc.kind) &&
+      doc.reviewStatus === DocumentReviewStatus.approved &&
+      farm.verificationStatus === PrismaVerificationStatus.approved
+    ) {
+      throw new BadRequestException(
+        'The approved verification document cannot be deleted while the producer is verified',
+      );
+    }
+
     await this.storage.delete(doc.key, STORAGE_VISIBILITY.PRIVATE);
     await this.prisma.farmDocument.delete({ where: { id: doc.id } });
 

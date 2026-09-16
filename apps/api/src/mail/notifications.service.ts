@@ -8,6 +8,7 @@ import {
   isLocale,
   localizeProductTitle,
   type UserNotificationItem,
+  type VerificationReasonCode,
 } from '@agrobridge/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { renderEmailTemplate } from './email-templates';
@@ -58,6 +59,75 @@ const HARVEST_STATUS_LABELS: Record<Locale, Record<string, string>> = {
     limited: 'limitado',
     soldOut: 'agotado',
   },
+};
+
+/**
+ * Producer-facing wording for a verification refusal. The stored reason is a code, so the
+ * seller always reads their own language instead of the moderation internals.
+ */
+const VERIFICATION_REASON_LABELS: Record<
+  Locale,
+  Record<VerificationReasonCode | 'unspecified', string>
+> = {
+  en: {
+    documentRejected: 'The verification document was not accepted by the moderator.',
+    registryNotConfirmed: 'The company registration could not be confirmed.',
+    contactConfirmationRequired: 'Email and phone confirmation is still missing.',
+    moderatorRejected: 'The moderator did not approve the verification.',
+    unspecified: 'The verification requirements were not met.',
+  },
+  ru: {
+    documentRejected: 'Модератор не принял документ для верификации.',
+    registryNotConfirmed: 'Регистрацию компании не удалось подтвердить.',
+    contactConfirmationRequired: 'Не подтверждены email и телефон.',
+    moderatorRejected: 'Модератор не одобрил верификацию.',
+    unspecified: 'Требования верификации не выполнены.',
+  },
+  ka: {
+    documentRejected: 'მოდერატორმა არ მიიღო ვერიფიკაციის დოკუმენტი.',
+    registryNotConfirmed: 'კომპანიის რეგისტრაციის დადასტურება ვერ მოხერხდა.',
+    contactConfirmationRequired: 'ელფოსტა და ტელეფონი ჯერ არ არის დადასტურებული.',
+    moderatorRejected: 'მოდერატორმა ვერიფიკაცია არ დაადასტურა.',
+    unspecified: 'ვერიფიკაციის მოთხოვნები არ არის შესრულებული.',
+  },
+  de: {
+    documentRejected: 'Das Verifizierungsdokument wurde vom Moderator nicht akzeptiert.',
+    registryNotConfirmed: 'Die Registrierung des Unternehmens konnte nicht bestätigt werden.',
+    contactConfirmationRequired: 'E-Mail und Telefon sind noch nicht bestätigt.',
+    moderatorRejected: 'Der Moderator hat die Verifizierung nicht bestätigt.',
+    unspecified: 'Die Anforderungen an die Verifizierung wurden nicht erfüllt.',
+  },
+  fr: {
+    documentRejected: 'Le document de vérification n’a pas été accepté par le modérateur.',
+    registryNotConfirmed: 'L’enregistrement de l’entreprise n’a pas pu être confirmé.',
+    contactConfirmationRequired: 'L’e-mail et le téléphone ne sont pas encore confirmés.',
+    moderatorRejected: 'Le modérateur n’a pas approuvé la vérification.',
+    unspecified: 'Les conditions de vérification ne sont pas remplies.',
+  },
+  it: {
+    documentRejected: 'Il documento di verifica non è stato accettato dal moderatore.',
+    registryNotConfirmed: 'Non è stato possibile confermare la registrazione dell’azienda.',
+    contactConfirmationRequired: 'Email e telefono non sono ancora confermati.',
+    moderatorRejected: 'Il moderatore non ha approvato la verifica.',
+    unspecified: 'I requisiti di verifica non sono stati soddisfatti.',
+  },
+  es: {
+    documentRejected: 'El moderador no aceptó el documento de verificación.',
+    registryNotConfirmed: 'No se pudo confirmar el registro de la empresa.',
+    contactConfirmationRequired: 'Faltan por confirmar el correo y el teléfono.',
+    moderatorRejected: 'El moderador no aprobó la verificación.',
+    unspecified: 'No se cumplieron los requisitos de verificación.',
+  },
+};
+
+const MODERATOR_COMMENT_LABELS: Record<Locale, string> = {
+  en: 'Moderator comment',
+  ru: 'Комментарий модератора',
+  ka: 'მოდერატორის კომენტარი',
+  de: 'Kommentar des Moderators',
+  fr: 'Commentaire du modérateur',
+  it: 'Commento del moderatore',
+  es: 'Comentario del moderador',
 };
 
 const SELLER_TYPE_LABELS: Record<Locale, Record<'privateFarmer' | 'company', string>> = {
@@ -264,6 +334,40 @@ export class NotificationsService {
       sellerType: SELLER_TYPE_LABELS[locale][params.sellerType],
       submittedAt: this.formatTimestamp(params.submittedAt, locale),
       link: this.appLink(locale, '/dashboard/admin?section=farms&status=documents'),
+    });
+  }
+
+  /** Producer email for a verification that a moderator (or the rules) just approved. */
+  async notifyVerificationApproved(params: {
+    farmer: MailRecipient;
+    farmName: string;
+  }): Promise<boolean> {
+    const locale = this.localeOf(params.farmer.locale);
+    return this.sendTemplate(params.farmer, 'verificationApproved', {
+      name: this.displayName(params.farmer),
+      farmName: params.farmName,
+      link: this.appLink(locale, '/dashboard/farm'),
+    });
+  }
+
+  /**
+   * Producer email for a refused verification. The reason arrives as a code and is translated
+   * here; a moderator's free-text comment is appended separately and stays as written.
+   */
+  async notifyVerificationRejected(params: {
+    farmer: MailRecipient;
+    farmName: string;
+    reasonCode: VerificationReasonCode | null;
+    moderatorComment: string | null;
+  }): Promise<boolean> {
+    const locale = this.localeOf(params.farmer.locale);
+    const comment = params.moderatorComment?.trim();
+    return this.sendTemplate(params.farmer, 'verificationRejected', {
+      name: this.displayName(params.farmer),
+      farmName: params.farmName,
+      reason: VERIFICATION_REASON_LABELS[locale][params.reasonCode ?? 'unspecified'],
+      comment: comment ? `\n${MODERATOR_COMMENT_LABELS[locale]}: ${comment}` : '',
+      link: this.appLink(locale, '/dashboard/farm'),
     });
   }
 

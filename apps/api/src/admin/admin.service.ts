@@ -506,21 +506,17 @@ export class AdminService {
       throw new NotFoundException('Farm not found');
     }
 
-    const farm = await this.prisma.farm.update({
+    // VerificationService owns the transition so the producer email is tied to a real status
+    // change instead of to this endpoint being called.
+    await this.verification.applyModeratorDecision({
+      farmId: id,
+      adminId: admin.id,
+      approve,
+      note: dto.note?.trim() || null,
+    });
+
+    const farm = await this.prisma.farm.findUniqueOrThrow({
       where: { id },
-      data: approve
-        ? {
-            verificationStatus: PrismaVerificationStatus.approved,
-            verificationNote: dto.note?.trim() || null,
-            verifiedAt: new Date(),
-            verifiedById: admin.id,
-          }
-        : {
-            verificationStatus: PrismaVerificationStatus.rejected,
-            verificationNote: dto.note?.trim() || 'Verification rejected',
-            verifiedAt: null,
-            verifiedById: admin.id,
-          },
       include: {
         owner: {
           select: {

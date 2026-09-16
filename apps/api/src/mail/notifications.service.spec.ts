@@ -169,6 +169,75 @@ describe('NotificationsService', () => {
     await expect(service.notifyVerificationPendingModeration(params)).resolves.toBe(false);
   });
 
+  it('tells the producer their verification passed, in their own language', async () => {
+    await expect(
+      service.notifyVerificationApproved({
+        farmer: { email: 'farmer@example.com', locale: 'ru', displayName: 'Нино' },
+        farmName: 'Kakheti Farm',
+      }),
+    ).resolves.toBe(true);
+
+    const sent = mail.send.mock.calls[0][0];
+    expect(sent.to).toBe('farmer@example.com');
+    expect(sent.subject).toContain('Верификация пройдена');
+    expect(sent.text).toContain('Kakheti Farm');
+    expect(sent.text).toContain('http://localhost:3000/ru/dashboard/farm');
+  });
+
+  it('translates the rejection reason and keeps the moderator comment verbatim', async () => {
+    await service.notifyVerificationRejected({
+      farmer: { email: 'farmer@example.com', locale: 'ru', displayName: 'Нино' },
+      farmName: 'Kakheti Farm',
+      reasonCode: 'documentRejected',
+      moderatorComment: 'Scan is unreadable',
+    });
+
+    const sent = mail.send.mock.calls[0][0];
+    expect(sent.subject).toContain('Верификация отклонена');
+    expect(sent.text).toContain('Модератор не принял документ для верификации.');
+    expect(sent.text).toContain('Комментарий модератора: Scan is unreadable');
+    // Internal wording must never reach the producer.
+    expect(sent.text).not.toContain('documentRejected');
+    expect(sent.text).not.toContain('Verification document rejected');
+  });
+
+  it('omits the comment block when a rejection has no moderator comment', async () => {
+    await service.notifyVerificationRejected({
+      farmer: { email: 'farmer@example.com', locale: 'en', displayName: 'Farmer' },
+      farmName: 'Kakheti Farm',
+      reasonCode: 'registryNotConfirmed',
+      moderatorComment: null,
+    });
+
+    const sent = mail.send.mock.calls[0][0];
+    expect(sent.text).toContain('The company registration could not be confirmed.');
+    expect(sent.text).not.toContain('Moderator comment');
+  });
+
+  it('falls back to English for an unknown locale and an unknown reason', async () => {
+    await service.notifyVerificationRejected({
+      farmer: { email: 'farmer@example.com', locale: 'pt', displayName: 'Farmer' },
+      farmName: 'Kakheti Farm',
+      reasonCode: null,
+      moderatorComment: null,
+    });
+
+    const sent = mail.send.mock.calls[0][0];
+    expect(sent.subject).toBe('Verification not approved: Kakheti Farm');
+    expect(sent.text).toContain('The verification requirements were not met.');
+  });
+
+  it('reports a failed decision email instead of throwing', async () => {
+    mail.send.mockRejectedValueOnce(new Error('resend unavailable'));
+
+    await expect(
+      service.notifyVerificationApproved({
+        farmer: { email: 'farmer@example.com', locale: 'en', displayName: 'Farmer' },
+        farmName: 'Kakheti Farm',
+      }),
+    ).resolves.toBe(false);
+  });
+
   it('builds password-reset links from WEB_PUBLIC_URL, not the request host', async () => {
     await service.notifyPasswordReset({
       email: 'farmer@example.com',

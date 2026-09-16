@@ -237,7 +237,8 @@
         "matched": "Registry match: {name}",
         "documentHint": "Laden Sie Ihre Firmenregistrierungsbescheinigung hoch, um das Unternehmen zu bestätigen.",
         "upload": "Firmenregistrierung hochladen",
-        "docTitle": "Firmenregistrierung"
+        "docTitle": "Firmenregistrierung",
+        "documentRequired": "Der Registereintrag ist gespeichert. Ein Moderator muss das Registrierungsdokument des Unternehmens noch bestätigen."
       },
       "private": {
         "title": "3. Identitätsprüfung",
@@ -249,6 +250,14 @@
         "submitted": "Dokument eingegangen und zur Prüfung weitergeleitet.",
         "received": "Dokument eingegangen. Bestätigen Sie E-Mail und Telefon – danach geht es automatisch an den Moderator.",
         "rejected": "Die Verifizierung wurde abgelehnt. Laden Sie ein neues Dokument hoch – es geht automatisch erneut zur Prüfung."
+      },
+      "reason": {
+        "label": "Grund",
+        "moderatorComment": "Kommentar des Moderators",
+        "documentRejected": "Das Verifizierungsdokument wurde vom Moderator nicht akzeptiert.",
+        "registryNotConfirmed": "Die Registrierung des Unternehmens konnte nicht bestätigt werden.",
+        "contactConfirmationRequired": "E-Mail und Telefon sind noch nicht bestätigt.",
+        "moderatorRejected": "Der Moderator hat die Verifizierung nicht bestätigt."
       },
       "pending": "Pending review",
       "approved": "Verified producer",

@@ -219,19 +219,30 @@ export function ProducerVerificationPanel({ initial }: Props) {
     if (status.verified || status.steps.identity === 'done') {
       return null;
     }
+    // A refusal comes first: telling a rejected seller their document is still in review
+    // would hide the decision they have to act on.
+    if (status.farmVerificationStatus === 'rejected' || status.steps.identity === 'rejected') {
+      return { text: t('review.rejected'), tone: 'error' };
+    }
     if (status.farmVerificationStatus === 'pending') {
       return { text: t('review.submitted'), tone: 'meta' };
     }
     if (status.hasPendingVerificationDocument) {
       return { text: t('review.received'), tone: 'meta' };
     }
-    if (status.farmVerificationStatus === 'rejected' || status.steps.identity === 'rejected') {
-      return { text: t('review.rejected'), tone: 'error' };
-    }
     return null;
   }
 
   const notice = reviewNotice();
+  // The moderation reason is stored as a code, so the seller reads it in their own language.
+  const reasonText = status.verificationReasonCode
+    ? t(`reason.${status.verificationReasonCode}`)
+    : null;
+  // A company that passed the registry check still needs a moderator to accept its document.
+  const companyDocumentRequired =
+    status.path === 'company' &&
+    status.companyRegistryValid === true &&
+    status.steps.identity === 'todo';
 
   const identityTitle =
     status.path === 'company'
@@ -402,7 +413,7 @@ export function ProducerVerificationPanel({ initial }: Props) {
                   }
                 />
               </label>
-              {status.steps.identity !== 'done' ? (
+              {status.companyRegistryValid !== true ? (
                 <form className="verification-inline-form" onSubmit={checkCompany}>
                   <label className="field">
                     <span>{t('company.number')}</span>
@@ -426,6 +437,9 @@ export function ProducerVerificationPanel({ initial }: Props) {
                     : ''}
                 </p>
               )}
+              {companyDocumentRequired ? (
+                <p className="product-list__meta">{t('company.documentRequired')}</p>
+              ) : null}
             </div>
           ) : null}
 
@@ -466,6 +480,22 @@ export function ProducerVerificationPanel({ initial }: Props) {
           {notice ? (
             <p className={notice.tone === 'error' ? 'form-error' : 'product-list__meta'}>
               {notice.text}
+            </p>
+          ) : null}
+
+          {reasonText ? (
+            <p
+              className={
+                status.farmVerificationStatus === 'rejected' ? 'form-error' : 'product-list__meta'
+              }
+            >
+              {t('reason.label')}: {reasonText}
+            </p>
+          ) : null}
+
+          {status.moderatorComment ? (
+            <p className="product-list__meta">
+              {t('reason.moderatorComment')}: {status.moderatorComment}
             </p>
           ) : null}
         </li>

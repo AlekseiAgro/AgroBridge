@@ -82,6 +82,15 @@ enum VerificationStatus {
   rejected
 }
 
+/// Why a farm is in its current verification state. Producer-facing copy is translated
+/// from this code, so moderation never has to ship English text into the UI or an email.
+enum VerificationReasonCode {
+  documentRejected
+  registryNotConfirmed
+  contactConfirmationRequired
+  moderatorRejected
+}
+
 enum DocumentReviewStatus {
   pending
   approved
@@ -224,7 +233,10 @@ model Farm {
   region                     String?
   description                String?
   verificationStatus         VerificationStatus @default(unverified)
+  // Free-text comment written by a moderator. Internal notes never go here: the
+  // machine-readable reason lives in verificationReasonCode.
   verificationNote           String?
+  verificationReasonCode     VerificationReasonCode?
   verifiedAt                 DateTime?
   verifiedById               String?
   companyRegistrationNumber  String?
