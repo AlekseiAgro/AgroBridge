@@ -237,17 +237,18 @@
         "matched": "Registry match: {name}",
         "documentHint": "Téléversez le certificat d’immatriculation de l’entreprise pour confirmer l’organisation.",
         "upload": "Téléverser l’immatriculation",
-        "docTitle": "Immatriculation d’entreprise",
-        "uploaded": "Document d’immatriculation téléversé."
+        "docTitle": "Immatriculation d’entreprise"
       },
       "private": {
         "title": "3. Vérification d’identité",
         "hint": "Téléversez une pièce d’identité pour confirmer votre identité.",
         "upload": "Téléverser la pièce d’identité",
-        "idTitle": "Pièce d’identité",
-        "submit": "Envoyer au modérateur",
-        "uploaded": "Pièce d’identité téléversée.",
-        "submitted": "Envoyé pour contrôle par un modérateur."
+        "idTitle": "Pièce d’identité"
+      },
+      "review": {
+        "submitted": "Document reçu et transmis pour contrôle.",
+        "received": "Document reçu. Confirmez votre e-mail et votre téléphone : il sera ensuite transmis automatiquement au modérateur.",
+        "rejected": "La vérification a été refusée. Téléversez un nouveau document : il sera automatiquement renvoyé pour contrôle."
       },
       "pending": "Pending review",
       "approved": "Verified producer",

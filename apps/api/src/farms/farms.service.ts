@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import type {
@@ -22,6 +23,7 @@ import {
   isFarmDocumentKind,
   isFarmDocumentMimeType,
   isFarmPhotoMimeType,
+  isPrimaryVerificationDocumentKind,
 } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
@@ -34,6 +36,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
 import { StorageService } from '../storage/storage.service';
 import { STORAGE_VISIBILITY } from '../storage/storage.constants';
+import { VerificationService } from '../verification/verification.service';
 import {
   mapProductSummary,
   sanitizeStringArray,
@@ -67,10 +70,13 @@ const farmImagesInclude = {
 
 @Injectable()
 export class FarmsService {
+  private readonly logger = new Logger(FarmsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly ratings: RatingsService,
     private readonly storage: StorageService,
+    private readonly verification: VerificationService,
   ) {}
 
   async list(): Promise<FarmSummary[]> {
@@ -426,6 +432,19 @@ export class FarmsService {
       },
     });
 
+    // Uploading an identity document is the submission itself. The stored document must
+    // survive a failing transition or mail outage, so this never rejects the upload.
+    if (isPrimaryVerificationDocumentKind(kind)) {
+      try {
+        await this.verification.ensureIdentityReviewSubmitted(user.id);
+      } catch (error) {
+        this.logger.error(
+          `Verification submission failed after upload for farm ${farm.id}`,
+          error instanceof Error ? error.name : 'unknown error',
+        );
+      }
+    }
+
     return this.toDocument(doc);
   }
 
@@ -470,6 +489,18 @@ export class FarmsService {
 
     await this.storage.delete(doc.key, STORAGE_VISIBILITY.PRIVATE);
     await this.prisma.farmDocument.delete({ where: { id: doc.id } });
+
+    // Withdrawing the document that started the review must not leave the farm in moderation.
+    if (isPrimaryVerificationDocumentKind(doc.kind)) {
+      try {
+        await this.verification.syncPrimaryDocumentState(user.id);
+      } catch (error) {
+        this.logger.error(
+          `Verification sync failed after document removal for farm ${farm.id}`,
+          error instanceof Error ? error.name : 'unknown error',
+        );
+      }
+    }
   }
 
   async uploadPhoto(

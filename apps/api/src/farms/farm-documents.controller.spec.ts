@@ -11,6 +11,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
 import { StorageService } from '../storage/storage.service';
 import { UploadsController } from '../storage/uploads.controller';
+import { VerificationService } from '../verification/verification.service';
 import { attachmentHeader, FarmDocumentsController } from './farm-documents.controller';
 import { FarmsService } from './farms.service';
 
@@ -96,6 +97,13 @@ describe('FarmDocumentsController (server-side authorization)', () => {
         { provide: PrismaService, useValue: prisma },
         { provide: StorageService, useValue: storage },
         { provide: RatingsService, useValue: {} },
+        {
+          provide: VerificationService,
+          useValue: {
+            ensureIdentityReviewSubmitted: jest.fn().mockResolvedValue(undefined),
+            syncPrimaryDocumentState: jest.fn().mockResolvedValue(undefined),
+          },
+        },
         {
           provide: ConfigService,
           useValue: { get: (key: string) => (key === 'JWT_SECRET' ? JWT_SECRET : undefined) },

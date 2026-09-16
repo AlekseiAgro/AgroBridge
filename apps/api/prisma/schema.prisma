@@ -278,6 +278,9 @@ model FarmDocument {
   reviewNote   String?
   reviewedAt   DateTime?
   reviewedById String?
+  // Claimed once when the document enters moderation so refreshes, retries, or
+  // duplicate requests cannot send the admin notification twice.
+  moderationNotifiedAt DateTime?
   createdAt    DateTime             @default(now())
   updatedAt    DateTime             @updatedAt
 

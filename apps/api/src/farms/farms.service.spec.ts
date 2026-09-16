@@ -40,10 +40,17 @@ describe('FarmsService', () => {
     $transaction: jest.fn(async (fn: (tx: typeof prisma) => Promise<unknown>) => fn(prisma)),
   };
 
+  const verification = {
+    ensureIdentityReviewSubmitted: jest.fn().mockResolvedValue(undefined),
+    syncPrimaryDocumentState: jest.fn().mockResolvedValue(undefined),
+  };
+
   let service: FarmsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    verification.ensureIdentityReviewSubmitted.mockResolvedValue(undefined);
+    verification.syncPrimaryDocumentState.mockResolvedValue(undefined);
     service = new FarmsService(
       prisma as never,
       {
@@ -51,6 +58,7 @@ describe('FarmsService', () => {
         summariesForUsers: jest.fn().mockResolvedValue(new Map()),
       } as never,
       storage as never,
+      verification as never,
     );
   });
 
@@ -357,6 +365,96 @@ describe('FarmsService', () => {
     );
     expect(document.url).toBe('/api/farms/documents/doc1/file');
     expect(document.url).not.toContain('/api/uploads/');
+    expect(verification.ensureIdentityReviewSubmitted).toHaveBeenCalledWith('u1');
+  });
+
+  it('keeps the uploaded document when the submission hook fails', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
+    prisma.farmDocument.count.mockResolvedValue(0);
+    storage.upload.mockResolvedValue({
+      key: 'farms/farm1/documents/abc.pdf',
+      url: '',
+    });
+    prisma.farmDocument.create.mockResolvedValue({
+      id: 'doc1',
+      farmId: 'farm1',
+      title: 'ID card',
+      fileName: 'id.pdf',
+      url: '',
+      key: 'farms/farm1/documents/abc.pdf',
+      mimeType: 'application/pdf',
+      kind: 'idCard',
+      reviewStatus: 'pending',
+      reviewNote: null,
+      reviewedAt: null,
+      createdAt: new Date(),
+    });
+    verification.ensureIdentityReviewSubmitted.mockRejectedValue(new Error('mail down'));
+
+    const document = await service.uploadDocument(
+      {
+        id: 'u1',
+        email: 'f@example.com',
+        role: 'farmer',
+        locale: 'ka',
+        displayName: 'Nino',
+      } as AuthenticatedUser,
+      'ID card',
+      {
+        buffer: Buffer.from('pdf'),
+        mimetype: 'application/pdf',
+        originalname: 'id.pdf',
+        size: 1024,
+      } as Express.Multer.File,
+      'idCard',
+    );
+
+    expect(document.id).toBe('doc1');
+    expect(storage.delete).not.toHaveBeenCalled();
+    expect(prisma.farmDocument.delete).not.toHaveBeenCalled();
+  });
+
+  it('does not submit verification for supporting documents', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
+    prisma.farmDocument.count.mockResolvedValue(0);
+    storage.upload.mockResolvedValue({
+      key: 'farms/farm1/documents/other.pdf',
+      url: '',
+    });
+    prisma.farmDocument.create.mockResolvedValue({
+      id: 'doc9',
+      farmId: 'farm1',
+      title: 'Price list',
+      fileName: 'prices.pdf',
+      url: '',
+      key: 'farms/farm1/documents/other.pdf',
+      mimeType: 'application/pdf',
+      kind: 'other',
+      reviewStatus: 'pending',
+      reviewNote: null,
+      reviewedAt: null,
+      createdAt: new Date(),
+    });
+
+    await service.uploadDocument(
+      {
+        id: 'u1',
+        email: 'f@example.com',
+        role: 'farmer',
+        locale: 'ka',
+        displayName: 'Nino',
+      } as AuthenticatedUser,
+      'Price list',
+      {
+        buffer: Buffer.from('pdf'),
+        mimetype: 'application/pdf',
+        originalname: 'prices.pdf',
+        size: 1024,
+      } as Express.Multer.File,
+      'other',
+    );
+
+    expect(verification.ensureIdentityReviewSubmitted).not.toHaveBeenCalled();
   });
 
   it('stores company registration uploads with kind businessRegistration', async () => {
@@ -409,6 +507,7 @@ describe('FarmsService', () => {
     );
     expect(document.kind).toBe('businessRegistration');
     expect(document.url).toBe('/api/farms/documents/doc2/file');
+    expect(verification.ensureIdentityReviewSubmitted).toHaveBeenCalledWith('u1');
   });
 
   it('deletes verification documents from private storage', async () => {
@@ -435,6 +534,80 @@ describe('FarmsService', () => {
       'farms/farm1/documents/abc.pdf',
       'private',
     );
+    expect(prisma.farmDocument.delete).toHaveBeenCalledWith({ where: { id: 'doc1' } });
+  });
+
+  it('reconciles the farm when the submitted identity document is withdrawn', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
+    prisma.farmDocument.findFirst.mockResolvedValue({
+      id: 'doc1',
+      farmId: 'farm1',
+      kind: 'idCard',
+      key: 'farms/farm1/documents/abc.pdf',
+    });
+    prisma.farmDocument.delete.mockResolvedValue({});
+
+    await service.removeDocument(
+      {
+        id: 'u1',
+        email: 'f@example.com',
+        role: 'farmer',
+        locale: 'ka',
+        displayName: 'Nino',
+      } as AuthenticatedUser,
+      'doc1',
+    );
+
+    expect(verification.syncPrimaryDocumentState).toHaveBeenCalledWith('u1');
+  });
+
+  it('leaves verification alone when a supporting document is withdrawn', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
+    prisma.farmDocument.findFirst.mockResolvedValue({
+      id: 'doc9',
+      farmId: 'farm1',
+      kind: 'other',
+      key: 'farms/farm1/documents/prices.pdf',
+    });
+    prisma.farmDocument.delete.mockResolvedValue({});
+
+    await service.removeDocument(
+      {
+        id: 'u1',
+        email: 'f@example.com',
+        role: 'farmer',
+        locale: 'ka',
+        displayName: 'Nino',
+      } as AuthenticatedUser,
+      'doc9',
+    );
+
+    expect(verification.syncPrimaryDocumentState).not.toHaveBeenCalled();
+  });
+
+  it('keeps the document deleted when the verification sync fails', async () => {
+    prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
+    prisma.farmDocument.findFirst.mockResolvedValue({
+      id: 'doc1',
+      farmId: 'farm1',
+      kind: 'idCard',
+      key: 'farms/farm1/documents/abc.pdf',
+    });
+    prisma.farmDocument.delete.mockResolvedValue({});
+    verification.syncPrimaryDocumentState.mockRejectedValue(new Error('db down'));
+
+    await expect(
+      service.removeDocument(
+        {
+          id: 'u1',
+          email: 'f@example.com',
+          role: 'farmer',
+          locale: 'ka',
+          displayName: 'Nino',
+        } as AuthenticatedUser,
+        'doc1',
+      ),
+    ).resolves.toBeUndefined();
     expect(prisma.farmDocument.delete).toHaveBeenCalledWith({ where: { id: 'doc1' } });
   });
 });

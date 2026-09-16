@@ -19,6 +19,7 @@ import type {
 } from '@agrobridge/shared';
 import {
   PRODUCT_CATEGORIES,
+  isPrimaryVerificationDocumentKind,
   mergeCategoryConfigs,
 } from '@agrobridge/shared';
 import {
@@ -568,8 +569,14 @@ export class AdminService {
           },
     });
 
-    if (approve && existing.kind === 'idCard') {
-      await this.verification.tryCompleteVerification(existing.farm.ownerId);
+    // Only the primary document of a seller type drives the farm-level state. Completion is
+    // attempted first: whatever it cannot finish (registry check, unconfirmed contact) is then
+    // reconciled so the farm never stays in moderation without a document under review.
+    if (isPrimaryVerificationDocumentKind(existing.kind)) {
+      if (approve) {
+        await this.verification.tryCompleteVerification(existing.farm.ownerId);
+      }
+      await this.verification.syncPrimaryDocumentState(existing.farm.ownerId);
     }
 
     return this.toFarmDocument(doc);

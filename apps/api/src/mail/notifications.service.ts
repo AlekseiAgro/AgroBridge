@@ -60,6 +60,16 @@ const HARVEST_STATUS_LABELS: Record<Locale, Record<string, string>> = {
   },
 };
 
+const SELLER_TYPE_LABELS: Record<Locale, Record<'privateFarmer' | 'company', string>> = {
+  en: { privateFarmer: 'private farmer', company: 'company' },
+  ru: { privateFarmer: 'частный фермер', company: 'компания' },
+  ka: { privateFarmer: 'კერძო ფერმერი', company: 'კომპანია' },
+  de: { privateFarmer: 'Privatlandwirt', company: 'Unternehmen' },
+  fr: { privateFarmer: 'agriculteur privé', company: 'entreprise' },
+  it: { privateFarmer: 'agricoltore privato', company: 'azienda' },
+  es: { privateFarmer: 'agricultor privado', company: 'empresa' },
+};
+
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
@@ -231,6 +241,29 @@ export class NotificationsService {
         locale,
         `/dashboard/admin?section=products&status=pending`,
       ),
+    });
+  }
+
+  /**
+   * Admin alert for a producer verification that entered moderation. Carries only data the
+   * admin dashboard already shows: never the document, its storage key, or its URL.
+   * Resolves to false when delivery failed, so the caller can retry the notification later.
+   */
+  async notifyVerificationPendingModeration(params: {
+    admin: MailRecipient;
+    farmId: string;
+    farmName: string;
+    sellerType: 'privateFarmer' | 'company';
+    submittedAt: Date;
+  }): Promise<boolean> {
+    const locale = this.localeOf(params.admin.locale);
+    return this.sendTemplate(params.admin, 'verificationPendingModeration', {
+      name: this.displayName(params.admin),
+      farmName: params.farmName,
+      farmId: params.farmId,
+      sellerType: SELLER_TYPE_LABELS[locale][params.sellerType],
+      submittedAt: this.formatTimestamp(params.submittedAt, locale),
+      link: this.appLink(locale, '/dashboard/admin?section=farms&status=documents'),
     });
   }
 
@@ -523,6 +556,14 @@ export class NotificationsService {
     }
   }
 
+  private formatTimestamp(value: Date, locale: Locale): string {
+    return `${new Intl.DateTimeFormat(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: 'UTC',
+    }).format(value)} UTC`;
+  }
+
   private harvestStatusLabel(status: string, locale: Locale): string {
     if (isHarvestStatus(status)) {
       return HARVEST_STATUS_LABELS[locale][status] ?? status;
@@ -568,11 +609,12 @@ export class NotificationsService {
     }
   }
 
+  /** Resolves to true when the message left the mail driver, false when delivery failed. */
   private async sendTemplate(
     recipient: MailRecipient,
     key: Parameters<typeof renderEmailTemplate>[1],
     vars: Record<string, string>,
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       const locale = this.localeOf(recipient.locale);
       const localizedVars =
@@ -588,12 +630,14 @@ export class NotificationsService {
         subject: rendered.subject,
         text: rendered.text,
       });
+      return true;
     } catch (error) {
       // Best-effort: do not rethrow. Callers that must fail closed (verification,
       // email change, deletion) invoke MailService.send directly instead.
       this.logger.error(
         `Failed to send ${key} email to ${recipient.email} detail=${sanitizeMailError(error)}`,
       );
+      return false;
     }
   }
 

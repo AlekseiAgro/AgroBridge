@@ -237,17 +237,18 @@
         "matched": "Registry match: {name}",
         "documentHint": "Suba el certificado de registro de la empresa para confirmar la organización.",
         "upload": "Subir registro de empresa",
-        "docTitle": "Registro de empresa",
-        "uploaded": "Documento de registro de empresa subido."
+        "docTitle": "Registro de empresa"
       },
       "private": {
         "title": "3. Verificación de identidad",
         "hint": "Suba un DNI para confirmar su identidad.",
         "upload": "Subir DNI",
-        "idTitle": "DNI",
-        "submit": "Enviar a revisión del moderador",
-        "uploaded": "Documento de identidad subido.",
-        "submitted": "Enviado a revisión del moderador."
+        "idTitle": "DNI"
+      },
+      "review": {
+        "submitted": "Documento recibido y enviado a revisión.",
+        "received": "Documento recibido. Confirme su correo y su teléfono y se enviará automáticamente al moderador.",
+        "rejected": "La verificación fue rechazada. Suba un documento nuevo y se enviará automáticamente a una nueva revisión."
       },
       "pending": "Pending review",
       "approved": "Verified producer",

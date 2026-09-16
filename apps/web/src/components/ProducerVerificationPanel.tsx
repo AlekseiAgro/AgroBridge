@@ -202,23 +202,36 @@ export function ProducerVerificationPanel({ initial }: Props) {
         throw new Error(next.message ?? t('genericError'));
       }
       applyStatus(next);
-      setMessage(kind === 'idCard' ? t('private.uploaded') : t('company.uploaded'));
+      setMessage(
+        next.farmVerificationStatus === 'pending' ? t('review.submitted') : t('review.received'),
+      );
     });
     if (input) {
       input.value = '';
     }
   }
 
-  async function submitPrivateReview() {
-    await run(async () => {
-      const next = await postJson<ProducerVerificationStatus>('/api/verification/private/submit');
-      applyStatus(next);
-      setMessage(t('private.submitted'));
-    });
-  }
-
   const stepLabel = (step: 'done' | 'todo' | 'pending_review' | 'rejected') =>
     t(`stepStatus.${step}`);
+
+  // Upload is the submission, so the panel only reports where the document stands.
+  function reviewNotice(): { text: string; tone: 'meta' | 'error' } | null {
+    if (status.verified || status.steps.identity === 'done') {
+      return null;
+    }
+    if (status.farmVerificationStatus === 'pending') {
+      return { text: t('review.submitted'), tone: 'meta' };
+    }
+    if (status.hasPendingVerificationDocument) {
+      return { text: t('review.received'), tone: 'meta' };
+    }
+    if (status.farmVerificationStatus === 'rejected' || status.steps.identity === 'rejected') {
+      return { text: t('review.rejected'), tone: 'error' };
+    }
+    return null;
+  }
+
+  const notice = reviewNotice();
 
   const identityTitle =
     status.path === 'company'
@@ -447,17 +460,13 @@ export function ProducerVerificationPanel({ initial }: Props) {
                   }
                 />
               </label>
-              {status.hasPendingIdDocument || status.hasApprovedIdDocument ? (
-                <button
-                  type="button"
-                  className="button button--primary"
-                  disabled={pending || status.steps.identity === 'pending_review'}
-                  onClick={() => void submitPrivateReview()}
-                >
-                  {t('private.submit')}
-                </button>
-              ) : null}
             </div>
+          ) : null}
+
+          {notice ? (
+            <p className={notice.tone === 'error' ? 'form-error' : 'product-list__meta'}>
+              {notice.text}
+            </p>
           ) : null}
         </li>
       </ol>

@@ -84,6 +84,19 @@
 - `ProductCertificate` files are private objects (`products/{productId}/certificates/{uuid}`). Pending and rejected certificates are visible only to the product owner and admins. Approved certificates are listed on public product payloads with an authorized file URL (`/api/products/{id}/certificates/{certificateId}/file`), never a public R2/CDN object URL. Listing approval does **not** change certificate `reviewStatus`; only `POST /admin/certificates/:id/approve|reject` does (same independent review model as farm verification documents).
 - Image changes on a published product reset moderation to `pending`.
 
+## Producer verification
+
+- Voluntary flow: confirm email → confirm phone (SMS) → identity. Identity evidence is the primary document per seller type: `idCard` for `privateFarmer`, `businessRegistration` for `company`.
+- Uploading the primary document **is** the submission. There is no separate "send to moderator" action in the seller UI; `VerificationService.ensureIdentityReviewSubmitted` runs on document upload and on email/SMS confirmation, and moves `Farm.verificationStatus` from `unverified`/`rejected` to `pending`.
+- Email and phone stay mandatory: the farm only enters the moderation queue once both are confirmed, so a document uploaded earlier is submitted automatically at the moment the last channel is confirmed.
+- `POST /verification/private/submit` remains for API clients, but only replays the same idempotent transition.
+- Only a primary document moderation has never been told about (`moderationNotifiedAt IS NULL`) counts as a submission. Confirming email or phone therefore cannot reopen an application a moderator already decided; a farm rejected through `POST /admin/farms/:id/verify` stays rejected until a new document is uploaded.
+- Each submitted document notifies admins exactly once. The claim is the conditional update of `FarmDocument.moderationNotifiedAt`, so refreshes, polling, `GET /verification/me`, and duplicate requests never re-notify. A new document after a rejection is a new submission and notifies again.
+- The admin email carries farm name, farm id, seller type, submission time, and the admin queue link only — never the document, its storage key, or a file URL. Delivery is best-effort: a mail failure never rolls back the upload or the state transition, but the claim is released so the next submission attempt retries the alert.
+- One farm can page the moderators at most three times per hour (`RateLimitService`, action `verification.submission.notify`). Beyond that the farm still enters the queue and only the extra mail is dropped, so an upload/delete loop cannot amplify into admin inboxes.
+- `VerificationService.syncPrimaryDocumentState` reconciles a farm that is in moderation after a document decision or a withdrawal: still-pending documents keep it `pending`, a rejected one moves it to `rejected`, an approved one that does not complete the path moves it back to `unverified` with the remaining requirement in `verificationNote`, and deleting the last primary document clears the submission entirely.
+- Company completion still requires the registry check: approving `businessRegistration` runs `tryCompleteVerification` (approves when `companyRegistryValid === true`) and otherwise takes the farm out of moderation, so a company is never stuck in `pending` and document approval alone never substitutes for the registry.
+
 ## Email notifications
 
 - `MailModule` provides `MailService` + `NotificationsService` (global).
@@ -101,7 +114,7 @@
 - Logs mask phone numbers and omit OTP bodies in production. API keys are never logged.
 - Resend uses a 10s HTTP timeout and retries transient failures (timeouts, 429, 5xx) up to 3 attempts. SMTP keeps TLS 1.2+, STARTTLS on 587 / SMTPS on 465, 10–20s timeouts, and the same retry budget.
 - Templates are locale-aware (`ka|en|ru|de|fr|it|es`) with English fallback.
-- Events: welcome, RFQ lifecycle, product moderation (pending → admins; approved/rejected → farmer).
+- Events: welcome, RFQ lifecycle, product moderation (pending → admins; approved/rejected → farmer), producer verification submitted (→ admins).
 - Template notifications (welcome, RFQ, harvest, chat, …) log delivery failures and do not fail the API action. Verification, email-change and account-deletion codes fail closed with a generic 503 that never includes SMTP details.
 - Chat messages email the recipient via `notifyChatMessage` (fire-and-forget; skipped if the peer opened the thread within the last 2 minutes).
 

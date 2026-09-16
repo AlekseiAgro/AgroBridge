@@ -24,6 +24,24 @@ export function isFarmDocumentKind(value: string): value is FarmDocumentKind {
   return (FARM_DOCUMENT_KINDS as readonly string[]).includes(value);
 }
 
+/**
+ * Document that submits identity verification for moderation, per seller type.
+ * Uploading it is the submission: there is no separate "send to moderator" action.
+ */
+export const PRIMARY_VERIFICATION_DOCUMENT_KIND = {
+  privateFarmer: 'idCard',
+  company: 'businessRegistration',
+} as const satisfies Record<'privateFarmer' | 'company', FarmDocumentKind>;
+
+const PRIMARY_VERIFICATION_DOCUMENT_KINDS: readonly string[] = Object.values(
+  PRIMARY_VERIFICATION_DOCUMENT_KIND,
+);
+
+/** True for the documents that drive the farm-level verification state. */
+export function isPrimaryVerificationDocumentKind(value: string): value is FarmDocumentKind {
+  return PRIMARY_VERIFICATION_DOCUMENT_KINDS.includes(value);
+}
+
 export const FARM_DOCUMENT_MAX_COUNT = 10;
 export const FARM_DOCUMENT_MAX_BYTES = 10 * 1024 * 1024;
 export const FARM_DOCUMENT_MIME_TYPES = [
@@ -67,6 +85,8 @@ export type ProducerVerificationStatus = {
   companyRegistryValid: boolean | null;
   hasApprovedIdDocument: boolean;
   hasPendingIdDocument: boolean;
+  /** A primary identity document for the selected seller type is awaiting moderation. */
+  hasPendingVerificationDocument: boolean;
   sellerTypeLocked: boolean;
   path: 'company' | 'privateFarmer' | 'unknown';
   steps: {

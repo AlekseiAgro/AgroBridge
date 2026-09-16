@@ -131,6 +131,44 @@ describe('NotificationsService', () => {
     );
   });
 
+  it('tells admins a verification needs review without exposing the document', async () => {
+    await service.notifyVerificationPendingModeration({
+      admin: { email: 'admin@agrobridge.ge', locale: 'ru', displayName: 'Admin' },
+      farmId: 'farm1',
+      farmName: 'Kakheti Farm',
+      sellerType: 'privateFarmer',
+      submittedAt: new Date('2026-09-16T10:30:00.000Z'),
+    });
+
+    const sent = mail.send.mock.calls[0][0];
+    expect(sent.to).toBe('admin@agrobridge.ge');
+    expect(sent.subject).toContain('Kakheti Farm');
+    expect(sent.text).toContain('частный фермер');
+    expect(sent.text).toContain('farm1');
+    expect(sent.text).toContain(
+      'http://localhost:3000/ru/dashboard/admin?section=farms&status=documents',
+    );
+    expect(sent.text).not.toContain('/api/uploads/');
+    expect(sent.text).not.toContain('farms/farm1/documents');
+    expect(sent.text).not.toContain('/file');
+  });
+
+  it('reports whether the verification alert reached the admin', async () => {
+    const params = {
+      admin: { email: 'admin@agrobridge.ge', locale: 'ru', displayName: 'Admin' },
+      farmId: 'farm1',
+      farmName: 'Kakheti Farm',
+      sellerType: 'privateFarmer' as const,
+      submittedAt: new Date('2026-09-16T10:30:00.000Z'),
+    };
+
+    await expect(service.notifyVerificationPendingModeration(params)).resolves.toBe(true);
+
+    mail.send.mockRejectedValueOnce(new Error('resend unavailable'));
+    // Delivery failures stay non-throwing, but the caller must be able to retry later.
+    await expect(service.notifyVerificationPendingModeration(params)).resolves.toBe(false);
+  });
+
   it('builds password-reset links from WEB_PUBLIC_URL, not the request host', async () => {
     await service.notifyPasswordReset({
       email: 'farmer@example.com',
