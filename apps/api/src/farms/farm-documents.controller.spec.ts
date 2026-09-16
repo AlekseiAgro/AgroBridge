@@ -99,7 +99,10 @@ describe('FarmDocumentsController (server-side authorization)', () => {
         { provide: RatingsService, useValue: {} },
         {
           provide: VerificationService,
-          useValue: { ensureIdentityReviewSubmitted: jest.fn().mockResolvedValue(undefined) },
+          useValue: {
+            ensureIdentityReviewSubmitted: jest.fn().mockResolvedValue(undefined),
+            syncPrimaryDocumentState: jest.fn().mockResolvedValue(undefined),
+          },
         },
         {
           provide: ConfigService,

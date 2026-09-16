@@ -33,6 +33,15 @@ export const PRIMARY_VERIFICATION_DOCUMENT_KIND = {
   company: 'businessRegistration',
 } as const satisfies Record<'privateFarmer' | 'company', FarmDocumentKind>;
 
+const PRIMARY_VERIFICATION_DOCUMENT_KINDS: readonly string[] = Object.values(
+  PRIMARY_VERIFICATION_DOCUMENT_KIND,
+);
+
+/** True for the documents that drive the farm-level verification state. */
+export function isPrimaryVerificationDocumentKind(value: string): value is FarmDocumentKind {
+  return PRIMARY_VERIFICATION_DOCUMENT_KINDS.includes(value);
+}
+
 export const FARM_DOCUMENT_MAX_COUNT = 10;
 export const FARM_DOCUMENT_MAX_BYTES = 10 * 1024 * 1024;
 export const FARM_DOCUMENT_MIME_TYPES = [

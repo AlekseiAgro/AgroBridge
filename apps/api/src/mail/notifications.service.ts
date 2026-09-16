@@ -247,6 +247,7 @@ export class NotificationsService {
   /**
    * Admin alert for a producer verification that entered moderation. Carries only data the
    * admin dashboard already shows: never the document, its storage key, or its URL.
+   * Resolves to false when delivery failed, so the caller can retry the notification later.
    */
   async notifyVerificationPendingModeration(params: {
     admin: MailRecipient;
@@ -254,9 +255,9 @@ export class NotificationsService {
     farmName: string;
     sellerType: 'privateFarmer' | 'company';
     submittedAt: Date;
-  }): Promise<void> {
+  }): Promise<boolean> {
     const locale = this.localeOf(params.admin.locale);
-    await this.sendTemplate(params.admin, 'verificationPendingModeration', {
+    return this.sendTemplate(params.admin, 'verificationPendingModeration', {
       name: this.displayName(params.admin),
       farmName: params.farmName,
       farmId: params.farmId,
@@ -608,11 +609,12 @@ export class NotificationsService {
     }
   }
 
+  /** Resolves to true when the message left the mail driver, false when delivery failed. */
   private async sendTemplate(
     recipient: MailRecipient,
     key: Parameters<typeof renderEmailTemplate>[1],
     vars: Record<string, string>,
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       const locale = this.localeOf(recipient.locale);
       const localizedVars =
@@ -628,12 +630,14 @@ export class NotificationsService {
         subject: rendered.subject,
         text: rendered.text,
       });
+      return true;
     } catch (error) {
       // Best-effort: do not rethrow. Callers that must fail closed (verification,
       // email change, deletion) invoke MailService.send directly instead.
       this.logger.error(
         `Failed to send ${key} email to ${recipient.email} detail=${sanitizeMailError(error)}`,
       );
+      return false;
     }
   }
 

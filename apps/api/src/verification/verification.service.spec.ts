@@ -1,5 +1,6 @@
 import { BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 import { RateLimitExceededException } from '../rate-limit/rate-limit-exceeded.exception';
+import { createTestRateLimit } from '../rate-limit/rate-limit.test-utils';
 import { VerificationService } from './verification.service';
 import { SmsDeliveryError } from '../sms/sms.errors';
 
@@ -29,7 +30,8 @@ describe('VerificationService', () => {
 
   const notifications = {
     notifyVerificationCode: jest.fn().mockResolvedValue(undefined),
-    notifyVerificationPendingModeration: jest.fn().mockResolvedValue(undefined),
+    // Mirrors production: the notification reports whether the mail was actually delivered.
+    notifyVerificationPendingModeration: jest.fn().mockResolvedValue(true),
   };
   const sms = { send: jest.fn().mockResolvedValue(undefined) };
   const registry = {
@@ -60,17 +62,20 @@ describe('VerificationService', () => {
     jest.clearAllMocks();
     codes.issue.mockResolvedValue('123456');
     codes.consume.mockResolvedValue({ id: 'c1', destination: 'farmer@example.com' });
+    notifications.notifyVerificationPendingModeration.mockResolvedValue(true);
     prisma.farm.updateMany.mockResolvedValue({ count: 1 });
     prisma.farmDocument.updateMany.mockResolvedValue({ count: 1 });
     prisma.user.findMany.mockResolvedValue([
       { email: 'admin@agrobridge.ge', locale: 'ru', displayName: 'Admin' },
     ]);
+    // Real throttle on in-process counters, so the submission cap is exercised, not stubbed.
     service = new VerificationService(
       prisma as never,
       notifications as never,
       sms as never,
       registry as never,
       codes as never,
+      createTestRateLimit().service,
     );
   });
 
@@ -649,6 +654,20 @@ describe('VerificationService', () => {
 
       await service.ensureIdentityReviewSubmitted('u1');
 
+      // Only documents moderation has never seen are picked up as a submission.
+      expect(prisma.farm.findUnique).toHaveBeenCalledWith({
+        where: { ownerId: 'u1' },
+        include: {
+          documents: {
+            where: {
+              kind: 'idCard',
+              reviewStatus: 'pending',
+              moderationNotifiedAt: null,
+            },
+            orderBy: { createdAt: 'desc' },
+          },
+        },
+      });
       expect(prisma.farm.updateMany).toHaveBeenCalledWith({
         where: { id: 'farm1', verificationStatus: { in: ['unverified', 'rejected'] } },
         data: {
@@ -787,14 +806,59 @@ describe('VerificationService', () => {
       expect(prisma.farm.updateMany).toHaveBeenCalled();
     });
 
+    it('releases the notification claim when the mail was not delivered', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(farmWithPendingId());
+      notifications.notifyVerificationPendingModeration.mockResolvedValueOnce(false);
+
+      await service.ensureIdentityReviewSubmitted('u1');
+
+      const [claim, release] = prisma.farmDocument.updateMany.mock.calls;
+      expect(claim[0]).toEqual({
+        where: { id: 'doc1', moderationNotifiedAt: null },
+        data: { moderationNotifiedAt: expect.any(Date) },
+      });
+      // Releasing matches the exact claim timestamp so a concurrent claim is never dropped.
+      expect(release[0]).toEqual({
+        where: { id: 'doc1', moderationNotifiedAt: claim[0].data.moderationNotifiedAt },
+        data: { moderationNotifiedAt: null },
+      });
+    });
+
+    it('keeps the claim when the mail was delivered', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(farmWithPendingId());
+
+      await service.ensureIdentityReviewSubmitted('u1');
+
+      expect(prisma.farmDocument.updateMany).toHaveBeenCalledTimes(1);
+    });
+
+    it('caps how often one farm can page the moderators', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(farmWithPendingId());
+
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        await service.ensureIdentityReviewSubmitted('u1');
+      }
+
+      expect(notifications.notifyVerificationPendingModeration).toHaveBeenCalledTimes(3);
+      // The suppressed attempt still queues the farm and still consumes its claim.
+      expect(prisma.farm.updateMany).toHaveBeenCalledTimes(4);
+      expect(prisma.farmDocument.updateMany).toHaveBeenCalledTimes(4);
+    });
+
     it('marks the farm rejected when the only submitted document is rejected', async () => {
       prisma.user.findUnique.mockResolvedValue(producer());
       prisma.farm.findUnique.mockResolvedValue(
-        farmWithPendingId({ verificationStatus: 'pending', documents: [] }),
+        farmWithPendingId({
+          verificationStatus: 'pending',
+          documents: [{ id: 'doc1', kind: 'idCard', reviewStatus: 'rejected' }],
+        }),
       );
       prisma.farm.update.mockResolvedValue({});
 
-      await service.syncAfterIdentityDocumentRejected('u1');
+      await service.syncPrimaryDocumentState('u1');
 
       expect(prisma.farm.update).toHaveBeenCalledWith({
         where: { id: 'farm1' },
@@ -802,6 +866,7 @@ describe('VerificationService', () => {
           verificationStatus: 'rejected',
           verificationNote: 'Verification document rejected',
           verifiedAt: null,
+          verifiedById: null,
         },
       });
     });
@@ -812,7 +877,61 @@ describe('VerificationService', () => {
         farmWithPendingId({ verificationStatus: 'pending' }),
       );
 
-      await service.syncAfterIdentityDocumentRejected('u1');
+      await service.syncPrimaryDocumentState('u1');
+
+      expect(prisma.farm.update).not.toHaveBeenCalled();
+    });
+
+    it('leaves moderation when the seller withdrew the submitted document', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(
+        farmWithPendingId({ verificationStatus: 'pending', documents: [] }),
+      );
+      prisma.farm.update.mockResolvedValue({});
+
+      await service.syncPrimaryDocumentState('u1');
+
+      expect(prisma.farm.update).toHaveBeenCalledWith({
+        where: { id: 'farm1' },
+        data: {
+          verificationStatus: 'unverified',
+          verificationNote: null,
+          verifiedAt: null,
+          verifiedById: null,
+        },
+      });
+    });
+
+    it('sends a company back to the registry check once its document is approved', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer({ sellerType: 'company' }));
+      prisma.farm.findUnique.mockResolvedValue(
+        farmWithPendingId({
+          verificationStatus: 'pending',
+          documents: [{ id: 'doc1', kind: 'businessRegistration', reviewStatus: 'approved' }],
+        }),
+      );
+      prisma.farm.update.mockResolvedValue({});
+
+      await service.syncPrimaryDocumentState('u1');
+
+      expect(prisma.farm.update).toHaveBeenCalledWith({
+        where: { id: 'farm1' },
+        data: {
+          verificationStatus: 'unverified',
+          verificationNote: 'Registration document approved; complete the company registry check',
+          verifiedAt: null,
+          verifiedById: null,
+        },
+      });
+    });
+
+    it('never touches a farm that is not in moderation', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(
+        farmWithPendingId({ verificationStatus: 'approved', documents: [] }),
+      );
+
+      await service.syncPrimaryDocumentState('u1');
 
       expect(prisma.farm.update).not.toHaveBeenCalled();
     });

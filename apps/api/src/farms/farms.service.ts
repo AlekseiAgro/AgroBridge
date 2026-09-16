@@ -23,6 +23,7 @@ import {
   isFarmDocumentKind,
   isFarmDocumentMimeType,
   isFarmPhotoMimeType,
+  isPrimaryVerificationDocumentKind,
 } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
@@ -433,7 +434,7 @@ export class FarmsService {
 
     // Uploading an identity document is the submission itself. The stored document must
     // survive a failing transition or mail outage, so this never rejects the upload.
-    if (kind === FarmDocumentKind.idCard || kind === FarmDocumentKind.businessRegistration) {
+    if (isPrimaryVerificationDocumentKind(kind)) {
       try {
         await this.verification.ensureIdentityReviewSubmitted(user.id);
       } catch (error) {
@@ -488,6 +489,18 @@ export class FarmsService {
 
     await this.storage.delete(doc.key, STORAGE_VISIBILITY.PRIVATE);
     await this.prisma.farmDocument.delete({ where: { id: doc.id } });
+
+    // Withdrawing the document that started the review must not leave the farm in moderation.
+    if (isPrimaryVerificationDocumentKind(doc.kind)) {
+      try {
+        await this.verification.syncPrimaryDocumentState(user.id);
+      } catch (error) {
+        this.logger.error(
+          `Verification sync failed after document removal for farm ${farm.id}`,
+          error instanceof Error ? error.name : 'unknown error',
+        );
+      }
+    }
   }
 
   async uploadPhoto(

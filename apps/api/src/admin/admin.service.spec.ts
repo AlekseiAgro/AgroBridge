@@ -19,7 +19,7 @@ describe('AdminService', () => {
 
   const verification = {
     tryCompleteVerification: jest.fn().mockResolvedValue(undefined),
-    syncAfterIdentityDocumentRejected: jest.fn().mockResolvedValue(undefined),
+    syncPrimaryDocumentState: jest.fn().mockResolvedValue(undefined),
   };
 
   const notifications = {
@@ -185,7 +185,26 @@ describe('AdminService', () => {
       await service.reviewDocument(admin, 'doc1', true, {});
 
       expect(verification.tryCompleteVerification).toHaveBeenCalledWith('owner1');
-      expect(verification.syncAfterIdentityDocumentRejected).not.toHaveBeenCalled();
+      expect(verification.syncPrimaryDocumentState).toHaveBeenCalledWith('owner1');
+    });
+
+    it('completes and reconciles a company after its registration document is approved', async () => {
+      prisma.farmDocument.findUnique.mockResolvedValue({
+        id: 'doc3',
+        kind: 'businessRegistration',
+        farm: { ownerId: 'owner2' },
+      });
+      prisma.farmDocument.update.mockResolvedValue({
+        ...reviewedDocument('approved'),
+        id: 'doc3',
+        kind: 'businessRegistration',
+      });
+
+      await service.reviewDocument(admin, 'doc3', true, {});
+
+      // Without this pair a company stayed in moderation forever once its document was approved.
+      expect(verification.tryCompleteVerification).toHaveBeenCalledWith('owner2');
+      expect(verification.syncPrimaryDocumentState).toHaveBeenCalledWith('owner2');
     });
 
     it('drops the farm out of moderation when the identity document is rejected', async () => {
@@ -198,7 +217,7 @@ describe('AdminService', () => {
 
       await service.reviewDocument(admin, 'doc1', false, { note: 'illegible scan' });
 
-      expect(verification.syncAfterIdentityDocumentRejected).toHaveBeenCalledWith('owner1');
+      expect(verification.syncPrimaryDocumentState).toHaveBeenCalledWith('owner1');
       expect(verification.tryCompleteVerification).not.toHaveBeenCalled();
     });
 
@@ -216,7 +235,7 @@ describe('AdminService', () => {
 
       await service.reviewDocument(admin, 'doc2', false, {});
 
-      expect(verification.syncAfterIdentityDocumentRejected).not.toHaveBeenCalled();
+      expect(verification.syncPrimaryDocumentState).not.toHaveBeenCalled();
       expect(verification.tryCompleteVerification).not.toHaveBeenCalled();
     });
   });

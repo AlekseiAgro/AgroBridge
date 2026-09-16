@@ -29,9 +29,19 @@ import {
 } from '../sms/sms.errors';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { RateLimitExceededException } from '../rate-limit/rate-limit-exceeded.exception';
+import { RateLimitService } from '../rate-limit/rate-limit.service';
 import { SmsService } from '../sms/sms.service';
 import { GeorgiaCompanyRegistryService } from './georgia-company-registry.service';
 import { VerificationCodeService } from './verification-code.service';
+
+/**
+ * A farm may announce a few submissions per hour. That covers a genuine resubmission after a
+ * rejection, but not an upload/delete loop used to spam moderators.
+ */
+const SUBMISSION_NOTIFICATION_ACTION = 'verification.submission.notify';
+const SUBMISSION_NOTIFICATION_LIMIT = 3;
+const SUBMISSION_NOTIFICATION_WINDOW_MS = 60 * 60 * 1000;
 
 @Injectable()
 export class VerificationService {
@@ -43,6 +53,7 @@ export class VerificationService {
     private readonly sms: SmsService,
     private readonly registry: GeorgiaCompanyRegistryService,
     private readonly codes: VerificationCodeService,
+    private readonly rateLimit: RateLimitService,
   ) {}
 
   async getStatus(user: AuthenticatedUser): Promise<ProducerVerificationStatus> {
@@ -395,7 +406,13 @@ export class VerificationService {
       where: { ownerId: userId },
       include: {
         documents: {
-          where: { kind: primaryKind, reviewStatus: DocumentReviewStatus.pending },
+          // Only a document moderation has never been told about is a submission. That is
+          // what stops an email or SMS confirmation from reopening a decided application.
+          where: {
+            kind: primaryKind,
+            reviewStatus: DocumentReviewStatus.pending,
+            moderationNotifiedAt: null,
+          },
           orderBy: { createdAt: 'desc' },
         },
       },
@@ -422,25 +439,43 @@ export class VerificationService {
 
     // The conditional update is the idempotency claim: only the request that flips
     // moderationNotifiedAt from null sends the email.
+    const claimedAt = new Date();
     const claimed = await this.prisma.farmDocument.updateMany({
       where: { id: document.id, moderationNotifiedAt: null },
-      data: { moderationNotifiedAt: new Date() },
+      data: { moderationNotifiedAt: claimedAt },
     });
     if (claimed.count !== 1) return;
 
-    await this.notifyAdminsVerificationPending({
+    if (!(await this.allowSubmissionNotification(farm.id))) {
+      // The farm is in the moderator queue either way; only the repeated mail is dropped.
+      this.logger.warn(
+        `Suppressed repeated verification submission notification for farm ${farm.id}`,
+      );
+      return;
+    }
+
+    const delivered = await this.notifyAdminsVerificationPending({
       farmId: farm.id,
       farmName: farm.name,
       sellerType,
       submittedAt: document.createdAt,
     });
+    if (!delivered) {
+      // Nothing reached an admin, so the claim must not block a later attempt. Matching the
+      // timestamp keeps this from releasing a claim another request has taken meanwhile.
+      await this.prisma.farmDocument.updateMany({
+        where: { id: document.id, moderationNotifiedAt: claimedAt },
+        data: { moderationNotifiedAt: null },
+      });
+    }
   }
 
   /**
-   * Keeps the farm-level state consistent with the moderator's document decision so the
-   * seller never sees "pending" while the only submitted document was rejected.
+   * Reconciles the farm with its primary documents after a moderation decision or after the
+   * seller removed one. Only a farm currently in moderation can change here: an approved farm
+   * is terminal, and an unverified or rejected one has no submission left to reconcile.
    */
-  async syncAfterIdentityDocumentRejected(userId: string): Promise<void> {
+  async syncPrimaryDocumentState(userId: string): Promise<void> {
     const dbUser = await this.prisma.user.findUnique({ where: { id: userId } });
     const sellerType = (dbUser?.sellerType as SellerType | null) ?? null;
     if (!dbUser || !sellerType) return;
@@ -448,44 +483,101 @@ export class VerificationService {
     const primaryKind = PRIMARY_VERIFICATION_DOCUMENT_KIND[sellerType] as FarmDocumentKind;
     const farm = await this.prisma.farm.findUnique({
       where: { ownerId: userId },
-      include: {
-        documents: {
-          where: {
-            kind: primaryKind,
-            reviewStatus: {
-              in: [DocumentReviewStatus.pending, DocumentReviewStatus.approved],
-            },
-          },
-        },
-      },
+      include: { documents: { where: { kind: primaryKind } } },
     });
     if (!farm || farm.verificationStatus !== VerificationStatus.pending) return;
-    if (farm.documents.length > 0) return;
 
+    const reviewStatuses = new Set(farm.documents.map((doc) => doc.reviewStatus));
+    if (reviewStatuses.has(DocumentReviewStatus.pending)) return;
+
+    if (reviewStatuses.has(DocumentReviewStatus.approved)) {
+      // Document moderation is done, but tryCompleteVerification did not finish the farm, so
+      // a path requirement is still open: the registry check, or a contact to re-confirm.
+      await this.leaveModeration(
+        farm.id,
+        VerificationStatus.unverified,
+        sellerType === 'company'
+          ? 'Registration document approved; complete the company registry check'
+          : 'Identity document approved; confirm email and phone to finish verification',
+      );
+      return;
+    }
+
+    if (reviewStatuses.has(DocumentReviewStatus.rejected)) {
+      await this.leaveModeration(
+        farm.id,
+        VerificationStatus.rejected,
+        'Verification document rejected',
+      );
+      return;
+    }
+
+    // The seller withdrew the document, so there is no submission left to review.
+    await this.leaveModeration(farm.id, VerificationStatus.unverified, null);
+  }
+
+  private async leaveModeration(
+    farmId: string,
+    status: VerificationStatus,
+    note: string | null,
+  ): Promise<void> {
     await this.prisma.farm.update({
-      where: { id: farm.id },
+      where: { id: farmId },
       data: {
-        verificationStatus: VerificationStatus.rejected,
-        verificationNote: 'Verification document rejected',
+        verificationStatus: status,
+        verificationNote: note,
         verifiedAt: null,
+        verifiedById: null,
       },
     });
   }
 
-  /** Best-effort: a mail failure must not undo a stored document or state transition. */
+  /**
+   * Caps how often one farm can page the moderators. Exceeding the budget only drops the
+   * mail: the farm is already queued, and counter problems must never silence a submission.
+   */
+  private async allowSubmissionNotification(farmId: string): Promise<boolean> {
+    try {
+      await this.rateLimit.consume([
+        {
+          action: SUBMISSION_NOTIFICATION_ACTION,
+          scope: { account: farmId },
+          limit: SUBMISSION_NOTIFICATION_LIMIT,
+          windowMs: SUBMISSION_NOTIFICATION_WINDOW_MS,
+        },
+      ]);
+      return true;
+    } catch (error) {
+      if (error instanceof RateLimitExceededException) {
+        return false;
+      }
+      this.logger.error(
+        `Verification notification throttle unavailable for farm ${farmId}`,
+        error instanceof Error ? error.name : 'unknown error',
+      );
+      return true;
+    }
+  }
+
+  /**
+   * Best-effort: a mail failure must not undo a stored document or state transition. Returns
+   * false when nothing reached an admin, so the caller can release the notification claim.
+   */
   private async notifyAdminsVerificationPending(params: {
     farmId: string;
     farmName: string;
     sellerType: SellerType;
     submittedAt: Date;
-  }): Promise<void> {
+  }): Promise<boolean> {
     try {
       const admins = await this.prisma.user.findMany({
         where: { role: 'admin', blockedAt: null },
         select: { email: true, locale: true, displayName: true },
       });
+      // Without a recipient there is nothing a retry could deliver.
+      if (admins.length === 0) return true;
 
-      await Promise.all(
+      const results = await Promise.all(
         admins.map((admin) =>
           this.notifications.notifyVerificationPendingModeration({
             admin,
@@ -496,12 +588,14 @@ export class VerificationService {
           }),
         ),
       );
+      return results.some(Boolean);
     } catch (error) {
       // Never log document contents, keys, or URLs: only the farm id and the error name.
       this.logger.error(
         `Failed to notify admins about verification submission for farm ${params.farmId}`,
         error instanceof Error ? error.name : 'unknown error',
       );
+      return false;
     }
   }
 

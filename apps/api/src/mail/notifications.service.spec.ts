@@ -153,6 +153,22 @@ describe('NotificationsService', () => {
     expect(sent.text).not.toContain('/file');
   });
 
+  it('reports whether the verification alert reached the admin', async () => {
+    const params = {
+      admin: { email: 'admin@agrobridge.ge', locale: 'ru', displayName: 'Admin' },
+      farmId: 'farm1',
+      farmName: 'Kakheti Farm',
+      sellerType: 'privateFarmer' as const,
+      submittedAt: new Date('2026-09-16T10:30:00.000Z'),
+    };
+
+    await expect(service.notifyVerificationPendingModeration(params)).resolves.toBe(true);
+
+    mail.send.mockRejectedValueOnce(new Error('resend unavailable'));
+    // Delivery failures stay non-throwing, but the caller must be able to retry later.
+    await expect(service.notifyVerificationPendingModeration(params)).resolves.toBe(false);
+  });
+
   it('builds password-reset links from WEB_PUBLIC_URL, not the request host', async () => {
     await service.notifyPasswordReset({
       email: 'farmer@example.com',
