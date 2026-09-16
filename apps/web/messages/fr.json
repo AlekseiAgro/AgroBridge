@@ -237,7 +237,8 @@
         "matched": "Registry match: {name}",
         "documentHint": "Téléversez le certificat d’immatriculation de l’entreprise pour confirmer l’organisation.",
         "upload": "Téléverser l’immatriculation",
-        "docTitle": "Immatriculation d’entreprise"
+        "docTitle": "Immatriculation d’entreprise",
+        "documentRequired": "La correspondance au registre est enregistrée. Un modérateur doit encore accepter le document d’enregistrement de l’entreprise."
       },
       "private": {
         "title": "3. Vérification d’identité",
@@ -249,6 +250,14 @@
         "submitted": "Document reçu et transmis pour contrôle.",
         "received": "Document reçu. Confirmez votre e-mail et votre téléphone : il sera ensuite transmis automatiquement au modérateur.",
         "rejected": "La vérification a été refusée. Téléversez un nouveau document : il sera automatiquement renvoyé pour contrôle."
+      },
+      "reason": {
+        "label": "Motif",
+        "moderatorComment": "Commentaire du modérateur",
+        "documentRejected": "Le document de vérification n’a pas été accepté par le modérateur.",
+        "registryNotConfirmed": "L’enregistrement de l’entreprise n’a pas pu être confirmé.",
+        "contactConfirmationRequired": "L’e-mail et le téléphone ne sont pas encore confirmés.",
+        "moderatorRejected": "Le modérateur n’a pas approuvé la vérification."
       },
       "pending": "Pending review",
       "approved": "Verified producer",

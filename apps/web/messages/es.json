@@ -237,7 +237,8 @@
         "matched": "Registry match: {name}",
         "documentHint": "Suba el certificado de registro de la empresa para confirmar la organización.",
         "upload": "Subir registro de empresa",
-        "docTitle": "Registro de empresa"
+        "docTitle": "Registro de empresa",
+        "documentRequired": "La coincidencia en el registro está guardada. Un moderador todavía debe aceptar el documento de registro de la empresa."
       },
       "private": {
         "title": "3. Verificación de identidad",
@@ -249,6 +250,14 @@
         "submitted": "Documento recibido y enviado a revisión.",
         "received": "Documento recibido. Confirme su correo y su teléfono y se enviará automáticamente al moderador.",
         "rejected": "La verificación fue rechazada. Suba un documento nuevo y se enviará automáticamente a una nueva revisión."
+      },
+      "reason": {
+        "label": "Motivo",
+        "moderatorComment": "Comentario del moderador",
+        "documentRejected": "El moderador no aceptó el documento de verificación.",
+        "registryNotConfirmed": "No se pudo confirmar el registro de la empresa.",
+        "contactConfirmationRequired": "Faltan por confirmar el correo y el teléfono.",
+        "moderatorRejected": "El moderador no aprobó la verificación."
       },
       "pending": "Pending review",
       "approved": "Verified producer",

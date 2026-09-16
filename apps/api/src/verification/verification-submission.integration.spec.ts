@@ -21,6 +21,8 @@ describeWithDatabase()('producer verification submission (database)', () => {
 
   const notifications = {
     notifyVerificationPendingModeration: jest.fn().mockResolvedValue(true),
+    notifyVerificationApproved: jest.fn().mockResolvedValue(true),
+    notifyVerificationRejected: jest.fn().mockResolvedValue(true),
     notifyProductApproved: jest.fn().mockResolvedValue(undefined),
     notifyProductRejected: jest.fn().mockResolvedValue(undefined),
   };
@@ -121,6 +123,8 @@ describeWithDatabase()('producer verification submission (database)', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     notifications.notifyVerificationPendingModeration.mockResolvedValue(true);
+    notifications.notifyVerificationApproved.mockResolvedValue(true);
+    notifications.notifyVerificationRejected.mockResolvedValue(true);
     const user = await prisma.user.create({
       data: {
         email: `producer-${randomUUID()}@example.test`,
@@ -252,6 +256,7 @@ describeWithDatabase()('producer verification submission (database)', () => {
     expect(farm.verificationStatus).toBe('approved');
     expect((await verification.getStatus(owner())).verified).toBe(true);
     expect(alertsForFarm()).toHaveLength(1);
+    expect(notifications.notifyVerificationApproved).toHaveBeenCalledTimes(1);
   });
 
   it('names the missing requirement when an approved document cannot finish verification', async () => {
@@ -262,14 +267,111 @@ describeWithDatabase()('producer verification submission (database)', () => {
 
     let farm = await farmRow();
     expect(farm.verificationStatus).toBe('unverified');
-    expect(farm.verificationNote).toBe(
-      'Identity document approved; confirm email and phone to finish verification',
-    );
+    expect(farm.verificationReasonCode).toBe('contactConfirmationRequired');
+    // The requirement is a code, never an English sentence stored for the seller to read.
+    expect(farm.verificationNote).toBeNull();
 
     await verification.confirmSmsCode(owner(), '123456');
 
     farm = await farmRow();
     expect(farm.verificationStatus).toBe('approved');
+    expect(farm.verificationReasonCode).toBeNull();
+  });
+
+  it('leaves a rejected producer a way back even when their document was accepted', async () => {
+    const document = await uploadIdCard('id.pdf');
+    await admin.reviewDocument(adminUser, document.id, true, {});
+    expect((await farmRow()).verificationStatus).toBe('approved');
+
+    await admin.verifyFarm(adminUser, farmId, false, { note: 'the farm is not what it claims' });
+
+    // 'done' would hide the upload control and strand the seller with no way to reapply.
+    const status = await verification.getStatus(owner());
+    expect(status.steps.identity).toBe('rejected');
+    expect(status.verified).toBe(false);
+
+    const replacement = await uploadIdCard('id-2.pdf');
+    expect((await farmRow()).verificationStatus).toBe('pending');
+    expect((await verification.getStatus(owner())).steps.identity).toBe('pending_review');
+    expect(replacement.reviewStatus).toBe('pending');
+  });
+
+  it('does not let a contact re-confirmation undo a moderator refusal', async () => {
+    const document = await uploadIdCard('id.pdf');
+    await admin.reviewDocument(adminUser, document.id, true, {});
+    await admin.verifyFarm(adminUser, farmId, false, { note: 'the farm is not what it claims' });
+    notifications.notifyVerificationApproved.mockClear();
+
+    // What an email or phone confirmation runs. The approved document is still on file, so
+    // without the transition guard this would quietly reinstate the badge.
+    await verification.tryCompleteVerification(ownerId);
+
+    expect((await farmRow()).verificationStatus).toBe('rejected');
+    expect(notifications.notifyVerificationApproved).not.toHaveBeenCalled();
+  });
+
+  it('never shows a producer an internal note as if a moderator had written it', async () => {
+    const document = await uploadIdCard('id.pdf');
+    await admin.reviewDocument(adminUser, document.id, false, { note: 'illegible scan' });
+
+    const status = await verification.getStatus(owner());
+
+    expect(status.farmVerificationStatus).toBe('rejected');
+    expect(status.verificationReasonCode).toBe('documentRejected');
+    expect(status.moderatorComment).toBeNull();
+  });
+
+  describe('producer decision emails', () => {
+    it('sends exactly one approval email per real transition', async () => {
+      const document = await uploadIdCard('id.pdf');
+
+      await admin.reviewDocument(adminUser, document.id, true, {});
+      await admin.verifyFarm(adminUser, farmId, true, { note: 'looks good' });
+
+      expect((await farmRow()).verificationStatus).toBe('approved');
+      expect(notifications.notifyVerificationApproved).toHaveBeenCalledTimes(1);
+      expect(notifications.notifyVerificationRejected).not.toHaveBeenCalled();
+    });
+
+    it('sends exactly one rejection email per real transition', async () => {
+      await uploadIdCard('id.pdf');
+
+      await admin.verifyFarm(adminUser, farmId, false, { note: 'documents do not match' });
+      await admin.verifyFarm(adminUser, farmId, false, { note: 'documents do not match' });
+
+      expect((await farmRow()).verificationStatus).toBe('rejected');
+      expect(notifications.notifyVerificationRejected).toHaveBeenCalledTimes(1);
+      expect(notifications.notifyVerificationRejected).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reasonCode: 'moderatorRejected',
+          moderatorComment: 'documents do not match',
+        }),
+      );
+    });
+
+    it('lets a moderator refresh the comment without emailing the producer again', async () => {
+      await uploadIdCard('id.pdf');
+      await admin.verifyFarm(adminUser, farmId, false, { note: 'first reason' });
+      notifications.notifyVerificationRejected.mockClear();
+
+      await admin.verifyFarm(adminUser, farmId, false, { note: 'second reason' });
+
+      expect((await farmRow()).verificationNote).toBe('second reason');
+      expect(notifications.notifyVerificationRejected).not.toHaveBeenCalled();
+    });
+
+    it('uses the producer locale and keeps the decision when the mail fails', async () => {
+      await prisma.user.update({ where: { id: ownerId }, data: { locale: 'ka' } });
+      notifications.notifyVerificationRejected.mockRejectedValue(new Error('resend down'));
+      await uploadIdCard('id.pdf');
+
+      await admin.verifyFarm(adminUser, farmId, false, { note: 'unreadable' });
+
+      expect((await farmRow()).verificationStatus).toBe('rejected');
+      expect(notifications.notifyVerificationRejected).toHaveBeenCalledWith(
+        expect.objectContaining({ farmer: expect.objectContaining({ locale: 'ka' }) }),
+      );
+    });
   });
 
   describe('moderator rejection of the farm', () => {
@@ -291,8 +393,15 @@ describeWithDatabase()('producer verification submission (database)', () => {
 
       farm = await farmRow();
       expect(farm.verificationStatus).toBe('rejected');
+      expect(farm.verificationReasonCode).toBe('moderatorRejected');
       expect(farm.verificationNote).toBe('documents do not match');
       expect(alertsForFarm()).toHaveLength(0);
+
+      // The stale pending document must not present the refusal as "still in review".
+      const rejectedStatus = await verification.getStatus(owner());
+      expect(rejectedStatus.steps.identity).toBe('rejected');
+      expect(rejectedStatus.verificationReasonCode).toBe('moderatorRejected');
+      expect(rejectedStatus.moderatorComment).toBe('documents do not match');
 
       const replacement = await uploadIdCard('id-2.pdf');
 
@@ -342,12 +451,58 @@ describeWithDatabase()('producer verification submission (database)', () => {
 
       expect((await farmRow()).verificationStatus).toBe('pending');
     });
+
+    it('refuses to remove the approved document a verified producer rests on', async () => {
+      const document = await uploadIdCard('id.pdf');
+      await admin.reviewDocument(adminUser, document.id, true, {});
+      expect((await farmRow()).verificationStatus).toBe('approved');
+
+      await expect(farms.removeDocument(owner(), document.id)).rejects.toThrow(
+        'The approved verification document cannot be deleted while the producer is verified',
+      );
+
+      expect(await prisma.farmDocument.count({ where: { id: document.id } })).toBe(1);
+      expect((await farmRow()).verificationStatus).toBe('approved');
+    });
+
+    it('still removes a rejected primary document from a verified producer', async () => {
+      const rejected = await uploadIdCard('id.pdf');
+      await admin.reviewDocument(adminUser, rejected.id, false, { note: 'unreadable' });
+      const approved = await uploadIdCard('id-2.pdf');
+      await admin.reviewDocument(adminUser, approved.id, true, {});
+      expect((await farmRow()).verificationStatus).toBe('approved');
+
+      await farms.removeDocument(owner(), rejected.id);
+
+      expect(await prisma.farmDocument.count({ where: { id: rejected.id } })).toBe(0);
+      expect((await farmRow()).verificationStatus).toBe('approved');
+    });
+
+    it('still removes supporting documents from a verified producer', async () => {
+      const document = await uploadIdCard('id.pdf');
+      await admin.reviewDocument(adminUser, document.id, true, {});
+      const supporting = await uploadDocument('other', 'prices.pdf');
+
+      await farms.removeDocument(owner(), supporting.id);
+
+      expect(await prisma.farmDocument.count({ where: { id: supporting.id } })).toBe(0);
+    });
   });
 
   describe('company verification', () => {
     beforeEach(async () => {
       await prisma.user.update({ where: { id: ownerId }, data: { sellerType: 'company' } });
     });
+
+    const registryMatches = (registrationNumber = '123456789') => {
+      registry.lookup.mockResolvedValue({
+        valid: true,
+        registrationNumber,
+        legalName: `Registry stub company ${registrationNumber}`,
+        source: 'stub',
+        message: 'ok',
+      });
+    };
 
     it('never stays pending after the moderator approves the registration document', async () => {
       const document = await uploadDocument('businessRegistration', 'registration.pdf');
@@ -361,37 +516,87 @@ describeWithDatabase()('producer verification submission (database)', () => {
       // instead of being approved by the document alone.
       const farm = await farmRow();
       expect(farm.verificationStatus).toBe('unverified');
-      expect(farm.verificationNote).toBe(
-        'Registration document approved; complete the company registry check',
-      );
+      expect(farm.verificationReasonCode).toBe('registryNotConfirmed');
+      expect(farm.verificationNote).toBeNull();
+      expect(notifications.notifyVerificationApproved).not.toHaveBeenCalled();
 
-      registry.lookup.mockResolvedValue({
-        valid: true,
-        registrationNumber: '123456789',
-        legalName: 'Demo LLC',
-        source: 'stub',
-        message: 'ok',
-      });
+      registryMatches();
       const status = await verification.checkCompanyRegistry(owner(), '123456789');
 
       expect(status.verified).toBe(true);
       expect((await farmRow()).verificationStatus).toBe('approved');
+      expect(notifications.notifyVerificationApproved).toHaveBeenCalledTimes(1);
     });
 
-    it('approves as soon as the registry confirms the company, document review or not', async () => {
-      await uploadDocument('businessRegistration', 'registration.pdf');
+    it('stops blaming the registry once a retry matches', async () => {
       registry.lookup.mockResolvedValue({
-        valid: true,
-        registrationNumber: '123456789',
-        legalName: 'Demo LLC',
+        valid: false,
+        registrationNumber: '1234567',
+        legalName: null,
         source: 'stub',
-        message: 'ok',
+        message: 'Identification code must be exactly 9 digits',
       });
+      await expect(verification.checkCompanyRegistry(owner(), '1234567')).rejects.toThrow(
+        'Identification code must be exactly 9 digits',
+      );
+      expect((await farmRow()).verificationReasonCode).toBe('registryNotConfirmed');
+
+      registryMatches();
+      const status = await verification.checkCompanyRegistry(owner(), '123456789');
+
+      // Telling the seller the registry failed while showing them the matched company name
+      // would be a contradiction they cannot act on.
+      expect(status.companyRegistryValid).toBe(true);
+      expect(status.verificationReasonCode).toBeNull();
+      expect(status.steps.identity).toBe('todo');
+    });
+
+    it('keeps a document refusal when a later registry retry matches', async () => {
+      const document = await uploadDocument('businessRegistration', 'registration.pdf');
+      await admin.reviewDocument(adminUser, document.id, false, { note: 'unreadable' });
+      expect((await farmRow()).verificationReasonCode).toBe('documentRejected');
+
+      registryMatches();
+      const status = await verification.checkCompanyRegistry(owner(), '123456789');
+
+      expect(status.farmVerificationStatus).toBe('rejected');
+      expect(status.verificationReasonCode).toBe('documentRejected');
+    });
+
+    it('does not approve on a registry match while the document is still under review', async () => {
+      await uploadDocument('businessRegistration', 'registration.pdf');
+      registryMatches();
 
       const status = await verification.checkCompanyRegistry(owner(), '123456789');
 
-      expect(status.verified).toBe(true);
-      expect((await farmRow()).verificationStatus).toBe('approved');
+      // The registry lookup is a stub that trusts any 9-digit code, so on its own it must
+      // never be enough: the farm stays in the moderation queue.
+      expect(status.verified).toBe(false);
+      expect((await farmRow()).verificationStatus).toBe('pending');
+      expect(notifications.notifyVerificationApproved).not.toHaveBeenCalled();
+    });
+
+    it('does not approve a company on a made-up nine-digit code with no approved document', async () => {
+      registryMatches('987654321');
+
+      const status = await verification.checkCompanyRegistry(owner(), '987654321');
+
+      expect(status.verified).toBe(false);
+      const farm = await farmRow();
+      expect(farm.companyRegistryValid).toBe(true);
+      expect(farm.verificationStatus).toBe('unverified');
+      expect(notifications.notifyVerificationApproved).not.toHaveBeenCalled();
+    });
+
+    it('does not approve a company whose registration document was rejected', async () => {
+      const document = await uploadDocument('businessRegistration', 'registration.pdf');
+      await admin.reviewDocument(adminUser, document.id, false, { note: 'unreadable' });
+      registryMatches();
+
+      const status = await verification.checkCompanyRegistry(owner(), '123456789');
+
+      expect(status.verified).toBe(false);
+      expect((await farmRow()).verificationStatus).toBe('rejected');
     });
 
     it('does not approve a company the registry rejects', async () => {
@@ -410,6 +615,29 @@ describeWithDatabase()('producer verification submission (database)', () => {
 
       const farm = await farmRow();
       expect(farm.verificationStatus).toBe('unverified');
+      expect(farm.companyRegistryValid).toBe(false);
+    });
+
+    it('does not let a mistyped registration number revoke a granted badge', async () => {
+      const document = await uploadDocument('businessRegistration', 'registration.pdf');
+      await admin.reviewDocument(adminUser, document.id, true, {});
+      registryMatches();
+      await verification.checkCompanyRegistry(owner(), '123456789');
+      expect((await farmRow()).verificationStatus).toBe('approved');
+
+      registry.lookup.mockResolvedValue({
+        valid: false,
+        registrationNumber: '000000000',
+        legalName: null,
+        source: 'stub',
+        message: 'Company not found in the registry',
+      });
+      await expect(verification.checkCompanyRegistry(owner(), '000000000')).rejects.toThrow(
+        'Company not found in the registry',
+      );
+
+      const farm = await farmRow();
+      expect(farm.verificationStatus).toBe('approved');
       expect(farm.companyRegistryValid).toBe(false);
     });
 

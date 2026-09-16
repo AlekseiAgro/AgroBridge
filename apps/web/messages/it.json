@@ -237,7 +237,8 @@
         "matched": "Registry match: {name}",
         "documentHint": "Carica il certificato di registrazione dell’azienda per confermare l’organizzazione.",
         "upload": "Carica registrazione aziendale",
-        "docTitle": "Registrazione aziendale"
+        "docTitle": "Registrazione aziendale",
+        "documentRequired": "La corrispondenza nel registro è salvata. Un moderatore deve ancora accettare il documento di registrazione dell’azienda."
       },
       "private": {
         "title": "3. Verifica dell’identità",
@@ -249,6 +250,14 @@
         "submitted": "Documento ricevuto e inviato alla verifica.",
         "received": "Documento ricevuto. Conferma email e telefono: verrà poi inviato automaticamente al moderatore.",
         "rejected": "La verifica è stata rifiutata. Carica un nuovo documento: verrà inviato automaticamente a una nuova verifica."
+      },
+      "reason": {
+        "label": "Motivo",
+        "moderatorComment": "Commento del moderatore",
+        "documentRejected": "Il documento di verifica non è stato accettato dal moderatore.",
+        "registryNotConfirmed": "Non è stato possibile confermare la registrazione dell’azienda.",
+        "contactConfirmationRequired": "Email e telefono non sono ancora confermati.",
+        "moderatorRejected": "Il moderatore non ha approvato la verifica."
       },
       "pending": "Pending review",
       "approved": "Verified producer",

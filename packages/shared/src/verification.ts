@@ -10,6 +10,22 @@ export function isVerificationStatus(value: string): value is VerificationStatus
   return (VERIFICATION_STATUSES as readonly string[]).includes(value);
 }
 
+/**
+ * Why a farm sits in its current verification state. The producer UI and the decision
+ * emails translate this code, so moderation never ships English internals to a seller.
+ */
+export const VERIFICATION_REASON_CODES = [
+  'documentRejected',
+  'registryNotConfirmed',
+  'contactConfirmationRequired',
+  'moderatorRejected',
+] as const;
+export type VerificationReasonCode = (typeof VERIFICATION_REASON_CODES)[number];
+
+export function isVerificationReasonCode(value: string): value is VerificationReasonCode {
+  return (VERIFICATION_REASON_CODES as readonly string[]).includes(value);
+}
+
 export const DOCUMENT_REVIEW_STATUSES = ['pending', 'approved', 'rejected'] as const;
 export type DocumentReviewStatus = (typeof DOCUMENT_REVIEW_STATUSES)[number];
 
@@ -75,7 +91,10 @@ export type FarmDocument = {
 export type ProducerVerificationStatus = {
   verified: boolean;
   farmVerificationStatus: VerificationStatus;
-  verificationNote: string | null;
+  /** Translatable explanation of the current state; null when there is nothing to explain. */
+  verificationReasonCode: VerificationReasonCode | null;
+  /** A moderator's own words. Not translated, and never an internal status message. */
+  moderatorComment: string | null;
   sellerType: 'privateFarmer' | 'company' | null;
   emailVerified: boolean;
   phone: string | null;

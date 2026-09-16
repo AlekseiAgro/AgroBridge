@@ -237,7 +237,8 @@
         "matched": "Registry match: {name}",
         "documentHint": "Upload your company registration certificate to confirm the company.",
         "upload": "Upload company registration",
-        "docTitle": "Company registration"
+        "docTitle": "Company registration",
+        "documentRequired": "The registry match is saved. A moderator still has to accept your company registration document."
       },
       "private": {
         "title": "3. Identity verification",
@@ -249,6 +250,14 @@
         "submitted": "Document received and sent for review.",
         "received": "Document received. Confirm your email and phone number and it goes to the moderator automatically.",
         "rejected": "Verification was rejected. Upload a new document and it is sent for review again automatically."
+      },
+      "reason": {
+        "label": "Reason",
+        "moderatorComment": "Moderator comment",
+        "documentRejected": "The verification document was not accepted by the moderator.",
+        "registryNotConfirmed": "The company registration could not be confirmed.",
+        "contactConfirmationRequired": "Email and phone confirmation is still missing.",
+        "moderatorRejected": "The moderator did not approve the verification."
       },
       "pending": "Pending review",
       "approved": "Verified producer",

@@ -18,6 +18,7 @@ import {
   DocumentReviewStatus,
   FarmDocumentKind,
   VerificationChannel,
+  VerificationReasonCode,
   VerificationStatus,
 } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -42,6 +43,23 @@ import { VerificationCodeService } from './verification-code.service';
 const SUBMISSION_NOTIFICATION_ACTION = 'verification.submission.notify';
 const SUBMISSION_NOTIFICATION_LIMIT = 3;
 const SUBMISSION_NOTIFICATION_WINDOW_MS = 60 * 60 * 1000;
+
+const ALL_VERIFICATION_STATUSES = [
+  VerificationStatus.unverified,
+  VerificationStatus.pending,
+  VerificationStatus.approved,
+  VerificationStatus.rejected,
+] as const;
+
+/**
+ * Statuses automatic completion may finish. A rejection is deliberately absent: only a new
+ * submission (which moves the farm back to `pending`) or an explicit moderator approval may
+ * undo it, so re-confirming an email or a phone can never quietly reverse a refusal.
+ */
+const AUTO_COMPLETABLE_STATUSES = [
+  VerificationStatus.unverified,
+  VerificationStatus.pending,
+] as const;
 
 @Injectable()
 export class VerificationService {
@@ -102,16 +120,50 @@ export class VerificationService {
       ),
     );
 
+    // The farm-level decision always wins over the documents behind it. A rejection that still
+    // rendered as "done" or "in review" would hide the outcome and, worse, hide the upload
+    // control the seller needs to apply again.
+    const farmLevelIdentity: ProducerVerificationStatus['steps']['identity'] | null =
+      farm?.verificationStatus === VerificationStatus.approved
+        ? 'done'
+        : farm?.verificationStatus === VerificationStatus.rejected
+          ? 'rejected'
+          : farm?.verificationStatus === VerificationStatus.pending
+            ? 'pending_review'
+            : null;
+
     let identity: ProducerVerificationStatus['steps']['identity'] = 'todo';
-    if (path === 'company') {
-      if (farm?.companyRegistryValid === true) identity = 'done';
-      else if (farm?.companyRegistryValid === false) identity = 'rejected';
-    } else if (path === 'privateFarmer') {
-      if (hasApprovedIdDocument || farm?.verificationStatus === VerificationStatus.approved) {
+    if (farmLevelIdentity) {
+      identity = farmLevelIdentity;
+    } else if (path === 'company') {
+      // A company is only done once the registry matched *and* a moderator accepted the
+      // registration document. The registry check alone never finishes the step.
+      const companyDocuments = farm?.documents.filter(
+        (doc) => doc.kind === FarmDocumentKind.businessRegistration,
+      );
+      const hasApprovedCompanyDocument = companyDocuments?.some(
+        (doc) => doc.reviewStatus === DocumentReviewStatus.approved,
+      );
+      const hasPendingCompanyDocument = companyDocuments?.some(
+        (doc) => doc.reviewStatus === DocumentReviewStatus.pending,
+      );
+      const companyDocumentsRejectedOnly = Boolean(
+        companyDocuments?.length && !hasApprovedCompanyDocument && !hasPendingCompanyDocument,
+      );
+
+      if (farm?.companyRegistryValid === true && hasApprovedCompanyDocument) {
         identity = 'done';
-      } else if (farm?.verificationStatus === VerificationStatus.pending || hasPendingIdDocument) {
+      } else if (hasPendingCompanyDocument) {
         identity = 'pending_review';
-      } else if (hasRejectedOnly || farm?.verificationStatus === VerificationStatus.rejected) {
+      } else if (farm?.companyRegistryValid === false || companyDocumentsRejectedOnly) {
+        identity = 'rejected';
+      }
+    } else if (path === 'privateFarmer') {
+      if (hasApprovedIdDocument) {
+        identity = 'done';
+      } else if (hasPendingIdDocument) {
+        identity = 'pending_review';
+      } else if (hasRejectedOnly) {
         identity = 'rejected';
       }
     }
@@ -120,11 +172,17 @@ export class VerificationService {
     const phoneVerified = Boolean(dbUser.phoneVerifiedAt);
     const verified = farm?.verificationStatus === VerificationStatus.approved;
 
+    const reasonCode = farm?.verificationReasonCode ?? null;
+    // Only a moderator's own words may reach the seller. Every other note is an internal
+    // message, including the English strings rows carried before reason codes existed.
+    const moderatorComment =
+      reasonCode === 'moderatorRejected' ? (farm?.verificationNote ?? null) : null;
+
     return {
       verified,
-      farmVerificationStatus: (farm?.verificationStatus ??
-        VerificationStatus.unverified) as ProducerVerificationStatus['farmVerificationStatus'],
-      verificationNote: farm?.verificationNote ?? null,
+      farmVerificationStatus: farm?.verificationStatus ?? VerificationStatus.unverified,
+      verificationReasonCode: reasonCode,
+      moderatorComment,
       sellerType,
       emailVerified,
       phone: dbUser.phone,
@@ -328,20 +386,29 @@ export class VerificationService {
         companyRegistryName: result.legalName,
         companyRegistryCheckedAt: new Date(),
         companyRegistryValid: result.valid,
-        ...(result.valid
-          ? {}
-          : {
-              verificationStatus: VerificationStatus.unverified,
-              verificationNote: result.message,
-              verifiedAt: null,
-              verifiedById: null,
-            }),
       },
     });
 
     if (!result.valid) {
+      // A failed retry clears an application that is still in flight, but the seller must not
+      // be able to revoke a moderator's decision by mistyping their registration number.
+      await this.applyFarmStatus({
+        farmId: farm.id,
+        from: [VerificationStatus.unverified, VerificationStatus.pending],
+        to: VerificationStatus.unverified,
+        reasonCode: VerificationReasonCode.registryNotConfirmed,
+        note: null,
+        verifiedById: null,
+      });
       throw new BadRequestException(result.message);
     }
+
+    // The registry now matches, so the refusal it caused is stale. Scoped to that one code so a
+    // rejected document or a moderator's refusal keeps its own reason.
+    await this.prisma.farm.updateMany({
+      where: { id: farm.id, verificationReasonCode: VerificationReasonCode.registryNotConfirmed },
+      data: { verificationReasonCode: null },
+    });
 
     await this.tryCompleteVerification(user.id);
     return this.getStatus(user);
@@ -422,19 +489,13 @@ export class VerificationService {
     const document = farm.documents[0];
     if (!document) return;
 
-    await this.prisma.farm.updateMany({
-      where: {
-        id: farm.id,
-        verificationStatus: {
-          in: [VerificationStatus.unverified, VerificationStatus.rejected],
-        },
-      },
-      data: {
-        verificationStatus: VerificationStatus.pending,
-        verificationNote: 'Awaiting moderator review of the verification document',
-        verifiedAt: null,
-        verifiedById: null,
-      },
+    await this.applyFarmStatus({
+      farmId: farm.id,
+      from: [VerificationStatus.unverified, VerificationStatus.rejected],
+      to: VerificationStatus.pending,
+      reasonCode: null,
+      note: null,
+      verifiedById: null,
     });
 
     // The conditional update is the idempotency claim: only the request that flips
@@ -497,8 +558,8 @@ export class VerificationService {
         farm.id,
         VerificationStatus.unverified,
         sellerType === 'company'
-          ? 'Registration document approved; complete the company registry check'
-          : 'Identity document approved; confirm email and phone to finish verification',
+          ? VerificationReasonCode.registryNotConfirmed
+          : VerificationReasonCode.contactConfirmationRequired,
       );
       return;
     }
@@ -507,7 +568,7 @@ export class VerificationService {
       await this.leaveModeration(
         farm.id,
         VerificationStatus.rejected,
-        'Verification document rejected',
+        VerificationReasonCode.documentRejected,
       );
       return;
     }
@@ -516,20 +577,124 @@ export class VerificationService {
     await this.leaveModeration(farm.id, VerificationStatus.unverified, null);
   }
 
+  /**
+   * Records a moderator's approval or rejection of the whole farm. Lives here rather than in
+   * AdminService so every status change — automatic or manual — passes the same transition
+   * guard and therefore the same exactly-once decision email.
+   */
+  async applyModeratorDecision(params: {
+    farmId: string;
+    adminId: string;
+    approve: boolean;
+    note: string | null;
+  }): Promise<void> {
+    const target = params.approve ? VerificationStatus.approved : VerificationStatus.rejected;
+    const reasonCode = params.approve ? null : VerificationReasonCode.moderatorRejected;
+
+    const changed = await this.applyFarmStatus({
+      farmId: params.farmId,
+      from: ALL_VERIFICATION_STATUSES.filter((status) => status !== target),
+      to: target,
+      reasonCode,
+      note: params.note,
+      verifiedById: params.adminId,
+    });
+    if (changed) return;
+
+    // Repeating a decision is not a transition: the moderator may only refresh their comment,
+    // and the producer must not be emailed again.
+    await this.prisma.farm.update({
+      where: { id: params.farmId },
+      data: { verificationNote: params.note, verificationReasonCode: reasonCode },
+    });
+  }
+
   private async leaveModeration(
     farmId: string,
     status: VerificationStatus,
-    note: string | null,
+    reasonCode: VerificationReasonCode | null,
   ): Promise<void> {
-    await this.prisma.farm.update({
-      where: { id: farmId },
+    await this.applyFarmStatus({
+      farmId,
+      from: [VerificationStatus.pending],
+      to: status,
+      reasonCode,
+      note: null,
+      verifiedById: null,
+    });
+  }
+
+  /**
+   * The single writer of Farm.verificationStatus. The conditional update is what makes the
+   * decision email exactly-once: a request that does not actually move the status changes
+   * nothing and notifies nobody, so duplicate admin clicks and replayed transitions are safe.
+   */
+  private async applyFarmStatus(params: {
+    farmId: string;
+    from: readonly VerificationStatus[];
+    to: VerificationStatus;
+    reasonCode: VerificationReasonCode | null;
+    note: string | null;
+    verifiedById: string | null;
+  }): Promise<boolean> {
+    const approved = params.to === VerificationStatus.approved;
+    const changed = await this.prisma.farm.updateMany({
+      where: { id: params.farmId, verificationStatus: { in: [...params.from] } },
       data: {
-        verificationStatus: status,
-        verificationNote: note,
-        verifiedAt: null,
-        verifiedById: null,
+        verificationStatus: params.to,
+        verificationReasonCode: params.reasonCode,
+        verificationNote: params.note,
+        verifiedAt: approved ? new Date() : null,
+        verifiedById: params.verifiedById,
       },
     });
+    if (changed.count !== 1) return false;
+
+    if (approved || params.to === VerificationStatus.rejected) {
+      await this.notifyProducerDecision(params.farmId, params.to, params.reasonCode, params.note);
+    }
+    return true;
+  }
+
+  /**
+   * Best-effort: a mail outage must never roll back a moderation decision that is already
+   * stored, so this only logs. The producer can still see the outcome in the cabinet.
+   */
+  private async notifyProducerDecision(
+    farmId: string,
+    status: VerificationStatus,
+    reasonCode: VerificationReasonCode | null,
+    moderatorComment: string | null,
+  ): Promise<void> {
+    try {
+      const farm = await this.prisma.farm.findUnique({
+        where: { id: farmId },
+        select: {
+          name: true,
+          owner: { select: { email: true, locale: true, displayName: true } },
+        },
+      });
+      if (!farm) return;
+
+      if (status === VerificationStatus.approved) {
+        await this.notifications.notifyVerificationApproved({
+          farmer: farm.owner,
+          farmName: farm.name,
+        });
+        return;
+      }
+      await this.notifications.notifyVerificationRejected({
+        farmer: farm.owner,
+        farmName: farm.name,
+        reasonCode,
+        moderatorComment,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to notify the producer about the verification decision for farm ${farmId}`,
+        error instanceof Error ? error.name : 'unknown error',
+      );
+    }
   }
 
   /**
@@ -605,40 +770,50 @@ export class VerificationService {
     const farm = await this.prisma.farm.findUnique({
       where: { ownerId: userId },
       include: {
-        documents: { where: { kind: FarmDocumentKind.idCard } },
+        documents: {
+          where: {
+            kind: { in: [FarmDocumentKind.idCard, FarmDocumentKind.businessRegistration] },
+          },
+        },
       },
     });
     if (!dbUser || !farm) return;
     if (farm.verificationStatus === VerificationStatus.approved) return;
     if (!dbUser.emailVerifiedAt || !dbUser.phoneVerifiedAt) return;
 
-    if (dbUser.sellerType === 'company' && farm.companyRegistryValid === true) {
-      await this.prisma.farm.update({
-        where: { id: farm.id },
-        data: {
-          verificationStatus: VerificationStatus.approved,
-          verificationNote: 'Verified via email, SMS, and company registry check',
-          verifiedAt: new Date(),
-          verifiedById: null,
-        },
+    const hasApprovedDocument = (kind: FarmDocumentKind) =>
+      farm.documents.some(
+        (doc) => doc.kind === kind && doc.reviewStatus === DocumentReviewStatus.approved,
+      );
+
+    if (dbUser.sellerType === 'company') {
+      // The registry lookup is still a stub that accepts any 9-digit code, so it can never be
+      // the only thing standing between a seller and a verified badge: a moderator has to
+      // accept the registration document as well.
+      const registryConfirmed = farm.companyRegistryValid === true;
+      if (!registryConfirmed || !hasApprovedDocument(FarmDocumentKind.businessRegistration)) {
+        return;
+      }
+      await this.applyFarmStatus({
+        farmId: farm.id,
+        from: AUTO_COMPLETABLE_STATUSES,
+        to: VerificationStatus.approved,
+        reasonCode: null,
+        note: null,
+        verifiedById: null,
       });
       return;
     }
 
-    if (dbUser.sellerType === 'privateFarmer') {
-      const hasApprovedId = farm.documents.some(
-        (doc) => doc.reviewStatus === DocumentReviewStatus.approved,
-      );
-      if (hasApprovedId) {
-        await this.prisma.farm.update({
-          where: { id: farm.id },
-          data: {
-            verificationStatus: VerificationStatus.approved,
-            verificationNote: 'Verified via email, SMS, and ID document review',
-            verifiedAt: new Date(),
-          },
-        });
-      }
+    if (dbUser.sellerType === 'privateFarmer' && hasApprovedDocument(FarmDocumentKind.idCard)) {
+      await this.applyFarmStatus({
+        farmId: farm.id,
+        from: AUTO_COMPLETABLE_STATUSES,
+        to: VerificationStatus.approved,
+        reasonCode: null,
+        note: null,
+        verifiedById: null,
+      });
     }
   }
 

@@ -26,6 +26,8 @@ export type EmailTemplateKey =
   | 'productRejected'
   | 'productPendingModeration'
   | 'verificationPendingModeration'
+  | 'verificationApproved'
+  | 'verificationRejected'
   | 'newProductListing'
   | 'newPurchaseRequest'
   | 'verificationCode'

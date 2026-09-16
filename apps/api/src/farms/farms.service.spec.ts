@@ -561,6 +561,96 @@ describe('FarmsService', () => {
     expect(verification.syncPrimaryDocumentState).toHaveBeenCalledWith('u1');
   });
 
+  it('refuses to delete the approved document a verified producer rests on', async () => {
+    prisma.farm.findUnique.mockResolvedValue({
+      id: 'farm1',
+      ownerId: 'u1',
+      verificationStatus: 'approved',
+    });
+    prisma.farmDocument.findFirst.mockResolvedValue({
+      id: 'doc1',
+      farmId: 'farm1',
+      kind: 'idCard',
+      reviewStatus: 'approved',
+      key: 'farms/farm1/documents/abc.pdf',
+    });
+
+    await expect(
+      service.removeDocument(
+        {
+          id: 'u1',
+          email: 'f@example.com',
+          role: 'farmer',
+          locale: 'ka',
+          displayName: 'Nino',
+        } as AuthenticatedUser,
+        'doc1',
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(storage.delete).not.toHaveBeenCalled();
+    expect(prisma.farmDocument.delete).not.toHaveBeenCalled();
+    expect(verification.syncPrimaryDocumentState).not.toHaveBeenCalled();
+  });
+
+  it('still deletes an approved primary document while the farm is not verified', async () => {
+    prisma.farm.findUnique.mockResolvedValue({
+      id: 'farm1',
+      ownerId: 'u1',
+      verificationStatus: 'unverified',
+    });
+    prisma.farmDocument.findFirst.mockResolvedValue({
+      id: 'doc1',
+      farmId: 'farm1',
+      kind: 'idCard',
+      reviewStatus: 'approved',
+      key: 'farms/farm1/documents/abc.pdf',
+    });
+    prisma.farmDocument.delete.mockResolvedValue({});
+
+    await service.removeDocument(
+      {
+        id: 'u1',
+        email: 'f@example.com',
+        role: 'farmer',
+        locale: 'ka',
+        displayName: 'Nino',
+      } as AuthenticatedUser,
+      'doc1',
+    );
+
+    expect(prisma.farmDocument.delete).toHaveBeenCalledWith({ where: { id: 'doc1' } });
+  });
+
+  it('still deletes a supporting document from a verified producer', async () => {
+    prisma.farm.findUnique.mockResolvedValue({
+      id: 'farm1',
+      ownerId: 'u1',
+      verificationStatus: 'approved',
+    });
+    prisma.farmDocument.findFirst.mockResolvedValue({
+      id: 'doc9',
+      farmId: 'farm1',
+      kind: 'other',
+      reviewStatus: 'approved',
+      key: 'farms/farm1/documents/prices.pdf',
+    });
+    prisma.farmDocument.delete.mockResolvedValue({});
+
+    await service.removeDocument(
+      {
+        id: 'u1',
+        email: 'f@example.com',
+        role: 'farmer',
+        locale: 'ka',
+        displayName: 'Nino',
+      } as AuthenticatedUser,
+      'doc9',
+    );
+
+    expect(prisma.farmDocument.delete).toHaveBeenCalledWith({ where: { id: 'doc9' } });
+  });
+
   it('leaves verification alone when a supporting document is withdrawn', async () => {
     prisma.farm.findUnique.mockResolvedValue({ id: 'farm1', ownerId: 'u1' });
     prisma.farmDocument.findFirst.mockResolvedValue({

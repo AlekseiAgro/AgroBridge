@@ -9,7 +9,7 @@ describe('AdminService', () => {
       findUnique: jest.fn(),
       update: jest.fn(),
     },
-    farm: { count: jest.fn() },
+    farm: { count: jest.fn(), findUnique: jest.fn(), findUniqueOrThrow: jest.fn() },
     user: { count: jest.fn(), findMany: jest.fn() },
     rfq: { count: jest.fn() },
     purchaseRequest: { count: jest.fn() },
@@ -20,6 +20,7 @@ describe('AdminService', () => {
   const verification = {
     tryCompleteVerification: jest.fn().mockResolvedValue(undefined),
     syncPrimaryDocumentState: jest.fn().mockResolvedValue(undefined),
+    applyModeratorDecision: jest.fn().mockResolvedValue(undefined),
   };
 
   const notifications = {
@@ -75,6 +76,67 @@ describe('AdminService', () => {
     expect(stats.farmsTotal).toBe(3);
     expect(stats.dealsCompleted).toBe(7);
     expect(stats.registrationsByDay).toHaveLength(14);
+  });
+
+  describe('farm verification decisions', () => {
+    const farmRow = {
+      id: 'farm1',
+      name: 'Kakheti Farm',
+      region: null,
+      description: null,
+      logoUrl: null,
+      verificationStatus: 'rejected',
+      verificationNote: 'documents do not match',
+      verifiedAt: null,
+      createdAt: new Date(),
+      owner: { id: 'u1', email: 'farmer@example.com', displayName: 'Farmer', blockedAt: null },
+      documents: [],
+      _count: { products: 0 },
+    };
+
+    it('rejects a decision on a farm that does not exist', async () => {
+      prisma.farm.findUnique.mockResolvedValue(null);
+
+      await expect(service.verifyFarm(admin, 'missing', true, {})).rejects.toBeInstanceOf(
+        NotFoundException,
+      );
+      expect(verification.applyModeratorDecision).not.toHaveBeenCalled();
+    });
+
+    it('delegates the transition so the producer email follows the state change', async () => {
+      prisma.farm.findUnique.mockResolvedValue({ id: 'farm1' });
+      prisma.farm.findUniqueOrThrow.mockResolvedValue(farmRow);
+
+      const result = await service.verifyFarm(admin, 'farm1', false, {
+        note: '  documents do not match  ',
+      });
+
+      expect(verification.applyModeratorDecision).toHaveBeenCalledWith({
+        farmId: 'farm1',
+        adminId: 'admin1',
+        approve: false,
+        note: 'documents do not match',
+      });
+      expect(result.verificationStatus).toBe('rejected');
+    });
+
+    it('passes an empty note through as no comment at all', async () => {
+      prisma.farm.findUnique.mockResolvedValue({ id: 'farm1' });
+      prisma.farm.findUniqueOrThrow.mockResolvedValue({
+        ...farmRow,
+        verificationStatus: 'approved',
+        verificationNote: null,
+      });
+
+      await service.verifyFarm(admin, 'farm1', true, { note: '   ' });
+
+      expect(verification.applyModeratorDecision).toHaveBeenCalledWith({
+        farmId: 'farm1',
+        adminId: 'admin1',
+        approve: true,
+        note: null,
+      });
+    });
   });
 
   it('rejects approve for missing product', async () => {

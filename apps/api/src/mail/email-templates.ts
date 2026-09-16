@@ -51,6 +51,14 @@ const en: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'New producer verification request: {{farmName}}',
     text: 'Hello {{name}},\n\nA producer submitted verification documents for review.\n\nFarm: {{farmName}} (ID {{farmId}})\nSeller type: {{sellerType}}\nSubmitted: {{submittedAt}}\n\nOpen the verification queue: {{link}}\n\n— AgroBridge',
   },
+  verificationApproved: {
+    subject: 'Verification approved: {{farmName}}',
+    text: 'Hello {{name}},\n\nYour verification is complete: {{farmName}} is now a verified producer on AgroBridge.\n\nOpen your producer profile: {{link}}\n\n— AgroBridge',
+  },
+  verificationRejected: {
+    subject: 'Verification not approved: {{farmName}}',
+    text: 'Hello {{name}},\n\nThe verification of {{farmName}} was not approved.\n\nReason: {{reason}}{{comment}}\n\nYou can fix this and submit the verification again: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "New catalog listing: {{productTitle}}",
     text: "Hello {{name}},\n\nA new product matching your alert is in the AgroBridge catalog.\n\n{{productTitle}} from {{farmName}}{{categoryPart}}{{regionPart}}.\n\nView listing: {{link}}\n\nManage alerts: {{settingsLink}}\n\n— AgroBridge",
@@ -134,6 +142,14 @@ const ru: Record<EmailTemplateKey, EmailTemplate> = {
   verificationPendingModeration: {
     subject: 'Новая заявка на проверку производителя: {{farmName}}',
     text: 'Здравствуйте, {{name}}!\n\nПроизводитель отправил документы на проверку.\n\nХозяйство: {{farmName}} (ID {{farmId}})\nТип продавца: {{sellerType}}\nОтправлено: {{submittedAt}}\n\nОткрыть очередь проверки: {{link}}\n\n— AgroBridge',
+  },
+  verificationApproved: {
+    subject: 'Верификация пройдена: {{farmName}}',
+    text: 'Здравствуйте, {{name}}!\n\nПроверка завершена: «{{farmName}}» теперь проверенный производитель на AgroBridge.\n\nОткрыть профиль производителя: {{link}}\n\n— AgroBridge',
+  },
+  verificationRejected: {
+    subject: 'Верификация отклонена: {{farmName}}',
+    text: 'Здравствуйте, {{name}}!\n\nВерификация «{{farmName}}» не пройдена.\n\nПричина: {{reason}}{{comment}}\n\nВы можете устранить замечание и отправить документы повторно: {{link}}\n\n— AgroBridge',
   },
   newProductListing: {
     subject: "Новое объявление: {{productTitle}}",
@@ -219,6 +235,14 @@ const de: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'Neue Produzenten-Verifizierung: {{farmName}}',
     text: 'Hallo {{name}},\n\nEin Produzent hat Verifizierungsdokumente zur Prüfung eingereicht.\n\nBetrieb: {{farmName}} (ID {{farmId}})\nVerkäufertyp: {{sellerType}}\nEingereicht: {{submittedAt}}\n\nPrüfwarteschlange öffnen: {{link}}\n\n— AgroBridge',
   },
+  verificationApproved: {
+    subject: 'Verifizierung bestätigt: {{farmName}}',
+    text: 'Hallo {{name}},\n\nIhre Verifizierung ist abgeschlossen: „{{farmName}}“ ist jetzt ein verifizierter Produzent auf AgroBridge.\n\nProduzentenprofil öffnen: {{link}}\n\n— AgroBridge',
+  },
+  verificationRejected: {
+    subject: 'Verifizierung nicht bestätigt: {{farmName}}',
+    text: 'Hallo {{name}},\n\nDie Verifizierung von „{{farmName}}“ wurde nicht bestätigt.\n\nGrund: {{reason}}{{comment}}\n\nSie können den Punkt beheben und die Verifizierung erneut einreichen: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "Neues Angebot: {{productTitle}}",
     text: "Hallo {{name}},\n\nEin neues Produkt passend zu Ihrem Alert ist im AgroBridge-Katalog.\n\n{{productTitle}} von {{farmName}}{{categoryPart}}{{regionPart}}.\n\nAngebot öffnen: {{link}}\n\nAlerts verwalten: {{settingsLink}}\n\n— AgroBridge",
@@ -302,6 +326,14 @@ const fr: Record<EmailTemplateKey, EmailTemplate> = {
   verificationPendingModeration: {
     subject: 'Nouvelle demande de vérification producteur : {{farmName}}',
     text: 'Bonjour {{name}},\n\nUn producteur a soumis des documents de vérification.\n\nExploitation : {{farmName}} (ID {{farmId}})\nType de vendeur : {{sellerType}}\nSoumis le : {{submittedAt}}\n\nOuvrir la file de vérification : {{link}}\n\n— AgroBridge',
+  },
+  verificationApproved: {
+    subject: 'Vérification approuvée : {{farmName}}',
+    text: 'Bonjour {{name}},\n\nVotre vérification est terminée : « {{farmName}} » est désormais un producteur vérifié sur AgroBridge.\n\nOuvrir votre profil producteur : {{link}}\n\n— AgroBridge',
+  },
+  verificationRejected: {
+    subject: 'Vérification refusée : {{farmName}}',
+    text: 'Bonjour {{name}},\n\nLa vérification de « {{farmName}} » n’a pas été approuvée.\n\nMotif : {{reason}}{{comment}}\n\nVous pouvez corriger le point signalé et soumettre à nouveau la vérification : {{link}}\n\n— AgroBridge',
   },
   newProductListing: {
     subject: "Nouvelle annonce : {{productTitle}}",
@@ -387,6 +419,14 @@ const it: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'Nuova richiesta di verifica produttore: {{farmName}}',
     text: 'Ciao {{name}},\n\nUn produttore ha inviato i documenti di verifica per la revisione.\n\nAzienda agricola: {{farmName}} (ID {{farmId}})\nTipo di venditore: {{sellerType}}\nInviato: {{submittedAt}}\n\nApri la coda di verifica: {{link}}\n\n— AgroBridge',
   },
+  verificationApproved: {
+    subject: 'Verifica approvata: {{farmName}}',
+    text: 'Ciao {{name}},\n\nLa verifica è completata: «{{farmName}}» ora è un produttore verificato su AgroBridge.\n\nApri il profilo del produttore: {{link}}\n\n— AgroBridge',
+  },
+  verificationRejected: {
+    subject: 'Verifica non approvata: {{farmName}}',
+    text: 'Ciao {{name}},\n\nLa verifica di «{{farmName}}» non è stata approvata.\n\nMotivo: {{reason}}{{comment}}\n\nPuoi correggere il problema e inviare di nuovo la verifica: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "Nuovo annuncio: {{productTitle}}",
     text: "Ciao {{name}},\n\nUn nuovo prodotto corrispondente al tuo avviso è nel catalogo AgroBridge.\n\n{{productTitle}} di {{farmName}}{{categoryPart}}{{regionPart}}.\n\nVedi annuncio: {{link}}\n\nGestisci avvisi: {{settingsLink}}\n\n— AgroBridge",
@@ -471,6 +511,14 @@ const es: Record<EmailTemplateKey, EmailTemplate> = {
     subject: 'Nueva solicitud de verificación de productor: {{farmName}}',
     text: 'Hola {{name}},\n\nUn productor ha enviado documentos de verificación para su revisión.\n\nGranja: {{farmName}} (ID {{farmId}})\nTipo de vendedor: {{sellerType}}\nEnviado: {{submittedAt}}\n\nAbrir la cola de verificación: {{link}}\n\n— AgroBridge',
   },
+  verificationApproved: {
+    subject: 'Verificación aprobada: {{farmName}}',
+    text: 'Hola {{name}},\n\nSu verificación está completa: «{{farmName}}» ya es un productor verificado en AgroBridge.\n\nAbrir su perfil de productor: {{link}}\n\n— AgroBridge',
+  },
+  verificationRejected: {
+    subject: 'Verificación no aprobada: {{farmName}}',
+    text: 'Hola {{name}},\n\nLa verificación de «{{farmName}}» no fue aprobada.\n\nMotivo: {{reason}}{{comment}}\n\nPuede corregirlo y enviar la verificación de nuevo: {{link}}\n\n— AgroBridge',
+  },
   newProductListing: {
     subject: "Nuevo anuncio: {{productTitle}}",
     text: "Hola {{name}},\n\nHay un nuevo producto de tu alerta en el catálogo de AgroBridge.\n\n{{productTitle}} de {{farmName}}{{categoryPart}}{{regionPart}}.\n\nVer anuncio: {{link}}\n\nGestionar alertas: {{settingsLink}}\n\n— AgroBridge",
@@ -554,6 +602,14 @@ const ka: Record<EmailTemplateKey, EmailTemplate> = {
   verificationPendingModeration: {
     subject: 'მწარმოებლის ვერიფიკაციის ახალი განაცხადი: {{farmName}}',
     text: 'გამარჯობა, {{name}}!\n\nმწარმოებელმა გამოაგზავნა ვერიფიკაციის დოკუმენტები შესამოწმებლად.\n\nმეურნეობა: {{farmName}} (ID {{farmId}})\nგამყიდველის ტიპი: {{sellerType}}\nგაგზავნილია: {{submittedAt}}\n\nვერიფიკაციის რიგის გახსნა: {{link}}\n\n— AgroBridge',
+  },
+  verificationApproved: {
+    subject: 'ვერიფიკაცია დადასტურდა: {{farmName}}',
+    text: 'გამარჯობა, {{name}}!\n\nვერიფიკაცია დასრულდა: „{{farmName}}“ უკვე დადასტურებული მწარმოებელია AgroBridge-ზე.\n\nმწარმოებლის პროფილის გახსნა: {{link}}\n\n— AgroBridge',
+  },
+  verificationRejected: {
+    subject: 'ვერიფიკაცია არ დადასტურდა: {{farmName}}',
+    text: 'გამარჯობა, {{name}}!\n\n„{{farmName}}“-ის ვერიფიკაცია არ დადასტურდა.\n\nმიზეზი: {{reason}}{{comment}}\n\nშეგიძლიათ გამოასწოროთ და ხელახლა გამოაგზავნოთ ვერიფიკაცია: {{link}}\n\n— AgroBridge',
   },
   newProductListing: {
     subject: "ახალი განცხადება: {{productTitle}}",

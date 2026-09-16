@@ -32,6 +32,8 @@ describe('VerificationService', () => {
     notifyVerificationCode: jest.fn().mockResolvedValue(undefined),
     // Mirrors production: the notification reports whether the mail was actually delivered.
     notifyVerificationPendingModeration: jest.fn().mockResolvedValue(true),
+    notifyVerificationApproved: jest.fn().mockResolvedValue(true),
+    notifyVerificationRejected: jest.fn().mockResolvedValue(true),
   };
   const sms = { send: jest.fn().mockResolvedValue(undefined) };
   const registry = {
@@ -63,6 +65,8 @@ describe('VerificationService', () => {
     codes.issue.mockResolvedValue('123456');
     codes.consume.mockResolvedValue({ id: 'c1', destination: 'farmer@example.com' });
     notifications.notifyVerificationPendingModeration.mockResolvedValue(true);
+    notifications.notifyVerificationApproved.mockResolvedValue(true);
+    notifications.notifyVerificationRejected.mockResolvedValue(true);
     prisma.farm.updateMany.mockResolvedValue({ count: 1 });
     prisma.farmDocument.updateMany.mockResolvedValue({ count: 1 });
     prisma.user.findMany.mockResolvedValue([
@@ -630,8 +634,10 @@ describe('VerificationService', () => {
       id: 'farm1',
       ownerId: 'u1',
       name: 'Kakheti Farm',
+      owner: { email: 'farmer@example.com', locale: 'en', displayName: 'Farmer' },
       verificationStatus: 'unverified',
       verificationNote: null,
+      verificationReasonCode: null,
       companyRegistrationNumber: null,
       companyRegistryName: null,
       companyRegistryValid: null,
@@ -672,11 +678,15 @@ describe('VerificationService', () => {
         where: { id: 'farm1', verificationStatus: { in: ['unverified', 'rejected'] } },
         data: {
           verificationStatus: 'pending',
-          verificationNote: 'Awaiting moderator review of the verification document',
+          verificationReasonCode: null,
+          verificationNote: null,
           verifiedAt: null,
           verifiedById: null,
         },
       });
+      // Entering the queue is not a decision, so the producer is not emailed yet.
+      expect(notifications.notifyVerificationApproved).not.toHaveBeenCalled();
+      expect(notifications.notifyVerificationRejected).not.toHaveBeenCalled();
       expect(prisma.farmDocument.updateMany).toHaveBeenCalledWith({
         where: { id: 'doc1', moderationNotifiedAt: null },
         data: { moderationNotifiedAt: expect.any(Date) },
@@ -856,19 +866,60 @@ describe('VerificationService', () => {
           documents: [{ id: 'doc1', kind: 'idCard', reviewStatus: 'rejected' }],
         }),
       );
-      prisma.farm.update.mockResolvedValue({});
 
       await service.syncPrimaryDocumentState('u1');
 
-      expect(prisma.farm.update).toHaveBeenCalledWith({
-        where: { id: 'farm1' },
+      expect(prisma.farm.updateMany).toHaveBeenCalledWith({
+        where: { id: 'farm1', verificationStatus: { in: ['pending'] } },
         data: {
           verificationStatus: 'rejected',
-          verificationNote: 'Verification document rejected',
+          verificationReasonCode: 'documentRejected',
+          verificationNote: null,
           verifiedAt: null,
           verifiedById: null,
         },
       });
+      // The seller is told why, in their own language, from the reason code.
+      expect(notifications.notifyVerificationRejected).toHaveBeenCalledTimes(1);
+      expect(notifications.notifyVerificationRejected).toHaveBeenCalledWith({
+        farmer: { email: 'farmer@example.com', locale: 'en', displayName: 'Farmer' },
+        farmName: 'Kakheti Farm',
+        reasonCode: 'documentRejected',
+        moderatorComment: null,
+      });
+    });
+
+    it('does not email the producer when the rejection was already recorded', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(
+        farmWithPendingId({
+          verificationStatus: 'pending',
+          documents: [{ id: 'doc1', kind: 'idCard', reviewStatus: 'rejected' }],
+        }),
+      );
+      prisma.farm.updateMany.mockResolvedValue({ count: 0 });
+
+      await service.syncPrimaryDocumentState('u1');
+
+      expect(notifications.notifyVerificationRejected).not.toHaveBeenCalled();
+    });
+
+    it('keeps the rejection recorded when the producer email fails', async () => {
+      prisma.user.findUnique.mockResolvedValue(producer());
+      prisma.farm.findUnique.mockResolvedValue(
+        farmWithPendingId({
+          verificationStatus: 'pending',
+          documents: [{ id: 'doc1', kind: 'idCard', reviewStatus: 'rejected' }],
+        }),
+      );
+      notifications.notifyVerificationRejected.mockRejectedValueOnce(new Error('smtp down'));
+
+      await expect(service.syncPrimaryDocumentState('u1')).resolves.toBeUndefined();
+      expect(prisma.farm.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ verificationStatus: 'rejected' }),
+        }),
+      );
     });
 
     it('stays pending while another submitted document is still in review', async () => {
@@ -880,6 +931,7 @@ describe('VerificationService', () => {
       await service.syncPrimaryDocumentState('u1');
 
       expect(prisma.farm.update).not.toHaveBeenCalled();
+      expect(prisma.farm.updateMany).not.toHaveBeenCalled();
     });
 
     it('leaves moderation when the seller withdrew the submitted document', async () => {
@@ -887,19 +939,21 @@ describe('VerificationService', () => {
       prisma.farm.findUnique.mockResolvedValue(
         farmWithPendingId({ verificationStatus: 'pending', documents: [] }),
       );
-      prisma.farm.update.mockResolvedValue({});
 
       await service.syncPrimaryDocumentState('u1');
 
-      expect(prisma.farm.update).toHaveBeenCalledWith({
-        where: { id: 'farm1' },
+      expect(prisma.farm.updateMany).toHaveBeenCalledWith({
+        where: { id: 'farm1', verificationStatus: { in: ['pending'] } },
         data: {
           verificationStatus: 'unverified',
+          verificationReasonCode: null,
           verificationNote: null,
           verifiedAt: null,
           verifiedById: null,
         },
       });
+      // Withdrawing is not a decision either.
+      expect(notifications.notifyVerificationRejected).not.toHaveBeenCalled();
     });
 
     it('sends a company back to the registry check once its document is approved', async () => {
@@ -910,15 +964,15 @@ describe('VerificationService', () => {
           documents: [{ id: 'doc1', kind: 'businessRegistration', reviewStatus: 'approved' }],
         }),
       );
-      prisma.farm.update.mockResolvedValue({});
 
       await service.syncPrimaryDocumentState('u1');
 
-      expect(prisma.farm.update).toHaveBeenCalledWith({
-        where: { id: 'farm1' },
+      expect(prisma.farm.updateMany).toHaveBeenCalledWith({
+        where: { id: 'farm1', verificationStatus: { in: ['pending'] } },
         data: {
           verificationStatus: 'unverified',
-          verificationNote: 'Registration document approved; complete the company registry check',
+          verificationReasonCode: 'registryNotConfirmed',
+          verificationNote: null,
           verifiedAt: null,
           verifiedById: null,
         },
@@ -934,6 +988,250 @@ describe('VerificationService', () => {
       await service.syncPrimaryDocumentState('u1');
 
       expect(prisma.farm.update).not.toHaveBeenCalled();
+      expect(prisma.farm.updateMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('completion rules', () => {
+    const confirmedUser = (sellerType: 'privateFarmer' | 'company') => ({
+      id: 'u1',
+      email: 'farmer@example.com',
+      locale: 'en',
+      displayName: 'Farmer',
+      emailVerifiedAt: new Date(),
+      phone: '+995500000000',
+      phoneVerifiedAt: new Date(),
+      sellerType,
+    });
+
+    const companyFarm = (
+      companyRegistryValid: boolean | null,
+      documents: Array<{ kind: string; reviewStatus: string }>,
+    ) => ({
+      id: 'farm1',
+      ownerId: 'u1',
+      name: 'Kakheti Farm',
+      owner: { email: 'farmer@example.com', locale: 'en', displayName: 'Farmer' },
+      verificationStatus: 'pending',
+      verificationNote: null,
+      verificationReasonCode: null,
+      companyRegistrationNumber: '123456789',
+      companyRegistryName: 'Demo LLC',
+      companyRegistryValid,
+      documents,
+    });
+
+    it('does not approve a company on a registry match alone', async () => {
+      prisma.user.findUnique.mockResolvedValue(confirmedUser('company'));
+      prisma.farm.findUnique.mockResolvedValue(
+        companyFarm(true, [{ kind: 'businessRegistration', reviewStatus: 'pending' }]),
+      );
+
+      await service.tryCompleteVerification('u1');
+
+      expect(prisma.farm.updateMany).not.toHaveBeenCalled();
+      expect(notifications.notifyVerificationApproved).not.toHaveBeenCalled();
+    });
+
+    it('does not approve a company whose registration document was rejected', async () => {
+      prisma.user.findUnique.mockResolvedValue(confirmedUser('company'));
+      prisma.farm.findUnique.mockResolvedValue(
+        companyFarm(true, [{ kind: 'businessRegistration', reviewStatus: 'rejected' }]),
+      );
+
+      await service.tryCompleteVerification('u1');
+
+      expect(prisma.farm.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('does not approve a company without a confirmed registry match', async () => {
+      prisma.user.findUnique.mockResolvedValue(confirmedUser('company'));
+      prisma.farm.findUnique.mockResolvedValue(
+        companyFarm(null, [{ kind: 'businessRegistration', reviewStatus: 'approved' }]),
+      );
+
+      await service.tryCompleteVerification('u1');
+
+      expect(prisma.farm.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('does not approve a company the registry rejected', async () => {
+      prisma.user.findUnique.mockResolvedValue(confirmedUser('company'));
+      prisma.farm.findUnique.mockResolvedValue(
+        companyFarm(false, [{ kind: 'businessRegistration', reviewStatus: 'approved' }]),
+      );
+
+      await service.tryCompleteVerification('u1');
+
+      expect(prisma.farm.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('approves a company only with both the registry match and an approved document', async () => {
+      prisma.user.findUnique.mockResolvedValue(confirmedUser('company'));
+      prisma.farm.findUnique.mockResolvedValue(
+        companyFarm(true, [{ kind: 'businessRegistration', reviewStatus: 'approved' }]),
+      );
+
+      await service.tryCompleteVerification('u1');
+
+      expect(prisma.farm.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'farm1',
+          verificationStatus: { in: ['unverified', 'pending'] },
+        },
+        data: {
+          verificationStatus: 'approved',
+          verificationReasonCode: null,
+          verificationNote: null,
+          verifiedAt: expect.any(Date),
+          verifiedById: null,
+        },
+      });
+      expect(notifications.notifyVerificationApproved).toHaveBeenCalledTimes(1);
+      expect(notifications.notifyVerificationApproved).toHaveBeenCalledWith({
+        farmer: { email: 'farmer@example.com', locale: 'en', displayName: 'Farmer' },
+        farmName: 'Kakheti Farm',
+      });
+    });
+
+    it('sends no second approval email when the farm was already approved', async () => {
+      prisma.user.findUnique.mockResolvedValue(confirmedUser('company'));
+      prisma.farm.findUnique.mockResolvedValue({
+        ...companyFarm(true, [{ kind: 'businessRegistration', reviewStatus: 'approved' }]),
+        verificationStatus: 'approved',
+      });
+
+      await service.tryCompleteVerification('u1');
+
+      expect(prisma.farm.updateMany).not.toHaveBeenCalled();
+      expect(notifications.notifyVerificationApproved).not.toHaveBeenCalled();
+    });
+
+    it('still approves a private farmer on an approved ID document', async () => {
+      prisma.user.findUnique.mockResolvedValue(confirmedUser('privateFarmer'));
+      prisma.farm.findUnique.mockResolvedValue({
+        ...companyFarm(null, [{ kind: 'idCard', reviewStatus: 'approved' }]),
+        companyRegistrationNumber: null,
+        companyRegistryName: null,
+      });
+
+      await service.tryCompleteVerification('u1');
+
+      expect(prisma.farm.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ verificationStatus: 'approved' }),
+        }),
+      );
+      expect(notifications.notifyVerificationApproved).toHaveBeenCalledTimes(1);
+    });
+
+    it('never lifts a refusal on its own, only a new submission or a moderator can', async () => {
+      prisma.user.findUnique.mockResolvedValue(confirmedUser('privateFarmer'));
+      prisma.farm.findUnique.mockResolvedValue({
+        ...companyFarm(null, [{ kind: 'idCard', reviewStatus: 'approved' }]),
+        companyRegistrationNumber: null,
+        companyRegistryName: null,
+        verificationStatus: 'rejected',
+      });
+
+      await service.tryCompleteVerification('u1');
+
+      expect(prisma.farm.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            verificationStatus: { in: ['unverified', 'pending'] },
+          }),
+        }),
+      );
+    });
+  });
+
+  describe('moderator decisions', () => {
+    const farmRow = (verificationStatus: string) => ({
+      id: 'farm1',
+      ownerId: 'u1',
+      name: 'Kakheti Farm',
+      owner: { email: 'farmer@example.com', locale: 'ru', displayName: 'Farmer' },
+      verificationStatus,
+      verificationNote: null,
+      verificationReasonCode: null,
+      documents: [],
+    });
+
+    it('emails the producer once when a moderator approves the farm', async () => {
+      prisma.farm.findUnique.mockResolvedValue(farmRow('pending'));
+
+      await service.applyModeratorDecision({
+        farmId: 'farm1',
+        adminId: 'admin1',
+        approve: true,
+        note: null,
+      });
+
+      expect(prisma.farm.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'farm1',
+          verificationStatus: { in: ['unverified', 'pending', 'rejected'] },
+        },
+        data: {
+          verificationStatus: 'approved',
+          verificationReasonCode: null,
+          verificationNote: null,
+          verifiedAt: expect.any(Date),
+          verifiedById: 'admin1',
+        },
+      });
+      expect(notifications.notifyVerificationApproved).toHaveBeenCalledTimes(1);
+    });
+
+    it('records the moderator reason and comment on a rejection', async () => {
+      prisma.farm.findUnique.mockResolvedValue(farmRow('pending'));
+
+      await service.applyModeratorDecision({
+        farmId: 'farm1',
+        adminId: 'admin1',
+        approve: false,
+        note: 'The scan is unreadable',
+      });
+
+      expect(prisma.farm.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'farm1',
+          verificationStatus: { in: ['unverified', 'pending', 'approved'] },
+        },
+        data: {
+          verificationStatus: 'rejected',
+          verificationReasonCode: 'moderatorRejected',
+          verificationNote: 'The scan is unreadable',
+          verifiedAt: null,
+          verifiedById: 'admin1',
+        },
+      });
+      expect(notifications.notifyVerificationRejected).toHaveBeenCalledWith({
+        farmer: { email: 'farmer@example.com', locale: 'ru', displayName: 'Farmer' },
+        farmName: 'Kakheti Farm',
+        reasonCode: 'moderatorRejected',
+        moderatorComment: 'The scan is unreadable',
+      });
+    });
+
+    it('repeating a decision only refreshes the comment and emails nobody', async () => {
+      prisma.farm.findUnique.mockResolvedValue(farmRow('approved'));
+      prisma.farm.updateMany.mockResolvedValue({ count: 0 });
+
+      await service.applyModeratorDecision({
+        farmId: 'farm1',
+        adminId: 'admin1',
+        approve: true,
+        note: 'Checked again',
+      });
+
+      expect(prisma.farm.update).toHaveBeenCalledWith({
+        where: { id: 'farm1' },
+        data: { verificationNote: 'Checked again', verificationReasonCode: null },
+      });
+      expect(notifications.notifyVerificationApproved).not.toHaveBeenCalled();
+      expect(notifications.notifyVerificationRejected).not.toHaveBeenCalled();
     });
   });
 
