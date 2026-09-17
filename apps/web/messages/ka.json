@@ -316,7 +316,10 @@
       "primaryError": "ყდის განახლება ვერ მოხერხდა.",
       "maxReached": "მიღწეულია {max} ფოტოს ლიმიტი.",
       "formEmpty": "შეგიძლიათ ახლავე დაამატოთ 3 ფოტომდე ან მოგვიანებით ამ გვერდიდან.",
-      "savedImmediately": "ფოტოების ცვლილებები მაშინვე ინახება."
+      "savedImmediately": "ფოტოების ცვლილებები მაშინვე ინახება.",
+      "openPhoto": "{name} — ფოტო {index}",
+      "viewerTitle": "ფერმის ფოტო",
+      "closeViewer": "დახურვა"
     },
     "foundedYear": "დაარსების წელი",
     "farmSizeHectares": "Farm size (hectares)",

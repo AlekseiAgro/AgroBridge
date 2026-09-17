@@ -316,7 +316,10 @@
       "primaryError": "Impossible de mettre à jour la couverture.",
       "maxReached": "Limite de {max} photos atteinte.",
       "formEmpty": "Vous pouvez ajouter jusqu’à 3 photos maintenant, ou plus tard depuis cette page.",
-      "savedImmediately": "Les modifications de photos sont enregistrées immédiatement."
+      "savedImmediately": "Les modifications de photos sont enregistrées immédiatement.",
+      "openPhoto": "Voir la photo {index} de {name}",
+      "viewerTitle": "Photo de l’exploitation",
+      "closeViewer": "Fermer"
     },
     "foundedYear": "Année de fondation",
     "farmSizeHectares": "Farm size (hectares)",

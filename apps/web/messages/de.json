@@ -316,7 +316,10 @@
       "primaryError": "Titelbild konnte nicht aktualisiert werden.",
       "maxReached": "Limit von {max} Fotos erreicht.",
       "formEmpty": "Sie können jetzt bis zu 3 Fotos hinzufügen oder später auf dieser Seite.",
-      "savedImmediately": "Fotoänderungen werden sofort gespeichert."
+      "savedImmediately": "Fotoänderungen werden sofort gespeichert.",
+      "openPhoto": "Foto {index} von {name} ansehen",
+      "viewerTitle": "Hof-Foto",
+      "closeViewer": "Schließen"
     },
     "foundedYear": "Gründungsjahr",
     "farmSizeHectares": "Farm size (hectares)",

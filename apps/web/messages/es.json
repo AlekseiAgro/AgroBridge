@@ -316,7 +316,10 @@
       "primaryError": "No se pudo actualizar la portada.",
       "maxReached": "Se alcanzó el límite de {max} fotos.",
       "formEmpty": "Puedes añadir hasta 3 fotos ahora o más tarde en esta página.",
-      "savedImmediately": "Los cambios de fotos se guardan al momento."
+      "savedImmediately": "Los cambios de fotos se guardan al momento.",
+      "openPhoto": "Ver foto {index} de {name}",
+      "viewerTitle": "Foto de la finca",
+      "closeViewer": "Cerrar"
     },
     "foundedYear": "Año de fundación",
     "farmSizeHectares": "Farm size (hectares)",

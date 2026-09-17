@@ -2,12 +2,13 @@ import type { FarmDetail, RatingSummary } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { CertificateBadges } from '@/components/CertificateBadges';
+import { FarmCoverPhotos } from '@/components/FarmCoverPhotos';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link } from '@/i18n/navigation';
 import { isPublicFarmProduct } from '@/lib/farm-profile';
-import { getProductCardImage, toPublicMediaUrl } from '@/lib/product-image';
+import { getProductCardImage } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
@@ -62,27 +63,7 @@ export async function FarmProfileView({
         }
       >
         {cover ? (
-          <div className="farm-profile__cover">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={toPublicMediaUrl(cover.url)}
-              alt={farm.name}
-              className="farm-profile__cover-image"
-            />
-            {extraPhotos.length > 0 ? (
-              <div className="farm-profile__cover-thumbs">
-                {extraPhotos.map((photo) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={photo.id}
-                    src={toPublicMediaUrl(photo.url)}
-                    alt=""
-                    className="farm-profile__cover-thumb"
-                  />
-                ))}
-              </div>
-            ) : null}
-          </div>
+          <FarmCoverPhotos farmName={farm.name} cover={cover} extraPhotos={extraPhotos} />
         ) : null}
         <div className="farm-profile__identity">
           <div className="farm-profile__identity-top">

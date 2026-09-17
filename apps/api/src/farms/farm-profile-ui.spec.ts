@@ -15,6 +15,7 @@ const ownerWorkspace = readFileSync(join(webRoot, 'components/FarmOwnerWorkspace
 const farmForm = readFileSync(join(webRoot, 'components/FarmForm.tsx'), 'utf8');
 const photosManager = readFileSync(join(webRoot, 'components/FarmPhotosManager.tsx'), 'utf8');
 const documentsManager = readFileSync(join(webRoot, 'components/FarmDocumentsManager.tsx'), 'utf8');
+const coverPhotos = readFileSync(join(webRoot, 'components/FarmCoverPhotos.tsx'), 'utf8');
 const verificationSection = readFileSync(
   join(webRoot, 'components/ProducerVerificationSection.tsx'),
   'utf8',
@@ -293,6 +294,10 @@ describe('farm profile copy', () => {
     }
     expect(farmCopy.hectaresValue).toContain('{count}');
     expect(farmCopy.photos.savedImmediately.trim().length).toBeGreaterThan(0);
+    expect(farmCopy.photos.openPhoto).toContain('{index}');
+    expect(farmCopy.photos.openPhoto).toContain('{name}');
+    expect(farmCopy.photos.viewerTitle.trim().length).toBeGreaterThan(0);
+    expect(farmCopy.photos.closeViewer.trim().length).toBeGreaterThan(0);
     expect(farmCopy.documents.savedImmediately.trim().length).toBeGreaterThan(0);
     for (const key of [
       'promptTitle',
@@ -401,19 +406,54 @@ describe('edit form save placement', () => {
 
 describe('compact farm header', () => {
   it('uses a compact cover instead of the product hero gallery', () => {
-    expect(profileView).toContain('farm-profile__cover-image');
+    expect(profileView).toContain('<FarmCoverPhotos');
     expect(profileView).toContain('farm-profile__lede');
     expect(profileView).not.toContain('product-gallery');
     expect(profileView).not.toContain('product-gallery__image--primary');
   });
 
-  it('keeps the header responsive without a fixed full-bleed hero', () => {
+  it('places the mobile farm-header override after the desktop declaration', () => {
     const css = readFileSync(join(webRoot, 'app/globals.css'), 'utf8');
-    expect(css).toContain('.farm-profile__header--with-cover');
-    expect(css).toContain('grid-template-columns: minmax(7.5rem, 11.5rem) minmax(0, 1fr)');
-    expect(css).toContain('.farm-profile__cover-image');
-    expect(css).toContain('max-height: 10.5rem');
-    expect(css).toContain('@media (max-width: 640px)');
-    expect(css).toContain('.farm-profile__header--with-cover {\n    grid-template-columns: 1fr;');
+    const desktopHeader = css.indexOf(
+      [
+        '.farm-profile__header--with-cover {',
+        '  display: grid;',
+        '  grid-template-columns: minmax(7.5rem, 11.5rem) minmax(0, 1fr);',
+      ].join('\n'),
+    );
+    const desktopCover = css.indexOf(
+      [
+        '.farm-profile__cover-image {',
+        '  display: block;',
+        '  width: 100%;',
+        '  max-height: 10.5rem;',
+        '  aspect-ratio: 4 / 3;',
+      ].join('\n'),
+    );
+    const mobileHeader = css.indexOf(
+      '.farm-profile__header--with-cover {\n    grid-template-columns: 1fr;',
+    );
+    const mobileCover = css.indexOf(
+      '.farm-profile__cover-image {\n    max-height: 8.5rem;\n    aspect-ratio: 16 / 9;',
+    );
+
+    expect(desktopHeader).toBeGreaterThan(-1);
+    expect(desktopCover).toBeGreaterThan(-1);
+    expect(mobileHeader).toBeGreaterThan(desktopHeader);
+    expect(mobileCover).toBeGreaterThan(desktopCover);
+
+    const mediaBeforeMobileHeader = css.lastIndexOf('@media (max-width: 640px)', mobileHeader);
+    expect(mediaBeforeMobileHeader).toBeGreaterThan(desktopHeader);
+  });
+
+  it('opens extra farm photos in an accessible native dialog', () => {
+    expect(profileView).toContain('<FarmCoverPhotos farmName={farm.name} cover={cover} extraPhotos={extraPhotos} />');
+    expect(coverPhotos).toContain('dialogRef.current?.showModal()');
+    expect(coverPhotos).toContain('className="farm-profile__cover-thumb-button"');
+    expect(coverPhotos).toContain("t('openPhoto', { name: farmName, index: index + 2 })");
+    expect(coverPhotos).toContain("t('closeViewer')");
+    expect(coverPhotos).toContain('aria-labelledby={titleId}');
+    expect(coverPhotos).toContain('toPublicMediaUrl(photo.url)');
+    expect(coverPhotos).not.toContain('farm.documents');
   });
 });

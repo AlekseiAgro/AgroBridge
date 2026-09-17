@@ -316,7 +316,10 @@
       "primaryError": "Impossibile aggiornare la copertina.",
       "maxReached": "Raggiunto il limite di {max} foto.",
       "formEmpty": "Puoi aggiungere fino a 3 foto ora oppure più tardi da questa pagina.",
-      "savedImmediately": "Le modifiche alle foto vengono salvate subito."
+      "savedImmediately": "Le modifiche alle foto vengono salvate subito.",
+      "openPhoto": "Vedi foto {index} di {name}",
+      "viewerTitle": "Foto dell’azienda",
+      "closeViewer": "Chiudi"
     },
     "foundedYear": "Anno di fondazione",
     "farmSizeHectares": "Farm size (hectares)",
