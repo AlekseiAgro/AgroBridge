@@ -308,10 +308,10 @@
       "maxReached": "Se alcanzó el límite de {max} fotos.",
       "formEmpty": "Puedes añadir hasta 3 fotos ahora o más tarde en esta página."
     },
-    "foundedYear": "Founded year",
+    "foundedYear": "Año de fundación",
     "farmSizeHectares": "Farm size (hectares)",
-    "ownershipType": "Ownership type",
-    "exportMarkets": "Export markets",
+    "ownershipType": "Tipo de propiedad",
+    "exportMarkets": "Mercados de exportación",
     "exportMarketsPlaceholder": "Comma separated, e.g. Germany, UAE, Poland",
     "history": "Farm history and story",
     "editFarm": "Editar granja",
