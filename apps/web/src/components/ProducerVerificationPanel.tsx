@@ -174,7 +174,12 @@ export function ProducerVerificationPanel({ initial }: Props) {
         registrationNumber,
       });
       applyStatus(next);
-      setMessage(t('company.matched', { name: next.companyRegistryName ?? registrationNumber }));
+      // No legal name means no registry actually answered; saying "match" would be a lie.
+      setMessage(
+        next.companyRegistryName
+          ? t('company.matched', { name: next.companyRegistryName })
+          : t('company.registryUnavailable'),
+      );
     });
   }
 
@@ -238,10 +243,17 @@ export function ProducerVerificationPanel({ initial }: Props) {
   const reasonText = status.verificationReasonCode
     ? t(`reason.${status.verificationReasonCode}`)
     : null;
-  // A company that passed the registry check still needs a moderator to accept its document.
+  // `true` only when a registry actually answered. Where none is connected it stays null, so
+  // the saved identification code — not a confirmation — is what the seller has on file.
+  const registryConfirmed = status.companyRegistryValid === true;
+  const registryRecorded =
+    !registryConfirmed &&
+    status.companyRegistryValid !== false &&
+    Boolean(status.companyRegistrationNumber);
+  // A company that submitted its number still needs a moderator to accept its document.
   const companyDocumentRequired =
     status.path === 'company' &&
-    status.companyRegistryValid === true &&
+    (registryConfirmed || registryRecorded) &&
     status.steps.identity === 'todo';
 
   const identityTitle =
@@ -413,7 +425,18 @@ export function ProducerVerificationPanel({ initial }: Props) {
                   }
                 />
               </label>
-              {status.companyRegistryValid !== true ? (
+              {registryConfirmed || registryRecorded ? (
+                <p className="product-list__meta">
+                  {[status.companyRegistryName, status.companyRegistrationNumber]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+              ) : null}
+              {registryRecorded ? (
+                <p className="product-list__meta">{t('company.registryUnavailable')}</p>
+              ) : null}
+              {!registryConfirmed ? (
+                // Still offered after a saved-but-unconfirmed code, so a typo stays fixable.
                 <form className="verification-inline-form" onSubmit={checkCompany}>
                   <label className="field">
                     <span>{t('company.number')}</span>
@@ -429,14 +452,7 @@ export function ProducerVerificationPanel({ initial }: Props) {
                   </button>
                   <p className="page__subtitle">{t('company.hint')}</p>
                 </form>
-              ) : (
-                <p className="product-list__meta">
-                  {status.companyRegistryName}
-                  {status.companyRegistrationNumber
-                    ? ` · ${status.companyRegistrationNumber}`
-                    : ''}
-                </p>
-              )}
+              ) : null}
               {companyDocumentRequired ? (
                 <p className="product-list__meta">{t('company.documentRequired')}</p>
               ) : null}

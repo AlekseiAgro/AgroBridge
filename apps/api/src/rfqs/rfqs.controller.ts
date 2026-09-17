@@ -5,16 +5,19 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { RateLimit } from '../rate-limit/rate-limit.decorator';
+import { RateLimitGuard } from '../rate-limit/rate-limit.guard';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { CreateRfqDto } from './dto/create-rfq.dto';
 import { RfqsService } from './rfqs.service';
 
 @Controller('rfqs')
-@UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard, RateLimitGuard)
 export class RfqsController {
   constructor(private readonly rfqsService: RfqsService) {}
 
   @Post()
+  @RateLimit('contentCreatePerAccount')
   @Roles('farmer', 'buyer', 'admin')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateRfqDto) {
     return this.rfqsService.create(user, dto);
@@ -57,6 +60,7 @@ export class RfqsController {
   }
 
   @Post(':id/offer')
+  @RateLimit('tradeActionPerAccount')
   @Roles('farmer', 'buyer', 'admin')
   createOffer(
     @CurrentUser() user: AuthenticatedUser,

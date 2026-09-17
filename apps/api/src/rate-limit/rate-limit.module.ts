@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { PrismaRateLimitStore } from './prisma-rate-limit.store';
 import { RateLimitConfig } from './rate-limit.config';
+import { RateLimitGuard } from './rate-limit.guard';
 import { RateLimitService } from './rate-limit.service';
 import { RATE_LIMIT_STORE } from './rate-limit.types';
 
@@ -12,7 +13,8 @@ import { RATE_LIMIT_STORE } from './rate-limit.types';
     PrismaRateLimitStore,
     { provide: RATE_LIMIT_STORE, useExisting: PrismaRateLimitStore },
     RateLimitService,
+    RateLimitGuard,
   ],
-  exports: [RateLimitService, RateLimitConfig],
+  exports: [RateLimitService, RateLimitConfig, RateLimitGuard],
 })
 export class RateLimitModule {}

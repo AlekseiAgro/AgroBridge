@@ -186,6 +186,9 @@
       "statusLabel": "Current status",
       "doneHint": "Buyers can see your Verified badge on the catalog and farm page.",
       "genericError": "Could not complete this verification step.",
+      "loadError": "No se pudo cargar el estado de verificación. El servicio puede estar temporalmente no disponible.",
+      "loadRetry": "Reintentar",
+      "loadRetrying": "Reintentando…",
       "unknownPath": "Elija si vende como agricultor particular o como empresa para continuar la verificación de identidad.",
       "sellerType": {
         "title": "Tipo de vendedor",
@@ -211,7 +214,7 @@
         "send": "Send email code",
         "code": "Email code",
         "confirm": "Confirm email",
-        "sent": "Code sent to {destination} (check API console/mail logs in demo).",
+        "sent": "Código enviado a {destination}.",
         "confirmed": "Email confirmed."
       },
       "phone": {
@@ -238,7 +241,8 @@
         "documentHint": "Suba el certificado de registro de la empresa para confirmar la organización.",
         "upload": "Subir registro de empresa",
         "docTitle": "Registro de empresa",
-        "documentRequired": "La coincidencia en el registro está guardada. Un moderador todavía debe aceptar el documento de registro de la empresa."
+        "documentRequired": "La coincidencia en el registro está guardada. Un moderador todavía debe aceptar el documento de registro de la empresa.",
+        "registryUnavailable": "No se pudo consultar el registro de empresas automáticamente. Tu código de identificación se ha guardado; un moderador confirmará la empresa con tu documento de registro."
       },
       "private": {
         "title": "3. Verificación de identidad",

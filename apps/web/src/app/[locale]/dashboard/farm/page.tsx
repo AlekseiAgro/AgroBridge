@@ -4,6 +4,7 @@ import { FarmDocumentsManager } from '@/components/FarmDocumentsManager';
 import { FarmForm } from '@/components/FarmForm';
 import { FarmPhotosManager } from '@/components/FarmPhotosManager';
 import { ProducerVerificationPanel } from '@/components/ProducerVerificationPanel';
+import { VerificationLoadError } from '@/components/VerificationLoadError';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link, redirect } from '@/i18n/navigation';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -30,11 +31,13 @@ export default async function DashboardFarmPage({ params }: Props) {
   } catch {
     farm = null;
   }
+  let verificationUnavailable = false;
   if (farm) {
     try {
       verification = await apiRequestAuthed<ProducerVerificationStatus>('/verification/me');
     } catch {
       verification = null;
+      verificationUnavailable = true;
     }
   }
 
@@ -67,6 +70,7 @@ export default async function DashboardFarmPage({ params }: Props) {
       />
       {farm ? <FarmPhotosManager initialPhotos={farm.photos ?? []} /> : null}
       {farm && verification ? <ProducerVerificationPanel initial={verification} /> : null}
+      {verificationUnavailable ? <VerificationLoadError /> : null}
       {farm ? (
         <>
           <FarmDocumentsManager initialDocuments={farm.documents ?? []} />

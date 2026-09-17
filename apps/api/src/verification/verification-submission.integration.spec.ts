@@ -497,10 +497,23 @@ describeWithDatabase()('producer verification submission (database)', () => {
     const registryMatches = (registrationNumber = '123456789') => {
       registry.lookup.mockResolvedValue({
         valid: true,
+        confirmed: true,
         registrationNumber,
         legalName: `Registry stub company ${registrationNumber}`,
         source: 'stub',
         message: 'ok',
+      });
+    };
+
+    /** What production answers: the code is accepted, nothing is confirmed. */
+    const registryUnavailable = (registrationNumber = '123456789') => {
+      registry.lookup.mockResolvedValue({
+        valid: true,
+        confirmed: null,
+        registrationNumber,
+        legalName: null,
+        source: 'unverified',
+        message: 'Company registry is not connected',
       });
     };
 
@@ -531,6 +544,7 @@ describeWithDatabase()('producer verification submission (database)', () => {
     it('stops blaming the registry once a retry matches', async () => {
       registry.lookup.mockResolvedValue({
         valid: false,
+        confirmed: false,
         registrationNumber: '1234567',
         legalName: null,
         source: 'stub',
@@ -603,6 +617,7 @@ describeWithDatabase()('producer verification submission (database)', () => {
       await uploadDocument('businessRegistration', 'registration.pdf');
       registry.lookup.mockResolvedValue({
         valid: false,
+        confirmed: false,
         registrationNumber: '000000000',
         legalName: null,
         source: 'stub',
@@ -627,6 +642,7 @@ describeWithDatabase()('producer verification submission (database)', () => {
 
       registry.lookup.mockResolvedValue({
         valid: false,
+        confirmed: false,
         registrationNumber: '000000000',
         legalName: null,
         source: 'stub',
@@ -639,6 +655,68 @@ describeWithDatabase()('producer verification submission (database)', () => {
       const farm = await farmRow();
       expect(farm.verificationStatus).toBe('approved');
       expect(farm.companyRegistryValid).toBe(false);
+    });
+
+    describe('with no registry connected (production default)', () => {
+      it('records the identification code without claiming it was confirmed', async () => {
+        registryUnavailable('404123456');
+
+        const status = await verification.checkCompanyRegistry(owner(), '404123456');
+
+        expect(status.companyRegistrationNumber).toBe('404123456');
+        expect(status.companyRegistryName).toBeNull();
+        // Not false either: the registry refused nothing, it simply never answered.
+        expect(status.companyRegistryValid).toBeNull();
+        expect(status.steps.identity).not.toBe('rejected');
+      });
+
+      it('cannot satisfy the registry gate even with an approved registration document', async () => {
+        const document = await uploadDocument('businessRegistration', 'registration.pdf');
+        registryUnavailable();
+        await verification.checkCompanyRegistry(owner(), '123456789');
+
+        await admin.reviewDocument(adminUser, document.id, true, {});
+
+        // The half that a human performed counts; nine well-formed digits do not.
+        const farm = await farmRow();
+        expect(farm.verificationStatus).toBe('unverified');
+        expect(farm.verificationReasonCode).toBe('registryNotConfirmed');
+        expect(farm.companyRegistryValid).toBeNull();
+        expect(notifications.notifyVerificationApproved).not.toHaveBeenCalled();
+      });
+
+      it('still lets a moderator approve the farm explicitly', async () => {
+        const document = await uploadDocument('businessRegistration', 'registration.pdf');
+        registryUnavailable();
+        await verification.checkCompanyRegistry(owner(), '123456789');
+        await admin.reviewDocument(adminUser, document.id, true, {});
+
+        await admin.verifyFarm(adminUser, farmId, true, {});
+
+        const farm = await farmRow();
+        expect(farm.verificationStatus).toBe('approved');
+        expect(farm.companyRegistryValid).toBeNull();
+        expect(notifications.notifyVerificationApproved).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not clear an earlier registry refusal it cannot actually disprove', async () => {
+        registry.lookup.mockResolvedValue({
+          valid: false,
+          confirmed: false,
+          registrationNumber: '1234567',
+          legalName: null,
+          source: 'unverified',
+          message: 'Identification code must be exactly 9 digits',
+        });
+        await expect(verification.checkCompanyRegistry(owner(), '1234567')).rejects.toThrow(
+          'Identification code must be exactly 9 digits',
+        );
+
+        registryUnavailable();
+        const status = await verification.checkCompanyRegistry(owner(), '123456789');
+
+        expect(status.verificationReasonCode).toBe('registryNotConfirmed');
+      });
     });
 
     it('drops the company out of moderation when its document is rejected', async () => {

@@ -13,6 +13,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { USER_AVATAR_MAX_BYTES } from '@agrobridge/shared';
 import { ClientIp } from '../http/client-ip';
+import { RateLimit } from '../rate-limit/rate-limit.decorator';
+import { RateLimitGuard } from '../rate-limit/rate-limit.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -30,7 +32,7 @@ import { UpdateLocaleDto } from './dto/update-locale.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Controller('cabinet')
-@UseGuards(JwtAuthGuard, EmailVerifiedGuard)
+@UseGuards(JwtAuthGuard, EmailVerifiedGuard, RateLimitGuard)
 export class CabinetController {
   constructor(private readonly cabinetService: CabinetService) {}
 
@@ -68,6 +70,7 @@ export class CabinetController {
   }
 
   @Post('me/avatar')
+  @RateLimit('mediaUploadPerAccount')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),

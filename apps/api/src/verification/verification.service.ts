@@ -385,7 +385,9 @@ export class VerificationService {
         companyRegistrationNumber: result.registrationNumber,
         companyRegistryName: result.legalName,
         companyRegistryCheckedAt: new Date(),
-        companyRegistryValid: result.valid,
+        // `confirmed`, not `valid`: an accepted code is not an answered registry. Null keeps
+        // the farm out of both the approval gate and the "registry refused you" state.
+        companyRegistryValid: result.confirmed,
       },
     });
 
@@ -403,12 +405,15 @@ export class VerificationService {
       throw new BadRequestException(result.message);
     }
 
-    // The registry now matches, so the refusal it caused is stale. Scoped to that one code so a
-    // rejected document or a moderator's refusal keeps its own reason.
-    await this.prisma.farm.updateMany({
-      where: { id: farm.id, verificationReasonCode: VerificationReasonCode.registryNotConfirmed },
-      data: { verificationReasonCode: null },
-    });
+    if (result.confirmed === true) {
+      // The registry now matches, so the refusal it caused is stale. Scoped to that one code so a
+      // rejected document or a moderator's refusal keeps its own reason.
+      // A merely accepted code clears nothing: the registry still has not confirmed anything.
+      await this.prisma.farm.updateMany({
+        where: { id: farm.id, verificationReasonCode: VerificationReasonCode.registryNotConfirmed },
+        data: { verificationReasonCode: null },
+      });
+    }
 
     await this.tryCompleteVerification(user.id);
     return this.getStatus(user);
@@ -787,9 +792,9 @@ export class VerificationService {
       );
 
     if (dbUser.sellerType === 'company') {
-      // The registry lookup is still a stub that accepts any 9-digit code, so it can never be
-      // the only thing standing between a seller and a verified badge: a moderator has to
-      // accept the registration document as well.
+      // Both halves are required, and `true` means a registry actually answered. Where none
+      // is connected the flag stays null, so this gate never opens on its own and the
+      // company waits for a moderator's explicit decision instead.
       const registryConfirmed = farm.companyRegistryValid === true;
       if (!registryConfirmed || !hasApprovedDocument(FarmDocumentKind.businessRegistration)) {
         return;

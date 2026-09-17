@@ -13,6 +13,8 @@ import { StorageService } from '../storage/storage.service';
 import { UploadsController } from '../storage/uploads.controller';
 import { CategoriesService } from '../categories/categories.service';
 import { NotificationsService } from '../mail/notifications.service';
+import { RateLimitService } from '../rate-limit/rate-limit.service';
+import { createTestRateLimit } from '../rate-limit/rate-limit.test-utils';
 import { MarketInsightService } from './market-insight.service';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
@@ -114,6 +116,9 @@ describe('Product certificate file HTTP authorization', () => {
         { provide: CategoriesService, useValue: { enabledIds: jest.fn() } },
         { provide: NotificationsService, useValue: {} },
         { provide: MarketInsightService, useValue: { forProduct: jest.fn() } },
+        // The upload routes carry `RateLimitGuard`; give it a real limiter on in-process
+        // counters so the guard behaves as it does in production.
+        { provide: RateLimitService, useValue: createTestRateLimit().service },
         {
           provide: ConfigService,
           useValue: { get: (key: string) => (key === 'JWT_SECRET' ? JWT_SECRET : undefined) },
