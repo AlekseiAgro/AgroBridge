@@ -307,46 +307,53 @@ describe('PurchaseRequestsService', () => {
   describe('close and cancel', () => {
     beforeEach(() => {
       prisma.purchaseRequest.findUnique.mockResolvedValue(requestRow());
-      prisma.purchaseRequest.updateMany.mockResolvedValue({ count: 1 });
+      tx.purchaseQuote.findMany.mockResolvedValue(requestRow().quotes);
     });
 
-    it('tells every supplier still waiting that the request is closed', async () => {
+    it('closes the request and declines pending quotes in one transaction', async () => {
       await service.close(buyer, 'r1');
 
-      expect(prisma.purchaseRequest.updateMany).toHaveBeenCalledWith({
+      expect(tx.purchaseRequest.updateMany).toHaveBeenCalledWith({
         where: { id: 'r1', status: 'open' },
         data: { status: 'closed' },
+      });
+      expect(tx.purchaseQuote.updateMany).toHaveBeenCalledWith({
+        where: { requestId: 'r1', status: 'pending' },
+        data: { status: 'declined' },
       });
       expect(notifications.notifyPurchaseRequestWithdrawn).toHaveBeenCalledTimes(2);
       expect(notifications.notifyPurchaseRequestWithdrawn).toHaveBeenCalledWith(
         expect.objectContaining({ reason: 'closed', title: 'Blueberries' }),
       );
+      expect(notifications.notifyPurchaseQuoteDeclined).not.toHaveBeenCalled();
     });
 
-    it('distinguishes a cancellation from a closure', async () => {
+    it('cancels the request and declines pending quotes in one transaction', async () => {
       await service.cancel(buyer, 'r1');
 
+      expect(tx.purchaseRequest.updateMany).toHaveBeenCalledWith({
+        where: { id: 'r1', status: 'open' },
+        data: { status: 'cancelled' },
+      });
+      expect(tx.purchaseQuote.updateMany).toHaveBeenCalledWith({
+        where: { requestId: 'r1', status: 'pending' },
+        data: { status: 'declined' },
+      });
       expect(notifications.notifyPurchaseRequestWithdrawn).toHaveBeenCalledWith(
         expect.objectContaining({ reason: 'cancelled' }),
       );
     });
 
     it('does not repeat the announcement when the request had already moved on', async () => {
-      prisma.purchaseRequest.updateMany.mockResolvedValue({ count: 0 });
+      tx.purchaseRequest.updateMany.mockResolvedValue({ count: 0 });
 
       await expect(service.close(buyer, 'r1')).rejects.toBeInstanceOf(ConflictException);
+      expect(tx.purchaseQuote.updateMany).not.toHaveBeenCalled();
       expect(notifications.notifyPurchaseRequestWithdrawn).not.toHaveBeenCalled();
     });
 
-    it('leaves already-declined suppliers alone', async () => {
-      prisma.purchaseRequest.findUnique.mockResolvedValue(
-        requestRow({
-          quotes: [
-            { ...quoteRow('q1', 'farm-a', 'a@example.com'), status: 'declined' },
-            quoteRow('q2', 'farm-b', 'b@example.com'),
-          ],
-        }),
-      );
+    it('leaves already-accepted and already-declined quotes out of the announcement', async () => {
+      tx.purchaseQuote.findMany.mockResolvedValue([quoteRow('q2', 'farm-b', 'b@example.com')]);
 
       await service.close(buyer, 'r1');
 
@@ -356,6 +363,33 @@ describe('PurchaseRequestsService', () => {
           farmer: { email: 'b@example.com', locale: 'en', displayName: null },
         }),
       );
+    });
+
+    it('rejects a caller who does not own the request', async () => {
+      await expect(
+        service.close(
+          { id: 'other', email: 'x@example.com', role: 'buyer', locale: 'en' } as never,
+          'r1',
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('rejects a supplier who tries to close someone else\'s request', async () => {
+      await expect(
+        service.cancel(
+          { id: 'owner-a', email: 'a@example.com', role: 'farmer', locale: 'en' } as never,
+          'r1',
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('does not open a transaction for a request that is already closed', async () => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue(requestRow({ status: 'closed' }));
+
+      await expect(service.close(buyer, 'r1')).rejects.toBeInstanceOf(BadRequestException);
+      expect(prisma.$transaction).not.toHaveBeenCalled();
     });
   });
 

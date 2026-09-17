@@ -188,32 +188,42 @@ export class PurchaseRequestsService {
     this.assertBuyer(user);
     const request = await this.requireOwnedOpen(user, id);
 
-    // Conditional, so a double click or a retried request leaves the second caller with a
-    // conflict instead of mailing every supplier a second time.
-    const closed = await this.prisma.purchaseRequest.updateMany({
-      where: { id: request.id, status: PurchaseRequestStatus.open },
-      data: {
-        status:
-          reason === 'closed' ? PurchaseRequestStatus.closed : PurchaseRequestStatus.cancelled,
-      },
+    // Same lock order as acceptQuote: the purchase-request row first, then the quotes.
+    // Concurrent close/cancel/accept then serialize on one row instead of deadlocking.
+    const pending = await this.prisma.$transaction(async (tx) => {
+      const closed = await tx.purchaseRequest.updateMany({
+        where: { id: request.id, status: PurchaseRequestStatus.open },
+        data: {
+          status:
+            reason === 'closed' ? PurchaseRequestStatus.closed : PurchaseRequestStatus.cancelled,
+        },
+      });
+      if (closed.count !== 1) {
+        throw new ConflictException('Purchase request is no longer open');
+      }
+
+      const stillPending = await tx.purchaseQuote.findMany({
+        where: { requestId: request.id, status: PurchaseQuoteStatus.pending },
+        include: quoteInclude,
+      });
+      await tx.purchaseQuote.updateMany({
+        where: { requestId: request.id, status: PurchaseQuoteStatus.pending },
+        data: { status: PurchaseQuoteStatus.declined },
+      });
+      return stillPending;
     });
-    if (closed.count !== 1) {
-      throw new ConflictException('Purchase request is no longer open');
-    }
 
     await this.announce(`purchase request ${request.id} ${reason}`, async () => {
       const buyerName = this.buyerLabel(request);
       await Promise.all(
-        request.quotes
-          .filter((quote) => quote.status === PurchaseQuoteStatus.pending)
-          .map((quote) =>
-            this.notifications.notifyPurchaseRequestWithdrawn({
-              farmer: quote.farm.owner,
-              buyerName,
-              title: request.title,
-              reason,
-            }),
-          ),
+        pending.map((quote) =>
+          this.notifications.notifyPurchaseRequestWithdrawn({
+            farmer: quote.farm.owner,
+            buyerName,
+            title: request.title,
+            reason,
+          }),
+        ),
       );
     });
 
