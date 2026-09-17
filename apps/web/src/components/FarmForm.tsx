@@ -25,6 +25,8 @@ type Props = {
     | 'history'
   > | null;
   mode: 'create' | 'edit';
+  /** Called after the profile is saved, before the page refresh. Used to leave edit mode. */
+  onSaved?: () => void;
 };
 
 type PendingPhoto = {
@@ -33,7 +35,7 @@ type PendingPhoto = {
   previewUrl: string;
 };
 
-export function FarmForm({ initial, mode }: Props) {
+export function FarmForm({ initial, mode, onSaved }: Props) {
   const t = useTranslations('farm');
   const tr = useTranslations();
   const router = useRouter();
@@ -158,12 +160,14 @@ export function FarmForm({ initial, mode }: Props) {
           setError(
             uploadError instanceof Error ? uploadError.message : t('photos.uploadError'),
           );
+          onSaved?.();
           router.replace('/dashboard/farm');
           router.refresh();
           return;
         }
       }
 
+      onSaved?.();
       router.replace('/dashboard/farm');
       router.refresh();
     } catch {

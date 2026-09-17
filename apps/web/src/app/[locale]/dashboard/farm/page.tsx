@@ -1,12 +1,22 @@
-import type { FarmDetail, ProducerVerificationStatus } from '@agrobridge/shared';
+import type { FarmDetail, ProducerVerificationStatus, RatingSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { FarmDocumentsManager } from '@/components/FarmDocumentsManager';
 import { FarmForm } from '@/components/FarmForm';
+import {
+  FarmCancelButton,
+  FarmEditButton,
+  FarmOwnerEditForm,
+  FarmOwnerEditor,
+  FarmOwnerView,
+  FarmOwnerWorkspace,
+} from '@/components/FarmOwnerWorkspace';
 import { FarmPhotosManager } from '@/components/FarmPhotosManager';
+import { FarmProfileView } from '@/components/FarmProfileView';
 import { ProducerVerificationPanel } from '@/components/ProducerVerificationPanel';
 import { VerificationLoadError } from '@/components/VerificationLoadError';
-import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link, redirect } from '@/i18n/navigation';
+import { apiRequest } from '@/lib/api';
+import { toPublicFarmProfile } from '@/lib/farm-profile';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
@@ -41,46 +51,73 @@ export default async function DashboardFarmPage({ params }: Props) {
     }
   }
 
+  if (!farm) {
+    return (
+      <main className="cabinet-page cabinet-page--narrow">
+        <h1>{t('createTitle')}</h1>
+        <p className="page__subtitle">{t('dashboardSubtitle')}</p>
+        <FarmForm mode="create" initial={null} />
+      </main>
+    );
+  }
+
+  let publicFarm: FarmDetail;
+  try {
+    publicFarm = await apiRequest<FarmDetail>(`/farms/${farm.id}`);
+  } catch {
+    publicFarm = toPublicFarmProfile(farm);
+  }
+
+  let ownerRating: RatingSummary = { average: null, count: 0 };
+  try {
+    ownerRating = await apiRequest<RatingSummary>(`/users/${farm.owner.id}/rating`);
+  } catch {
+    ownerRating = { average: null, count: 0 };
+  }
+
+  const formInitial = {
+    name: farm.name,
+    region: farm.region,
+    description: farm.description,
+    foundedYear: farm.foundedYear,
+    farmSizeHectares: farm.farmSizeHectares,
+    ownershipType: farm.ownershipType,
+    exportMarkets: farm.exportMarkets,
+    history: farm.history,
+  };
+
   return (
-    <main className="cabinet-page cabinet-page--narrow">
-      <h1>{farm ? t('editTitle') : t('createTitle')}</h1>
-      <p className="page__subtitle">{t('dashboardSubtitle')}</p>
-      {farm ? (
-        <p className="product-list__meta farm-verification-line">
-          {t('verification.label')}: {t(`verification.farmStatus.${farm.verificationStatus}`)}
-          <VerifiedBadge verified={farm.verified} />
-        </p>
-      ) : null}
-      <FarmForm
-        mode={farm ? 'edit' : 'create'}
-        initial={
-          farm
-            ? {
-                name: farm.name,
-                region: farm.region,
-                description: farm.description,
-                foundedYear: farm.foundedYear,
-                farmSizeHectares: farm.farmSizeHectares,
-                ownershipType: farm.ownershipType,
-                exportMarkets: farm.exportMarkets,
-                history: farm.history,
-              }
-            : null
-        }
-      />
-      {farm ? <FarmPhotosManager initialPhotos={farm.photos ?? []} /> : null}
-      {farm && verification ? <ProducerVerificationPanel initial={verification} /> : null}
-      {verificationUnavailable ? <VerificationLoadError /> : null}
-      {farm ? (
-        <>
-          <FarmDocumentsManager initialDocuments={farm.documents ?? []} />
+    <FarmOwnerWorkspace>
+      <FarmOwnerView>
+        <main className="cabinet-page">
+          <FarmProfileView
+            farm={publicFarm}
+            locale={locale}
+            ownerRating={ownerRating}
+            showOwnerLink={false}
+            actions={<FarmEditButton>{t('editFarm')}</FarmEditButton>}
+          />
+          {verification ? <ProducerVerificationPanel initial={verification} /> : null}
+          {verificationUnavailable ? <VerificationLoadError /> : null}
           <p className="auth-card__footer">
             <Link href={`/farms/${farm.id}`}>{t('viewPublic')}</Link>
             {' · '}
             <Link href="/dashboard/products">{t('manageProducts')}</Link>
           </p>
-        </>
-      ) : null}
-    </main>
+        </main>
+      </FarmOwnerView>
+      <FarmOwnerEditor>
+        <main className="cabinet-page cabinet-page--narrow">
+          <div className="farm-profile__toolbar">
+            <h1>{t('editTitle')}</h1>
+            <FarmCancelButton>{t('cancelEdit')}</FarmCancelButton>
+          </div>
+          <p className="page__subtitle">{t('dashboardSubtitle')}</p>
+          <FarmOwnerEditForm initial={formInitial} />
+          <FarmPhotosManager initialPhotos={farm.photos ?? []} />
+          <FarmDocumentsManager initialDocuments={farm.documents ?? []} />
+        </main>
+      </FarmOwnerEditor>
+    </FarmOwnerWorkspace>
   );
 }

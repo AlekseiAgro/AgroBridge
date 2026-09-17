@@ -313,7 +313,12 @@
     "ownershipType": "Ownership type",
     "exportMarkets": "Export markets",
     "exportMarketsPlaceholder": "Comma separated, e.g. Germany, UAE, Poland",
-    "history": "Farm history and story"
+    "history": "Farm history and story",
+    "editFarm": "რედაქტირება",
+    "cancelEdit": "გაუქმება",
+    "aboutHeading": "მეურნეობის შესახებ",
+    "size": "ფართობი",
+    "hectaresValue": "{count} ჰა"
   },
   "product": {
     "dashboardTitle": "ჩემი პროდუქცია",
