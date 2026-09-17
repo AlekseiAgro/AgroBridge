@@ -126,9 +126,7 @@ describe('NotificationsService', () => {
         text: expect.stringContaining('Hello from the farm'),
       }),
     );
-    expect(mail.send.mock.calls[0][0].text).toContain(
-      'http://localhost:3000/ru/dashboard/chat/c1',
-    );
+    expect(mail.send.mock.calls[0][0].text).toContain('http://localhost:3000/ru/dashboard/chat/c1');
   });
 
   it('tells admins a verification needs review without exposing the document', async () => {
@@ -254,10 +252,117 @@ describe('NotificationsService', () => {
         subject: expect.stringContaining('AgroBridge'),
       }),
     );
-    expect(text).toContain(
-      'http://localhost:3000/ka/reset-password?token=opaque-reset-token',
-    );
+    expect(text).toContain('http://localhost:3000/ka/reset-password?token=opaque-reset-token');
     expect(text).toContain('30');
     expect(text).not.toContain('evil.example');
+  });
+
+  describe('purchase request lifecycle emails', () => {
+    it('mails opted-in suppliers a new purchase request in their locale', async () => {
+      await service.notifyNewPurchaseRequest({
+        user: { email: 'farmer@example.com', locale: 'ru', displayName: 'Нино' },
+        title: 'Blueberries',
+        requestId: 'r1',
+        buyerName: 'Buyer Ltd',
+        category: 'berries',
+        quantity: '1t',
+        unit: 't',
+      });
+
+      expect(mail.send).toHaveBeenCalledTimes(1);
+      const sent = mail.send.mock.calls[0][0];
+      expect(sent.to).toBe('farmer@example.com');
+      expect(sent.subject).toBe('Новый запрос на покупку: Blueberries');
+      expect(sent.text).toContain('Buyer Ltd');
+      expect(sent.text).toContain('1t t');
+      expect(sent.text).toContain('http://localhost:3000/ru/requests/r1');
+      expect(sent.text).toContain('http://localhost:3000/ru/dashboard/subscriptions');
+    });
+
+    it('mails the buyer when a quote arrives', async () => {
+      await service.notifyPurchaseQuoteReceived({
+        buyer: { email: 'buyer@example.com', locale: 'en', displayName: 'Buyer Ltd' },
+        farmName: 'Kakheti Farm',
+        title: 'Blueberries',
+        priceAmount: '12.50',
+        currency: 'USD',
+        requestId: 'r1',
+      });
+
+      const sent = mail.send.mock.calls[0][0];
+      expect(sent.to).toBe('buyer@example.com');
+      expect(sent.subject).toBe('New quote for Blueberries');
+      expect(sent.text).toContain('Kakheti Farm');
+      expect(sent.text).toContain('12.50 USD');
+      expect(sent.text).toContain('http://localhost:3000/en/requests/r1');
+    });
+
+    it('mails the winning supplier that their quote was accepted', async () => {
+      await service.notifyPurchaseQuoteAccepted({
+        farmer: { email: 'farmer@example.com', locale: 'ka', displayName: 'ნინო' },
+        buyerName: 'Buyer Ltd',
+        title: 'Blueberries',
+      });
+
+      const sent = mail.send.mock.calls[0][0];
+      expect(sent.to).toBe('farmer@example.com');
+      expect(sent.subject).toContain('Blueberries');
+      expect(sent.text).toContain('Buyer Ltd');
+      expect(sent.text).toContain('http://localhost:3000/ka/requests');
+    });
+
+    it('mails a losing supplier that their quote was not selected', async () => {
+      await service.notifyPurchaseQuoteDeclined({
+        farmer: { email: 'farmer@example.com', locale: 'ru', displayName: 'Нино' },
+        buyerName: 'Buyer Ltd',
+        title: 'Blueberries',
+      });
+
+      const sent = mail.send.mock.calls[0][0];
+      expect(sent.subject).toBe('Ваше предложение не выбрано: «Blueberries»');
+      expect(sent.text).toContain('Buyer Ltd');
+    });
+
+    it('uses the closed template, not the declined template, when a request is closed', async () => {
+      await service.notifyPurchaseRequestWithdrawn({
+        farmer: { email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
+        buyerName: 'Buyer Ltd',
+        title: 'Blueberries',
+        reason: 'closed',
+      });
+
+      const sent = mail.send.mock.calls[0][0];
+      expect(sent.subject).toBe('Purchase request closed: Blueberries');
+      expect(sent.text).toContain('closed the purchase request');
+      expect(sent.text).not.toContain('did not select');
+    });
+
+    it('uses the cancelled template when a request is cancelled', async () => {
+      await service.notifyPurchaseRequestWithdrawn({
+        farmer: { email: 'farmer@example.com', locale: 'ru', displayName: 'Нино' },
+        buyerName: 'Buyer Ltd',
+        title: 'Blueberries',
+        reason: 'cancelled',
+      });
+
+      const sent = mail.send.mock.calls[0][0];
+      expect(sent.subject).toBe('Запрос на закупку отменён: «Blueberries»');
+      expect(sent.text).toContain('отменил');
+    });
+
+    it('does not throw when a purchase-request email cannot be delivered', async () => {
+      mail.send.mockRejectedValueOnce(new Error('smtp down'));
+
+      await expect(
+        service.notifyPurchaseQuoteReceived({
+          buyer: { email: 'buyer@example.com', locale: 'en', displayName: 'Buyer Ltd' },
+          farmName: 'Kakheti Farm',
+          title: 'Blueberries',
+          priceAmount: '12.50',
+          currency: 'USD',
+          requestId: 'r1',
+        }),
+      ).resolves.toBeUndefined();
+    });
   });
 });

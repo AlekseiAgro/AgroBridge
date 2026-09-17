@@ -140,15 +140,19 @@ export class PurchaseRequestsService {
       include: requestInclude,
     });
 
-    await this.subscriptions.notifyNewPurchaseRequest({
-      requestId: created.id,
-      title: created.title,
-      category: created.category,
-      quantity: created.quantity,
-      unit: created.unit,
-      buyerUserId: user.id,
-      buyerName: user.displayName?.trim() || user.email,
-    });
+    // The row is already committed. A bounced mailbox or a blip reading alert
+    // subscriptions must not 500 the client into publishing the same request twice.
+    await this.announce(`publication of purchase request ${created.id}`, () =>
+      this.subscriptions.notifyNewPurchaseRequest({
+        requestId: created.id,
+        title: created.title,
+        category: created.category,
+        quantity: created.quantity,
+        unit: created.unit,
+        buyerUserId: user.id,
+        buyerName: user.displayName?.trim() || user.email,
+      }),
+    );
 
     return this.toDetail(created, user);
   }
