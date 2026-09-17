@@ -61,7 +61,12 @@ const buyer = {
 describe('PurchaseRequestsService', () => {
   const tx = {
     purchaseRequest: { updateMany: jest.fn() },
-    purchaseQuote: { updateMany: jest.fn(), findMany: jest.fn() },
+    purchaseQuote: {
+      updateMany: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
   };
 
   const prisma = {
@@ -101,6 +106,8 @@ describe('PurchaseRequestsService', () => {
     prisma.$transaction.mockImplementation((run: (client: typeof tx) => unknown) => run(tx));
     tx.purchaseQuote.findMany.mockResolvedValue([]);
     tx.purchaseQuote.updateMany.mockResolvedValue({ count: 1 });
+    tx.purchaseQuote.create.mockResolvedValue({});
+    tx.purchaseQuote.update.mockResolvedValue({});
     tx.purchaseRequest.updateMany.mockResolvedValue({ count: 1 });
   });
 
@@ -375,7 +382,7 @@ describe('PurchaseRequestsService', () => {
       expect(prisma.$transaction).not.toHaveBeenCalled();
     });
 
-    it('rejects a supplier who tries to close someone else\'s request', async () => {
+    it("rejects a supplier who tries to close someone else's request", async () => {
       await expect(
         service.cancel(
           { id: 'owner-a', email: 'a@example.com', role: 'farmer', locale: 'en' } as never,
@@ -394,16 +401,38 @@ describe('PurchaseRequestsService', () => {
   });
 
   describe('createQuote', () => {
-    it('tells the buyer a quote arrived', async () => {
+    const farmer = {
+      id: 'owner-a',
+      email: 'a@example.com',
+      role: 'farmer',
+      locale: 'en',
+    } as never;
+
+    beforeEach(() => {
       prisma.farm.findUnique.mockResolvedValue({ id: 'farm-a', name: 'Farm farm-a' });
       prisma.purchaseRequest.findUnique.mockResolvedValue(requestRow({ quotes: [] }));
-      prisma.purchaseQuote.create.mockResolvedValue({});
+    });
 
-      await service.createQuote(
-        { id: 'owner-a', email: 'a@example.com', role: 'farmer', locale: 'en' } as never,
-        'r1',
-        { priceAmount: '12.5', currency: 'USD' } as never,
-      );
+    it('locks the open purchase request before inserting the quote', async () => {
+      await service.createQuote(farmer, 'r1', { priceAmount: '12.5', currency: 'USD' } as never);
+
+      expect(tx.purchaseRequest.updateMany).toHaveBeenCalledWith({
+        where: { id: 'r1', status: 'open' },
+        data: { status: 'open' },
+      });
+      expect(tx.purchaseQuote.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          requestId: 'r1',
+          farmId: 'farm-a',
+          status: 'pending',
+          currency: 'USD',
+        }),
+      });
+      expect(prisma.purchaseQuote.create).not.toHaveBeenCalled();
+    });
+
+    it('tells the buyer a quote arrived', async () => {
+      await service.createQuote(farmer, 'r1', { priceAmount: '12.5', currency: 'USD' } as never);
 
       expect(notifications.notifyPurchaseQuoteReceived).toHaveBeenCalledWith({
         buyer: { id: 'b1', displayName: 'Buyer Ltd', email: 'buyer@example.com', locale: 'en' },
@@ -416,19 +445,40 @@ describe('PurchaseRequestsService', () => {
     });
 
     it('stores the quote even when the buyer cannot be emailed', async () => {
-      prisma.farm.findUnique.mockResolvedValue({ id: 'farm-a', name: 'Farm farm-a' });
-      prisma.purchaseRequest.findUnique.mockResolvedValue(requestRow({ quotes: [] }));
-      prisma.purchaseQuote.create.mockResolvedValue({});
       notifications.notifyPurchaseQuoteReceived.mockRejectedValueOnce(new Error('resend down'));
 
       await expect(
-        service.createQuote(
-          { id: 'owner-a', email: 'a@example.com', role: 'farmer', locale: 'en' } as never,
-          'r1',
-          { priceAmount: '12.5', currency: 'USD' } as never,
-        ),
+        service.createQuote(farmer, 'r1', { priceAmount: '12.5', currency: 'USD' } as never),
       ).resolves.toBeDefined();
-      expect(prisma.purchaseQuote.create).toHaveBeenCalled();
+      expect(tx.purchaseQuote.create).toHaveBeenCalled();
+    });
+
+    it('does not insert a quote or mail the buyer when the request left OPEN mid-flight', async () => {
+      tx.purchaseRequest.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(
+        service.createQuote(farmer, 'r1', { priceAmount: '12.5', currency: 'USD' } as never),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(tx.purchaseQuote.create).not.toHaveBeenCalled();
+      expect(tx.purchaseQuote.update).not.toHaveBeenCalled();
+      expect(notifications.notifyPurchaseQuoteReceived).not.toHaveBeenCalled();
+    });
+
+    it('reactivates a withdrawn quote instead of inserting a second row', async () => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue(
+        requestRow({
+          quotes: [{ ...quoteRow('q1', 'farm-a', 'a@example.com'), status: 'withdrawn' }],
+        }),
+      );
+
+      await service.createQuote(farmer, 'r1', { priceAmount: '15', currency: 'EUR' } as never);
+
+      expect(tx.purchaseQuote.update).toHaveBeenCalledWith({
+        where: { id: 'q1' },
+        data: expect.objectContaining({ status: 'pending', currency: 'EUR' }),
+      });
+      expect(tx.purchaseQuote.create).not.toHaveBeenCalled();
+      expect(notifications.notifyPurchaseQuoteReceived).toHaveBeenCalledTimes(1);
     });
   });
 });

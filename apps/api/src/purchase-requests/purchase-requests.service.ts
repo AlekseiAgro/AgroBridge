@@ -261,34 +261,43 @@ export class PurchaseRequestsService {
       throw new BadRequestException('You already sent a quote for this request');
     }
 
-    if (existing) {
-      await this.prisma.purchaseQuote.update({
-        where: { id: existing.id },
-        data: {
-          priceAmount: new Prisma.Decimal(dto.priceAmount),
-          currency: dto.currency as CurrencyCode,
-          quantity: dto.quantity?.trim() || null,
-          unit: dto.unit || null,
-          message: dto.message?.trim() || null,
-          validUntil: dto.validUntil ? new Date(dto.validUntil) : null,
-          status: PurchaseQuoteStatus.pending,
-        },
+    const quoteData = {
+      priceAmount: new Prisma.Decimal(dto.priceAmount),
+      currency: dto.currency as CurrencyCode,
+      quantity: dto.quantity?.trim() || null,
+      unit: dto.unit || null,
+      message: dto.message?.trim() || null,
+      validUntil: dto.validUntil ? new Date(dto.validUntil) : null,
+      status: PurchaseQuoteStatus.pending,
+    };
+
+    // Same lock order as withdraw/acceptQuote: the purchase-request row first, then the
+    // quote write. A no-op OPEN→OPEN update is the lock — it serializes us with close,
+    // cancel and accept so a PENDING quote cannot land after those have already committed.
+    await this.prisma.$transaction(async (tx) => {
+      const claimed = await tx.purchaseRequest.updateMany({
+        where: { id: request.id, status: PurchaseRequestStatus.open },
+        data: { status: PurchaseRequestStatus.open },
       });
-    } else {
-      await this.prisma.purchaseQuote.create({
-        data: {
-          requestId: request.id,
-          farmId: farm.id,
-          priceAmount: new Prisma.Decimal(dto.priceAmount),
-          currency: dto.currency as CurrencyCode,
-          quantity: dto.quantity?.trim() || null,
-          unit: dto.unit || null,
-          message: dto.message?.trim() || null,
-          validUntil: dto.validUntil ? new Date(dto.validUntil) : null,
-          status: PurchaseQuoteStatus.pending,
-        },
-      });
-    }
+      if (claimed.count !== 1) {
+        throw new ConflictException('Purchase request is no longer open');
+      }
+
+      if (existing) {
+        await tx.purchaseQuote.update({
+          where: { id: existing.id },
+          data: quoteData,
+        });
+      } else {
+        await tx.purchaseQuote.create({
+          data: {
+            requestId: request.id,
+            farmId: farm.id,
+            ...quoteData,
+          },
+        });
+      }
+    });
 
     await this.announce(`quote from farm ${farm.id} on request ${request.id}`, () =>
       this.notifications.notifyPurchaseQuoteReceived({

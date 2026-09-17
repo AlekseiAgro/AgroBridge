@@ -73,6 +73,29 @@ describeWithDatabase()('purchase request quote acceptance (database)', () => {
     return { user, farmId: farm.id };
   }
 
+  const quoteDto = { priceAmount: '12.50', currency: 'USD' } as const;
+
+  function isDeadlock(error: unknown): boolean {
+    const message = error instanceof Error ? `${error.name} ${error.message}` : String(error);
+    return /deadlock/i.test(message);
+  }
+
+  /** An open request with a supplier who has not quoted yet. */
+  async function openRequestAwaitingQuote() {
+    const buyer = await createTrader('buyer');
+    const supplier = await createSupplier();
+    const request = await prisma.purchaseRequest.create({
+      data: {
+        buyerId: buyer.id,
+        title: `Hazelnuts ${randomUUID().slice(0, 8)}`,
+        category: 'nuts',
+        quantity: '1t',
+        status: 'open',
+      },
+    });
+    return { buyer, supplier: supplier.user, farmId: supplier.farmId, requestId: request.id };
+  }
+
   /** An open request carrying `count` pending quotes from distinct farms. */
   async function openRequestWithQuotes(count: number) {
     const buyer = await createTrader('buyer');
@@ -415,8 +438,9 @@ describeWithDatabase()('purchase request quote acceptance (database)', () => {
 
     expect(outcomes.filter((outcome) => outcome.status === 'fulfilled')).toHaveLength(1);
     expect(outcomes.filter((outcome) => outcome.status === 'rejected')).toHaveLength(1);
-    expect((outcomes.find((item) => item.status === 'rejected') as PromiseRejectedResult).reason)
-      .toBeInstanceOf(ConflictException);
+    expect(
+      (outcomes.find((item) => item.status === 'rejected') as PromiseRejectedResult).reason,
+    ).toBeInstanceOf(ConflictException);
 
     const state = await finalState(requestId);
     expect(['closed', 'cancelled']).toContain(state.status);
@@ -451,5 +475,147 @@ describeWithDatabase()('purchase request quote acceptance (database)', () => {
       expect(notifications.notifyPurchaseQuoteAccepted).not.toHaveBeenCalled();
       expect(notifications.notifyPurchaseRequestWithdrawn).toHaveBeenCalledTimes(2);
     }
+  });
+
+  it('creates a pending quote on the ordinary single-threaded path', async () => {
+    const { supplier, requestId } = await openRequestAwaitingQuote();
+
+    await service.createQuote(supplier, requestId, quoteDto as never);
+
+    expect(await finalState(requestId)).toEqual({
+      status: 'open',
+      accepted: 0,
+      declined: 0,
+      pending: 1,
+    });
+    expect(notifications.notifyPurchaseQuoteReceived).toHaveBeenCalledTimes(1);
+  });
+
+  it('reactivates a withdrawn quote while the request is still open', async () => {
+    const { supplier, farmId, requestId } = await openRequestAwaitingQuote();
+    await prisma.purchaseQuote.create({
+      data: {
+        requestId,
+        farmId,
+        priceAmount: 9,
+        currency: 'USD',
+        status: 'withdrawn',
+      },
+    });
+
+    await service.createQuote(supplier, requestId, quoteDto as never);
+
+    const quotes = await prisma.purchaseQuote.findMany({ where: { requestId } });
+    expect(quotes).toHaveLength(1);
+    expect(quotes[0]).toMatchObject({ status: 'pending', farmId });
+    expect(await finalState(requestId)).toMatchObject({ status: 'open', pending: 1 });
+  });
+
+  it('rejects a supplier quoting their own request and does not insert a row', async () => {
+    const owner = await createTrader('farmer');
+    await prisma.farm.create({
+      data: { ownerId: owner.id, name: `Own ${owner.id.slice(-6)}` },
+    });
+    const request = await prisma.purchaseRequest.create({
+      data: {
+        buyerId: owner.id,
+        title: `Own ${randomUUID().slice(0, 8)}`,
+        category: 'nuts',
+        quantity: '1t',
+        status: 'open',
+      },
+    });
+
+    await expect(service.createQuote(owner, request.id, quoteDto as never)).rejects.toBeDefined();
+    expect(await prisma.purchaseQuote.count({ where: { requestId: request.id } })).toBe(0);
+    expect(notifications.notifyPurchaseQuoteReceived).not.toHaveBeenCalled();
+  });
+
+  it('never leaves a pending quote when createQuote races close', async () => {
+    const { buyer, supplier, requestId } = await openRequestAwaitingQuote();
+
+    const outcomes = await Promise.allSettled([
+      service.createQuote(supplier, requestId, quoteDto as never),
+      service.close(buyer, requestId),
+    ]);
+
+    for (const outcome of outcomes) {
+      if (outcome.status === 'rejected') {
+        expect(isDeadlock(outcome.reason)).toBe(false);
+      }
+    }
+
+    const state = await finalState(requestId);
+    expect(state.status).toBe('closed');
+    expect(state).toMatchObject({ accepted: 0, pending: 0 });
+    const quotes = await prisma.purchaseQuote.findMany({ where: { requestId } });
+    expect(quotes.every((quote) => quote.status !== 'pending')).toBe(true);
+  });
+
+  it('never deadlocks or leaves a pending quote when createQuote races acceptQuote', async () => {
+    const { buyer, requestId, quotes } = await openRequestWithQuotes(1);
+    const other = await createSupplier();
+
+    const outcomes = await Promise.allSettled([
+      service.acceptQuote(buyer, requestId, quotes[0].id),
+      service.createQuote(other.user, requestId, quoteDto as never),
+    ]);
+
+    for (const outcome of outcomes) {
+      if (outcome.status === 'rejected') {
+        expect(isDeadlock(outcome.reason)).toBe(false);
+      }
+    }
+
+    const state = await finalState(requestId);
+    expect(state.pending).toBe(0);
+    expect(state.accepted).toBe(1);
+    expect(state.status).toBe('fulfilled');
+  });
+
+  it('never leaves a pending quote when createQuote races cancel', async () => {
+    const { buyer, supplier, requestId } = await openRequestAwaitingQuote();
+
+    const outcomes = await Promise.allSettled([
+      service.createQuote(supplier, requestId, quoteDto as never),
+      service.cancel(buyer, requestId),
+    ]);
+
+    for (const outcome of outcomes) {
+      if (outcome.status === 'rejected') {
+        expect(isDeadlock(outcome.reason)).toBe(false);
+      }
+    }
+
+    const state = await finalState(requestId);
+    expect(state.status).toBe('cancelled');
+    expect(state).toMatchObject({ accepted: 0, pending: 0 });
+  });
+
+  it('never leaves a pending quote across 120 real createQuote vs close races', async () => {
+    let orphans = 0;
+    let deadlocks = 0;
+
+    for (let index = 0; index < 120; index += 1) {
+      const { buyer, supplier, requestId } = await openRequestAwaitingQuote();
+      const outcomes = await Promise.allSettled([
+        service.createQuote(supplier, requestId, quoteDto as never),
+        index % 2 === 0 ? service.close(buyer, requestId) : service.cancel(buyer, requestId),
+      ]);
+
+      for (const outcome of outcomes) {
+        if (outcome.status === 'rejected' && isDeadlock(outcome.reason)) {
+          deadlocks += 1;
+        }
+      }
+
+      const state = await finalState(requestId);
+      if (state.status !== 'open' && state.pending > 0) {
+        orphans += 1;
+      }
+    }
+
+    expect(deadlocks).toBe(0);
+    expect(orphans).toBe(0);
   });
 });
