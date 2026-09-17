@@ -77,6 +77,7 @@ export function FarmDocumentsManager({ initialDocuments }: Props) {
         <p className="page__subtitle">
           {t('documents.subtitle', { max: FARM_DOCUMENT_MAX_COUNT })}
         </p>
+        <p className="field-hint">{t('documents.savedImmediately')}</p>
       </div>
 
       {documents.length === 0 ? (
@@ -96,12 +97,7 @@ export function FarmDocumentsManager({ initialDocuments }: Props) {
                 </p>
               ) : null}
               <div className="product-list__actions">
-                <a
-                  className="button button--ghost"
-                  href={doc.url}
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                <a className="button button--ghost" href={doc.url} target="_blank" rel="noreferrer">
                   {t('documents.open')}
                 </a>
                 <button

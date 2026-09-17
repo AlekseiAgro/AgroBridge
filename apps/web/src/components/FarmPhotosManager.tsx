@@ -105,6 +105,7 @@ export function FarmPhotosManager({ initialPhotos }: Props) {
       <div className="product-images__header">
         <h2 className="section-title">{t('photos.title')}</h2>
         <p className="page__subtitle">{t('photos.subtitle', { max: FARM_PHOTO_MAX_COUNT })}</p>
+        <p className="field-hint">{t('photos.savedImmediately')}</p>
       </div>
 
       {photos.length > 0 ? (

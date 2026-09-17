@@ -153,9 +153,9 @@ describe('verification status load failure', () => {
     expect(farmPage).toContain('{verificationUnavailable ? <VerificationLoadError /> : null}');
   });
 
-  it('keeps the success and empty states untouched', () => {
+  it('keeps the success and empty states on the owner farm page', () => {
     expect(farmPage).toContain(
-      '{verification ? <ProducerVerificationPanel initial={verification} /> : null}',
+      '{verification ? <ProducerVerificationSection initial={verification} /> : null}',
     );
   });
 

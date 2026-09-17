@@ -2,12 +2,13 @@ import type { FarmDetail, RatingSummary } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { CertificateBadges } from '@/components/CertificateBadges';
+import { FarmCoverPhotos } from '@/components/FarmCoverPhotos';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link } from '@/i18n/navigation';
 import { isPublicFarmProduct } from '@/lib/farm-profile';
-import { getProductCardImage, toPublicMediaUrl } from '@/lib/product-image';
+import { getProductCardImage } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
@@ -45,6 +46,8 @@ export async function FarmProfileView({
 
   const products = farm.products.filter(isPublicFarmProduct);
   const regionLabel = formatRegionLabel(farm.region, tr) || t('regionUnknown');
+  const cover = farm.photos.find((photo) => photo.isPrimary) ?? farm.photos[0] ?? null;
+  const extraPhotos = cover ? farm.photos.filter((photo) => photo.id !== cover.id) : [];
   const hasAbout =
     Boolean(farm.foundedYear) ||
     farm.farmSizeHectares != null ||
@@ -54,56 +57,50 @@ export async function FarmProfileView({
 
   return (
     <article className="farm-profile">
-      <header className="farm-profile__header">
-        <div>
-          <h1 className="farm-title-row">
-            {farm.name}
-            <VerifiedBadge verified={farm.verified} />
-          </h1>
-          <p className="page__subtitle">
-            {regionLabel}
-            {showOwnerLink ? (
-              <>
-                {' · '}
-                <Link href={`/users/${farm.owner.id}`} className="profile-link">
-                  {farm.owner.displayName || tProfile('viewProfile')}
-                </Link>
-              </>
-            ) : null}
-          </p>
-          {ownerRating ? (
-            <div className="farm-rating">
-              <RatingStars
-                value={ownerRating.average}
-                count={ownerRating.count}
-                size="sm"
-                reviewsHref={`/users/${farm.owner.id}/reviews`}
-              />
+      <header
+        className={
+          cover ? 'farm-profile__header farm-profile__header--with-cover' : 'farm-profile__header'
+        }
+      >
+        {cover ? (
+          <FarmCoverPhotos farmName={farm.name} cover={cover} extraPhotos={extraPhotos} />
+        ) : null}
+        <div className="farm-profile__identity">
+          <div className="farm-profile__identity-top">
+            <div>
+              <h1 className="farm-title-row">
+                {farm.name}
+                <VerifiedBadge verified={farm.verified} />
+              </h1>
+              <p className="page__subtitle">
+                {regionLabel}
+                {showOwnerLink ? (
+                  <>
+                    {' · '}
+                    <Link href={`/users/${farm.owner.id}`} className="profile-link">
+                      {farm.owner.displayName || tProfile('viewProfile')}
+                    </Link>
+                  </>
+                ) : null}
+              </p>
+              {ownerRating ? (
+                <div className="farm-rating">
+                  <RatingStars
+                    value={ownerRating.average}
+                    count={ownerRating.count}
+                    size="sm"
+                    reviewsHref={`/users/${farm.owner.id}/reviews`}
+                  />
+                </div>
+              ) : null}
             </div>
+            {actions ? <div className="farm-profile__actions">{actions}</div> : null}
+          </div>
+          {farm.description ? (
+            <p className="detail-text farm-profile__lede">{farm.description}</p>
           ) : null}
         </div>
-        {actions ? <div className="farm-profile__actions">{actions}</div> : null}
       </header>
-
-      {farm.photos.length > 0 ? (
-        <div className="product-gallery">
-          {farm.photos.map((photo) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={photo.id}
-              src={toPublicMediaUrl(photo.url)}
-              alt={farm.name}
-              className={
-                photo.isPrimary
-                  ? 'product-gallery__image product-gallery__image--primary'
-                  : 'product-gallery__image'
-              }
-            />
-          ))}
-        </div>
-      ) : null}
-
-      {farm.description ? <p className="detail-text">{farm.description}</p> : null}
 
       {hasAbout ? (
         <section className="farm-profile__about" aria-labelledby="farm-about-heading">

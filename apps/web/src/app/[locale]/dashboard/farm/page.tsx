@@ -12,7 +12,7 @@ import {
 } from '@/components/FarmOwnerWorkspace';
 import { FarmPhotosManager } from '@/components/FarmPhotosManager';
 import { FarmProfileView } from '@/components/FarmProfileView';
-import { ProducerVerificationPanel } from '@/components/ProducerVerificationPanel';
+import { ProducerVerificationSection } from '@/components/ProducerVerificationSection';
 import { VerificationLoadError } from '@/components/VerificationLoadError';
 import { Link, redirect } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
@@ -97,7 +97,7 @@ export default async function DashboardFarmPage({ params }: Props) {
             showOwnerLink={false}
             actions={<FarmEditButton>{t('editFarm')}</FarmEditButton>}
           />
-          {verification ? <ProducerVerificationPanel initial={verification} /> : null}
+          {verification ? <ProducerVerificationSection initial={verification} /> : null}
           {verificationUnavailable ? <VerificationLoadError /> : null}
           <p className="auth-card__footer">
             <Link href={`/farms/${farm.id}`}>{t('viewPublic')}</Link>
@@ -109,7 +109,10 @@ export default async function DashboardFarmPage({ params }: Props) {
       <FarmOwnerEditor>
         <main className="cabinet-page cabinet-page--narrow">
           <div className="farm-profile__toolbar">
-            <h1>{t('editTitle')}</h1>
+            <div>
+              <h1>{t('editTitle')}</h1>
+              <p className="field-hint">{t('cancelHint')}</p>
+            </div>
             <FarmCancelButton>{t('cancelEdit')}</FarmCancelButton>
           </div>
           <p className="page__subtitle">{t('dashboardSubtitle')}</p>

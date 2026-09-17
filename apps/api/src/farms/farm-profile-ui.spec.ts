@@ -1,7 +1,11 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { isPublicFarmProduct, toPublicFarmProfile } from '../../../web/src/lib/farm-profile';
-import type { FarmDetail, ProductSummary } from '@agrobridge/shared';
+import {
+  verificationPresentation,
+  type VerificationPresentation,
+} from '../../../web/src/lib/verification-presentation';
+import type { FarmDetail, ProducerVerificationStatus, ProductSummary } from '@agrobridge/shared';
 
 const webRoot = join(__dirname, '../../../web/src');
 const farmPage = readFileSync(join(webRoot, 'app/[locale]/dashboard/farm/page.tsx'), 'utf8');
@@ -9,13 +13,57 @@ const publicPage = readFileSync(join(webRoot, 'app/[locale]/farms/[id]/page.tsx'
 const profileView = readFileSync(join(webRoot, 'components/FarmProfileView.tsx'), 'utf8');
 const ownerWorkspace = readFileSync(join(webRoot, 'components/FarmOwnerWorkspace.tsx'), 'utf8');
 const farmForm = readFileSync(join(webRoot, 'components/FarmForm.tsx'), 'utf8');
+const photosManager = readFileSync(join(webRoot, 'components/FarmPhotosManager.tsx'), 'utf8');
+const documentsManager = readFileSync(join(webRoot, 'components/FarmDocumentsManager.tsx'), 'utf8');
+const coverPhotos = readFileSync(join(webRoot, 'components/FarmCoverPhotos.tsx'), 'utf8');
+const verificationSection = readFileSync(
+  join(webRoot, 'components/ProducerVerificationSection.tsx'),
+  'utf8',
+);
 
 const LOCALES = ['en', 'ru', 'ka', 'de', 'es', 'fr', 'it'] as const;
 
 function messages(locale: string) {
   return JSON.parse(
     readFileSync(join(__dirname, '../../../web/messages', `${locale}.json`), 'utf8'),
-  ) as { farm: Record<string, string> };
+  ) as {
+    farm: Record<string, string> & {
+      photos: Record<string, string>;
+      documents: Record<string, string>;
+      verification: Record<string, string>;
+    };
+  };
+}
+
+function verificationStatus(
+  overrides: Partial<ProducerVerificationStatus> = {},
+): ProducerVerificationStatus {
+  return {
+    verified: false,
+    farmVerificationStatus: 'unverified',
+    verificationReasonCode: null,
+    moderatorComment: null,
+    sellerType: null,
+    emailVerified: true,
+    phone: null,
+    phoneVerified: false,
+    companyRegistrationNumber: null,
+    companyRegistryName: null,
+    companyRegistryValid: null,
+    hasApprovedIdDocument: false,
+    hasPendingIdDocument: false,
+    hasPendingVerificationDocument: false,
+    sellerTypeLocked: false,
+    path: 'unknown',
+    steps: { email: 'done', phone: 'todo', identity: 'todo' },
+    ...overrides,
+    steps: {
+      email: 'done',
+      phone: 'todo',
+      identity: 'todo',
+      ...overrides.steps,
+    },
+  };
 }
 
 function product(overrides: Partial<ProductSummary>): ProductSummary {
@@ -164,9 +212,16 @@ describe('My Farm view/edit UX', () => {
     expect(farmPage).toContain('<FarmDocumentsManager');
     expect(farmPage).toContain('<FarmCancelButton>');
     expect(farmPage).toContain("t('cancelEdit')");
+    expect(farmPage).toContain("t('cancelHint')");
     expect(ownerWorkspace).toContain('onClick={cancelEdit}');
     expect(ownerWorkspace).toContain('setEditing(false)');
     expect(ownerWorkspace).toContain('onSaved={cancelEdit}');
+    expect(farmPage.indexOf('<FarmOwnerEditForm')).toBeLessThan(
+      farmPage.indexOf('<FarmPhotosManager'),
+    );
+    expect(farmPage.indexOf('<FarmPhotosManager')).toBeLessThan(
+      farmPage.indexOf('<FarmDocumentsManager'),
+    );
   });
 
   it('returns to view after a successful save because the form refreshes the page', () => {
@@ -180,10 +235,11 @@ describe('My Farm view/edit UX', () => {
 
   it('keeps the producer verification panel on the owner view', () => {
     expect(farmPage).toContain(
-      '{verification ? <ProducerVerificationPanel initial={verification} /> : null}',
+      '{verification ? <ProducerVerificationSection initial={verification} /> : null}',
     );
     expect(farmPage).toContain('{verificationUnavailable ? <VerificationLoadError /> : null}');
     expect(farmPage).toContain('<FarmOwnerView>');
+    expect(verificationSection).toContain('<ProducerVerificationPanel initial={initial} />');
   });
 
   it('creates a farm with the existing form when none exists yet', () => {
@@ -219,7 +275,16 @@ describe('public farm profile sharing', () => {
 });
 
 describe('farm profile copy', () => {
-  const required = ['editFarm', 'cancelEdit', 'aboutHeading', 'size', 'hectaresValue'] as const;
+  const required = [
+    'editFarm',
+    'cancelEdit',
+    'cancelHint',
+    'formSaveHint',
+    'aboutHeading',
+    'size',
+    'hectaresValue',
+    'saveSubmit',
+  ] as const;
 
   it.each(LOCALES)('%s translates the view/edit chrome', (locale) => {
     const farmCopy = messages(locale).farm;
@@ -228,10 +293,167 @@ describe('farm profile copy', () => {
       expect(farmCopy[key].trim().length).toBeGreaterThan(0);
     }
     expect(farmCopy.hectaresValue).toContain('{count}');
+    expect(farmCopy.photos.savedImmediately.trim().length).toBeGreaterThan(0);
+    expect(farmCopy.photos.openPhoto).toContain('{index}');
+    expect(farmCopy.photos.openPhoto).toContain('{name}');
+    expect(farmCopy.photos.viewerTitle.trim().length).toBeGreaterThan(0);
+    expect(farmCopy.photos.closeViewer.trim().length).toBeGreaterThan(0);
+    expect(farmCopy.documents.savedImmediately.trim().length).toBeGreaterThan(0);
+    for (const key of [
+      'promptTitle',
+      'promptBody',
+      'start',
+      'attentionTitle',
+      'attentionBody',
+      'continue',
+    ] as const) {
+      expect(farmCopy.verification[key].trim().length).toBeGreaterThan(0);
+    }
   });
 
   it('keeps every locale on its own Edit label', () => {
     const labels = LOCALES.map((locale) => messages(locale).farm.editFarm);
     expect(new Set(labels).size).toBe(LOCALES.length);
+  });
+});
+
+describe('verification presentation', () => {
+  const cases: Array<[string, ProducerVerificationStatus, VerificationPresentation]> = [
+    [
+      'hides the workflow when the producer is already approved',
+      verificationStatus({
+        verified: true,
+        farmVerificationStatus: 'approved',
+        steps: { email: 'done', phone: 'done', identity: 'done' },
+      }),
+      'hidden',
+    ],
+    ['shows a compact prompt when verification has not started', verificationStatus(), 'prompt'],
+    [
+      'does not treat account email confirmation as having started verification',
+      verificationStatus({
+        emailVerified: true,
+        steps: { email: 'done', phone: 'todo', identity: 'todo' },
+      }),
+      'prompt',
+    ],
+    [
+      'shows the workflow once a seller type is chosen',
+      verificationStatus({ sellerType: 'privateFarmer', path: 'privateFarmer' }),
+      'workflow',
+    ],
+    [
+      'shows the workflow while a document is pending review',
+      verificationStatus({
+        farmVerificationStatus: 'pending',
+        hasPendingVerificationDocument: true,
+        steps: { email: 'done', phone: 'done', identity: 'pending_review' },
+      }),
+      'workflow',
+    ],
+    [
+      'shows attention when verification was rejected',
+      verificationStatus({
+        farmVerificationStatus: 'rejected',
+        verificationReasonCode: 'documentRejected',
+        steps: { email: 'done', phone: 'done', identity: 'rejected' },
+      }),
+      'attention',
+    ],
+  ];
+
+  it.each(cases)('%s', (_title, status, expected) => {
+    expect(verificationPresentation(status)).toBe(expected);
+  });
+
+  it('hides the detailed checklist for approved producers', () => {
+    expect(verificationSection).toContain("presentation === 'hidden'");
+    expect(verificationSection).toContain('return null');
+    expect(verificationSection).not.toContain('verification-steps');
+  });
+
+  it('starts unverified producers on a compact reminder', () => {
+    expect(verificationSection).toContain("t('promptTitle')");
+    expect(verificationSection).toContain("t('start')");
+    expect(verificationSection).toContain('setExpanded(true)');
+  });
+
+  it('opens the existing workflow in progress and after rejection', () => {
+    expect(verificationSection).toContain(
+      "presentation === 'workflow' || presentation === 'attention'",
+    );
+    expect(verificationSection).toContain("t('attentionTitle')");
+    expect(verificationSection).toContain('t(`reason.${initial.verificationReasonCode}`)');
+    expect(verificationSection).toContain('<ProducerVerificationPanel initial={initial} />');
+  });
+});
+
+describe('edit form save placement', () => {
+  it('puts the primary Save action at the end of the profile form', () => {
+    expect(farmForm).toContain('className="farm-form__actions"');
+    expect(farmForm).toContain("t('formSaveHint')");
+    expect(farmForm).toContain("t('saveSubmit')");
+    expect(farmForm.indexOf('name="history"')).toBeLessThan(farmForm.indexOf('farm-form__actions'));
+    expect(farmForm.indexOf('farm-form__actions')).toBeLessThan(farmForm.indexOf('type="submit"'));
+    expect(farmForm.split('type="submit"').length - 1).toBe(1);
+  });
+
+  it('tells the owner that photo and document uploads save immediately', () => {
+    expect(photosManager).toContain("t('photos.savedImmediately')");
+    expect(documentsManager).toContain("t('documents.savedImmediately')");
+  });
+});
+
+describe('compact farm header', () => {
+  it('uses a compact cover instead of the product hero gallery', () => {
+    expect(profileView).toContain('<FarmCoverPhotos');
+    expect(profileView).toContain('farm-profile__lede');
+    expect(profileView).not.toContain('product-gallery');
+    expect(profileView).not.toContain('product-gallery__image--primary');
+  });
+
+  it('places the mobile farm-header override after the desktop declaration', () => {
+    const css = readFileSync(join(webRoot, 'app/globals.css'), 'utf8');
+    const desktopHeader = css.indexOf(
+      [
+        '.farm-profile__header--with-cover {',
+        '  display: grid;',
+        '  grid-template-columns: minmax(7.5rem, 11.5rem) minmax(0, 1fr);',
+      ].join('\n'),
+    );
+    const desktopCover = css.indexOf(
+      [
+        '.farm-profile__cover-image {',
+        '  display: block;',
+        '  width: 100%;',
+        '  max-height: 10.5rem;',
+        '  aspect-ratio: 4 / 3;',
+      ].join('\n'),
+    );
+    const mobileHeader = css.indexOf(
+      '.farm-profile__header--with-cover {\n    grid-template-columns: 1fr;',
+    );
+    const mobileCover = css.indexOf(
+      '.farm-profile__cover-image {\n    max-height: 8.5rem;\n    aspect-ratio: 16 / 9;',
+    );
+
+    expect(desktopHeader).toBeGreaterThan(-1);
+    expect(desktopCover).toBeGreaterThan(-1);
+    expect(mobileHeader).toBeGreaterThan(desktopHeader);
+    expect(mobileCover).toBeGreaterThan(desktopCover);
+
+    const mediaBeforeMobileHeader = css.lastIndexOf('@media (max-width: 640px)', mobileHeader);
+    expect(mediaBeforeMobileHeader).toBeGreaterThan(desktopHeader);
+  });
+
+  it('opens extra farm photos in an accessible native dialog', () => {
+    expect(profileView).toContain('<FarmCoverPhotos farmName={farm.name} cover={cover} extraPhotos={extraPhotos} />');
+    expect(coverPhotos).toContain('dialogRef.current?.showModal()');
+    expect(coverPhotos).toContain('className="farm-profile__cover-thumb-button"');
+    expect(coverPhotos).toContain("t('openPhoto', { name: farmName, index: index + 2 })");
+    expect(coverPhotos).toContain("t('closeViewer')");
+    expect(coverPhotos).toContain('aria-labelledby={titleId}');
+    expect(coverPhotos).toContain('toPublicMediaUrl(photo.url)');
+    expect(coverPhotos).not.toContain('farm.documents');
   });
 });
