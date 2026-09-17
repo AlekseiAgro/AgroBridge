@@ -157,9 +157,7 @@ export function FarmForm({ initial, mode, onSaved }: Props) {
         try {
           await uploadPendingPhotos(photos.map((photo) => photo.file));
         } catch (uploadError) {
-          setError(
-            uploadError instanceof Error ? uploadError.message : t('photos.uploadError'),
-          );
+          setError(uploadError instanceof Error ? uploadError.message : t('photos.uploadError'));
           onSaved?.();
           router.replace('/dashboard/farm');
           router.refresh();
@@ -180,7 +178,7 @@ export function FarmForm({ initial, mode, onSaved }: Props) {
   const canAddPhotos = mode === 'create' && photos.length < FARM_PHOTO_MAX_COUNT;
 
   return (
-    <form className="auth-form" onSubmit={onSubmit}>
+    <form className="auth-form farm-form" onSubmit={onSubmit}>
       <label className="field">
         <span>{t('name')}</span>
         <input name="name" required minLength={2} defaultValue={initial?.name ?? ''} />
@@ -299,9 +297,12 @@ export function FarmForm({ initial, mode, onSaved }: Props) {
       ) : null}
 
       {error ? <p className="form-error">{error}</p> : null}
-      <button className="button button--primary" type="submit" disabled={pending}>
-        {pending ? t('pleaseWait') : mode === 'create' ? t('createSubmit') : t('saveSubmit')}
-      </button>
+      <div className="farm-form__actions">
+        {mode === 'edit' ? <p className="field-hint">{t('formSaveHint')}</p> : <span />}
+        <button className="button button--primary" type="submit" disabled={pending}>
+          {pending ? t('pleaseWait') : mode === 'create' ? t('createSubmit') : t('saveSubmit')}
+        </button>
+      </div>
     </form>
   );
 }
