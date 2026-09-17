@@ -97,6 +97,44 @@ const SPECS = {
     windowSec: 15 * MINUTE,
     maxLimit: 50,
   },
+  /**
+   * Costly marketplace operations, keyed per account. Sized so an unusually busy human
+   * never notices and a script does: onboarding a whole catalog in one sitting stays
+   * inside them, a loop does not.
+   */
+  mediaUploadPerAccount: {
+    prefix: 'RATE_LIMIT_MEDIA_UPLOAD',
+    limit: 100,
+    windowSec: HOUR,
+    maxLimit: 2000,
+  },
+  chatMessagePerAccount: {
+    prefix: 'RATE_LIMIT_CHAT_MESSAGE',
+    limit: 60,
+    windowSec: 5 * MINUTE,
+    maxLimit: 1000,
+  },
+  /** Publishing a listing or a request fans out alert email to every subscriber. */
+  contentCreatePerAccount: {
+    prefix: 'RATE_LIMIT_CONTENT_CREATE',
+    limit: 30,
+    windowSec: HOUR,
+    maxLimit: 500,
+  },
+  /** Quotes and offers each mail one counterparty. */
+  tradeActionPerAccount: {
+    prefix: 'RATE_LIMIT_TRADE_ACTION',
+    limit: 60,
+    windowSec: HOUR,
+    maxLimit: 1000,
+  },
+  /** Every call is a billed Google Places request; the client already debounces. */
+  placesAutocompletePerAccount: {
+    prefix: 'RATE_LIMIT_PLACES',
+    limit: 120,
+    windowSec: 10 * MINUTE,
+    maxLimit: 2000,
+  },
 } satisfies Record<string, PolicySpec>;
 
 const CODE_SEND_COOLDOWN_SEC_DEFAULT = 60;
@@ -106,6 +144,16 @@ const CODE_MAX_ATTEMPTS_DEFAULT = 5;
 const CODE_MAX_ATTEMPTS_CEILING = 10;
 
 type PolicyName = keyof typeof SPECS;
+
+/** Policies a route may name through `@RateLimit`. */
+export type EndpointPolicyName = Extract<
+  PolicyName,
+  | 'mediaUploadPerAccount'
+  | 'chatMessagePerAccount'
+  | 'contentCreatePerAccount'
+  | 'tradeActionPerAccount'
+  | 'placesAutocompletePerAccount'
+>;
 
 @Injectable()
 export class RateLimitConfig {

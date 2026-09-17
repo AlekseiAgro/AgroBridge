@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -17,11 +19,17 @@ import {
   PurchaseRequestStatus,
 } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { CreatePurchaseQuoteDto } from './dto/create-purchase-quote.dto';
 import { CreatePurchaseRequestDto } from './dto/create-purchase-request.dto';
 
+/**
+ * The owner's contact details are loaded for the notification emails only. Every response
+ * shape is built by hand in `toQuoteView` / `toSummary`, so nothing here reaches an API
+ * consumer.
+ */
 const quoteInclude = {
   farm: {
     select: {
@@ -29,6 +37,13 @@ const quoteInclude = {
       name: true,
       region: true,
       ownerId: true,
+      owner: {
+        select: {
+          email: true,
+          locale: true,
+          displayName: true,
+        },
+      },
     },
   },
 } satisfies Prisma.PurchaseQuoteInclude;
@@ -38,6 +53,8 @@ const requestInclude = {
     select: {
       id: true,
       displayName: true,
+      email: true,
+      locale: true,
     },
   },
   quotes: {
@@ -51,9 +68,12 @@ type QuoteEntity = Prisma.PurchaseQuoteGetPayload<{ include: typeof quoteInclude
 
 @Injectable()
 export class PurchaseRequestsService {
+  private readonly logger = new Logger(PurchaseRequestsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly subscriptions: SubscriptionsService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async listOpen(
@@ -153,29 +173,51 @@ export class PurchaseRequestsService {
   }
 
   async cancel(user: AuthenticatedUser, id: string): Promise<PurchaseRequestDetail> {
-    this.assertBuyer(user);
-    const request = await this.requireOwnedOpen(user, id);
-
-    const updated = await this.prisma.purchaseRequest.update({
-      where: { id: request.id },
-      data: { status: PurchaseRequestStatus.cancelled },
-      include: requestInclude,
-    });
-
-    return this.toDetail(updated, user);
+    return this.withdraw(user, id, 'cancelled');
   }
 
   async close(user: AuthenticatedUser, id: string): Promise<PurchaseRequestDetail> {
+    return this.withdraw(user, id, 'closed');
+  }
+
+  private async withdraw(
+    user: AuthenticatedUser,
+    id: string,
+    reason: 'closed' | 'cancelled',
+  ): Promise<PurchaseRequestDetail> {
     this.assertBuyer(user);
     const request = await this.requireOwnedOpen(user, id);
 
-    const updated = await this.prisma.purchaseRequest.update({
-      where: { id: request.id },
-      data: { status: PurchaseRequestStatus.closed },
-      include: requestInclude,
+    // Conditional, so a double click or a retried request leaves the second caller with a
+    // conflict instead of mailing every supplier a second time.
+    const closed = await this.prisma.purchaseRequest.updateMany({
+      where: { id: request.id, status: PurchaseRequestStatus.open },
+      data: {
+        status:
+          reason === 'closed' ? PurchaseRequestStatus.closed : PurchaseRequestStatus.cancelled,
+      },
+    });
+    if (closed.count !== 1) {
+      throw new ConflictException('Purchase request is no longer open');
+    }
+
+    await this.announce(`purchase request ${request.id} ${reason}`, async () => {
+      const buyerName = this.buyerLabel(request);
+      await Promise.all(
+        request.quotes
+          .filter((quote) => quote.status === PurchaseQuoteStatus.pending)
+          .map((quote) =>
+            this.notifications.notifyPurchaseRequestWithdrawn({
+              farmer: quote.farm.owner,
+              buyerName,
+              title: request.title,
+              reason,
+            }),
+          ),
+      );
     });
 
-    return this.toDetail(updated, user);
+    return this.getById(user, id);
   }
 
   async createQuote(
@@ -238,6 +280,17 @@ export class PurchaseRequestsService {
       });
     }
 
+    await this.announce(`quote from farm ${farm.id} on request ${request.id}`, () =>
+      this.notifications.notifyPurchaseQuoteReceived({
+        buyer: request.buyer,
+        farmName: farm.name,
+        title: request.title,
+        priceAmount: new Prisma.Decimal(dto.priceAmount).toFixed(2),
+        currency: dto.currency,
+        requestId: request.id,
+      }),
+    );
+
     return this.getById(user, id);
   }
 
@@ -253,24 +306,70 @@ export class PurchaseRequestsService {
       throw new BadRequestException('Quote is not available to accept');
     }
 
-    await this.prisma.$transaction([
-      this.prisma.purchaseQuote.update({
-        where: { id: quote.id },
+    // One purchase request awards at most one quote. The reads above cannot enforce that:
+    // two buyers' tabs (or two retries) can both find a pending quote and both proceed.
+    const losers = await this.prisma.$transaction(async (tx) => {
+      // The purchase request row is the lock, and it is taken first. Claiming the quote
+      // first would let concurrent attempts hold each other's quote rows while both wait
+      // for this one, which Postgres resolves as a deadlock rather than as a loser.
+      const claimed = await tx.purchaseRequest.updateMany({
+        where: { id: request.id, status: PurchaseRequestStatus.open },
+        data: { status: PurchaseRequestStatus.fulfilled },
+      });
+      if (claimed.count !== 1) {
+        throw new ConflictException('This purchase request has already been decided');
+      }
+
+      const awarded = await tx.purchaseQuote.updateMany({
+        where: {
+          id: quote.id,
+          requestId: request.id,
+          status: PurchaseQuoteStatus.pending,
+        },
         data: { status: PurchaseQuoteStatus.accepted },
-      }),
-      this.prisma.purchaseQuote.updateMany({
+      });
+      if (awarded.count !== 1) {
+        // Withdrawn between the read and the claim. Rolling back beats fulfilling a
+        // request that has no winner.
+        throw new ConflictException('Quote is not available to accept');
+      }
+
+      const stillPending = await tx.purchaseQuote.findMany({
+        where: {
+          requestId: request.id,
+          id: { not: quote.id },
+          status: PurchaseQuoteStatus.pending,
+        },
+        include: quoteInclude,
+      });
+      await tx.purchaseQuote.updateMany({
         where: {
           requestId: request.id,
           id: { not: quote.id },
           status: PurchaseQuoteStatus.pending,
         },
         data: { status: PurchaseQuoteStatus.declined },
-      }),
-      this.prisma.purchaseRequest.update({
-        where: { id: request.id },
-        data: { status: PurchaseRequestStatus.fulfilled },
-      }),
-    ]);
+      });
+      return stillPending;
+    });
+
+    await this.announce(`acceptance of quote ${quote.id}`, async () => {
+      const buyerName = this.buyerLabel(request);
+      await this.notifications.notifyPurchaseQuoteAccepted({
+        farmer: quote.farm.owner,
+        buyerName,
+        title: request.title,
+      });
+      await Promise.all(
+        losers.map((loser) =>
+          this.notifications.notifyPurchaseQuoteDeclined({
+            farmer: loser.farm.owner,
+            buyerName,
+            title: request.title,
+          }),
+        ),
+      );
+    });
 
     return this.getById(user, requestId);
   }
@@ -287,10 +386,21 @@ export class PurchaseRequestsService {
       throw new BadRequestException('Quote is not available to decline');
     }
 
-    await this.prisma.purchaseQuote.update({
-      where: { id: quote.id },
+    const declined = await this.prisma.purchaseQuote.updateMany({
+      where: { id: quote.id, requestId: request.id, status: PurchaseQuoteStatus.pending },
       data: { status: PurchaseQuoteStatus.declined },
     });
+    if (declined.count !== 1) {
+      throw new ConflictException('Quote is not available to decline');
+    }
+
+    await this.announce(`decline of quote ${quote.id}`, () =>
+      this.notifications.notifyPurchaseQuoteDeclined({
+        farmer: quote.farm.owner,
+        buyerName: this.buyerLabel(request),
+        title: request.title,
+      }),
+    );
 
     return this.getById(user, requestId);
   }
@@ -346,6 +456,27 @@ export class PurchaseRequestsService {
       throw new BadRequestException('Purchase request is not open');
     }
     return request;
+  }
+
+  /**
+   * Mail is best-effort and runs after the state change has committed: a supplier whose
+   * mailbox bounces must not undo an accepted deal. Every caller sits behind a conditional
+   * update, so an operation that changed nothing reaches this point never, and nobody is
+   * told twice about the same transition.
+   */
+  private async announce(what: string, send: () => Promise<void>): Promise<void> {
+    try {
+      await send();
+    } catch (error) {
+      this.logger.error(
+        `Failed to send notifications for ${what}`,
+        error instanceof Error ? error.name : 'unknown error',
+      );
+    }
+  }
+
+  private buyerLabel(request: RequestEntity): string {
+    return request.buyer.displayName?.trim() || request.buyer.email;
   }
 
   private assertBuyer(user: AuthenticatedUser) {

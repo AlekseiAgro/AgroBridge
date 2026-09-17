@@ -5,12 +5,14 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { RateLimit } from '../rate-limit/rate-limit.decorator';
+import { RateLimitGuard } from '../rate-limit/rate-limit.guard';
 import { ChatService } from './chat.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 
 @Controller('conversations')
-@UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard, RateLimitGuard)
 @Roles('buyer', 'farmer', 'admin')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
@@ -40,6 +42,7 @@ export class ChatController {
   }
 
   @Post(':id/messages')
+  @RateLimit('chatMessagePerAccount')
   sendMessage(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,

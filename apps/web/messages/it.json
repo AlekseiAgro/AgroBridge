@@ -186,6 +186,9 @@
       "statusLabel": "Current status",
       "doneHint": "Buyers can see your Verified badge on the catalog and farm page.",
       "genericError": "Could not complete this verification step.",
+      "loadError": "Impossibile caricare lo stato di verifica. Il servizio potrebbe essere temporaneamente non disponibile.",
+      "loadRetry": "Riprova",
+      "loadRetrying": "Nuovo tentativo…",
       "unknownPath": "Scegli se vendi come agricoltore privato o come azienda per continuare la verifica dell’identità.",
       "sellerType": {
         "title": "Tipo di venditore",
@@ -211,7 +214,7 @@
         "send": "Send email code",
         "code": "Email code",
         "confirm": "Confirm email",
-        "sent": "Code sent to {destination} (check API console/mail logs in demo).",
+        "sent": "Codice inviato a {destination}.",
         "confirmed": "Email confirmed."
       },
       "phone": {
@@ -238,7 +241,8 @@
         "documentHint": "Carica il certificato di registrazione dell’azienda per confermare l’organizzazione.",
         "upload": "Carica registrazione aziendale",
         "docTitle": "Registrazione aziendale",
-        "documentRequired": "La corrispondenza nel registro è salvata. Un moderatore deve ancora accettare il documento di registrazione dell’azienda."
+        "documentRequired": "La corrispondenza nel registro è salvata. Un moderatore deve ancora accettare il documento di registrazione dell’azienda.",
+        "registryUnavailable": "Non è stato possibile consultare automaticamente il registro delle imprese. Il codice identificativo è stato salvato; un moderatore confermerà l’azienda dal documento di registrazione."
       },
       "private": {
         "title": "3. Verifica dell’identità",

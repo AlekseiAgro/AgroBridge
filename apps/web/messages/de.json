@@ -186,6 +186,9 @@
       "statusLabel": "Current status",
       "doneHint": "Buyers can see your Verified badge on the catalog and farm page.",
       "genericError": "Could not complete this verification step.",
+      "loadError": "Der Verifizierungsstatus konnte nicht geladen werden. Der Dienst ist möglicherweise vorübergehend nicht erreichbar.",
+      "loadRetry": "Erneut versuchen",
+      "loadRetrying": "Wird wiederholt…",
       "unknownPath": "Wählen Sie, ob Sie als privater Landwirt oder als Unternehmen verkaufen, um die Identitätsprüfung fortzusetzen.",
       "sellerType": {
         "title": "Verkäufertyp",
@@ -211,7 +214,7 @@
         "send": "Send email code",
         "code": "Email code",
         "confirm": "Confirm email",
-        "sent": "Code sent to {destination} (check API console/mail logs in demo).",
+        "sent": "Code an {destination} gesendet.",
         "confirmed": "Email confirmed."
       },
       "phone": {
@@ -238,7 +241,8 @@
         "documentHint": "Laden Sie Ihre Firmenregistrierungsbescheinigung hoch, um das Unternehmen zu bestätigen.",
         "upload": "Firmenregistrierung hochladen",
         "docTitle": "Firmenregistrierung",
-        "documentRequired": "Der Registereintrag ist gespeichert. Ein Moderator muss das Registrierungsdokument des Unternehmens noch bestätigen."
+        "documentRequired": "Der Registereintrag ist gespeichert. Ein Moderator muss das Registrierungsdokument des Unternehmens noch bestätigen.",
+        "registryUnavailable": "Das Unternehmensregister konnte nicht automatisch geprüft werden. Ihr Identifikationscode ist gespeichert; ein Moderator bestätigt das Unternehmen anhand Ihres Registrierungsdokuments."
       },
       "private": {
         "title": "3. Identitätsprüfung",

@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, type ExecutionContext } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import type { JwtService } from '@nestjs/jwt';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -10,7 +10,14 @@ import { PasswordResetService } from '../auth/password-reset.service';
 import type { MailService } from '../mail/mail.service';
 import { SupportController } from '../support/support.controller';
 import { SupportService } from '../support/support.service';
+import { EmailVerifiedGuard } from '../auth/email-verified.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { PlacesController } from '../places/places.controller';
+import { PlacesService } from '../places/places.service';
 import { RateLimitExceededFilter } from './rate-limit-exceeded.filter';
+import { RateLimitGuard } from './rate-limit.guard';
+import { RateLimitService } from './rate-limit.service';
 import { createTestRateLimit } from './rate-limit.test-utils';
 
 const CREDENTIALS = { email: 'victim@example.com', password: 'password1' };
@@ -238,5 +245,84 @@ describe('rate limiting over HTTP', () => {
       .expect(400);
 
     await request(server).post('/api/auth/login').send(CREDENTIALS).expect(401);
+  });
+});
+
+/**
+ * The endpoint limits are declarative: a policy name on the route plus `RateLimitGuard`
+ * behind authentication. This drives a throttled route through the real HTTP pipeline —
+ * guards, filter, headers — because the parts that can silently go wrong (guard ordering,
+ * whether the account is on the request yet) only exist there.
+ */
+describe('endpoint rate limits over HTTP', () => {
+  let app: NestExpressApplication;
+
+  afterEach(async () => {
+    await app?.close();
+  });
+
+  async function buildPlacesApp(
+    accountId: string,
+    env: Record<string, string>,
+  ): Promise<NestExpressApplication> {
+    const { service: rateLimit } = createTestRateLimit(env);
+
+    const moduleRef = await Test.createTestingModule({
+      controllers: [PlacesController],
+      providers: [
+        RateLimitGuard,
+        { provide: RateLimitService, useValue: rateLimit },
+        { provide: PlacesService, useValue: { autocomplete: jest.fn().mockResolvedValue([]) } },
+      ],
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: (context: ExecutionContext) => {
+          context.switchToHttp().getRequest().user = { id: accountId, role: 'farmer' };
+          return true;
+        },
+      })
+      .overrideGuard(EmailVerifiedGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
+
+    const built = moduleRef.createNestApplication<NestExpressApplication>();
+    built.setGlobalPrefix('api');
+    built.useGlobalFilters(new RateLimitExceededFilter());
+    await built.init();
+    return built;
+  }
+
+  it('serves normal autocomplete traffic and then answers 429', async () => {
+    app = await buildPlacesApp('account-1', {
+      RATE_LIMIT_PLACES_MAX: '3',
+      RATE_LIMIT_PLACES_WINDOW_SEC: '600',
+    });
+    const server = app.getHttpServer();
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await request(server).get('/api/places/autocomplete?q=tbi').expect(200);
+    }
+
+    const throttled = await request(server).get('/api/places/autocomplete?q=tbi').expect(429);
+    expect(throttled.headers['retry-after']).toBeDefined();
+    expect(throttled.body.retryAfterSeconds).toBeGreaterThan(0);
+  });
+
+  it('counts the authenticated account, not the address', async () => {
+    app = await buildPlacesApp('account-1', { RATE_LIMIT_PLACES_MAX: '1' });
+    const server = app.getHttpServer();
+
+    await request(server)
+      .get('/api/places/autocomplete?q=tbi')
+      .set('X-Forwarded-For', '203.0.113.1')
+      .expect(200);
+    // A fresh address does not buy the same account a fresh budget.
+    await request(server)
+      .get('/api/places/autocomplete?q=tbi')
+      .set('X-Forwarded-For', '203.0.113.2')
+      .expect(429);
   });
 });

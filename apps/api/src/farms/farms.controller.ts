@@ -21,6 +21,8 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
+import { RateLimit } from '../rate-limit/rate-limit.decorator';
+import { RateLimitGuard } from '../rate-limit/rate-limit.guard';
 import { FarmsService } from './farms.service';
 
 @Controller('farms')
@@ -47,7 +49,8 @@ export class FarmsController {
   }
 
   @Post('me/documents')
-  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard, RateLimitGuard)
+  @RateLimit('mediaUploadPerAccount')
   @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -75,7 +78,8 @@ export class FarmsController {
   }
 
   @Post('me/photos')
-  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard, RateLimitGuard)
+  @RateLimit('mediaUploadPerAccount')
   @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {

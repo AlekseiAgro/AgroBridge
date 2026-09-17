@@ -268,6 +268,76 @@ export class NotificationsService {
     });
   }
 
+  async notifyPurchaseQuoteReceived(params: {
+    buyer: MailRecipient;
+    farmName: string;
+    title: string;
+    priceAmount: string;
+    currency: string;
+    requestId: string;
+  }): Promise<void> {
+    const locale = this.localeOf(params.buyer.locale);
+    await this.sendTemplate(params.buyer, 'purchaseQuoteReceived', {
+      name: this.displayName(params.buyer),
+      farmName: params.farmName,
+      title: params.title,
+      priceAmount: params.priceAmount,
+      currency: params.currency,
+      link: this.appLink(locale, `/requests/${params.requestId}`),
+    });
+  }
+
+  /**
+   * A closed purchase request is only readable by its buyer, so every seller-side link here
+   * points at the open board rather than at a page that would answer 403.
+   */
+  async notifyPurchaseQuoteAccepted(params: {
+    farmer: MailRecipient;
+    buyerName: string;
+    title: string;
+  }): Promise<void> {
+    const locale = this.localeOf(params.farmer.locale);
+    await this.sendTemplate(params.farmer, 'purchaseQuoteAccepted', {
+      name: this.displayName(params.farmer),
+      buyerName: params.buyerName,
+      title: params.title,
+      link: this.appLink(locale, '/requests'),
+    });
+  }
+
+  async notifyPurchaseQuoteDeclined(params: {
+    farmer: MailRecipient;
+    buyerName: string;
+    title: string;
+  }): Promise<void> {
+    const locale = this.localeOf(params.farmer.locale);
+    await this.sendTemplate(params.farmer, 'purchaseQuoteDeclined', {
+      name: this.displayName(params.farmer),
+      buyerName: params.buyerName,
+      title: params.title,
+      link: this.appLink(locale, '/requests'),
+    });
+  }
+
+  async notifyPurchaseRequestWithdrawn(params: {
+    farmer: MailRecipient;
+    buyerName: string;
+    title: string;
+    reason: 'closed' | 'cancelled';
+  }): Promise<void> {
+    const locale = this.localeOf(params.farmer.locale);
+    await this.sendTemplate(
+      params.farmer,
+      params.reason === 'closed' ? 'purchaseRequestClosed' : 'purchaseRequestCancelled',
+      {
+        name: this.displayName(params.farmer),
+        buyerName: params.buyerName,
+        title: params.title,
+        link: this.appLink(locale, '/requests'),
+      },
+    );
+  }
+
   async notifyProductApproved(params: {
     farmer: MailRecipient;
     productTitle: string;

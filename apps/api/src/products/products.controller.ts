@@ -39,6 +39,8 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { isProductCertificateId } from './product-certificate-url';
 import { MarketInsightService } from './market-insight.service';
+import { RateLimit } from '../rate-limit/rate-limit.decorator';
+import { RateLimitGuard } from '../rate-limit/rate-limit.guard';
 import { ProductsService } from './products.service';
 
 @Controller('products')
@@ -79,7 +81,8 @@ export class ProductsController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard, RateLimitGuard)
+  @RateLimit('contentCreatePerAccount')
   @Roles('farmer', 'buyer', 'admin')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateProductDto) {
     return this.productsService.create(user, dto);
@@ -122,7 +125,8 @@ export class ProductsController {
   }
 
   @Post(':id/images')
-  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard, RateLimitGuard)
+  @RateLimit('mediaUploadPerAccount')
   @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -162,7 +166,8 @@ export class ProductsController {
   }
 
   @Post(':id/videos')
-  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard, RateLimitGuard)
+  @RateLimit('mediaUploadPerAccount')
   @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -228,7 +233,8 @@ export class ProductsController {
   }
 
   @Post(':id/certificates')
-  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard, RateLimitGuard)
+  @RateLimit('mediaUploadPerAccount')
   @Roles('farmer', 'buyer', 'admin')
   @UseInterceptors(
     FileInterceptor('file', {

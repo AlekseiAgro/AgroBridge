@@ -186,6 +186,9 @@
       "statusLabel": "Current status",
       "doneHint": "Buyers can see your Verified badge on the catalog and farm page.",
       "genericError": "Could not complete this verification step.",
+      "loadError": "Could not load your verification status. The service may be temporarily unavailable.",
+      "loadRetry": "Retry",
+      "loadRetrying": "Retrying…",
       "unknownPath": "Choose whether you sell as a private farmer or a company to continue identity verification.",
       "sellerType": {
         "title": "Seller type",
@@ -211,7 +214,7 @@
         "send": "Send email code",
         "code": "Email code",
         "confirm": "Confirm email",
-        "sent": "Code sent to {destination} (check API console/mail logs in demo).",
+        "sent": "Code sent to {destination}.",
         "confirmed": "Email confirmed."
       },
       "phone": {
@@ -238,7 +241,8 @@
         "documentHint": "Upload your company registration certificate to confirm the company.",
         "upload": "Upload company registration",
         "docTitle": "Company registration",
-        "documentRequired": "The registry match is saved. A moderator still has to accept your company registration document."
+        "documentRequired": "The registry match is saved. A moderator still has to accept your company registration document.",
+        "registryUnavailable": "The company registry could not be checked automatically. Your identification code is saved; a moderator will confirm the company from your registration document."
       },
       "private": {
         "title": "3. Identity verification",

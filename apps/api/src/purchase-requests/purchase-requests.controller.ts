@@ -16,6 +16,8 @@ import { RolesGuard } from '../auth/roles.guard';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CreatePurchaseQuoteDto } from './dto/create-purchase-quote.dto';
 import { CreatePurchaseRequestDto } from './dto/create-purchase-request.dto';
+import { RateLimit } from '../rate-limit/rate-limit.decorator';
+import { RateLimitGuard } from '../rate-limit/rate-limit.guard';
 import { PurchaseRequestsService } from './purchase-requests.service';
 
 @Controller('purchase-requests')
@@ -40,7 +42,8 @@ export class PurchaseRequestsController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard, RateLimitGuard)
+  @RateLimit('contentCreatePerAccount')
   @Roles('farmer', 'buyer', 'admin')
   create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreatePurchaseRequestDto) {
     return this.purchaseRequestsService.create(user, dto);
@@ -67,7 +70,8 @@ export class PurchaseRequestsController {
   }
 
   @Post(':id/quotes')
-  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard, RateLimitGuard)
+  @RateLimit('tradeActionPerAccount')
   @Roles('farmer', 'buyer', 'admin')
   createQuote(
     @CurrentUser() user: AuthenticatedUser,

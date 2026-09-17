@@ -88,7 +88,19 @@ RESEND_API_KEY=<sending-only Resend API key>
 TRANSLATION_PROVIDER=mock
 # Optional: product "place of origin" city/village suggestions (Places API New)
 # GOOGLE_MAPS_API_KEY=<google-maps-api-key>
-STORAGE_DRIVER=local
+# Object storage is required in production: the container filesystem is replaced on every
+# redeploy, so `local` loses every uploaded document, photo and certificate.
+STORAGE_DRIVER=s3
+S3_ENDPOINT=<S3/R2 endpoint>
+S3_REGION=auto
+S3_ACCESS_KEY_ID=<access key>
+S3_SECRET_ACCESS_KEY=<secret key>
+S3_PUBLIC_BUCKET=<public bucket>
+S3_PRIVATE_BUCKET=<private bucket, must differ from the public one>
+STORAGE_PUBLIC_BASE_URL=https://<public bucket domain>
+# Company registry (NAPR) is not connected yet. Leave GEORGIA_REGISTRY_MODE unset in
+# production: lookups then record the identification code without claiming it was verified,
+# and a moderator confirms the company from the registration document.
 
 # Link Railway Postgres / Redis (reference variables):
 # Postgres is required: it also stores the rate-limit counters. Redis stays unused for now.

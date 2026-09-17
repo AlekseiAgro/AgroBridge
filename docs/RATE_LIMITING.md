@@ -128,6 +128,38 @@ A successful login clears the IP+email counter; a successful confirmation clears
 account confirmation counter. The wide per-IP counters are never cleared by a success, so
 owning one valid account does not buy a fresh spraying budget.
 
+### Costly marketplace endpoints
+
+Credential abuse is not the only thing worth a counter. A handful of authenticated routes
+each cost real money or real storage per call — an object-storage write, a billed Google
+Places request, an email fan-out to every alert subscriber — and none of them had a limit.
+
+These are declarative: `@RateLimit('<policy>')` on the route plus `RateLimitGuard` listed
+*after* the authentication guard, so the counter is keyed to the account rather than to a
+shared office address. A route without the decorator is untouched even when its controller
+carries the guard, which is why catalogue reads stay unthrottled.
+
+| Endpoint | Policy | Default limit | Key |
+|---|---|---|---|
+| `POST /api/products/:id/images`, `/videos`, `/certificates` | `mediaUploadPerAccount` | 100 per hour | account |
+| `POST /api/farms/me/documents`, `/api/farms/me/photos` | `mediaUploadPerAccount` | 100 per hour | account |
+| `POST /api/cabinet/me/avatar` | `mediaUploadPerAccount` | 100 per hour | account |
+| `POST /api/conversations/:id/messages` | `chatMessagePerAccount` | 60 per 5 min | account |
+| `POST /api/products` | `contentCreatePerAccount` | 30 per hour | account |
+| `POST /api/rfqs` | `contentCreatePerAccount` | 30 per hour | account |
+| `POST /api/purchase-requests` | `contentCreatePerAccount` | 30 per hour | account |
+| `POST /api/rfqs/:id/offer` | `tradeActionPerAccount` | 60 per hour | account |
+| `POST /api/purchase-requests/:id/quotes` | `tradeActionPerAccount` | 60 per hour | account |
+| `GET /api/places/autocomplete` | `placesAutocompletePerAccount` | 120 per 10 min | account |
+
+The numbers are sized so that onboarding a whole catalogue in one sitting stays inside them
+and a loop does not. Overrides use the same `RATE_LIMIT_*_MAX` / `RATE_LIMIT_*_WINDOW_SEC`
+pattern with the prefixes `RATE_LIMIT_MEDIA_UPLOAD`, `RATE_LIMIT_CHAT_MESSAGE`,
+`RATE_LIMIT_CONTENT_CREATE`, `RATE_LIMIT_TRADE_ACTION` and `RATE_LIMIT_PLACES`.
+
+Accepting or declining a quote is deliberately not throttled: both are guarded by a
+conditional state transition that can only succeed once, so repeating them changes nothing.
+
 Every limit is overridable through `RATE_LIMIT_*_MAX` and `RATE_LIMIT_*_WINDOW_SEC`
 environment variables (see `apps/api/.env.example`). Values are validated at boot against a
 hard ceiling, so a typo cannot silently switch a protection off, and
