@@ -308,12 +308,17 @@
       "maxReached": "მიღწეულია {max} ფოტოს ლიმიტი.",
       "formEmpty": "შეგიძლიათ ახლავე დაამატოთ 3 ფოტომდე ან მოგვიანებით ამ გვერდიდან."
     },
-    "foundedYear": "Founded year",
+    "foundedYear": "დაარსების წელი",
     "farmSizeHectares": "Farm size (hectares)",
-    "ownershipType": "Ownership type",
-    "exportMarkets": "Export markets",
+    "ownershipType": "საკუთრების ფორმა",
+    "exportMarkets": "საექსპორტო ბაზრები",
     "exportMarketsPlaceholder": "Comma separated, e.g. Germany, UAE, Poland",
-    "history": "Farm history and story"
+    "history": "Farm history and story",
+    "editFarm": "რედაქტირება",
+    "cancelEdit": "გაუქმება",
+    "aboutHeading": "მეურნეობის შესახებ",
+    "size": "ფართობი",
+    "hectaresValue": "{count} ჰა"
   },
   "product": {
     "dashboardTitle": "ჩემი პროდუქცია",

@@ -313,7 +313,12 @@
     "ownershipType": "Форма владения",
     "exportMarkets": "Экспортные рынки",
     "exportMarketsPlaceholder": "Через запятую, например Германия, ОАЭ, Польша",
-    "history": "История хозяйства"
+    "history": "История хозяйства",
+    "editFarm": "Редактировать",
+    "cancelEdit": "Отмена",
+    "aboutHeading": "О хозяйстве",
+    "size": "Площадь",
+    "hectaresValue": "{count} га"
   },
   "product": {
     "dashboardTitle": "Мои товары",

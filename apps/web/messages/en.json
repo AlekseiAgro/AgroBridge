@@ -313,7 +313,12 @@
     "ownershipType": "Ownership type",
     "exportMarkets": "Export markets",
     "exportMarketsPlaceholder": "Comma separated, e.g. Germany, UAE, Poland",
-    "history": "Farm history and story"
+    "history": "Farm history and story",
+    "editFarm": "Edit farm",
+    "cancelEdit": "Cancel",
+    "aboutHeading": "About the farm",
+    "size": "Farm size",
+    "hectaresValue": "{count} ha"
   },
   "product": {
     "dashboardTitle": "My products",

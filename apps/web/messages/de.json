@@ -308,12 +308,17 @@
       "maxReached": "Limit von {max} Fotos erreicht.",
       "formEmpty": "Sie können jetzt bis zu 3 Fotos hinzufügen oder später auf dieser Seite."
     },
-    "foundedYear": "Founded year",
+    "foundedYear": "Gründungsjahr",
     "farmSizeHectares": "Farm size (hectares)",
-    "ownershipType": "Ownership type",
-    "exportMarkets": "Export markets",
+    "ownershipType": "Eigentumsform",
+    "exportMarkets": "Exportmärkte",
     "exportMarketsPlaceholder": "Comma separated, e.g. Germany, UAE, Poland",
-    "history": "Farm history and story"
+    "history": "Farm history and story",
+    "editFarm": "Hof bearbeiten",
+    "cancelEdit": "Abbrechen",
+    "aboutHeading": "Über den Hof",
+    "size": "Fläche",
+    "hectaresValue": "{count} ha"
   },
   "product": {
     "dashboardTitle": "Meine Produkte",
