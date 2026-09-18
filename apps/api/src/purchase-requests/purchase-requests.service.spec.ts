@@ -128,6 +128,24 @@ describe('PurchaseRequestsService', () => {
         { title: 'Blueberries', category: 'berries', quantity: '1' },
       ),
     ).resolves.toMatchObject({ title: 'Blueberries' });
+    expect(subscriptions.notifyNewPurchaseRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        requestId: 'r1',
+        title: 'Blueberries',
+        category: 'berries',
+        buyerUserId: 'f1',
+        buyerName: 'Farmer',
+      }),
+    );
+  });
+
+  it('still returns the created request when the subscriber mailing fails', async () => {
+    prisma.purchaseRequest.create.mockResolvedValue(requestRow({ quotes: [] }));
+    subscriptions.notifyNewPurchaseRequest.mockRejectedValueOnce(new Error('db blip'));
+
+    await expect(
+      service.create(buyer, { title: 'Blueberries', category: 'berries', quantity: '1' }),
+    ).resolves.toMatchObject({ id: 'r1', title: 'Blueberries' });
   });
 
   describe('acceptQuote', () => {
