@@ -206,6 +206,7 @@ describeWithDatabase()('purchase request mail dispatch (database)', () => {
     expect(mail.send).toHaveBeenCalledTimes(2);
     expect(sentMatching('Your quote was accepted: Blueberries')).toHaveLength(1);
     expect(sentMatching('Ваше предложение не выбрано: «Blueberries»')).toHaveLength(1);
+    expect(sentMatching(`/en/requests/${created.id}`)).toHaveLength(1);
     expect(recipients().sort()).toEqual([winner.user.email, loser.user.email].sort());
   });
 

@@ -302,13 +302,14 @@ describe('NotificationsService', () => {
         farmer: { email: 'farmer@example.com', locale: 'ka', displayName: 'ნინო' },
         buyerName: 'Buyer Ltd',
         title: 'Blueberries',
+        requestId: 'r1',
       });
 
       const sent = mail.send.mock.calls[0][0];
       expect(sent.to).toBe('farmer@example.com');
       expect(sent.subject).toContain('Blueberries');
       expect(sent.text).toContain('Buyer Ltd');
-      expect(sent.text).toContain('http://localhost:3000/ka/requests');
+      expect(sent.text).toContain('http://localhost:3000/ka/requests/r1');
     });
 
     it('mails a losing supplier that their quote was not selected', async () => {

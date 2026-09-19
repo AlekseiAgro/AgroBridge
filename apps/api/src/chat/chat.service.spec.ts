@@ -336,4 +336,72 @@ describe('ChatService', () => {
       });
     });
   });
+
+  it('lets the supplier open chat on a fulfilled purchase request', async () => {
+    prisma.purchaseRequest.findUnique.mockResolvedValue({
+      id: 'pr1',
+      buyerId: buyer.id,
+      status: 'fulfilled',
+    });
+    prisma.conversation.upsert.mockResolvedValue({
+      id: 'conv1',
+      farmerId: farmer.id,
+      buyerId: buyer.id,
+    });
+    prisma.user.update.mockResolvedValue({});
+    prisma.conversation.findUnique.mockResolvedValue({
+      id: 'conv1',
+      farmerId: farmer.id,
+      buyerId: buyer.id,
+      farmerLastReadAt: null,
+      buyerLastReadAt: null,
+      farmerLastDeliveredAt: null,
+      buyerLastDeliveredAt: null,
+      createdAt: new Date('2026-01-01'),
+      updatedAt: new Date('2026-01-01'),
+      farmer: { id: farmer.id, displayName: 'Farmer', role: 'farmer', locale: 'ru', avatarUrl: null },
+      buyer: { id: buyer.id, displayName: 'Buyer', role: 'buyer', locale: 'en', avatarUrl: null },
+    });
+    prisma.conversation.update.mockResolvedValue({});
+    prisma.message.findMany.mockResolvedValue([]);
+
+    const detail = await service.createOrGet(farmer, { purchaseRequestId: 'pr1' });
+    expect(detail.id).toBe('conv1');
+  });
+
+  it('lets the buyer keep opening chat with the winning seller after acceptance', async () => {
+    prisma.purchaseRequest.findUnique.mockResolvedValue({
+      id: 'pr1',
+      buyerId: buyer.id,
+      status: 'fulfilled',
+    });
+    prisma.user.findUnique.mockResolvedValue({ id: farmer.id, role: 'farmer' });
+    prisma.conversation.upsert.mockResolvedValue({
+      id: 'conv1',
+      farmerId: farmer.id,
+      buyerId: buyer.id,
+    });
+    prisma.user.update.mockResolvedValue({});
+    prisma.conversation.findUnique.mockResolvedValue({
+      id: 'conv1',
+      farmerId: farmer.id,
+      buyerId: buyer.id,
+      farmerLastReadAt: null,
+      buyerLastReadAt: null,
+      farmerLastDeliveredAt: null,
+      buyerLastDeliveredAt: null,
+      createdAt: new Date('2026-01-01'),
+      updatedAt: new Date('2026-01-01'),
+      farmer: { id: farmer.id, displayName: 'Farmer', role: 'farmer', locale: 'ru', avatarUrl: null },
+      buyer: { id: buyer.id, displayName: 'Buyer', role: 'buyer', locale: 'en', avatarUrl: null },
+    });
+    prisma.conversation.update.mockResolvedValue({});
+    prisma.message.findMany.mockResolvedValue([]);
+
+    const detail = await service.createOrGet(buyer, {
+      purchaseRequestId: 'pr1',
+      farmerId: farmer.id,
+    });
+    expect(detail.id).toBe('conv1');
+  });
 });

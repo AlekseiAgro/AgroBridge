@@ -920,7 +920,7 @@
     "applyFilters": "Search",
     "view": "Open",
     "mineTitle": "My purchase requests",
-    "mineSubtitle": "Open needs you published for farms to quote.",
+    "mineSubtitle": "Requests you published, and requests where a buyer accepted your quote.",
     "mineEmpty": "You have not published any purchase requests yet.",
     "productRfqsLink": "Product quote requests",
     "anonymousBuyer": "Buyer",
@@ -938,11 +938,13 @@
     "messageBuyer": "Message buyer",
     "messageFarmer": "Message farm",
     "viewFarm": "View farm",
+    "agreementTitle": "Agreement reached",
+    "agreementBody": "The buyer accepted a quote. This request is no longer accepting competing quotes. Delivery, payment, and completion are not handled here yet — coordinate with your counterpart in chat.",
     "statuses": {
       "open": "Open",
       "closed": "Closed",
       "cancelled": "Cancelled",
-      "fulfilled": "Fulfilled"
+      "fulfilled": "Quote accepted"
     },
     "quoteStatuses": {
       "pending": "Pending",

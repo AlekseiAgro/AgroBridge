@@ -288,20 +288,21 @@ export class NotificationsService {
   }
 
   /**
-   * A closed purchase request is only readable by its buyer, so every seller-side link here
-   * points at the open board rather than at a page that would answer 403.
+   * The winning seller keeps authorized access to the fulfilled request, so this link
+   * points at the request itself rather than at the public open board.
    */
   async notifyPurchaseQuoteAccepted(params: {
     farmer: MailRecipient;
     buyerName: string;
     title: string;
+    requestId: string;
   }): Promise<void> {
     const locale = this.localeOf(params.farmer.locale);
     await this.sendTemplate(params.farmer, 'purchaseQuoteAccepted', {
       name: this.displayName(params.farmer),
       buyerName: params.buyerName,
       title: params.title,
-      link: this.appLink(locale, '/requests'),
+      link: this.appLink(locale, `/requests/${params.requestId}`),
     });
   }
 
