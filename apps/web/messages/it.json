@@ -966,6 +966,12 @@
       "decline": "Rifiuta",
       "withdraw": "Ritira offerta"
     },
+    "confirm": {
+      "accept": "Accettare questa offerta? La richiesta di acquisto non accetterà altre offerte e le offerte in attesa rimanenti saranno rifiutate. L’azione non si può annullare. Accettare un’offerta non significa che pagamento, spedizione o consegna siano completati.",
+      "decline": "Rifiutare questa offerta? La richiesta di acquisto resta aperta, ma questo venditore non potrà inviare un’altra offerta per questa richiesta. L’azione non si può annullare.",
+      "close": "Chiudere questa richiesta di acquisto? Non ti servono più offerte. Uscirà dalla bacheca pubblica, tutte le offerte in attesa saranno rifiutate e non potrà essere riaperta.",
+      "cancel": "Annullare questa richiesta di acquisto? Usalo se la richiesta non è più pertinente o è stata pubblicata per errore. Tutte le offerte in attesa saranno rifiutate e non potrà essere riaperta."
+    },
     "floatingLead": "Puoi fornire questo prodotto?",
     "floatingText": "Pubblica la tua offerta e raggiungi gli acquirenti interessati.",
     "floatingCta": "Pubblica il tuo prodotto",

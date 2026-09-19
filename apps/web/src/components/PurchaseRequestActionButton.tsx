@@ -3,12 +3,15 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
-
-type Action = 'cancel' | 'close' | 'accept' | 'decline' | 'withdraw';
+import {
+  purchaseRequestActionRequiresConfirm,
+  resolvePurchaseRequestActionRequest,
+  type PurchaseRequestAction,
+} from '@/lib/purchase-request-action';
 
 type Props = {
   requestId: string;
-  action: Action;
+  action: PurchaseRequestAction;
   quoteId?: string;
   variant?: 'primary' | 'ghost';
 };
@@ -25,16 +28,22 @@ export function PurchaseRequestActionButton({
   const [error, setError] = useState<string | null>(null);
 
   async function onClick() {
+    const next = resolvePurchaseRequestActionRequest({
+      action,
+      requestId,
+      quoteId,
+      confirmMessage: purchaseRequestActionRequiresConfirm(action) ? t(`confirm.${action}`) : '',
+      confirm: (message) => window.confirm(message),
+    });
+    if (!next.proceed) {
+      return;
+    }
+
     setPending(true);
     setError(null);
 
-    const path =
-      action === 'cancel' || action === 'close'
-        ? `/api/purchase-requests/${requestId}/${action}`
-        : `/api/purchase-requests/${requestId}/quotes/${quoteId}/${action}`;
-
     try {
-      const response = await fetch(path, { method: 'POST' });
+      const response = await fetch(next.path, { method: next.method });
       const data = (await response.json()) as { message?: string };
       if (!response.ok) {
         setError(data.message ?? t('genericError'));
@@ -48,7 +57,7 @@ export function PurchaseRequestActionButton({
     }
   }
 
-  const labels: Record<Action, string> = {
+  const labels: Record<PurchaseRequestAction, string> = {
     cancel: t('actions.cancel'),
     close: t('actions.close'),
     accept: t('actions.accept'),

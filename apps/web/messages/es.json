@@ -966,6 +966,12 @@
       "decline": "Rechazar",
       "withdraw": "Retirar oferta"
     },
+    "confirm": {
+      "accept": "¿Aceptar esta oferta? La solicitud de compra dejará de admitir otras ofertas y las ofertas pendientes restantes se rechazarán. No se puede deshacer. Aceptar una oferta no significa que el pago, el envío o la entrega estén completados.",
+      "decline": "¿Rechazar esta oferta? La solicitud de compra sigue abierta, pero este vendedor no podrá enviar otra oferta para esta solicitud. No se puede deshacer.",
+      "close": "¿Cerrar esta solicitud de compra? Ya no necesita ofertas. Saldrá del tablón público, todas las ofertas pendientes se rechazarán y no se podrá reabrir.",
+      "cancel": "¿Cancelar esta solicitud de compra? Úselo si la solicitud ya no es pertinente o se publicó por error. Todas las ofertas pendientes se rechazarán y no se podrá reabrir."
+    },
     "floatingLead": "¿Puede suministrar esto?",
     "floatingText": "Publique su oferta de producto y llegue a compradores interesados.",
     "floatingCta": "Publicar mi producto",
