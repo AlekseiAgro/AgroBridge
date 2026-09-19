@@ -920,7 +920,7 @@
     "applyFilters": "Buscar",
     "view": "Abrir",
     "mineTitle": "Mis solicitudes de compra",
-    "mineSubtitle": "Necesidades que publicó para las fincas.",
+    "mineSubtitle": "Solicitudes que publicó y solicitudes en las que un comprador aceptó su oferta.",
     "mineEmpty": "Aún no ha publicado solicitudes de compra.",
     "productRfqsLink": "Solicitudes de cotización de producto",
     "anonymousBuyer": "Comprador",
@@ -938,11 +938,13 @@
     "messageBuyer": "Mensaje al comprador",
     "messageFarmer": "Mensaje a la finca",
     "viewFarm": "Ver finca",
+    "agreementTitle": "Acuerdo alcanzado",
+    "agreementBody": "El comprador aceptó una oferta. Esta solicitud ya no admite ofertas competidoras. La entrega, el pago y el cierre aún no se gestionan aquí: coordina los detalles con tu contraparte en el chat.",
     "statuses": {
       "open": "Abierta",
       "closed": "Cerrada",
       "cancelled": "Cancelada",
-      "fulfilled": "Cumplida"
+      "fulfilled": "Oferta aceptada"
     },
     "quoteStatuses": {
       "pending": "Pendiente",

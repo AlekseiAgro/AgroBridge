@@ -97,7 +97,7 @@ const en: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteAccepted: {
     subject: 'Your quote was accepted: {{title}}',
-    text: 'Hello {{name}},\n\n{{buyerName}} accepted your quote for the purchase request “{{title}}”.\n\nOpen purchase requests: {{link}}\n\n— AgroBridge',
+    text: 'Hello {{name}},\n\n{{buyerName}} accepted your quote for the purchase request “{{title}}”.\n\nView request: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteDeclined: {
     subject: 'Your quote was not selected: {{title}}',
@@ -209,7 +209,7 @@ const ru: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteAccepted: {
     subject: 'Ваше предложение принято: «{{title}}»',
-    text: 'Здравствуйте, {{name}}!\n\n{{buyerName}} принял(а) ваше предложение по запросу на закупку «{{title}}».\n\nОткрыть запросы на закупку: {{link}}\n\n— AgroBridge',
+    text: 'Здравствуйте, {{name}}!\n\n{{buyerName}} принял(а) ваше предложение по запросу на закупку «{{title}}».\n\nОткрыть запрос: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteDeclined: {
     subject: 'Ваше предложение не выбрано: «{{title}}»',
@@ -321,7 +321,7 @@ const de: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteAccepted: {
     subject: 'Ihr Angebot wurde angenommen: {{title}}',
-    text: 'Hallo {{name}},\n\n{{buyerName}} hat Ihr Angebot zur Kaufanfrage „{{title}}“ angenommen.\n\nKaufanfragen öffnen: {{link}}\n\n— AgroBridge',
+    text: 'Hallo {{name}},\n\n{{buyerName}} hat Ihr Angebot zur Kaufanfrage „{{title}}“ angenommen.\n\nAnfrage öffnen: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteDeclined: {
     subject: 'Ihr Angebot wurde nicht ausgewählt: {{title}}',
@@ -433,7 +433,7 @@ const fr: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteAccepted: {
     subject: 'Votre offre a été acceptée : {{title}}',
-    text: 'Bonjour {{name}},\n\n{{buyerName}} a accepté votre offre pour la demande d’achat « {{title}} ».\n\nOuvrir les demandes d’achat : {{link}}\n\n— AgroBridge',
+    text: 'Bonjour {{name}},\n\n{{buyerName}} a accepté votre offre pour la demande d’achat « {{title}} ».\n\nOuvrir la demande : {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteDeclined: {
     subject: 'Votre offre n’a pas été retenue : {{title}}',
@@ -545,7 +545,7 @@ const it: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteAccepted: {
     subject: 'La tua offerta è stata accettata: {{title}}',
-    text: 'Ciao {{name}},\n\n{{buyerName}} ha accettato la tua offerta per la richiesta di acquisto «{{title}}».\n\nApri le richieste di acquisto: {{link}}\n\n— AgroBridge',
+    text: 'Ciao {{name}},\n\n{{buyerName}} ha accettato la tua offerta per la richiesta di acquisto «{{title}}».\n\nApri la richiesta: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteDeclined: {
     subject: 'La tua offerta non è stata scelta: {{title}}',
@@ -657,7 +657,7 @@ const es: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteAccepted: {
     subject: 'Tu oferta ha sido aceptada: {{title}}',
-    text: 'Hola {{name}},\n\n{{buyerName}} ha aceptado tu oferta para la solicitud de compra «{{title}}».\n\nAbrir las solicitudes de compra: {{link}}\n\n— AgroBridge',
+    text: 'Hola {{name}},\n\n{{buyerName}} ha aceptado tu oferta para la solicitud de compra «{{title}}».\n\nAbrir la solicitud: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteDeclined: {
     subject: 'Tu oferta no ha sido seleccionada: {{title}}',
@@ -769,7 +769,7 @@ const ka: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteAccepted: {
     subject: 'თქვენი შეთავაზება მიღებულია: {{title}}',
-    text: 'გამარჯობა, {{name}}!\n\n{{buyerName}}-მა მიიღო თქვენი შეთავაზება შესყიდვის მოთხოვნაზე „{{title}}“.\n\nშესყიდვის მოთხოვნების გახსნა: {{link}}\n\n— AgroBridge',
+    text: 'გამარჯობა, {{name}}!\n\n{{buyerName}}-მა მიიღო თქვენი შეთავაზება შესყიდვის მოთხოვნაზე „{{title}}“.\n\nმოთხოვნის გახსნა: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteDeclined: {
     subject: 'თქვენი შეთავაზება არ შეირჩა: {{title}}',

@@ -920,7 +920,7 @@
     "applyFilters": "Suchen",
     "view": "Öffnen",
     "mineTitle": "Meine Kaufanfragen",
-    "mineSubtitle": "Bedarfe, die Sie für Betriebe veröffentlicht haben.",
+    "mineSubtitle": "Anfragen, die Sie veröffentlicht haben, und Anfragen, bei denen ein Käufer Ihr Angebot angenommen hat.",
     "mineEmpty": "Sie haben noch keine Kaufanfragen veröffentlicht.",
     "productRfqsLink": "Produkt-Angebotsanfragen",
     "anonymousBuyer": "Käufer",
@@ -938,11 +938,13 @@
     "messageBuyer": "Käufer anschreiben",
     "messageFarmer": "Betrieb anschreiben",
     "viewFarm": "Betrieb ansehen",
+    "agreementTitle": "Einigung erzielt",
+    "agreementBody": "Der Käufer hat ein Angebot angenommen. Für diese Anfrage werden keine weiteren Angebote mehr angenommen. Lieferung, Zahlung und Abschluss werden hier noch nicht abgebildet — stimmen Sie die Details im Chat ab.",
     "statuses": {
       "open": "Offen",
       "closed": "Geschlossen",
       "cancelled": "Storniert",
-      "fulfilled": "Erfüllt"
+      "fulfilled": "Angebot angenommen"
     },
     "quoteStatuses": {
       "pending": "Ausstehend",

@@ -57,12 +57,21 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
               </Link>
             </p>
           </div>
-          {isOwner ? (
+          {isOwner || request.myQuote?.status === 'accepted' ? (
             <Link href="/dashboard/purchase-requests" className="button button--ghost">
               {t('mineTitle')}
             </Link>
           ) : null}
         </div>
+
+        {request.status === 'fulfilled' ? (
+          <section className="verification-prompt" aria-labelledby="agreement-title">
+            <h2 id="agreement-title" className="section-title">
+              {t('agreementTitle')}
+            </h2>
+            <p className="page__subtitle">{t('agreementBody')}</p>
+          </section>
+        ) : null}
 
         <dl className="account-details">
           <div>

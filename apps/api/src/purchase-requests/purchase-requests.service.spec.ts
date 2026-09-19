@@ -196,6 +196,7 @@ describe('PurchaseRequestsService', () => {
         farmer: { email: 'a@example.com', locale: 'en', displayName: null },
         buyerName: 'Buyer Ltd',
         title: 'Blueberries',
+        requestId: 'r1',
       });
       expect(notifications.notifyPurchaseQuoteDeclined).toHaveBeenCalledTimes(1);
       expect(notifications.notifyPurchaseQuoteDeclined).toHaveBeenCalledWith(
@@ -497,6 +498,103 @@ describe('PurchaseRequestsService', () => {
       });
       expect(tx.purchaseQuote.create).not.toHaveBeenCalled();
       expect(notifications.notifyPurchaseQuoteReceived).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getById after acceptance', () => {
+    const winner = {
+      id: 'owner-farm-a',
+      email: 'a@example.com',
+      role: 'farmer',
+      locale: 'en',
+    } as never;
+    const loser = {
+      id: 'owner-farm-b',
+      email: 'b@example.com',
+      role: 'farmer',
+      locale: 'en',
+    } as never;
+    const stranger = {
+      id: 'stranger',
+      email: 'x@example.com',
+      role: 'buyer',
+      locale: 'en',
+    } as never;
+    const admin = {
+      id: 'admin1',
+      email: 'admin@example.com',
+      role: 'admin',
+      locale: 'en',
+    } as never;
+
+    beforeEach(() => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue(
+        requestRow({
+          status: 'fulfilled',
+          quotes: [
+            { ...quoteRow('q1', 'farm-a', 'a@example.com'), status: 'accepted' },
+            { ...quoteRow('q2', 'farm-b', 'b@example.com'), status: 'declined' },
+          ],
+        }),
+      );
+    });
+
+    it('lets the buyer read a fulfilled request', async () => {
+      await expect(service.getById(buyer, 'r1')).resolves.toMatchObject({
+        id: 'r1',
+        status: 'fulfilled',
+      });
+    });
+
+    it('lets the winning seller read a fulfilled request and keep chat', async () => {
+      const detail = await service.getById(winner, 'r1');
+      expect(detail.status).toBe('fulfilled');
+      expect(detail.myQuote?.status).toBe('accepted');
+      expect(detail.canMessageBuyer).toBe(true);
+      expect(detail.canQuote).toBe(false);
+    });
+
+    it('hides a fulfilled request from a losing seller', async () => {
+      await expect(service.getById(loser, 'r1')).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('hides a fulfilled request from an unrelated account', async () => {
+      await expect(service.getById(stranger, 'r1')).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('hides a fulfilled request from guests', async () => {
+      await expect(service.getById(null, 'r1')).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('lets an admin read a fulfilled request', async () => {
+      await expect(service.getById(admin, 'r1')).resolves.toMatchObject({ id: 'r1' });
+    });
+  });
+
+  describe('listMine', () => {
+    it('includes requests the viewer published and fulfilled requests they won', async () => {
+      prisma.purchaseRequest.findMany.mockResolvedValue([]);
+
+      await service.listMine(buyer);
+
+      expect(prisma.purchaseRequest.findMany).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            { buyerId: 'b1' },
+            {
+              status: 'fulfilled',
+              quotes: {
+                some: {
+                  status: 'accepted',
+                  farm: { ownerId: 'b1' },
+                },
+              },
+            },
+          ],
+        },
+        orderBy: { createdAt: 'desc' },
+        include: expect.any(Object),
+      });
     });
   });
 });

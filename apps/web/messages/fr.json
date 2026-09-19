@@ -920,7 +920,7 @@
     "applyFilters": "Rechercher",
     "view": "Ouvrir",
     "mineTitle": "Mes demandes d'achat",
-    "mineSubtitle": "Besoins que vous avez publiés pour les fermes.",
+    "mineSubtitle": "Demandes que vous avez publiées, et demandes pour lesquelles un acheteur a accepté votre offre.",
     "mineEmpty": "Vous n'avez encore publié aucune demande d'achat.",
     "productRfqsLink": "Demandes de prix produit",
     "anonymousBuyer": "Acheteur",
@@ -938,11 +938,13 @@
     "messageBuyer": "Contacter l'acheteur",
     "messageFarmer": "Contacter la ferme",
     "viewFarm": "Voir la ferme",
+    "agreementTitle": "Accord conclu",
+    "agreementBody": "L’acheteur a accepté une offre. Cette demande n’accepte plus d’offres concurrentes. La livraison, le paiement et la clôture ne sont pas encore gérés ici — coordonnez-vous avec votre correspondant dans le chat.",
     "statuses": {
       "open": "Ouverte",
       "closed": "Fermée",
       "cancelled": "Annulée",
-      "fulfilled": "Satisfaite"
+      "fulfilled": "Offre acceptée"
     },
     "quoteStatuses": {
       "pending": "En attente",

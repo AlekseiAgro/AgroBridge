@@ -920,7 +920,7 @@
     "applyFilters": "Cerca",
     "view": "Apri",
     "mineTitle": "Le mie richieste di acquisto",
-    "mineSubtitle": "Esigenze che hai pubblicato per le aziende agricole.",
+    "mineSubtitle": "Richieste che hai pubblicato e richieste in cui un acquirente ha accettato la tua offerta.",
     "mineEmpty": "Non hai ancora pubblicato richieste di acquisto.",
     "productRfqsLink": "Richieste di preventivo prodotto",
     "anonymousBuyer": "Acquirente",
@@ -938,11 +938,13 @@
     "messageBuyer": "Messaggia acquirente",
     "messageFarmer": "Messaggia azienda",
     "viewFarm": "Vedi azienda",
+    "agreementTitle": "Accordo raggiunto",
+    "agreementBody": "L’acquirente ha accettato un’offerta. Questa richiesta non accetta più offerte concorrenti. Consegna, pagamento e chiusura non sono ancora gestiti qui — coordinatevi con la controparte in chat.",
     "statuses": {
       "open": "Aperta",
       "closed": "Chiusa",
       "cancelled": "Annullata",
-      "fulfilled": "Evasa"
+      "fulfilled": "Offerta accettata"
     },
     "quoteStatuses": {
       "pending": "In attesa",

@@ -12,12 +12,7 @@ import {
   type PurchaseRequestDetail,
   type PurchaseRequestSummary,
 } from '@agrobridge/shared';
-import {
-  CurrencyCode,
-  Prisma,
-  PurchaseQuoteStatus,
-  PurchaseRequestStatus,
-} from '@prisma/client';
+import { CurrencyCode, Prisma, PurchaseQuoteStatus, PurchaseRequestStatus } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -110,7 +105,20 @@ export class PurchaseRequestsService {
     this.assertBuyer(user);
 
     const items = await this.prisma.purchaseRequest.findMany({
-      where: { buyerId: user.id },
+      where: {
+        OR: [
+          { buyerId: user.id },
+          {
+            status: PurchaseRequestStatus.fulfilled,
+            quotes: {
+              some: {
+                status: PurchaseQuoteStatus.accepted,
+                farm: { ownerId: user.id },
+              },
+            },
+          },
+        ],
+      },
       orderBy: { createdAt: 'desc' },
       include: requestInclude,
     });
@@ -167,9 +175,10 @@ export class PurchaseRequestsService {
       throw new NotFoundException('Purchase request not found');
     }
 
-    const isOwner = Boolean(user && request.buyerId === user.id);
-    const isAdmin = user?.role === 'admin';
-    if (request.status !== PurchaseRequestStatus.open && !isOwner && !isAdmin) {
+    if (
+      request.status !== PurchaseRequestStatus.open &&
+      !this.canViewNonPublicRequest(user, request)
+    ) {
       throw new ForbiddenException('This purchase request is no longer public');
     }
 
@@ -382,6 +391,7 @@ export class PurchaseRequestsService {
         farmer: quote.farm.owner,
         buyerName,
         title: request.title,
+        requestId: request.id,
       });
       await Promise.all(
         losers.map((loser) =>
@@ -502,6 +512,26 @@ export class PurchaseRequestsService {
     return request.buyer.displayName?.trim() || request.buyer.email;
   }
 
+  /**
+   * Open requests are the public board. Everything else is participant-only:
+   * the buyer, an admin, or the seller whose quote was accepted.
+   */
+  private canViewNonPublicRequest(user: AuthenticatedUser | null, request: RequestEntity): boolean {
+    if (!user) {
+      return false;
+    }
+    if (request.buyerId === user.id || user.role === 'admin') {
+      return true;
+    }
+    return this.isWinningSeller(user, request);
+  }
+
+  private isWinningSeller(user: AuthenticatedUser, request: RequestEntity): boolean {
+    return request.quotes.some(
+      (quote) => quote.status === PurchaseQuoteStatus.accepted && quote.farm.ownerId === user.id,
+    );
+  }
+
   private assertBuyer(user: AuthenticatedUser) {
     if (!canTrade(user.role)) {
       throw new ForbiddenException('Sign in to perform this action');
@@ -553,9 +583,9 @@ export class PurchaseRequestsService {
     farmId?: string | null,
   ): PurchaseRequestSummary {
     const myQuoteEntity = farmId
-      ? request.quotes.find((quote) => quote.farmId === farmId) ?? null
+      ? (request.quotes.find((quote) => quote.farmId === farmId) ?? null)
       : viewer
-        ? request.quotes.find((quote) => quote.farm.ownerId === viewer.id) ?? null
+        ? (request.quotes.find((quote) => quote.farm.ownerId === viewer.id) ?? null)
         : null;
 
     const publicQuoteCount = request.quotes.filter(
@@ -591,13 +621,14 @@ export class PurchaseRequestsService {
     const isOwner = Boolean(viewer && request.buyerId === viewer.id);
     const isAdmin = viewer?.role === 'admin';
     const isSellerSide = Boolean(viewer && canTrade(viewer.role));
+    const isWinner = Boolean(viewer && this.isWinningSeller(viewer, request));
     const requestOpen = request.status === PurchaseRequestStatus.open;
     const hasActiveQuote = Boolean(
       viewer &&
-        request.quotes.some(
-          (quote) =>
-            quote.farm.ownerId === viewer.id && quote.status !== PurchaseQuoteStatus.withdrawn,
-        ),
+      request.quotes.some(
+        (quote) =>
+          quote.farm.ownerId === viewer.id && quote.status !== PurchaseQuoteStatus.withdrawn,
+      ),
     );
 
     const summary = this.toSummary(request, viewer);
@@ -611,14 +642,10 @@ export class PurchaseRequestsService {
       canCancel: Boolean((isOwner || isAdmin) && requestOpen),
       canClose: Boolean((isOwner || isAdmin) && requestOpen),
       canQuote: Boolean(
-        isSellerSide &&
-          requestOpen &&
-          viewer &&
-          request.buyerId !== viewer.id &&
-          !hasActiveQuote,
+        isSellerSide && requestOpen && viewer && request.buyerId !== viewer.id && !hasActiveQuote,
       ),
       canMessageBuyer: Boolean(
-        isSellerSide && viewer && request.buyerId !== viewer.id && requestOpen,
+        isSellerSide && viewer && request.buyerId !== viewer.id && (requestOpen || isWinner),
       ),
     };
   }
