@@ -966,6 +966,12 @@
       "decline": "Ablehnen",
       "withdraw": "Angebot zurückziehen"
     },
+    "confirm": {
+      "accept": "Dieses Angebot annehmen? Die Kaufanfrage nimmt keine weiteren Angebote mehr an, und die übrigen ausstehenden Angebote werden abgelehnt. Das kann nicht rückgängig gemacht werden. Die Annahme eines Angebots bedeutet nicht, dass Zahlung, Versand oder Lieferung abgeschlossen sind.",
+      "decline": "Dieses Angebot ablehnen? Die Kaufanfrage bleibt offen, aber dieser Verkäufer kann kein weiteres Angebot dafür senden. Das kann nicht rückgängig gemacht werden.",
+      "close": "Diese Kaufanfrage schließen? Sie benötigen keine Angebote mehr. Sie verschwindet von der öffentlichen Tafel, alle ausstehenden Angebote werden abgelehnt, und sie kann nicht wieder geöffnet werden.",
+      "cancel": "Diese Kaufanfrage stornieren? Nutzen Sie das, wenn die Anfrage nicht mehr relevant ist oder irrtümlich veröffentlicht wurde. Alle ausstehenden Angebote werden abgelehnt, und sie kann nicht wieder geöffnet werden."
+    },
     "floatingLead": "Können Sie das liefern?",
     "floatingText": "Veröffentlichen Sie Ihr Angebot und erreichen Sie interessierte Käufer.",
     "floatingCta": "Eigenes Produkt listen",

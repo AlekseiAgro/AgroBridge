@@ -966,6 +966,12 @@
       "decline": "Decline",
       "withdraw": "Withdraw quote"
     },
+    "confirm": {
+      "accept": "Accept this quote? The purchase request will stop taking other quotes, and remaining pending quotes will be declined. This cannot be undone. Accepting a quote does not complete payment, shipment, or delivery.",
+      "decline": "Decline this quote? The purchase request stays open, but this seller will not be able to send another quote for it. This cannot be undone.",
+      "close": "Close this purchase request? You no longer need offers. It will leave the public board, all pending quotes will be declined, and it cannot be reopened.",
+      "cancel": "Cancel this purchase request? Use this if the request is no longer relevant or was published by mistake. All pending quotes will be declined, and it cannot be reopened."
+    },
     "floatingLead": "Can you supply this?",
     "floatingText": "Publish your product offer and reach buyers looking for it.",
     "floatingCta": "List your product",

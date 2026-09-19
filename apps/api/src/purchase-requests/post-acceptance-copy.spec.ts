@@ -33,6 +33,12 @@ function loadMessages(locale: string) {
       openRequest: string;
       requestUnavailable: string;
       statuses: { fulfilled: string };
+      confirm: {
+        accept: string;
+        decline: string;
+        close: string;
+        cancel: string;
+      };
     };
   };
 }
@@ -82,10 +88,25 @@ describe('post-acceptance user-facing copy', () => {
       ru.purchaseRequests.myQuotesEmpty,
       ru.purchaseRequests.agreementBody,
       ru.purchaseRequests.statuses.fulfilled,
+      ru.purchaseRequests.confirm.accept,
+      ru.purchaseRequests.confirm.decline,
+      ru.purchaseRequests.confirm.close,
+      ru.purchaseRequests.confirm.cancel,
     ]
       .join(' ')
       .toLowerCase();
     expect(haystack).toContain('предложен');
+    expect(haystack).toContain('запрос на покупку');
     expect(haystack).not.toContain('котиров');
+  });
+
+  it('localizes irreversible-action confirmation copy in every locale', () => {
+    for (const locale of LOCALES) {
+      const confirm = loadMessages(locale).purchaseRequests.confirm;
+      expect(confirm.accept.trim().length).toBeGreaterThan(0);
+      expect(confirm.decline.trim().length).toBeGreaterThan(0);
+      expect(confirm.close.trim().length).toBeGreaterThan(0);
+      expect(confirm.cancel.trim().length).toBeGreaterThan(0);
+    }
   });
 });

@@ -966,6 +966,12 @@
       "decline": "Refuser",
       "withdraw": "Retirer l'offre"
     },
+    "confirm": {
+      "accept": "Accepter cette offre ? La demande d’achat n’acceptera plus d’autres offres, et les offres en attente restantes seront refusées. Cette action est irréversible. Accepter une offre ne signifie pas que le paiement, l’expédition ou la livraison sont terminés.",
+      "decline": "Refuser cette offre ? La demande d’achat reste ouverte, mais ce vendeur ne pourra plus envoyer une autre offre pour cette demande. Cette action est irréversible.",
+      "close": "Fermer cette demande d’achat ? Vous n’avez plus besoin d’offres. Elle quittera le tableau public, toutes les offres en attente seront refusées, et elle ne pourra pas être rouverte.",
+      "cancel": "Annuler cette demande d’achat ? Utilisez cette action si la demande n’est plus pertinente ou a été publiée par erreur. Toutes les offres en attente seront refusées, et elle ne pourra pas être rouverte."
+    },
     "floatingLead": "Vous pouvez fournir cela ?",
     "floatingText": "Publiez votre offre produit pour atteindre les acheteurs intéressés.",
     "floatingCta": "Mettre en ligne mon produit",
