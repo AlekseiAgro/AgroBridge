@@ -814,8 +814,10 @@
     "ratingHint": "Based on completed deals. Buyers and sellers rate each other after completion.",
     "activityTitle": "Activity summary",
     "stats": {
-      "completedDeals": "Completed deals",
-      "openRequests": "Open requests",
+      "completedDeals": "Completed product deals",
+      "openPurchaseRequests": "Open purchase requests",
+      "pendingQuotes": "Pending quotes",
+      "acceptedQuotes": "Accepted quotes",
       "conversations": "Conversations",
       "publishedProducts": "Published products",
       "pendingModeration": "Pending moderation",

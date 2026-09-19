@@ -18,7 +18,9 @@ export type CabinetUserCard = {
 
 export type CabinetActivitySummary = {
   completedDeals: number;
-  openRequests: number;
+  openPurchaseRequests: number;
+  pendingQuotes: number;
+  acceptedQuotes: number;
   conversations: number;
   unreadMessages: number;
   publishedProducts: number;

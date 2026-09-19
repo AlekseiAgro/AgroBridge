@@ -814,8 +814,10 @@
     "ratingHint": "Basato sulle trattative completate. Acquirente e venditore si valutano solo dopo il completamento.",
     "activityTitle": "Riepilogo attività",
     "stats": {
-      "completedDeals": "Trattative completate",
-      "openRequests": "Richieste aperte",
+      "completedDeals": "Trattative prodotto completate",
+      "openPurchaseRequests": "Richieste di acquisto aperte",
+      "pendingQuotes": "Offerte in attesa",
+      "acceptedQuotes": "Offerte accettate",
       "conversations": "Conversazioni",
       "publishedProducts": "Prodotti pubblicati",
       "pendingModeration": "In moderazione",
