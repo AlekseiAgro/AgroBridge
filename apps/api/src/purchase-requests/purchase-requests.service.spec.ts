@@ -82,6 +82,7 @@ describe('PurchaseRequestsService', () => {
       update: jest.fn(),
       updateMany: jest.fn(),
       findUnique: jest.fn(),
+      findMany: jest.fn(),
     },
     farm: { findUnique: jest.fn() },
     $transaction: jest.fn(),
@@ -572,29 +573,100 @@ describe('PurchaseRequestsService', () => {
   });
 
   describe('listMine', () => {
-    it('includes requests the viewer published and fulfilled requests they won', async () => {
+    it('lists only purchase requests the viewer published', async () => {
       prisma.purchaseRequest.findMany.mockResolvedValue([]);
 
       await service.listMine(buyer);
 
       expect(prisma.purchaseRequest.findMany).toHaveBeenCalledWith({
-        where: {
-          OR: [
-            { buyerId: 'b1' },
-            {
-              status: 'fulfilled',
-              quotes: {
-                some: {
-                  status: 'accepted',
-                  farm: { ownerId: 'b1' },
-                },
-              },
-            },
-          ],
-        },
+        where: { buyerId: 'b1' },
         orderBy: { createdAt: 'desc' },
         include: expect.any(Object),
       });
+    });
+  });
+
+  describe('listMyQuotes', () => {
+    const winner = {
+      id: 'owner-farm-a',
+      email: 'a@example.com',
+      role: 'farmer',
+      locale: 'en',
+    } as never;
+
+    it('lists only quotes from farms the viewer owns', async () => {
+      prisma.purchaseQuote.findMany.mockResolvedValue([]);
+
+      await service.listMyQuotes(winner);
+
+      expect(prisma.purchaseQuote.findMany).toHaveBeenCalledWith({
+        where: { farm: { ownerId: 'owner-farm-a' } },
+        orderBy: { createdAt: 'desc' },
+        include: expect.any(Object),
+      });
+    });
+
+    it('lets the author open an accepted quote even after the request is fulfilled', async () => {
+      prisma.purchaseQuote.findMany.mockResolvedValue([
+        {
+          id: 'q1',
+          status: 'accepted',
+          priceAmount: { toFixed: () => '12.50' },
+          currency: 'USD',
+          quantity: null,
+          unit: null,
+          createdAt: new Date('2026-01-02T00:00:00Z'),
+          request: {
+            id: 'r1',
+            title: 'Blueberries',
+            quantity: '1t',
+            unit: null,
+            status: 'fulfilled',
+            buyer: { id: 'b1', displayName: 'Buyer Ltd' },
+          },
+        },
+      ]);
+
+      await expect(service.listMyQuotes(winner)).resolves.toEqual([
+        expect.objectContaining({
+          id: 'q1',
+          status: 'accepted',
+          priceAmount: '12.50',
+          canOpenRequest: true,
+          canWithdraw: false,
+          request: expect.objectContaining({ id: 'r1', status: 'fulfilled' }),
+        }),
+      ]);
+    });
+
+    it('keeps a declined quote visible but does not reopen a closed request', async () => {
+      prisma.purchaseQuote.findMany.mockResolvedValue([
+        {
+          id: 'q2',
+          status: 'declined',
+          priceAmount: { toFixed: () => '11.00' },
+          currency: 'USD',
+          quantity: null,
+          unit: null,
+          createdAt: new Date('2026-01-02T00:00:00Z'),
+          request: {
+            id: 'r1',
+            title: 'Blueberries',
+            quantity: '1t',
+            unit: null,
+            status: 'fulfilled',
+            buyer: { id: 'b1', displayName: 'Buyer Ltd' },
+          },
+        },
+      ]);
+
+      await expect(service.listMyQuotes(winner)).resolves.toEqual([
+        expect.objectContaining({
+          id: 'q2',
+          status: 'declined',
+          canOpenRequest: false,
+        }),
+      ]);
     });
   });
 });

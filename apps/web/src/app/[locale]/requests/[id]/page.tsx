@@ -57,9 +57,13 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
               </Link>
             </p>
           </div>
-          {isOwner || request.myQuote?.status === 'accepted' ? (
+          {isOwner ? (
             <Link href="/dashboard/purchase-requests" className="button button--ghost">
               {t('mineTitle')}
+            </Link>
+          ) : request.myQuote?.status === 'accepted' ? (
+            <Link href="/dashboard/quotes" className="button button--ghost">
+              {t('myQuotesTitle')}
             </Link>
           ) : null}
         </div>

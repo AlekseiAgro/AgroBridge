@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  REGISTERABLE_ROLES,
-  type PublicUser,
-  type RegisterableRole,
-} from '@agrobridge/shared';
+import { REGISTERABLE_ROLES, type PublicUser, type RegisterableRole } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -87,7 +83,7 @@ export function AuthForm({ mode, nextPath }: Props) {
 
           <fieldset className="role-fieldset">
             <legend>{t('role')}</legend>
-            <p className="product-list__meta">{t('roleHint')}</p>
+            <p className="product-list__meta">{t('dualCapabilityHint')}</p>
             {REGISTERABLE_ROLES.map((value) => (
               <label key={value} className="role-option">
                 <input

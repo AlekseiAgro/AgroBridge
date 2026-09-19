@@ -60,6 +60,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
             {trader ? (
               <>
                 <Link href="/requests">{t('purchaseRequests')}</Link>
+                <Link href="/dashboard/quotes">{t('myQuotes')}</Link>
                 <Link href="/dashboard/purchase-requests">{tp('mineTitle')}</Link>
               </>
             ) : null}
