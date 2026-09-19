@@ -7,6 +7,15 @@ describe('NotificationsService', () => {
     send: jest.fn().mockResolvedValue(undefined),
   };
 
+  const userNotification = {
+    create: jest.fn().mockResolvedValue({}),
+    findMany: jest.fn().mockResolvedValue([]),
+    findFirst: jest.fn(),
+    update: jest.fn(),
+    updateMany: jest.fn(),
+    count: jest.fn().mockResolvedValue(0),
+  };
+
   let service: NotificationsService;
 
   beforeEach(() => {
@@ -20,14 +29,7 @@ describe('NotificationsService', () => {
         },
       } as ConfigService,
       {
-        userNotification: {
-          create: jest.fn().mockResolvedValue({}),
-          findMany: jest.fn().mockResolvedValue([]),
-          findFirst: jest.fn(),
-          update: jest.fn(),
-          updateMany: jest.fn(),
-          count: jest.fn().mockResolvedValue(0),
-        },
+        userNotification,
       } as never,
     );
   });
@@ -281,7 +283,7 @@ describe('NotificationsService', () => {
 
     it('mails the buyer when a quote arrives', async () => {
       await service.notifyPurchaseQuoteReceived({
-        buyer: { email: 'buyer@example.com', locale: 'en', displayName: 'Buyer Ltd' },
+        buyer: { id: 'b1', email: 'buyer@example.com', locale: 'en', displayName: 'Buyer Ltd' },
         farmName: 'Kakheti Farm',
         title: 'Blueberries',
         priceAmount: '12.50',
@@ -299,8 +301,9 @@ describe('NotificationsService', () => {
 
     it('mails the winning supplier that their quote was accepted', async () => {
       await service.notifyPurchaseQuoteAccepted({
-        farmer: { email: 'farmer@example.com', locale: 'ka', displayName: 'ნინო' },
+        farmer: { id: 'f1', email: 'farmer@example.com', locale: 'ka', displayName: 'ნინო' },
         buyerName: 'Buyer Ltd',
+        buyerDisplayName: 'Buyer Ltd',
         title: 'Blueberries',
         requestId: 'r1',
       });
@@ -314,8 +317,9 @@ describe('NotificationsService', () => {
 
     it('mails a losing supplier that their quote was not selected', async () => {
       await service.notifyPurchaseQuoteDeclined({
-        farmer: { email: 'farmer@example.com', locale: 'ru', displayName: 'Нино' },
+        farmer: { id: 'f1', email: 'farmer@example.com', locale: 'ru', displayName: 'Нино' },
         buyerName: 'Buyer Ltd',
+        buyerDisplayName: 'Buyer Ltd',
         title: 'Blueberries',
       });
 
@@ -326,8 +330,9 @@ describe('NotificationsService', () => {
 
     it('uses the closed template, not the declined template, when a request is closed', async () => {
       await service.notifyPurchaseRequestWithdrawn({
-        farmer: { email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
+        farmer: { id: 'f1', email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
         buyerName: 'Buyer Ltd',
+        buyerDisplayName: 'Buyer Ltd',
         title: 'Blueberries',
         reason: 'closed',
       });
@@ -340,8 +345,9 @@ describe('NotificationsService', () => {
 
     it('uses the cancelled template when a request is cancelled', async () => {
       await service.notifyPurchaseRequestWithdrawn({
-        farmer: { email: 'farmer@example.com', locale: 'ru', displayName: 'Нино' },
+        farmer: { id: 'f1', email: 'farmer@example.com', locale: 'ru', displayName: 'Нино' },
         buyerName: 'Buyer Ltd',
+        buyerDisplayName: 'Buyer Ltd',
         title: 'Blueberries',
         reason: 'cancelled',
       });
@@ -356,7 +362,7 @@ describe('NotificationsService', () => {
 
       await expect(
         service.notifyPurchaseQuoteReceived({
-          buyer: { email: 'buyer@example.com', locale: 'en', displayName: 'Buyer Ltd' },
+          buyer: { id: 'b1', email: 'buyer@example.com', locale: 'en', displayName: 'Buyer Ltd' },
           farmName: 'Kakheti Farm',
           title: 'Blueberries',
           priceAmount: '12.50',
@@ -364,6 +370,154 @@ describe('NotificationsService', () => {
           requestId: 'r1',
         }),
       ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('purchase request lifecycle in-app notifications', () => {
+    function createdNotification() {
+      expect(userNotification.create).toHaveBeenCalledTimes(1);
+      return userNotification.create.mock.calls[0][0].data as {
+        userId: string;
+        type: string;
+        productId: string | null;
+        title: string;
+        body: string;
+        href: string;
+      };
+    }
+
+    it('notifies only the buyer when a quote arrives', async () => {
+      await service.notifyPurchaseQuoteReceived({
+        buyer: { id: 'b1', email: 'buyer@secret.test', locale: 'en', displayName: 'Buyer Ltd' },
+        farmName: 'Kakheti Farm',
+        title: 'Blueberries',
+        priceAmount: '12.50',
+        currency: 'USD',
+        requestId: 'r1',
+      });
+
+      expect(createdNotification()).toEqual({
+        userId: 'b1',
+        type: 'purchaseQuoteReceived',
+        productId: null,
+        title: 'New quote received',
+        body: 'Kakheti Farm sent a quote for your purchase request “Blueberries”.',
+        href: '/requests/r1',
+      });
+      expect(createdNotification().body).not.toContain('buyer@secret.test');
+      expect(createdNotification().body).not.toContain('12.50');
+    });
+
+    it('notifies the winning seller on the request they may still open', async () => {
+      await service.notifyPurchaseQuoteAccepted({
+        farmer: { id: 'f1', email: 'farmer@secret.test', locale: 'en', displayName: 'Nino' },
+        buyerName: 'buyer@secret.test',
+        buyerDisplayName: 'Buyer Ltd',
+        title: 'Blueberries',
+        requestId: 'r1',
+      });
+
+      expect(createdNotification()).toEqual({
+        userId: 'f1',
+        type: 'purchaseQuoteAccepted',
+        productId: null,
+        title: 'Your quote was accepted',
+        body: 'Buyer Ltd accepted your quote for the purchase request “Blueberries”.',
+        href: '/requests/r1',
+      });
+      expect(createdNotification().body).not.toContain('buyer@secret.test');
+      expect(createdNotification().body).not.toMatch(/completed|сделк/i);
+    });
+
+    it('sends declined sellers to My Quotes instead of the private request', async () => {
+      await service.notifyPurchaseQuoteDeclined({
+        farmer: { id: 'f2', email: 'loser@secret.test', locale: 'en', displayName: "Loser's Farm" },
+        buyerName: 'buyer@secret.test',
+        buyerDisplayName: null,
+        title: 'Blueberries',
+      });
+
+      expect(createdNotification()).toEqual(
+        expect.objectContaining({
+          userId: 'f2',
+          type: 'purchaseQuoteDeclined',
+          productId: null,
+          href: '/dashboard/quotes',
+        }),
+      );
+      expect(createdNotification().body).toContain('A buyer');
+      expect(createdNotification().body).not.toContain('buyer@secret.test');
+    });
+
+    it('keeps close and cancel copy distinct and seller-only', async () => {
+      await service.notifyPurchaseRequestWithdrawn({
+        farmer: { id: 'f1', email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
+        buyerName: 'Buyer Ltd',
+        buyerDisplayName: 'Buyer Ltd',
+        title: 'Blueberries',
+        reason: 'closed',
+      });
+      const closed = createdNotification();
+
+      userNotification.create.mockClear();
+      await service.notifyPurchaseRequestWithdrawn({
+        farmer: { id: 'f1', email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
+        buyerName: 'Buyer Ltd',
+        buyerDisplayName: 'Buyer Ltd',
+        title: 'Blueberries',
+        reason: 'cancelled',
+      });
+      const cancelled = createdNotification();
+
+      expect(closed).toEqual(
+        expect.objectContaining({
+          userId: 'f1',
+          type: 'purchaseRequestClosed',
+          productId: null,
+          href: '/dashboard/quotes',
+        }),
+      );
+      expect(cancelled).toEqual(
+        expect.objectContaining({
+          userId: 'f1',
+          type: 'purchaseRequestCancelled',
+          productId: null,
+          href: '/dashboard/quotes',
+        }),
+      );
+      expect(closed.body).not.toBe(cancelled.body);
+      expect(closed.title).not.toBe(cancelled.title);
+    });
+
+    it('notifies only the buyer when a quote is withdrawn and sends no email', async () => {
+      await service.notifyPurchaseQuoteWithdrawn({
+        buyer: { id: 'b1', email: 'buyer@secret.test', locale: 'en', displayName: 'Buyer Ltd' },
+        farmName: 'Kakheti Farm',
+        title: 'Blueberries',
+        requestId: 'r1',
+      });
+
+      expect(createdNotification()).toEqual({
+        userId: 'b1',
+        type: 'purchaseQuoteWithdrawn',
+        productId: null,
+        title: 'A quote was withdrawn',
+        body: 'Kakheti Farm withdrew a quote from your purchase request “Blueberries”.',
+        href: '/requests/r1',
+      });
+      expect(mail.send).not.toHaveBeenCalled();
+    });
+
+    it('lists only the current user\'s notifications', async () => {
+      userNotification.findMany.mockResolvedValue([]);
+
+      await service.listMine('user-1', 30);
+
+      expect(userNotification.findMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+        orderBy: { createdAt: 'desc' },
+        take: 30,
+      });
     });
   });
 });

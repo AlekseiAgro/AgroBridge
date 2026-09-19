@@ -186,9 +186,15 @@ model User {
 enum UserNotificationType {
   harvestAvailable
   harvestPreorderOpen
+  purchaseQuoteReceived
+  purchaseQuoteAccepted
+  purchaseQuoteDeclined
+  purchaseRequestClosed
+  purchaseRequestCancelled
+  purchaseQuoteWithdrawn
 }
 
-/// In-app cabinet alerts (harvest watches and related events).
+/// In-app cabinet alerts (harvest watches, purchase-request and quote events).
 model UserNotification {
   id        String                @id @default(cuid())
   userId    String
