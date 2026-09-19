@@ -39,6 +39,8 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
       <p className="eyebrow">
         <Link href="/requests">{t('boardTitle')}</Link>
         {' · '}
+        <Link href="/dashboard/quotes">{t('myQuotesTitle')}</Link>
+        {' · '}
         <Link href="/catalog">{tr('browseCatalog')}</Link>
       </p>
       <PurchaseRequestList items={items} emptyLabel={t('mineEmpty')} />

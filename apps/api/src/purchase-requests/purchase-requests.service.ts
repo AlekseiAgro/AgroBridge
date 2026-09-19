@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import {
   canTrade,
+  type PurchaseQuoteMineItem,
   type PurchaseQuoteView,
   type PurchaseRequestDetail,
   type PurchaseRequestSummary,
@@ -105,25 +106,40 @@ export class PurchaseRequestsService {
     this.assertBuyer(user);
 
     const items = await this.prisma.purchaseRequest.findMany({
-      where: {
-        OR: [
-          { buyerId: user.id },
-          {
-            status: PurchaseRequestStatus.fulfilled,
-            quotes: {
-              some: {
-                status: PurchaseQuoteStatus.accepted,
-                farm: { ownerId: user.id },
-              },
-            },
-          },
-        ],
-      },
+      where: { buyerId: user.id },
       orderBy: { createdAt: 'desc' },
       include: requestInclude,
     });
 
     return items.map((item) => this.toSummary(item, user));
+  }
+
+  /**
+   * Quotes the current user submitted from their farm. Winning sellers find accepted
+   * requests here; `getById` still decides who may open a non-public request.
+   */
+  async listMyQuotes(user: AuthenticatedUser): Promise<PurchaseQuoteMineItem[]> {
+    this.assertFarmer(user);
+
+    const quotes = await this.prisma.purchaseQuote.findMany({
+      where: { farm: { ownerId: user.id } },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        farm: { select: { id: true, name: true, ownerId: true } },
+        request: {
+          select: {
+            id: true,
+            title: true,
+            quantity: true,
+            unit: true,
+            status: true,
+            buyer: { select: { id: true, displayName: true } },
+          },
+        },
+      },
+    });
+
+    return quotes.map((quote) => this.toMineQuote(quote));
   }
 
   async create(
@@ -542,6 +558,50 @@ export class PurchaseRequestsService {
     if (!canTrade(user.role)) {
       throw new ForbiddenException('Sign in to perform this action');
     }
+  }
+
+  private toMineQuote(quote: {
+    id: string;
+    status: PurchaseQuoteStatus;
+    priceAmount: Prisma.Decimal;
+    currency: CurrencyCode;
+    quantity: string | null;
+    unit: string | null;
+    createdAt: Date;
+    request: {
+      id: string;
+      title: string;
+      quantity: string;
+      unit: string | null;
+      status: PurchaseRequestStatus;
+      buyer: { id: string; displayName: string | null };
+    };
+  }): PurchaseQuoteMineItem {
+    const requestOpen = quote.request.status === PurchaseRequestStatus.open;
+    const accepted = quote.status === PurchaseQuoteStatus.accepted;
+
+    return {
+      id: quote.id,
+      status: quote.status,
+      priceAmount: quote.priceAmount.toFixed(2),
+      currency: quote.currency,
+      quantity: quote.quantity,
+      unit: quote.unit,
+      createdAt: quote.createdAt.toISOString(),
+      canOpenRequest: requestOpen || accepted,
+      canWithdraw: quote.status === PurchaseQuoteStatus.pending && requestOpen,
+      request: {
+        id: quote.request.id,
+        title: quote.request.title,
+        quantity: quote.request.quantity,
+        unit: quote.request.unit,
+        status: quote.request.status,
+        buyer: {
+          id: quote.request.buyer.id,
+          displayName: quote.request.buyer.displayName,
+        },
+      },
+    };
   }
 
   private toQuoteView(

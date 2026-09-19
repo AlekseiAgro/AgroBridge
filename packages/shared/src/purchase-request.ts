@@ -1,21 +1,11 @@
 import type { ProductCategory, ProductUnit } from './catalog';
 import type { CurrencyCode } from './rfq';
 
-export const PURCHASE_REQUEST_STATUSES = [
-  'open',
-  'closed',
-  'cancelled',
-  'fulfilled',
-] as const;
+export const PURCHASE_REQUEST_STATUSES = ['open', 'closed', 'cancelled', 'fulfilled'] as const;
 
 export type PurchaseRequestStatus = (typeof PURCHASE_REQUEST_STATUSES)[number];
 
-export const PURCHASE_QUOTE_STATUSES = [
-  'pending',
-  'accepted',
-  'declined',
-  'withdrawn',
-] as const;
+export const PURCHASE_QUOTE_STATUSES = ['pending', 'accepted', 'declined', 'withdrawn'] as const;
 
 export type PurchaseQuoteStatus = (typeof PURCHASE_QUOTE_STATUSES)[number];
 
@@ -79,6 +69,27 @@ export type PurchaseRequestDetail = PurchaseRequestSummary & {
   canClose: boolean;
   canQuote: boolean;
   canMessageBuyer: boolean;
+};
+
+/** Seller-owned quote row for the My Quotes cabinet list. */
+export type PurchaseQuoteMineItem = {
+  id: string;
+  status: PurchaseQuoteStatus;
+  priceAmount: string;
+  currency: CurrencyCode;
+  quantity: string | null;
+  unit: string | null;
+  createdAt: string;
+  canOpenRequest: boolean;
+  canWithdraw: boolean;
+  request: {
+    id: string;
+    title: string;
+    quantity: string;
+    unit: string | null;
+    status: PurchaseRequestStatus;
+    buyer: PurchaseRequestBuyer;
+  };
 };
 
 export type CreatePurchaseRequestInput = {

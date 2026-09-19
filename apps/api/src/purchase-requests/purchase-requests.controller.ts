@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { EmailVerifiedGuard } from '../auth/email-verified.guard';
@@ -39,6 +31,13 @@ export class PurchaseRequestsController {
   @Roles('farmer', 'buyer', 'admin')
   listMine(@CurrentUser() user: AuthenticatedUser) {
     return this.purchaseRequestsService.listMine(user);
+  }
+
+  @Get('my-quotes')
+  @UseGuards(JwtAuthGuard, EmailVerifiedGuard, RolesGuard)
+  @Roles('farmer', 'buyer', 'admin')
+  listMyQuotes(@CurrentUser() user: AuthenticatedUser) {
+    return this.purchaseRequestsService.listMyQuotes(user);
   }
 
   @Post()

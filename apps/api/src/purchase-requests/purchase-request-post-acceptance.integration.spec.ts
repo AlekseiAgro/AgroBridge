@@ -139,21 +139,35 @@ describeWithDatabase()('purchase request post-acceptance access (database)', () 
     });
   });
 
-  it('lists the fulfilled request for the buyer and winning seller, not for others', async () => {
+  it('lists the fulfilled request for the buyer only; sellers find it in My Quotes', async () => {
     const { buyer, winner, loser, stranger, requestId } = await acceptQuoteScenario();
 
     const buyerMine = await service.listMine(buyer);
     expect(buyerMine.map((item) => item.id)).toContain(requestId);
 
     const winnerMine = await service.listMine(winner);
-    expect(winnerMine.map((item) => item.id)).toContain(requestId);
-    expect(winnerMine.find((item) => item.id === requestId)?.myQuote?.status).toBe('accepted');
+    expect(winnerMine.map((item) => item.id)).not.toContain(requestId);
+
+    const winnerQuotes = await service.listMyQuotes(winner);
+    expect(winnerQuotes.map((item) => item.request.id)).toContain(requestId);
+    expect(winnerQuotes.find((item) => item.request.id === requestId)).toMatchObject({
+      status: 'accepted',
+      canOpenRequest: true,
+    });
 
     const loserMine = await service.listMine(loser);
     expect(loserMine.map((item) => item.id)).not.toContain(requestId);
 
+    const loserQuotes = await service.listMyQuotes(loser);
+    expect(loserQuotes.map((item) => item.request.id)).toContain(requestId);
+    expect(loserQuotes.find((item) => item.request.id === requestId)).toMatchObject({
+      status: 'declined',
+      canOpenRequest: false,
+    });
+
     const strangerMine = await service.listMine(stranger);
     expect(strangerMine.map((item) => item.id)).not.toContain(requestId);
+    expect(await service.listMyQuotes(stranger)).toEqual([]);
 
     const board = await service.listOpen({}, winner);
     expect(board.map((item) => item.id)).not.toContain(requestId);
