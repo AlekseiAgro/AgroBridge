@@ -814,8 +814,10 @@
     "ratingHint": "Считается по завершённым сделкам. Покупатель и продавец оценивают друг друга только после завершения.",
     "activityTitle": "Сводка активности",
     "stats": {
-      "completedDeals": "Завершённые сделки",
-      "openRequests": "Открытые запросы",
+      "completedDeals": "Завершённые сделки по товарам",
+      "openPurchaseRequests": "Открытые запросы на покупку",
+      "pendingQuotes": "Ожидающие предложения",
+      "acceptedQuotes": "Принятые предложения",
       "conversations": "Чаты",
       "publishedProducts": "Опубликованные товары",
       "pendingModeration": "На модерации",

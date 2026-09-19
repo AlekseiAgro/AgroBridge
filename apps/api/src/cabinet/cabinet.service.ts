@@ -17,6 +17,7 @@ import {
 import {
   LocaleCode,
   ModerationStatus as PrismaModerationStatus,
+  PurchaseQuoteStatus as PrismaPurchaseQuoteStatus,
   PurchaseRequestStatus as PrismaPurchaseRequestStatus,
   RfqStatus as PrismaRfqStatus,
   VerificationChannel,
@@ -56,9 +57,9 @@ export class CabinetService {
     const [
       completedAsBuyer,
       completedAsSeller,
-      openBuyerRequests,
-      openInboxRequests,
       openPurchaseRequests,
+      pendingQuotes,
+      acceptedQuotes,
       conversations,
       publishedProducts,
       pendingModeration,
@@ -79,26 +80,26 @@ export class CabinetService {
           })
         : Promise.resolve(0),
       trader
-        ? this.prisma.rfq.count({
-            where: {
-              buyerId: user.id,
-              status: { in: [PrismaRfqStatus.pending, PrismaRfqStatus.offered, PrismaRfqStatus.accepted] },
-            },
-          })
-        : Promise.resolve(0),
-      trader
-        ? this.prisma.rfq.count({
-            where: {
-              product: { ownerUserId: user.id },
-              status: { in: [PrismaRfqStatus.pending, PrismaRfqStatus.offered, PrismaRfqStatus.accepted] },
-            },
-          })
-        : Promise.resolve(0),
-      trader
         ? this.prisma.purchaseRequest.count({
             where: {
               buyerId: user.id,
               status: PrismaPurchaseRequestStatus.open,
+            },
+          })
+        : Promise.resolve(0),
+      trader
+        ? this.prisma.purchaseQuote.count({
+            where: {
+              farm: { ownerId: user.id },
+              status: PrismaPurchaseQuoteStatus.pending,
+            },
+          })
+        : Promise.resolve(0),
+      trader
+        ? this.prisma.purchaseQuote.count({
+            where: {
+              farm: { ownerId: user.id },
+              status: PrismaPurchaseQuoteStatus.accepted,
             },
           })
         : Promise.resolve(0),
@@ -143,7 +144,9 @@ export class CabinetService {
       },
       activity: {
         completedDeals: completedAsBuyer + completedAsSeller,
-        openRequests: openBuyerRequests + openInboxRequests + openPurchaseRequests,
+        openPurchaseRequests,
+        pendingQuotes,
+        acceptedQuotes,
         conversations,
         unreadMessages,
         publishedProducts,

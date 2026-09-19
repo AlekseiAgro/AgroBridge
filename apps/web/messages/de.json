@@ -814,8 +814,10 @@
     "ratingHint": "Basierend auf abgeschlossenen Deals. Käufer und Verkäufer bewerten sich erst nach Abschluss.",
     "activityTitle": "Aktivitätsübersicht",
     "stats": {
-      "completedDeals": "Abgeschlossene Deals",
-      "openRequests": "Offene Anfragen",
+      "completedDeals": "Abgeschlossene Produktdeals",
+      "openPurchaseRequests": "Offene Kaufanfragen",
+      "pendingQuotes": "Ausstehende Angebote",
+      "acceptedQuotes": "Angenommene Angebote",
       "conversations": "Chats",
       "publishedProducts": "Veröffentlichte Produkte",
       "pendingModeration": "In Moderation",

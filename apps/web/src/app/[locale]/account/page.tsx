@@ -32,8 +32,6 @@ export default async function AccountPage({ params }: Props) {
   const roleKey = `roles.${user.role}` as 'roles.farmer' | 'roles.buyer' | 'roles.admin';
   const memberSince = formatMemberSinceMonthYear(user.memberSince, locale);
   const dealsBase = user.role === 'farmer' ? '/dashboard/inbox' : '/dashboard/rfqs';
-  const openRequestsHref =
-    user.role === 'farmer' ? `${dealsBase}?status=open` : '/dashboard/purchase-requests';
 
   const cards: Array<{
     key: string;
@@ -49,10 +47,22 @@ export default async function AccountPage({ params }: Props) {
       href: '/dashboard/deals',
     },
     {
-      key: 'openRequests',
-      value: activity.openRequests,
-      label: t('stats.openRequests'),
-      href: openRequestsHref,
+      key: 'openPurchaseRequests',
+      value: activity.openPurchaseRequests,
+      label: t('stats.openPurchaseRequests'),
+      href: '/dashboard/purchase-requests',
+    },
+    {
+      key: 'pendingQuotes',
+      value: activity.pendingQuotes,
+      label: t('stats.pendingQuotes'),
+      href: '/dashboard/quotes',
+    },
+    {
+      key: 'acceptedQuotes',
+      value: activity.acceptedQuotes,
+      label: t('stats.acceptedQuotes'),
+      href: '/dashboard/quotes',
     },
     {
       key: 'conversations',

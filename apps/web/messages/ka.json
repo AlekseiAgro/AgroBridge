@@ -814,8 +814,10 @@
     "ratingHint": "ითვლება დასრულებული გარიგებებით. მყიდველი და გამყიდველი ერთმანეთს აფასებენ მხოლოდ დასრულების შემდეგ.",
     "activityTitle": "აქტივობის შეჯამება",
     "stats": {
-      "completedDeals": "დასრულებული გარიგებები",
-      "openRequests": "ღია მოთხოვნები",
+      "completedDeals": "დასრულებული პროდუქტის გარიგებები",
+      "openPurchaseRequests": "ღია შესყიდვის მოთხოვნები",
+      "pendingQuotes": "მოლოდინში მყოფი შეთავაზებები",
+      "acceptedQuotes": "მიღებული შეთავაზებები",
       "conversations": "საუბრები",
       "publishedProducts": "გამოქვეყნებული პროდუქტები",
       "pendingModeration": "მოდერაციაზე",

@@ -29,6 +29,9 @@ describe('CabinetService', () => {
     purchaseRequest: {
       count: jest.fn(),
     },
+    purchaseQuote: {
+      count: jest.fn(),
+    },
     conversation: {
       count: jest.fn(),
     },
@@ -87,31 +90,86 @@ describe('CabinetService', () => {
     codes.consume.mockResolvedValue({ id: 'c1', destination: 'new@example.com' });
   });
 
-  it('includes open purchase requests in openRequests activity', async () => {
+  const buyer = {
+    ...farmer,
+    id: 'buyer_1',
+    email: 'buyer@example.com',
+    role: 'buyer' as const,
+    displayName: 'Buyer',
+  };
+
+  async function stubOverviewCounts(input?: {
+    completedAsBuyer?: number;
+    completedAsSeller?: number;
+    openPurchaseRequests?: number;
+    pendingQuotes?: number;
+    acceptedQuotes?: number;
+  }) {
     prisma.user.findUnique.mockResolvedValue({
       ...farmer,
       avatarUrl: null,
       createdAt: new Date('2026-01-01T00:00:00.000Z'),
       farm: null,
     });
-    ratings.summaryForUser.mockResolvedValue({
-      average: 0,
-      count: 0,
-    });
+    ratings.summaryForUser.mockResolvedValue({ average: 0, count: 0 });
     prisma.rfq.count
-      .mockResolvedValueOnce(0) // completed as buyer
-      .mockResolvedValueOnce(0) // completed as seller
-      .mockResolvedValueOnce(2) // open buyer RFQs
-      .mockResolvedValueOnce(1); // open inbox RFQs
-    prisma.purchaseRequest.count.mockResolvedValue(3);
+      .mockResolvedValueOnce(input?.completedAsBuyer ?? 0)
+      .mockResolvedValueOnce(input?.completedAsSeller ?? 0);
+    prisma.purchaseRequest.count.mockResolvedValue(input?.openPurchaseRequests ?? 0);
+    prisma.purchaseQuote.count
+      .mockResolvedValueOnce(input?.pendingQuotes ?? 0)
+      .mockResolvedValueOnce(input?.acceptedQuotes ?? 0);
     prisma.conversation.count.mockResolvedValue(0);
     prisma.product.count.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
     prisma.rfq.findMany.mockResolvedValue([]);
+  }
+
+  it('counts only the current buyer\'s open purchase requests', async () => {
+    await stubOverviewCounts({ openPurchaseRequests: 1 });
+
+    await expect(service.overview(buyer)).resolves.toEqual(
+      expect.objectContaining({
+        activity: expect.objectContaining({
+          openPurchaseRequests: 1,
+          pendingQuotes: 0,
+          acceptedQuotes: 0,
+        }),
+      }),
+    );
+    expect(prisma.purchaseRequest.count).toHaveBeenCalledWith({
+      where: {
+        buyerId: buyer.id,
+        status: 'open',
+      },
+    });
+    expect(prisma.purchaseRequest.count).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ buyerId: farmer.id }),
+      }),
+    );
+    expect(prisma.purchaseQuote.count).toHaveBeenNthCalledWith(1, {
+      where: {
+        farm: { ownerId: buyer.id },
+        status: 'pending',
+      },
+    });
+    expect(prisma.purchaseQuote.count).toHaveBeenNthCalledWith(2, {
+      where: {
+        farm: { ownerId: buyer.id },
+        status: 'accepted',
+      },
+    });
+  });
+
+  it('counts only the current seller\'s pending and accepted quotes', async () => {
+    await stubOverviewCounts({ pendingQuotes: 2, acceptedQuotes: 1 });
 
     await expect(service.overview(farmer)).resolves.toEqual(
       expect.objectContaining({
         activity: expect.objectContaining({
-          openRequests: 6,
+          openPurchaseRequests: 0,
+          pendingQuotes: 2,
+          acceptedQuotes: 1,
         }),
       }),
     );
@@ -121,6 +179,74 @@ describe('CabinetService', () => {
         status: 'open',
       },
     });
+    expect(prisma.purchaseQuote.count).toHaveBeenNthCalledWith(1, {
+      where: {
+        farm: { ownerId: farmer.id },
+        status: 'pending',
+      },
+    });
+    expect(prisma.purchaseQuote.count).toHaveBeenNthCalledWith(2, {
+      where: {
+        farm: { ownerId: farmer.id },
+        status: 'accepted',
+      },
+    });
+    expect(prisma.purchaseQuote.count).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ status: 'declined' }),
+      }),
+    );
+    expect(prisma.purchaseQuote.count).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ status: 'withdrawn' }),
+      }),
+    );
+  });
+
+  it('keeps dual-capability purchase-request and quote counts independent of RFQs', async () => {
+    await stubOverviewCounts({
+      completedAsBuyer: 4,
+      completedAsSeller: 5,
+      openPurchaseRequests: 1,
+      pendingQuotes: 2,
+      acceptedQuotes: 3,
+    });
+
+    await expect(service.overview(farmer)).resolves.toEqual(
+      expect.objectContaining({
+        activity: expect.objectContaining({
+          completedDeals: 9,
+          openPurchaseRequests: 1,
+          pendingQuotes: 2,
+          acceptedQuotes: 3,
+        }),
+      }),
+    );
+    expect(prisma.rfq.count).toHaveBeenCalledTimes(2);
+    expect(prisma.rfq.count).toHaveBeenNthCalledWith(1, {
+      where: { buyerId: farmer.id, status: 'completed' },
+    });
+    expect(prisma.rfq.count).toHaveBeenNthCalledWith(2, {
+      where: {
+        product: { ownerUserId: farmer.id },
+        status: 'completed',
+      },
+    });
+    expect(prisma.purchaseRequest.count).toHaveBeenCalledTimes(1);
+    expect(prisma.purchaseQuote.count).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not treat purchase-quote acceptance as a completed deal', async () => {
+    await stubOverviewCounts({
+      completedAsBuyer: 1,
+      completedAsSeller: 2,
+      acceptedQuotes: 7,
+    });
+
+    const overview = await service.overview(farmer);
+    expect(overview.activity.completedDeals).toBe(3);
+    expect(overview.activity.acceptedQuotes).toBe(7);
+    expect(overview.activity.completedDeals).not.toBe(overview.activity.acceptedQuotes);
   });
 
   it('refuses to delete admin accounts', async () => {
