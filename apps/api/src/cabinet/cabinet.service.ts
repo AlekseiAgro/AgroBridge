@@ -65,6 +65,7 @@ export class CabinetService {
       pendingModeration,
       awaitingMyRating,
       unreadMessages,
+      notificationUnread,
     ] = await Promise.all([
       trader
         ? this.prisma.rfq.count({
@@ -127,6 +128,7 @@ export class CabinetService {
         : Promise.resolve(0),
       this.countAwaitingRating(user.id),
       this.chat.unreadTotal(user).then((result) => result.count),
+      this.notifications.unreadSummary(user.id),
     ]);
 
     return {
@@ -153,6 +155,7 @@ export class CabinetService {
         pendingModeration,
         awaitingMyRating,
       },
+      notificationUnread,
     };
   }
 

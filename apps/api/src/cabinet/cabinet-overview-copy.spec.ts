@@ -59,6 +59,9 @@ describe('cabinet marketplace overview copy and navigation', () => {
     expect(source).toContain('activity.openPurchaseRequests');
     expect(source).toContain('activity.pendingQuotes');
     expect(source).toContain('activity.acceptedQuotes');
+    expect(source).toContain('notificationUnread.purchaseRequestsUnread');
+    expect(source).toContain('notificationUnread.pendingQuotesUnread');
+    expect(source).toContain('notificationUnread.acceptedQuotesUnread');
     expect(source).not.toContain('activity.openRequests');
     expect(source).not.toContain("t('stats.openRequests')");
     expect(source).not.toContain('/dashboard/inbox?status=open');

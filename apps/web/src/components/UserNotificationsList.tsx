@@ -15,6 +15,7 @@ export function UserNotificationsList({ initial }: Props) {
   const router = useRouter();
   const [items, setItems] = useState(initial);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [markingAll, setMarkingAll] = useState(false);
 
   useEffect(() => {
     setItems(initial);
@@ -35,45 +36,79 @@ export function UserNotificationsList({ initial }: Props) {
     }
   }
 
+  async function markAllRead() {
+    setMarkingAll(true);
+    try {
+      await fetch('/api/notifications/read-all', { method: 'POST' });
+      const now = new Date().toISOString();
+      setItems((prev) => prev.map((item) => ({ ...item, readAt: item.readAt ?? now })));
+      router.refresh();
+    } finally {
+      setMarkingAll(false);
+    }
+  }
+
   if (items.length === 0) {
     return <p className="empty-state">{t('inboxEmpty')}</p>;
   }
 
+  const hasUnread = items.some((item) => !item.readAt);
+
   return (
-    <ul className="user-notifications">
-      {items.map((item) => {
-        const created = new Date(item.createdAt).toLocaleString(locale);
-        return (
-          <li
-            key={item.id}
-            className={
-              item.readAt
-                ? 'user-notifications__item'
-                : 'user-notifications__item user-notifications__item--unread'
-            }
+    <div className="user-notifications-wrap">
+      {hasUnread ? (
+        <div className="user-notifications__toolbar">
+          <button
+            type="button"
+            className="button button--ghost"
+            disabled={markingAll}
+            onClick={() => {
+              void markAllRead();
+            }}
           >
-            <div className="user-notifications__main">
-              <Link href={item.href} className="product-list__title" onClick={() => void markRead(item.id)}>
-                {item.title}
-              </Link>
-              <p className="product-list__meta">{item.body}</p>
-              <p className="product-list__meta">{created}</p>
-            </div>
-            {!item.readAt ? (
-              <button
-                type="button"
-                className="button button--ghost"
-                disabled={pendingId === item.id}
-                onClick={() => {
-                  void markRead(item.id);
-                }}
-              >
-                {t('markRead')}
-              </button>
-            ) : null}
-          </li>
-        );
-      })}
-    </ul>
+            {t('markAllRead')}
+          </button>
+        </div>
+      ) : null}
+      <ul className="user-notifications">
+        {items.map((item) => {
+          const created = new Date(item.createdAt).toLocaleString(locale);
+          return (
+            <li
+              key={item.id}
+              className={
+                item.readAt
+                  ? 'user-notifications__item'
+                  : 'user-notifications__item user-notifications__item--unread'
+              }
+            >
+              <div className="user-notifications__main">
+                <Link
+                  href={item.href}
+                  className="product-list__title"
+                  onClick={() => void markRead(item.id)}
+                >
+                  {item.title}
+                </Link>
+                <p className="product-list__meta">{item.body}</p>
+                <p className="product-list__meta">{created}</p>
+              </div>
+              {!item.readAt ? (
+                <button
+                  type="button"
+                  className="button button--ghost"
+                  disabled={pendingId === item.id || markingAll}
+                  onClick={() => {
+                    void markRead(item.id);
+                  }}
+                >
+                  {t('markRead')}
+                </button>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

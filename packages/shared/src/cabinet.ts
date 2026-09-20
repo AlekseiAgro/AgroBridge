@@ -2,6 +2,7 @@ import type { BuyerType, SellerType } from './auth';
 import type { RatingSummary } from './rating';
 import type { UserRole } from './roles';
 import type { Locale } from './locales';
+import type { NotificationUnreadSummary } from './notification';
 
 export type CabinetUserCard = {
   id: string;
@@ -31,4 +32,5 @@ export type CabinetActivitySummary = {
 export type CabinetOverview = {
   user: CabinetUserCard;
   activity: CabinetActivitySummary;
+  notificationUnread: NotificationUnreadSummary;
 };

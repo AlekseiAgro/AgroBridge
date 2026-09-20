@@ -104,7 +104,11 @@
     "forSellers": "I'm a seller",
     "subscriptions": "Alerts",
     "chatUnread": "Chat, {count} unread",
-    "inboxUnread": "Incoming requests, {count} pending"
+    "inboxUnread": "Incoming requests, {count} pending",
+    "notifications": "Notifications",
+    "notificationsUnread": "Notifications, {count} unread",
+    "purchaseRequestsUnread": "My purchase requests, {count} unread",
+    "myQuotesUnread": "My quotes, {count} unread"
   },
   "footer": {
     "tagline": "Connecting Georgian farms with buyers worldwide.",
@@ -876,7 +880,8 @@
       "sellerRatingPending": "The seller has not left a rating yet.",
       "noComment": "No written review."
     },
-    "securityTitle": "Security"
+    "securityTitle": "Security",
+    "unreadCard": "{label}, {count} unread"
   },
   "rating": {
     "title": "Rate your partner",
@@ -1081,7 +1086,8 @@
     "browseCatalog": "Open the catalog and enable alerts on a product page",
     "partialLoadError": "Some subscription data failed to load. Refresh the page or try again later.",
     "pageError": "Could not open the subscriptions page.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "markAllRead": "Mark all read"
   },
   "harvest": {
     "title": "Harvest plan",

@@ -104,7 +104,11 @@
     "forSellers": "Ich bin Verkäufer",
     "subscriptions": "Alerts",
     "chatUnread": "Chat, {count} ungelesen",
-    "inboxUnread": "Eingehende Anfragen, {count} ausstehend"
+    "inboxUnread": "Eingehende Anfragen, {count} ausstehend",
+    "notifications": "Benachrichtigungen",
+    "notificationsUnread": "Benachrichtigungen, {count} ungelesen",
+    "purchaseRequestsUnread": "Meine Kaufanfragen, {count} ungelesen",
+    "myQuotesUnread": "Meine Angebote, {count} ungelesen"
   },
   "footer": {
     "tagline": "Wir verbinden georgische Betriebe mit Käufern weltweit.",
@@ -876,7 +880,8 @@
       "sellerRatingPending": "Der Verkäufer hat noch keine Bewertung abgegeben.",
       "noComment": "Kein schriftlicher Kommentar."
     },
-    "securityTitle": "Sicherheit"
+    "securityTitle": "Sicherheit",
+    "unreadCard": "{label}, {count} ungelesen"
   },
   "rating": {
     "title": "Partner bewerten",
@@ -1081,7 +1086,8 @@
     "browseCatalog": "Katalog öffnen und Alerts auf der Produktseite aktivieren",
     "partialLoadError": "Einige Abo-Daten konnten nicht geladen werden. Seite aktualisieren oder später erneut versuchen.",
     "pageError": "Die Aboseite konnte nicht geöffnet werden.",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "markAllRead": "Alle als gelesen"
   },
   "harvest": {
     "title": "Harvest plan",

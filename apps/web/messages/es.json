@@ -104,7 +104,11 @@
     "forSellers": "Soy vendedor",
     "subscriptions": "Alertas",
     "chatUnread": "Chat, {count} sin leer",
-    "inboxUnread": "Solicitudes entrantes, {count} pendientes"
+    "inboxUnread": "Solicitudes entrantes, {count} pendientes",
+    "notifications": "Avisos",
+    "notificationsUnread": "Avisos, {count} sin leer",
+    "purchaseRequestsUnread": "Mis solicitudes de compra, {count} sin leer",
+    "myQuotesUnread": "Mis ofertas, {count} sin leer"
   },
   "footer": {
     "tagline": "Conectamos granjas georgianas con compradores de todo el mundo.",
@@ -876,7 +880,8 @@
       "sellerRatingPending": "El vendedor aún no ha valorado.",
       "noComment": "Sin reseña escrita."
     },
-    "securityTitle": "Seguridad"
+    "securityTitle": "Seguridad",
+    "unreadCard": "{label}, {count} sin leer"
   },
   "rating": {
     "title": "Valora a tu partner",
@@ -1081,7 +1086,8 @@
     "browseCatalog": "Abrir el catálogo y activar alertas en la ficha del producto",
     "partialLoadError": "Parte de los datos de suscripción no se cargó. Actualiza la página o inténtalo más tarde.",
     "pageError": "No se pudo abrir la página de suscripciones.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "markAllRead": "Marcar todas como leídas"
   },
   "harvest": {
     "title": "Harvest plan",

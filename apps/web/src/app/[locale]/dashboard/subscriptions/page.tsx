@@ -83,7 +83,7 @@ export default async function SubscriptionsPage({ params }: Props) {
         ) : null}
       </section>
 
-      <section className="cabinet-section cabinet-section--nested">
+      <section id="inbox" className="cabinet-section cabinet-section--nested">
         <h2 className="section-title">{t('inboxTitle')}</h2>
         <p className="page__subtitle">{t('inboxHint')}</p>
         <UserNotificationsList initial={inbox} />
