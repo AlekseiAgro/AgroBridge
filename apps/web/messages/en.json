@@ -1217,29 +1217,30 @@
     }
   },
   "marketInsight": {
-    "button": "AI Market Insight",
-    "title": "Market insight",
+    "button": "Market Insight",
+    "title": "Market Insight",
     "close": "Close",
-    "loading": "Preparing a short market note…",
+    "loading": "Preparing a short listing signal…",
     "error": "Could not load market insight.",
-    "disclaimer": "Indicative note based on listing details. Not financial or trading advice."
+    "disclaimer": "An indicative signal calculated from listing characteristics, seasonality and stated export markets. It is not based on external market statistics or historical price data."
   },
   "opportunity": {
     "tiers": {
-      "excellent": "Excellent Opportunity",
-      "good": "Good Opportunity",
-      "fair": "Fair Opportunity",
-      "watch": "Watch Opportunity"
+      "excellent": "Strong opportunity signal",
+      "good": "Opportunity signal",
+      "fair": "Moderate opportunity signal",
+      "watch": "Listing to watch"
     },
     "tooltip": {
-      "highDemand": "High demand in {markets}.",
-      "steadyDemand": "Steady demand in {markets}.",
-      "limitedSupply": "Supply limited.",
-      "availableSupply": "Supply is available.",
-      "priceRiseThreeWeeks": "Price growth expected in the next three weeks.",
-      "priceRiseWeeks": "Price growth expected in the next {weeks} weeks.",
-      "priceRiseSoon": "Price growth is expected soon.",
-      "priceStable": "Recent price move about +{percent}%."
+      "signalBasis": "Calculated from listing fields, not market statistics.",
+      "exportMarkets": "Export markets considered: {markets}.",
+      "exportMarketsUnknown": "No export markets are stated on this listing.",
+      "limitedSupply": "Listing stock or harvest status is limited.",
+      "availableSupply": "Listing stock is available.",
+      "seasonOneWeek": "Stated harvest start is in about one week.",
+      "seasonWeeks": "Stated harvest start is in about {weeks} weeks.",
+      "seasonStarted": "Stated harvest start has begun or is imminent.",
+      "seasonUnstated": "No harvest start date is stated."
     }
   },
   "verifyEmail": {
