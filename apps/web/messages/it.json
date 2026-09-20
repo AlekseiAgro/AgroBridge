@@ -164,6 +164,23 @@
       "organic": "Prodotti biologici",
       "other": "Altro"
     },
+    "categoryAlts": {
+      "fruits": "Mele, pesche, prugne e uva",
+      "vegetables": "Verdura fresca",
+      "berries": "Bacche fresche",
+      "nuts": "Noci e nocciole",
+      "wine": "Vigneto",
+      "dairy": "Latticini",
+      "honey": "Miele in un vasetto di vetro",
+      "mineralWater": "Bottiglie di acqua minerale",
+      "spices": "Spezie essiccate",
+      "tea": "Foglie di tè essiccate",
+      "bayLeaf": "Foglie di alloro essiccate",
+      "essentialOils": "Flaconi di oli essenziali",
+      "organic": "Prodotti dell'orto biologico",
+      "other": "Paesaggio agricolo"
+    },
+    "categoryFallbackAlt": "Illustrazione della categoria: {category}",
     "allRegions": "Tutte le regioni",
     "optional": "(facoltativo)",
     "searchPlaceholder": "Nome o descrizione del prodotto",

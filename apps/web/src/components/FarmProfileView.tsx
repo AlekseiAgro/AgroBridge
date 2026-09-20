@@ -8,7 +8,11 @@ import { RatingStars } from '@/components/RatingStars';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link } from '@/i18n/navigation';
 import { isPublicFarmProduct } from '@/lib/farm-profile';
-import { getProductCardImage } from '@/lib/product-image';
+import {
+  formatCategoryFallbackAlt,
+  getProductCardImage,
+  getProductCardImageAlt,
+} from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
@@ -144,6 +148,13 @@ export async function FarmProfileView({
         <ul className="product-list">
           {products.map((product) => {
             const image = getProductCardImage(product);
+            const imageAlt = image
+              ? getProductCardImageAlt({
+                  fromCategory: image.fromCategory,
+                  productTitle: formatProductTitle(product.title, locale),
+                  categoryFallbackAlt: formatCategoryFallbackAlt(product.category, tc),
+                })
+              : '';
             const quantity = formatProductQuantityRange(
               product,
               product.unit ? tp(`units.${product.unit as 'kg'}`) : null,
@@ -152,7 +163,7 @@ export async function FarmProfileView({
               <li key={product.id} className="product-list__item product-list__item--with-media">
                 {image ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={image.url} alt="" className="product-list__media" />
+                  <img src={image.url} alt={imageAlt} className="product-list__media" />
                 ) : (
                   <div className="product-list__media product-list__media--empty" aria-hidden />
                 )}

@@ -164,6 +164,23 @@
       "organic": "Produits biologiques",
       "other": "Autre"
     },
+    "categoryAlts": {
+      "fruits": "Pommes, pêches, prunes et raisins",
+      "vegetables": "Légumes frais",
+      "berries": "Baies fraîches",
+      "nuts": "Noix et noisettes",
+      "wine": "Vignoble",
+      "dairy": "Produits laitiers",
+      "honey": "Miel en pot de verre",
+      "mineralWater": "Bouteilles d'eau minérale",
+      "spices": "Épices séchées",
+      "tea": "Feuilles de thé séchées",
+      "bayLeaf": "Feuilles de laurier séchées",
+      "essentialOils": "Flacons d'huiles essentielles",
+      "organic": "Produits du jardin biologique",
+      "other": "Paysage agricole"
+    },
+    "categoryFallbackAlt": "Illustration de la catégorie : {category}",
     "allRegions": "Toutes les régions",
     "optional": "(facultatif)",
     "searchPlaceholder": "Nom ou description du produit",
