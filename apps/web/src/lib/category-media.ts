@@ -19,7 +19,7 @@ export const CATEGORY_MEDIA: Record<ProductCategory, string> = {
   bayLeaf: '/images/categories/bayLeaf.jpg',
   essentialOils: '/images/categories/essentialOils.jpg',
   organic: '/images/categories/organic.jpg',
-  other: '/images/hero/farm-landscape.jpg',
+  other: '/images/categories/other.jpg',
 };
 
 export const SHOWCASE_CATEGORIES = PRODUCT_CATEGORIES.filter(

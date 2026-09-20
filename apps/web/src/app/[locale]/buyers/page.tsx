@@ -1,10 +1,7 @@
-import { canTrade } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RoleHub } from '@/components/RoleHub';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
-import { getUnreadMessagesCount } from '@/lib/chat-unread';
-import { getCurrentUser } from '@/lib/session';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -15,21 +12,6 @@ export default async function BuyersHubPage({ params }: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('roleHubs.buyers');
-  const tn = await getTranslations('nav');
-  const user = await getCurrentUser();
-  const trader = Boolean(user && canTrade(user.role));
-  const chatUnreadCount = user ? await getUnreadMessagesCount() : 0;
-
-  const asideLinks = trader
-    ? [
-        { href: '/dashboard/purchase-requests', label: t('asideMine') },
-        { href: '/dashboard/rfqs', label: tn('myRequests') },
-        { href: '/dashboard/chat', label: tn('chat') },
-      ]
-    : [
-        { href: '/login?next=/requests/new', label: tn('login') },
-        { href: '/register?next=/requests/new', label: t('asideRegister') },
-      ];
 
   return (
     <div className="page">
@@ -55,9 +37,6 @@ export default async function BuyersHubPage({ params }: Props) {
               imageSrc: '/images/categories/berries.jpg',
             },
           ]}
-          asideNote={t('asideNote')}
-          asideLinks={asideLinks}
-          chatUnreadCount={chatUnreadCount}
         />
       </main>
       <SiteFooter />

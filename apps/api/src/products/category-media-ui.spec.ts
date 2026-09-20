@@ -73,9 +73,9 @@ describe('category media mapping', () => {
     expect(getCategoryMediaUrl('nuts')).toBe('/images/categories/nuts.jpg');
     expect(getCategoryMediaUrl('wine')).toBe('/images/categories/wine.jpg');
     expect(getCategoryMediaUrl('mineralWater')).toBe('/images/categories/mineralWater.jpg');
-    expect(getCategoryMediaUrl('Орехи')).toBe('/images/hero/farm-landscape.jpg');
-    expect(getCategoryMediaUrl('nuts.jpg')).toBe('/images/hero/farm-landscape.jpg');
-    expect(getCategoryMediaUrl('nut')).toBe('/images/hero/farm-landscape.jpg');
+    expect(getCategoryMediaUrl('Орехи')).toBe('/images/categories/other.jpg');
+    expect(getCategoryMediaUrl('nuts.jpg')).toBe('/images/categories/other.jpg');
+    expect(getCategoryMediaUrl('nut')).toBe('/images/categories/other.jpg');
     expect(resolveProductCategory('tea')).toBe('tea');
     expect(resolveProductCategory(null)).toBe('other');
     expect(SHOWCASE_CATEGORIES).not.toContain('other');
@@ -99,23 +99,25 @@ describe('category media mapping', () => {
     expect(hashes.every((row) => row.bytes > 20_000 && row.bytes < 600_000)).toBe(true);
   });
 
-  it('keeps the generic farm landscape only for other/hero, and unique from showcase stills', () => {
+  it('keeps other on its own still, independent from the restored home hero', () => {
     const otherHash = sha256(publicFileFor(CATEGORY_MEDIA.other));
     const heroHash = sha256(join(WEB_PUBLIC, 'images/hero/farm-landscape.jpg'));
-    expect(otherHash).toBe(heroHash);
-    expect(CATEGORY_MEDIA.other).toBe('/images/hero/farm-landscape.jpg');
+    expect(CATEGORY_MEDIA.other).toBe('/images/categories/other.jpg');
+    expect(existsSync(join(WEB_PUBLIC, 'images/hero/farm-landscape.jpg'))).toBe(true);
+    expect(otherHash).not.toBe(heroHash);
 
     for (const category of SHOWCASE_CATEGORIES) {
       expect(sha256(publicFileFor(CATEGORY_MEDIA[category]))).not.toBe(otherHash);
+      expect(sha256(publicFileFor(CATEGORY_MEDIA[category]))).not.toBe(heroHash);
     }
   });
 
-  it('stores one jpeg per showcase category and no leftover unused category files', () => {
+  it('stores one jpeg per category including other, with no leftover unused files', () => {
     const files = readdirSync(join(WEB_PUBLIC, 'images/categories')).filter((name) =>
       name.endsWith('.jpg'),
     );
     expect(files.sort()).toEqual(
-      SHOWCASE_CATEGORIES.map((category) => `${category}.jpg`).sort(),
+      [...SHOWCASE_CATEGORIES, 'other'].map((category) => `${category}.jpg`).sort(),
     );
   });
 });
@@ -135,7 +137,7 @@ describe('product image precedence and honest fallback alt', () => {
       fromCategory: true,
     });
     expect(getProductCardImage({ category: 'unknown-group' })).toEqual({
-      url: '/images/hero/farm-landscape.jpg',
+      url: '/images/categories/other.jpg',
       fromCategory: true,
     });
   });
