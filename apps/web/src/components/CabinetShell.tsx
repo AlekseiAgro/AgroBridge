@@ -1,4 +1,4 @@
-import { canTrade } from '@agrobridge/shared';
+import { canTrade, EMPTY_NOTIFICATION_UNREAD_SUMMARY } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { ChatNavLink } from '@/components/ChatNavLink';
@@ -6,9 +6,12 @@ import { InboxNavLink } from '@/components/InboxNavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LocaleSync } from '@/components/LocaleSync';
 import { LogoutButton } from '@/components/LogoutButton';
+import { NavLinkWithBadge } from '@/components/NavLinkWithBadge';
+import { NotificationBell } from '@/components/NotificationBell';
 import { Link } from '@/i18n/navigation';
 import { getUnreadMessagesCount } from '@/lib/chat-unread';
 import { getPendingInboxCount } from '@/lib/inbox-unread';
+import { getNotificationUnreadCounts } from '@/lib/notification-unread';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -24,8 +27,11 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
   const tp = await getTranslations('purchaseRequests');
   const user = await getCurrentUser();
   const trader = Boolean(user && canTrade(user.role));
-  const unreadCount = user ? await getUnreadMessagesCount() : 0;
-  const pendingInboxCount = trader ? await getPendingInboxCount() : 0;
+  const [unreadCount, pendingInboxCount, notificationUnread] = await Promise.all([
+    user ? getUnreadMessagesCount() : Promise.resolve(0),
+    trader ? getPendingInboxCount() : Promise.resolve(0),
+    user ? getNotificationUnreadCounts() : Promise.resolve(EMPTY_NOTIFICATION_UNREAD_SUMMARY),
+  ]);
 
   return (
     <div className="cabinet">
@@ -60,8 +66,20 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
             {trader ? (
               <>
                 <Link href="/requests">{t('purchaseRequests')}</Link>
-                <Link href="/dashboard/quotes">{t('myQuotes')}</Link>
-                <Link href="/dashboard/purchase-requests">{tp('mineTitle')}</Link>
+                <NavLinkWithBadge
+                  href="/dashboard/quotes"
+                  label={t('myQuotes')}
+                  unreadLabel={t('myQuotesUnread', { count: notificationUnread.quotesUnread })}
+                  count={notificationUnread.quotesUnread}
+                />
+                <NavLinkWithBadge
+                  href="/dashboard/purchase-requests"
+                  label={tp('mineTitle')}
+                  unreadLabel={t('purchaseRequestsUnread', {
+                    count: notificationUnread.purchaseRequestsUnread,
+                  })}
+                  count={notificationUnread.purchaseRequestsUnread}
+                />
               </>
             ) : null}
           </div>
@@ -87,6 +105,13 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
             {subtitle ? <p className="cabinet__subtitle">{subtitle}</p> : null}
           </div>
           <div className="cabinet__top-actions">
+            {user ? (
+              <NotificationBell
+                count={notificationUnread.totalUnread}
+                label={t('notifications')}
+                unreadLabel={t('notificationsUnread', { count: notificationUnread.totalUnread })}
+              />
+            ) : null}
             <span className="cabinet__user-chip">
               {user?.displayName || user?.email || tc('guest')}
             </span>

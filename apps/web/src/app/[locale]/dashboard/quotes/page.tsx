@@ -1,6 +1,7 @@
 import type { PurchaseQuoteMineItem } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PurchaseQuoteList } from '@/components/PurchaseQuoteList';
+import { MarkSectionNotificationsRead } from '@/components/MarkSectionNotificationsRead';
 import { Link, redirect } from '@/i18n/navigation';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
@@ -27,6 +28,7 @@ export default async function MyQuotesPage({ params }: Props) {
 
   return (
     <main className="cabinet-page">
+      <MarkSectionNotificationsRead section="quotes" />
       <div className="page__heading-row">
         <div>
           <h1>{t('myQuotesTitle')}</h1>

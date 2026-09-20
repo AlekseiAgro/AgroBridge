@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { EMPTY_NOTIFICATION_UNREAD_SUMMARY } from '@agrobridge/shared';
 import { RateLimitExceededException } from '../rate-limit/rate-limit-exceeded.exception';
 import { CabinetService } from './cabinet.service';
 
@@ -52,6 +53,7 @@ describe('CabinetService', () => {
   const notifications = {
     notifyAccountDeletionCode: jest.fn().mockResolvedValue(undefined),
     notifyEmailChangeCode: jest.fn().mockResolvedValue(undefined),
+    unreadSummary: jest.fn().mockResolvedValue({ ...EMPTY_NOTIFICATION_UNREAD_SUMMARY }),
   };
   const chat = {
     unreadTotal: jest.fn().mockResolvedValue({ count: 0 }),
@@ -122,6 +124,7 @@ describe('CabinetService', () => {
     prisma.conversation.count.mockResolvedValue(0);
     prisma.product.count.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
     prisma.rfq.findMany.mockResolvedValue([]);
+    notifications.unreadSummary.mockResolvedValue({ ...EMPTY_NOTIFICATION_UNREAD_SUMMARY });
   }
 
   it('counts only the current buyer\'s open purchase requests', async () => {
@@ -247,6 +250,36 @@ describe('CabinetService', () => {
     expect(overview.activity.completedDeals).toBe(3);
     expect(overview.activity.acceptedQuotes).toBe(7);
     expect(overview.activity.completedDeals).not.toBe(overview.activity.acceptedQuotes);
+  });
+
+  it('exposes notification unread totals without changing marketplace object counts', async () => {
+    await stubOverviewCounts({
+      openPurchaseRequests: 5,
+      pendingQuotes: 8,
+      acceptedQuotes: 3,
+    });
+    notifications.unreadSummary.mockResolvedValue({
+      count: 7,
+      totalUnread: 7,
+      purchaseRequestsUnread: 2,
+      quotesUnread: 4,
+      pendingQuotesUnread: 3,
+      acceptedQuotesUnread: 1,
+    });
+
+    const overview = await service.overview(farmer);
+    expect(overview.activity.openPurchaseRequests).toBe(5);
+    expect(overview.activity.pendingQuotes).toBe(8);
+    expect(overview.activity.acceptedQuotes).toBe(3);
+    expect(overview.notificationUnread).toEqual({
+      count: 7,
+      totalUnread: 7,
+      purchaseRequestsUnread: 2,
+      quotesUnread: 4,
+      pendingQuotesUnread: 3,
+      acceptedQuotesUnread: 1,
+    });
+    expect(notifications.unreadSummary).toHaveBeenCalledWith(farmer.id);
   });
 
   it('refuses to delete admin accounts', async () => {

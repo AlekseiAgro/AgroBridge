@@ -1,6 +1,7 @@
 import type { PurchaseRequestSummary, RfqSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PurchaseRequestList } from '@/components/PurchaseRequestList';
+import { MarkSectionNotificationsRead } from '@/components/MarkSectionNotificationsRead';
 import { RfqList } from '@/components/RfqList';
 import { Link, redirect } from '@/i18n/navigation';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -27,6 +28,7 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
 
   return (
     <main className="cabinet-page">
+      <MarkSectionNotificationsRead section="purchase-requests" />
       <div className="page__heading-row">
         <div>
           <h1>{t('mineTitle')}</h1>

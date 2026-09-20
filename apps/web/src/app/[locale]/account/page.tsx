@@ -1,5 +1,5 @@
 import type { CabinetOverview } from '@agrobridge/shared';
-import { canTrade } from '@agrobridge/shared';
+import { canTrade, EMPTY_NOTIFICATION_UNREAD_SUMMARY } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ChangePasswordForm } from '@/components/ChangePasswordForm';
 import { ChatUnreadBadge } from '@/components/ChatNavLink';
@@ -27,7 +27,7 @@ export default async function AccountPage({ params }: Props) {
   const ta = await getTranslations('auth');
   const tProfile = await getTranslations('profile');
   const overview = await apiRequestAuthed<CabinetOverview>('/cabinet/overview');
-  const { user, activity } = overview;
+  const { user, activity, notificationUnread = EMPTY_NOTIFICATION_UNREAD_SUMMARY } = overview;
   const trader = canTrade(user.role);
   const roleKey = `roles.${user.role}` as 'roles.farmer' | 'roles.buyer' | 'roles.admin';
   const memberSince = formatMemberSinceMonthYear(user.memberSince, locale);
@@ -51,18 +51,21 @@ export default async function AccountPage({ params }: Props) {
       value: activity.openPurchaseRequests,
       label: t('stats.openPurchaseRequests'),
       href: '/dashboard/purchase-requests',
+      unreadBadge: notificationUnread.purchaseRequestsUnread,
     },
     {
       key: 'pendingQuotes',
       value: activity.pendingQuotes,
       label: t('stats.pendingQuotes'),
       href: '/dashboard/quotes',
+      unreadBadge: notificationUnread.pendingQuotesUnread,
     },
     {
       key: 'acceptedQuotes',
       value: activity.acceptedQuotes,
       label: t('stats.acceptedQuotes'),
       href: '/dashboard/quotes',
+      unreadBadge: notificationUnread.acceptedQuotesUnread,
     },
     {
       key: 'conversations',
@@ -142,13 +145,21 @@ export default async function AccountPage({ params }: Props) {
         <ul className="activity-summary__grid">
           {cards.map((card) => (
             <li key={card.key}>
-              <Link href={card.href} className="activity-summary__link">
-                <strong>
-                  {card.value}
+              <Link
+                href={card.href}
+                className="activity-summary__link"
+                aria-label={
+                  card.unreadBadge
+                    ? t('unreadCard', { label: card.label, count: card.unreadBadge })
+                    : undefined
+                }
+              >
+                <span className="activity-summary__value">
+                  <strong>{card.value}</strong>
                   {card.unreadBadge ? (
                     <ChatUnreadBadge count={card.unreadBadge} className="activity-summary__unread" />
                   ) : null}
-                </strong>
+                </span>
                 <span>{card.label}</span>
               </Link>
             </li>

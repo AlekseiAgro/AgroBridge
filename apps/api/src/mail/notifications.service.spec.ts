@@ -14,6 +14,7 @@ describe('NotificationsService', () => {
     update: jest.fn(),
     updateMany: jest.fn(),
     count: jest.fn().mockResolvedValue(0),
+    groupBy: jest.fn().mockResolvedValue([]),
   };
 
   let service: NotificationsService;
@@ -518,6 +519,105 @@ describe('NotificationsService', () => {
         orderBy: { createdAt: 'desc' },
         take: 30,
       });
+    });
+
+    it('summarizes unread counts from the current user only', async () => {
+      userNotification.groupBy.mockResolvedValue([
+        { type: 'purchaseQuoteReceived', _count: { _all: 2 } },
+        { type: 'purchaseQuoteWithdrawn', _count: { _all: 0 } },
+        { type: 'purchaseQuoteAccepted', _count: { _all: 1 } },
+        { type: 'purchaseQuoteDeclined', _count: { _all: 1 } },
+        { type: 'purchaseRequestClosed', _count: { _all: 1 } },
+        { type: 'purchaseRequestCancelled', _count: { _all: 1 } },
+        { type: 'harvestAvailable', _count: { _all: 1 } },
+      ]);
+
+      await expect(service.unreadSummary('user-1')).resolves.toEqual({
+        count: 7,
+        totalUnread: 7,
+        purchaseRequestsUnread: 2,
+        quotesUnread: 4,
+        pendingQuotesUnread: 3,
+        acceptedQuotesUnread: 1,
+      });
+      expect(userNotification.groupBy).toHaveBeenCalledWith({
+        by: ['type'],
+        where: { userId: 'user-1', readAt: null },
+        _count: { _all: true },
+      });
+    });
+
+    it('does not count a seller-side event toward My Purchase Requests', async () => {
+      userNotification.groupBy.mockResolvedValue([
+        { type: 'purchaseQuoteAccepted', _count: { _all: 3 } },
+      ]);
+
+      await expect(service.unreadSummary('seller-1')).resolves.toEqual({
+        count: 3,
+        totalUnread: 3,
+        purchaseRequestsUnread: 0,
+        quotesUnread: 3,
+        pendingQuotesUnread: 0,
+        acceptedQuotesUnread: 3,
+      });
+    });
+
+    it('does not count a buyer-side event toward My Quotes', async () => {
+      userNotification.groupBy.mockResolvedValue([
+        { type: 'purchaseQuoteReceived', _count: { _all: 2 } },
+        { type: 'purchaseQuoteWithdrawn', _count: { _all: 1 } },
+      ]);
+
+      await expect(service.unreadSummary('buyer-1')).resolves.toEqual({
+        count: 3,
+        totalUnread: 3,
+        purchaseRequestsUnread: 3,
+        quotesUnread: 0,
+        pendingQuotesUnread: 0,
+        acceptedQuotesUnread: 0,
+      });
+    });
+
+    it('excludes already-read rows from the unread query', async () => {
+      userNotification.groupBy.mockResolvedValue([]);
+
+      await service.unreadSummary('user-1');
+
+      expect(userNotification.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: 'user-1', readAt: null },
+        }),
+      );
+    });
+
+    it('marks one notification read only for the owning user', async () => {
+      userNotification.findFirst.mockResolvedValue(null);
+
+      await expect(service.markRead('user-1', 'n-other')).resolves.toBeNull();
+      expect(userNotification.update).not.toHaveBeenCalled();
+    });
+
+    it('marks matching unread types for the current user only', async () => {
+      userNotification.updateMany.mockResolvedValue({ count: 2 });
+
+      await expect(
+        service.markTypesRead('user-1', ['purchaseQuoteReceived', 'purchaseQuoteWithdrawn']),
+      ).resolves.toEqual({ updated: 2 });
+      expect(userNotification.updateMany).toHaveBeenCalledWith({
+        where: {
+          userId: 'user-1',
+          readAt: null,
+          type: { in: ['purchaseQuoteReceived', 'purchaseQuoteWithdrawn'] },
+        },
+        data: { readAt: expect.any(Date) },
+      });
+    });
+
+    it('ignores unknown types instead of marking another user or every row', async () => {
+      await expect(service.markTypesRead('user-1', ['not-a-type'])).resolves.toEqual({
+        updated: 0,
+      });
+      expect(userNotification.updateMany).not.toHaveBeenCalled();
     });
   });
 });

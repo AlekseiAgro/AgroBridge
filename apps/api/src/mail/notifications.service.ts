@@ -4,9 +4,13 @@ import { UserNotificationType as PrismaUserNotificationType } from '@prisma/clie
 import type { Locale } from '@agrobridge/shared';
 import {
   DEFAULT_LOCALE,
+  EMPTY_NOTIFICATION_UNREAD_SUMMARY,
   isHarvestStatus,
   isLocale,
+  isUserNotificationType,
   localizeProductTitle,
+  summarizeUnreadByType,
+  type NotificationUnreadSummary,
   type UserNotificationItem,
   type VerificationReasonCode,
 } from '@agrobridge/shared';
@@ -766,10 +770,46 @@ export class NotificationsService {
     return { ok: true };
   }
 
-  async unreadCount(userId: string): Promise<number> {
-    return this.prisma.userNotification.count({
-      where: { userId, readAt: null },
+  async markTypesRead(
+    userId: string,
+    types: readonly string[],
+  ): Promise<{ updated: number }> {
+    const allowed = [...new Set(types.filter(isUserNotificationType))];
+    if (allowed.length === 0) {
+      return { updated: 0 };
+    }
+    const result = await this.prisma.userNotification.updateMany({
+      where: {
+        userId,
+        readAt: null,
+        type: { in: allowed as PrismaUserNotificationType[] },
+      },
+      data: { readAt: new Date() },
     });
+    return { updated: result.count };
+  }
+
+  async unreadSummary(userId: string): Promise<NotificationUnreadSummary> {
+    try {
+      const groups = await this.prisma.userNotification.groupBy({
+        by: ['type'],
+        where: { userId, readAt: null },
+        _count: { _all: true },
+      });
+      return summarizeUnreadByType(
+        groups.map((group) => ({ type: group.type, count: group._count._all })),
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to summarize unread notifications for ${userId}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+      return { ...EMPTY_NOTIFICATION_UNREAD_SUMMARY };
+    }
+  }
+
+  async unreadCount(userId: string): Promise<number> {
+    return (await this.unreadSummary(userId)).totalUnread;
   }
 
   async notifyChatMessage(params: {

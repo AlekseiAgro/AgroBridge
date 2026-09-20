@@ -104,7 +104,11 @@
     "forSellers": "Je suis vendeur",
     "subscriptions": "Alertes",
     "chatUnread": "Chat, {count} non lus",
-    "inboxUnread": "Demandes reçues, {count} en attente"
+    "inboxUnread": "Demandes reçues, {count} en attente",
+    "notifications": "Notifications",
+    "notificationsUnread": "Notifications, {count} non lues",
+    "purchaseRequestsUnread": "Mes demandes d’achat, {count} non lues",
+    "myQuotesUnread": "Mes offres, {count} non lues"
   },
   "footer": {
     "tagline": "Nous relions les fermes géorgiennes aux acheteurs du monde entier.",
@@ -876,7 +880,8 @@
       "sellerRatingPending": "Le vendeur n’a pas encore noté.",
       "noComment": "Pas d’avis écrit."
     },
-    "securityTitle": "Sécurité"
+    "securityTitle": "Sécurité",
+    "unreadCard": "{label}, {count} non lues"
   },
   "rating": {
     "title": "Noter votre partenaire",
@@ -1081,7 +1086,8 @@
     "browseCatalog": "Ouvrir le catalogue et activer les alertes sur une fiche produit",
     "partialLoadError": "Une partie des abonnements n’a pas pu être chargée. Actualisez la page ou réessayez plus tard.",
     "pageError": "Impossible d’ouvrir la page des abonnements.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "markAllRead": "Tout marquer lu"
   },
   "harvest": {
     "title": "Harvest plan",
