@@ -1,6 +1,12 @@
 'use client';
 
-import { REGISTERABLE_ROLES, type PublicUser, type RegisterableRole } from '@agrobridge/shared';
+import {
+  CURRENT_LEGAL_VERSION,
+  REGISTERABLE_ROLES,
+  type LegalLocale,
+  type PublicUser,
+  type RegisterableRole,
+} from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -11,9 +17,11 @@ type Mode = 'login' | 'register';
 type Props = {
   mode: Mode;
   nextPath?: string;
+  termsVersion?: string;
+  termsLocale?: LegalLocale;
 };
 
-export function AuthForm({ mode, nextPath }: Props) {
+export function AuthForm({ mode, nextPath, termsVersion, termsLocale }: Props) {
   const t = useTranslations('auth');
   const locale = useLocale();
   const router = useRouter();
@@ -23,6 +31,8 @@ export function AuthForm({ mode, nextPath }: Props) {
     nextPath?.includes('/requests/new') ? 'buyer' : 'farmer',
   );
   const redirectTo = safeNextPath(nextPath, '/account');
+  const acceptedTermsVersion = termsVersion ?? CURRENT_LEGAL_VERSION;
+  const acceptedTermsLocale = termsLocale ?? 'en';
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,6 +40,11 @@ export function AuthForm({ mode, nextPath }: Props) {
     setPending(true);
 
     const form = new FormData(event.currentTarget);
+    if (mode === 'register' && form.get('acceptTerms') !== 'true') {
+      setError(t('termsRequired'));
+      setPending(false);
+      return;
+    }
     const payload =
       mode === 'login'
         ? {
@@ -42,6 +57,9 @@ export function AuthForm({ mode, nextPath }: Props) {
             displayName: String(form.get('displayName') ?? ''),
             role,
             locale,
+            acceptTerms: form.get('acceptTerms') === 'true',
+            acceptedTermsVersion,
+            acceptedTermsLocale,
           };
 
     try {
@@ -120,7 +138,33 @@ export function AuthForm({ mode, nextPath }: Props) {
         <p className="auth-form__forgot">
           <Link href="/forgot-password">{t('forgotPassword')}</Link>
         </p>
-      ) : null}
+      ) : (
+        <div className="auth-legal-accept">
+          <label className="auth-legal-accept__check">
+            <input name="acceptTerms" type="checkbox" value="true" required />
+            <span>
+              {t.rich('acceptTerms', {
+                terms: (chunks) => (
+                  <Link href="/terms" locale={acceptedTermsLocale}>
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </span>
+          </label>
+          <p className="auth-legal-accept__privacy">
+            {t.rich('privacyNotice', {
+              privacy: (chunks) => (
+                <Link href="/privacy" locale={acceptedTermsLocale}>
+                  {chunks}
+                </Link>
+              ),
+            })}
+          </p>
+          <input type="hidden" name="acceptedTermsVersion" value={acceptedTermsVersion} />
+          <input type="hidden" name="acceptedTermsLocale" value={acceptedTermsLocale} />
+        </div>
+      )}
 
       {error ? <p className="form-error">{error}</p> : null}
 

@@ -478,6 +478,79 @@ body {
   line-height: 1.45;
 }
 
+.cabinet-legal {
+  margin-top: 3.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 0.75rem;
+  max-width: 36rem;
+}
+
+.cabinet-legal__hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.legal-page p {
+  max-width: 42rem;
+  line-height: 1.55;
+}
+
+.legal-page__placeholder {
+  padding: 0.75rem 0.9rem;
+  border: 1px dashed var(--line);
+  border-radius: 0.75rem;
+  background: rgba(196, 163, 90, 0.08);
+  font-weight: 650;
+}
+
+.legal-page__chooser {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 36rem;
+}
+
+.legal-page__chooser-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.auth-legal-accept {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.auth-legal-accept__check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.auth-legal-accept__check input {
+  margin-top: 0.2rem;
+}
+
+.auth-legal-accept__privacy,
+.auth-legal-links {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.auth-legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-top: 1.25rem;
+}
+
 .auth-form__forgot {
   margin: -0.35rem 0 0;
   font-size: 0.9rem;

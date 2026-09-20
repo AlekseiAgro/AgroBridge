@@ -41,6 +41,13 @@ export async function SiteFooter() {
               </>
             )}
           </nav>
+
+          <nav className="site-footer__col" aria-label={t('legal')}>
+            <p className="site-footer__heading">{t('legal')}</p>
+            <Link href="/legal">{t('legalInformation')}</Link>
+            <Link href="/terms">{t('terms')}</Link>
+            <Link href="/privacy">{t('privacy')}</Link>
+          </nav>
         </div>
       </div>
 

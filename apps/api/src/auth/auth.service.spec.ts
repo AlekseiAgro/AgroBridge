@@ -22,7 +22,28 @@ describe('AuthService', () => {
         _count: { _all: 0 },
       }),
     },
+    legalAcceptance: {
+      create: jest.fn(),
+    },
     $transaction: jest.fn(),
+  };
+
+  const legal = {
+    requirePublishedTerms: jest.fn(),
+  };
+
+  const publishedTerms = (locale: 'ka' | 'en' = 'en') => ({
+    id: `doc_terms_${locale}`,
+    type: 'TERMS',
+    version: '1.0',
+    locale,
+    title: locale === 'ka' ? 'გამოყენების პირობები' : 'Terms of Use',
+    status: 'published',
+  });
+
+  const acceptedRegister = {
+    acceptTerms: true as const,
+    acceptedTermsVersion: '1.0',
   };
 
   const jwtService = {
@@ -52,6 +73,7 @@ describe('AuthService', () => {
       notifications as never,
       verification as never,
       rateLimit,
+      legal as never,
     );
   }
 
@@ -63,6 +85,9 @@ describe('AuthService', () => {
       }
       return undefined;
     });
+    legal.requirePublishedTerms.mockImplementation(async (locale: 'ka' | 'en') =>
+      publishedTerms(locale),
+    );
     service = buildService();
   });
 
@@ -86,6 +111,8 @@ describe('AuthService', () => {
       role: 'farmer',
       displayName: 'Nino',
       locale: 'ka',
+      ...acceptedRegister,
+      acceptedTermsLocale: 'ka',
     });
 
     expect(result.accessToken).toBe('test-token');
@@ -117,6 +144,14 @@ describe('AuthService', () => {
         }),
       }),
     );
+    expect(legal.requirePublishedTerms).toHaveBeenCalledWith('ka', '1.0');
+    expect(prisma.legalAcceptance.create).toHaveBeenCalledWith({
+      data: {
+        userId: 'user_1',
+        documentId: 'doc_terms_ka',
+        documentVersion: '1.0',
+      },
+    });
     expect(notifications.notifyWelcome).toHaveBeenCalledWith({
       email: 'farmer@example.com',
       locale: 'ka',
@@ -148,6 +183,8 @@ describe('AuthService', () => {
       role: 'buyer',
       displayName: 'Elena',
       locale: 'en',
+      ...acceptedRegister,
+      acceptedTermsLocale: 'en',
     });
 
     expect(result.user.role).toBe('buyer');
@@ -165,6 +202,36 @@ describe('AuthService', () => {
     );
   });
 
+  it('rejects registration without Terms acceptance', async () => {
+    await expect(
+      service.register({
+        email: 'new@example.com',
+        password: 'password1',
+        role: 'buyer',
+        acceptTerms: false,
+        acceptedTermsVersion: '1.0',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.user.create).not.toHaveBeenCalled();
+    expect(prisma.legalAcceptance.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects registration when the Terms version is unpublished', async () => {
+    legal.requirePublishedTerms.mockRejectedValue(
+      new BadRequestException('Unknown or unpublished Terms of Use version'),
+    );
+
+    await expect(
+      service.register({
+        email: 'new@example.com',
+        password: 'password1',
+        role: 'buyer',
+        ...acceptedRegister,
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.user.create).not.toHaveBeenCalled();
+  });
+
   it('rejects duplicate email', async () => {
     prisma.user.findUnique.mockResolvedValue({ id: 'existing' });
 
@@ -173,6 +240,7 @@ describe('AuthService', () => {
         email: 'farmer@example.com',
         password: 'password1',
         role: 'farmer',
+        ...acceptedRegister,
       }),
     ).rejects.toBeInstanceOf(ConflictException);
   });
@@ -339,7 +407,10 @@ describe('AuthService', () => {
       }));
 
       const signUp = (email: string, ip: string) =>
-        limited.register({ email, password: 'password1', role: 'buyer' }, ip);
+        limited.register(
+          { email, password: 'password1', role: 'buyer', ...acceptedRegister },
+          ip,
+        );
 
       await expect(signUp('a@example.com', '192.0.2.1')).resolves.toBeDefined();
       await expect(signUp('b@example.com', '192.0.2.1')).resolves.toBeDefined();

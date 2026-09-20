@@ -77,7 +77,10 @@
     "passwordChanged": "Mot de passe mis à jour. Les autres sessions ont été déconnectées.",
     "passwordMismatch": "Les nouveaux mots de passe ne correspondent pas.",
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
-    "backToLogin": "Retour à la connexion"
+    "backToLogin": "Retour à la connexion",
+    "acceptTerms": "J'accepte les <terms>Conditions d'utilisation</terms>.",
+    "privacyNotice": "Vous pouvez aussi lire la <privacy>Politique de confidentialité</privacy>.",
+    "termsRequired": "Veuillez accepter les Conditions d'utilisation pour créer un compte."
   },
   "account": {
     "title": "Votre compte",
@@ -116,7 +119,11 @@
     "explore": "Explorer",
     "account": "Compte",
     "support": "Assistance",
-    "copyright": "© {year} AgroBridge"
+    "copyright": "© {year} AgroBridge",
+    "legal": "Mentions légales",
+    "legalInformation": "Informations juridiques",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité"
   },
   "support": {
     "title": "Assistance",
@@ -882,9 +889,20 @@
       "noComment": "Pas d’avis écrit."
     },
     "settingsTitle": "Paramètres",
-    "settingsSubtitle": "Mot de passe et sécurité du compte.",
+    "settingsSubtitle": "Mot de passe, sécurité du compte et documents juridiques.",
     "securityTitle": "Sécurité",
-    "unreadCard": "{label}, {count} non lues"
+    "unreadCard": "{label}, {count} non lues",
+    "legalTitle": "Mentions légales",
+    "legalSubtitle": "Documents publiés actuellement et votre acceptation des Conditions d'utilisation.",
+    "currentTerms": "Conditions d'utilisation actuelles",
+    "termsVersion": "Version {version}",
+    "termsAcceptedAt": "Vous avez accepté les Conditions d'utilisation version {version} le {date}.",
+    "termsNotAccepted": "Aucune acceptation des Conditions d'utilisation n'est enregistrée pour ce compte.",
+    "viewTerms": "Voir les Conditions d'utilisation actuelles",
+    "viewPrivacy": "Voir la Politique de confidentialité",
+    "privacyTransparency": "La Politique de confidentialité décrit le traitement des données personnelles. La consulter n'est pas enregistrée comme un consentement.",
+    "privacyNotAccepted": "Le consentement à la Politique de confidentialité n'est pas recueilli à l'inscription.",
+    "legalLoadError": "Impossible de charger les informations d'acceptation juridique."
   },
   "rating": {
     "title": "Noter votre partenaire",
@@ -1218,5 +1236,16 @@
     "confirmed": "E-mail confirmé. Ouverture du compte…",
     "pleaseWait": "Veuillez patienter…",
     "genericError": "Une erreur s’est produite. Réessayez."
+  },
+  "legal": {
+    "informationTitle": "Informations juridiques",
+    "termsTitle": "Conditions d'utilisation",
+    "privacyTitle": "Politique de confidentialité",
+    "version": "Version {version}",
+    "availableLocalesTitle": "Versions juridiques disponibles",
+    "availableLocalesBody": "Les documents juridiques sont publiés uniquement en géorgien et en anglais. AgroBridge ne génère pas de traduction juridique pour cette langue.",
+    "openGeorgian": "Version géorgienne",
+    "openEnglish": "Version anglaise",
+    "placeholderBanner": "[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]"
   }
 }

@@ -23,6 +23,7 @@ import { PlacesModule } from './places/places.module';
 import { UsersModule } from './users/users.module';
 import { VerificationModule } from './verification/verification.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { LegalModule } from './legal/legal.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     CabinetModule,
     SupportModule,
     NotificationsModule,
+    LegalModule,
   ],
 })
 export class AppModule {}

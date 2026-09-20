@@ -5,7 +5,13 @@ import type {
   PublicUser,
   SellerType,
 } from '@agrobridge/shared';
-import { DEFAULT_LOCALE, isLocale, isRegisterableRole } from '@agrobridge/shared';
+import {
+  DEFAULT_LOCALE,
+  isLegalLocale,
+  isLocale,
+  isRegisterableRole,
+  legalLocaleFor,
+} from '@agrobridge/shared';
 import {
   BadRequestException,
   ConflictException,
@@ -25,6 +31,7 @@ import { UNKNOWN_IP } from '../http/client-ip';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RateLimitService, type RateLimitRequest } from '../rate-limit/rate-limit.service';
+import { LegalService } from '../legal/legal.service';
 import { VerificationService } from '../verification/verification.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -40,6 +47,7 @@ export class AuthService {
     private readonly notifications: NotificationsService,
     private readonly verification: VerificationService,
     private readonly rateLimit: RateLimitService,
+    private readonly legal: LegalService,
   ) {}
 
   async register(dto: RegisterDto, ip?: string | null): Promise<AuthTokenResponse> {
@@ -56,20 +64,46 @@ export class AuthService {
       throw new ConflictException('Email is already registered');
     }
 
+    if (dto.acceptTerms !== true) {
+      throw new BadRequestException('Terms of Use must be accepted');
+    }
+
     const locale = this.resolveLocale(dto.locale);
+    const requestedTermsLocale = dto.acceptedTermsLocale;
+    const termsLocale =
+      requestedTermsLocale && isLegalLocale(requestedTermsLocale)
+        ? requestedTermsLocale
+        : legalLocaleFor(locale);
+    const termsVersion = dto.acceptedTermsVersion?.trim();
+    if (!termsVersion) {
+      throw new BadRequestException('acceptedTermsVersion is required');
+    }
+
+    const termsDocument = await this.legal.requirePublishedTerms(termsLocale, termsVersion);
     const passwordHash = await bcrypt.hash(dto.password, 12);
 
     // Role is for registration stats (seller vs buyer). Seller/buyer subtypes are filled later in the cabinet.
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        role: dto.role as UserRole,
-        sellerType: null,
-        buyerType: null,
-        locale: locale as LocaleCode,
-        displayName: dto.displayName?.trim() || null,
-      },
+    // Terms acceptance is written in the same transaction so an account cannot exist without it.
+    const user = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.user.create({
+        data: {
+          email,
+          passwordHash,
+          role: dto.role as UserRole,
+          sellerType: null,
+          buyerType: null,
+          locale: locale as LocaleCode,
+          displayName: dto.displayName?.trim() || null,
+        },
+      });
+      await tx.legalAcceptance.create({
+        data: {
+          userId: created.id,
+          documentId: termsDocument.id,
+          documentVersion: termsDocument.version,
+        },
+      });
+      return created;
     });
 
     const authUser = this.toAuthenticatedUser(user);

@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { AuthLegalLinks } from '@/components/AuthLegalLinks';
 import { ForgotPasswordForm } from '@/components/ForgotPasswordForm';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link, redirect } from '@/i18n/navigation';
@@ -35,6 +36,7 @@ export default async function ForgotPasswordPage({ params }: Props) {
         <p className="auth-card__footer">
           <Link href="/login">{t('backToLogin')}</Link>
         </p>
+        <AuthLegalLinks />
       </main>
     </div>
   );

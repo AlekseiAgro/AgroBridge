@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { AuthLegalLinks } from '@/components/AuthLegalLinks';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { VerifyEmailForm } from '@/components/VerifyEmailForm';
 import { Link, redirect } from '@/i18n/navigation';
@@ -41,6 +42,7 @@ export default async function VerifyEmailPage({ params, searchParams }: Props) {
         <h1>{t('title')}</h1>
         <p className="auth-card__subtitle">{t('subtitle')}</p>
         <VerifyEmailForm email={user!.email} nextPath={nextPath} />
+        <AuthLegalLinks />
       </main>
     </div>
   );

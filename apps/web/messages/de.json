@@ -77,7 +77,10 @@
     "passwordChanged": "Passwort aktualisiert. Andere Sitzungen wurden abgemeldet.",
     "passwordMismatch": "Die neuen Passwörter stimmen nicht überein.",
     "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen haben.",
-    "backToLogin": "Zurück zur Anmeldung"
+    "backToLogin": "Zurück zur Anmeldung",
+    "acceptTerms": "Ich stimme den <terms>Nutzungsbedingungen</terms> zu.",
+    "privacyNotice": "Sie können auch die <privacy>Datenschutzrichtlinie</privacy> lesen.",
+    "termsRequired": "Bitte akzeptieren Sie die Nutzungsbedingungen, um ein Konto zu erstellen."
   },
   "account": {
     "title": "Ihr Konto",
@@ -116,7 +119,11 @@
     "explore": "Entdecken",
     "account": "Konto",
     "support": "Support",
-    "copyright": "© {year} AgroBridge"
+    "copyright": "© {year} AgroBridge",
+    "legal": "Rechtliches",
+    "legalInformation": "Rechtliche Informationen",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutzrichtlinie"
   },
   "support": {
     "title": "Support",
@@ -882,9 +889,20 @@
       "noComment": "Kein schriftlicher Kommentar."
     },
     "settingsTitle": "Einstellungen",
-    "settingsSubtitle": "Passwort und Kontosicherheit.",
+    "settingsSubtitle": "Passwort, Kontosicherheit und Rechtsdokumente.",
     "securityTitle": "Sicherheit",
-    "unreadCard": "{label}, {count} ungelesen"
+    "unreadCard": "{label}, {count} ungelesen",
+    "legalTitle": "Rechtliches",
+    "legalSubtitle": "Aktuell veröffentlichte Dokumente und Ihre Annahme der Nutzungsbedingungen.",
+    "currentTerms": "Aktuelle Nutzungsbedingungen",
+    "termsVersion": "Version {version}",
+    "termsAcceptedAt": "Sie haben die Nutzungsbedingungen Version {version} am {date} angenommen.",
+    "termsNotAccepted": "Für dieses Konto ist keine Annahme der Nutzungsbedingungen gespeichert.",
+    "viewTerms": "Aktuelle Nutzungsbedingungen ansehen",
+    "viewPrivacy": "Datenschutzrichtlinie ansehen",
+    "privacyTransparency": "Die Datenschutzrichtlinie beschreibt die Verarbeitung personenbezogener Daten. Das Öffnen gilt nicht als Einwilligung.",
+    "privacyNotAccepted": "Eine Einwilligung zur Datenschutzrichtlinie wird bei der Registrierung nicht eingeholt.",
+    "legalLoadError": "Angaben zur rechtlichen Annahme konnten nicht geladen werden."
   },
   "rating": {
     "title": "Partner bewerten",
@@ -1218,5 +1236,16 @@
     "confirmed": "E-Mail bestätigt. Konto wird geöffnet…",
     "pleaseWait": "Bitte warten…",
     "genericError": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+  },
+  "legal": {
+    "informationTitle": "Rechtliche Informationen",
+    "termsTitle": "Nutzungsbedingungen",
+    "privacyTitle": "Datenschutzrichtlinie",
+    "version": "Version {version}",
+    "availableLocalesTitle": "Verfügbare Rechtsfassungen",
+    "availableLocalesBody": "Rechtsdokumente sind nur auf Georgisch und Englisch veröffentlicht. AgroBridge erzeugt keine rechtliche Übersetzung für diese Sprache.",
+    "openGeorgian": "Georgische Fassung",
+    "openEnglish": "Englische Fassung",
+    "placeholderBanner": "[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]"
   }
 }

@@ -1,7 +1,14 @@
+import {
+  CURRENT_LEGAL_VERSION,
+  legalLocaleFor,
+  type CurrentLegalDocuments,
+} from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { AuthForm } from '@/components/AuthForm';
+import { AuthLegalLinks } from '@/components/AuthLegalLinks';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link, redirect } from '@/i18n/navigation';
+import { apiRequest } from '@/lib/api';
 import { safeNextPath } from '@/lib/safe-next-path';
 import { cabinetPathForUser } from '@/lib/require-verified-user';
 import { getCurrentUser } from '@/lib/session';
@@ -23,6 +30,19 @@ export default async function RegisterPage({ params, searchParams }: Props) {
   }
 
   const t = await getTranslations('auth');
+  const termsLocale = legalLocaleFor(locale);
+  let termsVersion = CURRENT_LEGAL_VERSION;
+  try {
+    const current = await apiRequest<CurrentLegalDocuments>(
+      `/legal/documents/current?locale=${termsLocale}`,
+    );
+    const terms = current.documents.find((document) => document.type === 'TERMS');
+    if (terms) {
+      termsVersion = terms.version;
+    }
+  } catch {
+    // The published version is still enforced by the API during registration.
+  }
 
   return (
     <div className="auth-page">
@@ -37,13 +57,19 @@ export default async function RegisterPage({ params, searchParams }: Props) {
         <h1>{t('registerTitle')}</h1>
         <p className="auth-card__subtitle">{t('registerSubtitle')}</p>
         <p className="product-list__meta">{t('registerEmailVerifyHint')}</p>
-        <AuthForm mode="register" nextPath={nextPath} />
+        <AuthForm
+          mode="register"
+          nextPath={nextPath}
+          termsVersion={termsVersion}
+          termsLocale={termsLocale}
+        />
         <p className="auth-card__footer">
           {t('hasAccount')}{' '}
           <Link href={next ? `/login?next=${encodeURIComponent(nextPath)}` : '/login'}>
             {t('goLogin')}
           </Link>
         </p>
+        <AuthLegalLinks />
       </main>
     </div>
   );

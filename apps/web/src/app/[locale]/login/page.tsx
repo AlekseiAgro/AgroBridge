@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { AuthForm } from '@/components/AuthForm';
+import { AuthLegalLinks } from '@/components/AuthLegalLinks';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link, redirect } from '@/i18n/navigation';
 import { safeNextPath } from '@/lib/safe-next-path';
@@ -43,6 +44,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
             {t('goRegister')}
           </Link>
         </p>
+        <AuthLegalLinks />
       </main>
     </div>
   );

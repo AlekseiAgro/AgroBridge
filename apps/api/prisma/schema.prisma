@@ -135,6 +135,24 @@ enum CertificateType {
   other
 }
 
+/// Published legal texts live in the app. These rows identify type + locale + version
+/// so acceptance records can point at an exact document without storing the body.
+enum LegalDocumentType {
+  TERMS
+  PRIVACY
+}
+
+enum LegalDocumentStatus {
+  draft
+  published
+  archived
+}
+
+enum LegalDocumentLocale {
+  ka
+  en
+}
+
 model User {
   id               String      @id @default(cuid())
   email            String      @unique
@@ -178,6 +196,7 @@ model User {
   harvestWatches               HarvestWatch[]
   notifications                UserNotification[]
   passwordResetTokens          PasswordResetToken[]
+  legalAcceptances             LegalAcceptance[]
 
   @@index([blockedAt])
   @@index([createdAt])
@@ -670,4 +689,41 @@ model MessageTranslation {
 
   @@unique([messageId, targetLocale])
   @@index([status])
+}
+
+model LegalDocument {
+  id          String              @id @default(cuid())
+  type        LegalDocumentType
+  version     String
+  locale      LegalDocumentLocale
+  title       String
+  status      LegalDocumentStatus @default(draft)
+  publishedAt DateTime?
+  effectiveAt DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  acceptances LegalAcceptance[]
+
+  @@unique([type, locale, version])
+  @@index([type, locale, status])
+  @@map("legal_documents")
+}
+
+/// One row per user per exact published document (type + locale + version).
+/// Historical rows stay after a later version is published.
+model LegalAcceptance {
+  id              String   @id @default(cuid())
+  userId          String
+  documentId      String
+  documentVersion String
+  acceptedAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document LegalDocument @relation(fields: [documentId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, documentId])
+  @@index([userId, acceptedAt])
+  @@map("legal_acceptances")
 }
