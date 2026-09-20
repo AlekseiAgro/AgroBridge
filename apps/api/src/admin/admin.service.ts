@@ -20,6 +20,7 @@ import type {
 import {
   PRODUCT_CATEGORIES,
   isPrimaryVerificationDocumentKind,
+  isPubliclyListedProduct,
   mergeCategoryConfigs,
 } from '@agrobridge/shared';
 import {
@@ -193,8 +194,7 @@ export class AdminService {
 
   async approve(user: AuthenticatedUser, id: string): Promise<ModeratedProduct> {
     const existing = await this.requireProduct(id);
-    const wasPublic =
-      existing.isPublished && existing.moderationStatus === PrismaModerationStatus.approved;
+    const wasPublic = isPubliclyListedProduct(existing);
 
     const product = await this.prisma.product.update({
       where: { id },
@@ -212,27 +212,29 @@ export class AdminService {
     // (same DocumentReviewStatus pattern as FarmDocument). Approving a listing
     // must not silently approve unseen certificate files. Use reviewCertificate.
 
-    await this.notifications.notifyProductApproved({
-      farmer: product.owner,
-      productTitle: product.title,
-      productId: product.id,
-    });
+    if (isPubliclyListedProduct(product)) {
+      await this.notifications.notifyProductApproved({
+        farmer: product.owner,
+        productTitle: product.title,
+        productId: product.id,
+      });
 
-    await this.subscriptions.notifyNewProduct({
-      productId: product.id,
-      productTitle: product.title,
-      category: product.category,
-      region: product.farm?.region ?? null,
-      farmName: product.farm?.name || product.owner.displayName?.trim() || product.owner.email,
-      ownerUserId: product.owner.id,
-    });
+      await this.subscriptions.notifyNewProduct({
+        productId: product.id,
+        productTitle: product.title,
+        category: product.category,
+        region: product.farm?.region ?? null,
+        farmName: product.farm?.name || product.owner.displayName?.trim() || product.owner.email,
+        ownerUserId: product.owner.id,
+      });
 
-    await this.products.dispatchHarvestWatchNotifications({
-      productId: product.id,
-      previousStatus: existing.harvestStatus,
-      previousPreorder: existing.preorderEnabled,
-      wasPublic,
-    });
+      await this.products.dispatchHarvestWatchNotifications({
+        productId: product.id,
+        previousStatus: existing.harvestStatus,
+        previousPreorder: existing.preorderEnabled,
+        wasPublic,
+      });
+    }
 
     return this.toModerated(product);
   }

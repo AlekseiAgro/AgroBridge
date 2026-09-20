@@ -28,6 +28,14 @@ describe('AdminService', () => {
     notifyProductRejected: jest.fn().mockResolvedValue(undefined),
   };
 
+  const subscriptions = {
+    notifyNewProduct: jest.fn().mockResolvedValue(undefined),
+  };
+
+  const harvest = {
+    dispatchHarvestWatchNotifications: jest.fn().mockResolvedValue(undefined),
+  };
+
   let service: AdminService;
 
   const admin = {
@@ -43,9 +51,9 @@ describe('AdminService', () => {
     service = new AdminService(
       prisma as never,
       notifications as never,
-      { notifyNewProduct: jest.fn().mockResolvedValue(undefined) } as never,
+      subscriptions as never,
       verification as never,
-      { dispatchHarvestWatchNotifications: jest.fn().mockResolvedValue(undefined) } as never,
+      harvest as never,
     );
   });
 
@@ -172,6 +180,45 @@ describe('AdminService', () => {
 
     expect(prisma.productCertificate.updateMany).not.toHaveBeenCalled();
     expect(prisma.productCertificate.update).not.toHaveBeenCalled();
+    expect(notifications.notifyProductApproved).toHaveBeenCalledWith(
+      expect.objectContaining({ productTitle: 'Hazelnuts', productId: 'p1' }),
+    );
+    expect(subscriptions.notifyNewProduct).toHaveBeenCalledWith(
+      expect.objectContaining({ productTitle: 'Hazelnuts', productId: 'p1' }),
+    );
+    expect(harvest.dispatchHarvestWatchNotifications).toHaveBeenCalled();
+  });
+
+  it('does not announce a draft-title listing to marketplace subscribers after approve', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      title: 'Новый товар',
+      isPublished: false,
+      moderationStatus: 'pending',
+      harvestStatus: null,
+      preorderEnabled: false,
+    });
+    prisma.product.update.mockResolvedValue({
+      id: 'p1',
+      title: 'Новый товар',
+      category: null,
+      isPublished: true,
+      moderationStatus: 'approved',
+      harvestStatus: null,
+      preorderEnabled: false,
+      moderationNote: null,
+      moderatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      owner: { id: 'u1', email: 'f@example.com', displayName: 'Nino', locale: 'en' },
+      farm: null,
+    });
+
+    const result = await service.approve(admin, 'p1');
+    expect(result.title).toBe('Новый товар');
+    expect(notifications.notifyProductApproved).not.toHaveBeenCalled();
+    expect(subscriptions.notifyNewProduct).not.toHaveBeenCalled();
+    expect(harvest.dispatchHarvestWatchNotifications).not.toHaveBeenCalled();
   });
 
   it('lets an admin approve or reject a certificate without exposing a storage URL', async () => {

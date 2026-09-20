@@ -258,6 +258,8 @@ export class ProductsService {
             select: {
               id: true,
               title: true,
+              isPublished: true,
+              moderationStatus: true,
               harvestStatus: true,
               preorderEnabled: true,
               ownerUserId: true,
@@ -280,10 +282,11 @@ export class ProductsService {
         },
       });
 
-      const ownerIds = [...new Set(watches.map((watch) => watch.product.ownerUserId))];
+      const visible = watches.filter((watch) => isPubliclyListedProduct(watch.product));
+      const ownerIds = [...new Set(visible.map((watch) => watch.product.ownerUserId))];
       const ratings = await this.ratings.summariesForUsers(ownerIds);
 
-      return watches.map((watch) => ({
+      return visible.map((watch) => ({
         id: watch.id,
         productId: watch.product.id,
         productTitle: watch.product.title,
@@ -546,8 +549,7 @@ export class ProductsService {
 
     const previousStatus = product.harvestStatus;
     const previousPreorder = product.preorderEnabled;
-    const wasPublic =
-      product.isPublished && product.moderationStatus === PrismaModerationStatus.approved;
+    const wasPublic = isPubliclyListedProduct(product);
 
     const updated = await this.prisma.product.update({
       where: { id: product.id },
@@ -606,7 +608,7 @@ export class ProductsService {
       nextStatus: updated.harvestStatus,
       nextPreorder: updated.preorderEnabled,
       wasPublic,
-      isPublic: updated.isPublished && updated.moderationStatus === PrismaModerationStatus.approved,
+      isPublic: isPubliclyListedProduct(updated),
     });
 
     if (
@@ -1427,8 +1429,7 @@ export class ProductsService {
       nextStatus: product.harvestStatus,
       nextPreorder: product.preorderEnabled,
       wasPublic: params.wasPublic,
-      isPublic:
-        product.isPublished && product.moderationStatus === PrismaModerationStatus.approved,
+      isPublic: isPubliclyListedProduct(product),
     });
   }
 

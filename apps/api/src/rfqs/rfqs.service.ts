@@ -4,7 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { canTrade, type RfqOfferView, type RfqSummary, type RfqStatus } from '@agrobridge/shared';
+import {
+  canTrade,
+  isPubliclyListedProduct,
+  type RfqOfferView,
+  type RfqSummary,
+  type RfqStatus,
+} from '@agrobridge/shared';
 import { CurrencyCode, Prisma, RfqStatus as PrismaRfqStatus } from '@prisma/client';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -77,11 +83,7 @@ export class RfqsService {
       },
     });
 
-    if (
-      !product ||
-      !product.isPublished ||
-      product.moderationStatus !== 'approved'
-    ) {
+    if (!product || !isPubliclyListedProduct(product)) {
       throw new NotFoundException('Product not found');
     }
 
