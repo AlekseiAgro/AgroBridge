@@ -215,9 +215,29 @@ describeWithDatabase()('legal acceptance (database)', () => {
     expect(snapshot.currentTerms?.version).toBe('1.1');
     expect(original?.documentId).toBe('legal_terms_1_0_en');
     expect(original?.documentVersion).toBe('1.0');
+
+    await prisma.legalDocument.delete({ where: { id: laterId } });
+    extraDocumentIds.splice(extraDocumentIds.indexOf(laterId), 1);
   });
 
   async function ensureOlderPublishedTerms() {
+    await prisma.legalAcceptance.deleteMany({
+      where: {
+        document: {
+          type: LegalDocumentType.TERMS,
+          locale: LegalDocumentLocale.en,
+          NOT: { version: { in: ['0.9', '1.0'] } },
+        },
+      },
+    });
+    await prisma.legalDocument.deleteMany({
+      where: {
+        type: LegalDocumentType.TERMS,
+        locale: LegalDocumentLocale.en,
+        NOT: { version: { in: ['0.9', '1.0'] } },
+      },
+    });
+
     const olderId = 'legal_terms_0_9_en';
     if (!extraDocumentIds.includes(olderId)) {
       extraDocumentIds.push(olderId);
