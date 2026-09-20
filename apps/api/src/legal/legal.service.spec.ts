@@ -55,15 +55,42 @@ describe('LegalService', () => {
     expect(publicDocument).not.toHaveProperty('id');
   });
 
-  it('rejects an unpublished Terms version', async () => {
-    prisma.legalDocument.findUnique.mockResolvedValue({
-      ...publishedTerms,
-      status: LegalDocumentStatus.draft,
-    });
+  it('rejects a published Terms version that is not the current one', async () => {
+    prisma.legalDocument.findFirst.mockResolvedValue(publishedTerms);
+
+    await expect(service.requirePublishedTerms('en', '0.9')).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(prisma.legalDocument.findUnique).not.toHaveBeenCalled();
+  });
+
+  it('accepts only the current published Terms version', async () => {
+    prisma.legalDocument.findFirst.mockResolvedValue(publishedTerms);
+
+    await expect(service.requirePublishedTerms('en', '1.0')).resolves.toEqual(publishedTerms);
+  });
+
+  it('rejects registration Terms when no current published document exists', async () => {
+    prisma.legalDocument.findFirst.mockResolvedValue(null);
 
     await expect(service.requirePublishedTerms('en', '1.0')).rejects.toBeInstanceOf(
       BadRequestException,
     );
+  });
+
+  it('returns only the latest published document per type and locale', async () => {
+    prisma.legalDocument.findFirst.mockImplementation(
+      ({ where }: { where: { type: string } }) =>
+        Promise.resolve(where.type === 'TERMS' ? publishedTerms : publishedPrivacy),
+    );
+
+    const result = await service.currentDocuments('en');
+
+    expect(result.documents).toEqual([
+      toPublicLegalDocument(publishedTerms),
+      toPublicLegalDocument(publishedPrivacy),
+    ]);
+    expect(prisma.legalDocument.findMany).not.toHaveBeenCalled();
   });
 
   it('does not invent a Terms acceptance for an existing user', async () => {

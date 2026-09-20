@@ -1,9 +1,11 @@
 import {
   CURRENT_LEGAL_VERSION,
+  currentDocumentOfType,
   emptyTermsAcceptance,
   isLegalDocumentType,
   isLegalLocale,
   legalLocaleFor,
+  type PublicLegalDocument,
 } from '@agrobridge/shared';
 
 describe('legal locale helpers', () => {
@@ -39,5 +41,36 @@ describe('legal locale helpers', () => {
       documentVersion: null,
       documentLocale: null,
     });
+  });
+
+  it('does not guess a Terms version from document array order', () => {
+    const older: PublicLegalDocument = {
+      type: 'TERMS',
+      version: '0.9',
+      locale: 'en',
+      title: 'Old Terms',
+      publishedAt: null,
+      effectiveAt: null,
+    };
+    const current: PublicLegalDocument = {
+      type: 'TERMS',
+      version: '1.0',
+      locale: 'en',
+      title: 'Terms of Use',
+      publishedAt: null,
+      effectiveAt: null,
+    };
+    const privacy: PublicLegalDocument = {
+      type: 'PRIVACY',
+      version: '1.0',
+      locale: 'en',
+      title: 'Privacy Policy',
+      publishedAt: null,
+      effectiveAt: null,
+    };
+
+    expect(currentDocumentOfType([privacy], 'TERMS')).toBeNull();
+    expect(currentDocumentOfType([older, current, privacy], 'TERMS')).toBeNull();
+    expect(currentDocumentOfType([privacy, current], 'TERMS')).toEqual(current);
   });
 });

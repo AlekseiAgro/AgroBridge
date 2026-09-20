@@ -80,6 +80,10 @@ describe('legal foundation UI architecture', () => {
     expect(form).toContain('acceptedTermsVersion');
     expect(form).not.toContain('name="acceptPrivacy"');
     expect(form).toContain('privacyNotice');
+
+    const registerPage = readWeb('app/[locale]/register/page.tsx');
+    expect(registerPage).toContain('currentDocumentOfType');
+    expect(registerPage).not.toContain('.find(');
   });
 
   it('shows Terms acceptance state in Account Settings without claiming Privacy was accepted', () => {
