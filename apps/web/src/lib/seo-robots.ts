@@ -13,17 +13,21 @@ export const noindexRobots = {
 
 /**
  * Path suffixes after `/{locale}` that must not be crawled.
+ * Auth/recovery pages are omitted so crawlers can fetch their noindex meta.
  * Only families that exist in `app/[locale]`.
  */
 export const ROBOTS_DISALLOW_SUFFIXES = [
   '/dashboard',
   '/account',
+  '/requests/new',
+] as const;
+
+export const AUTH_CRAWLABLE_NOINDEX_SUFFIXES = [
   '/login',
   '/register',
   '/forgot-password',
   '/reset-password',
   '/verify-email',
-  '/requests/new',
 ] as const;
 
 export function robotsDisallowPaths(): string[] {

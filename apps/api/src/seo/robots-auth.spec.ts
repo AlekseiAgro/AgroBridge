@@ -3,6 +3,7 @@ import { join } from 'path';
 import { LOCALES } from '@agrobridge/shared';
 import { publicProductWhere } from '../products/public-product.where';
 import {
+  AUTH_CRAWLABLE_NOINDEX_SUFFIXES,
   PRODUCTION_SITEMAP_URL,
   PRODUCTION_WEB_ORIGIN,
   ROBOTS_DISALLOW_SUFFIXES,
@@ -52,35 +53,40 @@ describe('robots.txt rules', () => {
     expect(source).toContain('disallow: robotsDisallowPaths()');
     expect(source).toContain('sitemap: PRODUCTION_SITEMAP_URL');
     expect(source).not.toContain('agrobrid.ge');
+    expect(source).not.toMatch(/\{ka,en/);
     expect(readWeb('lib/seo-robots.ts')).not.toContain('agrobrid.ge');
+    expect(readWeb('lib/seo-robots.ts')).not.toMatch(/\{ka,en/);
   });
 
-  it('allows public crawling and lists only existing private path families', () => {
-    expect(ROBOTS_DISALLOW_SUFFIXES).toEqual(
-      expect.arrayContaining([
-        '/dashboard',
-        '/account',
-        '/login',
-        '/register',
-        '/forgot-password',
-        '/reset-password',
-        '/verify-email',
-        '/requests/new',
+  it('emits explicit locale Disallow lines without brace-expansion syntax', () => {
+    const disallow = robotsDisallowPaths();
+    expect(disallow.join('\n')).not.toMatch(/[{}]/);
+    expect(ROBOTS_DISALLOW_SUFFIXES).toEqual(['/dashboard', '/account', '/requests/new']);
+    expect(disallow).toEqual(
+      LOCALES.flatMap((locale) => [
+        `/${locale}/dashboard`,
+        `/${locale}/account`,
+        `/${locale}/requests/new`,
       ]),
     );
-    expect(ROBOTS_DISALLOW_SUFFIXES).not.toContain('/admin');
-    expect(ROBOTS_DISALLOW_SUFFIXES).not.toContain('/chat');
-    expect(ROBOTS_DISALLOW_SUFFIXES).not.toContain('/verification');
   });
 
-  it('disallows cabinet and auth routes for every locale', () => {
+  it('disallows cabinet surfaces for every locale and leaves auth pages crawlable', () => {
     const disallow = robotsDisallowPaths();
+    const blob = disallow.join('\n');
     for (const locale of LOCALES) {
       expect(disallow).toContain(`/${locale}/dashboard`);
       expect(disallow).toContain(`/${locale}/account`);
-      expect(disallow).toContain(`/${locale}/login`);
       expect(disallow).toContain(`/${locale}/requests/new`);
+      for (const suffix of AUTH_CRAWLABLE_NOINDEX_SUFFIXES) {
+        expect(disallow).not.toContain(`/${locale}${suffix}`);
+      }
     }
+    expect(blob).not.toContain('/login');
+    expect(blob).not.toContain('/register');
+    expect(blob).not.toContain('/forgot-password');
+    expect(blob).not.toContain('/reset-password');
+    expect(blob).not.toContain('/verify-email');
   });
 
   it('does not disallow public catalog, product, farm, request, or legal surfaces', () => {
