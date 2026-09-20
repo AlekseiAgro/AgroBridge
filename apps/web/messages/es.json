@@ -79,7 +79,7 @@
     "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
     "backToLogin": "Volver al inicio de sesión",
     "acceptTerms": "Acepto los <terms>Términos de uso</terms>.",
-    "privacyNotice": "También puedes leer la <privacy>Política de privacidad</privacy>.",
+    "privacyNotice": "<privacy>Política de privacidad</privacy>",
     "termsRequired": "Debes aceptar los Términos de uso para crear una cuenta."
   },
   "account": {
@@ -1242,10 +1242,7 @@
     "termsTitle": "Términos de uso",
     "privacyTitle": "Política de privacidad",
     "version": "Versión {version}",
-    "availableLocalesTitle": "Versiones legales disponibles",
-    "availableLocalesBody": "Los documentos legales se publican solo en georgiano e inglés. AgroBridge no genera una traducción legal para este idioma.",
-    "openGeorgian": "Versión georgiana",
-    "openEnglish": "Versión inglesa",
-    "placeholderBanner": "[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]"
+    "close": "Cerrar",
+    "documentPending": "El texto completo del documento se publicará aquí."
   }
 }

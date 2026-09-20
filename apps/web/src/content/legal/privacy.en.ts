@@ -1,6 +1,7 @@
 export const LEGAL_PRIVACY_EN = {
   title: 'Privacy Policy',
   version: '1.0',
+  ready: false,
   placeholder: '[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]',
   paragraphs: [
     'This page is the published English Privacy Policy placeholder for AgroBridge version 1.0.',

@@ -1,6 +1,7 @@
 export const LEGAL_PRIVACY_KA = {
   title: "კონფიდენციალურობის პოლიტიკა",
   version: '1.0',
+  ready: false,
   placeholder: '[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]',
   paragraphs: [
     "ეს გვერდი არის AgroBridge-ის კონფიდენციალურობის პოლიტიკის ქართული placeholder, ვერსია 1.0.",

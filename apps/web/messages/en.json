@@ -79,7 +79,7 @@
     "passwordTooShort": "Password must be at least 8 characters.",
     "backToLogin": "Back to log in",
     "acceptTerms": "I agree to the <terms>Terms of Use</terms>.",
-    "privacyNotice": "You can also read the <privacy>Privacy Policy</privacy>.",
+    "privacyNotice": "<privacy>Privacy Policy</privacy>",
     "termsRequired": "Please accept the Terms of Use to create an account."
   },
   "account": {
@@ -1242,10 +1242,7 @@
     "termsTitle": "Terms of Use",
     "privacyTitle": "Privacy Policy",
     "version": "Version {version}",
-    "availableLocalesTitle": "Available legal versions",
-    "availableLocalesBody": "Legal documents are published in Georgian and English only. AgroBridge does not generate a legal translation for this language.",
-    "openGeorgian": "Georgian version",
-    "openEnglish": "English version",
-    "placeholderBanner": "[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]"
+    "close": "Close",
+    "documentPending": "The full document text will be published here."
   }
 }

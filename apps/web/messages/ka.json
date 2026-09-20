@@ -79,7 +79,7 @@
     "passwordTooShort": "პაროლი უნდა იყოს მინიმუმ 8 სიმბოლო.",
     "backToLogin": "შესვლაზე დაბრუნება",
     "acceptTerms": "ვეთანხმები <terms>გამოყენების პირობები</terms>.",
-    "privacyNotice": "ასევე იხილეთ <privacy>კონფიდენციალურობის პოლიტიკა</privacy>.",
+    "privacyNotice": "<privacy>კონფიდენციალურობის პოლიტიკა</privacy>",
     "termsRequired": "ანგარიშის შესაქმნელად უნდა დაეთანხმოთ გამოყენების პირობები."
   },
   "account": {
@@ -1242,10 +1242,7 @@
     "termsTitle": "გამოყენების პირობები",
     "privacyTitle": "კონფიდენციალურობის პოლიტიკა",
     "version": "ვერსია {version}",
-    "availableLocalesTitle": "ხელმისაწვდომი იურიდიული ვერსიები",
-    "availableLocalesBody": "სამართლებრივი დოკუმენტები გამოქვეყნებულია მხოლოდ ქართულ და ინგლისურ ენებზე. AgroBridge არ ქმნის ამ ენის იურიდიულ თარგმანს.",
-    "openGeorgian": "ქართული ვერსია",
-    "openEnglish": "ინგლისური ვერსია",
-    "placeholderBanner": "[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]"
+    "close": "დახურვა",
+    "documentPending": "დოკუმენტის სრული ტექსტი გამოქვეყნდება აქ."
   }
 }
