@@ -76,7 +76,7 @@ describe('legal foundation UI architecture', () => {
     expect(privacyEn).not.toMatch(/we retain personal data for|our processors are|this cookie policy|standard contractual clauses/i);
   });
 
-  it('publishes approved Terms v1.0 bodies and keeps Privacy pending', () => {
+  it('publishes approved Terms v1.0 and Privacy Policy v1.0 bodies', () => {
     const termsEn = readWeb('content/legal/terms.en.ts');
     const termsKa = readWeb('content/legal/terms.ka.ts');
     const privacyEn = readWeb('content/legal/privacy.en.ts');
@@ -98,9 +98,23 @@ describe('legal foundation UI architecture', () => {
     expect(termsKa).not.toContain(DEVELOPER_MARKER);
     expect(termsEn).not.toMatch(/full document text will be published here/i);
     expect(termsKa).not.toMatch(/დოკუმენტის სრული ტექსტი გამოქვეყნდება აქ/);
-    expect(privacyEn).toMatch(/ready:\s*false/);
-    expect(privacyKa).toMatch(/ready:\s*false/);
-    expect(privacyEn).toContain(DEVELOPER_MARKER);
+    expect(privacyEn).toContain('ready: true');
+    expect(privacyKa).toContain('ready: true');
+    expect(privacyEn).toContain('20 September 2026');
+    expect(privacyKa).toContain('20 სექტემბერი 2026');
+    expect(privacyEn).toContain('P/E VANO MEGVINETUKHUTSESI');
+    expect(privacyEn).toContain('## 1. Who We Are');
+    expect(privacyEn).toContain('## 23. Contact');
+    expect(privacyEn).toContain('The current chat message flow does not send user messages to OpenAI for translation.');
+    expect(privacyKa).toContain('ი/მ ვანო მეღვინეთუხუცესი');
+    expect(privacyKa).toContain('## 1. ჩვენ შესახებ');
+    expect(privacyKa).toContain('## 23. საკონტაქტო ინფორმაცია');
+    expect(privacyEn).not.toContain(DEVELOPER_MARKER);
+    expect(privacyKa).not.toContain(DEVELOPER_MARKER);
+    expect(privacyEn).not.toMatch(/full document text will be published here/i);
+    expect(privacyKa).not.toMatch(/დოკუმენტის სრული ტექსტი გამოქვეყნდება აქ/);
+    expect(privacyEn).not.toMatch(/[А-Яа-яЁё]/);
+    expect(privacyKa).not.toMatch(/[А-Яа-яЁё]/);
     expect(article).toContain('effectiveDate');
     expect(view).toContain('effectiveDate');
     expect(article).toContain('documentPending');
