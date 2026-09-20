@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import type { AlertSubscription } from '@agrobridge/shared';
 import {
   GEORGIA_REGIONS,
   PRODUCT_CATEGORIES,
   isGeorgiaRegion,
+  isInternalDraftProductTitle,
   isProductCategory,
+  type AlertSubscription,
 } from '@agrobridge/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../mail/notifications.service';
@@ -87,6 +88,10 @@ export class SubscriptionsService {
     farmName: string;
     ownerUserId: string;
   }): Promise<void> {
+    if (isInternalDraftProductTitle(params.productTitle)) {
+      return;
+    }
+
     const subscriptions = await this.prisma.alertSubscription.findMany({
       where: {
         notifyProducts: true,

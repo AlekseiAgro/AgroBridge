@@ -71,12 +71,121 @@ describe('RfqsService', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
+  it('creates an RFQ for a published approved product with a real title', async () => {
+    const createdAt = new Date('2026-08-01T10:00:00.000Z');
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      title: 'Hazelnuts',
+      ownerUserId: farmer.id,
+      farmId: 'f1',
+      unit: 'kg',
+      isPublished: true,
+      moderationStatus: 'approved',
+      owner: {
+        id: farmer.id,
+        email: farmer.email,
+        locale: farmer.locale,
+        displayName: farmer.displayName,
+      },
+      farm: { id: 'f1', name: 'Farm' },
+    });
+    prisma.rfq.create.mockResolvedValue({
+      id: 'rfq1',
+      buyerId: buyer.id,
+      status: 'pending',
+      quantity: '100',
+      unit: 'kg',
+      message: null,
+      createdAt,
+      updatedAt: createdAt,
+      completedAt: null,
+      product: {
+        id: 'p1',
+        title: 'Hazelnuts',
+        ownerUserId: farmer.id,
+        owner: {
+          id: farmer.id,
+          email: farmer.email,
+          locale: farmer.locale,
+          displayName: farmer.displayName,
+        },
+      },
+      farm: { id: 'f1', name: 'Farm', region: null, ownerId: farmer.id },
+      buyer: {
+        id: buyer.id,
+        displayName: buyer.displayName,
+        email: buyer.email,
+        locale: buyer.locale,
+      },
+      offer: null,
+      ratings: [],
+    });
+
+    const result = await service.create(buyer, { productId: 'p1', quantity: '100' });
+    expect(result.id).toBe('rfq1');
+    expect(result.product.title).toBe('Hazelnuts');
+    expect(prisma.rfq.create).toHaveBeenCalledTimes(1);
+    expect(notifications.notifyRfqCreated).toHaveBeenCalledWith(
+      expect.objectContaining({ productTitle: 'Hazelnuts', rfqId: 'rfq1' }),
+    );
+  });
+
   it('rejects RFQ for unpublished product', async () => {
     prisma.product.findUnique.mockResolvedValue(null);
 
     await expect(
       service.create(buyer, { productId: 'missing', quantity: '100' }),
     ).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.rfq.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects RFQ for a published draft title and does not create a row', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      title: 'Новый товар',
+      ownerUserId: farmer.id,
+      farmId: null,
+      unit: 'kg',
+      isPublished: true,
+      moderationStatus: 'approved',
+      owner: {
+        id: farmer.id,
+        email: farmer.email,
+        locale: farmer.locale,
+        displayName: farmer.displayName,
+      },
+      farm: null,
+    });
+
+    await expect(
+      service.create(buyer, { productId: 'p1', quantity: '100' }),
+    ).rejects.toMatchObject({ message: 'Product not found' });
+    expect(prisma.rfq.create).not.toHaveBeenCalled();
+    expect(notifications.notifyRfqCreated).not.toHaveBeenCalled();
+  });
+
+  it('rejects RFQ for a hidden draft product', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      title: 'Hazelnuts',
+      ownerUserId: farmer.id,
+      farmId: null,
+      unit: 'kg',
+      isPublished: false,
+      moderationStatus: 'draft',
+      owner: {
+        id: farmer.id,
+        email: farmer.email,
+        locale: farmer.locale,
+        displayName: farmer.displayName,
+      },
+      farm: null,
+    });
+
+    await expect(
+      service.create(buyer, { productId: 'p1', quantity: '100' }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.rfq.create).not.toHaveBeenCalled();
   });
 
   it('rejects accepting when no offer exists', async () => {

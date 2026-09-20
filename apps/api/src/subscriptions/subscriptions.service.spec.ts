@@ -79,6 +79,37 @@ describe('SubscriptionsService', () => {
     );
   });
 
+  it('sends a catalog alert for a real public product title', async () => {
+    prisma.alertSubscription.findMany.mockResolvedValue([sub()]);
+
+    await service.notifyNewProduct({
+      productId: 'p1',
+      productTitle: 'Hazelnuts',
+      category: 'nuts',
+      region: 'kakheti',
+      farmName: 'Kakheti Farm',
+      ownerUserId: 'farmer1',
+    });
+
+    expect(notifications.notifyNewProductListing).toHaveBeenCalledWith(
+      expect.objectContaining({ productTitle: 'Hazelnuts', productId: 'p1' }),
+    );
+  });
+
+  it('does not mail subscribers a draft product title', async () => {
+    await service.notifyNewProduct({
+      productId: 'p1',
+      productTitle: 'Новый товар',
+      category: 'nuts',
+      region: 'kakheti',
+      farmName: 'Kakheti Farm',
+      ownerUserId: 'farmer1',
+    });
+
+    expect(prisma.alertSubscription.findMany).not.toHaveBeenCalled();
+    expect(notifications.notifyNewProductListing).not.toHaveBeenCalled();
+  });
+
   it('sends nothing when nobody is subscribed to purchase-request alerts', async () => {
     prisma.alertSubscription.findMany.mockResolvedValue([]);
 

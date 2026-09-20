@@ -455,6 +455,8 @@ describe('ProductsService', () => {
         product: {
           id: 'p1',
           title: 'Hazelnuts',
+          isPublished: true,
+          moderationStatus: 'approved',
           harvestStatus: 'growing',
           preorderEnabled: true,
           ownerUserId: 'seller1',
@@ -568,5 +570,76 @@ describe('ProductsService', () => {
         user: expect.objectContaining({ id: 'buyer1' }),
       }),
     );
+  });
+
+  it('does not notify harvest watchers when the listing still uses a draft title', async () => {
+    const notifications = {
+      notifyHarvestAvailable: jest.fn().mockResolvedValue(undefined),
+      notifyHarvestPreorderOpen: jest.fn().mockResolvedValue(undefined),
+      notifyProductPendingModeration: jest.fn().mockResolvedValue(undefined),
+    };
+    const localService = new ProductsService(
+      prisma as never,
+      storage as never,
+      ratings as never,
+      { enabledIds: jest.fn().mockResolvedValue(null) } as never,
+      notifications as never,
+    );
+
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      ownerUserId: 'farmer1',
+      title: 'Новый товар',
+      harvestStatus: 'available',
+      preorderEnabled: true,
+      isPublished: true,
+      moderationStatus: 'approved',
+      owner: { id: 'farmer1', displayName: 'Nino', email: 'n@example.com' },
+      farm: { name: 'Kakheti Farm' },
+      images: [],
+      videos: [],
+      certificates: [],
+    });
+
+    await localService.dispatchHarvestWatchNotifications({
+      productId: 'p1',
+      previousStatus: 'available',
+      previousPreorder: true,
+      wasPublic: false,
+    });
+
+    expect(notifications.notifyHarvestAvailable).not.toHaveBeenCalled();
+    expect(notifications.notifyHarvestPreorderOpen).not.toHaveBeenCalled();
+    expect(prisma.harvestWatch.findMany).not.toHaveBeenCalled();
+  });
+
+  it('omits watches whose product is not publicly listed', async () => {
+    prisma.harvestWatch.findMany.mockResolvedValue([
+      {
+        id: 'hidden',
+        createdAt: new Date('2026-08-01T10:00:00.000Z'),
+        product: {
+          id: 'p-draft',
+          title: 'Новый товар',
+          isPublished: true,
+          moderationStatus: 'approved',
+          harvestStatus: 'available',
+          preorderEnabled: false,
+          ownerUserId: 'seller1',
+          owner: { id: 'seller1', displayName: 'Nino' },
+          farm: null,
+          images: [],
+        },
+      },
+    ]);
+
+    const result = await service.listMyWatches({
+      id: 'u1',
+      email: 'buyer@example.com',
+      role: 'buyer',
+      locale: 'en',
+      displayName: null,
+    });
+    expect(result).toEqual([]);
   });
 });
