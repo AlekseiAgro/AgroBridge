@@ -215,5 +215,111 @@ describeWithDatabase()('legal acceptance (database)', () => {
     expect(snapshot.currentTerms?.version).toBe('1.1');
     expect(original?.documentId).toBe('legal_terms_1_0_en');
     expect(original?.documentVersion).toBe('1.0');
+
+    await prisma.legalDocument.delete({ where: { id: laterId } });
+    extraDocumentIds.splice(extraDocumentIds.indexOf(laterId), 1);
+  });
+
+  async function ensureOlderPublishedTerms() {
+    await prisma.legalAcceptance.deleteMany({
+      where: {
+        document: {
+          type: LegalDocumentType.TERMS,
+          locale: LegalDocumentLocale.en,
+          NOT: { version: { in: ['0.9', '1.0'] } },
+        },
+      },
+    });
+    await prisma.legalDocument.deleteMany({
+      where: {
+        type: LegalDocumentType.TERMS,
+        locale: LegalDocumentLocale.en,
+        NOT: { version: { in: ['0.9', '1.0'] } },
+      },
+    });
+
+    const olderId = 'legal_terms_0_9_en';
+    if (!extraDocumentIds.includes(olderId)) {
+      extraDocumentIds.push(olderId);
+    }
+    await prisma.legalDocument.upsert({
+      where: { id: olderId },
+      create: {
+        id: olderId,
+        type: LegalDocumentType.TERMS,
+        locale: LegalDocumentLocale.en,
+        version: '0.9',
+        title: 'Old published Terms',
+        status: LegalDocumentStatus.published,
+        publishedAt: new Date('2025-06-01T00:00:00.000Z'),
+        effectiveAt: new Date('2025-06-01T00:00:00.000Z'),
+      },
+      update: {
+        status: LegalDocumentStatus.published,
+        publishedAt: new Date('2025-06-01T00:00:00.000Z'),
+        effectiveAt: new Date('2025-06-01T00:00:00.000Z'),
+      },
+    });
+    return olderId;
+  }
+
+  it('rejects registration against an older published Terms version and creates nothing', async () => {
+    const olderId = await ensureOlderPublishedTerms();
+
+    const current = await legal.currentDocuments('en');
+    expect(current.documents.filter((document) => document.type === 'TERMS')).toEqual([
+      expect.objectContaining({ type: 'TERMS', version: '1.0', locale: 'en' }),
+    ]);
+
+    const auth = buildAuthService();
+    const email = `legal-old-${randomUUID()}@example.test`;
+
+    await expect(
+      auth.register(
+        {
+          email,
+          password: 'password1',
+          role: 'buyer',
+          locale: 'en',
+          acceptTerms: true,
+          acceptedTermsVersion: '0.9',
+          acceptedTermsLocale: 'en',
+        },
+        `203.0.113.${Math.floor(Math.random() * 200) + 10}`,
+      ),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(await prisma.user.findUnique({ where: { email } })).toBeNull();
+    expect(await prisma.legalAcceptance.count({ where: { documentId: olderId } })).toBe(0);
+  });
+
+  it('registers against the current published Terms when an older published version also exists', async () => {
+    await ensureOlderPublishedTerms();
+
+    const auth = buildAuthService();
+    const email = `legal-current-${randomUUID()}@example.test`;
+    const result = await auth.register(
+      {
+        email,
+        password: 'password1',
+        role: 'buyer',
+        locale: 'en',
+        acceptTerms: true,
+        acceptedTermsVersion: '1.0',
+        acceptedTermsLocale: 'en',
+      },
+      `198.51.100.${Math.floor(Math.random() * 200) + 10}`,
+    );
+
+    createdUserIds.push(result.user.id);
+    const acceptances = await prisma.legalAcceptance.findMany({
+      where: { userId: result.user.id },
+      include: { document: true },
+    });
+
+    expect(acceptances).toHaveLength(1);
+    expect(acceptances[0]?.documentVersion).toBe('1.0');
+    expect(acceptances[0]?.document.id).toBe('legal_terms_1_0_en');
+    expect(acceptances[0]?.document.status).toBe(LegalDocumentStatus.published);
   });
 });

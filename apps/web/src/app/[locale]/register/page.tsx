@@ -1,5 +1,6 @@
 import {
   CURRENT_LEGAL_VERSION,
+  currentDocumentOfType,
   legalLocaleFor,
   type CurrentLegalDocuments,
 } from '@agrobridge/shared';
@@ -36,7 +37,7 @@ export default async function RegisterPage({ params, searchParams }: Props) {
     const current = await apiRequest<CurrentLegalDocuments>(
       `/legal/documents/current?locale=${termsLocale}`,
     );
-    const terms = current.documents.find((document) => document.type === 'TERMS');
+    const terms = currentDocumentOfType(current.documents, 'TERMS');
     if (terms) {
       termsVersion = terms.version;
     }

@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   emptyTermsAcceptance,
+  LEGAL_DOCUMENT_TYPES,
+  LEGAL_LOCALES,
   legalLocaleFor,
   type CurrentLegalDocuments,
   type LegalAcceptanceSnapshot,
@@ -15,38 +17,47 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { toPublicLegalDocument } from './legal.mapper';
 
+/** Newest published document wins; version is the last deterministic tie-breaker. */
+const CURRENT_PUBLISHED_ORDER = [
+  { effectiveAt: 'desc' as const },
+  { publishedAt: 'desc' as const },
+  { createdAt: 'desc' as const },
+  { version: 'desc' as const },
+];
+
 @Injectable()
 export class LegalService {
   constructor(private readonly prisma: PrismaService) {}
 
   async currentDocuments(locale?: LegalLocale): Promise<CurrentLegalDocuments> {
-    const documents = await this.prisma.legalDocument.findMany({
-      where: {
-        status: LegalDocumentStatus.published,
-        ...(locale ? { locale } : {}),
-      },
-      orderBy: [{ type: 'asc' }, { locale: 'asc' }, { version: 'asc' }],
-    });
+    const locales = locale ? [locale] : [...LEGAL_LOCALES];
+    const documents: LegalDocument[] = [];
+
+    for (const legalLocale of locales) {
+      for (const type of LEGAL_DOCUMENT_TYPES) {
+        const current = await this.latestPublished(type, legalLocale);
+        if (current) {
+          documents.push(current);
+        }
+      }
+    }
 
     return { documents: documents.map(toPublicLegalDocument) };
   }
 
+  /**
+   * Resolves the current published TERMS for `locale`. The client version is a
+   * confirmation only — it cannot select an older published document.
+   */
   async requirePublishedTerms(locale: LegalLocale, version: string): Promise<LegalDocument> {
-    const document = await this.prisma.legalDocument.findUnique({
-      where: {
-        type_locale_version: {
-          type: PrismaLegalDocumentType.TERMS,
-          locale,
-          version,
-        },
-      },
-    });
-
-    if (!document || document.status !== LegalDocumentStatus.published) {
-      throw new BadRequestException('Unknown or unpublished Terms of Use version');
+    const current = await this.latestPublished('TERMS', locale);
+    if (!current || current.version !== version) {
+      throw new BadRequestException(
+        'acceptedTermsVersion must match the current published Terms of Use version',
+      );
     }
 
-    return document;
+    return current;
   }
 
   async latestPublished(
@@ -59,7 +70,7 @@ export class LegalService {
         locale,
         status: LegalDocumentStatus.published,
       },
-      orderBy: [{ effectiveAt: 'desc' }, { publishedAt: 'desc' }, { createdAt: 'desc' }],
+      orderBy: CURRENT_PUBLISHED_ORDER,
     });
   }
 

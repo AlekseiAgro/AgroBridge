@@ -55,3 +55,16 @@ export function emptyTermsAcceptance(): TermsAcceptanceState {
     documentLocale: null,
   };
 }
+
+/**
+ * Pick the current document of one type from GET /legal/documents/current.
+ * The API returns at most one current published row per type+locale, so a
+ * unique type match is identity — not a version guess from array order.
+ */
+export function currentDocumentOfType(
+  documents: readonly PublicLegalDocument[],
+  type: LegalDocumentType,
+): PublicLegalDocument | null {
+  const matches = documents.filter((document) => document.type === type);
+  return matches.length === 1 ? (matches[0] ?? null) : null;
+}

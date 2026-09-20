@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
@@ -70,6 +70,23 @@ describe('registration HTTP Terms acceptance', () => {
       .send({ ...VALID_REGISTER, acceptedTermsLocale: 'ru' })
       .expect(400);
     expect(authService.register).not.toHaveBeenCalled();
+    await app.close();
+  });
+
+  it('returns HTTP 400 when the submitted Terms version is not current', async () => {
+    const authService = {
+      register: jest.fn().mockRejectedValue(
+        new BadRequestException(
+          'acceptedTermsVersion must match the current published Terms of Use version',
+        ),
+      ),
+    };
+    const { app } = await buildApp(authService);
+    await request(app.getHttpServer())
+      .post('/api/auth/register')
+      .send({ ...VALID_REGISTER, acceptedTermsVersion: '0.9' })
+      .expect(400);
+    expect(authService.register).toHaveBeenCalled();
     await app.close();
   });
 
