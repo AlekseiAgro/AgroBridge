@@ -9,6 +9,7 @@ import {
 } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
+import { LegalDocumentDialog } from '@/components/LegalDocumentDialog';
 import { Link, useRouter } from '@/i18n/navigation';
 import { safeNextPath } from '@/lib/safe-next-path';
 
@@ -27,6 +28,7 @@ export function AuthForm({ mode, nextPath, termsVersion, termsLocale }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [legalDialog, setLegalDialog] = useState<'terms' | 'privacy' | null>(null);
   const [role, setRole] = useState<RegisterableRole>(
     nextPath?.includes('/requests/new') ? 'buyer' : 'farmer',
   );
@@ -145,9 +147,18 @@ export function AuthForm({ mode, nextPath, termsVersion, termsLocale }: Props) {
             <span>
               {t.rich('acceptTerms', {
                 terms: (chunks) => (
-                  <Link href="/terms" locale={acceptedTermsLocale}>
+                  <button
+                    type="button"
+                    className="legal-inline-link"
+                    aria-haspopup="dialog"
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setLegalDialog('terms');
+                    }}
+                  >
                     {chunks}
-                  </Link>
+                  </button>
                 ),
               })}
             </span>
@@ -155,14 +166,29 @@ export function AuthForm({ mode, nextPath, termsVersion, termsLocale }: Props) {
           <p className="auth-legal-accept__privacy">
             {t.rich('privacyNotice', {
               privacy: (chunks) => (
-                <Link href="/privacy" locale={acceptedTermsLocale}>
+                <button
+                  type="button"
+                  className="legal-inline-link"
+                  aria-haspopup="dialog"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setLegalDialog('privacy');
+                  }}
+                >
                   {chunks}
-                </Link>
+                </button>
               ),
             })}
           </p>
           <input type="hidden" name="acceptedTermsVersion" value={acceptedTermsVersion} />
           <input type="hidden" name="acceptedTermsLocale" value={acceptedTermsLocale} />
+          <LegalDocumentDialog
+            open={legalDialog !== null}
+            kind={legalDialog}
+            uiLocale={locale}
+            onClose={() => setLegalDialog(null)}
+          />
         </div>
       )}
 

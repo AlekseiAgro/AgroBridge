@@ -5,6 +5,7 @@ const LOCALES = ['en', 'ka', 'ru', 'de', 'fr', 'it', 'es'] as const;
 const WEB = join(__dirname, '../../../web');
 const MESSAGES_DIR = join(WEB, 'messages');
 const CONTENT_DIR = join(WEB, 'src/content/legal');
+const DEVELOPER_MARKER = '[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]';
 
 function readWeb(path: string) {
   return readFileSync(join(WEB, 'src', path), 'utf8');
@@ -34,28 +35,43 @@ describe('legal foundation UI architecture', () => {
     expect(extras).toEqual([]);
   });
 
-  it('exposes public legal routes and a chooser for unsupported legal locales', () => {
+  it('shows public legal documents with a language switch and no missing-locale warning', () => {
     expect(existsSync(join(WEB, 'src/app/[locale]/legal/page.tsx'))).toBe(true);
     expect(existsSync(join(WEB, 'src/app/[locale]/terms/page.tsx'))).toBe(true);
     expect(existsSync(join(WEB, 'src/app/[locale]/privacy/page.tsx'))).toBe(true);
 
     const page = readWeb('components/LegalPublicPage.tsx');
-    expect(page).toContain('LegalLocaleChooser');
-    expect(page).toContain('isLegalLocale');
+    const panel = readWeb('components/LegalDocumentPanel.tsx');
+    const switcher = readWeb('components/LegalLanguageSwitch.tsx');
+    expect(page).toContain('LegalDocumentPanel');
+    expect(page).not.toContain('LegalLocaleChooser');
+    expect(panel).toContain('LegalLanguageSwitch');
+    expect(switcher).toContain('ქართული');
+    expect(switcher).toContain('English');
+    expect(switcher).not.toContain('availableLocalesBody');
     expect(page).not.toContain('detectMessageLocale');
   });
 
-  it('marks Terms and Privacy as placeholders for later legal drafting', () => {
+  it('does not expose developer placeholder banners in the legal UI', () => {
+    const uiFiles = [
+      'components/LegalPublicPage.tsx',
+      'components/LegalDocumentPanel.tsx',
+      'components/LegalDocumentArticle.tsx',
+      'components/LegalDocumentDialog.tsx',
+      'components/AuthForm.tsx',
+    ];
+    for (const path of uiFiles) {
+      expect(readWeb(path)).not.toContain(DEVELOPER_MARKER);
+    }
+    for (const locale of LOCALES) {
+      expect(JSON.stringify(loadMessages(locale).legal)).not.toContain(DEVELOPER_MARKER);
+      expect(JSON.stringify(loadMessages(locale).legal)).not.toMatch(
+        /only (georgian|english)|не создаёт юридический перевод|keine rechtliche Übersetzung/i,
+      );
+    }
+
     const termsEn = readWeb('content/legal/terms.en.ts');
     const privacyEn = readWeb('content/legal/privacy.en.ts');
-    const termsKa = readWeb('content/legal/terms.ka.ts');
-    const privacyKa = readWeb('content/legal/privacy.ka.ts');
-    const marker = '[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]';
-
-    expect(termsEn).toContain(marker);
-    expect(privacyEn).toContain(marker);
-    expect(termsKa).toContain(marker);
-    expect(privacyKa).toContain(marker);
     expect(termsEn).not.toMatch(/shall be governed|binding arbitration|liability shall not exceed|refunds are/i);
     expect(privacyEn).not.toMatch(/we retain personal data for|our processors are|this cookie policy|standard contractual clauses/i);
   });
@@ -72,7 +88,7 @@ describe('legal foundation UI architecture', () => {
     expect(shell).not.toContain('href="/terms"');
   });
 
-  it('requires an explicit Terms checkbox on registration and does not require Privacy acceptance', () => {
+  it('requires an explicit Terms checkbox on registration and opens legal documents in a modal', () => {
     const form = readWeb('components/AuthForm.tsx');
     expect(form).toContain('name="acceptTerms"');
     expect(form).toContain('type="checkbox"');
@@ -80,6 +96,9 @@ describe('legal foundation UI architecture', () => {
     expect(form).toContain('acceptedTermsVersion');
     expect(form).not.toContain('name="acceptPrivacy"');
     expect(form).toContain('privacyNotice');
+    expect(form).toContain('LegalDocumentDialog');
+    expect(form).not.toContain('href="/terms"');
+    expect(form).not.toContain('href="/privacy"');
 
     const registerPage = readWeb('app/[locale]/register/page.tsx');
     expect(registerPage).toContain('currentDocumentOfType');
@@ -104,14 +123,14 @@ describe('legal foundation UI architecture', () => {
       expect(messages.footer.terms.trim().length).toBeGreaterThan(0);
       expect(messages.footer.privacy.trim().length).toBeGreaterThan(0);
       expect(messages.auth.acceptTerms).toContain('<terms>');
-      expect(messages.auth.privacyNotice).toContain('<privacy>');
+      expect(messages.auth.privacyNotice).toMatch(/^<privacy>.+<\/privacy>$/);
+      expect(messages.auth.privacyNotice).not.toMatch(/also|также|aussi|también|anche|können auch/i);
       expect(messages.cabinet.legalTitle.trim().length).toBeGreaterThan(0);
-      expect(messages.legal.availableLocalesBody.trim().length).toBeGreaterThan(0);
+      expect(messages.legal.documentPending.trim().length).toBeGreaterThan(0);
+      expect(messages.legal.close.trim().length).toBeGreaterThan(0);
+      expect(messages.legal).not.toHaveProperty('availableLocalesBody');
+      expect(messages.legal).not.toHaveProperty('placeholderBanner');
     }
-
-    const ru = loadMessages('ru');
-    expect(ru.legal.availableLocalesBody).toMatch(/грузинск|английск/i);
-    expect(ru.legal.availableLocalesBody).toMatch(/не создаёт юридический перевод/i);
   });
 
   it('keeps operator facts on the Legal Information pages and avoids unsupported claims', () => {

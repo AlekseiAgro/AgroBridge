@@ -1,6 +1,7 @@
 export const LEGAL_TERMS_KA = {
   title: "გამოყენების პირობები",
   version: '1.0',
+  ready: false,
   placeholder: '[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]',
   paragraphs: [
     "ეს გვერდი არის AgroBridge-ის გამოყენების პირობების ქართული placeholder, ვერსია 1.0.",
