@@ -76,6 +76,36 @@ describe('legal foundation UI architecture', () => {
     expect(privacyEn).not.toMatch(/we retain personal data for|our processors are|this cookie policy|standard contractual clauses/i);
   });
 
+  it('publishes approved Terms v1.0 bodies and keeps Privacy pending', () => {
+    const termsEn = readWeb('content/legal/terms.en.ts');
+    const termsKa = readWeb('content/legal/terms.ka.ts');
+    const privacyEn = readWeb('content/legal/privacy.en.ts');
+    const privacyKa = readWeb('content/legal/privacy.ka.ts');
+    const article = readWeb('components/LegalDocumentArticle.tsx');
+    const view = readWeb('content/legal/index.ts');
+
+    expect(termsEn).toContain('ready: true');
+    expect(termsKa).toContain('ready: true');
+    expect(termsEn).toContain('20 September 2026');
+    expect(termsKa).toContain('20 სექტემბერი 2026');
+    expect(termsEn).toContain('P/E VANO MEGVINETUKHUTSESI');
+    expect(termsEn).toContain('29/5 Adam Mitskevichi Street, Tbilisi, Georgia');
+    expect(termsEn).toContain('AgroBridge is not a seller, buyer, agent');
+    expect(termsKa).toContain('ი/მ ვანო მეღვინეთუხუცესი');
+    expect(termsKa).toContain('ადამ მიცკევიჩის ქ. 29/5, თბილისი, საქართველო');
+    expect(termsKa).toContain('AgroBridge არ წარმოადგენს მომხმარებლებს შორის გარიგების მხარეს');
+    expect(termsEn).not.toContain(DEVELOPER_MARKER);
+    expect(termsKa).not.toContain(DEVELOPER_MARKER);
+    expect(termsEn).not.toMatch(/full document text will be published here/i);
+    expect(termsKa).not.toMatch(/დოკუმენტის სრული ტექსტი გამოქვეყნდება აქ/);
+    expect(privacyEn).toMatch(/ready:\s*false/);
+    expect(privacyKa).toMatch(/ready:\s*false/);
+    expect(privacyEn).toContain(DEVELOPER_MARKER);
+    expect(article).toContain('effectiveDate');
+    expect(view).toContain('effectiveDate');
+    expect(article).toContain('documentPending');
+  });
+
   it('adds footer legal links without a cabinet Legal sidebar item', () => {
     const footer = readWeb('components/SiteFooter.tsx');
     const shell = readWeb('components/CabinetShell.tsx');
@@ -127,6 +157,7 @@ describe('legal foundation UI architecture', () => {
       expect(messages.auth.privacyNotice).not.toMatch(/also|также|aussi|también|anche|können auch/i);
       expect(messages.cabinet.legalTitle.trim().length).toBeGreaterThan(0);
       expect(messages.legal.documentPending.trim().length).toBeGreaterThan(0);
+      expect(messages.legal.effectiveDate).toContain('{date}');
       expect(messages.legal.close.trim().length).toBeGreaterThan(0);
       expect(messages.legal).not.toHaveProperty('availableLocalesBody');
       expect(messages.legal).not.toHaveProperty('placeholderBanner');

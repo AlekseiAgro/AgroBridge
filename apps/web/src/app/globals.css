@@ -535,10 +535,28 @@ body {
   gap: 0.9rem;
   max-width: 42rem;
   line-height: 1.65;
+  overflow-wrap: anywhere;
 }
 
 .legal-document__body p {
   margin: 0;
+}
+
+.legal-document__section {
+  margin: 0.75rem 0 0;
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+
+.legal-document__list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.legal-document__link {
+  color: var(--accent, #1f6b4a);
+  text-decoration: underline;
+  overflow-wrap: anywhere;
 }
 
 .legal-lang-switch {

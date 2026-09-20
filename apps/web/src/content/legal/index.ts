@@ -17,6 +17,7 @@ export type LegalInfoContent = {
 export type LegalPlaceholderContent = {
   title: string;
   version: string;
+  effectiveDate?: string;
   placeholder?: string;
   paragraphs: string[];
   ready?: boolean;
@@ -25,6 +26,7 @@ export type LegalPlaceholderContent = {
 export type LegalDocumentView = {
   title: string;
   version?: string;
+  effectiveDate?: string;
   paragraphs: string[];
   pending: boolean;
 };
@@ -62,6 +64,7 @@ export function legalDocumentView(
   return {
     title: content.title,
     version: content.version,
+    effectiveDate: content.ready ? content.effectiveDate : undefined,
     paragraphs: content.ready ? content.paragraphs : [],
     pending: !content.ready,
   };

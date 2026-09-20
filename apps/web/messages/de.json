@@ -1242,6 +1242,7 @@
     "termsTitle": "Nutzungsbedingungen",
     "privacyTitle": "Datenschutzrichtlinie",
     "version": "Version {version}",
+    "effectiveDate": "Inkrafttreten: {date}",
     "close": "Schließen",
     "documentPending": "Der vollständige Dokumenttext wird hier veröffentlicht."
   }

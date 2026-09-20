@@ -1242,6 +1242,7 @@
     "termsTitle": "Conditions d'utilisation",
     "privacyTitle": "Politique de confidentialité",
     "version": "Version {version}",
+    "effectiveDate": "Date d'entrée en vigueur : {date}",
     "close": "Fermer",
     "documentPending": "Le texte intégral du document sera publié ici."
   }
