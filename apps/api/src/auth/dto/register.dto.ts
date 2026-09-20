@@ -1,5 +1,7 @@
-import { isLocale, isRegisterableRole } from '@agrobridge/shared';
+import { isLegalLocale, isLocale, isRegisterableRole } from '@agrobridge/shared';
 import {
+  Equals,
+  IsBoolean,
   IsEmail,
   IsOptional,
   IsString,
@@ -32,6 +34,17 @@ class LocaleConstraint implements ValidatorConstraintInterface {
   }
 }
 
+@ValidatorConstraint({ name: 'legalLocaleCode', async: false })
+class LegalLocaleConstraint implements ValidatorConstraintInterface {
+  validate(value: unknown) {
+    return typeof value === 'string' && isLegalLocale(value);
+  }
+
+  defaultMessage() {
+    return 'acceptedTermsLocale must be ka or en';
+  }
+}
+
 export class RegisterDto {
   @IsEmail()
   @MaxLength(255)
@@ -56,4 +69,18 @@ export class RegisterDto {
   @IsString()
   @Validate(LocaleConstraint)
   locale?: string;
+
+  @IsBoolean()
+  @Equals(true, { message: 'Terms of Use must be accepted' })
+  acceptTerms!: boolean;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(32)
+  acceptedTermsVersion!: string;
+
+  @IsOptional()
+  @IsString()
+  @Validate(LegalLocaleConstraint)
+  acceptedTermsLocale?: string;
 }

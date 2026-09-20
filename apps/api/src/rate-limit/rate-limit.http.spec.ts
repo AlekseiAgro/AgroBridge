@@ -54,6 +54,7 @@ async function buildApp(options: {
           { notifyWelcome: jest.fn() } as never,
           { sendEmailCode: jest.fn() } as never,
           rateLimit,
+          { requirePublishedTerms: jest.fn() } as never,
         ),
       },
       {

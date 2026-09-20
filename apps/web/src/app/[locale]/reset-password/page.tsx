@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { AuthLegalLinks } from '@/components/AuthLegalLinks';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ResetPasswordForm } from '@/components/ResetPasswordForm';
 import { Link } from '@/i18n/navigation';
@@ -38,6 +39,7 @@ export default async function ResetPasswordPage({ params, searchParams }: Props)
         <p className="auth-card__footer">
           <Link href="/login">{t('backToLogin')}</Link>
         </p>
+        <AuthLegalLinks />
       </main>
     </div>
   );

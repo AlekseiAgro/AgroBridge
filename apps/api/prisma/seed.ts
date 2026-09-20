@@ -1,6 +1,9 @@
 import {
   CurrencyCode,
   DocumentReviewStatus,
+  LegalDocumentLocale,
+  LegalDocumentStatus,
+  LegalDocumentType,
   LocaleCode,
   ModerationStatus,
   PrismaClient,
@@ -925,6 +928,56 @@ async function removeObsoleteDemoData() {
   }
 }
 
+const INITIAL_LEGAL_DOCUMENTS = [
+  {
+    id: 'legal_terms_1_0_ka',
+    type: LegalDocumentType.TERMS,
+    version: '1.0',
+    locale: LegalDocumentLocale.ka,
+    title: 'გამოყენების პირობები',
+  },
+  {
+    id: 'legal_terms_1_0_en',
+    type: LegalDocumentType.TERMS,
+    version: '1.0',
+    locale: LegalDocumentLocale.en,
+    title: 'Terms of Use',
+  },
+  {
+    id: 'legal_privacy_1_0_ka',
+    type: LegalDocumentType.PRIVACY,
+    version: '1.0',
+    locale: LegalDocumentLocale.ka,
+    title: 'კონფიდენციალურობის პოლიტიკა',
+  },
+  {
+    id: 'legal_privacy_1_0_en',
+    type: LegalDocumentType.PRIVACY,
+    version: '1.0',
+    locale: LegalDocumentLocale.en,
+    title: 'Privacy Policy',
+  },
+] as const;
+
+async function ensureLegalDocuments() {
+  const now = new Date();
+  for (const document of INITIAL_LEGAL_DOCUMENTS) {
+    await prisma.legalDocument.upsert({
+      where: { id: document.id },
+      create: {
+        ...document,
+        status: LegalDocumentStatus.published,
+        publishedAt: now,
+        effectiveAt: now,
+      },
+      update: {
+        title: document.title,
+        status: LegalDocumentStatus.published,
+      },
+    });
+  }
+}
+
 async function main() {
   const adminEmail = (
     process.env.ADMIN_EMAIL ?? 'admin@agrobridge.local'
@@ -933,6 +986,7 @@ async function main() {
   const adminDisplayName = process.env.ADMIN_DISPLAY_NAME ?? 'AgroBridge Admin';
 
   await removeObsoleteDemoData();
+  await ensureLegalDocuments();
 
   const [adminPasswordHash, demoPasswordHash] = await Promise.all([
     bcrypt.hash(adminPassword, 12),

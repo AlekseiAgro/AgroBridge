@@ -77,7 +77,10 @@
     "passwordChanged": "Password aggiornata. Le altre sessioni sono state disconnesse.",
     "passwordMismatch": "Le nuove password non coincidono.",
     "passwordTooShort": "La password deve contenere almeno 8 caratteri.",
-    "backToLogin": "Torna all’accesso"
+    "backToLogin": "Torna all’accesso",
+    "acceptTerms": "Accetto i <terms>Termini di utilizzo</terms>.",
+    "privacyNotice": "Puoi anche leggere l'<privacy>Informativa sulla privacy</privacy>.",
+    "termsRequired": "Per creare un account devi accettare i Termini di utilizzo."
   },
   "account": {
     "title": "Il tuo account",
@@ -116,7 +119,11 @@
     "explore": "Esplora",
     "account": "Account",
     "support": "Assistenza",
-    "copyright": "© {year} AgroBridge"
+    "copyright": "© {year} AgroBridge",
+    "legal": "Note legali",
+    "legalInformation": "Informazioni legali",
+    "terms": "Termini di utilizzo",
+    "privacy": "Informativa sulla privacy"
   },
   "support": {
     "title": "Assistenza",
@@ -882,9 +889,20 @@
       "noComment": "Nessuna recensione scritta."
     },
     "settingsTitle": "Impostazioni",
-    "settingsSubtitle": "Password e sicurezza dell’account.",
+    "settingsSubtitle": "Password, sicurezza dell'account e documenti legali.",
     "securityTitle": "Sicurezza",
-    "unreadCard": "{label}, {count} non lette"
+    "unreadCard": "{label}, {count} non lette",
+    "legalTitle": "Documenti legali",
+    "legalSubtitle": "Documenti pubblicati e la tua accettazione dei Termini di utilizzo.",
+    "currentTerms": "Termini di utilizzo attuali",
+    "termsVersion": "Versione {version}",
+    "termsAcceptedAt": "Hai accettato i Termini di utilizzo versione {version} il {date}.",
+    "termsNotAccepted": "Per questo account non risulta alcuna accettazione dei Termini di utilizzo.",
+    "viewTerms": "Apri i Termini di utilizzo attuali",
+    "viewPrivacy": "Apri l'Informativa sulla privacy",
+    "privacyTransparency": "L'Informativa sulla privacy descrive il trattamento dei dati personali. La visualizzazione non è registrata come consenso.",
+    "privacyNotAccepted": "Il consenso all'Informativa sulla privacy non viene raccolto in fase di registrazione.",
+    "legalLoadError": "Impossibile caricare i dettagli di accettazione legale."
   },
   "rating": {
     "title": "Valuta il partner",
@@ -1218,5 +1236,16 @@
     "confirmed": "Email confermata. Apertura dell’account…",
     "pleaseWait": "Attendere…",
     "genericError": "Qualcosa è andato storto. Riprova."
+  },
+  "legal": {
+    "informationTitle": "Informazioni legali",
+    "termsTitle": "Termini di utilizzo",
+    "privacyTitle": "Informativa sulla privacy",
+    "version": "Versione {version}",
+    "availableLocalesTitle": "Versioni legali disponibili",
+    "availableLocalesBody": "I documenti legali sono pubblicati solo in georgiano e inglese. AgroBridge non genera una traduzione legale per questa lingua.",
+    "openGeorgian": "Versione georgiana",
+    "openEnglish": "Versione inglese",
+    "placeholderBanner": "[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]"
   }
 }

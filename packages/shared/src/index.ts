@@ -21,4 +21,5 @@ export * from './support';
 export * from './user-profile';
 export * from './subscription';
 export * from './notification';
+export * from './legal';
 export * from './places';

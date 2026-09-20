@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule, type JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { LegalModule } from '../legal/legal.module';
 import { VerificationModule } from '../verification/verification.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -24,6 +25,7 @@ import { PasswordResetService } from './password-reset.service';
       }),
     }),
     VerificationModule,
+    LegalModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, PasswordResetService, JwtStrategy, EmailVerifiedGuard],

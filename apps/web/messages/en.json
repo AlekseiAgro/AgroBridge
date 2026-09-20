@@ -77,7 +77,10 @@
     "passwordChanged": "Password updated. Other sessions have been signed out.",
     "passwordMismatch": "The new passwords do not match.",
     "passwordTooShort": "Password must be at least 8 characters.",
-    "backToLogin": "Back to log in"
+    "backToLogin": "Back to log in",
+    "acceptTerms": "I agree to the <terms>Terms of Use</terms>.",
+    "privacyNotice": "You can also read the <privacy>Privacy Policy</privacy>.",
+    "termsRequired": "Please accept the Terms of Use to create an account."
   },
   "account": {
     "title": "Your account",
@@ -116,7 +119,11 @@
     "explore": "Explore",
     "account": "Account",
     "support": "Support",
-    "copyright": "© {year} AgroBridge"
+    "copyright": "© {year} AgroBridge",
+    "legal": "Legal",
+    "legalInformation": "Legal Information",
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy"
   },
   "support": {
     "title": "Support",
@@ -882,9 +889,20 @@
       "noComment": "No written review."
     },
     "settingsTitle": "Settings",
-    "settingsSubtitle": "Password and account security.",
+    "settingsSubtitle": "Password, account security, and legal documents.",
     "securityTitle": "Security",
-    "unreadCard": "{label}, {count} unread"
+    "unreadCard": "{label}, {count} unread",
+    "legalTitle": "Legal",
+    "legalSubtitle": "Current published documents and your Terms of Use acceptance.",
+    "currentTerms": "Current Terms of Use",
+    "termsVersion": "Version {version}",
+    "termsAcceptedAt": "You accepted Terms of Use version {version} on {date}.",
+    "termsNotAccepted": "No Terms of Use acceptance is recorded for this account.",
+    "viewTerms": "View current Terms of Use",
+    "viewPrivacy": "View Privacy Policy",
+    "privacyTransparency": "The Privacy Policy explains how personal data is processed. Viewing it is not recorded as consent.",
+    "privacyNotAccepted": "Privacy Policy consent is not collected at registration.",
+    "legalLoadError": "Legal acceptance details could not be loaded."
   },
   "rating": {
     "title": "Rate your partner",
@@ -1218,5 +1236,16 @@
     "confirmed": "Email confirmed. Opening your account…",
     "pleaseWait": "Please wait…",
     "genericError": "Something went wrong. Please try again."
+  },
+  "legal": {
+    "informationTitle": "Legal Information",
+    "termsTitle": "Terms of Use",
+    "privacyTitle": "Privacy Policy",
+    "version": "Version {version}",
+    "availableLocalesTitle": "Available legal versions",
+    "availableLocalesBody": "Legal documents are published in Georgian and English only. AgroBridge does not generate a legal translation for this language.",
+    "openGeorgian": "Georgian version",
+    "openEnglish": "English version",
+    "placeholderBanner": "[FINAL LEGAL TEXT TO BE INSERTED IN PR #133]"
   }
 }
