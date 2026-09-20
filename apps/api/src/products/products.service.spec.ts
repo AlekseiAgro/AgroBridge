@@ -284,7 +284,7 @@ describe('ProductsService', () => {
   it('keeps draft-title filters when listing the public catalog', async () => {
     prisma.product.findMany.mockResolvedValue([]);
 
-    await service.list({});
+    await service.catalog({});
 
     expect(prisma.product.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -315,7 +315,7 @@ describe('ProductsService', () => {
     );
     prisma.product.findMany.mockResolvedValue([]);
 
-    await filtered.list({ category: 'fruits' });
+    await filtered.catalog({ category: 'fruits' });
 
     const where = prisma.product.findMany.mock.calls[0]?.[0]?.where;
     expect(where.AND).toEqual(

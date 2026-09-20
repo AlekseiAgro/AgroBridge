@@ -79,6 +79,7 @@ describe('ProductsService certificate authorization', () => {
       reviewStatus: 'approved',
       product: {
         ownerUserId: owner.id,
+        title: 'Hazelnuts',
         isPublished: true,
         moderationStatus: 'approved',
       },
@@ -97,6 +98,16 @@ describe('ProductsService certificate authorization', () => {
         fileName: 'gap.pdf',
         mimeType: 'application/pdf',
       });
+    });
+
+    it('does not treat an internal draft title as a public listing for certificate download', async () => {
+      prisma.productCertificate.findFirst.mockResolvedValue({
+        ...approvedPublic,
+        product: { ...approvedPublic.product, title: 'Новый товар' },
+      });
+      await expect(service.getCertificateDownload('p1', 'c1', null)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
     });
 
     it('returns 401 for an unauthenticated pending certificate', async () => {
