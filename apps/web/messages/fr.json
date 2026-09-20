@@ -108,7 +108,8 @@
     "notifications": "Notifications",
     "notificationsUnread": "Notifications, {count} non lues",
     "purchaseRequestsUnread": "Mes demandes d’achat, {count} non lues",
-    "myQuotesUnread": "Mes offres, {count} non lues"
+    "myQuotesUnread": "Mes offres, {count} non lues",
+    "settings": "Paramètres"
   },
   "footer": {
     "tagline": "Nous relions les fermes géorgiennes aux acheteurs du monde entier.",
@@ -880,6 +881,8 @@
       "sellerRatingPending": "Le vendeur n’a pas encore noté.",
       "noComment": "Pas d’avis écrit."
     },
+    "settingsTitle": "Paramètres",
+    "settingsSubtitle": "Mot de passe et sécurité du compte.",
     "securityTitle": "Sécurité",
     "unreadCard": "{label}, {count} non lues"
   },

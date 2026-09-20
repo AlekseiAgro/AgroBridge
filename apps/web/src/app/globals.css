@@ -1151,9 +1151,11 @@ body {
 
 .page__main {
   width: min(100%, 56rem);
+  min-width: 0;
   margin: 0 auto;
   padding: 0.25rem 0.15rem 2rem;
   flex: 1;
+  container: marketplace / inline-size;
 }
 
 .page__main.narrow {
@@ -1326,6 +1328,12 @@ body {
   gap: 0.75rem;
   margin-bottom: 1.5rem;
   align-items: end;
+  min-width: 0;
+}
+
+.catalog-filters .field,
+.catalog-filters select {
+  min-width: 0;
 }
 
 .catalog-filters__hint {
@@ -1347,9 +1355,11 @@ body {
   padding: 0;
   display: grid;
   gap: 0.85rem;
+  min-width: 0;
 }
 
 .product-list__item {
+  min-width: 0;
   padding: 1rem 1.1rem;
   border: 1px solid var(--line);
   border-radius: 0.9rem;
@@ -1412,6 +1422,10 @@ body {
   grid-template-columns: 7.5rem minmax(0, 1fr);
   gap: 1rem;
   align-items: start;
+}
+
+.product-list__item--with-media > * {
+  min-width: 0;
 }
 
 .product-list__item--row {
@@ -2410,23 +2424,30 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .cabinet {
+  .activity-summary__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/*
+ * Marketplace pages sit in CabinetShell for signed-in users. The sidebar stays
+ * two-column until 640px, so the content column is already "mobile-narrow" at
+ * tablet viewports. Query the available container, not the viewport, so guests
+ * keep the public wide layout while cabinet catalog/requests can stack.
+ */
+@container marketplace (max-width: 40rem) {
+  .catalog-filters {
     grid-template-columns: 1fr;
   }
 
-  .cabinet__sidebar {
-    position: static;
-    min-height: auto;
+  .page__heading-row,
+  .product-list__item--row {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .cabinet__nav {
-    display: flex;
+  .product-list__item-main {
     flex-wrap: wrap;
-    gap: 0.45rem;
-  }
-
-  .activity-summary__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -2477,6 +2498,7 @@ body {
 .cabinet {
   display: grid;
   grid-template-columns: 16.5rem minmax(0, 1fr);
+  min-width: 0;
   min-height: 100vh;
 }
 
@@ -2553,6 +2575,7 @@ body {
 }
 
 .cabinet__main {
+  min-width: 0;
   padding: 1.25rem 1.4rem 2.5rem;
 }
 
@@ -2639,12 +2662,63 @@ body {
   font-size: 0.92rem;
 }
 
+.cabinet__content {
+  min-width: 0;
+}
+
 .cabinet-page {
   width: min(100%, 56rem);
 }
 
 .cabinet-page--narrow {
   width: min(100%, 32rem);
+}
+
+.cabinet__content:has(.floating-cta) {
+  padding-bottom: 6.5rem;
+}
+
+@media (max-width: 640px) {
+  .cabinet {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cabinet__sidebar {
+    position: static;
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .cabinet__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .cabinet__main,
+  .cabinet__content,
+  .cabinet__top {
+    min-width: 0;
+  }
+
+  .cabinet__top {
+    flex-wrap: wrap;
+  }
+
+  .cabinet__top-actions {
+    max-width: 100%;
+  }
+
+  .cabinet__user-chip {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .cabinet__main {
+    padding: 1rem 0.9rem 2rem;
+  }
 }
 
 .user-card {
@@ -4109,15 +4183,16 @@ body {
 }
 
 .product-opportunity-row {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
   margin: 0.35rem 0 0.15rem;
+  min-width: 0;
 }
 
 .opportunity-badge {
-  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -4178,7 +4253,7 @@ body {
   left: 0;
   bottom: calc(100% + 0.45rem);
   z-index: 20;
-  width: min(18.5rem, 72vw);
+  width: min(18.5rem, 100%);
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--line);
   border-radius: 0.65rem;

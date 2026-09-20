@@ -3,8 +3,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PurchaseRequestFilters } from '@/components/PurchaseRequestFilters';
 import { PurchaseRequestList } from '@/components/PurchaseRequestList';
 import { RequestsSellCta } from '@/components/RequestsSellCta';
-import { SiteFooter } from '@/components/SiteFooter';
-import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
@@ -43,8 +41,7 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
   const canCreate = Boolean(user);
 
   return (
-    <div className="page">
-      <SiteHeader />
+    <>
       <main className="page__main">
         <p className="eyebrow">
           <Link href="/sellers">{tn('forSellers')}</Link>
@@ -76,7 +73,6 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
         ) : null}
       </main>
       <RequestsSellCta />
-      <SiteFooter />
-    </div>
+    </>
   );
 }

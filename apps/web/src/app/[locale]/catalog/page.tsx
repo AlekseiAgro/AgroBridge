@@ -7,8 +7,6 @@ import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
 import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
-import { SiteFooter } from '@/components/SiteFooter';
-import { SiteHeader } from '@/components/SiteHeader';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
@@ -55,8 +53,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   }
 
   return (
-    <div className="page">
-      <SiteHeader />
+    <>
       <main className="page__main">
         <p className="eyebrow">
           <Link href="/buyers">{tn('forBuyers')}</Link>
@@ -155,7 +152,6 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         )}
       </main>
       <CatalogPurchaseCta />
-      <SiteFooter />
-    </div>
+    </>
   );
 }

@@ -108,7 +108,8 @@
     "notifications": "შეტყობინებები",
     "notificationsUnread": "შეტყობინებები, წაუკითხავი: {count}",
     "purchaseRequestsUnread": "ჩემი შესყიდვის მოთხოვნები, წაუკითხავი: {count}",
-    "myQuotesUnread": "ჩემი შეთავაზებები, წაუკითხავი: {count}"
+    "myQuotesUnread": "ჩემი შეთავაზებები, წაუკითხავი: {count}",
+    "settings": "პარამეტრები"
   },
   "footer": {
     "tagline": "ვაკავშირებთ ქართულ მეურნეობებს მყიდველებთან მთელ მსოფლიოში.",
@@ -880,6 +881,8 @@
       "sellerRatingPending": "გამყიდველს ჯერ არ დაუტოვებია შეფასება.",
       "noComment": "ტექსტური გამოხმაურება არ არის."
     },
+    "settingsTitle": "პარამეტრები",
+    "settingsSubtitle": "პაროლი და ანგარიშის უსაფრთხოება.",
     "securityTitle": "უსაფრთხოება",
     "unreadCard": "{label}, წაუკითხავი: {count}"
   },

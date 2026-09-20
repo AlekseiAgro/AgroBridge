@@ -108,7 +108,8 @@
     "notifications": "Avisos",
     "notificationsUnread": "Avisos, {count} sin leer",
     "purchaseRequestsUnread": "Mis solicitudes de compra, {count} sin leer",
-    "myQuotesUnread": "Mis ofertas, {count} sin leer"
+    "myQuotesUnread": "Mis ofertas, {count} sin leer",
+    "settings": "Ajustes"
   },
   "footer": {
     "tagline": "Conectamos granjas georgianas con compradores de todo el mundo.",
@@ -880,6 +881,8 @@
       "sellerRatingPending": "El vendedor aún no ha valorado.",
       "noComment": "Sin reseña escrita."
     },
+    "settingsTitle": "Ajustes",
+    "settingsSubtitle": "Contraseña y seguridad de la cuenta.",
     "securityTitle": "Seguridad",
     "unreadCard": "{label}, {count} sin leer"
   },

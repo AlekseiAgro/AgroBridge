@@ -108,7 +108,8 @@
     "notifications": "Notifications",
     "notificationsUnread": "Notifications, {count} unread",
     "purchaseRequestsUnread": "My purchase requests, {count} unread",
-    "myQuotesUnread": "My quotes, {count} unread"
+    "myQuotesUnread": "My quotes, {count} unread",
+    "settings": "Settings"
   },
   "footer": {
     "tagline": "Connecting Georgian farms with buyers worldwide.",
@@ -880,6 +881,8 @@
       "sellerRatingPending": "The seller has not left a rating yet.",
       "noComment": "No written review."
     },
+    "settingsTitle": "Settings",
+    "settingsSubtitle": "Password and account security.",
     "securityTitle": "Security",
     "unreadCard": "{label}, {count} unread"
   },
