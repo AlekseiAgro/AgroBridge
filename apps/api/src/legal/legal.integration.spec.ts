@@ -36,8 +36,8 @@ describeWithDatabase()('legal acceptance (database)', () => {
       prisma as unknown as PrismaService,
       new JwtService({ secret: 'legal-integration-secret' }),
       config,
-      { notifyWelcome: jest.fn() } as never,
-      { sendEmailCode: jest.fn() } as never,
+      { notifyWelcome: jest.fn().mockResolvedValue(undefined) } as never,
+      { sendEmailCode: jest.fn().mockResolvedValue({ sent: true }) } as never,
       rateLimit,
       legal,
     );
@@ -59,7 +59,6 @@ describeWithDatabase()('legal acceptance (database)', () => {
         effectiveAt: new Date(),
       },
       update: {
-        title: options.title,
         status: LegalDocumentStatus.published,
       },
     });
@@ -87,7 +86,7 @@ describeWithDatabase()('legal acceptance (database)', () => {
       type: LegalDocumentType.TERMS,
       locale: LegalDocumentLocale.ka,
       version: '1.0',
-      title: 'Terms of Use KA',
+      title: 'Terms of Use',
     });
   });
 

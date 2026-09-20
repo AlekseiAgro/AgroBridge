@@ -91,7 +91,7 @@ export function AuthForm({ mode, nextPath, termsVersion, termsLocale }: Props) {
   }
 
   return (
-    <form className="auth-form" onSubmit={onSubmit}>
+    <form className="auth-form" method="post" action="#" onSubmit={onSubmit}>
       {mode === 'register' ? (
         <>
           <label className="field">

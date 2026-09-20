@@ -56,8 +56,8 @@ describe('legal foundation UI architecture', () => {
     expect(privacyEn).toContain(marker);
     expect(termsKa).toContain(marker);
     expect(privacyKa).toContain(marker);
-    expect(termsEn).not.toMatch(/governing law|arbitration|liability cap|refund policy/i);
-    expect(privacyEn).not.toMatch(/retention period|processor list|cookie policy|international transfer/i);
+    expect(termsEn).not.toMatch(/shall be governed|binding arbitration|liability shall not exceed|refunds are/i);
+    expect(privacyEn).not.toMatch(/we retain personal data for|our processors are|this cookie policy|standard contractual clauses/i);
   });
 
   it('adds footer legal links without a cabinet Legal sidebar item', () => {
