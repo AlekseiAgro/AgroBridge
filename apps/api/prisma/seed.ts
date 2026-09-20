@@ -17,6 +17,7 @@ import * as bcrypt from 'bcrypt';
 import { mkdir, rm, writeFile } from 'fs/promises';
 import { dirname, join, resolve } from 'path';
 import { PRODUCT_CATEGORIES } from '@agrobridge/shared';
+import { demoMarketplaceSeedPlan } from '../src/demo-data/demo-seed-guard';
 import {
   buildEnrichedProductData,
   enrichDemoFarm,
@@ -979,13 +980,16 @@ async function ensureLegalDocuments() {
 }
 
 async function main() {
+  const seedPlan = demoMarketplaceSeedPlan();
   const adminEmail = (
     process.env.ADMIN_EMAIL ?? 'admin@agrobridge.local'
   ).toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD ?? 'ChangeMeAdmin1';
   const adminDisplayName = process.env.ADMIN_DISPLAY_NAME ?? 'AgroBridge Admin';
 
-  await removeObsoleteDemoData();
+  if (seedPlan.allowDemoMarketplace) {
+    await removeObsoleteDemoData();
+  }
   await ensureLegalDocuments();
 
   const [adminPasswordHash, demoPasswordHash] = await Promise.all([
@@ -1010,6 +1014,12 @@ async function main() {
       create: { id, enabled: true, sortOrder: index },
       update: {},
     });
+  }
+
+  if (!seedPlan.allowDemoMarketplace) {
+    console.warn(seedPlan.blockedReason);
+    console.log('Skipping demo farmers, buyers, products, deals, and purchase requests.');
+    return;
   }
 
   // Buyers must be email-verified: chat + LocaleSync (cabinet/me/locale) require EmailVerifiedGuard.

@@ -348,6 +348,41 @@ export const PRODUCT_TITLE_I18N: Record<string, Partial<Record<Locale, string>>>
   },
 };
 
+/**
+ * Internal draft titles created when a farmer opens "new product".
+ * These must never appear in the public catalog, even if the row is published.
+ * Keep in sync with `product.draftTitle` in apps/web/messages/*.json.
+ */
+export const INTERNAL_DRAFT_PRODUCT_TITLES = [
+  'Untitled product',
+  'Новый товар',
+  'ახალი პროდუქტი',
+  'Unbenanntes Produkt',
+  'Produit sans titre',
+  'Prodotto senza titolo',
+  'Producto sin título',
+] as const;
+
+/** True when the stored title is empty or still the locale draft placeholder. */
+export function isInternalDraftProductTitle(title: string | null | undefined): boolean {
+  const normalized = title?.trim() ?? '';
+  if (!normalized) return true;
+  return (INTERNAL_DRAFT_PRODUCT_TITLES as readonly string[]).includes(normalized);
+}
+
+/** Visitor-facing marketplace listing: published, approved, and a real title. */
+export function isPubliclyListedProduct(product: {
+  isPublished?: boolean | null;
+  moderationStatus?: string | null;
+  title?: string | null;
+}): boolean {
+  return (
+    product.isPublished === true &&
+    product.moderationStatus === 'approved' &&
+    !isInternalDraftProductTitle(product.title)
+  );
+}
+
 /** Resolve a product title for the active UI locale; falls back to the stored title. */
 export function localizeProductTitle(
   title: string | null | undefined,

@@ -1,8 +1,8 @@
-import type { FarmDetail, ProductSummary } from '@agrobridge/shared';
+import { isPubliclyListedProduct, type FarmDetail, type ProductSummary } from '@agrobridge/shared';
 
 /** Listings a visitor is allowed to see on a farm profile. */
 export function isPublicFarmProduct(product: ProductSummary): boolean {
-  return product.isPublished && product.moderationStatus === 'approved';
+  return isPubliclyListedProduct(product);
 }
 
 /**

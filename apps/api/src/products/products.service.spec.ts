@@ -1,4 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
+import { INTERNAL_DRAFT_PRODUCT_TITLES } from '@agrobridge/shared';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 
 describe('ProductsService', () => {
@@ -278,6 +279,171 @@ describe('ProductsService', () => {
         }),
       }),
     );
+  });
+
+  it('keeps draft-title filters when listing the public catalog', async () => {
+    prisma.product.findMany.mockResolvedValue([]);
+
+    await service.list({});
+
+    expect(prisma.product.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          isPublished: true,
+          moderationStatus: 'approved',
+          AND: expect.arrayContaining([
+            { title: { not: '' } },
+            { title: { notIn: [...INTERNAL_DRAFT_PRODUCT_TITLES] } },
+          ]),
+        }),
+      }),
+    );
+  });
+
+  it('does not drop draft-title filters when category AND is applied', async () => {
+    const categories = { enabledIds: jest.fn().mockResolvedValue(['fruits']) };
+    const filtered = new ProductsService(
+      prisma as never,
+      storage as never,
+      ratings as never,
+      categories as never,
+      {
+        notifyHarvestAvailable: jest.fn().mockResolvedValue(undefined),
+        notifyHarvestPreorderOpen: jest.fn().mockResolvedValue(undefined),
+        notifyProductPendingModeration: jest.fn().mockResolvedValue(undefined),
+      } as never,
+    );
+    prisma.product.findMany.mockResolvedValue([]);
+
+    await filtered.list({ category: 'fruits' });
+
+    const where = prisma.product.findMany.mock.calls[0]?.[0]?.where;
+    expect(where.AND).toEqual(
+      expect.arrayContaining([
+        { title: { not: '' } },
+        { title: { notIn: [...INTERNAL_DRAFT_PRODUCT_TITLES] } },
+        { category: 'fruits' },
+      ]),
+    );
+  });
+
+  it('hides a published draft title from public getById and keeps a real title visible', async () => {
+    const published = {
+      id: 'p1',
+      ownerUserId: 'u1',
+      farmId: null,
+      title: 'Новый товар',
+      description: null,
+      category: null,
+      variety: null,
+      country: null,
+      originPlace: null,
+      unit: null,
+      minQuantity: null,
+      maxQuantity: null,
+      currentStock: null,
+      monthlyProduction: null,
+      maxAnnualProduction: null,
+      seasonMonths: [],
+      harvestStartAt: null,
+      harvestEndAt: null,
+      forecastQuantity: null,
+      harvestStatus: null,
+      preorderEnabled: false,
+      attributes: {},
+      packagingTypes: [],
+      packagingWeights: [],
+      palletSize: null,
+      incoterms: [],
+      carriers: [],
+      customDelivery: null,
+      nearestPort: null,
+      deliveryAvailable: false,
+      leadTimeDays: null,
+      priceFrom: null,
+      priceCurrency: null,
+      priceNegotiable: false,
+      priceDependsOnVolume: false,
+      isPublished: true,
+      moderationStatus: 'approved',
+      moderationNote: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      owner: { id: 'u1', displayName: 'Owner' },
+      farm: null,
+      images: [],
+      videos: [],
+      certificates: [],
+    };
+    prisma.product.findUnique.mockResolvedValue(published);
+
+    await expect(service.getById('p1', null)).rejects.toBeInstanceOf(NotFoundException);
+
+    prisma.product.findUnique.mockResolvedValue({
+      ...published,
+      title: 'Fresh Kakheti peaches',
+    });
+    const detail = await service.getById('p1', null);
+    expect(detail.title).toBe('Fresh Kakheti peaches');
+  });
+
+  it('lets the owner still open a listing that uses an internal draft title', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      ownerUserId: 'u1',
+      farmId: null,
+      title: 'Новый товар',
+      description: null,
+      category: null,
+      variety: null,
+      country: null,
+      originPlace: null,
+      unit: null,
+      minQuantity: null,
+      maxQuantity: null,
+      currentStock: null,
+      monthlyProduction: null,
+      maxAnnualProduction: null,
+      seasonMonths: [],
+      harvestStartAt: null,
+      harvestEndAt: null,
+      forecastQuantity: null,
+      harvestStatus: null,
+      preorderEnabled: false,
+      attributes: {},
+      packagingTypes: [],
+      packagingWeights: [],
+      palletSize: null,
+      incoterms: [],
+      carriers: [],
+      customDelivery: null,
+      nearestPort: null,
+      deliveryAvailable: false,
+      leadTimeDays: null,
+      priceFrom: null,
+      priceCurrency: null,
+      priceNegotiable: false,
+      priceDependsOnVolume: false,
+      isPublished: true,
+      moderationStatus: 'approved',
+      moderationNote: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      owner: { id: 'u1', displayName: 'Owner' },
+      farm: null,
+      images: [],
+      videos: [],
+      certificates: [],
+    });
+
+    const detail = await service.getById('p1', {
+      id: 'u1',
+      email: 'f@example.com',
+      role: 'farmer',
+      locale: 'en',
+      displayName: null,
+    });
+    expect(detail.title).toBe('Новый товар');
   });
 
   it('lists harvest watches for the current user', async () => {

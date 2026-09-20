@@ -2,11 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   evaluateMarketOpportunity,
   isLocale,
+  isPubliclyListedProduct,
   localizeProductTitle,
   type Locale,
   type ProductMarketInsight,
 } from '@agrobridge/shared';
-import { ModerationStatus as PrismaModerationStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 type InsightProduct = {
@@ -89,11 +89,7 @@ export class MarketInsightService {
       },
     });
 
-    if (
-      !product ||
-      !product.isPublished ||
-      product.moderationStatus !== PrismaModerationStatus.approved
-    ) {
+    if (!product || !isPubliclyListedProduct(product)) {
       throw new NotFoundException('Product not found');
     }
 

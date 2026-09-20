@@ -15,6 +15,7 @@ import {
   PRODUCT_VIDEO_MIME_TYPES,
   canTrade,
   catalogSearchCanonicalMatches,
+  isPubliclyListedProduct,
   isCarrier,
   isCertificateType,
   isFarmDocumentMimeType,
@@ -54,11 +55,7 @@ import {
   sanitizeStringArray,
   toNumberOrNull,
 } from './product-mapper';
-
-const publicProductWhere: Prisma.ProductWhereInput = {
-  isPublished: true,
-  moderationStatus: PrismaModerationStatus.approved,
-};
+import { publicProductWhereAnd } from './public-product.where';
 
 const imageOrderBy: Prisma.ProductImageOrderByWithRelationInput[] = [
   { isPrimary: 'desc' },
@@ -203,10 +200,7 @@ export class ProductsService {
       and.push({ seasonMonths: { has: new Date().getUTCMonth() + 1 } });
     }
 
-    const where: Prisma.ProductWhereInput = {
-      ...publicProductWhere,
-      ...(and.length > 0 ? { AND: and } : {}),
-    };
+    const where = publicProductWhereAnd(and);
 
     const products = await this.prisma.product.findMany({
       where,
@@ -233,8 +227,7 @@ export class ProductsService {
 
     const isOwner = viewer && (viewer.role === 'admin' || product.ownerUserId === viewer.id);
 
-    const isPublic =
-      product.isPublished && product.moderationStatus === PrismaModerationStatus.approved;
+    const isPublic = isPubliclyListedProduct(product);
 
     if (!isPublic && !isOwner) {
       throw new NotFoundException('Product not found');
@@ -998,6 +991,7 @@ export class ProductsService {
         product: {
           select: {
             ownerUserId: true,
+            title: true,
             isPublished: true,
             moderationStatus: true,
           },
@@ -1013,8 +1007,7 @@ export class ProductsService {
     const isPrivileged = Boolean(
       viewer && (viewer.role === 'admin' || product.ownerUserId === viewer.id),
     );
-    const productIsPublic =
-      product.isPublished && product.moderationStatus === PrismaModerationStatus.approved;
+    const productIsPublic = isPubliclyListedProduct(product);
     const certificateIsApproved = certificate.reviewStatus === 'approved';
 
     if (certificateIsApproved && productIsPublic) {
@@ -1378,15 +1371,12 @@ export class ProductsService {
       where: { id: productId },
       select: {
         id: true,
+        title: true,
         isPublished: true,
         moderationStatus: true,
       },
     });
-    if (
-      !product ||
-      !product.isPublished ||
-      product.moderationStatus !== PrismaModerationStatus.approved
-    ) {
+    if (!product || !isPubliclyListedProduct(product)) {
       throw new NotFoundException('Product not found');
     }
     return product;
@@ -1397,6 +1387,7 @@ export class ProductsService {
       where: { id: productId },
       select: {
         id: true,
+        title: true,
         isPublished: true,
         moderationStatus: true,
         ownerUserId: true,
@@ -1406,8 +1397,7 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
     const isOwner = user.role === 'admin' || product.ownerUserId === user.id;
-    const isPublic =
-      product.isPublished && product.moderationStatus === PrismaModerationStatus.approved;
+    const isPublic = isPubliclyListedProduct(product);
     if (!isPublic && !isOwner) {
       throw new NotFoundException('Product not found');
     }

@@ -22,7 +22,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "db:cleanup-demo": "node ./prisma/run-cleanup-demo.cjs"
   },
   "prisma": {
     "seed": "node ./prisma/run-seed.cjs"

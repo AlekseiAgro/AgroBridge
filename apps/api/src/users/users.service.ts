@@ -1,10 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { PublicUserProfile } from '@agrobridge/shared';
-import {
-  ModerationStatus as PrismaModerationStatus,
-  RfqStatus as PrismaRfqStatus,
-} from '@prisma/client';
+import { RfqStatus as PrismaRfqStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { publicProductWhere } from '../products/public-product.where';
 import { RatingsService } from '../ratings/ratings.service';
 
 @Injectable()
@@ -27,10 +25,7 @@ export class UsersService {
             _count: {
               select: {
                 products: {
-                  where: {
-                    isPublished: true,
-                    moderationStatus: PrismaModerationStatus.approved,
-                  },
+                  where: publicProductWhere,
                 },
               },
             },
