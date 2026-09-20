@@ -1217,29 +1217,30 @@
     }
   },
   "marketInsight": {
-    "button": "AI Market Insight",
-    "title": "Market insight",
-    "close": "Close",
-    "loading": "Preparing a short market note…",
-    "error": "Could not load market insight.",
-    "disclaimer": "Indicative note based on listing details. Not financial or trading advice."
+    "button": "Marktsignal",
+    "title": "Marktsignal",
+    "close": "Schließen",
+    "loading": "Kurzes Anzeigesignal wird vorbereitet…",
+    "error": "Marktsignal konnte nicht geladen werden.",
+    "disclaimer": "Ein indikatives Signal aus Angebotsmerkmalen, Saisonalität und genannten Exportmärkten. Es beruht nicht auf externen Marktstatistiken oder historischen Preisdaten."
   },
   "opportunity": {
     "tiers": {
-      "excellent": "Hervorragende Chance",
-      "good": "Gute Chance",
-      "fair": "Moderate Chance",
-      "watch": "Chance beobachten"
+      "excellent": "Starkes Marktsignal",
+      "good": "Marktsignal",
+      "fair": "Mäßiges Marktsignal",
+      "watch": "Anzeige beobachten"
     },
     "tooltip": {
-      "highDemand": "Hohe Nachfrage in {markets}.",
-      "steadyDemand": "Stabile Nachfrage in {markets}.",
-      "limitedSupply": "Angebot begrenzt.",
-      "availableSupply": "Angebot verfügbar.",
-      "priceRiseThreeWeeks": "Preisanstieg in den nächsten drei Wochen erwartet.",
-      "priceRiseWeeks": "Preisanstieg in den nächsten {weeks} Wochen erwartet.",
-      "priceRiseSoon": "Bald wird ein Preisanstieg erwartet.",
-      "priceStable": "Jüngste Preisbewegung etwa +{percent}%."
+      "signalBasis": "Berechnet aus Angebotsfeldern, nicht aus Marktstatistik.",
+      "exportMarkets": "Berücksichtigte Exportmärkte: {markets}.",
+      "exportMarketsUnknown": "In der Anzeige sind keine Exportmärkte angegeben.",
+      "limitedSupply": "Bestand oder Erntestatus der Anzeige ist begrenzt.",
+      "availableSupply": "Der Bestand der Anzeige ist verfügbar.",
+      "seasonOneWeek": "Angegebener Erntestart in etwa einer Woche.",
+      "seasonWeeks": "Angegebener Erntestart in etwa {weeks} Wochen.",
+      "seasonStarted": "Angegebener Erntestart hat begonnen oder steht bevor.",
+      "seasonUnstated": "Kein Erntestart in der Anzeige angegeben."
     }
   },
   "verifyEmail": {

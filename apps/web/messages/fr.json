@@ -1217,29 +1217,30 @@
     }
   },
   "marketInsight": {
-    "button": "AI Market Insight",
-    "title": "Market insight",
-    "close": "Close",
-    "loading": "Preparing a short market note…",
-    "error": "Could not load market insight.",
-    "disclaimer": "Indicative note based on listing details. Not financial or trading advice."
+    "button": "Signal de marché",
+    "title": "Signal de marché",
+    "close": "Fermer",
+    "loading": "Préparation d’un court signal de fiche…",
+    "error": "Impossible de charger le signal de marché.",
+    "disclaimer": "Signal indicatif calculé à partir des caractéristiques de la fiche, de la saisonnalité et des marchés d’export indiqués. Il ne repose pas sur des statistiques de marché externes ni sur un historique de prix."
   },
   "opportunity": {
     "tiers": {
-      "excellent": "Excellente opportunité",
-      "good": "Bonne opportunité",
-      "fair": "Opportunité correcte",
-      "watch": "Opportunité à surveiller"
+      "excellent": "Signal d’opportunité fort",
+      "good": "Signal d’opportunité",
+      "fair": "Signal d’opportunité modéré",
+      "watch": "Fiche à surveiller"
     },
     "tooltip": {
-      "highDemand": "Forte demande en {markets}.",
-      "steadyDemand": "Demande stable en {markets}.",
-      "limitedSupply": "Offre limitée.",
-      "availableSupply": "Offre disponible.",
-      "priceRiseThreeWeeks": "Hausse des prix attendue dans les trois prochaines semaines.",
-      "priceRiseWeeks": "Hausse des prix attendue dans les {weeks} prochaines semaines.",
-      "priceRiseSoon": "Une hausse des prix est attendue bientôt.",
-      "priceStable": "Variation récente des prix d’environ +{percent}%."
+      "signalBasis": "Calculé à partir des champs de la fiche, pas de statistiques de marché.",
+      "exportMarkets": "Marchés d’export pris en compte : {markets}.",
+      "exportMarketsUnknown": "Aucun marché d’export n’est indiqué sur la fiche.",
+      "limitedSupply": "Le stock ou le statut de récolte de la fiche est limité.",
+      "availableSupply": "Le stock indiqué sur la fiche est disponible.",
+      "seasonOneWeek": "Le début de récolte indiqué est dans environ une semaine.",
+      "seasonWeeks": "Le début de récolte indiqué est dans environ {weeks} semaines.",
+      "seasonStarted": "Le début de récolte indiqué a commencé ou est imminent.",
+      "seasonUnstated": "Aucun début de récolte n’est indiqué."
     }
   },
   "verifyEmail": {

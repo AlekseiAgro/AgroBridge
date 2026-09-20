@@ -165,26 +165,24 @@ export function MarketOpportunityBadge({ opportunity, className = '' }: Props) {
   const locale = useLocale();
   const markets = joinMarkets(opportunity.markets, locale);
 
-  const demand = opportunity.highDemand
-    ? t('tooltip.highDemand', { markets })
-    : t('tooltip.steadyDemand', { markets });
+  const marketsLine = markets
+    ? t('tooltip.exportMarkets', { markets })
+    : t('tooltip.exportMarketsUnknown');
 
   const supply = opportunity.limitedSupply
     ? t('tooltip.limitedSupply')
     : t('tooltip.availableSupply');
 
-  const price =
-    opportunity.priceRiseLikely &&
-    opportunity.weeksToSeason != null &&
-    opportunity.weeksToSeason > 0
-      ? opportunity.weeksToSeason === 3
-        ? t('tooltip.priceRiseThreeWeeks')
-        : t('tooltip.priceRiseWeeks', { weeks: opportunity.weeksToSeason })
-      : opportunity.priceRiseLikely
-        ? t('tooltip.priceRiseSoon')
-        : t('tooltip.priceStable', { percent: opportunity.priceDeltaPercent });
+  const season =
+    opportunity.weeksToSeason != null && opportunity.weeksToSeason > 0
+      ? opportunity.weeksToSeason === 1
+        ? t('tooltip.seasonOneWeek')
+        : t('tooltip.seasonWeeks', { weeks: opportunity.weeksToSeason })
+      : opportunity.weeksToSeason === 0
+        ? t('tooltip.seasonStarted')
+        : t('tooltip.seasonUnstated');
 
-  const tooltip = `${demand} ${supply} ${price}`;
+  const tooltip = `${t('tooltip.signalBasis')} ${marketsLine} ${supply} ${season}`;
 
   return (
     <span
