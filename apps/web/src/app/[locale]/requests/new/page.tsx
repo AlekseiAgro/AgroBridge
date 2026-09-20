@@ -1,8 +1,6 @@
 import { canTrade } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PurchaseRequestForm } from '@/components/PurchaseRequestForm';
-import { SiteFooter } from '@/components/SiteFooter';
-import { SiteHeader } from '@/components/SiteHeader';
 import { Link, redirect } from '@/i18n/navigation';
 import { requireVerifiedUser } from '@/lib/require-verified-user';
 
@@ -24,9 +22,7 @@ export default async function NewPurchaseRequestPage({ params }: Props) {
   }
 
   return (
-    <div className="page">
-      <SiteHeader />
-      <main className="page__main narrow">
+    <main className="page__main narrow">
         <p className="eyebrow">
           <Link href="/buyers">{tn('forBuyers')}</Link>
           {' · '}
@@ -35,8 +31,6 @@ export default async function NewPurchaseRequestPage({ params }: Props) {
         <h1>{t('createTitle')}</h1>
         <p className="page__subtitle">{t('createSubtitle')}</p>
         <PurchaseRequestForm />
-      </main>
-      <SiteFooter />
-    </div>
+    </main>
   );
 }

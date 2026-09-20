@@ -88,6 +88,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
             <div className="cabinet__nav-group">
               <p className="cabinet__nav-label">{tc('navGroups.account')}</p>
               <Link href="/dashboard/subscriptions">{t('subscriptions')}</Link>
+              <Link href="/account/settings">{t('settings')}</Link>
               {user.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
             </div>
           ) : null}

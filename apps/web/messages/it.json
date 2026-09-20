@@ -108,7 +108,8 @@
     "notifications": "Notifiche",
     "notificationsUnread": "Notifiche, {count} non lette",
     "purchaseRequestsUnread": "Le mie richieste di acquisto, {count} non lette",
-    "myQuotesUnread": "Le mie offerte, {count} non lette"
+    "myQuotesUnread": "Le mie offerte, {count} non lette",
+    "settings": "Impostazioni"
   },
   "footer": {
     "tagline": "Colleghiamo le aziende georgiane con acquirenti in tutto il mondo.",
@@ -880,6 +881,8 @@
       "sellerRatingPending": "Il venditore non ha ancora valutato.",
       "noComment": "Nessuna recensione scritta."
     },
+    "settingsTitle": "Impostazioni",
+    "settingsSubtitle": "Password e sicurezza dell’account.",
     "securityTitle": "Sicurezza",
     "unreadCard": "{label}, {count} non lette"
   },

@@ -108,7 +108,8 @@
     "notifications": "Benachrichtigungen",
     "notificationsUnread": "Benachrichtigungen, {count} ungelesen",
     "purchaseRequestsUnread": "Meine Kaufanfragen, {count} ungelesen",
-    "myQuotesUnread": "Meine Angebote, {count} ungelesen"
+    "myQuotesUnread": "Meine Angebote, {count} ungelesen",
+    "settings": "Einstellungen"
   },
   "footer": {
     "tagline": "Wir verbinden georgische Betriebe mit Käufern weltweit.",
@@ -880,6 +881,8 @@
       "sellerRatingPending": "Der Verkäufer hat noch keine Bewertung abgegeben.",
       "noComment": "Kein schriftlicher Kommentar."
     },
+    "settingsTitle": "Einstellungen",
+    "settingsSubtitle": "Passwort und Kontosicherheit.",
     "securityTitle": "Sicherheit",
     "unreadCard": "{label}, {count} ungelesen"
   },

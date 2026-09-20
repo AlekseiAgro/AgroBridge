@@ -4,8 +4,6 @@ import { notFound } from 'next/navigation';
 import { OpenChatButton } from '@/components/OpenChatButton';
 import { PurchaseQuoteForm } from '@/components/PurchaseQuoteForm';
 import { PurchaseRequestActionButton } from '@/components/PurchaseRequestActionButton';
-import { SiteFooter } from '@/components/SiteFooter';
-import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
@@ -41,9 +39,7 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
   const buyerName = request.buyer.displayName || t('anonymousBuyer');
 
   return (
-    <div className="page">
-      <SiteHeader />
-      <main className="page__main">
+    <main className="page__main">
         <p className="eyebrow">
           <Link href="/requests">{t('boardTitle')}</Link>
         </p>
@@ -231,8 +227,6 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
             {t('noQuotesYet')}
           </p>
         ) : null}
-      </main>
-      <SiteFooter />
-    </div>
+    </main>
   );
 }

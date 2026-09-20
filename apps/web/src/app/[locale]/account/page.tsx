@@ -1,17 +1,13 @@
 import type { CabinetOverview } from '@agrobridge/shared';
 import { canTrade, EMPTY_NOTIFICATION_UNREAD_SUMMARY } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { ChangePasswordForm } from '@/components/ChangePasswordForm';
 import { ChatUnreadBadge } from '@/components/ChatNavLink';
-import { CabinetShell } from '@/components/CabinetShell';
-import { DeleteAccountButton } from '@/components/DeleteAccountButton';
 import { EditProfileControl } from '@/components/EditProfileControl';
 import { RatingStars } from '@/components/RatingStars';
 import { UserAvatarEditor } from '@/components/UserAvatarEditor';
 import { Link } from '@/i18n/navigation';
 import { formatMemberSinceMonthYear } from '@/lib/member-since';
 import { apiRequestAuthed } from '@/lib/server-api';
-import { requireVerifiedUser } from '@/lib/require-verified-user';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -20,8 +16,6 @@ type Props = {
 export default async function AccountPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-
-  await requireVerifiedUser(locale, '/account');
 
   const t = await getTranslations('cabinet');
   const ta = await getTranslations('auth');
@@ -101,7 +95,14 @@ export default async function AccountPage({ params }: Props) {
   });
 
   return (
-    <CabinetShell title={t('title')} subtitle={t('subtitle')}>
+    <main className="cabinet-page">
+      <div className="page__heading-row">
+        <div>
+          <h1>{t('title')}</h1>
+          <p className="page__subtitle">{t('subtitle')}</p>
+        </div>
+      </div>
+
       <section className="user-card">
         <div className="user-card__identity">
           <UserAvatarEditor
@@ -167,19 +168,6 @@ export default async function AccountPage({ params }: Props) {
         </ul>
       </section>
 
-      <section className="cabinet-security" aria-labelledby="cabinet-security-title">
-        <h2 id="cabinet-security-title" className="section-title">
-          {t('securityTitle')}
-        </h2>
-        <p className="cabinet-security__hint">{ta('changePasswordHint')}</p>
-        <ChangePasswordForm />
-      </section>
-
-      {user.role !== 'admin' ? (
-        <section className="cabinet-danger">
-          <DeleteAccountButton email={user.email} />
-        </section>
-      ) : null}
-    </CabinetShell>
+    </main>
   );
 }

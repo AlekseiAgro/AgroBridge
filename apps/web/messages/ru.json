@@ -108,7 +108,8 @@
     "notifications": "Уведомления",
     "notificationsUnread": "Уведомления, непрочитанных: {count}",
     "purchaseRequestsUnread": "Мои запросы на покупку, непрочитанных: {count}",
-    "myQuotesUnread": "Мои предложения, непрочитанных: {count}"
+    "myQuotesUnread": "Мои предложения, непрочитанных: {count}",
+    "settings": "Настройки"
   },
   "footer": {
     "tagline": "Связываем грузинские хозяйства с покупателями по всему миру.",
@@ -880,6 +881,8 @@
       "sellerRatingPending": "Продавец ещё не оставил оценку.",
       "noComment": "Без текстового отзыва."
     },
+    "settingsTitle": "Настройки",
+    "settingsSubtitle": "Пароль и безопасность аккаунта.",
     "securityTitle": "Безопасность",
     "unreadCard": "{label}, непрочитанных: {count}"
   },
