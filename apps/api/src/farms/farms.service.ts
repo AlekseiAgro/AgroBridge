@@ -28,7 +28,6 @@ import {
 import {
   DocumentReviewStatus,
   FarmDocumentKind,
-  ModerationStatus as PrismaModerationStatus,
   VerificationStatus as PrismaVerificationStatus,
 } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -46,16 +45,12 @@ import {
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
 import { farmDocumentFileUrl } from './farm-document-url';
+import { publicProductWhere } from '../products/public-product.where';
 
 export type FarmDocumentDownload = {
   key: string;
   fileName: string;
   mimeType: string;
-};
-
-const publicProductWhere = {
-  isPublished: true,
-  moderationStatus: PrismaModerationStatus.approved,
 };
 
 const farmImagesInclude = {

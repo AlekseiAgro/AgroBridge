@@ -1,4 +1,9 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import {
+  INTERNAL_DRAFT_PRODUCT_TITLES,
+  isInternalDraftProductTitle,
+  isPubliclyListedProduct,
   localizeProductDescription,
   localizeProductTitle,
   PRODUCT_DESCRIPTION_I18N,
@@ -28,6 +33,59 @@ describe('localizeProductTitle', () => {
         expect(localizeProductTitle(title, locale)).toBe(translations[locale]);
       }
     }
+  });
+});
+
+describe('public product titles', () => {
+  it('treats empty and locale draft placeholders as internal', () => {
+    expect(isInternalDraftProductTitle('Новый товар')).toBe(true);
+    expect(isInternalDraftProductTitle('Untitled product')).toBe(true);
+    expect(isInternalDraftProductTitle('  ')).toBe(true);
+    expect(isInternalDraftProductTitle('')).toBe(true);
+    expect(isInternalDraftProductTitle(null)).toBe(true);
+    expect(isInternalDraftProductTitle('Fresh Kakheti peaches')).toBe(false);
+  });
+
+  it('stays in sync with product.draftTitle in every UI locale', () => {
+    const locales = ['en', 'ru', 'ka', 'de', 'fr', 'it', 'es'] as const;
+    const draftTitles = locales.map((locale) => {
+      const messages = JSON.parse(
+        readFileSync(join(__dirname, '../../../web/messages', `${locale}.json`), 'utf8'),
+      ) as { product: { draftTitle: string } };
+      return messages.product.draftTitle;
+    });
+    expect(new Set(draftTitles)).toEqual(new Set(INTERNAL_DRAFT_PRODUCT_TITLES));
+  });
+
+  it('keeps published approved products public only when the title is real', () => {
+    expect(
+      isPubliclyListedProduct({
+        isPublished: true,
+        moderationStatus: 'approved',
+        title: 'Fresh Kakheti peaches',
+      }),
+    ).toBe(true);
+    expect(
+      isPubliclyListedProduct({
+        isPublished: true,
+        moderationStatus: 'approved',
+        title: 'Новый товар',
+      }),
+    ).toBe(false);
+    expect(
+      isPubliclyListedProduct({
+        isPublished: true,
+        moderationStatus: 'approved',
+        title: '',
+      }),
+    ).toBe(false);
+    expect(
+      isPubliclyListedProduct({
+        isPublished: false,
+        moderationStatus: 'approved',
+        title: 'Fresh Kakheti peaches',
+      }),
+    ).toBe(false);
   });
 });
 

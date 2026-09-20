@@ -164,14 +164,12 @@ Or create/update immediately in the API shell (`cwd` is usually `/app/apps/api`)
 node ./prisma/ensure-admin.cjs
 ```
 
-Full demo seed (optional):
+`prisma db seed` is optional and **does not** create demo farmers/products when `NODE_ENV=production` unless `ALLOW_DEMO_SEED=true` is set (staging/demo override only — never on the public marketplace). Production start already runs `ensure-admin.cjs`; that is enough for the admin desk.
+
+To inspect leftover `@agrobridge.local` demo users (dry-run, no deletes):
 
 ```bash
-./node_modules/.bin/prisma db seed
-# fallback:
-/app/node_modules/.bin/prisma db seed
-# or:
-node ./prisma/run-seed.cjs
+node ./prisma/run-cleanup-demo.cjs
 ```
 
 ## 5. Point agrobrid.ge (Cloudflare)

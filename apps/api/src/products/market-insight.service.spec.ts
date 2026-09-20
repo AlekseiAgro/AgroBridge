@@ -74,4 +74,14 @@ describe('MarketInsightService', () => {
     prisma.product.findUnique.mockResolvedValue(null);
     await expect(service.forProduct('missing', 'en')).rejects.toBeInstanceOf(NotFoundException);
   });
+
+  it('rejects published products that still use an internal draft title', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      title: 'Новый товар',
+      isPublished: true,
+      moderationStatus: 'approved',
+    });
+    await expect(service.forProduct('p1', 'en')).rejects.toBeInstanceOf(NotFoundException);
+  });
 });

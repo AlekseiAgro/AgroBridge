@@ -10,6 +10,7 @@
     "db:generate": "pnpm --filter @agrobridge/api db:generate",
     "db:migrate": "pnpm --filter @agrobridge/api db:migrate",
     "db:seed": "pnpm --filter @agrobridge/api db:seed",
+    "db:cleanup-demo": "pnpm --filter @agrobridge/api db:cleanup-demo",
     "db:studio": "pnpm --filter @agrobridge/api db:studio",
     "docker:prod:up": "docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build",
     "docker:prod:down": "docker compose -f docker-compose.prod.yml --env-file .env.production down",

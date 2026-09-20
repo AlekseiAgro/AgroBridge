@@ -171,6 +171,20 @@ describe('toPublicFarmProfile', () => {
     );
   });
 
+  it('hides published products that still use an internal draft title', () => {
+    const visible = toPublicFarmProfile(
+      farm({
+        products: [
+          product({ id: 'live', title: 'Hazelnuts' }),
+          product({ id: 'draft-ru', title: 'Новый товар' }),
+          product({ id: 'empty', title: '' }),
+        ],
+      }),
+    );
+    expect(visible.products.map((item) => item.id)).toEqual(['live']);
+    expect(isPublicFarmProduct(product({ title: 'Новый товар' }))).toBe(false);
+  });
+
   it('strips owner-only fields so the profile view cannot expose them', () => {
     const visible = toPublicFarmProfile(farm());
     expect(visible.documents).toBeUndefined();

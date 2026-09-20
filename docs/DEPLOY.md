@@ -59,21 +59,28 @@ curl -sS https://api.agrobrid.ge/api/health
 curl -sS -o /dev/null -w '%{http_code}\n' https://agrobrid.ge
 ```
 
-## 3. Admin login + optional demo seed
+## 3. Admin login (no demo marketplace seed)
 
-Set `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env.production`. On every API start the container upserts that admin (verified email) via `prisma/ensure-admin.cjs`.
+Set `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env.production`. On every API start the container upserts that admin (verified email) via `prisma/ensure-admin.cjs`. Production boot never runs `prisma db seed`.
 
 To create/update the admin **immediately** without waiting for redeploy, from inside the API container (`/app/apps/api`):
 
 ```bash
-# admin account only (recommended):
+# admin account only (recommended for production):
 node ./prisma/ensure-admin.cjs
-
-# full demo catalog (farmers/buyers / DemoPass123):
-./node_modules/.bin/prisma db seed
-# if local bin missing:
-/app/node_modules/.bin/prisma db seed
 ```
+
+`prisma db seed` still upserts legal documents, category config, and the admin account. Demo farmers, buyers, products, deals, and purchase requests are **blocked when `NODE_ENV=production`**. Do not set `ALLOW_DEMO_SEED=true` on the public marketplace.
+
+To inspect leftover `@agrobridge.local` demo marketplace users (dry-run JSON report, no deletes):
+
+```bash
+node ./prisma/run-cleanup-demo.cjs
+# only after reviewing the report, and only with explicit approval:
+node ./prisma/run-cleanup-demo.cjs --apply
+```
+
+Live test records that do not use `@agrobridge.local` (for example a farm named BBB or a draft titled «Новый товар») are **not** deleted by this script.
 
 ## 4. Reverse proxy (agrobrid.ge)
 

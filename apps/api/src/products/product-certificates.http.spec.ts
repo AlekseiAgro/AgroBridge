@@ -93,6 +93,7 @@ describe('Product certificate file HTTP authorization', () => {
       reviewStatus: 'pending',
       product: {
         ownerUserId: USERS.owner.id,
+        title: 'Hazelnuts',
         isPublished: true,
         moderationStatus: 'approved',
       },

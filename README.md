@@ -123,7 +123,7 @@ pnpm --filter @agrobridge/api db:seed
 # examples: farmer-fruits-1@agrobridge.local , buyer-1@agrobridge.local
 ```
 
-Demo seed creates ~3–4 farmers (with farm + published product) per product category, plus 4 buyers. Product photos are copied from the category showcase images.
+Local/dev seed creates ~3–4 farmers (with farm + published product) per product category, plus 4 buyers. Product photos are copied from the category showcase images. `NODE_ENV=production` blocks that demo marketplace seed unless `ALLOW_DEMO_SEED=true` is set as an explicit staging override. Production start never runs seed automatically. Public catalog listings hide internal draft titles such as «Новый товар».
 ## Product photos
 
 - Farmers upload up to **8** product photos (JPEG / PNG / WebP, max **5MB** each) on the product edit page
