@@ -164,6 +164,23 @@
       "organic": "Bioprodukte",
       "other": "Sonstiges"
     },
+    "categoryAlts": {
+      "fruits": "Äpfel, Pfirsiche, Pflaumen und Trauben",
+      "vegetables": "Frisches Gemüse",
+      "berries": "Frische Beeren",
+      "nuts": "Walnüsse und Haselnüsse",
+      "wine": "Weinberg",
+      "dairy": "Milchprodukte",
+      "honey": "Honig im Glas",
+      "mineralWater": "Mineralwasserflaschen",
+      "spices": "Getrocknete Gewürze",
+      "tea": "Getrocknete Teeblätter",
+      "bayLeaf": "Getrocknete Lorbeerblätter",
+      "essentialOils": "Flaschen mit ätherischen Ölen",
+      "organic": "Biogemüse aus dem Garten",
+      "other": "Bauernhofflandschaft"
+    },
+    "categoryFallbackAlt": "Kategorieillustration: {category}",
     "allRegions": "Alle Regionen",
     "optional": "(optional)",
     "searchPlaceholder": "Produktname oder Beschreibung",

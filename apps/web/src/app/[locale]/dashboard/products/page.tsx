@@ -4,7 +4,11 @@ import { CertificateBadges } from '@/components/CertificateBadges';
 import { DeleteProductButton } from '@/components/DeleteProductButton';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { Link, redirect } from '@/i18n/navigation';
-import { getProductCardImage } from '@/lib/product-image';
+import {
+  formatCategoryFallbackAlt,
+  getProductCardImage,
+  getProductCardImageAlt,
+} from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductTitle } from '@/lib/product-title';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -64,6 +68,13 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
         <ul className="product-list">
           {products.map((product) => {
             const image = getProductCardImage(product);
+            const imageAlt = image
+              ? getProductCardImageAlt({
+                  fromCategory: image.fromCategory,
+                  productTitle: formatProductTitle(product.title, locale),
+                  categoryFallbackAlt: formatCategoryFallbackAlt(product.category, tc),
+                })
+              : '';
             const quantity = formatProductQuantityRange(
               product,
               product.unit ? t(`units.${product.unit as 'kg'}`) : null,
@@ -75,7 +86,7 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={image.url}
-                      alt=""
+                      alt={imageAlt}
                       className="product-list__media product-list__media--sm"
                     />
                   ) : (

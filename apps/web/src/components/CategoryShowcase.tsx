@@ -25,7 +25,7 @@ export async function CategoryShowcase() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={CATEGORY_MEDIA[category]}
-                alt=""
+                alt={tc(`categoryAlts.${category}`)}
                 className="category-tile__image"
               />
               <span className="category-tile__veil" aria-hidden />

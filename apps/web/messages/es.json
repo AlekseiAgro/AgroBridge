@@ -164,6 +164,23 @@
       "organic": "Productos orgánicos",
       "other": "Otro"
     },
+    "categoryAlts": {
+      "fruits": "Manzanas, melocotones, ciruelas y uvas",
+      "vegetables": "Verduras frescas",
+      "berries": "Bayas frescas",
+      "nuts": "Nueces y avellanas",
+      "wine": "Viñedo",
+      "dairy": "Productos lácteos",
+      "honey": "Miel en un tarro de cristal",
+      "mineralWater": "Botellas de agua mineral",
+      "spices": "Especias secas",
+      "tea": "Hojas de té secas",
+      "bayLeaf": "Hojas de laurel secas",
+      "essentialOils": "Frascos de aceites esenciales",
+      "organic": "Productos de huerto ecológico",
+      "other": "Paisaje agrícola"
+    },
+    "categoryFallbackAlt": "Ilustración de la categoría: {category}",
     "allRegions": "Todas las regiones",
     "optional": "(opcional)",
     "searchPlaceholder": "Nombre o descripción del producto",

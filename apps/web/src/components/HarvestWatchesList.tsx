@@ -66,7 +66,11 @@ export function HarvestWatchesList({ initial }: Props) {
             <li key={item.id} className="harvest-watches__item product-list__item--with-media">
               {imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={imageUrl} alt="" className="product-list__media" />
+                <img
+                  src={imageUrl}
+                  alt={formatProductTitle(item.productTitle, locale)}
+                  className="product-list__media"
+                />
               ) : (
                 <div className="product-list__media product-list__media--empty" aria-hidden />
               )}

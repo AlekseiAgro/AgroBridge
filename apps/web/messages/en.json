@@ -164,6 +164,23 @@
       "organic": "Organic products",
       "other": "Other"
     },
+    "categoryAlts": {
+      "fruits": "Apples, peaches, plums and grapes",
+      "vegetables": "Fresh vegetables",
+      "berries": "Fresh berries",
+      "nuts": "Walnuts and hazelnuts",
+      "wine": "Grape vineyard",
+      "dairy": "Dairy products",
+      "honey": "Honey in a glass jar",
+      "mineralWater": "Mineral water bottles",
+      "spices": "Dried spices",
+      "tea": "Dried tea leaves",
+      "bayLeaf": "Dried bay leaves",
+      "essentialOils": "Essential oil bottles",
+      "organic": "Organic garden produce",
+      "other": "Farm landscape"
+    },
+    "categoryFallbackAlt": "Category illustration: {category}",
     "allRegions": "All regions",
     "optional": "(optional)",
     "searchPlaceholder": "Product name or description",

@@ -1,9 +1,9 @@
 import type { ProductCategory, ProductImage } from '@agrobridge/shared';
-import { isProductCategory } from '@agrobridge/shared';
-import { CATEGORY_MEDIA } from '@/lib/category-media';
-import { toPublicMediaUrl } from '@/lib/public-media-url';
+import { CATEGORY_MEDIA, getCategoryMediaUrl, resolveProductCategory } from './category-media';
+import { toPublicMediaUrl } from './public-media-url';
 
-export { isFarmVerificationObjectUrl, isLegacyFarmDocumentUploadUrl, toPublicMediaUrl } from '@/lib/public-media-url';
+export { isFarmVerificationObjectUrl, isLegacyFarmDocumentUploadUrl, toPublicMediaUrl } from './public-media-url';
+export { getCategoryMediaUrl, resolveProductCategory } from './category-media';
 
 export function getPrimaryProductImage(
   images: ProductImage[] | undefined | null,
@@ -24,15 +24,35 @@ export function getProductCardImage(product: {
     return { url: toPublicMediaUrl(primary.url), fromCategory: false };
   }
 
-  if (product.category && isProductCategory(product.category)) {
-    return {
-      url: CATEGORY_MEDIA[product.category as ProductCategory],
-      fromCategory: true,
-    };
-  }
-
   return {
-    url: CATEGORY_MEDIA.other,
+    url: getCategoryMediaUrl(product.category),
     fromCategory: true,
   };
 }
+
+/**
+ * Alt text for a catalog/farm/dashboard card image.
+ * A category fallback must not be described as the seller's product photograph.
+ */
+export function getProductCardImageAlt(input: {
+  fromCategory: boolean;
+  productTitle: string;
+  categoryFallbackAlt: string;
+}): string {
+  if (input.fromCategory) {
+    return input.categoryFallbackAlt;
+  }
+  return input.productTitle.trim();
+}
+
+export function formatCategoryFallbackAlt(
+  category: string | null | undefined,
+  translate: (key: string, values?: Record<string, string>) => string,
+): string {
+  const id: ProductCategory = resolveProductCategory(category);
+  return translate('categoryFallbackAlt', {
+    category: translate(`categories.${id}`),
+  });
+}
+
+export { CATEGORY_MEDIA };
