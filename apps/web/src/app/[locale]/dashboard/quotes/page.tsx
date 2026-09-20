@@ -28,7 +28,7 @@ export default async function MyQuotesPage({ params }: Props) {
 
   return (
     <main className="cabinet-page">
-      <MarkSectionNotificationsRead section="quotes" />
+      {loadError ? null : <MarkSectionNotificationsRead section="quotes" />}
       <div className="page__heading-row">
         <div>
           <h1>{t('myQuotesTitle')}</h1>

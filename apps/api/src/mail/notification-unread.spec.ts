@@ -13,6 +13,7 @@ const MESSAGES_DIR = join(__dirname, '../../../web/messages');
 const SHELL = join(__dirname, '../../../web/src/components/CabinetShell.tsx');
 const ACCOUNT = join(__dirname, '../../../web/src/app/[locale]/account/page.tsx');
 const BELL = join(__dirname, '../../../web/src/components/NotificationBell.tsx');
+const QUOTES = join(__dirname, '../../../web/src/app/[locale]/dashboard/quotes/page.tsx');
 
 function loadMessages(locale: string) {
   return JSON.parse(readFileSync(join(MESSAGES_DIR, `${locale}.json`), 'utf8')) as {
@@ -102,5 +103,11 @@ describe('cabinet notification unread mapping', () => {
     expect(account).toContain('activity.openPurchaseRequests');
     expect(account).toContain('activity.pendingQuotes');
     expect(account).toContain('activity.acceptedQuotes');
+  });
+
+  it('does not mark My Quotes notifications read when the page failed to load', () => {
+    const quotes = readFileSync(QUOTES, 'utf8');
+    expect(quotes).toContain('MarkSectionNotificationsRead');
+    expect(quotes).toMatch(/loadError \? null : <MarkSectionNotificationsRead section="quotes" \/>/);
   });
 });
