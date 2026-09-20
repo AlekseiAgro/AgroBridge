@@ -3,7 +3,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { RoleHub } from '@/components/RoleHub';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
-import { getUnreadMessagesCount } from '@/lib/chat-unread';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -15,23 +14,8 @@ export default async function SellersHubPage({ params }: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('roleHubs.sellers');
-  const tn = await getTranslations('nav');
   const user = await getCurrentUser();
   const trader = Boolean(user && canTrade(user.role));
-  const chatUnreadCount = user ? await getUnreadMessagesCount() : 0;
-
-  const asideLinks = trader
-    ? [
-        { href: '/dashboard/products', label: tn('myProducts') },
-        { href: '/dashboard/inbox', label: tn('inbox') },
-        { href: '/dashboard/farm', label: tn('myFarm') },
-        { href: '/dashboard/chat', label: tn('chat') },
-      ]
-    : [
-        { href: '/login', label: tn('login') },
-        { href: '/register', label: t('asideRegister') },
-      ];
-
   const offerHref = trader ? '/dashboard/products/new' : '/register';
 
   return (
@@ -58,9 +42,6 @@ export default async function SellersHubPage({ params }: Props) {
               imageSrc: '/images/categories/wine.jpg',
             },
           ]}
-          asideNote={t('asideNote')}
-          asideLinks={asideLinks}
-          chatUnreadCount={chatUnreadCount}
         />
       </main>
       <SiteFooter />
