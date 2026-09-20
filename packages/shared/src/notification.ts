@@ -1,6 +1,12 @@
 export const USER_NOTIFICATION_TYPES = [
   'harvestAvailable',
   'harvestPreorderOpen',
+  'purchaseQuoteReceived',
+  'purchaseQuoteAccepted',
+  'purchaseQuoteDeclined',
+  'purchaseRequestClosed',
+  'purchaseRequestCancelled',
+  'purchaseQuoteWithdrawn',
 ] as const;
 
 export type UserNotificationType = (typeof USER_NOTIFICATION_TYPES)[number];

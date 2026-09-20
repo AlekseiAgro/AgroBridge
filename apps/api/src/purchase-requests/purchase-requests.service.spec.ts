@@ -24,7 +24,7 @@ function quoteRow(id: string, farmId: string, ownerEmail: string) {
       name: `Farm ${farmId}`,
       region: null,
       ownerId: `owner-${farmId}`,
-      owner: { email: ownerEmail, locale: 'en', displayName: null },
+      owner: { id: `owner-${farmId}`, email: ownerEmail, locale: 'en', displayName: null },
     },
   };
 }
@@ -94,6 +94,7 @@ describe('PurchaseRequestsService', () => {
     notifyPurchaseQuoteAccepted: jest.fn().mockResolvedValue(undefined),
     notifyPurchaseQuoteDeclined: jest.fn().mockResolvedValue(undefined),
     notifyPurchaseRequestWithdrawn: jest.fn().mockResolvedValue(undefined),
+    notifyPurchaseQuoteWithdrawn: jest.fn().mockResolvedValue(undefined),
   };
 
   const service = new PurchaseRequestsService(
@@ -194,15 +195,17 @@ describe('PurchaseRequestsService', () => {
 
       expect(notifications.notifyPurchaseQuoteAccepted).toHaveBeenCalledTimes(1);
       expect(notifications.notifyPurchaseQuoteAccepted).toHaveBeenCalledWith({
-        farmer: { email: 'a@example.com', locale: 'en', displayName: null },
+        farmer: { id: 'owner-farm-a', email: 'a@example.com', locale: 'en', displayName: null },
         buyerName: 'Buyer Ltd',
+        buyerDisplayName: 'Buyer Ltd',
         title: 'Blueberries',
         requestId: 'r1',
       });
       expect(notifications.notifyPurchaseQuoteDeclined).toHaveBeenCalledTimes(1);
       expect(notifications.notifyPurchaseQuoteDeclined).toHaveBeenCalledWith(
         expect.objectContaining({
-          farmer: { email: 'b@example.com', locale: 'en', displayName: null },
+          farmer: { id: 'owner-farm-b', email: 'b@example.com', locale: 'en', displayName: null },
+          buyerDisplayName: 'Buyer Ltd',
         }),
       );
     });
@@ -315,8 +318,9 @@ describe('PurchaseRequestsService', () => {
 
       expect(notifications.notifyPurchaseQuoteDeclined).toHaveBeenCalledTimes(1);
       expect(notifications.notifyPurchaseQuoteDeclined).toHaveBeenCalledWith({
-        farmer: { email: 'a@example.com', locale: 'en', displayName: null },
+        farmer: { id: 'owner-farm-a', email: 'a@example.com', locale: 'en', displayName: null },
         buyerName: 'Buyer Ltd',
+        buyerDisplayName: 'Buyer Ltd',
         title: 'Blueberries',
       });
     });
@@ -387,7 +391,8 @@ describe('PurchaseRequestsService', () => {
       expect(notifications.notifyPurchaseRequestWithdrawn).toHaveBeenCalledTimes(1);
       expect(notifications.notifyPurchaseRequestWithdrawn).toHaveBeenCalledWith(
         expect.objectContaining({
-          farmer: { email: 'b@example.com', locale: 'en', displayName: null },
+          farmer: { id: 'owner-farm-b', email: 'b@example.com', locale: 'en', displayName: null },
+          buyerDisplayName: 'Buyer Ltd',
         }),
       );
     });
@@ -499,6 +504,73 @@ describe('PurchaseRequestsService', () => {
       });
       expect(tx.purchaseQuote.create).not.toHaveBeenCalled();
       expect(notifications.notifyPurchaseQuoteReceived).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('withdrawQuote', () => {
+    const farmer = {
+      id: 'owner-a',
+      email: 'a@example.com',
+      role: 'farmer',
+      locale: 'en',
+    } as never;
+
+    const pendingQuote = {
+      id: 'q1',
+      requestId: 'r1',
+      farmId: 'farm-a',
+      status: 'pending',
+      request: {
+        id: 'r1',
+        status: 'open',
+        title: 'Blueberries',
+        buyer: { id: 'b1', email: 'buyer@example.com', locale: 'en', displayName: 'Buyer Ltd' },
+      },
+    };
+
+    beforeEach(() => {
+      prisma.farm.findUnique.mockResolvedValue({ id: 'farm-a', name: 'Farm farm-a', ownerId: 'owner-a' });
+      prisma.purchaseQuote.findUnique.mockResolvedValue(pendingQuote);
+      prisma.purchaseQuote.updateMany.mockResolvedValue({ count: 1 });
+      prisma.purchaseRequest.findUnique.mockResolvedValue(requestRow());
+    });
+
+    it('notifies the buyer only after a pending quote is withdrawn', async () => {
+      await service.withdrawQuote(farmer, 'r1', 'q1');
+
+      expect(prisma.purchaseQuote.updateMany).toHaveBeenCalledWith({
+        where: { id: 'q1', requestId: 'r1', status: 'pending' },
+        data: { status: 'withdrawn' },
+      });
+      expect(notifications.notifyPurchaseQuoteWithdrawn).toHaveBeenCalledTimes(1);
+      expect(notifications.notifyPurchaseQuoteWithdrawn).toHaveBeenCalledWith({
+        buyer: { id: 'b1', email: 'buyer@example.com', locale: 'en', displayName: 'Buyer Ltd' },
+        farmName: 'Farm farm-a',
+        title: 'Blueberries',
+        requestId: 'r1',
+      });
+    });
+
+    it('does not announce when the pending row is already gone', async () => {
+      prisma.purchaseQuote.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(service.withdrawQuote(farmer, 'r1', 'q1')).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+      expect(notifications.notifyPurchaseQuoteWithdrawn).not.toHaveBeenCalled();
+    });
+
+    it('does not announce a second withdrawal of an already withdrawn quote', async () => {
+      prisma.purchaseQuote.findUnique.mockResolvedValue({
+        ...pendingQuote,
+        status: 'withdrawn',
+      });
+
+      await expect(service.withdrawQuote(farmer, 'r1', 'q1')).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      expect(prisma.purchaseQuote.updateMany).not.toHaveBeenCalled();
+      expect(notifications.notifyPurchaseQuoteWithdrawn).not.toHaveBeenCalled();
     });
   });
 

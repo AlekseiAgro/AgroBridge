@@ -269,7 +269,7 @@ export class NotificationsService {
   }
 
   async notifyPurchaseQuoteReceived(params: {
-    buyer: MailRecipient;
+    buyer: MailRecipient & { id: string };
     farmName: string;
     title: string;
     priceAmount: string;
@@ -277,13 +277,23 @@ export class NotificationsService {
     requestId: string;
   }): Promise<void> {
     const locale = this.localeOf(params.buyer.locale);
+    const href = `/requests/${params.requestId}`;
+    const copy = this.purchaseQuoteReceivedCopy(locale, params.farmName, params.title);
+    await this.createUserNotification({
+      userId: params.buyer.id,
+      type: PrismaUserNotificationType.purchaseQuoteReceived,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.buyer, 'purchaseQuoteReceived', {
       name: this.displayName(params.buyer),
       farmName: params.farmName,
       title: params.title,
       priceAmount: params.priceAmount,
       currency: params.currency,
-      link: this.appLink(locale, `/requests/${params.requestId}`),
+      link: this.appLink(locale, href),
     });
   }
 
@@ -292,26 +302,56 @@ export class NotificationsService {
    * points at the request itself rather than at the public open board.
    */
   async notifyPurchaseQuoteAccepted(params: {
-    farmer: MailRecipient;
+    farmer: MailRecipient & { id: string };
     buyerName: string;
+    buyerDisplayName?: string | null;
     title: string;
     requestId: string;
   }): Promise<void> {
     const locale = this.localeOf(params.farmer.locale);
+    const href = `/requests/${params.requestId}`;
+    const copy = this.purchaseQuoteAcceptedCopy(
+      locale,
+      this.inAppBuyerLabel(params.buyerDisplayName, locale),
+      params.title,
+    );
+    await this.createUserNotification({
+      userId: params.farmer.id,
+      type: PrismaUserNotificationType.purchaseQuoteAccepted,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.farmer, 'purchaseQuoteAccepted', {
       name: this.displayName(params.farmer),
       buyerName: params.buyerName,
       title: params.title,
-      link: this.appLink(locale, `/requests/${params.requestId}`),
+      link: this.appLink(locale, href),
     });
   }
 
   async notifyPurchaseQuoteDeclined(params: {
-    farmer: MailRecipient;
+    farmer: MailRecipient & { id: string };
     buyerName: string;
+    buyerDisplayName?: string | null;
     title: string;
   }): Promise<void> {
     const locale = this.localeOf(params.farmer.locale);
+    const href = '/dashboard/quotes';
+    const copy = this.purchaseQuoteDeclinedCopy(
+      locale,
+      this.inAppBuyerLabel(params.buyerDisplayName, locale),
+      params.title,
+    );
+    await this.createUserNotification({
+      userId: params.farmer.id,
+      type: PrismaUserNotificationType.purchaseQuoteDeclined,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.farmer, 'purchaseQuoteDeclined', {
       name: this.displayName(params.farmer),
       buyerName: params.buyerName,
@@ -321,12 +361,37 @@ export class NotificationsService {
   }
 
   async notifyPurchaseRequestWithdrawn(params: {
-    farmer: MailRecipient;
+    farmer: MailRecipient & { id: string };
     buyerName: string;
+    buyerDisplayName?: string | null;
     title: string;
     reason: 'closed' | 'cancelled';
   }): Promise<void> {
     const locale = this.localeOf(params.farmer.locale);
+    const href = '/dashboard/quotes';
+    const copy =
+      params.reason === 'closed'
+        ? this.purchaseRequestClosedCopy(
+            locale,
+            this.inAppBuyerLabel(params.buyerDisplayName, locale),
+            params.title,
+          )
+        : this.purchaseRequestCancelledCopy(
+            locale,
+            this.inAppBuyerLabel(params.buyerDisplayName, locale),
+            params.title,
+          );
+    await this.createUserNotification({
+      userId: params.farmer.id,
+      type:
+        params.reason === 'closed'
+          ? PrismaUserNotificationType.purchaseRequestClosed
+          : PrismaUserNotificationType.purchaseRequestCancelled,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(
       params.farmer,
       params.reason === 'closed' ? 'purchaseRequestClosed' : 'purchaseRequestCancelled',
@@ -337,6 +402,24 @@ export class NotificationsService {
         link: this.appLink(locale, '/requests'),
       },
     );
+  }
+
+  async notifyPurchaseQuoteWithdrawn(params: {
+    buyer: MailRecipient & { id: string };
+    farmName: string;
+    title: string;
+    requestId: string;
+  }): Promise<void> {
+    const locale = this.localeOf(params.buyer.locale);
+    const copy = this.purchaseQuoteWithdrawnCopy(locale, params.farmName, params.title);
+    await this.createUserNotification({
+      userId: params.buyer.id,
+      type: PrismaUserNotificationType.purchaseQuoteWithdrawn,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href: `/requests/${params.requestId}`,
+    });
   }
 
   async notifyProductApproved(params: {
@@ -744,6 +827,293 @@ export class NotificationsService {
       return HARVEST_STATUS_LABELS[locale][status] ?? status;
     }
     return status;
+  }
+
+  private inAppBuyerLabel(displayName: string | null | undefined, locale: Locale): string {
+    const name = displayName?.trim();
+    if (name) {
+      return name;
+    }
+    switch (locale) {
+      case 'ru':
+        return 'Покупатель';
+      case 'ka':
+        return 'მყიდველი';
+      case 'de':
+        return 'Ein Käufer';
+      case 'fr':
+        return 'Un acheteur';
+      case 'it':
+        return 'Un acquirente';
+      case 'es':
+        return 'Un comprador';
+      default:
+        return 'A buyer';
+    }
+  }
+
+  private purchaseQuoteReceivedCopy(
+    locale: Locale,
+    farmName: string,
+    title: string,
+  ): { title: string; body: string } {
+    switch (locale) {
+      case 'ru':
+        return {
+          title: 'Новое предложение',
+          body: `${farmName} отправил(а) предложение по вашему запросу на покупку «${title}».`,
+        };
+      case 'ka':
+        return {
+          title: 'ახალი შეთავაზება',
+          body: `${farmName} გამოგიგზავნათ შეთავაზება თქვენს შესყიდვის მოთხოვნაზე «${title}».`,
+        };
+      case 'de':
+        return {
+          title: 'Neues Angebot erhalten',
+          body: `${farmName} hat ein Angebot zu Ihrer Kaufanfrage „${title}“ gesendet.`,
+        };
+      case 'fr':
+        return {
+          title: 'Nouvelle offre reçue',
+          body: `${farmName} a envoyé une offre pour votre demande d’achat « ${title} ».`,
+        };
+      case 'it':
+        return {
+          title: 'Nuova offerta ricevuta',
+          body: `${farmName} ha inviato un’offerta per la tua richiesta di acquisto «${title}».`,
+        };
+      case 'es':
+        return {
+          title: 'Nueva oferta recibida',
+          body: `${farmName} envió una oferta para tu solicitud de compra «${title}».`,
+        };
+      default:
+        return {
+          title: 'New quote received',
+          body: `${farmName} sent a quote for your purchase request “${title}”.`,
+        };
+    }
+  }
+
+  private purchaseQuoteAcceptedCopy(
+    locale: Locale,
+    buyerName: string,
+    title: string,
+  ): { title: string; body: string } {
+    switch (locale) {
+      case 'ru':
+        return {
+          title: 'Ваше предложение принято',
+          body: `${buyerName} принял(а) ваше предложение по запросу на покупку «${title}».`,
+        };
+      case 'ka':
+        return {
+          title: 'თქვენი შეთავაზება მიღებულია',
+          body: `${buyerName} მიიღო თქვენი შეთავაზება შესყიდვის მოთხოვნაზე «${title}».`,
+        };
+      case 'de':
+        return {
+          title: 'Ihr Angebot wurde angenommen',
+          body: `${buyerName} hat Ihr Angebot zur Kaufanfrage „${title}“ angenommen.`,
+        };
+      case 'fr':
+        return {
+          title: 'Votre offre a été acceptée',
+          body: `${buyerName} a accepté votre offre pour la demande d’achat « ${title} ».`,
+        };
+      case 'it':
+        return {
+          title: 'La tua offerta è stata accettata',
+          body: `${buyerName} ha accettato la tua offerta per la richiesta di acquisto «${title}».`,
+        };
+      case 'es':
+        return {
+          title: 'Tu oferta fue aceptada',
+          body: `${buyerName} aceptó tu oferta para la solicitud de compra «${title}».`,
+        };
+      default:
+        return {
+          title: 'Your quote was accepted',
+          body: `${buyerName} accepted your quote for the purchase request “${title}”.`,
+        };
+    }
+  }
+
+  private purchaseQuoteDeclinedCopy(
+    locale: Locale,
+    buyerName: string,
+    title: string,
+  ): { title: string; body: string } {
+    switch (locale) {
+      case 'ru':
+        return {
+          title: 'Ваше предложение не выбрано',
+          body: `${buyerName} не выбрал(а) ваше предложение по запросу на покупку «${title}». Откройте «Мои предложения».`,
+        };
+      case 'ka':
+        return {
+          title: 'თქვენი შეთავაზება არ შეირჩა',
+          body: `${buyerName} არ შეარჩია თქვენი შეთავაზება შესყიდვის მოთხოვნაზე «${title}».`,
+        };
+      case 'de':
+        return {
+          title: 'Ihr Angebot wurde nicht ausgewählt',
+          body: `${buyerName} hat Ihr Angebot zur Kaufanfrage „${title}“ nicht ausgewählt.`,
+        };
+      case 'fr':
+        return {
+          title: 'Votre offre n’a pas été retenue',
+          body: `${buyerName} n’a pas retenu votre offre pour la demande d’achat « ${title} ».`,
+        };
+      case 'it':
+        return {
+          title: 'La tua offerta non è stata scelta',
+          body: `${buyerName} non ha scelto la tua offerta per la richiesta di acquisto «${title}».`,
+        };
+      case 'es':
+        return {
+          title: 'Tu oferta no fue seleccionada',
+          body: `${buyerName} no seleccionó tu oferta para la solicitud de compra «${title}».`,
+        };
+      default:
+        return {
+          title: 'Your quote was not selected',
+          body: `${buyerName} did not select your quote for the purchase request “${title}”.`,
+        };
+    }
+  }
+
+  private purchaseRequestClosedCopy(
+    locale: Locale,
+    buyerName: string,
+    title: string,
+  ): { title: string; body: string } {
+    switch (locale) {
+      case 'ru':
+        return {
+          title: 'Запрос на покупку закрыт',
+          body: `${buyerName} закрыл(а) запрос на покупку «${title}», ваше предложение больше не рассматривается. Откройте «Мои предложения».`,
+        };
+      case 'ka':
+        return {
+          title: 'შესყიდვის მოთხოვნა დაიხურა',
+          body: `${buyerName} დახურა შესყიდვის მოთხოვნა «${title}», ამიტომ თქვენი შეთავაზება აღარ განიხილება.`,
+        };
+      case 'de':
+        return {
+          title: 'Kaufanfrage geschlossen',
+          body: `${buyerName} hat die Kaufanfrage „${title}“ geschlossen. Ihr Angebot wird nicht mehr geprüft.`,
+        };
+      case 'fr':
+        return {
+          title: 'Demande d’achat clôturée',
+          body: `${buyerName} a clôturé la demande d’achat « ${title} », votre offre n’est plus examinée.`,
+        };
+      case 'it':
+        return {
+          title: 'Richiesta di acquisto chiusa',
+          body: `${buyerName} ha chiuso la richiesta di acquisto «${title}», la tua offerta non è più in esame.`,
+        };
+      case 'es':
+        return {
+          title: 'Solicitud de compra cerrada',
+          body: `${buyerName} cerró la solicitud de compra «${title}», tu oferta ya no se considera.`,
+        };
+      default:
+        return {
+          title: 'Purchase request closed',
+          body: `${buyerName} closed the purchase request “${title}”, so your quote is no longer under consideration.`,
+        };
+    }
+  }
+
+  private purchaseRequestCancelledCopy(
+    locale: Locale,
+    buyerName: string,
+    title: string,
+  ): { title: string; body: string } {
+    switch (locale) {
+      case 'ru':
+        return {
+          title: 'Запрос на покупку отменён',
+          body: `${buyerName} отменил(а) запрос на покупку «${title}», ваше предложение больше не рассматривается. Откройте «Мои предложения».`,
+        };
+      case 'ka':
+        return {
+          title: 'შესყიდვის მოთხოვნა გაუქმდა',
+          body: `${buyerName} გააუქმა შესყიდვის მოთხოვნა «${title}», ამიტომ თქვენი შეთავაზება აღარ განიხილება.`,
+        };
+      case 'de':
+        return {
+          title: 'Kaufanfrage storniert',
+          body: `${buyerName} hat die Kaufanfrage „${title}“ storniert. Ihr Angebot wird nicht mehr geprüft.`,
+        };
+      case 'fr':
+        return {
+          title: 'Demande d’achat annulée',
+          body: `${buyerName} a annulé la demande d’achat « ${title} », votre offre n’est plus examinée.`,
+        };
+      case 'it':
+        return {
+          title: 'Richiesta di acquisto annullata',
+          body: `${buyerName} ha annullato la richiesta di acquisto «${title}», la tua offerta non è più in esame.`,
+        };
+      case 'es':
+        return {
+          title: 'Solicitud de compra cancelada',
+          body: `${buyerName} canceló la solicitud de compra «${title}», tu oferta ya no se considera.`,
+        };
+      default:
+        return {
+          title: 'Purchase request cancelled',
+          body: `${buyerName} cancelled the purchase request “${title}”, so your quote is no longer under consideration.`,
+        };
+    }
+  }
+
+  private purchaseQuoteWithdrawnCopy(
+    locale: Locale,
+    farmName: string,
+    title: string,
+  ): { title: string; body: string } {
+    switch (locale) {
+      case 'ru':
+        return {
+          title: 'Предложение отозвано',
+          body: `${farmName} отозвал(а) предложение по вашему запросу на покупку «${title}».`,
+        };
+      case 'ka':
+        return {
+          title: 'შეთავაზება გაუქმდა',
+          body: `${farmName} გაიხმო შეთავაზება თქვენი შესყიდვის მოთხოვნიდან «${title}».`,
+        };
+      case 'de':
+        return {
+          title: 'Angebot zurückgezogen',
+          body: `${farmName} hat ein Angebot zu Ihrer Kaufanfrage „${title}“ zurückgezogen.`,
+        };
+      case 'fr':
+        return {
+          title: 'Offre retirée',
+          body: `${farmName} a retiré une offre de votre demande d’achat « ${title} ».`,
+        };
+      case 'it':
+        return {
+          title: 'Offerta ritirata',
+          body: `${farmName} ha ritirato un’offerta dalla tua richiesta di acquisto «${title}».`,
+        };
+      case 'es':
+        return {
+          title: 'Oferta retirada',
+          body: `${farmName} retiró una oferta de tu solicitud de compra «${title}».`,
+        };
+      default:
+        return {
+          title: 'A quote was withdrawn',
+          body: `${farmName} withdrew a quote from your purchase request “${title}”.`,
+        };
+    }
   }
 
   private harvestAvailableBody(locale: Locale, farmName: string, statusLabel: string): string {

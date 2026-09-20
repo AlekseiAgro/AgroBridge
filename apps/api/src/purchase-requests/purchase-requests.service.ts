@@ -35,6 +35,7 @@ const quoteInclude = {
       ownerId: true,
       owner: {
         select: {
+          id: true,
           email: true,
           locale: true,
           displayName: true,
@@ -249,6 +250,7 @@ export class PurchaseRequestsService {
           this.notifications.notifyPurchaseRequestWithdrawn({
             farmer: quote.farm.owner,
             buyerName,
+            buyerDisplayName: request.buyer.displayName,
             title: request.title,
             reason,
           }),
@@ -406,6 +408,7 @@ export class PurchaseRequestsService {
       await this.notifications.notifyPurchaseQuoteAccepted({
         farmer: quote.farm.owner,
         buyerName,
+        buyerDisplayName: request.buyer.displayName,
         title: request.title,
         requestId: request.id,
       });
@@ -414,6 +417,7 @@ export class PurchaseRequestsService {
           this.notifications.notifyPurchaseQuoteDeclined({
             farmer: loser.farm.owner,
             buyerName,
+            buyerDisplayName: request.buyer.displayName,
             title: request.title,
           }),
         ),
@@ -447,6 +451,7 @@ export class PurchaseRequestsService {
       this.notifications.notifyPurchaseQuoteDeclined({
         farmer: quote.farm.owner,
         buyerName: this.buyerLabel(request),
+        buyerDisplayName: request.buyer.displayName,
         title: request.title,
       }),
     );
@@ -467,7 +472,18 @@ export class PurchaseRequestsService {
 
     const quote = await this.prisma.purchaseQuote.findUnique({
       where: { id: quoteId },
-      include: { request: true },
+      include: {
+        request: {
+          select: {
+            id: true,
+            status: true,
+            title: true,
+            buyer: {
+              select: { id: true, email: true, locale: true, displayName: true },
+            },
+          },
+        },
+      },
     });
     if (!quote || quote.requestId !== requestId) {
       throw new NotFoundException('Quote not found');
@@ -482,10 +498,22 @@ export class PurchaseRequestsService {
       throw new BadRequestException('Only pending quotes can be withdrawn');
     }
 
-    await this.prisma.purchaseQuote.update({
-      where: { id: quote.id },
+    const withdrawn = await this.prisma.purchaseQuote.updateMany({
+      where: { id: quote.id, requestId, status: PurchaseQuoteStatus.pending },
       data: { status: PurchaseQuoteStatus.withdrawn },
     });
+    if (withdrawn.count !== 1) {
+      throw new ConflictException('Quote is not available to withdraw');
+    }
+
+    await this.announce(`withdrawal of quote ${quote.id}`, () =>
+      this.notifications.notifyPurchaseQuoteWithdrawn({
+        buyer: quote.request.buyer,
+        farmName: farm.name,
+        title: quote.request.title,
+        requestId: quote.request.id,
+      }),
+    );
 
     return this.getById(user, requestId);
   }
