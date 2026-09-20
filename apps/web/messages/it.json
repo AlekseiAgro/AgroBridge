@@ -1242,6 +1242,7 @@
     "termsTitle": "Termini di utilizzo",
     "privacyTitle": "Informativa sulla privacy",
     "version": "Versione {version}",
+    "effectiveDate": "Data di entrata in vigore: {date}",
     "close": "Chiudi",
     "documentPending": "Il testo completo del documento sarà pubblicato qui."
   }
