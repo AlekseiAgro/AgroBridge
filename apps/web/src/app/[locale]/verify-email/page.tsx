@@ -4,7 +4,12 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { VerifyEmailForm } from '@/components/VerifyEmailForm';
 import { Link, redirect } from '@/i18n/navigation';
 import { safeNextPath } from '@/lib/safe-next-path';
+import { noindexRobots } from '@/lib/seo-robots';
 import { getCurrentUser } from '@/lib/session';
+
+export const metadata = {
+  robots: noindexRobots,
+};
 
 type Props = {
   params: Promise<{ locale: string }>;

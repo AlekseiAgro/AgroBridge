@@ -5,7 +5,12 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link, redirect } from '@/i18n/navigation';
 import { safeNextPath } from '@/lib/safe-next-path';
 import { cabinetPathForUser } from '@/lib/require-verified-user';
+import { noindexRobots } from '@/lib/seo-robots';
 import { getCurrentUser } from '@/lib/session';
+
+export const metadata = {
+  robots: noindexRobots,
+};
 
 type Props = {
   params: Promise<{ locale: string }>;
