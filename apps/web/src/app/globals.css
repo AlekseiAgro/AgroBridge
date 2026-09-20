@@ -1151,9 +1151,11 @@ body {
 
 .page__main {
   width: min(100%, 56rem);
+  min-width: 0;
   margin: 0 auto;
   padding: 0.25rem 0.15rem 2rem;
   flex: 1;
+  container: marketplace / inline-size;
 }
 
 .page__main.narrow {
@@ -1326,6 +1328,12 @@ body {
   gap: 0.75rem;
   margin-bottom: 1.5rem;
   align-items: end;
+  min-width: 0;
+}
+
+.catalog-filters .field,
+.catalog-filters select {
+  min-width: 0;
 }
 
 .catalog-filters__hint {
@@ -1347,9 +1355,11 @@ body {
   padding: 0;
   display: grid;
   gap: 0.85rem;
+  min-width: 0;
 }
 
 .product-list__item {
+  min-width: 0;
   padding: 1rem 1.1rem;
   border: 1px solid var(--line);
   border-radius: 0.9rem;
@@ -1412,6 +1422,10 @@ body {
   grid-template-columns: 7.5rem minmax(0, 1fr);
   gap: 1rem;
   align-items: start;
+}
+
+.product-list__item--with-media > * {
+  min-width: 0;
 }
 
 .product-list__item--row {
@@ -2415,6 +2429,28 @@ body {
   }
 }
 
+/*
+ * Marketplace pages sit in CabinetShell for signed-in users. The sidebar stays
+ * two-column until 640px, so the content column is already "mobile-narrow" at
+ * tablet viewports. Query the available container, not the viewport, so guests
+ * keep the public wide layout while cabinet catalog/requests can stack.
+ */
+@container marketplace (max-width: 40rem) {
+  .catalog-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .page__heading-row,
+  .product-list__item--row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .product-list__item-main {
+    flex-wrap: wrap;
+  }
+}
+
 .admin-day-stats {
   list-style: none;
   margin: 0 0 1.5rem;
@@ -2624,6 +2660,10 @@ body {
   color: var(--brand-deep);
   font-weight: 600;
   font-size: 0.92rem;
+}
+
+.cabinet__content {
+  min-width: 0;
 }
 
 .cabinet-page {
@@ -4143,15 +4183,16 @@ body {
 }
 
 .product-opportunity-row {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
   margin: 0.35rem 0 0.15rem;
+  min-width: 0;
 }
 
 .opportunity-badge {
-  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -4212,7 +4253,7 @@ body {
   left: 0;
   bottom: calc(100% + 0.45rem);
   z-index: 20;
-  width: min(18.5rem, 72vw);
+  width: min(18.5rem, 100%);
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--line);
   border-radius: 0.65rem;
