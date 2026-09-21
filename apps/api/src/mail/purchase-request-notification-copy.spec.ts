@@ -4,6 +4,9 @@ import { ConfigService } from '@nestjs/config';
 import { NotificationsService } from './notifications.service';
 import type { MailService } from './mail.service';
 
+const SERVICE_SOURCE = readFileSync(join(__dirname, 'notifications.service.ts'), 'utf8');
+const EMAIL_TEMPLATES_SOURCE = readFileSync(join(__dirname, 'email-templates.ts'), 'utf8');
+
 const LOCALES = ['en', 'ka', 'ru', 'de', 'fr', 'it', 'es'] as const;
 const MESSAGES_DIR = join(__dirname, '../../../web/messages');
 
@@ -108,5 +111,29 @@ describe('purchase request notification copy', () => {
     expect(haystack).not.toContain('котиров');
     expect(haystack).not.toContain('сделка завершена');
     expect(userNotification.create.mock.calls[1][0].data.body.toLowerCase()).not.toContain('заверш');
+  });
+
+  it('keeps seller-affected email copy and only changes the destination to My Quotes', () => {
+    expect(EMAIL_TEMPLATES_SOURCE).toContain(
+      'Browse open purchase requests: {{link}}',
+    );
+    expect(EMAIL_TEMPLATES_SOURCE).toContain('Смотреть открытые запросы: {{link}}');
+    expect(EMAIL_TEMPLATES_SOURCE.match(/purchaseQuoteDeclined: \{/g)?.length).toBe(7);
+    expect(EMAIL_TEMPLATES_SOURCE.match(/purchaseRequestClosed: \{/g)?.length).toBe(7);
+    expect(EMAIL_TEMPLATES_SOURCE.match(/purchaseRequestCancelled: \{/g)?.length).toBe(7);
+
+    expect(SERVICE_SOURCE).toMatch(
+      /async notifyPurchaseQuoteDeclined[\s\S]*?const href = '\/dashboard\/quotes';[\s\S]*?link: this\.appLink\(locale, href\)/,
+    );
+    expect(SERVICE_SOURCE).toMatch(
+      /async notifyPurchaseRequestWithdrawn[\s\S]*?const href = '\/dashboard\/quotes';[\s\S]*?link: this\.appLink\(locale, href\)/,
+    );
+    expect(SERVICE_SOURCE).toContain("link: this.appLink(locale, `/requests/${params.requestId}`)");
+    expect(SERVICE_SOURCE).not.toMatch(
+      /notifyPurchaseQuoteDeclined[\s\S]*?link: this\.appLink\(locale, '\/requests'\)/,
+    );
+    expect(SERVICE_SOURCE).not.toMatch(
+      /notifyPurchaseRequestWithdrawn[\s\S]*?link: this\.appLink\(locale, '\/requests'\)/,
+    );
   });
 });

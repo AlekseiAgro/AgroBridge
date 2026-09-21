@@ -360,7 +360,7 @@ export class NotificationsService {
       name: this.displayName(params.farmer),
       buyerName: params.buyerName,
       title: params.title,
-      link: this.appLink(locale, '/requests'),
+      link: this.appLink(locale, href),
     });
   }
 
@@ -403,7 +403,7 @@ export class NotificationsService {
         name: this.displayName(params.farmer),
         buyerName: params.buyerName,
         title: params.title,
-        link: this.appLink(locale, '/requests'),
+        link: this.appLink(locale, href),
       },
     );
   }
