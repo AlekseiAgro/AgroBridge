@@ -988,7 +988,7 @@
     "mineEmpty": "Aún no ha publicado solicitudes de compra.",
     "myQuotesTitle": "Mis ofertas",
     "myQuotesSubtitle": "Ofertas que envió a los compradores.",
-    "myQuotesEmpty": "Aún no ha enviado ofertas.",
+    "myQuotesEmpty": "Las ofertas enviadas aparecerán aquí.",
     "myQuotesLoadError": "No se pudieron cargar las ofertas. ¿Está en marcha la API?",
     "openRequest": "Abrir solicitud",
     "requestUnavailable": "Esta solicitud ya no está disponible.",
@@ -1000,6 +1000,9 @@
     "quoteMessagePlaceholder": "Plazos, calidad, logística…",
     "submitQuote": "Enviar oferta",
     "price": "Precio",
+    "quotedQuantity": "Cantidad ofrecida",
+    "requestedQuantity": "Cantidad solicitada",
+    "sentAt": "Enviada el {date}",
     "currency": "Moneda",
     "yourQuote": "Su oferta",
     "quoteStatus": "Estado de la oferta",
@@ -1021,6 +1024,12 @@
       "accepted": "Aceptada",
       "declined": "Rechazada",
       "withdrawn": "Retirada"
+    },
+    "quoteStatusHints": {
+      "pending": "Esperando la decisión del comprador",
+      "accepted": "Oferta aceptada",
+      "declined": "Oferta rechazada",
+      "withdrawn": "Oferta retirada"
     },
     "actions": {
       "cancel": "Cancelar solicitud",

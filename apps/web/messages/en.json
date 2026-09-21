@@ -988,7 +988,7 @@
     "mineEmpty": "You have not published any purchase requests yet.",
     "myQuotesTitle": "My quotes",
     "myQuotesSubtitle": "Quotes you sent to buyers.",
-    "myQuotesEmpty": "You have not sent any quotes yet.",
+    "myQuotesEmpty": "Quotes you send to buyers will appear here.",
     "myQuotesLoadError": "Could not load your quotes. Is the API running?",
     "openRequest": "Open request",
     "requestUnavailable": "This request is no longer available.",
@@ -1000,6 +1000,9 @@
     "quoteMessagePlaceholder": "Lead time, quality notes, logistics…",
     "submitQuote": "Send quote",
     "price": "Price",
+    "quotedQuantity": "Offered quantity",
+    "requestedQuantity": "Requested quantity",
+    "sentAt": "Sent {date}",
     "currency": "Currency",
     "yourQuote": "Your quote",
     "quoteStatus": "Quote status",
@@ -1021,6 +1024,12 @@
       "accepted": "Accepted",
       "declined": "Declined",
       "withdrawn": "Withdrawn"
+    },
+    "quoteStatusHints": {
+      "pending": "Awaiting buyer decision",
+      "accepted": "Quote accepted",
+      "declined": "Quote declined",
+      "withdrawn": "Quote withdrawn"
     },
     "actions": {
       "cancel": "Cancel request",
