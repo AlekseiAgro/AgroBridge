@@ -440,7 +440,8 @@ describe('read-only account overview and settings profile editing', () => {
     expect(shell).toContain("href=\"/dashboard/subscriptions\">{t('subscriptions')}");
     expect(shell).toContain("href=\"/account/settings\">{t('settings')}");
     expect(shell).toContain('NotificationBell');
-    expect(bell).toContain('/dashboard/subscriptions');
+    expect(bell).toContain('/dashboard/notifications');
+    expect(bell).not.toContain('/dashboard/subscriptions');
   });
 
   it('localizes the Settings profile section in every locale', () => {

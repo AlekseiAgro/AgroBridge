@@ -2343,6 +2343,10 @@ body {
   background: color-mix(in srgb, var(--accent, #2f6b4f) 6%, var(--surface));
 }
 
+.user-notifications__item--unread .product-list__title {
+  font-weight: 700;
+}
+
 .user-notifications__main {
   min-width: 0;
   flex: 1 1 14rem;

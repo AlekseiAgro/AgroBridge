@@ -1167,6 +1167,18 @@
     "retry": "Reintentar",
     "markAllRead": "Marcar todas como leídas"
   },
+  "notifications": {
+    "title": "Avisos",
+    "subtitle": "Aquí aparecen los eventos importantes de tus solicitudes de compra, ofertas y productos.",
+    "empty": "Todavía no hay avisos",
+    "emptyHint": "Aquí aparecerán los eventos importantes de tus solicitudes de compra, ofertas y productos.",
+    "markAllRead": "Marcar todo como leído",
+    "markRead": "Leído",
+    "unread": "No leído",
+    "loadError": "No se pudieron cargar los avisos.",
+    "pageError": "No se pudieron abrir los avisos.",
+    "retry": "Reintentar"
+  },
   "harvest": {
     "title": "Plan de cosecha",
     "formTitle": "Planificación de la cosecha",

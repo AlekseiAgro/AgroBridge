@@ -7,15 +7,19 @@ import { Link, useRouter } from '@/i18n/navigation';
 
 type Props = {
   initial: UserNotificationItem[];
+  copyNamespace?: 'subscriptions' | 'notifications';
 };
 
-export function UserNotificationsList({ initial }: Props) {
-  const t = useTranslations('subscriptions');
+export function UserNotificationsList({ initial, copyNamespace = 'subscriptions' }: Props) {
+  const t = useTranslations(copyNamespace);
   const locale = useLocale();
   const router = useRouter();
   const [items, setItems] = useState(initial);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [markingAll, setMarkingAll] = useState(false);
+  const emptyLabel = copyNamespace === 'notifications' ? t('empty') : t('inboxEmpty');
+  const emptyHint = copyNamespace === 'notifications' ? t('emptyHint') : null;
+  const unreadLabel = copyNamespace === 'notifications' ? t('unread') : null;
 
   useEffect(() => {
     setItems(initial);
@@ -49,7 +53,12 @@ export function UserNotificationsList({ initial }: Props) {
   }
 
   if (items.length === 0) {
-    return <p className="empty-state">{t('inboxEmpty')}</p>;
+    return (
+      <div className="empty-state">
+        <p>{emptyLabel}</p>
+        {emptyHint ? <p className="page__subtitle">{emptyHint}</p> : null}
+      </div>
+    );
   }
 
   const hasUnread = items.some((item) => !item.readAt);
@@ -83,6 +92,7 @@ export function UserNotificationsList({ initial }: Props) {
               }
             >
               <div className="user-notifications__main">
+                {unreadLabel && !item.readAt ? <span className="sr-only">{unreadLabel}</span> : null}
                 <Link
                   href={item.href}
                   className="product-list__title"
