@@ -1171,7 +1171,6 @@
     "title": "Notifications",
     "subtitle": "Important events about your purchase requests, quotes, and products appear here.",
     "empty": "No notifications yet",
-    "emptyHint": "Important events about your purchase requests, quotes, and products will appear here.",
     "markAllRead": "Mark all as read",
     "markRead": "Read",
     "unread": "Unread",

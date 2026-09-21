@@ -20,7 +20,7 @@ function loadMessages(locale: string) {
       title: string;
       subtitle: string;
       empty: string;
-      emptyHint: string;
+      emptyHint?: string;
       markAllRead: string;
       markRead: string;
     };
@@ -288,6 +288,9 @@ describe('dedicated Notification Center', () => {
 
     expect(page).toContain('UserNotificationsList');
     expect(page).toContain("copyNamespace=\"notifications\"");
+    expect(page).toContain("{t('subtitle')}");
+    expect(list).toContain("t('empty')");
+    expect(list).not.toContain('emptyHint');
     expect(page).not.toContain('AlertSubscriptionForm');
     expect(page).not.toContain('HarvestWatchesList');
     expect(page).not.toContain('HarvestWatchButton');
@@ -327,7 +330,7 @@ describe('dedicated Notification Center', () => {
       expect(messages.notifications.title).toBe(expectedTitle[locale]);
       expect(messages.notifications.subtitle.trim().length).toBeGreaterThan(0);
       expect(messages.notifications.empty.trim().length).toBeGreaterThan(0);
-      expect(messages.notifications.emptyHint.trim().length).toBeGreaterThan(0);
+      expect(messages.notifications.emptyHint).toBeUndefined();
       expect(messages.notifications.markAllRead.trim().length).toBeGreaterThan(0);
       expect(messages.notifications.markRead.trim().length).toBeGreaterThan(0);
       expect(messages.notifications.title).not.toBe(messages.nav.inbox);
@@ -338,10 +341,16 @@ describe('dedicated Notification Center', () => {
 
     const ru = loadMessages('ru');
     expect(ru.notifications.empty).toBe('Пока нет уведомлений');
+    expect(ru.notifications.subtitle).toBe(
+      'Здесь отображаются важные события, связанные с вашими запросами, предложениями и товарами.',
+    );
     expect(ru.notifications.markAllRead).toBe('Прочитать все');
     expect(ru.notifications.markRead).toBe('Прочитано');
     const en = loadMessages('en');
     expect(en.notifications.empty).toBe('No notifications yet');
+    expect(en.notifications.subtitle).toBe(
+      'Important events about your purchase requests, quotes, and products appear here.',
+    );
     expect(en.notifications.markAllRead).toBe('Mark all as read');
     expect(en.notifications.markRead).toBe('Read');
   });

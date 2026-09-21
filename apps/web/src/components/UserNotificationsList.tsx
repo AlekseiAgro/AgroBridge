@@ -18,7 +18,6 @@ export function UserNotificationsList({ initial, copyNamespace = 'subscriptions'
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [markingAll, setMarkingAll] = useState(false);
   const emptyLabel = copyNamespace === 'notifications' ? t('empty') : t('inboxEmpty');
-  const emptyHint = copyNamespace === 'notifications' ? t('emptyHint') : null;
   const unreadLabel = copyNamespace === 'notifications' ? t('unread') : null;
 
   useEffect(() => {
@@ -56,7 +55,6 @@ export function UserNotificationsList({ initial, copyNamespace = 'subscriptions'
     return (
       <div className="empty-state">
         <p>{emptyLabel}</p>
-        {emptyHint ? <p className="page__subtitle">{emptyHint}</p> : null}
       </div>
     );
   }

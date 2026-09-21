@@ -1171,7 +1171,6 @@
     "title": "Notifications",
     "subtitle": "Les événements importants concernant vos demandes d’achat, offres et produits apparaissent ici.",
     "empty": "Aucune notification pour le moment",
-    "emptyHint": "Les événements importants concernant vos demandes d’achat, offres et produits apparaîtront ici.",
     "markAllRead": "Tout marquer comme lu",
     "markRead": "Lu",
     "unread": "Non lu",
