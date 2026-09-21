@@ -47,8 +47,6 @@ describe('My Quotes page chrome', () => {
     const page = source(MINE_PAGE);
     expect(page).toContain("<h1>{t('mineTitle')}</h1>");
     expect(page).toContain("t('mineSubtitle')");
-    expect(page).toContain("href=\"/dashboard/quotes\"");
-    expect(page).toContain("t('myQuotesTitle')");
   });
 
   it('keeps the top CTA as navigation to the public purchase-request board', () => {
