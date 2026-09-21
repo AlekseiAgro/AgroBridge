@@ -1,4 +1,4 @@
-import type { ProductDetail } from '@agrobridge/shared';
+import { formatListedPrice, type ProductDetail } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { CertificateBadges } from '@/components/CertificateBadges';
@@ -329,9 +329,7 @@ export default async function ProductDetailPage({ params }: Props) {
                 {product.priceFrom != null ? (
                   <div>
                     <dt>{t('priceFrom')}</dt>
-                    <dd>
-                      {product.priceFrom} {product.priceCurrency}
-                    </dd>
+                    <dd>{formatListedPrice(product) ?? `${product.priceFrom} ${product.priceCurrency}`}</dd>
                   </div>
                 ) : null}
                 <div>

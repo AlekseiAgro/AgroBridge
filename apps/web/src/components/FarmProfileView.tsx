@@ -1,4 +1,4 @@
-import type { FarmDetail, RatingSummary } from '@agrobridge/shared';
+import { formatListedPrice, type FarmDetail, type RatingSummary } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { CertificateBadges } from '@/components/CertificateBadges';
@@ -154,6 +154,7 @@ export async function FarmProfileView({
               product,
               product.unit ? tp(`units.${product.unit as 'kg'}`) : null,
             );
+            const listedPrice = formatListedPrice(product);
             return (
               <li key={product.id} className="product-list__item product-list__item--with-media">
                 {image ? (
@@ -175,6 +176,11 @@ export async function FarmProfileView({
                       ? tc(`categories.${product.category as 'fruits'}`)
                       : tc('allCategories')}
                     {quantity ? ` · ${quantity}` : ''}
+                  </p>
+                  <p
+                    className={`product-list__price${listedPrice ? '' : ' product-list__price--request'}`}
+                  >
+                    {listedPrice ?? tc('priceOnRequest')}
                   </p>
                   <div className="product-quality-summary">
                     <QualityScoreChip score={product.qualityScore} />

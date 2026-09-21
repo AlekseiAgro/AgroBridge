@@ -188,6 +188,7 @@
     "searchPlaceholder": "Nom ou description du produit",
     "availableQuantity": "Quantité disponible",
     "sellerRating": "Note du vendeur",
+    "priceOnRequest": "Prix sur demande",
     "floatingLead": "Vous ne trouvez pas ce qu'il faut ?",
     "floatingText": "Décrivez votre besoin et recevez des offres.",
     "floatingCta": "Publier une demande d'achat"

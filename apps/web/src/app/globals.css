@@ -1821,6 +1821,20 @@ body {
   color: inherit;
 }
 
+.product-list__price {
+  margin: 0.4rem 0 0;
+  min-width: 0;
+  color: var(--brand-deep);
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.product-list__price--request {
+  font-weight: 600;
+  color: var(--muted);
+}
+
 .product-list__rating {
   display: flex;
   flex-wrap: wrap;
@@ -3918,6 +3932,8 @@ body {
 .harvest-badge--preorder {
   border-color: rgba(47, 107, 58, 0.28);
   background: rgba(47, 107, 58, 0.08);
+  white-space: normal;
+  max-width: 100%;
 }
 
 .harvest-plan,

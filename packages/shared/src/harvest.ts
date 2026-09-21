@@ -12,6 +12,17 @@ export function isHarvestStatus(value: string): value is HarvestStatus {
   return (HARVEST_STATUSES as readonly string[]).includes(value);
 }
 
+/**
+ * Pre-order is a capability, not a harvest status.
+ * When current stock is available, use the additive "Pre-order available" label
+ * so it does not look like a competing status.
+ */
+export function harvestPreorderMessageKey(
+  status: HarvestStatus | null | undefined,
+): 'filterPreorder' | 'preorderBadge' {
+  return status === 'available' ? 'filterPreorder' : 'preorderBadge';
+}
+
 /** Calendar months 1–12 used for seasonal availability. */
 export const SEASON_MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
 export type SeasonMonth = (typeof SEASON_MONTHS)[number];

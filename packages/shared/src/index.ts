@@ -6,6 +6,7 @@ export * from './moderation';
 export * from './verification';
 export * from './admin';
 export * from './harvest';
+export * from './product-price';
 export * from './quality';
 export * from './market-insight';
 export * from './catalog';

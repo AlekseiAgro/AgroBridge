@@ -1,4 +1,4 @@
-import type { ProductSummary } from '@agrobridge/shared';
+import { formatListedPrice, type ProductSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CertificateBadges } from '@/components/CertificateBadges';
 import { CatalogFilters } from '@/components/CatalogFilters';
@@ -86,6 +86,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
               product,
               product.unit ? tr(`product.units.${product.unit as 'kg'}`) : null,
             );
+            const listedPrice = formatListedPrice(product);
             const rating = product.sellerRating;
             const sellerLabel =
               product.farm?.name ||
@@ -127,6 +128,11 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                     status={product.harvestStatus}
                     preorderEnabled={product.preorderEnabled}
                   />
+                  <p
+                    className={`product-list__price${listedPrice ? '' : ' product-list__price--request'}`}
+                  >
+                    {listedPrice ?? t('priceOnRequest')}
+                  </p>
                   <div className="product-opportunity-row">
                     <MarketOpportunityBadge opportunity={product.opportunity} />
                   </div>
