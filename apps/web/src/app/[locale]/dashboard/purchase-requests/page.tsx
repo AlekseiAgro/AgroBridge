@@ -19,7 +19,6 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
   if (!user) redirect({ href: '/login', locale });
 
   const t = await getTranslations('purchaseRequests');
-  const tn = await getTranslations('nav');
   const tr = await getTranslations('rfq');
   const [items, rfqs] = await Promise.all([
     apiRequestAuthed<PurchaseRequestSummary[]>('/purchase-requests/mine'),
@@ -48,7 +47,7 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
       <PurchaseRequestList items={items} emptyLabel={t('mineEmpty')} />
 
       <section id="my-requests" className="cabinet-section cabinet-section--nested">
-        <h2 className="section-title">{tn('myRequests')}</h2>
+        <h2 className="section-title">{t('productRfqsLink')}</h2>
         <p className="page__subtitle">{tr('mineSubtitle')}</p>
         <RfqList items={rfqs} emptyLabel={tr('mineEmpty')} detailBasePath="/dashboard/rfqs" />
       </section>

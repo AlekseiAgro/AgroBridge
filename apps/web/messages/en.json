@@ -21,7 +21,7 @@
   },
   "auth": {
     "loginTitle": "Welcome back",
-    "loginSubtitle": "Log in to continue as a farmer or buyer.",
+    "loginSubtitle": "Log in to your AgroBridge account.",
     "registerTitle": "Join AgroBridge",
     "registerSubtitle": "Create an account to list products or find suppliers.",
     "email": "Email",
@@ -95,8 +95,8 @@
     "account": "Account",
     "login": "Log in",
     "register": "Sign up",
-    "inbox": "Incoming requests",
-    "myRequests": "My requests",
+    "inbox": "Incoming quote requests",
+    "myRequests": "My quote requests",
     "chat": "Chat",
     "admin": "Admin",
     "language": "Language",
@@ -107,7 +107,7 @@
     "forSellers": "I'm a seller",
     "subscriptions": "Alerts",
     "chatUnread": "Chat, {count} unread",
-    "inboxUnread": "Incoming requests, {count} pending",
+    "inboxUnread": "Incoming quote requests, {count} pending",
     "notifications": "Notifications",
     "notificationsUnread": "Notifications, {count} unread",
     "purchaseRequestsUnread": "My purchase requests, {count} unread",
@@ -589,39 +589,39 @@
   },
   "rfq": {
     "requestTitle": "Request a quote",
-    "requestSubtitle": "Tell the farmer what you need. They will reply with an offer.",
+    "requestSubtitle": "Tell the farmer what you need. They will reply with a quote.",
     "quantity": "Quantity",
     "unit": "Unit",
     "message": "Message",
     "messagePlaceholder": "Delivery window, quality needs, packaging…",
-    "submitRequest": "Send request",
+    "submitRequest": "Request a quote",
     "pleaseWait": "Please wait…",
     "genericError": "Something went wrong. Please try again.",
-    "loginToRequest": "Log in as a buyer to request a quote",
+    "loginToRequest": "Log in to request a quote",
     "mineTitle": "My quote requests",
-    "mineSubtitle": "Track requests you sent to farms.",
-    "mineEmpty": "You have not sent any requests yet.",
+    "mineSubtitle": "Quote requests you sent for specific catalog products.",
+    "mineEmpty": "You have not sent any quote requests yet.",
     "browseCatalog": "Browse catalog",
-    "inboxTitle": "Incoming requests",
+    "inboxTitle": "Incoming quote requests",
     "inboxSubtitle": "Respond to buyers interested in your products.",
     "inboxEmpty": "No quote requests yet.",
-    "offerTitle": "Send your offer",
+    "offerTitle": "Send your quote",
     "price": "Price",
     "currency": "Currency",
-    "submitOffer": "Send offer",
+    "submitOffer": "Send quote",
     "buyerMessage": "Buyer message",
     "farmerMessage": "Farmer message",
-    "offerSummary": "Offer: {amount} {currency}",
+    "offerSummary": "Quote: {amount} {currency}",
     "statuses": {
       "pending": "Pending",
-      "offered": "Offer received",
+      "offered": "Quote received",
       "accepted": "Accepted",
       "declined": "Declined",
       "cancelled": "Cancelled",
       "completed": "Completed"
     },
     "actions": {
-      "accept": "Accept offer",
+      "accept": "Accept quote",
       "decline": "Decline",
       "cancel": "Cancel request",
       "complete": "Mark deal completed"
@@ -781,7 +781,7 @@
       "buyer": "Buyer",
       "seller": "Seller",
       "kinds": {
-        "rfq": "Product RFQ",
+        "rfq": "Product quote request",
         "purchase_request": "Purchase request"
       },
       "tabs": {
@@ -972,7 +972,7 @@
     "mineSubtitle": "Open needs you published for farms to quote.",
     "mineEmpty": "You have not published any purchase requests yet.",
     "myQuotesTitle": "My quotes",
-    "myQuotesSubtitle": "Price offers you sent to buyers.",
+    "myQuotesSubtitle": "Quotes you sent to buyers.",
     "myQuotesEmpty": "You have not sent any quotes yet.",
     "myQuotesLoadError": "Could not load your quotes. Is the API running?",
     "openRequest": "Open request",
@@ -1017,14 +1017,14 @@
     "confirm": {
       "accept": "Accept this quote? The purchase request will stop taking other quotes, and remaining pending quotes will be declined. This cannot be undone. Accepting a quote does not complete payment, shipment, or delivery.",
       "decline": "Decline this quote? The purchase request stays open, but this seller will not be able to send another quote for it. This cannot be undone.",
-      "close": "Close this purchase request? You no longer need offers. It will leave the public board, all pending quotes will be declined, and it cannot be reopened.",
+      "close": "Close this purchase request? You no longer need quotes. It will leave the public board, all pending quotes will be declined, and it cannot be reopened.",
       "cancel": "Cancel this purchase request? Use this if the request is no longer relevant or was published by mistake. All pending quotes will be declined, and it cannot be reopened."
     },
     "floatingLead": "Can you supply this?",
     "floatingText": "Publish your product offer and reach buyers looking for it.",
     "floatingCta": "List your product",
     "buyerOnly": "Sign in to post a purchase request. Any AgroBridge account can buy and sell.",
-    "registerAsBuyer": "Register as a buyer"
+    "registerAsBuyer": "Create an account"
   },
   "roleHubs": {
     "buyers": {
@@ -1032,7 +1032,7 @@
       "title": "I'm a buyer",
       "lead": "Browse Georgian farm offers or publish exactly what you need to buy.",
       "asideNote": "Need an account to post a request or message farms? Sign in any time.",
-      "asideRegister": "Create buyer account",
+      "asideRegister": "Create an account",
       "asideMine": "My purchase requests",
       "paths": {
         "catalog": {
@@ -1052,7 +1052,7 @@
       "title": "I'm a seller",
       "lead": "Respond to buyer demand or publish your own product offer for the catalog.",
       "asideNote": "List products and reply to purchase requests. A farm profile is optional and helps buyers learn more about you.",
-      "asideRegister": "Create seller account",
+      "asideRegister": "Create an account",
       "paths": {
         "requests": {
           "title": "Open purchase requests",

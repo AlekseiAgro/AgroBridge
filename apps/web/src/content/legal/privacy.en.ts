@@ -60,7 +60,7 @@ export const LEGAL_PRIVACY_EN = {
     "- destinations;",
     "- prices;",
     "- messages and descriptions;",
-    "- Offers and RFQ information;",
+    "- Quotes and product quote-request information;",
     "- transaction-related marketplace information;",
     "- information identifying the relevant buyer or seller.",
     "Some Purchase Request and marketplace information is intentionally public. In particular, an open Purchase Request may include the author's display name and free-text message.",

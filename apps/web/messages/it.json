@@ -21,7 +21,7 @@
   },
   "auth": {
     "loginTitle": "Bentornato",
-    "loginSubtitle": "Accedi come agricoltore o acquirente.",
+    "loginSubtitle": "Accedi al tuo account AgroBridge.",
     "registerTitle": "Unisciti ad AgroBridge",
     "registerSubtitle": "Crea un account per pubblicare prodotti o trovare fornitori.",
     "email": "Email",
@@ -95,8 +95,8 @@
     "account": "Account",
     "login": "Accedi",
     "register": "Registrati",
-    "inbox": "Richieste in arrivo",
-    "myRequests": "Le mie richieste",
+    "inbox": "Preventivi richiesti in arrivo",
+    "myRequests": "Le mie richieste di preventivo",
     "chat": "Chat",
     "admin": "Admin",
     "language": "Lingua",
@@ -107,7 +107,7 @@
     "forSellers": "Sono un venditore",
     "subscriptions": "Avvisi",
     "chatUnread": "Chat, {count} non letti",
-    "inboxUnread": "Richieste in arrivo, {count} in sospeso",
+    "inboxUnread": "Preventivi richiesti in arrivo, {count} in sospeso",
     "notifications": "Notifiche",
     "notificationsUnread": "Notifiche, {count} non lette",
     "purchaseRequestsUnread": "Le mie richieste di acquisto, {count} non lette",
@@ -589,22 +589,22 @@
   },
   "rfq": {
     "requestTitle": "Richiedi un preventivo",
-    "requestSubtitle": "Indica cosa ti serve: l’azienda risponderà con un’offerta.",
+    "requestSubtitle": "Descrivi ciò che ti serve. L’azienda agricola risponderà con un preventivo.",
     "quantity": "Quantità",
     "unit": "Unità",
     "message": "Messaggio",
     "messagePlaceholder": "Tempi di consegna, qualità, imballaggio…",
-    "submitRequest": "Invia richiesta",
+    "submitRequest": "Richiedi un preventivo",
     "pleaseWait": "Attendi…",
     "genericError": "Qualcosa è andato storto. Riprova.",
-    "loginToRequest": "Accedi come acquirente per richiedere un preventivo",
-    "mineTitle": "Le mie richieste",
-    "mineSubtitle": "Monitora le richieste inviate alle aziende.",
-    "mineEmpty": "Non hai ancora inviato richieste.",
+    "loginToRequest": "Accedi per richiedere un preventivo",
+    "mineTitle": "Le mie richieste di preventivo",
+    "mineSubtitle": "Richieste di preventivo per prodotti specifici del catalogo.",
+    "mineEmpty": "Non hai ancora inviato richieste di preventivo.",
     "browseCatalog": "Vai al catalogo",
-    "inboxTitle": "Richieste in arrivo",
+    "inboxTitle": "Preventivi richiesti in arrivo",
     "inboxSubtitle": "Rispondi agli acquirenti interessati ai tuoi prodotti.",
-    "inboxEmpty": "Nessuna richiesta al momento.",
+    "inboxEmpty": "Nessuna richiesta di preventivo al momento.",
     "offerTitle": "Invia la tua offerta",
     "price": "Prezzo",
     "currency": "Valuta",
@@ -781,7 +781,7 @@
       "buyer": "Acquirente",
       "seller": "Venditore",
       "kinds": {
-        "rfq": "RFQ prodotto",
+        "rfq": "Richiesta di preventivo prodotto",
         "purchase_request": "Richiesta d’acquisto"
       },
       "tabs": {
@@ -1024,7 +1024,7 @@
     "floatingText": "Pubblica la tua offerta e raggiungi gli acquirenti interessati.",
     "floatingCta": "Pubblica il tuo prodotto",
     "buyerOnly": "Accedi per pubblicare una richiesta di acquisto. Qualsiasi account AgroBridge può comprare e vendere.",
-    "registerAsBuyer": "Registrati come acquirente"
+    "registerAsBuyer": "Crea un account"
   },
   "roleHubs": {
     "buyers": {
@@ -1032,7 +1032,7 @@
       "title": "Sono un acquirente",
       "lead": "Esplora le offerte delle aziende georgiane o pubblica la tua richiesta di acquisto.",
       "asideNote": "Accedi per pubblicare una richiesta o scrivere alle aziende.",
-      "asideRegister": "Crea account acquirente",
+      "asideRegister": "Crea un account",
       "asideMine": "Le mie richieste di acquisto",
       "paths": {
         "catalog": {
@@ -1052,7 +1052,7 @@
       "title": "Sono un venditore",
       "lead": "Rispondi alle esigenze degli acquirenti o crea la tua offerta prodotto.",
       "asideNote": "Aggiungi prodotti e rispondi alle richieste di acquisto. Il profilo azienda è facoltativo e aiuta gli acquirenti a conoscerti meglio.",
-      "asideRegister": "Crea account venditore",
+      "asideRegister": "Crea un account",
       "paths": {
         "requests": {
           "title": "Richieste di acquisto aperte",
