@@ -1167,6 +1167,18 @@
     "retry": "Erneut versuchen",
     "markAllRead": "Alle als gelesen"
   },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "subtitle": "Hier erscheinen wichtige Ereignisse zu Ihren Kaufanfragen, Angeboten und Produkten.",
+    "empty": "Noch keine Benachrichtigungen",
+    "emptyHint": "Hier erscheinen wichtige Ereignisse zu Ihren Kaufanfragen, Angeboten und Produkten.",
+    "markAllRead": "Alle als gelesen markieren",
+    "markRead": "Gelesen",
+    "unread": "Ungelesen",
+    "loadError": "Benachrichtigungen konnten nicht geladen werden.",
+    "pageError": "Benachrichtigungen konnten nicht geöffnet werden.",
+    "retry": "Erneut versuchen"
+  },
   "harvest": {
     "title": "Ernteplan",
     "formTitle": "Ernteplanung",

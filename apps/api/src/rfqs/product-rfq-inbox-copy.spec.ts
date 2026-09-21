@@ -114,6 +114,24 @@ describe('incoming Product RFQ terminology', () => {
       expect(notice).not.toBe(read(messages(locale), 'nav.inbox'));
       expect(notice).not.toBe(read(messages(locale), 'rfq.inboxTitle'));
     }
+
+    const center = source('app/[locale]/dashboard/notifications/page.tsx');
+    expect(center).toContain("getTranslations('notifications')");
+    expect(center).not.toContain('/rfqs/inbox');
+    expect(center).not.toContain('rfqs/inbox/unread-count');
+    expect(read(messages('en'), 'notifications.title')).toBe('Notifications');
+    expect(read(messages('ru'), 'notifications.title')).toBe('Уведомления');
+    expect(read(messages('en'), 'notifications.title')).not.toBe(read(messages('en'), 'nav.inbox'));
+    expect(read(messages('ru'), 'notifications.title')).not.toBe(read(messages('ru'), 'nav.inbox'));
+    for (const locale of LOCALES) {
+      expect(read(messages(locale), 'notifications.title')).not.toBe(
+        read(messages(locale), 'nav.inbox'),
+      );
+      expect(read(messages(locale), 'notifications.title')).not.toBe(
+        read(messages(locale), 'rfq.inboxTitle'),
+      );
+      expect(read(messages(locale), 'notifications.title').toLowerCase()).not.toContain('inbox');
+    }
   });
 
   it('keeps outgoing Product RFQ, My Quotes, and My Purchase Requests distinct', () => {

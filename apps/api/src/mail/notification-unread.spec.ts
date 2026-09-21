@@ -90,7 +90,9 @@ describe('cabinet notification unread mapping', () => {
     const account = readFileSync(ACCOUNT, 'utf8');
     const bell = readFileSync(BELL, 'utf8');
 
-    expect(bell).toContain('/dashboard/subscriptions');
+    expect(bell).toContain("href=\"/dashboard/notifications\"");
+    expect(bell).not.toContain('/dashboard/subscriptions');
+    expect(bell).not.toContain('/dashboard/inbox');
     expect(shell).toContain('NotificationBell');
     expect(shell).toContain('/dashboard/purchase-requests');
     expect(shell).toContain('/dashboard/quotes');

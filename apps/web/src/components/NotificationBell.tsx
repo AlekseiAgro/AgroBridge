@@ -34,7 +34,7 @@ function BellIcon() {
 export function NotificationBell({ count, label, unreadLabel }: Props) {
   return (
     <Link
-      href="/dashboard/subscriptions#inbox"
+      href="/dashboard/notifications"
       className={['notification-bell', count > 0 ? 'notification-bell--unread' : '']
         .filter(Boolean)
         .join(' ')}
