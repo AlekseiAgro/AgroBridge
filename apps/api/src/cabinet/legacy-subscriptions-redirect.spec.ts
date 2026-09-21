@@ -61,8 +61,13 @@ function cabinetNavFixture(css: string): string {
       <div class="cabinet__content">
         <main class="cabinet-page cabinet-page--settings">
           <section id="notifications" class="cabinet-notifications">
-            <h2 class="section-title">Уведомления</h2>
-            <p class="page__subtitle">Выберите, какие письма получать.</p>
+            <div class="settings-section-head">
+              <span class="settings-section-head__icon" aria-hidden></span>
+              <div class="settings-section-head__copy">
+                <h2 class="section-title">Уведомления</h2>
+                <p class="settings-section-head__desc">Выберите, какие письма получать, и управляйте уже созданными подписками на урожай.</p>
+              </div>
+            </div>
           </section>
         </main>
       </div>
