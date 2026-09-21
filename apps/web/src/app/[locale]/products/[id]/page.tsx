@@ -56,7 +56,7 @@ export default async function ProductDetailPage({ params }: Props) {
     product.unit ? t(`units.${product.unit as 'kg'}`) : null,
   );
   const unitLabel = product.unit ? t(`units.${product.unit as 'kg'}`) : null;
-  const canRequest = Boolean(user);
+  const canRequest = Boolean(user) && !product.isOwner;
   const showPreorder =
     product.preorderEnabled &&
     (product.harvestStatus === 'growing' ||
