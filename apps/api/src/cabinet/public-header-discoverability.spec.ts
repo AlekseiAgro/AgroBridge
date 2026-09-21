@@ -31,19 +31,30 @@ describe('public header marketplace discoverability', () => {
     const header = readWeb('components/SiteHeader.tsx');
     const catalogIndex = header.indexOf("href=\"/catalog\">{t('catalog')}");
     const requestsIndex = header.indexOf("href=\"/requests\">{t('purchaseRequests')}");
-    const buyersIndex = header.indexOf("href=\"/buyers\"");
-    const sellersIndex = header.indexOf("href=\"/sellers\"");
     const howItWorksIndex = header.indexOf("href=\"/how-it-works\"");
 
     expect(catalogIndex).toBeGreaterThan(-1);
     expect(requestsIndex).toBeGreaterThan(catalogIndex);
-    expect(buyersIndex).toBeGreaterThan(requestsIndex);
-    expect(sellersIndex).toBeGreaterThan(buyersIndex);
-    expect(howItWorksIndex).toBeGreaterThan(sellersIndex);
+    expect(howItWorksIndex).toBeGreaterThan(requestsIndex);
     expect(header).toContain("from '@/i18n/navigation'");
+    expect(header).not.toContain('href="/buyers"');
+    expect(header).not.toContain('href="/sellers"');
+    expect(header).not.toContain('site-header__role-link');
+    expect(header).not.toContain("t('forBuyers')");
+    expect(header).not.toContain("t('forSellers')");
     expect(header).not.toContain('NotificationBell');
     expect(header).not.toContain("t('subscriptions')");
     expect(header).not.toContain("t('notifications')");
+  });
+
+  it('keeps homepage Hero buyer/seller CTAs outside the public header', () => {
+    const home = readWeb('app/[locale]/page.tsx');
+    expect(home).toContain('<SiteHeader tone="light" />');
+    expect(home).toContain('home__actions');
+    expect(home).toContain("href=\"/buyers\"");
+    expect(home).toContain("href=\"/sellers\"");
+    expect(home).toContain("{t('ctaBuyer')}");
+    expect(home).toContain("{t('ctaSeller')}");
   });
 
   it('does not copy public marketplace links into a second header or cabinet chrome', () => {

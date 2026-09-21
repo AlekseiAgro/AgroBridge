@@ -25,12 +25,6 @@ export async function SiteHeader({ tone = 'default' }: Props) {
       <nav className="site-header__nav">
         <Link href="/catalog">{t('catalog')}</Link>
         <Link href="/requests">{t('purchaseRequests')}</Link>
-        <Link href="/buyers" className="site-header__role-link">
-          {t('forBuyers')}
-        </Link>
-        <Link href="/sellers" className="site-header__role-link">
-          {t('forSellers')}
-        </Link>
         <Link href="/how-it-works">{t('howItWorks')}</Link>
         {user ? <ChatNavLink initialCount={unreadCount} /> : null}
         {user?.role === 'admin' ? <Link href="/dashboard/admin">{t('admin')}</Link> : null}
