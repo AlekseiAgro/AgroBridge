@@ -72,47 +72,50 @@ export function UserAvatarEditor({ avatarUrl, fallbackInitial }: Props) {
   }
 
   return (
-    <div className="user-avatar-editor">
-      <button
-        type="button"
-        className="user-card__avatar user-card__avatar--editable"
-        onClick={() => inputRef.current?.click()}
-        disabled={pending}
-        aria-label={t('avatarChange')}
-      >
-        {previewUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={toPublicMediaUrl(previewUrl)} alt="" />
-        ) : (
-          <span aria-hidden>{fallbackInitial}</span>
-        )}
-      </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        hidden
-        onChange={(event) => void onUpload(event.target.files)}
-      />
-      <div className="user-avatar-editor__actions">
+    <div className="cabinet-profile__block">
+      <p className="cabinet-profile__label">{t('avatarLabel')}</p>
+      <div className="user-avatar-editor">
         <button
           type="button"
-          className="button button--ghost user-avatar-editor__button"
-          disabled={pending}
+          className="user-card__avatar user-card__avatar--editable"
           onClick={() => inputRef.current?.click()}
+          disabled={pending}
+          aria-label={t('avatarChange')}
         >
-          {pending ? t('avatarUploading') : previewUrl ? t('avatarChange') : t('avatarUpload')}
+          {previewUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={toPublicMediaUrl(previewUrl)} alt="" />
+          ) : (
+            <span aria-hidden>{fallbackInitial}</span>
+          )}
         </button>
-        {previewUrl ? (
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          onChange={(event) => void onUpload(event.target.files)}
+        />
+        <div className="user-avatar-editor__actions">
           <button
             type="button"
             className="button button--ghost user-avatar-editor__button"
             disabled={pending}
-            onClick={() => void onRemove()}
+            onClick={() => inputRef.current?.click()}
           >
-            {t('avatarRemove')}
+            {pending ? t('avatarUploading') : previewUrl ? t('avatarChange') : t('avatarUpload')}
           </button>
-        ) : null}
+          {previewUrl ? (
+            <button
+              type="button"
+              className="button button--ghost user-avatar-editor__button"
+              disabled={pending}
+              onClick={() => void onRemove()}
+            >
+              {t('avatarRemove')}
+            </button>
+          ) : null}
+        </div>
       </div>
       {error ? <p className="form-error">{error}</p> : null}
     </div>

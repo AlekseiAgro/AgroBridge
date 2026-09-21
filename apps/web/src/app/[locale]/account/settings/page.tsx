@@ -51,7 +51,7 @@ export default async function AccountSettingsPage({ params }: Props) {
           {t('profileSettingsTitle')}
         </h2>
         <p className="cabinet-profile__hint">{t('profileSettingsHint')}</p>
-        <div className="cabinet-profile__identity">
+        <div className="cabinet-profile__stack">
           <UserAvatarEditor
             avatarUrl={user.avatarUrl}
             fallbackInitial={(user.displayName || user.email).slice(0, 1).toUpperCase()}

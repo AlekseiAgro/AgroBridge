@@ -147,11 +147,13 @@ export function EditProfileControl({
     }
   }
 
+  const actionsClass = alwaysOpen ? 'cabinet-profile__actions' : 'how-it-works__actions';
+
   return (
-    <div className="edit-profile">
-      <div className="edit-profile__name-row">
-        <h3 className="user-card__name">{shownName}</h3>
-        {alwaysOpen ? null : (
+    <div className={alwaysOpen ? 'edit-profile edit-profile--settings' : 'edit-profile'}>
+      {alwaysOpen ? null : (
+        <div className="edit-profile__name-row">
+          <h3 className="user-card__name">{shownName}</h3>
           <button
             type="button"
             className="edit-profile__pencil"
@@ -174,13 +176,13 @@ export function EditProfileControl({
               />
             </svg>
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {!open ? <p className="user-card__meta">{email}</p> : null}
 
       {open ? (
-        <div className="edit-profile__panel">
+        <div className={alwaysOpen ? 'edit-profile__fields' : 'edit-profile__panel'}>
           <form className="profile-edit-form" onSubmit={onSaveName}>
             <label className="field">
               <span>{t('displayNameLabel')}</span>
@@ -195,7 +197,7 @@ export function EditProfileControl({
             </label>
             {nameError ? <p className="form-error">{nameError}</p> : null}
             {nameSaved ? <p className="product-list__meta">{t('displayNameSaved')}</p> : null}
-            <div className="how-it-works__actions">
+            <div className={actionsClass}>
               <button className="button button--primary" type="submit" disabled={namePending}>
                 {namePending ? ta('pleaseWait') : t('displayNameSave')}
               </button>
@@ -203,10 +205,8 @@ export function EditProfileControl({
           </form>
 
           <div className="edit-profile__email">
-            <p className="user-card__meta">
-              <span className="profile-edit-row__label">{t('emailLabel')}: </span>
-              {email}
-            </p>
+            <p className="cabinet-profile__label">{t('emailLabel')}</p>
+            <p className="cabinet-profile__value">{email}</p>
             {!emailOpen ? (
               <button
                 type="button"
@@ -247,7 +247,7 @@ export function EditProfileControl({
                       />
                     </label>
                     {emailError ? <p className="form-error">{emailError}</p> : null}
-                    <div className="how-it-works__actions">
+                    <div className={actionsClass}>
                       <button className="button button--primary" type="submit" disabled={emailPending}>
                         {emailPending ? ta('pleaseWait') : t('changeEmailSendCode')}
                       </button>
@@ -299,7 +299,7 @@ export function EditProfileControl({
                       />
                     </label>
                     {emailError ? <p className="form-error">{emailError}</p> : null}
-                    <div className="how-it-works__actions">
+                    <div className={actionsClass}>
                       <button
                         className="button button--primary"
                         type="submit"
