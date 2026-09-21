@@ -393,8 +393,13 @@ describe('read-only account overview and settings profile editing', () => {
     expect(settings).toContain('legalAcceptanceLabel');
 
     expect(editor).toContain("useState<Editing>('none')");
+    expect(editor).toContain("type Editing = 'none' | 'name' | 'email'");
+    expect(editor).toContain("startEditing('name')");
+    expect(editor).toContain("startEditing('email')");
     expect(editor).toContain('settingsEdit');
+    expect(editor).not.toContain('alwaysOpen');
     expect(settings).not.toContain('user-card__name');
+    expect(settings).not.toContain('profileSettingsHint');
     expect(editor).toContain("fetch('/api/cabinet/me/profile'");
     expect(editor).toContain("'/api/cabinet/me/email/request'");
     expect(editor).toContain("'/api/cabinet/me/email/confirm'");
@@ -402,9 +407,16 @@ describe('read-only account overview and settings profile editing', () => {
     expect(avatar).toContain("fetch('/api/cabinet/me/avatar'");
     expect(avatar).toContain("method: 'POST'");
     expect(avatar).toContain("method: 'DELETE'");
+    expect(avatar).toContain('avatarChange');
     expect(password).toContain("fetch('/api/auth/change-password'");
-    expect(password).toContain('useState(false)');
+    expect(password).toContain('const [open, setOpen] = useState(false)');
     expect(password).toContain('changePasswordAction');
+    expect(password).toContain('passwordRowHint');
+    const deletion = readWeb('components/DeleteAccountButton.tsx');
+    expect(deletion).toContain('const [open, setOpen] = useState(false)');
+    expect(deletion).toContain('deleteAccountCompactHint');
+    expect(deletion).toContain('/api/cabinet/me/delete/request');
+    expect(deletion).toContain('/api/cabinet/me/delete/confirm');
   });
 
   it('does not change cabinet API contracts or sidebar destinations', () => {
@@ -466,8 +478,10 @@ describe('read-only account overview and settings profile editing', () => {
     expect(ru.cabinet.displayNameSave).toBe('Сохранить');
     expect(ru.cabinet.settingsEdit).toBe('Изменить');
     expect(ru.cabinet.changePasswordAction).toBe('Изменить пароль');
+    expect(ru.cabinet.passwordRowHint).toBe('Измените пароль для входа в аккаунт.');
     expect(ru.cabinet.legalTitle).toBe('Юридическая информация');
     expect(ru.cabinet.deleteAccountTitle).toBe('Удаление аккаунта');
+    expect(ru.cabinet.deleteAccountCompactHint).toBe('Удаление аккаунта необратимо.');
   });
 
   it('keeps the Profile section visually aligned with Security and Legal', () => {
@@ -480,6 +494,7 @@ describe('read-only account overview and settings profile editing', () => {
     expect(css).toContain('.settings-list');
     expect(css).toContain('.cabinet-page--settings');
     expect(css).toMatch(/\.cabinet-page--settings\s*\{[\s\S]*?max-width:\s*46rem|\.cabinet-page--settings\s*\{[\s\S]*?width:\s*min\(100%, 46rem\)/);
+    expect(css).toMatch(/\.settings-row__action\s*\{[\s\S]*?flex-shrink:\s*0/);
     expect(css).not.toContain('.cabinet-profile__identity');
   });
 

@@ -539,6 +539,7 @@ body {
   color: var(--muted);
   overflow-wrap: anywhere;
   min-width: 0;
+  flex: 1;
 }
 
 .settings-row__body {
@@ -570,6 +571,7 @@ body {
   font-weight: 650;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .settings-row__action:hover,
@@ -628,9 +630,11 @@ body {
 @media (max-width: 640px) {
   .settings-row__body {
     flex-wrap: wrap;
+    align-items: flex-start;
   }
 
-  .settings-row__actions {
+  .settings-row__actions,
+  .cabinet-danger .button {
     justify-content: flex-start;
   }
 }
