@@ -9,14 +9,20 @@ type EmailStep = 'idle' | 'codeSent';
 type Props = {
   initialDisplayName: string | null;
   email: string;
+  /** Settings shows the name/email forms immediately; overview never uses this. */
+  alwaysOpen?: boolean;
 };
 
-export function EditProfileControl({ initialDisplayName, email }: Props) {
+export function EditProfileControl({
+  initialDisplayName,
+  email,
+  alwaysOpen = false,
+}: Props) {
   const t = useTranslations('cabinet');
   const ta = useTranslations('auth');
   const router = useRouter();
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(alwaysOpen);
   const [displayName, setDisplayName] = useState(initialDisplayName ?? '');
   const [namePending, setNamePending] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
@@ -121,8 +127,7 @@ export function EditProfileControl({ initialDisplayName, email }: Props) {
     }
   }
 
-  function closePanel() {
-    setOpen(false);
+  function resetFields() {
     setDisplayName(initialDisplayName ?? '');
     setNameError(null);
     setNameSaved(false);
@@ -135,32 +140,41 @@ export function EditProfileControl({ initialDisplayName, email }: Props) {
     setEmailMessage(null);
   }
 
+  function closePanel() {
+    resetFields();
+    if (!alwaysOpen) {
+      setOpen(false);
+    }
+  }
+
   return (
     <div className="edit-profile">
       <div className="edit-profile__name-row">
-        <h2 className="user-card__name">{shownName}</h2>
-        <button
-          type="button"
-          className="edit-profile__pencil"
-          title={t('editProfile')}
-          aria-label={t('editProfile')}
-          aria-expanded={open}
-          onClick={() => {
-            if (open) {
-              closePanel();
-            } else {
-              setOpen(true);
-              setNameSaved(false);
-            }
-          }}
-        >
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-            <path
-              fill="currentColor"
-              d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.99-1.66z"
-            />
-          </svg>
-        </button>
+        <h3 className="user-card__name">{shownName}</h3>
+        {alwaysOpen ? null : (
+          <button
+            type="button"
+            className="edit-profile__pencil"
+            title={t('editProfile')}
+            aria-label={t('editProfile')}
+            aria-expanded={open}
+            onClick={() => {
+              if (open) {
+                closePanel();
+              } else {
+                setOpen(true);
+                setNameSaved(false);
+              }
+            }}
+          >
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+              <path
+                fill="currentColor"
+                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.99-1.66z"
+              />
+            </svg>
+          </button>
+        )}
       </div>
 
       {!open ? <p className="user-card__meta">{email}</p> : null}
@@ -308,9 +322,11 @@ export function EditProfileControl({ initialDisplayName, email }: Props) {
             )}
           </div>
 
-          <button type="button" className="button button--ghost" onClick={closePanel}>
-            {t('displayNameCancel')}
-          </button>
+          {alwaysOpen ? null : (
+            <button type="button" className="button button--ghost" onClick={closePanel}>
+              {t('displayNameCancel')}
+            </button>
+          )}
         </div>
       ) : null}
     </div>

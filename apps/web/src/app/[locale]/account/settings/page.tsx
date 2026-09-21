@@ -2,6 +2,8 @@ import { legalLocaleFor, type LegalAcceptanceSnapshot } from '@agrobridge/shared
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ChangePasswordForm } from '@/components/ChangePasswordForm';
 import { DeleteAccountButton } from '@/components/DeleteAccountButton';
+import { EditProfileControl } from '@/components/EditProfileControl';
+import { UserAvatarEditor } from '@/components/UserAvatarEditor';
 import { Link } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -43,6 +45,24 @@ export default async function AccountSettingsPage({ params }: Props) {
           <p className="page__subtitle">{t('settingsSubtitle')}</p>
         </div>
       </div>
+
+      <section className="cabinet-profile" aria-labelledby="cabinet-profile-title">
+        <h2 id="cabinet-profile-title" className="section-title">
+          {t('profileSettingsTitle')}
+        </h2>
+        <p className="cabinet-profile__hint">{t('profileSettingsHint')}</p>
+        <div className="cabinet-profile__identity">
+          <UserAvatarEditor
+            avatarUrl={user.avatarUrl}
+            fallbackInitial={(user.displayName || user.email).slice(0, 1).toUpperCase()}
+          />
+          <EditProfileControl
+            alwaysOpen
+            initialDisplayName={user.displayName}
+            email={user.email}
+          />
+        </div>
+      </section>
 
       <section className="cabinet-security" aria-labelledby="cabinet-security-title">
         <h2 id="cabinet-security-title" className="section-title">

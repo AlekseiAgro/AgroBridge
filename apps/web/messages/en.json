@@ -889,6 +889,7 @@
     "avatarRemoveError": "Could not remove the photo.",
     "avatarRemoveConfirm": "Remove your profile photo?",
     "profileSettingsTitle": "Profile settings",
+    "profileSettingsHint": "Change your display name, profile photo, and email address.",
     "displayNameLabel": "Display name",
     "displayNameEdit": "Edit name",
     "displayNameSave": "Save name",
@@ -924,7 +925,7 @@
       "noComment": "No written review."
     },
     "settingsTitle": "Settings",
-    "settingsSubtitle": "Password, account security, and legal documents.",
+    "settingsSubtitle": "Profile, password, account security, and legal documents.",
     "securityTitle": "Security",
     "unreadCard": "{label}, {count} unread",
     "legalTitle": "Legal",

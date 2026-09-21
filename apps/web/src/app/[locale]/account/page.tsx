@@ -2,11 +2,10 @@ import type { CabinetOverview } from '@agrobridge/shared';
 import { canTrade, EMPTY_NOTIFICATION_UNREAD_SUMMARY } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ChatUnreadBadge } from '@/components/ChatNavLink';
-import { EditProfileControl } from '@/components/EditProfileControl';
 import { RatingStars } from '@/components/RatingStars';
-import { UserAvatarEditor } from '@/components/UserAvatarEditor';
 import { Link } from '@/i18n/navigation';
 import { formatMemberSinceMonthYear } from '@/lib/member-since';
+import { toPublicMediaUrl } from '@/lib/product-image';
 import { apiRequestAuthed } from '@/lib/server-api';
 
 type Props = {
@@ -105,12 +104,17 @@ export default async function AccountPage({ params }: Props) {
 
       <section className="user-card">
         <div className="user-card__identity">
-          <UserAvatarEditor
-            avatarUrl={user.avatarUrl}
-            fallbackInitial={(user.displayName || user.email).slice(0, 1).toUpperCase()}
-          />
+          <div className="user-card__avatar" aria-hidden>
+            {user.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={toPublicMediaUrl(user.avatarUrl)} alt="" />
+            ) : (
+              (user.displayName || user.email).slice(0, 1).toUpperCase()
+            )}
+          </div>
           <div>
-            <EditProfileControl initialDisplayName={user.displayName} email={user.email} />
+            <h2 className="user-card__name">{user.displayName?.trim() || t('noDisplayName')}</h2>
+            <p className="user-card__meta">{user.email}</p>
             <p className="user-card__meta">
               {ta(roleKey)}
               {user.sellerType
