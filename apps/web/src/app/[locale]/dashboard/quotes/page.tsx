@@ -36,13 +36,13 @@ export default async function MyQuotesPage({ params }: Props) {
           <p className="page__subtitle">{t('myQuotesSubtitle')}</p>
         </div>
         <Link href="/requests" className="button button--ghost">
-          {t('boardTitle')}
+          {t('browseBoard')}
         </Link>
       </div>
       <p className="eyebrow">
         <Link href="/requests">{t('boardTitle')}</Link>
         {' · '}
-        <Link href="/dashboard/purchase-requests">{t('mineTitle')}</Link>
+        {t('myQuotesTitle')}
       </p>
       {loadError ? (
         <p className="form-error">{loadError}</p>
