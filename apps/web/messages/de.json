@@ -21,7 +21,7 @@
   },
   "auth": {
     "loginTitle": "Willkommen zurück",
-    "loginSubtitle": "Melden Sie sich als Landwirt oder Käufer an.",
+    "loginSubtitle": "Melden Sie sich bei Ihrem AgroBridge-Konto an.",
     "registerTitle": "AgroBridge beitreten",
     "registerSubtitle": "Erstellen Sie ein Konto, um Produkte einzustellen oder Lieferanten zu finden.",
     "email": "E-Mail",
@@ -95,8 +95,8 @@
     "account": "Konto",
     "login": "Anmelden",
     "register": "Registrieren",
-    "inbox": "Eingehende Anfragen",
-    "myRequests": "Meine Anfragen",
+    "inbox": "Eingehende Angebotsanfragen",
+    "myRequests": "Meine Angebotsanfragen",
     "chat": "Chat",
     "admin": "Admin",
     "language": "Sprache",
@@ -107,7 +107,7 @@
     "forSellers": "Ich bin Verkäufer",
     "subscriptions": "Alerts",
     "chatUnread": "Chat, {count} ungelesen",
-    "inboxUnread": "Eingehende Anfragen, {count} ausstehend",
+    "inboxUnread": "Eingehende Angebotsanfragen, {count} ausstehend",
     "notifications": "Benachrichtigungen",
     "notificationsUnread": "Benachrichtigungen, {count} ungelesen",
     "purchaseRequestsUnread": "Meine Kaufanfragen, {count} ungelesen",
@@ -588,23 +588,23 @@
     "publishLiveHint": "„Speichern“ und „Veröffentlichen“ aktualisieren die Live-Anzeige sofort (ohne Rücknahme)."
   },
   "rfq": {
-    "requestTitle": "Preis anfragen",
+    "requestTitle": "Angebot anfragen",
     "requestSubtitle": "Sagen Sie dem Betrieb, was Sie brauchen. Sie erhalten ein Angebot.",
     "quantity": "Menge",
     "unit": "Einheit",
     "message": "Nachricht",
     "messagePlaceholder": "Lieferfenster, Qualität, Verpackung…",
-    "submitRequest": "Anfrage senden",
+    "submitRequest": "Angebot anfragen",
     "pleaseWait": "Bitte warten…",
     "genericError": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
-    "loginToRequest": "Melden Sie sich als Käufer an, um eine Anfrage zu senden",
-    "mineTitle": "Meine Preisanfragen",
-    "mineSubtitle": "Verfolgen Sie Anfragen an Betriebe.",
-    "mineEmpty": "Sie haben noch keine Anfragen gesendet.",
+    "loginToRequest": "Melden Sie sich an, um ein Angebot anzufragen",
+    "mineTitle": "Meine Angebotsanfragen",
+    "mineSubtitle": "Angebotsanfragen zu bestimmten Katalogprodukten.",
+    "mineEmpty": "Sie haben noch keine Angebotsanfragen gesendet.",
     "browseCatalog": "Katalog öffnen",
-    "inboxTitle": "Eingehende Anfragen",
+    "inboxTitle": "Eingehende Angebotsanfragen",
     "inboxSubtitle": "Antworten Sie auf interessierte Käufer.",
-    "inboxEmpty": "Noch keine Anfragen.",
+    "inboxEmpty": "Noch keine Angebotsanfragen.",
     "offerTitle": "Angebot senden",
     "price": "Preis",
     "currency": "Währung",
@@ -781,7 +781,7 @@
       "buyer": "Käufer",
       "seller": "Verkäufer",
       "kinds": {
-        "rfq": "Produkt-RFQ",
+        "rfq": "Produkt-Angebotsanfrage",
         "purchase_request": "Kaufanfrage"
       },
       "tabs": {
@@ -1024,7 +1024,7 @@
     "floatingText": "Veröffentlichen Sie Ihr Angebot und erreichen Sie interessierte Käufer.",
     "floatingCta": "Eigenes Produkt listen",
     "buyerOnly": "Melden Sie sich an, um eine Kaufanfrage zu stellen. Jedes AgroBridge-Konto kann kaufen und verkaufen.",
-    "registerAsBuyer": "Als Käufer registrieren"
+    "registerAsBuyer": "Konto erstellen"
   },
   "roleHubs": {
     "buyers": {
@@ -1032,7 +1032,7 @@
       "title": "Ich bin Käufer",
       "lead": "Durchstöbern Sie Angebote georgischer Betriebe oder veröffentlichen Sie Ihren Kaufbedarf.",
       "asideNote": "Melden Sie sich an, um eine Anfrage zu posten oder Betriebe zu kontaktieren.",
-      "asideRegister": "Käuferkonto erstellen",
+      "asideRegister": "Konto erstellen",
       "asideMine": "Meine Kaufanfragen",
       "paths": {
         "catalog": {
@@ -1052,7 +1052,7 @@
       "title": "Ich bin Verkäufer",
       "lead": "Reagieren Sie auf Käuferbedarf oder erstellen Sie Ihr eigenes Produktangebot.",
       "asideNote": "Listen Sie Produkte und antworten Sie auf Kaufanfragen. Ein Betriebsprofil ist optional und hilft Käufern, mehr über Sie zu erfahren.",
-      "asideRegister": "Verkäuferkonto erstellen",
+      "asideRegister": "Konto erstellen",
       "paths": {
         "requests": {
           "title": "Offene Kaufanfragen",

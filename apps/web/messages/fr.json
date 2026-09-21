@@ -21,7 +21,7 @@
   },
   "auth": {
     "loginTitle": "Bon retour",
-    "loginSubtitle": "Connectez-vous en tant qu’agriculteur ou acheteur.",
+    "loginSubtitle": "Connectez-vous à votre compte AgroBridge.",
     "registerTitle": "Rejoindre AgroBridge",
     "registerSubtitle": "Créez un compte pour publier des produits ou trouver des fournisseurs.",
     "email": "E-mail",
@@ -95,8 +95,8 @@
     "account": "Compte",
     "login": "Connexion",
     "register": "Inscription",
-    "inbox": "Demandes reçues",
-    "myRequests": "Mes demandes",
+    "inbox": "Demandes de devis reçues",
+    "myRequests": "Mes demandes de devis",
     "chat": "Chat",
     "admin": "Admin",
     "language": "Langue",
@@ -107,7 +107,7 @@
     "forSellers": "Je suis vendeur",
     "subscriptions": "Alertes",
     "chatUnread": "Chat, {count} non lus",
-    "inboxUnread": "Demandes reçues, {count} en attente",
+    "inboxUnread": "Demandes de devis reçues, {count} en attente",
     "notifications": "Notifications",
     "notificationsUnread": "Notifications, {count} non lues",
     "purchaseRequestsUnread": "Mes demandes d’achat, {count} non lues",
@@ -589,22 +589,22 @@
   },
   "rfq": {
     "requestTitle": "Demander un devis",
-    "requestSubtitle": "Indiquez votre besoin — le producteur répondra avec une offre.",
+    "requestSubtitle": "Indiquez au producteur ce dont vous avez besoin. Il répondra par un devis.",
     "quantity": "Quantité",
     "unit": "Unité",
     "message": "Message",
     "messagePlaceholder": "Délai, qualité, emballage…",
-    "submitRequest": "Envoyer la demande",
+    "submitRequest": "Demander un devis",
     "pleaseWait": "Veuillez patienter…",
     "genericError": "Une erreur s’est produite. Réessayez.",
-    "loginToRequest": "Connectez-vous en tant qu’acheteur pour demander un devis",
+    "loginToRequest": "Connectez-vous pour demander un devis",
     "mineTitle": "Mes demandes de devis",
-    "mineSubtitle": "Suivez les demandes envoyées aux fermes.",
-    "mineEmpty": "Vous n’avez encore envoyé aucune demande.",
+    "mineSubtitle": "Demandes de devis pour des produits précis du catalogue.",
+    "mineEmpty": "Vous n’avez encore envoyé aucune demande de devis.",
     "browseCatalog": "Voir le catalogue",
-    "inboxTitle": "Demandes reçues",
+    "inboxTitle": "Demandes de devis reçues",
     "inboxSubtitle": "Répondez aux acheteurs intéressés par vos produits.",
-    "inboxEmpty": "Aucune demande pour le moment.",
+    "inboxEmpty": "Aucune demande de devis pour le moment.",
     "offerTitle": "Envoyer votre offre",
     "price": "Prix",
     "currency": "Devise",
@@ -781,7 +781,7 @@
       "buyer": "Acheteur",
       "seller": "Vendeur",
       "kinds": {
-        "rfq": "RFQ produit",
+        "rfq": "Demande de devis produit",
         "purchase_request": "Demande d’achat"
       },
       "tabs": {
@@ -1024,7 +1024,7 @@
     "floatingText": "Publiez votre offre produit pour atteindre les acheteurs intéressés.",
     "floatingCta": "Mettre en ligne mon produit",
     "buyerOnly": "Connectez-vous pour publier une demande d’achat. Tout compte AgroBridge peut acheter et vendre.",
-    "registerAsBuyer": "S’inscrire comme acheteur"
+    "registerAsBuyer": "Créer un compte"
   },
   "roleHubs": {
     "buyers": {
@@ -1032,7 +1032,7 @@
       "title": "Je suis acheteur",
       "lead": "Parcourez les offres des fermes géorgiennes ou publiez votre besoin d'achat.",
       "asideNote": "Connectez-vous pour publier une demande ou écrire aux fermes.",
-      "asideRegister": "Créer un compte acheteur",
+      "asideRegister": "Créer un compte",
       "asideMine": "Mes demandes d'achat",
       "paths": {
         "catalog": {
@@ -1052,7 +1052,7 @@
       "title": "Je suis vendeur",
       "lead": "Répondez à la demande des acheteurs ou publiez votre propre offre produit.",
       "asideNote": "Ajoutez des produits et répondez aux demandes d'achat. Le profil de ferme est facultatif et aide les acheteurs à en savoir plus sur vous.",
-      "asideRegister": "Créer un compte vendeur",
+      "asideRegister": "Créer un compte",
       "paths": {
         "requests": {
           "title": "Demandes d'achat ouvertes",

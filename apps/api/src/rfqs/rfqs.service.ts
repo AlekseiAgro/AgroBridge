@@ -184,11 +184,11 @@ export class RfqsService {
     const rfq = await this.requireSellerOwnedRfq(user, id);
 
     if (rfq.status !== PrismaRfqStatus.pending && rfq.status !== PrismaRfqStatus.offered) {
-      throw new BadRequestException('Offers can only be sent for pending or offered requests');
+      throw new BadRequestException('Quotes can only be sent for pending or offered requests');
     }
 
     if (rfq.offer) {
-      throw new BadRequestException('An offer already exists for this request');
+      throw new BadRequestException('A quote already exists for this request');
     }
 
     const price = new Prisma.Decimal(dto.priceAmount);
@@ -256,7 +256,7 @@ export class RfqsService {
 
     if (isBuyer) {
       if (rfq.status !== PrismaRfqStatus.offered) {
-        throw new BadRequestException('Buyers can decline only after an offer is received');
+        throw new BadRequestException('Buyers can decline only after a quote is received');
       }
     } else if (isSellerOwner) {
       if (rfq.status !== PrismaRfqStatus.pending && rfq.status !== PrismaRfqStatus.offered) {

@@ -405,13 +405,13 @@ export class ChatService {
         include: { product: { select: { ownerUserId: true } } },
       });
       if (!rfq) {
-        throw new NotFoundException('RFQ not found');
+        throw new NotFoundException('Quote request not found');
       }
 
       const isBuyer = rfq.buyerId === user.id;
       const isFarmer = rfq.product.ownerUserId === user.id;
       if (!isBuyer && !isFarmer && user.role !== 'admin') {
-        throw new ForbiddenException('Not allowed to open chat for this RFQ');
+        throw new ForbiddenException('Not allowed to open chat for this quote request');
       }
 
       return { farmerId: rfq.product.ownerUserId, buyerId: rfq.buyerId };

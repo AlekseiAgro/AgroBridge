@@ -21,7 +21,7 @@
   },
   "auth": {
     "loginTitle": "Bienvenido de nuevo",
-    "loginSubtitle": "Inicia sesión como agricultor o comprador.",
+    "loginSubtitle": "Inicia sesión en tu cuenta de AgroBridge.",
     "registerTitle": "Únete a AgroBridge",
     "registerSubtitle": "Crea una cuenta para publicar productos o encontrar proveedores.",
     "email": "Correo electrónico",
@@ -95,8 +95,8 @@
     "account": "Cuenta",
     "login": "Iniciar sesión",
     "register": "Registrarse",
-    "inbox": "Solicitudes entrantes",
-    "myRequests": "Mis solicitudes",
+    "inbox": "Solicitudes de cotización entrantes",
+    "myRequests": "Mis solicitudes de cotización",
     "chat": "Chat",
     "admin": "Admin",
     "language": "Idioma",
@@ -107,7 +107,7 @@
     "forSellers": "Soy vendedor",
     "subscriptions": "Alertas",
     "chatUnread": "Chat, {count} sin leer",
-    "inboxUnread": "Solicitudes entrantes, {count} pendientes",
+    "inboxUnread": "Solicitudes de cotización entrantes, {count} pendientes",
     "notifications": "Avisos",
     "notificationsUnread": "Avisos, {count} sin leer",
     "purchaseRequestsUnread": "Mis solicitudes de compra, {count} sin leer",
@@ -589,22 +589,22 @@
   },
   "rfq": {
     "requestTitle": "Solicitar cotización",
-    "requestSubtitle": "Indica lo que necesitas: la granja responderá con una oferta.",
+    "requestSubtitle": "Indica lo que necesitas: la granja responderá con una cotización.",
     "quantity": "Cantidad",
     "unit": "Unidad",
     "message": "Mensaje",
     "messagePlaceholder": "Plazos, calidad, embalaje…",
-    "submitRequest": "Enviar solicitud",
+    "submitRequest": "Solicitar cotización",
     "pleaseWait": "Espera…",
     "genericError": "Algo salió mal. Inténtalo de nuevo.",
-    "loginToRequest": "Inicia sesión como comprador para solicitar una cotización",
-    "mineTitle": "Mis solicitudes",
-    "mineSubtitle": "Sigue las solicitudes enviadas a granjas.",
-    "mineEmpty": "Aún no has enviado solicitudes.",
+    "loginToRequest": "Inicia sesión para solicitar una cotización",
+    "mineTitle": "Mis solicitudes de cotización",
+    "mineSubtitle": "Solicitudes de cotización de productos concretos del catálogo.",
+    "mineEmpty": "Aún no has enviado solicitudes de cotización.",
     "browseCatalog": "Ver catálogo",
-    "inboxTitle": "Solicitudes entrantes",
+    "inboxTitle": "Solicitudes de cotización entrantes",
     "inboxSubtitle": "Responde a compradores interesados en tus productos.",
-    "inboxEmpty": "Aún no hay solicitudes.",
+    "inboxEmpty": "Aún no hay solicitudes de cotización.",
     "offerTitle": "Enviar tu oferta",
     "price": "Precio",
     "currency": "Moneda",
@@ -781,7 +781,7 @@
       "buyer": "Comprador",
       "seller": "Vendedor",
       "kinds": {
-        "rfq": "RFQ de producto",
+        "rfq": "Solicitud de cotización de producto",
         "purchase_request": "Solicitud de compra"
       },
       "tabs": {
@@ -1024,7 +1024,7 @@
     "floatingText": "Publique su oferta de producto y llegue a compradores interesados.",
     "floatingCta": "Publicar mi producto",
     "buyerOnly": "Inicia sesión para publicar una solicitud de compra. Cualquier cuenta de AgroBridge puede comprar y vender.",
-    "registerAsBuyer": "Registrarse como comprador"
+    "registerAsBuyer": "Crear una cuenta"
   },
   "roleHubs": {
     "buyers": {
@@ -1032,7 +1032,7 @@
       "title": "Soy comprador",
       "lead": "Explore ofertas de fincas georgianas o publique su solicitud de compra.",
       "asideNote": "Inicie sesión para publicar una solicitud o escribir a las fincas.",
-      "asideRegister": "Crear cuenta de comprador",
+      "asideRegister": "Crear una cuenta",
       "asideMine": "Mis solicitudes de compra",
       "paths": {
         "catalog": {
@@ -1052,7 +1052,7 @@
       "title": "Soy vendedor",
       "lead": "Responda a la demanda de compradores o publique su propia oferta de producto.",
       "asideNote": "Publica productos y responde a solicitudes de compra. El perfil de finca es opcional y ayuda a los compradores a conocerte mejor.",
-      "asideRegister": "Crear cuenta de vendedor",
+      "asideRegister": "Crear una cuenta",
       "paths": {
         "requests": {
           "title": "Solicitudes de compra abiertas",
