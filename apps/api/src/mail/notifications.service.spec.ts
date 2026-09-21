@@ -466,6 +466,73 @@ describe('NotificationsService', () => {
       expect(mail.send.mock.calls[0][0].text).toContain('http://localhost:3000/ru/requests/r1');
       expect(mail.send.mock.calls[0][0].text).not.toContain('/dashboard/quotes');
     });
+
+    it('mails the buyer once when a seller withdraws a quote, in en, ru and de', async () => {
+      const subjects = {
+        en: 'Quote withdrawn: Blueberries',
+        ru: 'Предложение отозвано: «Blueberries»',
+        de: 'Angebot zurückgezogen: Blueberries',
+      } as const;
+
+      for (const locale of ['en', 'ru', 'de'] as const) {
+        mail.send.mockClear();
+        userNotification.create.mockClear();
+        await service.notifyPurchaseQuoteWithdrawn({
+          buyer: {
+            id: 'b1',
+            email: 'buyer@example.com',
+            locale,
+            displayName: 'Buyer Ltd',
+          },
+          farmName: 'Kakheti Farm',
+          title: 'Blueberries',
+          requestId: 'r1',
+        });
+
+        expect(userNotification.create).toHaveBeenCalledTimes(1);
+        expect(userNotification.create.mock.calls[0][0].data).toEqual(
+          expect.objectContaining({
+            userId: 'b1',
+            type: 'purchaseQuoteWithdrawn',
+            href: '/requests/r1',
+          }),
+        );
+        expect(mail.send).toHaveBeenCalledTimes(1);
+        const sent = mail.send.mock.calls[0][0];
+        expect(sent.to).toBe('buyer@example.com');
+        expect(sent.subject).toBe(subjects[locale]);
+        expect(sent.text).toContain('Kakheti Farm');
+        expect(sent.text).toContain(`http://localhost:3000/${locale}/requests/r1`);
+        expect(sent.text).not.toContain('/dashboard/quotes');
+        expect(sent.text).not.toContain('did not select');
+        expect(sent.text).not.toContain('closed the purchase request');
+      }
+    });
+
+    it('leaves Product RFQ emails on inbox/rfq destinations', async () => {
+      await service.notifyRfqCreated({
+        farmer: { email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
+        buyerName: 'Buyer Ltd',
+        productTitle: 'Hazelnuts',
+        quantity: '1',
+        unit: 't',
+        rfqId: 'rfq1',
+      });
+      expect(mail.send.mock.calls[0][0].text).toContain(
+        'http://localhost:3000/en/dashboard/inbox/rfq1',
+      );
+      expect(mail.send.mock.calls[0][0].text).not.toContain('/requests/');
+
+      mail.send.mockClear();
+      await service.notifyRfqCancelled({
+        farmer: { email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
+        buyerName: 'Buyer Ltd',
+        productTitle: 'Hazelnuts',
+      });
+      expect(mail.send.mock.calls[0][0].text).toContain(
+        'http://localhost:3000/en/dashboard/inbox',
+      );
+    });
   });
 
   describe('purchase request lifecycle in-app notifications', () => {
@@ -587,7 +654,7 @@ describe('NotificationsService', () => {
       expect(closed.title).not.toBe(cancelled.title);
     });
 
-    it('notifies only the buyer when a quote is withdrawn and sends no email', async () => {
+    it('notifies only the buyer when a quote is withdrawn and emails the same request', async () => {
       await service.notifyPurchaseQuoteWithdrawn({
         buyer: { id: 'b1', email: 'buyer@secret.test', locale: 'en', displayName: 'Buyer Ltd' },
         farmName: 'Kakheti Farm',
@@ -603,7 +670,14 @@ describe('NotificationsService', () => {
         body: 'Kakheti Farm withdrew a quote from your purchase request “Blueberries”.',
         href: '/requests/r1',
       });
-      expect(mail.send).not.toHaveBeenCalled();
+      expect(mail.send).toHaveBeenCalledTimes(1);
+      expect(mail.send.mock.calls[0][0].to).toBe('buyer@secret.test');
+      expect(mail.send.mock.calls[0][0].subject).toBe('Quote withdrawn: Blueberries');
+      expect(mail.send.mock.calls[0][0].text).toContain(
+        'http://localhost:3000/en/requests/r1',
+      );
+      expect(mail.send.mock.calls[0][0].text).not.toContain('/dashboard/quotes');
+      expect(mail.send.mock.calls[0][0].text).not.toMatch(/\/requests(?!\/r1)/);
     });
 
     it('lists only the current user\'s notifications', async () => {

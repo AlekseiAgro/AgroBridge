@@ -415,6 +415,7 @@ export class NotificationsService {
     requestId: string;
   }): Promise<void> {
     const locale = this.localeOf(params.buyer.locale);
+    const href = `/requests/${params.requestId}`;
     const copy = this.purchaseQuoteWithdrawnCopy(locale, params.farmName, params.title);
     await this.createUserNotification({
       userId: params.buyer.id,
@@ -422,7 +423,13 @@ export class NotificationsService {
       productId: null,
       title: copy.title,
       body: copy.body,
-      href: `/requests/${params.requestId}`,
+      href,
+    });
+    await this.sendTemplate(params.buyer, 'purchaseQuoteWithdrawn', {
+      name: this.displayName(params.buyer),
+      farmName: params.farmName,
+      title: params.title,
+      link: this.appLink(locale, href),
     });
   }
 
