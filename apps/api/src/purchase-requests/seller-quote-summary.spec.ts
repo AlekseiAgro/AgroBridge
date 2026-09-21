@@ -120,7 +120,27 @@ describe('seller quote summary on purchase request detail', () => {
     const detail = readWeb('app/[locale]/requests/[id]/page.tsx');
     expect(detail).toContain('SellerQuoteSummary');
     expect(detail).toContain('canMessageBuyer={request.canMessageBuyer}');
-    expect(detail).toContain('canMessageBuyer && !request.myQuote');
+    expect(detail).not.toContain('canMessageBuyer && !request.myQuote');
+    expect(detail).not.toMatch(
+      /OpenChatButton[\s\S]*purchaseRequestId=\{request\.id\}[\s\S]*label=\{t\('messageBuyer'\)\}/,
+    );
+  });
+
+  it('hides message-buyer unless the viewer already has a quote or is the request owner', () => {
+    const detail = readWeb('app/[locale]/requests/[id]/page.tsx');
+    const sellerSummary = readWeb('components/SellerQuoteSummary.tsx');
+
+    expect(detail).toContain('{request.canCancel || request.canClose || !user ? (');
+    expect(detail).toContain("{request.myQuote ? (");
+    expect(detail).toContain('canMessageBuyer={request.canMessageBuyer}');
+    expect(sellerSummary).toContain("label={t('messageBuyer')}");
+    expect(sellerSummary).toContain('purchaseRequestId={requestId}');
+
+    expect(detail).toContain('user?.id === request.buyer.id');
+    expect(detail).toContain("label={t('messageFarmer')}");
+    expect(detail).toContain('farmerId={quote.farm.ownerId}');
+    expect(detail).not.toContain("user.role === 'farmer'");
+    expect(detail).not.toContain("user.role === 'buyer'");
   });
 
   it('renders existing quote statuses with harvest-badge language', () => {
@@ -193,5 +213,12 @@ describe('seller quote summary on purchase request detail', () => {
     expect(shared).toContain("'pending', 'accepted', 'declined', 'withdrawn'");
     expect(shared).toContain('canWithdraw: boolean');
     expect(shared).toContain('canMessageBuyer: boolean');
+
+    const chat = readFileSync(
+      join(__dirname, '../chat/chat.service.ts'),
+      'utf8',
+    );
+    expect(chat).toContain('sellerQuoted(sellerId) && (requestOpen || sellerWon(sellerId) || isAdmin)');
+    expect(chat).toContain("throw new ForbiddenException('Not allowed to open chat for this purchase request')");
   });
 });

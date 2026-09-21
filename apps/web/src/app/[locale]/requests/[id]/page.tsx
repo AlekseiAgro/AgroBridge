@@ -112,19 +112,13 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
           ) : null}
         </dl>
 
-        {request.canCancel ||
-        request.canClose ||
-        (request.canMessageBuyer && !request.myQuote) ||
-        !user ? (
+        {request.canCancel || request.canClose || !user ? (
           <div className="home__actions" style={{ marginTop: '1.25rem' }}>
             {request.canCancel ? (
               <PurchaseRequestActionButton requestId={request.id} action="cancel" />
             ) : null}
             {request.canClose ? (
               <PurchaseRequestActionButton requestId={request.id} action="close" />
-            ) : null}
-            {request.canMessageBuyer && !request.myQuote ? (
-              <OpenChatButton purchaseRequestId={request.id} label={t('messageBuyer')} />
             ) : null}
             {!user ? (
               <Link href="/login" className="button button--primary">
