@@ -33,6 +33,7 @@ export type EmailTemplateKey =
   | 'purchaseQuoteReceived'
   | 'purchaseQuoteAccepted'
   | 'purchaseQuoteDeclined'
+  | 'purchaseQuoteWithdrawn'
   | 'purchaseRequestClosed'
   | 'purchaseRequestCancelled'
   | 'verificationCode'

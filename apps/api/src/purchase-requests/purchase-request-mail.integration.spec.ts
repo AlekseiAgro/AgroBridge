@@ -289,7 +289,7 @@ describeWithDatabase()('purchase request mail dispatch (database)', () => {
     expect(mail.send).not.toHaveBeenCalled();
   });
 
-  it('does not mail the buyer when a supplier withdraws a quote', async () => {
+  it('emails the buyer once when a supplier withdraws a quote', async () => {
     const buyer = await createTrader('buyer');
     const supplier = await createSupplier();
     const created = await service.create(buyer, {
@@ -305,7 +305,11 @@ describeWithDatabase()('purchase request mail dispatch (database)', () => {
 
     await service.withdrawQuote(supplier.user, created.id, quote.id);
 
-    expect(mail.send).not.toHaveBeenCalled();
+    expect(mail.send).toHaveBeenCalledTimes(1);
+    expect(mail.send.mock.calls[0][0].to).toBe(buyer.email);
+    expect(mail.send.mock.calls[0][0].subject).toBe('Quote withdrawn: Blueberries');
+    expect(mail.send.mock.calls[0][0].text).toContain(`/en/requests/${created.id}`);
+    expect(mail.send.mock.calls[0][0].text).not.toContain('/dashboard/quotes');
     expect(await prisma.purchaseQuote.findUniqueOrThrow({ where: { id: quote.id } })).toMatchObject(
       { status: 'withdrawn' },
     );

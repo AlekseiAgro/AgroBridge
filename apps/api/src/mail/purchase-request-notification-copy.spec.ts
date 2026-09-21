@@ -3,6 +3,7 @@ import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
 import { NotificationsService } from './notifications.service';
 import type { MailService } from './mail.service';
+import { renderEmailTemplate } from './email-templates';
 
 const SERVICE_SOURCE = readFileSync(join(__dirname, 'notifications.service.ts'), 'utf8');
 const EMAIL_TEMPLATES_SOURCE = readFileSync(join(__dirname, 'email-templates.ts'), 'utf8');
@@ -98,6 +99,12 @@ describe('purchase request notification copy', () => {
       title: 'Голубика',
       reason: 'closed',
     });
+    await service.notifyPurchaseQuoteWithdrawn({
+      buyer: { id: 'b2', email: 'buyer@example.com', locale: 'ru', displayName: 'Buyer Ltd' },
+      farmName: 'Kakheti Farm',
+      title: 'Голубика',
+      requestId: 'r1',
+    });
 
     const bodies = userNotification.create.mock.calls
       .map((call) => `${call[0].data.title} ${call[0].data.body}`)
@@ -135,5 +142,29 @@ describe('purchase request notification copy', () => {
     expect(SERVICE_SOURCE).not.toMatch(
       /notifyPurchaseRequestWithdrawn[\s\S]*?link: this\.appLink\(locale, '\/requests'\)/,
     );
+  });
+
+  it('renders the withdrawn-quote email onto the same request destination as in-app', () => {
+    expect(EMAIL_TEMPLATES_SOURCE.match(/purchaseQuoteWithdrawn: \{/g)?.length).toBe(7);
+    expect(EMAIL_TEMPLATES_SOURCE).toContain('View request: {{link}}');
+    expect(EMAIL_TEMPLATES_SOURCE).toContain('{{farmName}} withdrew a quote from your purchase request');
+    expect(SERVICE_SOURCE).toMatch(
+      /async notifyPurchaseQuoteWithdrawn[\s\S]*?const href = `\/requests\/\$\{params\.requestId\}`;[\s\S]*?link: this\.appLink\(locale, href\)/,
+    );
+
+    for (const locale of ['en', 'ru', 'de'] as const) {
+      const rendered = renderEmailTemplate(locale, 'purchaseQuoteWithdrawn', {
+        name: 'Buyer Ltd',
+        farmName: 'Kakheti Farm',
+        title: 'Blueberries',
+        link: `http://localhost:3000/${locale}/requests/r1`,
+      });
+      expect(rendered.subject).toContain('Blueberries');
+      expect(rendered.subject).not.toContain('{{');
+      expect(rendered.text).not.toContain('{{');
+      expect(rendered.text).toContain(`http://localhost:3000/${locale}/requests/r1`);
+      expect(rendered.text).toContain('Kakheti Farm');
+      expect(rendered.text).not.toContain('/dashboard/quotes');
+    }
   });
 });
