@@ -30,9 +30,7 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
   let items: PurchaseRequestSummary[] = [];
   let loadError: string | null = null;
   try {
-    const path = query.toString()
-      ? `/purchase-requests?${query.toString()}`
-      : '/purchase-requests';
+    const path = query.toString() ? `/purchase-requests?${query.toString()}` : '/purchase-requests';
     items = await apiRequest<PurchaseRequestSummary[]>(path, { token });
   } catch {
     loadError = t('loadError');
@@ -41,38 +39,34 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
   const canCreate = Boolean(user);
 
   return (
-    <>
-      <main className="page__main">
-        <p className="eyebrow">
-          <Link href="/sellers">{tn('forSellers')}</Link>
-          {' · '}
-          <Link href="/buyers">{tn('forBuyers')}</Link>
-        </p>
-        <div className="page__heading-row">
-          <div>
-            <h1>{t('boardTitle')}</h1>
-            <p className="page__subtitle">{t('boardSubtitle')}</p>
-          </div>
-          {canCreate ? (
-            <Link href="/requests/new" className="button button--primary">
-              {t('createCta')}
-            </Link>
-          ) : !user ? (
-            <Link href="/login" className="button button--primary">
-              {t('loginToCreate')}
-            </Link>
-          ) : null}
+    <main className="page__main">
+      <p className="eyebrow">
+        <Link href="/sellers">{tn('forSellers')}</Link>
+        {' · '}
+        <Link href="/buyers">{tn('forBuyers')}</Link>
+      </p>
+      <div className="page__heading-row">
+        <div>
+          <h1>{t('boardTitle')}</h1>
+          <p className="page__subtitle">{t('boardSubtitle')}</p>
         </div>
-
-        <PurchaseRequestFilters initialQ={filters.q} initialCategory={filters.category} />
-
-        {loadError ? <p className="form-error">{loadError}</p> : null}
-
-        {!loadError ? (
-          <PurchaseRequestList items={items} emptyLabel={t('boardEmpty')} />
+        {canCreate ? (
+          <Link href="/requests/new" className="button button--primary">
+            {t('createCta')}
+          </Link>
+        ) : !user ? (
+          <Link href="/login" className="button button--primary">
+            {t('loginToCreate')}
+          </Link>
         ) : null}
-      </main>
+      </div>
+
       <RequestsSellCta />
-    </>
+      <PurchaseRequestFilters initialQ={filters.q} initialCategory={filters.category} />
+
+      {loadError ? <p className="form-error">{loadError}</p> : null}
+
+      {!loadError ? <PurchaseRequestList items={items} emptyLabel={t('boardEmpty')} /> : null}
+    </main>
   );
 }
