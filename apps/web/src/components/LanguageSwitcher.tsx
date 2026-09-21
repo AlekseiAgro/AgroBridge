@@ -1,8 +1,11 @@
 'use client';
 
-import { LOCALE_LABELS, type Locale } from '@agrobridge/shared';
+import { LOCALE_LABELS, isLocale, type Locale } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Link, usePathname } from '@/i18n/navigation';
+import { localeSwitchHref } from '@/lib/locale-switch-href';
 import { routing } from '@/i18n/routing';
 
 function GlobeIcon() {
@@ -34,25 +37,34 @@ function GlobeIcon() {
   );
 }
 
-export function LanguageSwitcher() {
+function LanguageSwitcherMenu({ search }: { search: string }) {
   const t = useTranslations('nav');
   const locale = useLocale();
   const pathname = usePathname() || '/';
+  const href = localeSwitchHref(pathname, search);
+  const currentLabel = isLocale(locale) ? LOCALE_LABELS[locale] : locale.toUpperCase();
 
   return (
     <details className="language-switcher">
-      <summary className="language-switcher__button" aria-label={t('language')}>
+      <summary
+        className="language-switcher__button"
+        aria-label={`${t('language')}: ${currentLabel}`}
+        aria-haspopup="menu"
+      >
         <GlobeIcon />
+        <span className="language-switcher__code">{locale.toUpperCase()}</span>
       </summary>
-      <ul className="language-switcher__menu" role="listbox" aria-label={t('language')}>
+      <ul className="language-switcher__menu" role="menu" aria-label={t('language')}>
         {routing.locales.map((code) => {
           const active = code === locale;
           return (
-            <li key={code} role="option" aria-selected={active}>
+            <li key={code}>
               <Link
-                href={pathname}
+                href={href}
                 locale={code as Locale}
                 hrefLang={code}
+                role="menuitem"
+                aria-current={active ? 'true' : undefined}
                 className={
                   active
                     ? 'language-switcher__option language-switcher__option--active'
@@ -66,5 +78,19 @@ export function LanguageSwitcher() {
         })}
       </ul>
     </details>
+  );
+}
+
+function LanguageSwitcherWithSearch() {
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
+  return <LanguageSwitcherMenu search={search ? `?${search}` : ''} />;
+}
+
+export function LanguageSwitcher() {
+  return (
+    <Suspense fallback={<LanguageSwitcherMenu search="" />}>
+      <LanguageSwitcherWithSearch />
+    </Suspense>
   );
 }
