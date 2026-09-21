@@ -181,6 +181,8 @@
       "other": "Farm landscape"
     },
     "categoryFallbackAlt": "Category illustration: {category}",
+    "noProductPhoto": "No product photo",
+    "noProductPhotoAlt": "No product photo available",
     "allRegions": "All regions",
     "optional": "(optional)",
     "searchPlaceholder": "Product name or description",

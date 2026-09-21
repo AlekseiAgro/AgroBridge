@@ -55,6 +55,8 @@ function messages(locale: string) {
       categories: Record<string, string>;
       categoryAlts: Record<string, string>;
       categoryFallbackAlt: string;
+      noProductPhoto: string;
+      noProductPhotoAlt: string;
     };
   };
 }
@@ -123,42 +125,36 @@ describe('category media mapping', () => {
 });
 
 describe('product image precedence and honest fallback alt', () => {
-  it('prefers an uploaded product photo over the category still', () => {
+  it('prefers an uploaded product photo and never uses a category still', () => {
     const image = getProductCardImage({
       category: 'honey',
       images: [{ id: 'img1', url: '/api/uploads/products/p1/a.jpg', sortOrder: 0, isPrimary: true, kind: 'overview' }],
     });
-    expect(image).toEqual({ url: '/api/uploads/products/p1/a.jpg', fromCategory: false });
+    expect(image).toEqual({ url: '/api/uploads/products/p1/a.jpg' });
   });
 
-  it('falls back to the matching category still when no product photo exists', () => {
-    expect(getProductCardImage({ category: 'honey', images: [] })).toEqual({
-      url: '/images/categories/honey.jpg',
-      fromCategory: true,
-    });
-    expect(getProductCardImage({ category: 'unknown-group' })).toEqual({
-      url: '/images/categories/other.jpg',
-      fromCategory: true,
-    });
+  it('does not fall back to a category still when no product photo exists', () => {
+    expect(getProductCardImage({ category: 'honey', images: [] })).toBeNull();
+    expect(getProductCardImage({ category: 'organic', images: [] })).toBeNull();
+    expect(getProductCardImage({ category: 'unknown-group' })).toBeNull();
   });
 
-  it('does not describe a category fallback as the seller product photograph', () => {
+  it('describes a missing photo as absent, not as a category illustration', () => {
     const fallbackAlt = formatCategoryFallbackAlt('honey', (key, values) => {
       if (key === 'categories.honey') return 'Honey';
       if (key === 'categoryFallbackAlt') return `Category illustration: ${values?.category}`;
       return key;
     });
     expect(fallbackAlt).toBe('Category illustration: Honey');
-    expect(fallbackAlt.toLowerCase()).not.toContain('seller');
     expect(getProductCardImageAlt({
-      fromCategory: true,
+      hasProductPhoto: false,
       productTitle: 'Acacia honey 500g',
-      categoryFallbackAlt: fallbackAlt,
-    })).toBe('Category illustration: Honey');
+      noPhotoAlt: 'No product photo available',
+    })).toBe('No product photo available');
     expect(getProductCardImageAlt({
-      fromCategory: false,
+      hasProductPhoto: true,
       productTitle: 'Acacia honey 500g',
-      categoryFallbackAlt: fallbackAlt,
+      noPhotoAlt: 'No product photo available',
     })).toBe('Acacia honey 500g');
   });
 });
@@ -168,13 +164,20 @@ describe('category localization and catalog surfaces', () => {
     for (const locale of LOCALES) {
       const catalog = messages(locale).catalog;
       expect(catalog.categoryFallbackAlt).toContain('{category}');
+      expect(catalog.noProductPhoto.trim().length).toBeGreaterThan(0);
+      expect(catalog.noProductPhotoAlt.trim().length).toBeGreaterThan(0);
+      expect(catalog.noProductPhotoAlt.toLowerCase()).not.toContain('category');
       for (const key of CATEGORY_KEYS) {
         expect(catalog.categories[key].trim().length).toBeGreaterThan(0);
         expect(catalog.categoryAlts[key].trim().length).toBeGreaterThan(0);
       }
       if (locale !== 'ru') {
-        const blob = `${Object.values(catalog.categories).join(' ')} ${Object.values(catalog.categoryAlts).join(' ')} ${catalog.categoryFallbackAlt}`;
+        const blob = `${Object.values(catalog.categories).join(' ')} ${Object.values(catalog.categoryAlts).join(' ')} ${catalog.categoryFallbackAlt} ${catalog.noProductPhoto} ${catalog.noProductPhotoAlt}`;
         expect(blob).not.toMatch(/[А-Яа-яЁё]/);
+      }
+      if (locale !== 'en') {
+        expect(catalog.noProductPhoto).not.toBe('No product photo');
+        expect(catalog.noProductPhotoAlt).not.toBe('No product photo available');
       }
     }
   });
@@ -189,13 +192,18 @@ describe('category localization and catalog surfaces', () => {
     expect(showcase).toContain('categoryAlts.${category}');
     expect(showcase).not.toMatch(/alt=""/);
     expect(catalog).toContain('getProductCardImageAlt');
-    expect(catalog).toContain('formatCategoryFallbackAlt');
+    expect(catalog).toContain('ProductPhotoPlaceholder');
+    expect(catalog).toContain('noProductPhotoAlt');
+    expect(catalog).not.toContain('formatCategoryFallbackAlt');
     expect(catalog).not.toMatch(/alt=""/);
     expect(farm).toContain('getProductCardImageAlt');
+    expect(farm).toContain('ProductPhotoPlaceholder');
     expect(dashboard).toContain('getProductCardImageAlt');
-    expect(detail).toContain('getProductCardImageAlt');
-    expect(detail).toContain('formatCategoryFallbackAlt');
-    expect(detail).toMatch(/product\.images\.map[\s\S]*alt=\{formatProductTitle\(product\.title, locale\)\}/);
+    expect(dashboard).toContain('ProductPhotoPlaceholder');
+    expect(detail).toContain('getRenderableProductImages');
+    expect(detail).toContain('ProductPhotoPlaceholder');
+    expect(detail).not.toContain('formatCategoryFallbackAlt');
+    expect(detail).toMatch(/galleryImages\.map[\s\S]*alt=\{formatProductTitle\(product\.title, locale\)\}/);
   });
 
   it('does not weaken public product visibility rules', () => {

@@ -4,11 +4,8 @@ import { CertificateBadges } from '@/components/CertificateBadges';
 import { DeleteProductButton } from '@/components/DeleteProductButton';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { Link, redirect } from '@/i18n/navigation';
-import {
-  formatCategoryFallbackAlt,
-  getProductCardImage,
-  getProductCardImageAlt,
-} from '@/lib/product-image';
+import { ProductPhotoPlaceholder } from '@/components/ProductPhotoPlaceholder';
+import { getProductCardImage, getProductCardImageAlt } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductTitle } from '@/lib/product-title';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -68,13 +65,11 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
         <ul className="product-list">
           {products.map((product) => {
             const image = getProductCardImage(product);
-            const imageAlt = image
-              ? getProductCardImageAlt({
-                  fromCategory: image.fromCategory,
-                  productTitle: formatProductTitle(product.title, locale),
-                  categoryFallbackAlt: formatCategoryFallbackAlt(product.category, tc),
-                })
-              : '';
+            const imageAlt = getProductCardImageAlt({
+              hasProductPhoto: Boolean(image),
+              productTitle: formatProductTitle(product.title, locale),
+              noPhotoAlt: tc('noProductPhotoAlt'),
+            });
             const quantity = formatProductQuantityRange(
               product,
               product.unit ? t(`units.${product.unit as 'kg'}`) : null,
@@ -90,9 +85,10 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
                       className="product-list__media product-list__media--sm"
                     />
                   ) : (
-                    <div
-                      className="product-list__media product-list__media--sm product-list__media--empty"
-                      aria-hidden
+                    <ProductPhotoPlaceholder
+                      label={tc('noProductPhoto')}
+                      alt={imageAlt}
+                      className="product-list__media product-list__media--sm"
                     />
                   )}
                   <div>

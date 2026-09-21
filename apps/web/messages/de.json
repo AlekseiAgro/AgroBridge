@@ -181,6 +181,8 @@
       "other": "Bauernhofflandschaft"
     },
     "categoryFallbackAlt": "Kategorieillustration: {category}",
+    "noProductPhoto": "Kein Produktfoto",
+    "noProductPhotoAlt": "Kein Produktfoto vorhanden",
     "allRegions": "Alle Regionen",
     "optional": "(optional)",
     "searchPlaceholder": "Produktname oder Beschreibung",
