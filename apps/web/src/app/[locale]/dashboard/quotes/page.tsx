@@ -19,7 +19,6 @@ export default async function MyQuotesPage({ params }: Props) {
   if (!user) redirect({ href: '/login', locale });
 
   const t = await getTranslations('purchaseRequests');
-  const tn = await getTranslations('nav');
   let items: PurchaseQuoteMineItem[] = [];
   let loadError: string | null = null;
   try {
@@ -55,14 +54,9 @@ export default async function MyQuotesPage({ params }: Props) {
               title={t('myQuotesEmptyTitle')}
               body={t('myQuotesEmpty')}
               actions={
-                <>
-                  <Link href="/requests" className="button button--primary">
-                    {t('boardTitle')}
-                  </Link>
-                  <Link href="/catalog" className="button button--ghost">
-                    {tn('catalog')}
-                  </Link>
-                </>
+                <Link href="/requests" className="button button--primary">
+                  {t('boardTitle')}
+                </Link>
               }
             />
           }
