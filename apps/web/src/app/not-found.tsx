@@ -4,16 +4,18 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { NotFoundPanel } from '@/components/NotFoundPanel';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
+import { resolveRequestLocale } from '@/lib/request-locale';
 import './globals.css';
 
 export default async function RootNotFound() {
-  setRequestLocale(DEFAULT_LOCALE);
+  const locale = await resolveRequestLocale(DEFAULT_LOCALE);
+  setRequestLocale(locale);
   const messages = await getMessages();
 
   return (
-    <html lang={DEFAULT_LOCALE}>
+    <html lang={locale}>
       <body>
-        <NextIntlClientProvider locale={DEFAULT_LOCALE} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <div className="page">
             <SiteHeader />
             <main className="page__main">

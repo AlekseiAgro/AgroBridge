@@ -59,7 +59,9 @@ describe('branded 404 and empty states', () => {
     expect(locale404).toContain('NotFoundPanel');
     expect(locale404).not.toContain('href="/buyers"');
     expect(root404).toContain('NotFoundPanel');
+    expect(root404).toContain('resolveRequestLocale');
     expect(root404).toContain('DEFAULT_LOCALE');
+    expect(catchAll).toContain('setRequestLocale');
     expect(catchAll).toContain('notFound()');
     expect(catalog404).toContain('NotFoundPanel');
     expect(catalog404).not.toContain('SiteHeader');
