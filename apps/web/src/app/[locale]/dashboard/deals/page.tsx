@@ -2,20 +2,26 @@ import type { RfqSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CompletedDealsList } from '@/components/CompletedDealsList';
 import { Link } from '@/i18n/navigation';
+import { filterRfqsForCabinet } from '@/lib/rfq-cabinet-filters';
 import { requireVerifiedUser } from '@/lib/require-verified-user';
 import { apiRequestAuthed } from '@/lib/server-api';
 
 type Props = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ needsRating?: string }>;
 };
 
-export default async function CompletedDealsPage({ params }: Props) {
+export default async function CompletedDealsPage({ params, searchParams }: Props) {
   const { locale } = await params;
+  const query = await searchParams;
   setRequestLocale(locale);
 
   const user = await requireVerifiedUser(locale, '/dashboard/deals');
   const t = await getTranslations('cabinet');
-  const items = await apiRequestAuthed<RfqSummary[]>('/rfqs/completed');
+  const items = filterRfqsForCabinet(
+    await apiRequestAuthed<RfqSummary[]>('/rfqs/completed'),
+    query,
+  );
 
   return (
     <main className="cabinet-page">

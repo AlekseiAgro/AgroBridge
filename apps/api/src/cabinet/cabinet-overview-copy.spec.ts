@@ -66,5 +66,9 @@ describe('cabinet marketplace overview copy and navigation', () => {
     expect(source).not.toContain("t('stats.openRequests')");
     expect(source).not.toContain('/dashboard/inbox?status=open');
     expect(source).not.toContain("user.role === 'farmer' ? `${dealsBase}?status=open`");
+    expect(source).toContain("href: '/dashboard/deals?needsRating=1'");
+    expect(source).not.toContain("user.role === 'farmer' ? '/dashboard/inbox'");
+    expect(source).not.toContain('/dashboard/inbox?needsRating=1');
+    expect(source).not.toContain('/dashboard/rfqs?needsRating=1');
   });
 });
