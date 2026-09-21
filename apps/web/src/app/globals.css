@@ -1897,70 +1897,58 @@ body {
 
 .product-list__actions {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.5rem;
   flex-shrink: 0;
-  min-width: 0;
-  align-items: center;
 }
 
-.quote-list {
+.seller-quote {
+  margin-top: 1.5rem;
   min-width: 0;
 }
 
-.quote-list__item {
-  align-items: flex-start;
+.seller-quote .section-title {
+  margin: 0 0 0.65rem;
+}
+
+.seller-quote__card {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.quote-list__item .product-list__item-body {
-  flex: 1 1 12rem;
-  min-width: 0;
-}
-
-.quote-list__header {
+.seller-quote__top {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 0.4rem 0.75rem;
+  gap: 0.35rem 0.85rem;
 }
 
-.quote-list__header .product-list__title {
-  min-width: 0;
-  overflow-wrap: anywhere;
+.seller-quote__price {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.25;
 }
 
-.quote-list__hint {
-  margin-top: 0.25rem;
+.seller-quote__hint {
+  margin-top: 0;
 }
 
-.quote-list__facts {
+.seller-quote__facts {
   display: flex;
   flex-wrap: wrap;
   gap: 0.2rem 0.85rem;
+  margin-top: 0;
 }
 
-.quote-list__price {
-  font-size: 1.2rem;
-  line-height: 1.3;
+.seller-quote__actions {
+  margin-top: 0.45rem;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
-.quote-list__price-label {
-  display: block;
-  margin-bottom: 0.1rem;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 650;
-  letter-spacing: 0.01em;
-}
-
-.quote-list__actions {
-  justify-content: flex-end;
-  max-width: 100%;
-}
-
-.quote-list__actions > div {
+.seller-quote__actions > div {
   min-width: 0;
 }
 
@@ -1991,29 +1979,18 @@ body {
   color: var(--muted);
 }
 
-@media (max-width: 768px) {
-  .quote-list__item.product-list__item--row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .quote-list__actions {
-    justify-content: flex-start;
+@media (max-width: 640px) {
+  .seller-quote__actions {
     width: 100%;
   }
 
-  .quote-list__actions > div:has(.button--primary) {
+  .seller-quote__actions > div:has(.button--primary) {
     flex: 1 1 100%;
   }
 
-  .quote-list__actions > div:has(.button--primary) .button,
-  .quote-list__actions .button--primary {
+  .seller-quote__actions > div:has(.button--primary) .button,
+  .seller-quote__actions .button--primary {
     width: 100%;
-  }
-
-  .quote-list__actions > a.button,
-  .quote-list__actions > div:not(:has(.button--primary)) {
-    flex: 0 1 auto;
   }
 }
 

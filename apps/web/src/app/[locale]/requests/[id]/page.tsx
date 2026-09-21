@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { OpenChatButton } from '@/components/OpenChatButton';
 import { PurchaseQuoteForm } from '@/components/PurchaseQuoteForm';
 import { PurchaseRequestActionButton } from '@/components/PurchaseRequestActionButton';
+import { SellerQuoteSummary } from '@/components/SellerQuoteSummary';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
@@ -111,22 +112,27 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
           ) : null}
         </dl>
 
-        <div className="home__actions" style={{ marginTop: '1.25rem' }}>
-          {request.canCancel ? (
-            <PurchaseRequestActionButton requestId={request.id} action="cancel" />
-          ) : null}
-          {request.canClose ? (
-            <PurchaseRequestActionButton requestId={request.id} action="close" />
-          ) : null}
-          {request.canMessageBuyer ? (
-            <OpenChatButton purchaseRequestId={request.id} label={t('messageBuyer')} />
-          ) : null}
-          {!user ? (
-            <Link href="/login" className="button button--primary">
-              {t('loginToRespond')}
-            </Link>
-          ) : null}
-        </div>
+        {request.canCancel ||
+        request.canClose ||
+        (request.canMessageBuyer && !request.myQuote) ||
+        !user ? (
+          <div className="home__actions" style={{ marginTop: '1.25rem' }}>
+            {request.canCancel ? (
+              <PurchaseRequestActionButton requestId={request.id} action="cancel" />
+            ) : null}
+            {request.canClose ? (
+              <PurchaseRequestActionButton requestId={request.id} action="close" />
+            ) : null}
+            {request.canMessageBuyer && !request.myQuote ? (
+              <OpenChatButton purchaseRequestId={request.id} label={t('messageBuyer')} />
+            ) : null}
+            {!user ? (
+              <Link href="/login" className="button button--primary">
+                {t('loginToRespond')}
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
 
         {request.canQuote ? (
           <div style={{ marginTop: '2rem' }}>
@@ -139,36 +145,11 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
         ) : null}
 
         {request.myQuote ? (
-          <section style={{ marginTop: '2rem' }}>
-            <h2 className="section-title">{t('yourQuote')}</h2>
-            <dl className="account-details">
-              <div>
-                <dt>{t('price')}</dt>
-                <dd>
-                  {request.myQuote.priceAmount} {request.myQuote.currency}
-                </dd>
-              </div>
-              <div>
-                <dt>{t('quoteStatus')}</dt>
-                <dd>{t(`quoteStatuses.${request.myQuote.status}`)}</dd>
-              </div>
-              {request.myQuote.message ? (
-                <div>
-                  <dt>{t('message')}</dt>
-                  <dd>{request.myQuote.message}</dd>
-                </div>
-              ) : null}
-            </dl>
-            {request.myQuote.canWithdraw ? (
-              <div style={{ marginTop: '1rem' }}>
-                <PurchaseRequestActionButton
-                  requestId={request.id}
-                  quoteId={request.myQuote.id}
-                  action="withdraw"
-                />
-              </div>
-            ) : null}
-          </section>
+          <SellerQuoteSummary
+            requestId={request.id}
+            quote={request.myQuote}
+            canMessageBuyer={request.canMessageBuyer}
+          />
         ) : null}
 
         {request.quotes.length > 0 && (user?.id === request.buyer.id || user?.role === 'admin') ? (

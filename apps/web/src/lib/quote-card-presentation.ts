@@ -1,25 +1,4 @@
-import type { PurchaseQuoteMineItem, PurchaseQuoteStatus } from '@agrobridge/shared';
-
-export type QuoteCardActions = {
-  showMessageBuyer: boolean;
-  showOpenRequest: boolean;
-  showWithdraw: boolean;
-};
-
-/**
- * Presentation-only: surface actions already allowed by the my-quotes payload.
- * Messaging follows `canOpenRequest`, which matches seller `canMessageBuyer`
- * (open request or accepted/winning quote) without a new API field.
- */
-export function quoteCardActions(
-  item: Pick<PurchaseQuoteMineItem, 'canOpenRequest' | 'canWithdraw'>,
-): QuoteCardActions {
-  return {
-    showMessageBuyer: item.canOpenRequest,
-    showOpenRequest: item.canOpenRequest,
-    showWithdraw: item.canWithdraw,
-  };
-}
+import type { PurchaseQuoteStatus } from '@agrobridge/shared';
 
 export function quoteStatusBadgeClass(status: PurchaseQuoteStatus): string {
   return `harvest-badge quote-status quote-status--${status}`;
@@ -36,4 +15,14 @@ export function formatQuoteQuantity(
 ): string | null {
   if (!amount) return null;
   return unitLabel ? `${amount} ${unitLabel}` : amount;
+}
+
+export function sellerQuoteActions(input: {
+  canMessageBuyer: boolean;
+  canWithdraw: boolean;
+}) {
+  return {
+    showMessageBuyer: input.canMessageBuyer,
+    showWithdraw: input.canWithdraw,
+  };
 }
