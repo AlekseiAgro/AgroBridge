@@ -1171,7 +1171,6 @@
     "title": "Notifiche",
     "subtitle": "Qui compaiono gli eventi importanti su richieste di acquisto, offerte e prodotti.",
     "empty": "Nessuna notifica al momento",
-    "emptyHint": "Qui compariranno gli eventi importanti su richieste di acquisto, offerte e prodotti.",
     "markAllRead": "Segna tutte come lette",
     "markRead": "Letto",
     "unread": "Non letta",

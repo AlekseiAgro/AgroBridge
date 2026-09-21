@@ -20,7 +20,7 @@ function loadMessages(locale: string) {
       title: string;
       subtitle: string;
       empty: string;
-      emptyHint: string;
+      emptyHint?: string;
       markAllRead: string;
       markRead: string;
     };
@@ -93,6 +93,44 @@ function notificationsFixture(css: string): string {
                 </div>
               </li>
             </ul>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function notificationsEmptyFixture(css: string): string {
+  return `<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>${css}</style>
+</head>
+<body>
+  <div class="cabinet">
+    <aside class="cabinet__sidebar">
+      <a class="cabinet__brand" href="/">AgroBridge</a>
+      <nav class="cabinet__nav">
+        <a href="/account">Account</a>
+        <a href="/dashboard/subscriptions">Subscriptions</a>
+        <a href="/account/settings">Settings</a>
+      </nav>
+    </aside>
+    <div class="cabinet__main">
+      <div class="cabinet__content">
+        <main class="cabinet-page">
+          <div class="page__heading-row">
+            <div>
+              <h1>Уведомления</h1>
+              <p class="page__subtitle">Здесь отображаются важные события, связанные с вашими запросами, предложениями и товарами.</p>
+            </div>
+          </div>
+          <div class="empty-state">
+            <p>Пока нет уведомлений</p>
           </div>
         </main>
       </div>
@@ -288,6 +326,10 @@ describe('dedicated Notification Center', () => {
 
     expect(page).toContain('UserNotificationsList');
     expect(page).toContain("copyNamespace=\"notifications\"");
+    expect(page).toContain("{t('subtitle')}");
+    expect(list).toContain("t('empty')");
+    expect(list).not.toContain('emptyHint');
+    expect(list).not.toContain('Здесь появятся важные события');
     expect(page).not.toContain('AlertSubscriptionForm');
     expect(page).not.toContain('HarvestWatchesList');
     expect(page).not.toContain('HarvestWatchButton');
@@ -327,7 +369,8 @@ describe('dedicated Notification Center', () => {
       expect(messages.notifications.title).toBe(expectedTitle[locale]);
       expect(messages.notifications.subtitle.trim().length).toBeGreaterThan(0);
       expect(messages.notifications.empty.trim().length).toBeGreaterThan(0);
-      expect(messages.notifications.emptyHint.trim().length).toBeGreaterThan(0);
+      expect(messages.notifications.emptyHint).toBeUndefined();
+      expect(JSON.stringify(messages.notifications)).not.toContain('emptyHint');
       expect(messages.notifications.markAllRead.trim().length).toBeGreaterThan(0);
       expect(messages.notifications.markRead.trim().length).toBeGreaterThan(0);
       expect(messages.notifications.title).not.toBe(messages.nav.inbox);
@@ -338,10 +381,19 @@ describe('dedicated Notification Center', () => {
 
     const ru = loadMessages('ru');
     expect(ru.notifications.empty).toBe('Пока нет уведомлений');
+    expect(ru.notifications.subtitle).toBe(
+      'Здесь отображаются важные события, связанные с вашими запросами, предложениями и товарами.',
+    );
+    expect(ru.notifications.subtitle).not.toBe(
+      'Здесь появятся важные события, связанные с вашими запросами, предложениями и товарами.',
+    );
     expect(ru.notifications.markAllRead).toBe('Прочитать все');
     expect(ru.notifications.markRead).toBe('Прочитано');
     const en = loadMessages('en');
     expect(en.notifications.empty).toBe('No notifications yet');
+    expect(en.notifications.subtitle).toBe(
+      'Important events about your purchase requests, quotes, and products appear here.',
+    );
     expect(en.notifications.markAllRead).toBe('Mark all as read');
     expect(en.notifications.markRead).toBe('Read');
   });
@@ -360,28 +412,34 @@ describe('dedicated Notification Center', () => {
     async () => {
       if (!chrome) return;
       const launched = await launchChrome(chrome);
+      const css = readGlobalsCss();
       const server = await startStaticServer({
-        'notifications.html': notificationsFixture(readGlobalsCss()),
+        'notifications.html': notificationsFixture(css),
+        'notifications-empty.html': notificationsEmptyFixture(css),
       });
       try {
-        for (const viewport of viewports) {
-          const result = await cdpEvaluate(
-            launched.wsUrl,
-            `${server.url}/notifications.html`,
-            viewport,
-          );
-          expect({
-            viewport: viewport.width,
-            diff: result.diff,
-            overflowers: result.overflowers,
-            horizontalOverflow: result.horizontalOverflow,
-          }).toEqual({
-            viewport: viewport.width,
-            diff: expect.any(Number),
-            overflowers: [],
-            horizontalOverflow: false,
-          });
-          expect(result.diff).toBeLessThanOrEqual(1);
+        for (const page of ['notifications.html', 'notifications-empty.html'] as const) {
+          for (const viewport of viewports) {
+            const result = await cdpEvaluate(
+              launched.wsUrl,
+              `${server.url}/${page}`,
+              viewport,
+            );
+            expect({
+              page,
+              viewport: viewport.width,
+              diff: result.diff,
+              overflowers: result.overflowers,
+              horizontalOverflow: result.horizontalOverflow,
+            }).toEqual({
+              page,
+              viewport: viewport.width,
+              diff: expect.any(Number),
+              overflowers: [],
+              horizontalOverflow: false,
+            });
+            expect(result.diff).toBeLessThanOrEqual(1);
+          }
         }
       } finally {
         launched.cleanup();
