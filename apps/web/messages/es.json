@@ -945,7 +945,15 @@
     "viewPrivacy": "Política de privacidad",
     "privacyTransparency": "La Política de privacidad describe el tratamiento de datos personales. Verla no se registra como consentimiento.",
     "privacyNotAccepted": "En el registro no se recaba consentimiento de la Política de privacidad.",
-    "legalLoadError": "No se pudieron cargar los datos de aceptación legal."
+    "legalLoadError": "No se pudieron cargar los datos de aceptación legal.",
+    "notificationsSettingsTitle": "Avisos",
+    "notificationsSettingsSubtitle": "Elige qué correos recibir y gestiona los avisos de cosecha que ya creaste.",
+    "emailNotificationsTitle": "Avisos por email",
+    "harvestNotificationsTitle": "Avisos de cosecha",
+    "harvestNotificationsHint": "Aquí solo aparecen productos que ya sigues. Una nueva alerta se activa en la ficha del producto.",
+    "harvestNotificationsEmpty": "Todavía no hay avisos de cosecha.",
+    "harvestNotificationsBrowse": "Abrir el catálogo",
+    "notificationsLoadError": "No se pudieron cargar los ajustes de avisos."
   },
   "rating": {
     "title": "Valora a tu partner",

@@ -492,6 +492,15 @@ body {
   min-width: 0;
 }
 
+.cabinet-notifications {
+  margin-top: 1.5rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
 .cabinet-legal {
   margin-top: 1.5rem;
   padding-top: 1.35rem;
@@ -618,6 +627,34 @@ body {
   margin-top: 0.15rem;
   min-width: 0;
   max-width: 28rem;
+}
+
+.settings-row--stack {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.cabinet-notifications .auth-card {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0.15rem 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.cabinet-notifications .harvest-watches,
+.cabinet-notifications .harvest-watches__item,
+.cabinet-notifications .empty-state {
+  min-width: 0;
+}
+
+.cabinet-notifications .empty-state {
+  display: grid;
+  gap: 0.65rem;
+  justify-items: start;
 }
 
 .settings-row--editing .settings-row__actions {

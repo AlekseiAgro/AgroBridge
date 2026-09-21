@@ -945,7 +945,15 @@
     "viewPrivacy": "Informativa sulla privacy",
     "privacyTransparency": "L'Informativa sulla privacy descrive il trattamento dei dati personali. La visualizzazione non è registrata come consenso.",
     "privacyNotAccepted": "Il consenso all'Informativa sulla privacy non viene raccolto in fase di registrazione.",
-    "legalLoadError": "Impossibile caricare i dettagli di accettazione legale."
+    "legalLoadError": "Impossibile caricare i dettagli di accettazione legale.",
+    "notificationsSettingsTitle": "Notifiche",
+    "notificationsSettingsSubtitle": "Scegli quali e-mail ricevere e gestisci gli avvisi di raccolta già creati.",
+    "emailNotificationsTitle": "Notifiche e-mail",
+    "harvestNotificationsTitle": "Avvisi di raccolta",
+    "harvestNotificationsHint": "Qui compaiono solo i prodotti che segui già. Una nuova iscrizione si attiva dalla scheda prodotto.",
+    "harvestNotificationsEmpty": "Nessun avviso di raccolta al momento.",
+    "harvestNotificationsBrowse": "Apri il catalogo",
+    "notificationsLoadError": "Impossibile caricare le impostazioni delle notifiche."
   },
   "rating": {
     "title": "Valuta il partner",

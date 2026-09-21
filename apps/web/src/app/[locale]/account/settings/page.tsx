@@ -1,13 +1,42 @@
-import { legalLocaleFor, type LegalAcceptanceSnapshot } from '@agrobridge/shared';
+import {
+  legalLocaleFor,
+  type AlertSubscription,
+  type HarvestWatchItem,
+  type LegalAcceptanceSnapshot,
+} from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ChangePasswordForm } from '@/components/ChangePasswordForm';
 import { DeleteAccountButton } from '@/components/DeleteAccountButton';
 import { EditProfileControl } from '@/components/EditProfileControl';
+import { HarvestWatchesList } from '@/components/HarvestWatchesList';
+import { SettingsEmailAlertsControl } from '@/components/SettingsEmailAlertsControl';
 import { UserAvatarEditor } from '@/components/UserAvatarEditor';
 import { Link } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { requireVerifiedUser } from '@/lib/require-verified-user';
+
+const EMPTY_ALERT_SUBSCRIPTION: AlertSubscription = {
+  id: 'default',
+  notifyProducts: false,
+  notifyPurchaseRequests: false,
+  allCategories: true,
+  categories: [],
+  allRegions: true,
+  regions: [],
+  updatedAt: new Date(0).toISOString(),
+};
+
+async function loadOptional<T>(path: string, fallback: T): Promise<{ data: T; error: boolean }> {
+  try {
+    return { data: await apiRequestAuthed<T>(path), error: false };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return { data: fallback, error: true };
+    }
+    throw error;
+  }
+}
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -20,14 +49,16 @@ export default async function AccountSettingsPage({ params }: Props) {
   const user = await requireVerifiedUser(locale, '/account/settings');
   const t = await getTranslations('cabinet');
 
-  let legal: LegalAcceptanceSnapshot | null = null;
-  try {
-    legal = await apiRequestAuthed<LegalAcceptanceSnapshot>('/legal/me');
-  } catch (error) {
-    if (!(error instanceof ApiError)) {
-      throw error;
-    }
-  }
+  const [legalResult, alertsResult, watchesResult] = await Promise.all([
+    loadOptional<LegalAcceptanceSnapshot | null>('/legal/me', null),
+    loadOptional<AlertSubscription>('/subscriptions/alerts', EMPTY_ALERT_SUBSCRIPTION),
+    loadOptional<HarvestWatchItem[]>('/products/watches', []),
+  ]);
+
+  const legal = legalResult.data;
+  const subscription = alertsResult.data;
+  const watches = watchesResult.data;
+  const notificationsLoadError = alertsResult.error || watchesResult.error;
 
   const legalLocale = legalLocaleFor(locale);
   const acceptedAt = legal?.terms.acceptedAt
@@ -70,6 +101,31 @@ export default async function AccountSettingsPage({ params }: Props) {
           {t('securityTitle')}
         </h2>
         <ChangePasswordForm />
+      </section>
+
+      <section className="cabinet-notifications" aria-labelledby="cabinet-notifications-title">
+        <h2 id="cabinet-notifications-title" className="section-title">
+          {t('notificationsSettingsTitle')}
+        </h2>
+        <p className="page__subtitle">{t('notificationsSettingsSubtitle')}</p>
+        {notificationsLoadError ? <p className="form-error">{t('notificationsLoadError')}</p> : null}
+        <div className="settings-list">
+          <SettingsEmailAlertsControl initial={subscription} />
+          <div className="settings-row settings-row--stack">
+            <p className="settings-row__label">{t('harvestNotificationsTitle')}</p>
+            <p className="settings-row__value">{t('harvestNotificationsHint')}</p>
+            {watches.length > 0 ? (
+              <HarvestWatchesList initial={watches} />
+            ) : (
+              <div className="empty-state">
+                <p>{t('harvestNotificationsEmpty')}</p>
+                <Link href="/catalog" className="button button--ghost">
+                  {t('harvestNotificationsBrowse')}
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
       </section>
 
       <section className="cabinet-legal" aria-labelledby="cabinet-legal-title">
