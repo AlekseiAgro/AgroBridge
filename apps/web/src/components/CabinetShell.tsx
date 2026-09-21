@@ -94,7 +94,6 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
           ) : null}
         </nav>
         <div className="cabinet__sidebar-foot">
-          <LanguageSwitcher />
           <LogoutButton />
         </div>
       </aside>
@@ -113,6 +112,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
                 unreadLabel={t('notificationsUnread', { count: notificationUnread.totalUnread })}
               />
             ) : null}
+            <LanguageSwitcher />
             <span className="cabinet__user-chip">
               {user?.displayName || user?.email || tc('guest')}
             </span>
