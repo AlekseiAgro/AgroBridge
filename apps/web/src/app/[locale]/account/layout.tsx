@@ -2,6 +2,11 @@ import type { ReactNode } from 'react';
 import { setRequestLocale } from 'next-intl/server';
 import { CabinetShell } from '@/components/CabinetShell';
 import { requireVerifiedUser } from '@/lib/require-verified-user';
+import { noindexRobots } from '@/lib/seo-robots';
+
+export const metadata = {
+  robots: noindexRobots,
+};
 
 type Props = {
   children: ReactNode;

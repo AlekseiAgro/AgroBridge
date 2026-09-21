@@ -3,6 +3,11 @@ import { AuthLegalLinks } from '@/components/AuthLegalLinks';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ResetPasswordForm } from '@/components/ResetPasswordForm';
 import { Link } from '@/i18n/navigation';
+import { noindexRobots } from '@/lib/seo-robots';
+
+export const metadata = {
+  robots: noindexRobots,
+};
 
 type Props = {
   params: Promise<{ locale: string }>;

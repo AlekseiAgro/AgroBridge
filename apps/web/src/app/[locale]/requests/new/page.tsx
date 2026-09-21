@@ -3,6 +3,11 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PurchaseRequestForm } from '@/components/PurchaseRequestForm';
 import { Link, redirect } from '@/i18n/navigation';
 import { requireVerifiedUser } from '@/lib/require-verified-user';
+import { noindexRobots } from '@/lib/seo-robots';
+
+export const metadata = {
+  robots: noindexRobots,
+};
 
 type Props = {
   params: Promise<{ locale: string }>;
