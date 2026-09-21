@@ -21,10 +21,16 @@ export default async function BuyerRfqsPage({ params, searchParams }: Props) {
 
   const t = await getTranslations('rfq');
   const tp = await getTranslations('purchaseRequests');
-  const items = filterRfqsForCabinet(
-    await apiRequestAuthed<RfqSummary[]>('/rfqs/mine'),
-    query,
-  );
+  let items: RfqSummary[] = [];
+  let loadError: string | null = null;
+  try {
+    items = filterRfqsForCabinet(
+      await apiRequestAuthed<RfqSummary[]>('/rfqs/mine'),
+      query,
+    );
+  } catch {
+    loadError = t('loadError');
+  }
 
   return (
     <main className="cabinet-page">
@@ -35,7 +41,11 @@ export default async function BuyerRfqsPage({ params, searchParams }: Props) {
           {' · '}
           <Link href="/dashboard/purchase-requests">{tp('mineTitle')}</Link>
         </p>
-        <RfqList items={items} emptyLabel={t('mineEmpty')} detailBasePath="/dashboard/rfqs" />
+        {loadError ? (
+          <p className="form-error">{loadError}</p>
+        ) : (
+          <RfqList items={items} emptyLabel={t('mineEmpty')} detailBasePath="/dashboard/rfqs" />
+        )}
     </main>
   );
 }

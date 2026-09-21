@@ -21,14 +21,21 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
 
   const t = await getTranslations('purchaseRequests');
   const tr = await getTranslations('rfq');
-  const [items, rfqs] = await Promise.all([
-    apiRequestAuthed<PurchaseRequestSummary[]>('/purchase-requests/mine'),
-    apiRequestAuthed<RfqSummary[]>('/rfqs/mine'),
-  ]);
+  let items: PurchaseRequestSummary[] = [];
+  let rfqs: RfqSummary[] = [];
+  let loadError: string | null = null;
+  try {
+    [items, rfqs] = await Promise.all([
+      apiRequestAuthed<PurchaseRequestSummary[]>('/purchase-requests/mine'),
+      apiRequestAuthed<RfqSummary[]>('/rfqs/mine'),
+    ]);
+  } catch {
+    loadError = t('loadError');
+  }
 
   return (
     <main className="cabinet-page">
-      <MarkSectionNotificationsRead section="purchase-requests" />
+      {loadError ? null : <MarkSectionNotificationsRead section="purchase-requests" />}
       <div className="page__heading-row">
         <div>
           <h1>{t('mineTitle')}</h1>
@@ -38,6 +45,10 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
           {t('createCta')}
         </Link>
       </div>
+      {loadError ? (
+        <p className="form-error">{loadError}</p>
+      ) : (
+      <>
       <PurchaseRequestList
         items={items}
         empty={
@@ -70,6 +81,8 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
         </div>
         <RfqList items={rfqs} emptyLabel={tr('mineEmpty')} detailBasePath="/dashboard/rfqs" />
       </section>
+      </>
+      )}
     </main>
   );
 }
