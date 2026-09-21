@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { BrandLogo } from '@/components/BrandLogo';
 import { Link } from '@/i18n/navigation';
 
 export async function NotFoundPanel() {
@@ -7,7 +8,9 @@ export async function NotFoundPanel() {
 
   return (
     <section className="empty-panel empty-panel--not-found">
-      <p className="empty-panel__brand">AgroBridge</p>
+      <p className="empty-panel__brand">
+        <BrandLogo />
+      </p>
       <h1 className="empty-panel__title">{t('title')}</h1>
       <p className="empty-panel__body">{t('body')}</p>
       <div className="empty-panel__actions">

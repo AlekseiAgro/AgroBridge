@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { AuthLegalLinks } from '@/components/AuthLegalLinks';
+import { BrandLogo } from '@/components/BrandLogo';
 import { ForgotPasswordForm } from '@/components/ForgotPasswordForm';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link, redirect } from '@/i18n/navigation';
@@ -29,7 +30,7 @@ export default async function ForgotPasswordPage({ params }: Props) {
     <div className="auth-page">
       <header className="auth-page__top">
         <Link href="/" className="auth-brand">
-          AgroBridge
+          <BrandLogo />
         </Link>
         <LanguageSwitcher />
       </header>

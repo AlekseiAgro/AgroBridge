@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { BrandLogo } from '@/components/BrandLogo';
 import { CategoryShowcase } from '@/components/CategoryShowcase';
 import { HowItWorksSection } from '@/components/HowItWorksSection';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -30,7 +31,9 @@ export default async function HomePage({ params }: Props) {
         <div className="home-hero__shell">
           <SiteHeader tone="light" />
           <div className="home-hero__content">
-            <p className="home__brand">AgroBridge</p>
+            <p className="home__brand">
+              <BrandLogo />
+            </p>
             <h1 className="home__headline">{t('headline')}</h1>
             <p className="home__subtitle">{t('subtitle')}</p>
 

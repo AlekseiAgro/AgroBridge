@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { AuthForm } from '@/components/AuthForm';
+import { BrandLogo } from '@/components/BrandLogo';
 import { AuthLegalLinks } from '@/components/AuthLegalLinks';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { Link, redirect } from '@/i18n/navigation';
@@ -34,7 +35,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
     <div className="auth-page">
       <header className="auth-page__top">
         <Link href="/" className="auth-brand">
-          AgroBridge
+          <BrandLogo />
         </Link>
         <LanguageSwitcher />
       </header>

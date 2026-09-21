@@ -1,6 +1,7 @@
 import { canTrade, EMPTY_NOTIFICATION_UNREAD_SUMMARY } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { BrandLogo } from '@/components/BrandLogo';
 import { ChatNavLink } from '@/components/ChatNavLink';
 import { InboxNavLink } from '@/components/InboxNavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -38,7 +39,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
       {user ? <LocaleSync profileLocale={user.locale} /> : null}
       <aside className="cabinet__sidebar">
         <Link href="/" className="cabinet__brand">
-          AgroBridge
+          <BrandLogo />
         </Link>
         <p className="cabinet__eyebrow">{tc('shellLabel')}</p>
         <nav className="cabinet__nav" aria-label={tc('shellLabel')}>

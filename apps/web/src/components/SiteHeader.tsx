@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { BrandLogo } from '@/components/BrandLogo';
 import { ChatNavLink } from '@/components/ChatNavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LocaleSync } from '@/components/LocaleSync';
@@ -20,7 +21,7 @@ export async function SiteHeader({ tone = 'default' }: Props) {
       {user ? <LocaleSync profileLocale={user.locale} /> : null}
       <header className={tone === 'light' ? 'site-header site-header--light' : 'site-header'}>
       <Link href="/" className="auth-brand">
-        AgroBridge
+        <BrandLogo />
       </Link>
       <nav className="site-header__nav">
         <Link href="/catalog">{t('catalog')}</Link>

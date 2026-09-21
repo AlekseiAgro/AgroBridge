@@ -48,6 +48,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: t('title'),
     description: t('description'),
+    icons: {
+      icon: [
+        { url: '/favicon.ico', sizes: '48x48', type: 'image/x-icon' },
+        { url: '/icon.png', sizes: '32x32', type: 'image/png' },
+      ],
+      apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    },
     ...htmlSeo,
   };
 }
