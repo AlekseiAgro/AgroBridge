@@ -3,7 +3,7 @@ import { join } from 'path';
 import {
   loginRedirectHref,
   protectedNextFromRequest,
-} from '../../web/src/lib/protected-next-path';
+} from '../../../web/src/lib/protected-next-path';
 
 const WEB = join(__dirname, '../../../web/src');
 
