@@ -23,6 +23,8 @@ export async function SiteHeader({ tone = 'default' }: Props) {
         AgroBridge
       </Link>
       <nav className="site-header__nav">
+        <Link href="/catalog">{t('catalog')}</Link>
+        <Link href="/requests">{t('purchaseRequests')}</Link>
         <Link href="/buyers" className="site-header__role-link">
           {t('forBuyers')}
         </Link>
