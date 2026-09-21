@@ -101,7 +101,7 @@ const en: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteDeclined: {
     subject: 'Your quote was not selected: {{title}}',
-    text: 'Hello {{name}},\n\n{{buyerName}} did not select your quote for the purchase request “{{title}}”.\n\nBrowse open purchase requests: {{link}}\n\n— AgroBridge',
+    text: 'Hello {{name}},\n\n{{buyerName}} did not select your quote for the purchase request “{{title}}”.\n\nOpen my quotes: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteWithdrawn: {
     subject: 'Quote withdrawn: {{title}}',
@@ -109,11 +109,11 @@ const en: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseRequestClosed: {
     subject: 'Purchase request closed: {{title}}',
-    text: 'Hello {{name}},\n\n{{buyerName}} closed the purchase request “{{title}}”, so your quote is no longer under consideration.\n\nBrowse open purchase requests: {{link}}\n\n— AgroBridge',
+    text: 'Hello {{name}},\n\n{{buyerName}} closed the purchase request “{{title}}”, so your quote is no longer under consideration.\n\nOpen my quotes: {{link}}\n\n— AgroBridge',
   },
   purchaseRequestCancelled: {
     subject: 'Purchase request cancelled: {{title}}',
-    text: 'Hello {{name}},\n\n{{buyerName}} cancelled the purchase request “{{title}}”, so your quote is no longer under consideration.\n\nBrowse open purchase requests: {{link}}\n\n— AgroBridge',
+    text: 'Hello {{name}},\n\n{{buyerName}} cancelled the purchase request “{{title}}”, so your quote is no longer under consideration.\n\nOpen my quotes: {{link}}\n\n— AgroBridge',
   },
   chatMessage: {
     subject: 'New message from {{senderName}}',
@@ -217,7 +217,7 @@ const ru: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteDeclined: {
     subject: 'Ваше предложение не выбрано: «{{title}}»',
-    text: 'Здравствуйте, {{name}}!\n\n{{buyerName}} не выбрал(а) ваше предложение по запросу на закупку «{{title}}».\n\nСмотреть открытые запросы: {{link}}\n\n— AgroBridge',
+    text: 'Здравствуйте, {{name}}!\n\n{{buyerName}} не выбрал(а) ваше предложение по запросу на закупку «{{title}}».\n\nОткрыть мои предложения: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteWithdrawn: {
     subject: 'Предложение отозвано: «{{title}}»',
@@ -225,11 +225,11 @@ const ru: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseRequestClosed: {
     subject: 'Запрос на закупку закрыт: «{{title}}»',
-    text: 'Здравствуйте, {{name}}!\n\n{{buyerName}} закрыл(а) запрос на закупку «{{title}}», ваше предложение больше не рассматривается.\n\nСмотреть открытые запросы: {{link}}\n\n— AgroBridge',
+    text: 'Здравствуйте, {{name}}!\n\n{{buyerName}} закрыл(а) запрос на закупку «{{title}}», ваше предложение больше не рассматривается.\n\nОткрыть мои предложения: {{link}}\n\n— AgroBridge',
   },
   purchaseRequestCancelled: {
     subject: 'Запрос на закупку отменён: «{{title}}»',
-    text: 'Здравствуйте, {{name}}!\n\n{{buyerName}} отменил(а) запрос на закупку «{{title}}», ваше предложение больше не рассматривается.\n\nСмотреть открытые запросы: {{link}}\n\n— AgroBridge',
+    text: 'Здравствуйте, {{name}}!\n\n{{buyerName}} отменил(а) запрос на закупку «{{title}}», ваше предложение больше не рассматривается.\n\nОткрыть мои предложения: {{link}}\n\n— AgroBridge',
   },
   chatMessage: {
     subject: 'Новое сообщение от {{senderName}}',
@@ -333,7 +333,7 @@ const de: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteDeclined: {
     subject: 'Ihr Angebot wurde nicht ausgewählt: {{title}}',
-    text: 'Hallo {{name}},\n\n{{buyerName}} hat Ihr Angebot zur Kaufanfrage „{{title}}“ nicht ausgewählt.\n\nOffene Kaufanfragen ansehen: {{link}}\n\n— AgroBridge',
+    text: 'Hallo {{name}},\n\n{{buyerName}} hat Ihr Angebot zur Kaufanfrage „{{title}}“ nicht ausgewählt.\n\nMeine Angebote öffnen: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteWithdrawn: {
     subject: 'Angebot zurückgezogen: {{title}}',
@@ -341,11 +341,11 @@ const de: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseRequestClosed: {
     subject: 'Kaufanfrage geschlossen: {{title}}',
-    text: 'Hallo {{name}},\n\n{{buyerName}} hat die Kaufanfrage „{{title}}“ geschlossen; Ihr Angebot wird nicht weiter berücksichtigt.\n\nOffene Kaufanfragen ansehen: {{link}}\n\n— AgroBridge',
+    text: 'Hallo {{name}},\n\n{{buyerName}} hat die Kaufanfrage „{{title}}“ geschlossen; Ihr Angebot wird nicht weiter berücksichtigt.\n\nMeine Angebote öffnen: {{link}}\n\n— AgroBridge',
   },
   purchaseRequestCancelled: {
     subject: 'Kaufanfrage storniert: {{title}}',
-    text: 'Hallo {{name}},\n\n{{buyerName}} hat die Kaufanfrage „{{title}}“ storniert; Ihr Angebot wird nicht weiter berücksichtigt.\n\nOffene Kaufanfragen ansehen: {{link}}\n\n— AgroBridge',
+    text: 'Hallo {{name}},\n\n{{buyerName}} hat die Kaufanfrage „{{title}}“ storniert; Ihr Angebot wird nicht weiter berücksichtigt.\n\nMeine Angebote öffnen: {{link}}\n\n— AgroBridge',
   },
   chatMessage: {
     subject: 'Neue Nachricht von {{senderName}}',
@@ -449,7 +449,7 @@ const fr: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteDeclined: {
     subject: 'Votre offre n’a pas été retenue : {{title}}',
-    text: 'Bonjour {{name}},\n\n{{buyerName}} n’a pas retenu votre offre pour la demande d’achat « {{title}} ».\n\nVoir les demandes ouvertes : {{link}}\n\n— AgroBridge',
+    text: 'Bonjour {{name}},\n\n{{buyerName}} n’a pas retenu votre offre pour la demande d’achat « {{title}} ».\n\nOuvrir mes offres : {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteWithdrawn: {
     subject: 'Offre retirée : {{title}}',
@@ -457,11 +457,11 @@ const fr: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseRequestClosed: {
     subject: 'Demande d’achat clôturée : {{title}}',
-    text: 'Bonjour {{name}},\n\n{{buyerName}} a clôturé la demande d’achat « {{title}} » ; votre offre n’est plus à l’étude.\n\nVoir les demandes ouvertes : {{link}}\n\n— AgroBridge',
+    text: 'Bonjour {{name}},\n\n{{buyerName}} a clôturé la demande d’achat « {{title}} » ; votre offre n’est plus à l’étude.\n\nOuvrir mes offres : {{link}}\n\n— AgroBridge',
   },
   purchaseRequestCancelled: {
     subject: 'Demande d’achat annulée : {{title}}',
-    text: 'Bonjour {{name}},\n\n{{buyerName}} a annulé la demande d’achat « {{title}} » ; votre offre n’est plus à l’étude.\n\nVoir les demandes ouvertes : {{link}}\n\n— AgroBridge',
+    text: 'Bonjour {{name}},\n\n{{buyerName}} a annulé la demande d’achat « {{title}} » ; votre offre n’est plus à l’étude.\n\nOuvrir mes offres : {{link}}\n\n— AgroBridge',
   },
   chatMessage: {
     subject: 'Nouveau message de {{senderName}}',
@@ -565,7 +565,7 @@ const it: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteDeclined: {
     subject: 'La tua offerta non è stata scelta: {{title}}',
-    text: 'Ciao {{name}},\n\n{{buyerName}} non ha scelto la tua offerta per la richiesta di acquisto «{{title}}».\n\nVedi le richieste aperte: {{link}}\n\n— AgroBridge',
+    text: 'Ciao {{name}},\n\n{{buyerName}} non ha scelto la tua offerta per la richiesta di acquisto «{{title}}».\n\nApri le mie offerte: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteWithdrawn: {
     subject: 'Offerta ritirata: {{title}}',
@@ -573,11 +573,11 @@ const it: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseRequestClosed: {
     subject: 'Richiesta di acquisto chiusa: {{title}}',
-    text: 'Ciao {{name}},\n\n{{buyerName}} ha chiuso la richiesta di acquisto «{{title}}»: la tua offerta non è più in esame.\n\nVedi le richieste aperte: {{link}}\n\n— AgroBridge',
+    text: 'Ciao {{name}},\n\n{{buyerName}} ha chiuso la richiesta di acquisto «{{title}}»: la tua offerta non è più in esame.\n\nApri le mie offerte: {{link}}\n\n— AgroBridge',
   },
   purchaseRequestCancelled: {
     subject: 'Richiesta di acquisto annullata: {{title}}',
-    text: 'Ciao {{name}},\n\n{{buyerName}} ha annullato la richiesta di acquisto «{{title}}»: la tua offerta non è più in esame.\n\nVedi le richieste aperte: {{link}}\n\n— AgroBridge',
+    text: 'Ciao {{name}},\n\n{{buyerName}} ha annullato la richiesta di acquisto «{{title}}»: la tua offerta non è più in esame.\n\nApri le mie offerte: {{link}}\n\n— AgroBridge',
   },
   chatMessage: {
     subject: 'Nuovo messaggio da {{senderName}}',
@@ -681,7 +681,7 @@ const es: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteDeclined: {
     subject: 'Tu oferta no ha sido seleccionada: {{title}}',
-    text: 'Hola {{name}},\n\n{{buyerName}} no ha seleccionado tu oferta para la solicitud de compra «{{title}}».\n\nVer solicitudes abiertas: {{link}}\n\n— AgroBridge',
+    text: 'Hola {{name}},\n\n{{buyerName}} no ha seleccionado tu oferta para la solicitud de compra «{{title}}».\n\nAbrir mis ofertas: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteWithdrawn: {
     subject: 'Oferta retirada: {{title}}',
@@ -689,11 +689,11 @@ const es: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseRequestClosed: {
     subject: 'Solicitud de compra cerrada: {{title}}',
-    text: 'Hola {{name}},\n\n{{buyerName}} ha cerrado la solicitud de compra «{{title}}»; tu oferta ya no está en consideración.\n\nVer solicitudes abiertas: {{link}}\n\n— AgroBridge',
+    text: 'Hola {{name}},\n\n{{buyerName}} ha cerrado la solicitud de compra «{{title}}»; tu oferta ya no está en consideración.\n\nAbrir mis ofertas: {{link}}\n\n— AgroBridge',
   },
   purchaseRequestCancelled: {
     subject: 'Solicitud de compra cancelada: {{title}}',
-    text: 'Hola {{name}},\n\n{{buyerName}} ha cancelado la solicitud de compra «{{title}}»; tu oferta ya no está en consideración.\n\nVer solicitudes abiertas: {{link}}\n\n— AgroBridge',
+    text: 'Hola {{name}},\n\n{{buyerName}} ha cancelado la solicitud de compra «{{title}}»; tu oferta ya no está en consideración.\n\nAbrir mis ofertas: {{link}}\n\n— AgroBridge',
   },
   chatMessage: {
     subject: 'Nuevo mensaje de {{senderName}}',
@@ -797,7 +797,7 @@ const ka: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseQuoteDeclined: {
     subject: 'თქვენი შეთავაზება არ შეირჩა: {{title}}',
-    text: 'გამარჯობა, {{name}}!\n\n{{buyerName}}-მა არ შეარჩია თქვენი შეთავაზება შესყიდვის მოთხოვნაზე „{{title}}“.\n\nღია მოთხოვნების ნახვა: {{link}}\n\n— AgroBridge',
+    text: 'გამარჯობა, {{name}}!\n\n{{buyerName}}-მა არ შეარჩია თქვენი შეთავაზება შესყიდვის მოთხოვნაზე „{{title}}“.\n\nჩემი შეთავაზებების გახსნა: {{link}}\n\n— AgroBridge',
   },
   purchaseQuoteWithdrawn: {
     subject: 'შეთავაზება გაუქმდა: {{title}}',
@@ -805,11 +805,11 @@ const ka: Record<EmailTemplateKey, EmailTemplate> = {
   },
   purchaseRequestClosed: {
     subject: 'შესყიდვის მოთხოვნა დაიხურა: {{title}}',
-    text: 'გამარჯობა, {{name}}!\n\n{{buyerName}}-მა დახურა შესყიდვის მოთხოვნა „{{title}}“, თქვენი შეთავაზება აღარ განიხილება.\n\nღია მოთხოვნების ნახვა: {{link}}\n\n— AgroBridge',
+    text: 'გამარჯობა, {{name}}!\n\n{{buyerName}}-მა დახურა შესყიდვის მოთხოვნა „{{title}}“, თქვენი შეთავაზება აღარ განიხილება.\n\nჩემი შეთავაზებების გახსნა: {{link}}\n\n— AgroBridge',
   },
   purchaseRequestCancelled: {
     subject: 'შესყიდვის მოთხოვნა გაუქმდა: {{title}}',
-    text: 'გამარჯობა, {{name}}!\n\n{{buyerName}}-მა გააუქმა შესყიდვის მოთხოვნა „{{title}}“, თქვენი შეთავაზება აღარ განიხილება.\n\nღია მოთხოვნების ნახვა: {{link}}\n\n— AgroBridge',
+    text: 'გამარჯობა, {{name}}!\n\n{{buyerName}}-მა გააუქმა შესყიდვის მოთხოვნა „{{title}}“, თქვენი შეთავაზება აღარ განიხილება.\n\nჩემი შეთავაზებების გახსნა: {{link}}\n\n— AgroBridge',
   },
   chatMessage: {
     subject: 'ახალი შეტყობინება: {{senderName}}',
