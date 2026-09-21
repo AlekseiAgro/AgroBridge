@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { Source_Sans_3, Fraunces, Noto_Sans_Georgian } from 'next/font/google';
 import { routing } from '@/i18n/routing';
+import { REQUEST_PATHNAME_HEADER } from '@/lib/protected-next-path';
+import { publicPageHtmlMetadata } from '@/lib/seo-html-metadata';
 import '../globals.css';
 
 const sans = Source_Sans_3({
@@ -34,10 +37,18 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'meta' });
+  let htmlSeo: ReturnType<typeof publicPageHtmlMetadata> = null;
+  try {
+    const requestHeaders = await headers();
+    htmlSeo = publicPageHtmlMetadata(locale, requestHeaders.get(REQUEST_PATHNAME_HEADER));
+  } catch {
+    htmlSeo = null;
+  }
 
   return {
     title: t('title'),
     description: t('description'),
+    ...htmlSeo,
   };
 }
 

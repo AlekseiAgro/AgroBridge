@@ -120,14 +120,16 @@ describe('purchase request notification copy', () => {
     expect(userNotification.create.mock.calls[1][0].data.body.toLowerCase()).not.toContain('заверш');
   });
 
-  it('keeps seller-affected email copy and only changes the destination to My Quotes', () => {
-    expect(EMAIL_TEMPLATES_SOURCE).toContain(
-      'Browse open purchase requests: {{link}}',
-    );
-    expect(EMAIL_TEMPLATES_SOURCE).toContain('Смотреть открытые запросы: {{link}}');
+  it('keeps seller-affected email destination on My Quotes and opens that page in the CTA', () => {
     expect(EMAIL_TEMPLATES_SOURCE.match(/purchaseQuoteDeclined: \{/g)?.length).toBe(7);
     expect(EMAIL_TEMPLATES_SOURCE.match(/purchaseRequestClosed: \{/g)?.length).toBe(7);
     expect(EMAIL_TEMPLATES_SOURCE.match(/purchaseRequestCancelled: \{/g)?.length).toBe(7);
+    expect(EMAIL_TEMPLATES_SOURCE).toContain('Open my quotes: {{link}}');
+    expect(EMAIL_TEMPLATES_SOURCE).toContain('Открыть мои предложения: {{link}}');
+    expect(EMAIL_TEMPLATES_SOURCE).not.toContain('Browse open purchase requests: {{link}}');
+    expect(EMAIL_TEMPLATES_SOURCE).not.toContain('Смотреть открытые запросы: {{link}}');
+    expect(EMAIL_TEMPLATES_SOURCE).not.toMatch(/Browse open purchase requests/i);
+    expect(EMAIL_TEMPLATES_SOURCE).not.toContain('открытые запросы');
 
     expect(SERVICE_SOURCE).toMatch(
       /async notifyPurchaseQuoteDeclined[\s\S]*?const href = '\/dashboard\/quotes';[\s\S]*?link: this\.appLink\(locale, href\)/,
@@ -142,6 +144,52 @@ describe('purchase request notification copy', () => {
     expect(SERVICE_SOURCE).not.toMatch(
       /notifyPurchaseRequestWithdrawn[\s\S]*?link: this\.appLink\(locale, '\/requests'\)/,
     );
+  });
+
+  it('renders seller-side decline/close/cancel emails onto My Quotes in every locale', () => {
+    const events = [
+      'purchaseQuoteDeclined',
+      'purchaseRequestClosed',
+      'purchaseRequestCancelled',
+    ] as const;
+    const openBoardPhrases = [
+      /browse open purchase requests/i,
+      /открытые запросы/i,
+      /offene kaufanfragen/i,
+      /demandes ouvertes/i,
+      /richieste aperte/i,
+      /solicitudes abiertas/i,
+      /ღია მოთხოვნ/i,
+    ];
+    const ctaByLocale: Record<(typeof LOCALES)[number], string> = {
+      en: 'Open my quotes',
+      ru: 'Открыть мои предложения',
+      ka: 'ჩემი შეთავაზებების გახსნა',
+      de: 'Meine Angebote öffnen',
+      fr: 'Ouvrir mes offres',
+      it: 'Apri le mie offerte',
+      es: 'Abrir mis ofertas',
+    };
+
+    for (const locale of LOCALES) {
+      for (const event of events) {
+        const rendered = renderEmailTemplate(locale, event, {
+          name: 'Nino',
+          buyerName: 'Buyer Ltd',
+          title: 'Blueberries',
+          link: `http://localhost:3000/${locale}/dashboard/quotes`,
+        });
+        expect(rendered.subject).toContain('Blueberries');
+        expect(rendered.subject).not.toContain('{{');
+        expect(rendered.text).not.toContain('{{');
+        expect(rendered.text).toContain(`http://localhost:3000/${locale}/dashboard/quotes`);
+        expect(rendered.text).toContain(ctaByLocale[locale]);
+        expect(rendered.text).not.toContain('/requests');
+        for (const phrase of openBoardPhrases) {
+          expect(rendered.text).not.toMatch(phrase);
+        }
+      }
+    }
   });
 
   it('renders the withdrawn-quote email onto the same request destination as in-app', () => {
