@@ -17,7 +17,7 @@ export default async function DashboardLayout({ children, params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  await requireVerifiedUser(locale, '/account');
+  await requireVerifiedUser(locale);
 
   return <CabinetShell>{children}</CabinetShell>;
 }
