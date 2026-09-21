@@ -229,6 +229,8 @@ describeWithDatabase()('purchase request mail dispatch (database)', () => {
     expect(mail.send).toHaveBeenCalledTimes(1);
     expect(mail.send.mock.calls[0][0].to).toBe(supplier.user.email);
     expect(mail.send.mock.calls[0][0].subject).toBe('Your quote was not selected: Blueberries');
+    expect(mail.send.mock.calls[0][0].text).toContain('/en/dashboard/quotes');
+    expect(mail.send.mock.calls[0][0].text).not.toContain('/requests');
   });
 
   it('emails waiting suppliers the closed template, not the declined template', async () => {
@@ -248,6 +250,8 @@ describeWithDatabase()('purchase request mail dispatch (database)', () => {
     expect(mail.send.mock.calls[0][0].to).toBe(supplier.user.email);
     expect(mail.send.mock.calls[0][0].subject).toBe('Purchase request closed: Blueberries');
     expect(mail.send.mock.calls[0][0].text).not.toContain('did not select');
+    expect(mail.send.mock.calls[0][0].text).toContain('/en/dashboard/quotes');
+    expect(mail.send.mock.calls[0][0].text).not.toContain('/requests');
   });
 
   it('emails waiting suppliers the cancelled template', async () => {
@@ -265,6 +269,8 @@ describeWithDatabase()('purchase request mail dispatch (database)', () => {
 
     expect(mail.send).toHaveBeenCalledTimes(1);
     expect(mail.send.mock.calls[0][0].subject).toBe('Purchase request cancelled: Blueberries');
+    expect(mail.send.mock.calls[0][0].text).toContain('/en/dashboard/quotes');
+    expect(mail.send.mock.calls[0][0].text).not.toContain('/requests');
   });
 
   it('does not mail anyone when close is retried after success', async () => {
