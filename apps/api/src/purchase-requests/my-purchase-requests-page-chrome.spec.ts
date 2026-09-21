@@ -30,29 +30,24 @@ const MINE_PAGE = 'app/[locale]/dashboard/purchase-requests/page.tsx';
 const QUOTES_PAGE = 'app/[locale]/dashboard/quotes/page.tsx';
 
 describe('My Purchase Requests page chrome', () => {
-  it('does not use My Quotes as the purchase-requests eyebrow', () => {
+  it('does not render a redundant eyebrow above My Purchase Requests', () => {
     const page = source(MINE_PAGE);
     expect(page).toContain("<h1>{t('mineTitle')}</h1>");
     expect(page).toContain("t('mineSubtitle')");
-    expect(page).toContain("t('boardTitle')");
     expect(page).toContain("t('createCta')");
     expect(page).not.toContain("t('myQuotesTitle')");
     expect(page).not.toContain('/dashboard/quotes');
     expect(page).not.toContain("forBuyers");
     expect(page).not.toContain("forSellers");
-    expect(page).toMatch(
-      /<Link href="\/requests">\{t\('boardTitle'\)\}<\/Link>\s*\{\s*' · '\s*\}\s*\{t\('mineTitle'\)\}/,
-    );
+    expect(page).not.toContain('className="eyebrow"');
+    expect(page.match(/<h1>/g)?.length).toBe(1);
   });
 
   it('keeps catalog navigation as an RFQ-section action, not page identity', () => {
     const page = source(MINE_PAGE);
-    const eyebrow = page.slice(
-      page.indexOf('className="eyebrow"'),
-      page.indexOf('PurchaseRequestList'),
-    );
-    expect(eyebrow).not.toContain('/catalog');
-    expect(eyebrow).not.toContain('browseCatalog');
+    const heading = page.slice(0, page.indexOf('PurchaseRequestList'));
+    expect(heading).not.toContain('/catalog');
+    expect(heading).not.toContain('browseCatalog');
 
     const rfqSection = page.slice(page.indexOf('id="my-requests"'));
     expect(rfqSection).toContain("t('productRfqsLink')");
@@ -60,6 +55,7 @@ describe('My Purchase Requests page chrome', () => {
     expect(rfqSection).toContain('href="/catalog"');
     expect(rfqSection).toContain("tr('browseCatalog')");
     expect(rfqSection).toContain('detailBasePath="/dashboard/rfqs"');
+    expect(rfqSection).toContain('cabinet-section--nested');
   });
 
   it('preserves compact purchase-request list markup and empty actions', () => {
@@ -72,15 +68,14 @@ describe('My Purchase Requests page chrome', () => {
     expect(list).toContain("t('view')");
   });
 
-  it('leaves My Quotes chrome from #155 unchanged', () => {
+  it('keeps My Quotes identity as H1, subtitle, and browse CTA without an eyebrow', () => {
     const page = source(QUOTES_PAGE);
     expect(page).toContain("<h1>{t('myQuotesTitle')}</h1>");
+    expect(page).toContain("t('myQuotesSubtitle')");
     expect(page).toContain("t('browseBoard')");
     expect(page).not.toContain("t('mineTitle')");
     expect(page).not.toContain('/dashboard/purchase-requests');
-    expect(page).toMatch(
-      /<Link href="\/requests">\{t\('boardTitle'\)\}<\/Link>\s*\{\s*' · '\s*\}\s*\{t\('myQuotesTitle'\)\}/,
-    );
+    expect(page).not.toContain('className="eyebrow"');
   });
 
   it('keeps product RFQ copy distinct from My Purchase Requests in every locale', () => {

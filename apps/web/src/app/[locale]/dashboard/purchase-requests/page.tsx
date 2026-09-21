@@ -29,11 +29,6 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
   return (
     <main className="cabinet-page">
       <MarkSectionNotificationsRead section="purchase-requests" />
-      <p className="eyebrow">
-        <Link href="/requests">{t('boardTitle')}</Link>
-        {' · '}
-        {t('mineTitle')}
-      </p>
       <div className="page__heading-row">
         <div>
           <h1>{t('mineTitle')}</h1>

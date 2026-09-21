@@ -30,17 +30,17 @@ const QUOTES_PAGE = 'app/[locale]/dashboard/quotes/page.tsx';
 const MINE_PAGE = 'app/[locale]/dashboard/purchase-requests/page.tsx';
 
 describe('My Quotes page chrome', () => {
-  it('does not use My Purchase Requests as the quotes eyebrow', () => {
+  it('does not render a redundant eyebrow above My Quotes', () => {
     const page = source(QUOTES_PAGE);
-    expect(page).toContain("t('myQuotesTitle')");
+    expect(page).toContain("<h1>{t('myQuotesTitle')}</h1>");
     expect(page).toContain("t('myQuotesSubtitle')");
-    expect(page).toContain("t('boardTitle')");
     expect(page).toContain("t('browseBoard')");
     expect(page).not.toContain("t('mineTitle')");
     expect(page).not.toContain('/dashboard/purchase-requests');
-    expect(page).toMatch(
-      /<Link href="\/requests">\{t\('boardTitle'\)\}<\/Link>\s*\{\s*' · '\s*\}\s*\{t\('myQuotesTitle'\)\}/,
-    );
+    expect(page).not.toContain('className="eyebrow"');
+    expect(page).not.toContain("forBuyers");
+    expect(page).not.toContain("forSellers");
+    expect(page.match(/<h1>/g)?.length).toBe(1);
   });
 
   it('keeps My Purchase Requests using mineTitle for its own heading', () => {
