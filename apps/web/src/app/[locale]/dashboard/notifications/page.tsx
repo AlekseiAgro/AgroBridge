@@ -37,8 +37,11 @@ export default async function NotificationsPage({ params }: Props) {
           <p className="page__subtitle">{t('subtitle')}</p>
         </div>
       </div>
-      {loadError ? <p className="form-error">{t('loadError')}</p> : null}
-      <UserNotificationsList initial={items} copyNamespace="notifications" />
+      {loadError ? (
+        <p className="form-error">{t('loadError')}</p>
+      ) : (
+        <UserNotificationsList initial={items} copyNamespace="notifications" />
+      )}
     </main>
   );
 }
