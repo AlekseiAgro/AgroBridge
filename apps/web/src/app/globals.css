@@ -1551,8 +1551,16 @@ body {
 }
 
 .catalog-filters .field,
-.catalog-filters select {
+.catalog-filters select,
+.catalog-filters input,
+.catalog-filters .check-row,
+.catalog-filters .button {
   min-width: 0;
+}
+
+.catalog-filters .field input {
+  width: 100%;
+  max-width: 100%;
 }
 
 .catalog-filters__hint {
@@ -1881,8 +1889,10 @@ body {
   width: 100%;
 }
 
-.page:has(.floating-cta) .page__main {
-  padding-bottom: 7.5rem;
+@media (min-width: 1025px) {
+  .page:has(.floating-cta) .page__main {
+    padding-bottom: 7.5rem;
+  }
 }
 
 .empty-state,
@@ -2566,6 +2576,52 @@ body {
   }
 }
 
+/*
+ * Public catalog/requests keep a 4-column filter grid until 640px, so around
+ * 768px the Search field and selects collide. Signed-in cabinet pages already
+ * stack via the 40rem marketplace container query; guests do not.
+ *
+ * Below desktop the seller CTA must sit in normal flow. Viewport-fixed docking
+ * covers Search and the first result on mobile/tablet — padding-bottom only
+ * reserved space at the end of the document.
+ */
+@media (max-width: 1024px) {
+  .catalog-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalog-filters > .button,
+  .catalog-filters > .check-row {
+    grid-column: 1 / -1;
+  }
+
+  .floating-cta {
+    position: static;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    z-index: auto;
+    width: 100%;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    background: none;
+  }
+
+  .floating-cta__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .floating-cta__text {
+    display: block;
+  }
+
+  .floating-cta__button {
+    width: 100%;
+    white-space: normal;
+  }
+}
+
 @media (max-width: 640px) {
   .home-hero__shell {
     padding: 1rem 1rem 2.5rem;
@@ -2633,36 +2689,6 @@ body {
     width: 100%;
   }
 
-  .floating-cta {
-    right: 0;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    padding: 0.65rem 0.85rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
-    background: linear-gradient(180deg, transparent, rgba(238, 243, 234, 0.92) 28%);
-  }
-
-  .floating-cta__inner {
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 0.75rem 0.9rem;
-    padding: 0.85rem 0.95rem;
-    border-radius: 0.9rem;
-  }
-
-  .floating-cta__text {
-    display: none;
-  }
-
-  .floating-cta__button {
-    width: auto;
-    white-space: nowrap;
-  }
-
-  .page:has(.floating-cta) .page__main {
-    padding-bottom: 6.5rem;
-  }
-
   .site-footer__inner {
     flex-direction: column;
     gap: 1.75rem;
@@ -2686,7 +2712,47 @@ body {
  * two-column until 640px, so the content column is already "mobile-narrow" at
  * tablet viewports. Query the available container, not the viewport, so guests
  * keep the public wide layout while cabinet catalog/requests can stack.
+ *
+ * 52rem (~832px) is the public tablet band where a 4-column filter grid
+ * collides; 40rem remains the phone/cabinet stacked layout.
  */
+@container marketplace (max-width: 52rem) {
+  .catalog-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalog-filters > .button,
+  .catalog-filters > .check-row {
+    grid-column: 1 / -1;
+  }
+
+  .floating-cta {
+    position: static;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    z-index: auto;
+    width: 100%;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    background: none;
+  }
+
+  .floating-cta__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .floating-cta__text {
+    display: block;
+  }
+
+  .floating-cta__button {
+    width: 100%;
+    white-space: normal;
+  }
+}
+
 @container marketplace (max-width: 40rem) {
   .catalog-filters {
     grid-template-columns: 1fr;
@@ -2700,6 +2766,19 @@ body {
 
   .product-list__item-main {
     flex-wrap: wrap;
+  }
+
+  .floating-cta {
+    position: static;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    z-index: auto;
+    width: 100%;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    background: none;
   }
 }
 
@@ -2926,8 +3005,10 @@ body {
   width: min(100%, 32rem);
 }
 
-.cabinet__content:has(.floating-cta) {
-  padding-bottom: 6.5rem;
+@media (min-width: 1025px) {
+  .cabinet__content:has(.floating-cta) {
+    padding-bottom: 6.5rem;
+  }
 }
 
 @media (max-width: 640px) {
