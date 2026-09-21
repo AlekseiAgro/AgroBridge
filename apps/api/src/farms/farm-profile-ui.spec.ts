@@ -329,6 +329,47 @@ describe('farm profile copy', () => {
     const labels = LOCALES.map((locale) => messages(locale).farm.editFarm);
     expect(new Set(labels).size).toBe(LOCALES.length);
   });
+
+  it('localizes farm-form size, history, and export placeholder in de/fr/it/es', () => {
+    const keys = ['farmSizeHectares', 'history', 'exportMarketsPlaceholder'] as const;
+    const english = messages('en').farm;
+    const expected: Record<'de' | 'fr' | 'it' | 'es', Record<(typeof keys)[number], string>> = {
+      de: {
+        farmSizeHectares: 'Hofgröße (Hektar)',
+        history: 'Geschichte und Hintergrund des Hofs',
+        exportMarketsPlaceholder: 'Durch Komma getrennt, z. B. Deutschland, VAE, Polen',
+      },
+      fr: {
+        farmSizeHectares: 'Superficie de l’exploitation (hectares)',
+        history: 'Histoire et récit de la ferme',
+        exportMarketsPlaceholder: 'Séparés par des virgules, p. ex. Allemagne, EAU, Pologne',
+      },
+      it: {
+        farmSizeHectares: 'Superficie dell’azienda (ettari)',
+        history: 'Storia e racconto dell’azienda',
+        exportMarketsPlaceholder: 'Separati da virgola, ad es. Germania, EAU, Polonia',
+      },
+      es: {
+        farmSizeHectares: 'Superficie de la granja (hectáreas)',
+        history: 'Historia y relato de la granja',
+        exportMarketsPlaceholder: 'Separados por comas, p. ej. Alemania, EAU, Polonia',
+      },
+    };
+
+    expect(english.farmSizeHectares).toBe('Farm size (hectares)');
+    expect(english.history).toBe('Farm history and story');
+    expect(messages('ru').farm.farmSizeHectares).toBe('Площадь хозяйства (га)');
+    expect(messages('ka').farm.farmSizeHectares).toBe('Farm size (hectares)');
+
+    for (const locale of ['de', 'fr', 'it', 'es'] as const) {
+      const farmCopy = messages(locale).farm;
+      for (const key of keys) {
+        expect(farmCopy[key]).toBe(expected[locale][key]);
+        expect(farmCopy[key]).not.toBe(english[key]);
+        expect(farmCopy[key]).not.toMatch(/Farm size|Farm history|Comma separated/);
+      }
+    }
+  });
 });
 
 describe('verification presentation', () => {
