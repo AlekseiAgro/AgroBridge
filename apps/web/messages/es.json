@@ -3,6 +3,11 @@
     "title": "AgroBridge",
     "description": "Conecta a productores agrícolas georgianos con compradores de todo el mundo."
   },
+  "notFound": {
+    "title": "Página no encontrada",
+    "body": "Esta página de AgroBridge no existe o ya no está disponible. Vuelve al inicio o sigue en el mercado.",
+    "home": "Volver al inicio"
+  },
   "home": {
     "brand": "AgroBridge",
     "headline": "Granjas georgianas. Compradores globales.",
@@ -191,7 +196,11 @@
     "priceOnRequest": "Precio a consultar",
     "floatingLead": "¿No encuentra lo que necesita?",
     "floatingText": "Describa su necesidad y reciba ofertas de las fincas.",
-    "floatingCta": "Publicar solicitud de compra"
+    "floatingCta": "Publicar solicitud de compra",
+    "emptyTitle": "Aún no hay productos",
+    "emptyFilteredTitle": "No hay productos coincidentes",
+    "emptyUnfiltered": "Ahora mismo no hay productos publicados. Publica una solicitud de compra para que las granjas puedan responder.",
+    "emptyReset": "Borrar filtros"
   },
   "farm": {
     "createTitle": "Crear perfil de granja",
@@ -395,6 +404,12 @@
     "published": "Publicado",
     "draft": "Borrador",
     "emptyMine": "Aún no tienes productos.",
+    "emptyMineTitle": "Aún no hay productos",
+    "emptyPublishedTitle": "No hay productos publicados",
+    "emptyPublished": "Ninguno de tus productos está aún en el catálogo público. Añade un producto o abre todos los anuncios.",
+    "emptyPendingTitle": "No hay productos en moderación",
+    "emptyPending": "No tienes productos esperando moderación. Abre todos los anuncios o añade un producto nuevo.",
+    "emptyShowAll": "Mostrar todos los productos",
     "needFarmFirst": "El perfil de finca es opcional. Puedes añadir productos sin crearlo.",
     "goCreateFarm": "Ir al perfil de granja",
     "units": {
@@ -1024,7 +1039,12 @@
     "floatingText": "Publique su oferta de producto y llegue a compradores interesados.",
     "floatingCta": "Publicar mi producto",
     "buyerOnly": "Inicia sesión para publicar una solicitud de compra. Cualquier cuenta de AgroBridge puede comprar y vender.",
-    "registerAsBuyer": "Crear una cuenta"
+    "registerAsBuyer": "Crear una cuenta",
+    "boardEmptyTitle": "No hay solicitudes de compra",
+    "boardEmptyFiltered": "Ninguna solicitud de compra coincide con tu búsqueda. Borra los filtros o publica una nueva solicitud.",
+    "boardEmptyReset": "Borrar filtros",
+    "mineEmptyTitle": "Aún no hay solicitudes de compra",
+    "myQuotesEmptyTitle": "Aún no hay ofertas"
   },
   "roleHubs": {
     "buyers": {

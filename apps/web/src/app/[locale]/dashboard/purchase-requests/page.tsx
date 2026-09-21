@@ -1,6 +1,7 @@
 import type { PurchaseRequestSummary, RfqSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PurchaseRequestList } from '@/components/PurchaseRequestList';
+import { EmptyState } from '@/components/EmptyState';
 import { MarkSectionNotificationsRead } from '@/components/MarkSectionNotificationsRead';
 import { RfqList } from '@/components/RfqList';
 import { Link, redirect } from '@/i18n/navigation';
@@ -44,7 +45,25 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
         {' · '}
         <Link href="/catalog">{tr('browseCatalog')}</Link>
       </p>
-      <PurchaseRequestList items={items} emptyLabel={t('mineEmpty')} />
+      <PurchaseRequestList
+        items={items}
+        empty={
+          <EmptyState
+            title={t('mineEmptyTitle')}
+            body={t('mineEmpty')}
+            actions={
+              <>
+                <Link href="/requests/new" className="button button--primary">
+                  {t('createCta')}
+                </Link>
+                <Link href="/requests" className="button button--ghost">
+                  {t('boardTitle')}
+                </Link>
+              </>
+            }
+          />
+        }
+      />
 
       <section id="my-requests" className="cabinet-section cabinet-section--nested">
         <h2 className="section-title">{t('productRfqsLink')}</h2>

@@ -3,6 +3,11 @@
     "title": "AgroBridge",
     "description": "Relier les producteurs agricoles géorgiens aux acheteurs du monde entier."
   },
+  "notFound": {
+    "title": "Page introuvable",
+    "body": "Cette page AgroBridge n'existe pas ou n'est plus disponible. Revenez à l'accueil ou continuez sur la place de marché.",
+    "home": "Retour à l'accueil"
+  },
   "home": {
     "brand": "AgroBridge",
     "headline": "Fermes géorgiennes. Acheteurs mondiaux.",
@@ -191,7 +196,11 @@
     "priceOnRequest": "Prix sur demande",
     "floatingLead": "Vous ne trouvez pas ce qu'il faut ?",
     "floatingText": "Décrivez votre besoin et recevez des offres.",
-    "floatingCta": "Publier une demande d'achat"
+    "floatingCta": "Publier une demande d'achat",
+    "emptyTitle": "Aucun produit pour le moment",
+    "emptyFilteredTitle": "Aucun produit correspondant",
+    "emptyUnfiltered": "Aucun produit publié n'est visible pour le moment. Publiez une demande d'achat pour que les fermes puissent répondre.",
+    "emptyReset": "Effacer les filtres"
   },
   "farm": {
     "createTitle": "Créer le profil de ferme",
@@ -395,6 +404,12 @@
     "published": "Publié",
     "draft": "Brouillon",
     "emptyMine": "Vous n’avez pas encore de produits.",
+    "emptyMineTitle": "Pas encore de produits",
+    "emptyPublishedTitle": "Aucun produit publié",
+    "emptyPublished": "Aucun de vos produits n'est encore dans le catalogue public. Ajoutez un produit ou ouvrez toutes les annonces.",
+    "emptyPendingTitle": "Aucun produit en modération",
+    "emptyPending": "Vous n'avez aucun produit en attente de modération. Ouvrez toutes les annonces ou ajoutez un nouveau produit.",
+    "emptyShowAll": "Afficher tous les produits",
     "needFarmFirst": "Le profil de ferme est facultatif. Vous pouvez ajouter des produits sans en créer un.",
     "goCreateFarm": "Aller au profil de ferme",
     "units": {
@@ -1024,7 +1039,12 @@
     "floatingText": "Publiez votre offre produit pour atteindre les acheteurs intéressés.",
     "floatingCta": "Mettre en ligne mon produit",
     "buyerOnly": "Connectez-vous pour publier une demande d’achat. Tout compte AgroBridge peut acheter et vendre.",
-    "registerAsBuyer": "Créer un compte"
+    "registerAsBuyer": "Créer un compte",
+    "boardEmptyTitle": "Aucune demande d'achat",
+    "boardEmptyFiltered": "Aucune demande d'achat ne correspond à votre recherche. Effacez les filtres ou publiez une nouvelle demande.",
+    "boardEmptyReset": "Effacer les filtres",
+    "mineEmptyTitle": "Pas encore de demandes d'achat",
+    "myQuotesEmptyTitle": "Pas encore d'offres"
   },
   "roleHubs": {
     "buyers": {

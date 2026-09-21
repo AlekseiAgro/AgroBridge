@@ -3,6 +3,11 @@
     "title": "AgroBridge",
     "description": "Georgische Agrarproduzenten mit Käufern weltweit verbinden."
   },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "body": "Diese AgroBridge-Seite existiert nicht oder ist nicht mehr verfügbar. Gehen Sie zur Startseite oder weiter zum Marktplatz.",
+    "home": "Zur Startseite"
+  },
   "home": {
     "brand": "AgroBridge",
     "headline": "Georgische Betriebe. Globale Käufer.",
@@ -191,7 +196,11 @@
     "priceOnRequest": "Preis auf Anfrage",
     "floatingLead": "Nicht das Richtige gefunden?",
     "floatingText": "Beschreiben Sie Ihren Bedarf und erhalten Sie Angebote.",
-    "floatingCta": "Kaufanfrage veröffentlichen"
+    "floatingCta": "Kaufanfrage veröffentlichen",
+    "emptyTitle": "Noch keine Produkte",
+    "emptyFilteredTitle": "Keine passenden Produkte",
+    "emptyUnfiltered": "Derzeit sind keine veröffentlichten Produkte zu sehen. Veröffentlichen Sie eine Kaufanfrage, damit Betriebe antworten können.",
+    "emptyReset": "Filter zurücksetzen"
   },
   "farm": {
     "createTitle": "Betriebsprofil erstellen",
@@ -395,6 +404,12 @@
     "published": "Veröffentlicht",
     "draft": "Entwurf",
     "emptyMine": "Sie haben noch keine Produkte.",
+    "emptyMineTitle": "Noch keine Produkte",
+    "emptyPublishedTitle": "Keine veröffentlichten Produkte",
+    "emptyPublished": "Noch keines Ihrer Produkte ist im öffentlichen Katalog. Fügen Sie ein Produkt hinzu oder öffnen Sie alle Angebote.",
+    "emptyPendingTitle": "Keine Produkte in der Moderation",
+    "emptyPending": "Sie haben keine Produkte, die auf Moderation warten. Öffnen Sie alle Angebote oder fügen Sie ein neues Produkt hinzu.",
+    "emptyShowAll": "Alle Produkte anzeigen",
     "needFarmFirst": "Ein Betriebsprofil ist optional. Sie können auch ohne eines Produkte hinzufügen.",
     "goCreateFarm": "Zum Betriebsprofil",
     "units": {
@@ -1024,7 +1039,12 @@
     "floatingText": "Veröffentlichen Sie Ihr Angebot und erreichen Sie interessierte Käufer.",
     "floatingCta": "Eigenes Produkt listen",
     "buyerOnly": "Melden Sie sich an, um eine Kaufanfrage zu stellen. Jedes AgroBridge-Konto kann kaufen und verkaufen.",
-    "registerAsBuyer": "Konto erstellen"
+    "registerAsBuyer": "Konto erstellen",
+    "boardEmptyTitle": "Keine Kaufanfragen",
+    "boardEmptyFiltered": "Keine Kaufanfragen entsprechen Ihrer Suche. Setzen Sie die Filter zurück oder veröffentlichen Sie eine neue Anfrage.",
+    "boardEmptyReset": "Filter zurücksetzen",
+    "mineEmptyTitle": "Noch keine Kaufanfragen",
+    "myQuotesEmptyTitle": "Noch keine Angebote"
   },
   "roleHubs": {
     "buyers": {
