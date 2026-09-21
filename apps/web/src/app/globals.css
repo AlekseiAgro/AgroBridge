@@ -860,6 +860,13 @@ body {
   font-weight: 700;
 }
 
+@media (max-width: 640px) {
+  .site-header .language-switcher__menu {
+    left: 0;
+    right: auto;
+  }
+}
+
 .auth-page {
   min-height: 100vh;
   padding: 1.25rem 1.25rem 3rem;
