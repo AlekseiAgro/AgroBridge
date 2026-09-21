@@ -111,7 +111,7 @@ describe('public product UI localization (S1)', () => {
 
     const harvest = source('components/HarvestStatusBadge.tsx');
     expect(harvest).toContain("useTranslations('harvest')");
-    expect(harvest).toContain("t('preorderBadge')");
+    expect(harvest).toContain('harvestPreorderMessageKey');
 
     const detail = source('app/[locale]/products/[id]/page.tsx');
     expect(detail).toContain("t('sections.basics')");

@@ -188,6 +188,7 @@
     "searchPlaceholder": "Nombre o descripción del producto",
     "availableQuantity": "Cantidad disponible",
     "sellerRating": "Valoración del vendedor",
+    "priceOnRequest": "Precio a consultar",
     "floatingLead": "¿No encuentra lo que necesita?",
     "floatingText": "Describa su necesidad y reciba ofertas de las fincas.",
     "floatingCta": "Publicar solicitud de compra"

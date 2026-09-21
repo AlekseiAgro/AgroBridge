@@ -188,6 +188,7 @@
     "searchPlaceholder": "Название или описание продукта",
     "availableQuantity": "Доступный объём",
     "sellerRating": "Рейтинг продавца",
+    "priceOnRequest": "Цена по запросу",
     "floatingLead": "Не нашли нужное?",
     "floatingText": "Опишите потребность — хозяйства пришлют предложения.",
     "floatingCta": "Разместить запрос на покупку"

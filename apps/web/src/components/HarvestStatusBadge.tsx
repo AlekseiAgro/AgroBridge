@@ -1,6 +1,6 @@
 'use client';
 
-import type { HarvestStatus } from '@agrobridge/shared';
+import { harvestPreorderMessageKey, type HarvestStatus } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 
 type Props = {
@@ -23,7 +23,9 @@ export function HarvestStatusBadge({
         <span className={`harvest-badge harvest-badge--${status}`}>{t(`status.${status}`)}</span>
       ) : null}
       {preorderEnabled ? (
-        <span className="harvest-badge harvest-badge--preorder">{t('preorderBadge')}</span>
+        <span className="harvest-badge harvest-badge--preorder">
+          {t(harvestPreorderMessageKey(status))}
+        </span>
       ) : null}
     </span>
   );
