@@ -27,10 +27,16 @@ function loadMessages(locale: string) {
       avatarLabel: string;
       displayNameLabel: string;
       displayNameSave: string;
+      settingsEdit: string;
+      changePasswordAction: string;
+      passwordRowHint: string;
       settingsTitle: string;
       settingsSubtitle: string;
       securityTitle: string;
       legalTitle: string;
+      legalAcceptanceLabel: string;
+      deleteAccountTitle: string;
+      deleteAccountCompactHint: string;
     };
   };
 }
@@ -96,49 +102,62 @@ function cabinetFixture(css: string, page: 'account' | 'settings'): string {
     </main>`;
 
   const settingsMain = `
-    <main class="cabinet-page">
-      <div class="page__heading-row"><div><h1>Settings</h1><p class="page__subtitle">Profile, password, account security, and legal documents.</p></div></div>
+    <main class="cabinet-page cabinet-page--settings">
       <section class="cabinet-profile">
         <h2 class="section-title">Profile</h2>
-        <p class="cabinet-profile__hint">Change your display name, profile photo, and email address.</p>
-        <div class="cabinet-profile__stack">
-          <div class="cabinet-profile__block">
-            <p class="cabinet-profile__label">Profile photo</p>
-            <div class="user-avatar-editor">
+        <div class="settings-list">
+          <div class="settings-row">
+            <p class="settings-row__label">Profile photo</p>
+            <div class="settings-row__body">
               <button type="button" class="user-card__avatar user-card__avatar--editable">A</button>
-              <div class="user-avatar-editor__actions">
-                <button type="button" class="button button--ghost user-avatar-editor__button">Change photo</button>
-              </div>
+              <button type="button" class="settings-row__action">Change photo</button>
             </div>
           </div>
-          <div class="edit-profile edit-profile--settings">
-            <div class="edit-profile__fields">
-              <form class="profile-edit-form">
-                <label class="field"><span>Profile name</span><input type="text" value="Very Long Display Name For Overflow Checks" /></label>
-                <div class="cabinet-profile__actions">
-                  <button class="button button--primary" type="submit">Save</button>
-                </div>
-              </form>
-              <div class="edit-profile__email">
-                <p class="cabinet-profile__label">Email</p>
-                <p class="cabinet-profile__value">very.long.email.address.for.overflow@example.com</p>
-                <button type="button" class="button button--ghost profile-edit-row__button">Change email</button>
-              </div>
+          <div class="settings-row">
+            <p class="settings-row__label">Profile name</p>
+            <div class="settings-row__body">
+              <p class="settings-row__value">Very Long Display Name For Overflow Checks</p>
+              <button type="button" class="settings-row__action">Edit</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <p class="settings-row__label">Email</p>
+            <div class="settings-row__body">
+              <p class="settings-row__value">very.long.email.address.for.overflow@example.com</p>
+              <button type="button" class="settings-row__action">Edit</button>
             </div>
           </div>
         </div>
       </section>
       <section class="cabinet-security">
         <h2 class="section-title">Security</h2>
-        <p class="cabinet-security__hint">Use a strong password.</p>
-        <form class="auth-form">
-          <label class="field"><span>Current password</span><input type="password" value="password1" /></label>
-          <label class="field"><span>New password</span><input type="password" /></label>
-        </form>
+        <div class="settings-row">
+          <p class="settings-row__label">Password</p>
+          <div class="settings-row__body">
+            <p class="settings-row__value">Change the password you use to sign in.</p>
+            <button type="button" class="settings-row__action">Change password</button>
+          </div>
+        </div>
       </section>
       <section class="cabinet-legal">
-        <h2 class="section-title">Legal</h2>
-        <p class="cabinet-legal__hint">Current published documents and your Terms of Use acceptance.</p>
+        <h2 class="section-title">Legal information</h2>
+        <div class="settings-list">
+          <a class="settings-row settings-row--link" href="#"><span class="settings-row__label">Terms of Use</span><span class="settings-row__chevron">→</span></a>
+          <a class="settings-row settings-row--link" href="#"><span class="settings-row__label">Privacy Policy</span><span class="settings-row__chevron">→</span></a>
+          <div class="settings-row">
+            <p class="settings-row__label">Terms acceptance</p>
+            <p class="settings-row__value">You accepted Terms of Use version 1.0 on 20 September 2026.</p>
+          </div>
+        </div>
+      </section>
+      <section class="cabinet-danger">
+        <h2 class="section-title">Delete account</h2>
+        <div class="settings-row">
+          <div class="settings-row__body">
+            <p class="settings-row__value">Deleting your account cannot be undone.</p>
+            <button class="button button--danger-quiet" type="button">Delete account</button>
+          </div>
+        </div>
       </section>
     </main>`;
 
@@ -361,18 +380,20 @@ describe('read-only account overview and settings profile editing', () => {
 
     expect(settings).toContain('cabinet-profile');
     expect(settings).toContain('profileSettingsTitle');
-    expect(settings).toContain('cabinet-profile__stack');
+    expect(settings).toContain('settings-list');
+    expect(settings).toContain('cabinet-page--settings');
     expect(settings).not.toContain('cabinet-profile__identity');
+    expect(settings).not.toContain('alwaysOpen');
     expect(settings).toContain('UserAvatarEditor');
     expect(settings).toContain('EditProfileControl');
-    expect(settings).toContain('alwaysOpen');
     expect(settings).toContain('ChangePasswordForm');
     expect(settings).toContain('DeleteAccountButton');
     expect(settings).toContain('cabinet-legal');
     expect(settings).toContain('/legal/me');
+    expect(settings).toContain('legalAcceptanceLabel');
 
-    expect(editor).toContain('edit-profile--settings');
-    expect(editor).toContain('{alwaysOpen ? null : (');
+    expect(editor).toContain("useState<Editing>('none')");
+    expect(editor).toContain('settingsEdit');
     expect(settings).not.toContain('user-card__name');
     expect(editor).toContain("fetch('/api/cabinet/me/profile'");
     expect(editor).toContain("'/api/cabinet/me/email/request'");
@@ -382,6 +403,8 @@ describe('read-only account overview and settings profile editing', () => {
     expect(avatar).toContain("method: 'POST'");
     expect(avatar).toContain("method: 'DELETE'");
     expect(password).toContain("fetch('/api/auth/change-password'");
+    expect(password).toContain('useState(false)');
+    expect(password).toContain('changePasswordAction');
   });
 
   it('does not change cabinet API contracts or sidebar destinations', () => {
@@ -394,6 +417,8 @@ describe('read-only account overview and settings profile editing', () => {
     expect(controller).toContain("@Post('me/email/confirm')");
     expect(controller).toContain("@Post('me/avatar')");
     expect(controller).toContain("@Delete('me/avatar')");
+    expect(controller).toContain("@Post('me/delete/request')");
+    expect(controller).toContain("@Post('me/delete/confirm')");
 
     expect(shell).toContain("href=\"/dashboard/subscriptions\">{t('subscriptions')}");
     expect(shell).toContain("href=\"/account/settings\">{t('settings')}");
@@ -418,7 +443,12 @@ describe('read-only account overview and settings profile editing', () => {
       expect(messages.cabinet.profileSettingsHint.trim().length).toBeGreaterThan(0);
       expect(messages.cabinet.avatarLabel.trim().length).toBeGreaterThan(0);
       expect(messages.cabinet.displayNameLabel.trim().length).toBeGreaterThan(0);
-      expect(messages.cabinet.displayNameSave.trim().length).toBeGreaterThan(0);
+      expect(messages.cabinet.settingsEdit.trim().length).toBeGreaterThan(0);
+      expect(messages.cabinet.changePasswordAction.trim().length).toBeGreaterThan(0);
+      expect(messages.cabinet.passwordRowHint.trim().length).toBeGreaterThan(0);
+      expect(messages.cabinet.legalAcceptanceLabel.trim().length).toBeGreaterThan(0);
+      expect(messages.cabinet.deleteAccountTitle.trim().length).toBeGreaterThan(0);
+      expect(messages.cabinet.deleteAccountCompactHint.trim().length).toBeGreaterThan(0);
       expect(messages.cabinet.settingsTitle.trim().length).toBeGreaterThan(0);
       expect(messages.cabinet.settingsSubtitle).toBe(expectedSubtitle[locale]);
       expect(messages.cabinet.securityTitle.trim().length).toBeGreaterThan(0);
@@ -434,18 +464,22 @@ describe('read-only account overview and settings profile editing', () => {
     expect(ru.cabinet.avatarLabel).toBe('Фото профиля');
     expect(ru.cabinet.displayNameLabel).toBe('Имя профиля');
     expect(ru.cabinet.displayNameSave).toBe('Сохранить');
+    expect(ru.cabinet.settingsEdit).toBe('Изменить');
+    expect(ru.cabinet.changePasswordAction).toBe('Изменить пароль');
+    expect(ru.cabinet.legalTitle).toBe('Юридическая информация');
+    expect(ru.cabinet.deleteAccountTitle).toBe('Удаление аккаунта');
   });
 
   it('keeps the Profile section visually aligned with Security and Legal', () => {
     const css = readWeb('app/globals.css');
-    expect(css).toMatch(/\.cabinet-profile\s*\{[\s\S]*?margin-top:\s*3\.5rem/);
+    expect(css).toMatch(/\.cabinet-profile\s*\{[\s\S]*?margin-top:\s*1\.5rem/);
     expect(css).toMatch(/\.cabinet-profile\s*\{[\s\S]*?border-top:\s*1px solid var\(--line\)/);
-    expect(css).toMatch(/\.cabinet-security\s*\{[\s\S]*?margin-top:\s*3\.5rem/);
-    expect(css).toMatch(/\.cabinet-legal\s*\{[\s\S]*?margin-top:\s*3\.5rem/);
-    expect(css).toContain('.cabinet-profile__hint');
-    expect(css).toContain('.cabinet-profile__stack');
-    expect(css).toContain('.cabinet-profile__label');
-    expect(css).toMatch(/\.cabinet-profile\s*\{[\s\S]*?max-width:\s*28rem/);
+    expect(css).toMatch(/\.cabinet-security\s*\{[\s\S]*?margin-top:\s*1\.5rem/);
+    expect(css).toMatch(/\.cabinet-legal\s*\{[\s\S]*?margin-top:\s*1\.5rem/);
+    expect(css).toContain('.settings-row');
+    expect(css).toContain('.settings-list');
+    expect(css).toContain('.cabinet-page--settings');
+    expect(css).toMatch(/\.cabinet-page--settings\s*\{[\s\S]*?max-width:\s*46rem|\.cabinet-page--settings\s*\{[\s\S]*?width:\s*min\(100%, 46rem\)/);
     expect(css).not.toContain('.cabinet-profile__identity');
   });
 

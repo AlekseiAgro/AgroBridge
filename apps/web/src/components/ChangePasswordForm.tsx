@@ -5,9 +5,17 @@ import { useTranslations } from 'next-intl';
 
 export function ChangePasswordForm() {
   const t = useTranslations('auth');
+  const tc = useTranslations('cabinet');
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  function closeForm() {
+    setOpen(false);
+    setError(null);
+    setPending(false);
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,6 +52,7 @@ export function ChangePasswordForm() {
       }
       form.reset();
       setSuccess(t('passwordChanged'));
+      closeForm();
     } catch {
       setError(t('genericError'));
     } finally {
@@ -51,48 +60,76 @@ export function ChangePasswordForm() {
     }
   }
 
+  if (!open) {
+    return (
+      <div className="settings-row">
+        <p className="settings-row__label">{t('password')}</p>
+        <div className="settings-row__body">
+          <p className="settings-row__value">{success ?? tc('passwordRowHint')}</p>
+          <button
+            type="button"
+            className="settings-row__action"
+            onClick={() => {
+              setSuccess(null);
+              setOpen(true);
+            }}
+          >
+            {tc('changePasswordAction')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <form className="auth-form" onSubmit={onSubmit}>
-      <label className="field">
-        <span>{t('currentPassword')}</span>
-        <input
-          name="currentPassword"
-          type="password"
-          required
-          minLength={8}
-          maxLength={128}
-          autoComplete="current-password"
-        />
-      </label>
-      <label className="field">
-        <span>{t('newPassword')}</span>
-        <input
-          name="newPassword"
-          type="password"
-          required
-          minLength={8}
-          maxLength={128}
-          autoComplete="new-password"
-        />
-      </label>
-      <label className="field">
-        <span>{t('confirmNewPassword')}</span>
-        <input
-          name="confirmNewPassword"
-          type="password"
-          required
-          minLength={8}
-          maxLength={128}
-          autoComplete="new-password"
-        />
-      </label>
+    <div className="settings-row settings-row--editing">
+      <p className="settings-row__label">{t('password')}</p>
+      <form className="auth-form" onSubmit={onSubmit}>
+        <label className="field">
+          <span>{t('currentPassword')}</span>
+          <input
+            name="currentPassword"
+            type="password"
+            required
+            minLength={8}
+            maxLength={128}
+            autoComplete="current-password"
+          />
+        </label>
+        <label className="field">
+          <span>{t('newPassword')}</span>
+          <input
+            name="newPassword"
+            type="password"
+            required
+            minLength={8}
+            maxLength={128}
+            autoComplete="new-password"
+          />
+        </label>
+        <label className="field">
+          <span>{t('confirmNewPassword')}</span>
+          <input
+            name="confirmNewPassword"
+            type="password"
+            required
+            minLength={8}
+            maxLength={128}
+            autoComplete="new-password"
+          />
+        </label>
 
-      {error ? <p className="form-error">{error}</p> : null}
-      {success ? <p className="form-success">{success}</p> : null}
+        {error ? <p className="form-error">{error}</p> : null}
 
-      <button className="button button--primary" type="submit" disabled={pending}>
-        {pending ? t('pleaseWait') : t('changePasswordSubmit')}
-      </button>
-    </form>
+        <div className="settings-row__actions">
+          <button className="button button--primary" type="submit" disabled={pending}>
+            {pending ? t('pleaseWait') : t('changePasswordSubmit')}
+          </button>
+          <button className="button button--ghost" type="button" disabled={pending} onClick={closeForm}>
+            {tc('displayNameCancel')}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

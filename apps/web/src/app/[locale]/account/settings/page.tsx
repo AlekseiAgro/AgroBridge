@@ -19,7 +19,6 @@ export default async function AccountSettingsPage({ params }: Props) {
 
   const user = await requireVerifiedUser(locale, '/account/settings');
   const t = await getTranslations('cabinet');
-  const ta = await getTranslations('auth');
 
   let legal: LegalAcceptanceSnapshot | null = null;
   try {
@@ -36,9 +35,16 @@ export default async function AccountSettingsPage({ params }: Props) {
         new Date(legal.terms.acceptedAt),
       )
     : null;
+  const acceptanceStatus =
+    legal?.terms.accepted && legal.terms.documentVersion && acceptedAt
+      ? t('termsAcceptedAt', {
+          version: legal.terms.documentVersion,
+          date: acceptedAt,
+        })
+      : t('termsNotAccepted');
 
   return (
-    <main className="cabinet-page">
+    <main className="cabinet-page cabinet-page--settings">
       <div className="page__heading-row">
         <div>
           <h1>{t('settingsTitle')}</h1>
@@ -50,17 +56,12 @@ export default async function AccountSettingsPage({ params }: Props) {
         <h2 id="cabinet-profile-title" className="section-title">
           {t('profileSettingsTitle')}
         </h2>
-        <p className="cabinet-profile__hint">{t('profileSettingsHint')}</p>
-        <div className="cabinet-profile__stack">
+        <div className="settings-list">
           <UserAvatarEditor
             avatarUrl={user.avatarUrl}
             fallbackInitial={(user.displayName || user.email).slice(0, 1).toUpperCase()}
           />
-          <EditProfileControl
-            alwaysOpen
-            initialDisplayName={user.displayName}
-            email={user.email}
-          />
+          <EditProfileControl initialDisplayName={user.displayName} email={user.email} />
         </div>
       </section>
 
@@ -68,7 +69,6 @@ export default async function AccountSettingsPage({ params }: Props) {
         <h2 id="cabinet-security-title" className="section-title">
           {t('securityTitle')}
         </h2>
-        <p className="cabinet-security__hint">{ta('changePasswordHint')}</p>
         <ChangePasswordForm />
       </section>
 
@@ -76,43 +76,37 @@ export default async function AccountSettingsPage({ params }: Props) {
         <h2 id="cabinet-legal-title" className="section-title">
           {t('legalTitle')}
         </h2>
-        <p className="cabinet-legal__hint">{t('legalSubtitle')}</p>
         {legal ? (
-          <>
-            <p>
-              {t('currentTerms')}
-              {legal.currentTerms
-                ? ` — ${t('termsVersion', { version: legal.currentTerms.version })}`
-                : ''}
-            </p>
-            <p>
-              {legal.terms.accepted && legal.terms.documentVersion && acceptedAt
-                ? t('termsAcceptedAt', {
-                    version: legal.terms.documentVersion,
-                    date: acceptedAt,
-                  })
-                : t('termsNotAccepted')}
-            </p>
-            <p>
-              <Link href="/terms" locale={legalLocale}>
-                {t('viewTerms')}
-              </Link>
-            </p>
-            <p>
-              <Link href="/privacy" locale={legalLocale}>
-                {t('viewPrivacy')}
-              </Link>
-            </p>
+          <div className="settings-list">
+            <Link href="/terms" locale={legalLocale} className="settings-row settings-row--link">
+              <span className="settings-row__label">{t('viewTerms')}</span>
+              <span className="settings-row__chevron" aria-hidden>
+                →
+              </span>
+            </Link>
+            <Link href="/privacy" locale={legalLocale} className="settings-row settings-row--link">
+              <span className="settings-row__label">{t('viewPrivacy')}</span>
+              <span className="settings-row__chevron" aria-hidden>
+                →
+              </span>
+            </Link>
+            <div className="settings-row">
+              <p className="settings-row__label">{t('legalAcceptanceLabel')}</p>
+              <p className="settings-row__value">{acceptanceStatus}</p>
+            </div>
             <p className="cabinet-legal__hint">{t('privacyTransparency')}</p>
             <p className="cabinet-legal__hint">{t('privacyNotAccepted')}</p>
-          </>
+          </div>
         ) : (
           <p className="cabinet-legal__hint">{t('legalLoadError')}</p>
         )}
       </section>
 
       {user.role !== 'admin' ? (
-        <section className="cabinet-danger">
+        <section className="cabinet-danger" aria-labelledby="cabinet-danger-title">
+          <h2 id="cabinet-danger-title" className="section-title">
+            {t('deleteAccountTitle')}
+          </h2>
           <DeleteAccountButton email={user.email} />
         </section>
       ) : null}
