@@ -252,6 +252,42 @@ describe('CabinetService', () => {
     expect(overview.activity.completedDeals).not.toBe(overview.activity.acceptedQuotes);
   });
 
+  it('counts only completed deals that still need the current user\'s rating', async () => {
+    await stubOverviewCounts();
+    prisma.rfq.findMany.mockResolvedValue([
+      { id: 'buyer_pending', ratings: [] },
+      { id: 'seller_pending', ratings: [{ fromUserId: 'someone_else' }] },
+      { id: 'already_rated', ratings: [{ fromUserId: farmer.id }] },
+      { id: 'counterparty_only', ratings: [{ fromUserId: buyer.id }] },
+    ]);
+
+    const overview = await service.overview(farmer);
+    expect(overview.activity.awaitingMyRating).toBe(3);
+    expect(prisma.rfq.findMany).toHaveBeenCalledWith({
+      where: {
+        status: 'completed',
+        OR: [{ buyerId: farmer.id }, { product: { ownerUserId: farmer.id } }],
+      },
+      select: {
+        id: true,
+        ratings: { select: { fromUserId: true } },
+      },
+    });
+  });
+
+  it('returns zero awaiting ratings when every completed deal is already rated by the user', async () => {
+    await stubOverviewCounts();
+    prisma.rfq.findMany.mockResolvedValue([
+      { id: 'done', ratings: [{ fromUserId: farmer.id }, { fromUserId: buyer.id }] },
+    ]);
+
+    await expect(service.overview(farmer)).resolves.toEqual(
+      expect.objectContaining({
+        activity: expect.objectContaining({ awaitingMyRating: 0 }),
+      }),
+    );
+  });
+
   it('exposes notification unread totals without changing marketplace object counts', async () => {
     await stubOverviewCounts({
       openPurchaseRequests: 5,

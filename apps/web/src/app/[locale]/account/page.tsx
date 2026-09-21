@@ -24,8 +24,6 @@ export default async function AccountPage({ params }: Props) {
   const trader = canTrade(user.role);
   const roleKey = `roles.${user.role}` as 'roles.farmer' | 'roles.buyer' | 'roles.admin';
   const memberSince = formatMemberSinceMonthYear(user.memberSince, locale);
-  const dealsBase = user.role === 'farmer' ? '/dashboard/inbox' : '/dashboard/rfqs';
-
   const cards: Array<{
     key: string;
     value: number;
@@ -90,7 +88,7 @@ export default async function AccountPage({ params }: Props) {
     key: 'awaitingMyRating',
     value: activity.awaitingMyRating,
     label: t('stats.awaitingMyRating'),
-    href: `${dealsBase}?needsRating=1`,
+    href: '/dashboard/deals?needsRating=1',
   });
 
   return (
