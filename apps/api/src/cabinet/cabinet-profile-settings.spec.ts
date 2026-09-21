@@ -53,6 +53,8 @@ type OverflowMeasure = {
   diff: number;
   overflowers: Array<{ cls: string; extra: number }>;
   horizontalOverflow: boolean;
+  avatarWidth: number | null;
+  avatarHeight: number | null;
 };
 
 function findChrome(): string | null {
@@ -194,6 +196,7 @@ const MEASURE_JS = `(() => {
   const scroll = measured.scrollWidth;
   const host = measured.getBoundingClientRect();
   const overflowers = [];
+  const avatar = document.querySelector('.cabinet-page--settings .user-card__avatar');
   for (const el of document.querySelectorAll('body *')) {
     const r = el.getBoundingClientRect();
     if (r.width > 0 && r.right > host.right + 1) {
@@ -209,6 +212,8 @@ const MEASURE_JS = `(() => {
     diff: scroll - client,
     overflowers: overflowers.slice(0, 8),
     horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+    avatarWidth: avatar ? Math.round(avatar.getBoundingClientRect().width) : null,
+    avatarHeight: avatar ? Math.round(avatar.getBoundingClientRect().height) : null,
   };
 })()`;
 
@@ -498,6 +503,9 @@ describe('read-only account overview and settings profile editing', () => {
     expect(css).toMatch(
       /\.cabinet-page--settings \.cabinet-profile\s*\{[\s\S]*?border-top:\s*0/,
     );
+    expect(css).toMatch(
+      /\.cabinet-page--settings \.user-card__avatar\s*\{[\s\S]*?width:\s*72px[\s\S]*?height:\s*72px/,
+    );
     expect(css).not.toContain('.cabinet-profile__identity');
   });
 
@@ -539,6 +547,13 @@ describe('read-only account overview and settings profile editing', () => {
               horizontalOverflow: false,
             });
             expect(result.diff).toBeLessThanOrEqual(1);
+            if (page === 'settings.html') {
+              expect({ viewport: viewport.width, avatarWidth: result.avatarWidth, avatarHeight: result.avatarHeight }).toEqual({
+                viewport: viewport.width,
+                avatarWidth: 72,
+                avatarHeight: 72,
+              });
+            }
           }
         }
       } finally {

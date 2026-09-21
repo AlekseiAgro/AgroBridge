@@ -625,8 +625,8 @@ body {
 }
 
 .cabinet-page--settings .user-card__avatar {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 72px;
+  height: 72px;
   font-size: 1.15rem;
   border-radius: 0.8rem;
 }
