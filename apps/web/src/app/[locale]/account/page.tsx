@@ -19,7 +19,28 @@ export default async function AccountPage({ params }: Props) {
   const t = await getTranslations('cabinet');
   const ta = await getTranslations('auth');
   const tProfile = await getTranslations('profile');
-  const overview = await apiRequestAuthed<CabinetOverview>('/cabinet/overview');
+  let overview: CabinetOverview | null = null;
+  let loadError: string | null = null;
+  try {
+    overview = await apiRequestAuthed<CabinetOverview>('/cabinet/overview');
+  } catch {
+    loadError = t('loadError');
+  }
+
+  if (loadError || !overview) {
+    return (
+      <main className="cabinet-page">
+        <div className="page__heading-row">
+          <div>
+            <h1>{t('title')}</h1>
+            <p className="page__subtitle">{t('subtitle')}</p>
+          </div>
+        </div>
+        <p className="form-error">{t('loadError')}</p>
+      </main>
+    );
+  }
+
   const { user, activity, notificationUnread = EMPTY_NOTIFICATION_UNREAD_SUMMARY } = overview;
   const trader = canTrade(user.role);
   const roleKey = `roles.${user.role}` as 'roles.farmer' | 'roles.buyer' | 'roles.admin';
@@ -169,7 +190,6 @@ export default async function AccountPage({ params }: Props) {
           ))}
         </ul>
       </section>
-
     </main>
   );
 }

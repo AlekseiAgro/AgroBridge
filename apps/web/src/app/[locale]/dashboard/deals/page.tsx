@@ -18,10 +18,16 @@ export default async function CompletedDealsPage({ params, searchParams }: Props
 
   const user = await requireVerifiedUser(locale, '/dashboard/deals');
   const t = await getTranslations('cabinet');
-  const items = filterRfqsForCabinet(
-    await apiRequestAuthed<RfqSummary[]>('/rfqs/completed'),
-    query,
-  );
+  let items: RfqSummary[] = [];
+  let loadError: string | null = null;
+  try {
+    items = filterRfqsForCabinet(
+      await apiRequestAuthed<RfqSummary[]>('/rfqs/completed'),
+      query,
+    );
+  } catch {
+    loadError = t('deals.loadError');
+  }
 
   return (
     <main className="cabinet-page">
@@ -30,11 +36,15 @@ export default async function CompletedDealsPage({ params, searchParams }: Props
       </p>
       <h1>{t('deals.title')}</h1>
       <p className="page__subtitle">{t('deals.subtitle')}</p>
-      <CompletedDealsList
-        items={items}
-        viewerId={user.id}
-        emptyLabel={t('deals.empty')}
-      />
+      {loadError ? (
+        <p className="form-error">{loadError}</p>
+      ) : (
+        <CompletedDealsList
+          items={items}
+          viewerId={user.id}
+          emptyLabel={t('deals.empty')}
+        />
+      )}
     </main>
   );
 }
