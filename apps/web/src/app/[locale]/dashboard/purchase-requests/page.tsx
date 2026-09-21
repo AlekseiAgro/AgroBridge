@@ -29,6 +29,11 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
   return (
     <main className="cabinet-page">
       <MarkSectionNotificationsRead section="purchase-requests" />
+      <p className="eyebrow">
+        <Link href="/requests">{t('boardTitle')}</Link>
+        {' · '}
+        {t('mineTitle')}
+      </p>
       <div className="page__heading-row">
         <div>
           <h1>{t('mineTitle')}</h1>
@@ -38,13 +43,6 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
           {t('createCta')}
         </Link>
       </div>
-      <p className="eyebrow">
-        <Link href="/requests">{t('boardTitle')}</Link>
-        {' · '}
-        <Link href="/dashboard/quotes">{t('myQuotesTitle')}</Link>
-        {' · '}
-        <Link href="/catalog">{tr('browseCatalog')}</Link>
-      </p>
       <PurchaseRequestList
         items={items}
         empty={
@@ -66,8 +64,15 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
       />
 
       <section id="my-requests" className="cabinet-section cabinet-section--nested">
-        <h2 className="section-title">{t('productRfqsLink')}</h2>
-        <p className="page__subtitle">{tr('mineSubtitle')}</p>
+        <div className="page__heading-row">
+          <div>
+            <h2 className="section-title">{t('productRfqsLink')}</h2>
+            <p className="page__subtitle">{tr('mineSubtitle')}</p>
+          </div>
+          <Link href="/catalog" className="button button--ghost">
+            {tr('browseCatalog')}
+          </Link>
+        </div>
         <RfqList items={rfqs} emptyLabel={tr('mineEmpty')} detailBasePath="/dashboard/rfqs" />
       </section>
     </main>
