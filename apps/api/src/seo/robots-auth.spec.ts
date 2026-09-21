@@ -42,6 +42,7 @@ const PUBLIC_PAGE_SOURCES = [
 describe('robots.txt rules', () => {
   it('exposes a Next metadata robots route', () => {
     expect(existsSync(join(WEB_SRC, 'app/robots.ts'))).toBe(true);
+    expect(existsSync(join(WEB_SRC, 'app/sitemap.ts'))).toBe(true);
   });
 
   it('points crawlers at the production sitemap URL', () => {
