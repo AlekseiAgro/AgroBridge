@@ -1558,7 +1558,7 @@ body {
   min-width: 0;
 }
 
-.catalog-filters input {
+.catalog-filters .field input {
   width: 100%;
   max-width: 100%;
 }
@@ -2590,7 +2590,8 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .catalog-filters > .button {
+  .catalog-filters > .button,
+  .catalog-filters > .check-row {
     grid-column: 1 / -1;
   }
 
@@ -2602,7 +2603,7 @@ body {
     left: auto;
     z-index: auto;
     width: 100%;
-    margin: 0 0 1.25rem;
+    margin: 1.5rem 0 0;
     padding: 0;
     background: none;
   }
@@ -2720,7 +2721,8 @@ body {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .catalog-filters > .button {
+  .catalog-filters > .button,
+  .catalog-filters > .check-row {
     grid-column: 1 / -1;
   }
 
@@ -2732,7 +2734,7 @@ body {
     left: auto;
     z-index: auto;
     width: 100%;
-    margin: 0 0 1.25rem;
+    margin: 1.5rem 0 0;
     padding: 0;
     background: none;
   }
@@ -2774,7 +2776,7 @@ body {
     left: auto;
     z-index: auto;
     width: 100%;
-    margin: 0 0 1.25rem;
+    margin: 1.5rem 0 0;
     padding: 0;
     background: none;
   }

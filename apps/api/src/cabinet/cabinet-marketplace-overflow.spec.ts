@@ -74,15 +74,6 @@ function pageMain(options: { longCta?: boolean } = {}): string {
       <h1>Catalog</h1>
       <a class="button button--primary" href="#">Publish request</a>
     </div>
-    <aside class="floating-cta" aria-label="${ctaLabel}">
-      <div class="floating-cta__inner">
-        <div class="floating-cta__copy">
-          <p class="floating-cta__lead">${options.longCta ? 'ვერ იპოვეთ საჭირო?' : 'Looking for something else?'}</p>
-          <p class="floating-cta__text">${options.longCta ? 'გამოაქვეყნეთ მოთხოვნა.' : 'Post a purchase request and let sellers reply.'}</p>
-        </div>
-        <a class="button button--primary floating-cta__button" href="#cta">${ctaLabel}</a>
-      </div>
-    </aside>
     <form class="catalog-filters">
       <label class="field"><span>${searchLabel}</span><input value="honey" /></label>
       <label class="field"><span>${categoryLabel} <span class="field__optional">optional</span></span>
@@ -124,6 +115,15 @@ function pageMain(options: { longCta?: boolean } = {}): string {
         </div>
       </li>
     </ul>
+    <aside class="floating-cta" aria-label="${ctaLabel}">
+      <div class="floating-cta__inner">
+        <div class="floating-cta__copy">
+          <p class="floating-cta__lead">${options.longCta ? 'ვერ იპოვეთ საჭირო?' : 'Looking for something else?'}</p>
+          <p class="floating-cta__text">${options.longCta ? 'გამოაქვეყნეთ მოთხოვნა.' : 'Post a purchase request and let sellers reply.'}</p>
+        </div>
+        <a class="button button--primary floating-cta__button" href="#cta">${ctaLabel}</a>
+      </div>
+    </aside>
   </main>`;
 }
 
@@ -408,21 +408,23 @@ describe('cabinet marketplace tablet overflow (S1)', () => {
     expect(tabletContainer).toContain('repeat(2, minmax(0, 1fr))');
     expect(tabletContainer).toContain('position: static');
 
-    expect(css).toMatch(/\.catalog-filters input[\s\S]{0,120}width:\s*100%/);
+    expect(css).toMatch(/\.catalog-filters \.field input[\s\S]{0,120}width:\s*100%/);
     expect(css).toMatch(/\.floating-cta\s*\{[\s\S]*?position:\s*fixed/);
     expect(css).toMatch(/@media \(min-width: 1025px\)[\s\S]*?\.page:has\(\.floating-cta\)/);
 
     const catalogPage = readFileSync(join(WEB_SRC, 'app/[locale]/catalog/page.tsx'), 'utf8');
     const requestsPage = readFileSync(join(WEB_SRC, 'app/[locale]/requests/page.tsx'), 'utf8');
     expect(catalogPage.indexOf('<CatalogPurchaseCta')).toBeGreaterThan(-1);
-    expect(catalogPage.indexOf('<CatalogPurchaseCta')).toBeLessThan(
-      catalogPage.indexOf('<CatalogFilters'),
+    expect(catalogPage.indexOf('<CatalogFilters')).toBeLessThan(
+      catalogPage.indexOf('<CatalogPurchaseCta'),
     );
+    expect(catalogPage.indexOf('<CatalogPurchaseCta')).toBeLessThan(catalogPage.indexOf('</main>'));
     expect(catalogPage).not.toMatch(/<\/main>[\s\S]*CatalogPurchaseCta/);
     expect(requestsPage.indexOf('<RequestsSellCta')).toBeGreaterThan(-1);
-    expect(requestsPage.indexOf('<RequestsSellCta')).toBeLessThan(
-      requestsPage.indexOf('<PurchaseRequestFilters'),
+    expect(requestsPage.indexOf('<PurchaseRequestFilters')).toBeLessThan(
+      requestsPage.indexOf('<RequestsSellCta'),
     );
+    expect(requestsPage.indexOf('<RequestsSellCta')).toBeLessThan(requestsPage.indexOf('</main>'));
     expect(requestsPage).not.toMatch(/<\/main>[\s\S]*RequestsSellCta/);
   });
 

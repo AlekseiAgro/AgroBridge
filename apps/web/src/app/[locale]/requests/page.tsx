@@ -61,12 +61,12 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
         ) : null}
       </div>
 
-      <RequestsSellCta />
       <PurchaseRequestFilters initialQ={filters.q} initialCategory={filters.category} />
 
       {loadError ? <p className="form-error">{loadError}</p> : null}
 
       {!loadError ? <PurchaseRequestList items={items} emptyLabel={t('boardEmpty')} /> : null}
+      <RequestsSellCta />
     </main>
   );
 }

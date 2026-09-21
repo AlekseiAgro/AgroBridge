@@ -60,7 +60,6 @@ export default async function CatalogPage({ params, searchParams }: Props) {
       </p>
       <h1>{t('title')}</h1>
       <p className="page__subtitle">{t('subtitle')}</p>
-      <CatalogPurchaseCta />
       <CatalogFilters
         initialQ={filters.q}
         initialCategory={filters.category}
@@ -160,6 +159,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
           })}
         </ul>
       )}
+      <CatalogPurchaseCta />
     </main>
   );
 }
