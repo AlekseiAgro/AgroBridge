@@ -45,6 +45,16 @@ body {
   background-attachment: fixed;
 }
 
+.brand-logo {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+  flex-shrink: 0;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -155,12 +165,15 @@ body {
 }
 
 .home__brand {
+  display: flex;
+  justify-content: center;
   margin: 0 0 0.75rem;
-  font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(2.6rem, 7vw, 4.2rem);
-  font-weight: 650;
-  letter-spacing: -0.03em;
-  color: var(--brand-deep);
+}
+
+.home__brand .brand-logo {
+  height: clamp(5.5rem, 20vw, 9rem);
+  width: auto;
+  max-width: min(100%, 20rem);
 }
 
 .home__headline {
@@ -1064,11 +1077,18 @@ body {
 }
 
 .auth-brand {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: 1.4rem;
-  font-weight: 650;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  max-width: min(100%, 11rem);
   color: var(--brand-deep);
   text-decoration: none;
+}
+
+.auth-brand .brand-logo {
+  height: 2.85rem;
+  width: auto;
+  max-width: 100%;
 }
 
 .auth-card {
@@ -1494,12 +1514,15 @@ body {
 
 .site-footer__logo {
   display: inline-block;
-  font-family: var(--font-display), Georgia, serif;
-  font-size: 1.35rem;
-  font-weight: 650;
+  max-width: 100%;
   color: var(--brand-deep);
   text-decoration: none;
-  letter-spacing: -0.02em;
+}
+
+.site-footer__logo .brand-logo {
+  height: 3.15rem;
+  width: auto;
+  max-width: 100%;
 }
 
 .site-footer__tagline {
@@ -2249,10 +2272,12 @@ body {
 
 .empty-panel__brand {
   margin: 0 0 0.65rem;
-  font-family: var(--font-display), Georgia, serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--brand-deep);
+}
+
+.empty-panel__brand .brand-logo {
+  height: 2.75rem;
+  width: auto;
+  max-width: min(100%, 10rem);
 }
 
 .empty-panel__title {
@@ -3236,11 +3261,16 @@ body {
 }
 
 .cabinet__brand {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: 1.45rem;
-  font-weight: 650;
+  display: block;
+  max-width: 100%;
   color: var(--brand-deep);
   text-decoration: none;
+}
+
+.cabinet__brand .brand-logo {
+  height: 3.15rem;
+  width: auto;
+  max-width: 100%;
 }
 
 .cabinet__eyebrow {
