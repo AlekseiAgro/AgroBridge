@@ -20,7 +20,7 @@ function readApi(path: string) {
 
 function loadMessages(locale: string) {
   return JSON.parse(readFileSync(join(MESSAGES_DIR, `${locale}.json`), 'utf8')) as {
-    nav: { subscriptions: string; settings: string };
+    nav: { settings: string };
     cabinet: {
       profileSettingsTitle: string;
       profileSettingsHint: string;
@@ -176,7 +176,6 @@ function cabinetFixture(css: string, page: 'account' | 'settings'): string {
       <a class="cabinet__brand" href="/">AgroBridge</a>
       <nav class="cabinet__nav">
         <a href="/account">Account</a>
-        <a href="/dashboard/subscriptions">Subscriptions</a>
         <a href="/account/settings">Settings</a>
       </nav>
     </aside>
@@ -437,7 +436,8 @@ describe('read-only account overview and settings profile editing', () => {
     expect(controller).toContain("@Post('me/delete/request')");
     expect(controller).toContain("@Post('me/delete/confirm')");
 
-    expect(shell).toContain("href=\"/dashboard/subscriptions\">{t('subscriptions')}");
+    expect(shell).not.toContain('/dashboard/subscriptions');
+    expect(shell).not.toContain("t('subscriptions')");
     expect(shell).toContain("href=\"/account/settings\">{t('settings')}");
     expect(shell).toContain('NotificationBell');
     expect(bell).toContain('/dashboard/notifications');
@@ -472,12 +472,11 @@ describe('read-only account overview and settings profile editing', () => {
       expect(messages.cabinet.securityTitle.trim().length).toBeGreaterThan(0);
       expect(messages.cabinet.legalTitle.trim().length).toBeGreaterThan(0);
       expect(messages.nav.settings.trim().length).toBeGreaterThan(0);
-      expect(messages.nav.subscriptions.trim().length).toBeGreaterThan(0);
+      expect('subscriptions' in messages.nav).toBe(false);
     }
 
     const ru = loadMessages('ru');
     expect(ru.nav.settings).toBe('Настройки');
-    expect(ru.nav.subscriptions).toBe('Подписки');
     expect(ru.cabinet.profileSettingsTitle).toBe('Профиль');
     expect(ru.cabinet.avatarLabel).toBe('Фото профиля');
     expect(ru.cabinet.displayNameLabel).toBe('Имя профиля');

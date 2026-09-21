@@ -545,7 +545,7 @@ export class NotificationsService {
       categoryPart: params.category ? ` · ${params.category}` : '',
       regionPart: params.region ? ` · ${params.region}` : '',
       link: this.appLink(locale, `/products/${params.productId}`),
-      settingsLink: this.appLink(locale, '/dashboard/subscriptions'),
+      settingsLink: this.appLink(locale, '/account/settings#notifications'),
     });
   }
 
@@ -567,7 +567,7 @@ export class NotificationsService {
       unit: params.unit ? ` ${params.unit}` : '',
       categoryPart: params.category ? ` · ${params.category}` : '',
       link: this.appLink(locale, `/requests/${params.requestId}`),
-      settingsLink: this.appLink(locale, '/dashboard/subscriptions'),
+      settingsLink: this.appLink(locale, '/account/settings#notifications'),
     });
   }
 

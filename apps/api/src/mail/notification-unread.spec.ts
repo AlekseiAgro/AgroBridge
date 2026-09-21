@@ -96,7 +96,9 @@ describe('cabinet notification unread mapping', () => {
     expect(shell).toContain('NotificationBell');
     expect(shell).toContain('/dashboard/purchase-requests');
     expect(shell).toContain('/dashboard/quotes');
-    expect(shell).toContain("href=\"/dashboard/subscriptions\">{t('subscriptions')}");
+    expect(shell).not.toContain('/dashboard/subscriptions');
+    expect(shell).not.toContain("t('subscriptions')");
+    expect(shell).not.toContain("href=\"/dashboard/notifications\">{t('notifications')}");
     expect(shell).toContain('ChatNavLink');
     expect(shell).toContain('getUnreadMessagesCount');
     expect(account).toContain('notificationUnread.purchaseRequestsUnread');

@@ -64,7 +64,6 @@ function notificationsFixture(css: string): string {
       <a class="cabinet__brand" href="/">AgroBridge</a>
       <nav class="cabinet__nav">
         <a href="/account">Account</a>
-        <a href="/dashboard/subscriptions">Subscriptions</a>
         <a href="/account/settings">Settings</a>
       </nav>
     </aside>
@@ -116,7 +115,6 @@ function notificationsEmptyFixture(css: string): string {
       <a class="cabinet__brand" href="/">AgroBridge</a>
       <nav class="cabinet__nav">
         <a href="/account">Account</a>
-        <a href="/dashboard/subscriptions">Subscriptions</a>
         <a href="/account/settings">Settings</a>
       </nav>
     </aside>
@@ -313,7 +311,8 @@ describe('dedicated Notification Center', () => {
     expect(bell).not.toContain('/dashboard/inbox');
     expect(page).toContain("requireVerifiedUser(locale, '/dashboard/notifications')");
     expect(page).toContain("'/notifications?limit=30'");
-    expect(shell).toContain("href=\"/dashboard/subscriptions\">{t('subscriptions')}");
+    expect(shell).not.toContain('/dashboard/subscriptions');
+    expect(shell).not.toContain("t('subscriptions')");
     expect(shell).not.toContain("href=\"/dashboard/notifications\">{t('notifications')}");
   });
 
@@ -322,7 +321,10 @@ describe('dedicated Notification Center', () => {
     const list = readWeb('components/UserNotificationsList.tsx');
     const product = readWeb('app/[locale]/products/[id]/page.tsx');
     const watch = readWeb('components/HarvestWatchButton.tsx');
-    const subscriptions = readWeb('app/[locale]/dashboard/subscriptions/page.tsx');
+    const subscriptions = [
+      readWeb('app/[locale]/dashboard/subscriptions/page.tsx'),
+      readWeb('app/[locale]/dashboard/subscriptions/legacy-redirect.tsx'),
+    ].join('\n');
 
     expect(page).toContain('UserNotificationsList');
     expect(page).toContain("copyNamespace=\"notifications\"");
@@ -348,9 +350,11 @@ describe('dedicated Notification Center', () => {
 
     expect(product).toContain('HarvestWatchButton');
     expect(watch).toContain("fetch(`/api/products/${productId}/watch`");
-    expect(subscriptions).toContain('AlertSubscriptionForm');
-    expect(subscriptions).toContain('HarvestWatchesList');
-    expect(subscriptions).toContain('id="inbox"');
+    expect(subscriptions).toContain('/account/settings#notifications');
+    expect(subscriptions).not.toContain('AlertSubscriptionForm');
+    expect(subscriptions).not.toContain('HarvestWatchesList');
+    expect(subscriptions).not.toContain('id="inbox"');
+    expect(subscriptions).not.toContain('UserNotificationsList');
   });
 
   it('localizes the Notification Center without Inbox/RFQ collisions', () => {

@@ -284,7 +284,10 @@ describe('Settings → Notifications', () => {
     const product = readWeb('app/[locale]/products/[id]/page.tsx');
     const watch = readWeb('components/HarvestWatchButton.tsx');
     const center = readWeb('app/[locale]/dashboard/notifications/page.tsx');
-    const subscriptions = readWeb('app/[locale]/dashboard/subscriptions/page.tsx');
+    const subscriptions = [
+      readWeb('app/[locale]/dashboard/subscriptions/page.tsx'),
+      readWeb('app/[locale]/dashboard/subscriptions/legacy-redirect.tsx'),
+    ].join('\n');
 
     expect(settings).toContain('cabinet-notifications');
     expect(settings).toContain('notificationsSettingsTitle');
@@ -323,9 +326,11 @@ describe('Settings → Notifications', () => {
     expect(center).not.toContain('SettingsEmailAlertsControl');
     expect(center).toContain("copyNamespace=\"notifications\"");
 
-    expect(subscriptions).toContain('AlertSubscriptionForm');
-    expect(subscriptions).toContain('HarvestWatchesList');
-    expect(subscriptions).toContain('id="inbox"');
+    expect(settings).toContain('id="notifications"');
+    expect(subscriptions).toContain('/account/settings#notifications');
+    expect(subscriptions).not.toContain('AlertSubscriptionForm');
+    expect(subscriptions).not.toContain('HarvestWatchesList');
+    expect(subscriptions).not.toContain('id="inbox"');
   });
 
   it('localizes Settings Notifications without colliding with Notification Center', () => {
