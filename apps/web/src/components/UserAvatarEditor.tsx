@@ -72,9 +72,9 @@ export function UserAvatarEditor({ avatarUrl, fallbackInitial }: Props) {
   }
 
   return (
-    <div className="cabinet-profile__block">
-      <p className="cabinet-profile__label">{t('avatarLabel')}</p>
-      <div className="user-avatar-editor">
+    <div className="settings-row">
+      <p className="settings-row__label">{t('avatarLabel')}</p>
+      <div className="settings-row__body">
         <button
           type="button"
           className="user-card__avatar user-card__avatar--editable"
@@ -96,10 +96,10 @@ export function UserAvatarEditor({ avatarUrl, fallbackInitial }: Props) {
           hidden
           onChange={(event) => void onUpload(event.target.files)}
         />
-        <div className="user-avatar-editor__actions">
+        <div className="settings-row__actions">
           <button
             type="button"
-            className="button button--ghost user-avatar-editor__button"
+            className="settings-row__action"
             disabled={pending}
             onClick={() => inputRef.current?.click()}
           >
@@ -108,7 +108,7 @@ export function UserAvatarEditor({ avatarUrl, fallbackInitial }: Props) {
           {previewUrl ? (
             <button
               type="button"
-              className="button button--ghost user-avatar-editor__button"
+              className="settings-row__action settings-row__action--muted"
               disabled={pending}
               onClick={() => void onRemove()}
             >

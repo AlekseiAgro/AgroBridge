@@ -85,17 +85,20 @@ export function DeleteAccountButton({ email }: { email: string }) {
 
   if (!open) {
     return (
-      <div className="cabinet-danger__trigger">
-        <button className="button button--danger-quiet" type="button" onClick={() => setOpen(true)}>
-          {t('deleteAccount')}
-        </button>
-        <p className="cabinet-danger__hint">{t('deleteAccountHint')}</p>
+      <div className="settings-row">
+        <div className="settings-row__body">
+          <p className="settings-row__value">{t('deleteAccountCompactHint')}</p>
+          <button className="button button--danger-quiet" type="button" onClick={() => setOpen(true)}>
+            {t('deleteAccount')}
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="auth-form" style={{ marginTop: '0.75rem' }}>
+    <div className="settings-row settings-row--editing">
+      <div className="auth-form" style={{ marginTop: '0.15rem' }}>
       <p className="product-list__meta">{t('deleteAccountFlowHint', { email })}</p>
 
       {step === 'idle' ? (
@@ -112,7 +115,7 @@ export function DeleteAccountButton({ email }: { email: string }) {
             />
           </label>
           {error ? <p className="form-error">{error}</p> : null}
-          <div className="how-it-works__actions">
+          <div className="settings-row__actions">
             <button className="button button--primary" type="submit" disabled={pending}>
               {pending ? ta('pleaseWait') : t('deleteAccountSendCode')}
             </button>
@@ -160,7 +163,7 @@ export function DeleteAccountButton({ email }: { email: string }) {
             />
           </label>
           {error ? <p className="form-error">{error}</p> : null}
-          <div className="how-it-works__actions">
+          <div className="settings-row__actions">
             <button
               className="button button--danger"
               type="submit"
@@ -179,6 +182,7 @@ export function DeleteAccountButton({ email }: { email: string }) {
           </div>
         </form>
       )}
+      </div>
     </div>
   );
 }
