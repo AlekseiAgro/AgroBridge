@@ -2,6 +2,7 @@ import type { PurchaseRequestSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PurchaseRequestFilters } from '@/components/PurchaseRequestFilters';
 import { PurchaseRequestList } from '@/components/PurchaseRequestList';
+import { EmptyState } from '@/components/EmptyState';
 import { RequestsSellCta } from '@/components/RequestsSellCta';
 import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
@@ -37,6 +38,7 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
   }
 
   const canCreate = Boolean(user);
+  const hasFilters = query.toString().length > 0;
 
   return (
     <main className="page__main">
@@ -65,7 +67,35 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
 
       {loadError ? <p className="form-error">{loadError}</p> : null}
 
-      {!loadError ? <PurchaseRequestList items={items} emptyLabel={t('boardEmpty')} /> : null}
+      {!loadError ? (
+        <PurchaseRequestList
+          items={items}
+          empty={
+            <EmptyState
+              title={t('boardEmptyTitle')}
+              body={hasFilters ? t('boardEmptyFiltered') : t('boardEmpty')}
+              actions={
+                <>
+                  {hasFilters ? (
+                    <Link href="/requests" className="button button--ghost">
+                      {t('boardEmptyReset')}
+                    </Link>
+                  ) : null}
+                  {canCreate ? (
+                    <Link href="/requests/new" className="button button--primary">
+                      {t('createCta')}
+                    </Link>
+                  ) : !user ? (
+                    <Link href="/login" className="button button--primary">
+                      {t('loginToCreate')}
+                    </Link>
+                  ) : null}
+                </>
+              }
+            />
+          }
+        />
+      ) : null}
       <RequestsSellCta />
     </main>
   );

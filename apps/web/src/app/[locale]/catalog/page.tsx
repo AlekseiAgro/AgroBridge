@@ -9,6 +9,7 @@ import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { ProductPhotoPlaceholder } from '@/components/ProductPhotoPlaceholder';
+import { EmptyState } from '@/components/EmptyState';
 import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
 import { getProductCardImage, getProductCardImageAlt } from '@/lib/product-image';
@@ -53,6 +54,8 @@ export default async function CatalogPage({ params, searchParams }: Props) {
     loadError = t('loadError');
   }
 
+  const hasFilters = query.toString().length > 0;
+
   return (
     <main className="page__main">
       <p className="eyebrow">
@@ -72,7 +75,22 @@ export default async function CatalogPage({ params, searchParams }: Props) {
       {loadError ? <p className="form-error">{loadError}</p> : null}
 
       {!loadError && products.length === 0 ? (
-        <p className="empty-state">{t('empty')}</p>
+        <EmptyState
+          title={hasFilters ? t('emptyFilteredTitle') : t('emptyTitle')}
+          body={hasFilters ? t('empty') : t('emptyUnfiltered')}
+          actions={
+            <>
+              {hasFilters ? (
+                <Link href="/catalog" className="button button--ghost">
+                  {t('emptyReset')}
+                </Link>
+              ) : null}
+              <Link href="/requests/new" className="button button--primary">
+                {t('floatingCta')}
+              </Link>
+            </>
+          }
+        />
       ) : (
         <ul className="product-list">
           {products.map((product) => {

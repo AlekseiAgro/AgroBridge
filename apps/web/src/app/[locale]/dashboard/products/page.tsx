@@ -4,6 +4,7 @@ import { CertificateBadges } from '@/components/CertificateBadges';
 import { DeleteProductButton } from '@/components/DeleteProductButton';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { Link, redirect } from '@/i18n/navigation';
+import { EmptyState } from '@/components/EmptyState';
 import { ProductPhotoPlaceholder } from '@/components/ProductPhotoPlaceholder';
 import { getProductCardImage, getProductCardImageAlt } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
@@ -60,7 +61,34 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
       {error ? <p className="form-error">{error}</p> : null}
 
       {!error && products.length === 0 ? (
-        <p className="empty-state">{t('emptyMine')}</p>
+        <EmptyState
+          title={
+            filter === 'published'
+              ? t('emptyPublishedTitle')
+              : filter === 'pending'
+                ? t('emptyPendingTitle')
+                : t('emptyMineTitle')
+          }
+          body={
+            filter === 'published'
+              ? t('emptyPublished')
+              : filter === 'pending'
+                ? t('emptyPending')
+                : t('emptyMine')
+          }
+          actions={
+            <>
+              {filter ? (
+                <Link href="/dashboard/products" className="button button--ghost">
+                  {t('emptyShowAll')}
+                </Link>
+              ) : null}
+              <Link className="button button--primary" href="/dashboard/products/new">
+                {t('addProduct')}
+              </Link>
+            </>
+          }
+        />
       ) : (
         <ul className="product-list">
           {products.map((product) => {

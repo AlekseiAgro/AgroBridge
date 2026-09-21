@@ -1,16 +1,19 @@
 import type { PurchaseRequestSummary } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
+import type { ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
 
 type Props = {
   items: PurchaseRequestSummary[];
-  emptyLabel: string;
+  emptyLabel?: string;
+  empty?: ReactNode;
   detailBasePath?: string;
 };
 
 export async function PurchaseRequestList({
   items,
   emptyLabel,
+  empty,
   detailBasePath = '/requests',
 }: Props) {
   const t = await getTranslations('purchaseRequests');
@@ -18,7 +21,7 @@ export async function PurchaseRequestList({
   const tp = await getTranslations('product');
 
   if (items.length === 0) {
-    return <p className="empty-state">{emptyLabel}</p>;
+    return empty ?? <p className="empty-state">{emptyLabel}</p>;
   }
 
   return (

@@ -1,6 +1,7 @@
 import type { PurchaseQuoteMineItem } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PurchaseQuoteList } from '@/components/PurchaseQuoteList';
+import { EmptyState } from '@/components/EmptyState';
 import { MarkSectionNotificationsRead } from '@/components/MarkSectionNotificationsRead';
 import { Link, redirect } from '@/i18n/navigation';
 import { apiRequestAuthed } from '@/lib/server-api';
@@ -44,7 +45,20 @@ export default async function MyQuotesPage({ params }: Props) {
         <Link href="/dashboard/purchase-requests">{t('mineTitle')}</Link>
       </p>
       {loadError ? <p className="form-error">{loadError}</p> : null}
-      <PurchaseQuoteList items={items} emptyLabel={t('myQuotesEmpty')} />
+      <PurchaseQuoteList
+        items={items}
+        empty={
+          <EmptyState
+            title={t('myQuotesEmptyTitle')}
+            body={t('myQuotesEmpty')}
+            actions={
+              <Link href="/requests" className="button button--primary">
+                {t('boardTitle')}
+              </Link>
+            }
+          />
+        }
+      />
     </main>
   );
 }

@@ -3,6 +3,11 @@
     "title": "AgroBridge",
     "description": "Connect Georgian agricultural producers with buyers worldwide."
   },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This AgroBridge page does not exist or is no longer available. Go home or continue in the marketplace.",
+    "home": "Back to home"
+  },
   "home": {
     "brand": "AgroBridge",
     "headline": "Georgian farms. Global buyers.",
@@ -191,7 +196,11 @@
     "priceOnRequest": "Price on request",
     "floatingLead": "Looking for something else?",
     "floatingText": "Tell farms what you need and receive quotes.",
-    "floatingCta": "Post a purchase request"
+    "floatingCta": "Post a purchase request",
+    "emptyTitle": "No products yet",
+    "emptyFilteredTitle": "No matching products",
+    "emptyUnfiltered": "There are no published products to show right now. Post a purchase request so farms can reply.",
+    "emptyReset": "Clear filters"
   },
   "farm": {
     "createTitle": "Create farm profile",
@@ -395,6 +404,12 @@
     "published": "Published",
     "draft": "Draft",
     "emptyMine": "You have no products yet.",
+    "emptyMineTitle": "No products yet",
+    "emptyPublishedTitle": "No published products",
+    "emptyPublished": "None of your products are in the public catalog yet. Add a product or open all listings.",
+    "emptyPendingTitle": "No products pending moderation",
+    "emptyPending": "You have no products waiting for moderation. Open all listings or add a new product.",
+    "emptyShowAll": "Show all products",
     "needFarmFirst": "A farm profile is optional. You can add products without one.",
     "goCreateFarm": "Go to farm profile",
     "units": {
@@ -1024,7 +1039,12 @@
     "floatingText": "Publish your product offer and reach buyers looking for it.",
     "floatingCta": "List your product",
     "buyerOnly": "Sign in to post a purchase request. Any AgroBridge account can buy and sell.",
-    "registerAsBuyer": "Create an account"
+    "registerAsBuyer": "Create an account",
+    "boardEmptyTitle": "No purchase requests",
+    "boardEmptyFiltered": "No purchase requests match your search. Clear the filters or post a new request.",
+    "boardEmptyReset": "Clear filters",
+    "mineEmptyTitle": "No purchase requests yet",
+    "myQuotesEmptyTitle": "No quotes yet"
   },
   "roleHubs": {
     "buyers": {

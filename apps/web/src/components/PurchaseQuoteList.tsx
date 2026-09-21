@@ -1,18 +1,20 @@
 import type { PurchaseQuoteMineItem } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
+import type { ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
 
 type Props = {
   items: PurchaseQuoteMineItem[];
-  emptyLabel: string;
+  emptyLabel?: string;
+  empty?: ReactNode;
 };
 
-export async function PurchaseQuoteList({ items, emptyLabel }: Props) {
+export async function PurchaseQuoteList({ items, emptyLabel, empty }: Props) {
   const t = await getTranslations('purchaseRequests');
   const tp = await getTranslations('product');
 
   if (items.length === 0) {
-    return <p className="empty-state">{emptyLabel}</p>;
+    return empty ?? <p className="empty-state">{emptyLabel}</p>;
   }
 
   return (
