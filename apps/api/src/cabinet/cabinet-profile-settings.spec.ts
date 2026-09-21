@@ -24,6 +24,9 @@ function loadMessages(locale: string) {
     cabinet: {
       profileSettingsTitle: string;
       profileSettingsHint: string;
+      avatarLabel: string;
+      displayNameLabel: string;
+      displayNameSave: string;
       settingsTitle: string;
       settingsSubtitle: string;
       securityTitle: string;
@@ -96,28 +99,29 @@ function cabinetFixture(css: string, page: 'account' | 'settings'): string {
     <main class="cabinet-page">
       <div class="page__heading-row"><div><h1>Settings</h1><p class="page__subtitle">Profile, password, account security, and legal documents.</p></div></div>
       <section class="cabinet-profile">
-        <h2 class="section-title">Profile settings</h2>
+        <h2 class="section-title">Profile</h2>
         <p class="cabinet-profile__hint">Change your display name, profile photo, and email address.</p>
-        <div class="cabinet-profile__identity">
-          <div class="user-avatar-editor">
-            <button type="button" class="user-card__avatar user-card__avatar--editable">A</button>
-            <div class="user-avatar-editor__actions">
-              <button type="button" class="button button--ghost user-avatar-editor__button">Upload photo</button>
+        <div class="cabinet-profile__stack">
+          <div class="cabinet-profile__block">
+            <p class="cabinet-profile__label">Profile photo</p>
+            <div class="user-avatar-editor">
+              <button type="button" class="user-card__avatar user-card__avatar--editable">A</button>
+              <div class="user-avatar-editor__actions">
+                <button type="button" class="button button--ghost user-avatar-editor__button">Change photo</button>
+              </div>
             </div>
           </div>
-          <div class="edit-profile">
-            <div class="edit-profile__name-row">
-              <h3 class="user-card__name">Very Long Display Name For Overflow Checks</h3>
-            </div>
-            <div class="edit-profile__panel">
+          <div class="edit-profile edit-profile--settings">
+            <div class="edit-profile__fields">
               <form class="profile-edit-form">
-                <label class="field"><span>Display name</span><input type="text" value="Very Long Display Name For Overflow Checks" /></label>
-                <div class="how-it-works__actions">
-                  <button class="button button--primary" type="submit">Save name</button>
+                <label class="field"><span>Profile name</span><input type="text" value="Very Long Display Name For Overflow Checks" /></label>
+                <div class="cabinet-profile__actions">
+                  <button class="button button--primary" type="submit">Save</button>
                 </div>
               </form>
               <div class="edit-profile__email">
-                <p class="user-card__meta">very.long.email.address.for.overflow@example.com</p>
+                <p class="cabinet-profile__label">Email</p>
+                <p class="cabinet-profile__value">very.long.email.address.for.overflow@example.com</p>
                 <button type="button" class="button button--ghost profile-edit-row__button">Change email</button>
               </div>
             </div>
@@ -357,6 +361,8 @@ describe('read-only account overview and settings profile editing', () => {
 
     expect(settings).toContain('cabinet-profile');
     expect(settings).toContain('profileSettingsTitle');
+    expect(settings).toContain('cabinet-profile__stack');
+    expect(settings).not.toContain('cabinet-profile__identity');
     expect(settings).toContain('UserAvatarEditor');
     expect(settings).toContain('EditProfileControl');
     expect(settings).toContain('alwaysOpen');
@@ -365,6 +371,9 @@ describe('read-only account overview and settings profile editing', () => {
     expect(settings).toContain('cabinet-legal');
     expect(settings).toContain('/legal/me');
 
+    expect(editor).toContain('edit-profile--settings');
+    expect(editor).toContain('{alwaysOpen ? null : (');
+    expect(settings).not.toContain('user-card__name');
     expect(editor).toContain("fetch('/api/cabinet/me/profile'");
     expect(editor).toContain("'/api/cabinet/me/email/request'");
     expect(editor).toContain("'/api/cabinet/me/email/confirm'");
@@ -407,6 +416,9 @@ describe('read-only account overview and settings profile editing', () => {
       const messages = loadMessages(locale);
       expect(messages.cabinet.profileSettingsTitle.trim().length).toBeGreaterThan(0);
       expect(messages.cabinet.profileSettingsHint.trim().length).toBeGreaterThan(0);
+      expect(messages.cabinet.avatarLabel.trim().length).toBeGreaterThan(0);
+      expect(messages.cabinet.displayNameLabel.trim().length).toBeGreaterThan(0);
+      expect(messages.cabinet.displayNameSave.trim().length).toBeGreaterThan(0);
       expect(messages.cabinet.settingsTitle.trim().length).toBeGreaterThan(0);
       expect(messages.cabinet.settingsSubtitle).toBe(expectedSubtitle[locale]);
       expect(messages.cabinet.securityTitle.trim().length).toBeGreaterThan(0);
@@ -418,7 +430,10 @@ describe('read-only account overview and settings profile editing', () => {
     const ru = loadMessages('ru');
     expect(ru.nav.settings).toBe('Настройки');
     expect(ru.nav.subscriptions).toBe('Подписки');
-    expect(ru.cabinet.profileSettingsTitle).toBe('Настройки профиля');
+    expect(ru.cabinet.profileSettingsTitle).toBe('Профиль');
+    expect(ru.cabinet.avatarLabel).toBe('Фото профиля');
+    expect(ru.cabinet.displayNameLabel).toBe('Имя профиля');
+    expect(ru.cabinet.displayNameSave).toBe('Сохранить');
   });
 
   it('keeps the Profile section visually aligned with Security and Legal', () => {
@@ -428,7 +443,10 @@ describe('read-only account overview and settings profile editing', () => {
     expect(css).toMatch(/\.cabinet-security\s*\{[\s\S]*?margin-top:\s*3\.5rem/);
     expect(css).toMatch(/\.cabinet-legal\s*\{[\s\S]*?margin-top:\s*3\.5rem/);
     expect(css).toContain('.cabinet-profile__hint');
-    expect(css).toContain('.cabinet-profile__identity');
+    expect(css).toContain('.cabinet-profile__stack');
+    expect(css).toContain('.cabinet-profile__label');
+    expect(css).toMatch(/\.cabinet-profile\s*\{[\s\S]*?max-width:\s*28rem/);
+    expect(css).not.toContain('.cabinet-profile__identity');
   });
 
   const chrome = findChrome();
