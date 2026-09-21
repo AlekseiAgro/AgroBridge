@@ -103,7 +103,11 @@ export default async function AccountSettingsPage({ params }: Props) {
         <ChangePasswordForm />
       </section>
 
-      <section className="cabinet-notifications" aria-labelledby="cabinet-notifications-title">
+      <section
+        id="notifications"
+        className="cabinet-notifications"
+        aria-labelledby="cabinet-notifications-title"
+      >
         <h2 id="cabinet-notifications-title" className="section-title">
           {t('notificationsSettingsTitle')}
         </h2>

@@ -279,7 +279,7 @@ describe('NotificationsService', () => {
       expect(sent.text).toContain('Buyer Ltd');
       expect(sent.text).toContain('1t t');
       expect(sent.text).toContain('http://localhost:3000/ru/requests/r1');
-      expect(sent.text).toContain('http://localhost:3000/ru/dashboard/subscriptions');
+      expect(sent.text).toContain('http://localhost:3000/ru/account/settings#notifications');
     });
 
     it('mails the buyer when a quote arrives', async () => {
