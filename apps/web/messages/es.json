@@ -221,20 +221,20 @@
     "regionUnknown": "Región no indicada",
     "regionPlaceholder": "Selecciona una región",
     "verification": {
-      "label": "Verification",
+      "label": "Verificación",
       "badge": "Verificado",
       "badgeHint": "Este productor completó la verificación voluntaria de AgroBridge.",
-      "title": "Voluntary producer verification",
-      "subtitle": "Recommended. Completing email, SMS, and identity checks shows a Verified badge to buyers. Listing products does not require verification.",
+      "title": "Verificación voluntaria del productor",
+      "subtitle": "Recomendado. Tras confirmar el email, el SMS y la identidad, los compradores verán la insignia Verified. Publicar productos no exige verificación.",
       "promptTitle": "Consigue la insignia Verified",
       "promptBody": "Recomendado. Tras confirmar el email, el SMS y la identidad, los compradores verán la insignia Verified. Publicar productos no exige verificación.",
       "start": "Empezar verificación",
       "attentionTitle": "La verificación necesita atención",
       "attentionBody": "La verificación del productor no fue aprobada. Puedes actualizar los datos y enviarlos de nuevo a revisión.",
       "continue": "Continuar verificación",
-      "statusLabel": "Current status",
-      "doneHint": "Buyers can see your Verified badge on the catalog and farm page.",
-      "genericError": "Could not complete this verification step.",
+      "statusLabel": "Estado actual",
+      "doneHint": "Los compradores ven su insignia Verified en el catálogo y en la página de la granja.",
+      "genericError": "No se pudo completar este paso de verificación.",
       "loadError": "No se pudo cargar el estado de verificación. El servicio puede estar temporalmente no disponible.",
       "loadRetry": "Reintentar",
       "loadRetrying": "Reintentando…",
@@ -247,24 +247,24 @@
         "locked": "Tras iniciar la verificación no se puede cambiar el tipo de vendedor."
       },
       "farmStatus": {
-        "unverified": "Not verified yet",
-        "pending": "Pending moderator review",
-        "approved": "Verified producer",
-        "rejected": "Verification rejected"
+        "unverified": "Aún no verificado",
+        "pending": "Pendiente de revisión del moderador",
+        "approved": "Productor verificado",
+        "rejected": "Verificación rechazada"
       },
       "stepStatus": {
-        "todo": "To do",
-        "done": "Done",
-        "pending_review": "Awaiting review",
-        "rejected": "Rejected"
+        "todo": "Pendiente",
+        "done": "Hecho",
+        "pending_review": "En espera de revisión",
+        "rejected": "Rechazado"
       },
       "email": {
-        "title": "1. Confirm email",
-        "send": "Send email code",
-        "code": "Email code",
-        "confirm": "Confirm email",
+        "title": "1. Confirmar el email",
+        "send": "Enviar código por email",
+        "code": "Código del email",
+        "confirm": "Confirmar email",
         "sent": "Código enviado a {destination}.",
-        "confirmed": "Email confirmed."
+        "confirmed": "Email confirmado."
       },
       "phone": {
         "title": "2. Confirmar teléfono (SMS)",
@@ -282,11 +282,11 @@
         "alreadyVerified": "Este número de teléfono ya está confirmado."
       },
       "company": {
-        "title": "3. Company verification",
-        "number": "Georgian company identification code",
-        "check": "Check registry",
-        "hint": "Enter the 9-digit identification code from Georgian public company databases.",
-        "matched": "Registry match: {name}",
+        "title": "3. Verificación de la empresa",
+        "number": "Código de identificación de empresa georgiana",
+        "check": "Consultar el registro",
+        "hint": "Introduzca el código de identificación de 9 dígitos de las bases públicas de empresas de Georgia.",
+        "matched": "Coincidencia en el registro: {name}",
         "documentHint": "Suba el certificado de registro de la empresa para confirmar la organización.",
         "upload": "Subir registro de empresa",
         "docTitle": "Registro de empresa",
@@ -312,10 +312,10 @@
         "contactConfirmationRequired": "Faltan por confirmar el correo y el teléfono.",
         "moderatorRejected": "El moderador no aprobó la verificación."
       },
-      "pending": "Pending review",
-      "approved": "Verified producer",
-      "rejected": "Verification rejected",
-      "unverified": "Not verified yet"
+      "pending": "En revisión",
+      "approved": "Productor verificado",
+      "rejected": "Verificación rechazada",
+      "unverified": "Aún no verificado"
     },
     "documents": {
       "title": "Documentos adicionales",

@@ -144,6 +144,37 @@ describe('verification review copy', () => {
     expect(sent).toContain('{destination}');
     expect(sent).not.toMatch(/demo|API console|mail logs|логи|ლოგებ/i);
   });
+
+  it('localizes farm.verification chrome in de, fr, it, and es without dropping tokens', () => {
+    const allowSameAsEn = new Set(['phone.placeholder']);
+    const flatten = (value: unknown, prefix = ''): Record<string, string> => {
+      if (typeof value === 'string') return { [prefix]: value };
+      if (!value || typeof value !== 'object') return {};
+      return Object.entries(value as Record<string, unknown>).reduce(
+        (acc, [key, nested]) => ({
+          ...acc,
+          ...flatten(nested, prefix ? `${prefix}.${key}` : key),
+        }),
+        {},
+      );
+    };
+
+    const en = flatten(messages('en').farm.verification);
+    const tokens = (value: string) => value.match(/\{[a-zA-Z0-9_]+\}/g)?.sort().join(',') ?? '';
+
+    expect(Object.keys(flatten(messages('ru').farm.verification))).toEqual(Object.keys(en));
+    expect(Object.keys(flatten(messages('ka').farm.verification))).toEqual(Object.keys(en));
+
+    for (const locale of ['de', 'fr', 'it', 'es'] as const) {
+      const localized = flatten(messages(locale).farm.verification);
+      expect(Object.keys(localized).sort()).toEqual(Object.keys(en).sort());
+      for (const [key, english] of Object.entries(en)) {
+        expect(tokens(localized[key])).toBe(tokens(english));
+        if (allowSameAsEn.has(key)) continue;
+        expect(localized[key]).not.toBe(english);
+      }
+    }
+  });
 });
 
 describe('verification status load failure', () => {
