@@ -930,6 +930,7 @@
     "settingsTitle": "Настройки",
     "settingsSubtitle": "Профиль, пароль, безопасность аккаунта и юридические документы.",
     "securityTitle": "Безопасность",
+    "securitySubtitle": "Защита вашего аккаунта и доступ к нему.",
     "changePasswordAction": "Изменить пароль",
     "passwordRowHint": "Измените пароль для входа в аккаунт.",
     "unreadCard": "{label}, непрочитанных: {count}",

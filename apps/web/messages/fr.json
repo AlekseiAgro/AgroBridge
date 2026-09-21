@@ -930,6 +930,7 @@
     "settingsTitle": "Paramètres",
     "settingsSubtitle": "Profil, mot de passe, sécurité du compte et documents juridiques.",
     "securityTitle": "Sécurité",
+    "securitySubtitle": "Protection de votre compte et de l’accès à celui-ci.",
     "changePasswordAction": "Changer le mot de passe",
     "passwordRowHint": "Modifiez le mot de passe de connexion au compte.",
     "unreadCard": "{label}, {count} non lues",

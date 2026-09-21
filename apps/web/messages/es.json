@@ -930,6 +930,7 @@
     "settingsTitle": "Ajustes",
     "settingsSubtitle": "Perfil, contraseña, seguridad de la cuenta y documentos legales.",
     "securityTitle": "Seguridad",
+    "securitySubtitle": "Protección de tu cuenta y del acceso a ella.",
     "changePasswordAction": "Cambiar contraseña",
     "passwordRowHint": "Cambia la contraseña de acceso a la cuenta.",
     "unreadCard": "{label}, {count} sin leer",

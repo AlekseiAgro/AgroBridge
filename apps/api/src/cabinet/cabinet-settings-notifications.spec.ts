@@ -92,11 +92,32 @@ function settingsNotificationsFixture(css: string, emptyWatches: boolean): strin
     <div class="cabinet__main">
       <div class="cabinet__content">
         <main class="cabinet-page cabinet-page--settings">
-          <section class="cabinet-profile"><h2 class="section-title">Профиль</h2></section>
-          <section class="cabinet-security"><h2 class="section-title">Безопасность</h2></section>
+          <section class="cabinet-profile">
+            <div class="settings-section-head">
+              <span class="settings-section-head__icon" aria-hidden></span>
+              <div class="settings-section-head__copy">
+                <h2 class="section-title">Профиль</h2>
+                <p class="settings-section-head__desc">Измените имя, фото профиля и адрес электронной почты.</p>
+              </div>
+            </div>
+          </section>
+          <section class="cabinet-security">
+            <div class="settings-section-head">
+              <span class="settings-section-head__icon" aria-hidden></span>
+              <div class="settings-section-head__copy">
+                <h2 class="section-title">Безопасность</h2>
+                <p class="settings-section-head__desc">Защита вашего аккаунта и доступ к нему.</p>
+              </div>
+            </div>
+          </section>
           <section class="cabinet-notifications">
-            <h2 class="section-title">Уведомления</h2>
-            <p class="page__subtitle">Выберите, какие письма получать, и управляйте уже созданными подписками на урожай.</p>
+            <div class="settings-section-head">
+              <span class="settings-section-head__icon" aria-hidden></span>
+              <div class="settings-section-head__copy">
+                <h2 class="section-title">Уведомления</h2>
+                <p class="settings-section-head__desc">Выберите, какие письма получать, и управляйте уже созданными подписками на урожай.</p>
+              </div>
+            </div>
             <div class="settings-list">
               <div class="settings-row">
                 <p class="settings-row__label">Email-уведомления</p>
@@ -112,7 +133,15 @@ function settingsNotificationsFixture(css: string, emptyWatches: boolean): strin
               </div>
             </div>
           </section>
-          <section class="cabinet-legal"><h2 class="section-title">Юридическая информация</h2></section>
+          <section class="cabinet-legal">
+            <div class="settings-section-head">
+              <span class="settings-section-head__icon" aria-hidden></span>
+              <div class="settings-section-head__copy">
+                <h2 class="section-title">Юридическая информация</h2>
+                <p class="settings-section-head__desc">Текущие опубликованные документы и принятие Условий использования.</p>
+              </div>
+            </div>
+          </section>
         </main>
       </div>
     </div>
@@ -290,7 +319,9 @@ describe('Settings → Notifications', () => {
     ].join('\n');
 
     expect(settings).toContain('cabinet-notifications');
+    expect(settings).toContain('SettingsSectionHead');
     expect(settings).toContain('notificationsSettingsTitle');
+    expect(settings).toContain('notificationsSettingsSubtitle');
     expect(settings).toContain('SettingsEmailAlertsControl');
     expect(settings).toContain("'/subscriptions/alerts'");
     expect(settings).toContain("'/products/watches'");

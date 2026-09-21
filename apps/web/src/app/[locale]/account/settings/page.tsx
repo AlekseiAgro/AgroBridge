@@ -10,6 +10,7 @@ import { DeleteAccountButton } from '@/components/DeleteAccountButton';
 import { EditProfileControl } from '@/components/EditProfileControl';
 import { HarvestWatchesList } from '@/components/HarvestWatchesList';
 import { SettingsEmailAlertsControl } from '@/components/SettingsEmailAlertsControl';
+import { SettingsSectionHead } from '@/components/SettingsSectionHead';
 import { UserAvatarEditor } from '@/components/UserAvatarEditor';
 import { Link } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api';
@@ -84,9 +85,12 @@ export default async function AccountSettingsPage({ params }: Props) {
       </div>
 
       <section className="cabinet-profile" aria-labelledby="cabinet-profile-title">
-        <h2 id="cabinet-profile-title" className="section-title">
-          {t('profileSettingsTitle')}
-        </h2>
+        <SettingsSectionHead
+          id="cabinet-profile-title"
+          icon="profile"
+          title={t('profileSettingsTitle')}
+          description={t('profileSettingsHint')}
+        />
         <div className="settings-list">
           <UserAvatarEditor
             avatarUrl={user.avatarUrl}
@@ -97,9 +101,12 @@ export default async function AccountSettingsPage({ params }: Props) {
       </section>
 
       <section className="cabinet-security" aria-labelledby="cabinet-security-title">
-        <h2 id="cabinet-security-title" className="section-title">
-          {t('securityTitle')}
-        </h2>
+        <SettingsSectionHead
+          id="cabinet-security-title"
+          icon="security"
+          title={t('securityTitle')}
+          description={t('securitySubtitle')}
+        />
         <ChangePasswordForm />
       </section>
 
@@ -108,10 +115,12 @@ export default async function AccountSettingsPage({ params }: Props) {
         className="cabinet-notifications"
         aria-labelledby="cabinet-notifications-title"
       >
-        <h2 id="cabinet-notifications-title" className="section-title">
-          {t('notificationsSettingsTitle')}
-        </h2>
-        <p className="page__subtitle">{t('notificationsSettingsSubtitle')}</p>
+        <SettingsSectionHead
+          id="cabinet-notifications-title"
+          icon="notifications"
+          title={t('notificationsSettingsTitle')}
+          description={t('notificationsSettingsSubtitle')}
+        />
         {notificationsLoadError ? <p className="form-error">{t('notificationsLoadError')}</p> : null}
         <div className="settings-list">
           <SettingsEmailAlertsControl initial={subscription} />
@@ -133,9 +142,12 @@ export default async function AccountSettingsPage({ params }: Props) {
       </section>
 
       <section className="cabinet-legal" aria-labelledby="cabinet-legal-title">
-        <h2 id="cabinet-legal-title" className="section-title">
-          {t('legalTitle')}
-        </h2>
+        <SettingsSectionHead
+          id="cabinet-legal-title"
+          icon="legal"
+          title={t('legalTitle')}
+          description={t('legalSubtitle')}
+        />
         {legal ? (
           <div className="settings-list">
             <Link href="/terms" locale={legalLocale} className="settings-row settings-row--link">
@@ -164,9 +176,13 @@ export default async function AccountSettingsPage({ params }: Props) {
 
       {user.role !== 'admin' ? (
         <section className="cabinet-danger" aria-labelledby="cabinet-danger-title">
-          <h2 id="cabinet-danger-title" className="section-title">
-            {t('deleteAccountTitle')}
-          </h2>
+          <SettingsSectionHead
+            id="cabinet-danger-title"
+            icon="danger"
+            tone="danger"
+            title={t('deleteAccountTitle')}
+            description={t('deleteAccountHint')}
+          />
           <DeleteAccountButton email={user.email} />
         </section>
       ) : null}

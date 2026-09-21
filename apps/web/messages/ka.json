@@ -930,6 +930,7 @@
     "settingsTitle": "პარამეტრები",
     "settingsSubtitle": "პროფილი, პაროლი, ანგარიშის უსაფრთხოება და სამართლებრივი დოკუმენტები.",
     "securityTitle": "უსაფრთხოება",
+    "securitySubtitle": "თქვენი ანგარიშის დაცვა და მასზე წვდომა.",
     "changePasswordAction": "პაროლის შეცვლა",
     "passwordRowHint": "შეცვალეთ ანგარიშში შესვლის პაროლი.",
     "unreadCard": "{label}, წაუკითხავი: {count}",

@@ -33,6 +33,7 @@ function loadMessages(locale: string) {
       settingsTitle: string;
       settingsSubtitle: string;
       securityTitle: string;
+      securitySubtitle: string;
       legalTitle: string;
       legalAcceptanceLabel: string;
       deleteAccountTitle: string;
@@ -106,7 +107,13 @@ function cabinetFixture(css: string, page: 'account' | 'settings'): string {
   const settingsMain = `
     <main class="cabinet-page cabinet-page--settings">
       <section class="cabinet-profile">
-        <h2 class="section-title">Profile</h2>
+        <div class="settings-section-head">
+          <span class="settings-section-head__icon" aria-hidden></span>
+          <div class="settings-section-head__copy">
+            <h2 class="section-title">Profile</h2>
+            <p class="settings-section-head__desc">Change your display name, profile photo, and email address.</p>
+          </div>
+        </div>
         <div class="settings-list">
           <div class="settings-row">
             <p class="settings-row__label">Profile photo</p>
@@ -132,7 +139,13 @@ function cabinetFixture(css: string, page: 'account' | 'settings'): string {
         </div>
       </section>
       <section class="cabinet-security">
-        <h2 class="section-title">Security</h2>
+        <div class="settings-section-head">
+          <span class="settings-section-head__icon" aria-hidden></span>
+          <div class="settings-section-head__copy">
+            <h2 class="section-title">Security</h2>
+            <p class="settings-section-head__desc">Protect your account and how you access it.</p>
+          </div>
+        </div>
         <div class="settings-row">
           <p class="settings-row__label">Password</p>
           <div class="settings-row__body">
@@ -142,7 +155,13 @@ function cabinetFixture(css: string, page: 'account' | 'settings'): string {
         </div>
       </section>
       <section class="cabinet-legal">
-        <h2 class="section-title">Legal information</h2>
+        <div class="settings-section-head">
+          <span class="settings-section-head__icon" aria-hidden></span>
+          <div class="settings-section-head__copy">
+            <h2 class="section-title">Legal information</h2>
+            <p class="settings-section-head__desc">Current published documents and Terms of Use acceptance.</p>
+          </div>
+        </div>
         <div class="settings-list">
           <a class="settings-row settings-row--link" href="#"><span class="settings-row__label">Terms of Use</span><span class="settings-row__chevron">→</span></a>
           <a class="settings-row settings-row--link" href="#"><span class="settings-row__label">Privacy Policy</span><span class="settings-row__chevron">→</span></a>
@@ -153,7 +172,13 @@ function cabinetFixture(css: string, page: 'account' | 'settings'): string {
         </div>
       </section>
       <section class="cabinet-danger">
-        <h2 class="section-title">Delete account</h2>
+        <div class="settings-section-head settings-section-head--danger">
+          <span class="settings-section-head__icon" aria-hidden></span>
+          <div class="settings-section-head__copy">
+            <h2 class="section-title">Delete account</h2>
+            <p class="settings-section-head__desc">This permanently deletes the account, farm profile, products, and related requests.</p>
+          </div>
+        </div>
         <div class="settings-row">
           <div class="settings-row__body">
             <p class="settings-row__value">Deleting your account cannot be undone.</p>
@@ -381,9 +406,17 @@ describe('read-only account overview and settings profile editing', () => {
     const editor = readWeb('components/EditProfileControl.tsx');
     const avatar = readWeb('components/UserAvatarEditor.tsx');
     const password = readWeb('components/ChangePasswordForm.tsx');
+    const sectionHead = readWeb('components/SettingsSectionHead.tsx');
 
     expect(settings).toContain('cabinet-profile');
     expect(settings).toContain('profileSettingsTitle');
+    expect(settings).toContain('profileSettingsHint');
+    expect(settings).toContain('SettingsSectionHead');
+    expect(settings).toContain('securitySubtitle');
+    expect(sectionHead).toContain('settings-section-head');
+    expect(sectionHead).toContain('settings-section-head--danger');
+    expect(sectionHead).not.toContain('lucide');
+    expect(sectionHead).not.toContain('react-icons');
     expect(settings).toContain('settings-list');
     expect(settings).toContain('cabinet-page--settings');
     expect(settings).not.toContain('cabinet-profile__identity');
@@ -403,7 +436,6 @@ describe('read-only account overview and settings profile editing', () => {
     expect(editor).toContain('settingsEdit');
     expect(editor).not.toContain('alwaysOpen');
     expect(settings).not.toContain('user-card__name');
-    expect(settings).not.toContain('profileSettingsHint');
     expect(editor).toContain("fetch('/api/cabinet/me/profile'");
     expect(editor).toContain("'/api/cabinet/me/email/request'");
     expect(editor).toContain("'/api/cabinet/me/email/confirm'");
@@ -470,6 +502,7 @@ describe('read-only account overview and settings profile editing', () => {
       expect(messages.cabinet.settingsTitle.trim().length).toBeGreaterThan(0);
       expect(messages.cabinet.settingsSubtitle).toBe(expectedSubtitle[locale]);
       expect(messages.cabinet.securityTitle.trim().length).toBeGreaterThan(0);
+      expect(messages.cabinet.securitySubtitle.trim().length).toBeGreaterThan(0);
       expect(messages.cabinet.legalTitle.trim().length).toBeGreaterThan(0);
       expect(messages.nav.settings.trim().length).toBeGreaterThan(0);
       expect('subscriptions' in messages.nav).toBe(false);
@@ -483,6 +516,7 @@ describe('read-only account overview and settings profile editing', () => {
     expect(ru.cabinet.displayNameSave).toBe('Сохранить');
     expect(ru.cabinet.settingsEdit).toBe('Изменить');
     expect(ru.cabinet.changePasswordAction).toBe('Изменить пароль');
+    expect(ru.cabinet.securitySubtitle).toBe('Защита вашего аккаунта и доступ к нему.');
     expect(ru.cabinet.passwordRowHint).toBe('Измените пароль для входа в аккаунт.');
     expect(ru.cabinet.legalTitle).toBe('Юридическая информация');
     expect(ru.cabinet.deleteAccountTitle).toBe('Удаление аккаунта');
@@ -497,6 +531,8 @@ describe('read-only account overview and settings profile editing', () => {
     expect(css).toMatch(/\.cabinet-legal\s*\{[\s\S]*?margin-top:\s*1\.5rem/);
     expect(css).toContain('.settings-row');
     expect(css).toContain('.settings-list');
+    expect(css).toContain('.settings-section-head');
+    expect(css).toContain('.settings-section-head--danger');
     expect(css).toContain('.cabinet-page--settings');
     expect(css).toMatch(/\.cabinet-page--settings\s*\{[\s\S]*?max-width:\s*46rem|\.cabinet-page--settings\s*\{[\s\S]*?width:\s*min\(100%, 46rem\)/);
     expect(css).toMatch(/\.settings-row__action\s*\{[\s\S]*?flex-shrink:\s*0/);
