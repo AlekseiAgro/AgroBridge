@@ -284,7 +284,10 @@ describe('Settings → Notifications', () => {
     const product = readWeb('app/[locale]/products/[id]/page.tsx');
     const watch = readWeb('components/HarvestWatchButton.tsx');
     const center = readWeb('app/[locale]/dashboard/notifications/page.tsx');
-    const subscriptions = readWeb('app/[locale]/dashboard/subscriptions/page.tsx');
+    const subscriptions = [
+      readWeb('app/[locale]/dashboard/subscriptions/page.tsx'),
+      readWeb('app/[locale]/dashboard/subscriptions/legacy-redirect.tsx'),
+    ].join('\n');
 
     expect(settings).toContain('cabinet-notifications');
     expect(settings).toContain('notificationsSettingsTitle');

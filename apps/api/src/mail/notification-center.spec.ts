@@ -321,7 +321,10 @@ describe('dedicated Notification Center', () => {
     const list = readWeb('components/UserNotificationsList.tsx');
     const product = readWeb('app/[locale]/products/[id]/page.tsx');
     const watch = readWeb('components/HarvestWatchButton.tsx');
-    const subscriptions = readWeb('app/[locale]/dashboard/subscriptions/page.tsx');
+    const subscriptions = [
+      readWeb('app/[locale]/dashboard/subscriptions/page.tsx'),
+      readWeb('app/[locale]/dashboard/subscriptions/legacy-redirect.tsx'),
+    ].join('\n');
 
     expect(page).toContain('UserNotificationsList');
     expect(page).toContain("copyNamespace=\"notifications\"");

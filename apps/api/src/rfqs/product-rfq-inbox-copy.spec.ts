@@ -95,7 +95,10 @@ describe('incoming Product RFQ terminology', () => {
   });
 
   it('keeps notification-center copy distinct from Product RFQ inbox', () => {
-    const subscriptions = source('app/[locale]/dashboard/subscriptions/page.tsx');
+    const subscriptions = [
+      source('app/[locale]/dashboard/subscriptions/page.tsx'),
+      source('app/[locale]/dashboard/subscriptions/legacy-redirect.tsx'),
+    ].join('\n');
     expect(subscriptions).toContain('/account/settings#notifications');
     expect(subscriptions).not.toContain('id="inbox"');
     expect(subscriptions).not.toContain("t('inboxTitle')");
