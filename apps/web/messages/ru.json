@@ -213,7 +213,7 @@
     "regionPlaceholder": "Выберите регион",
     "verification": {
       "label": "Верификация",
-      "badge": "Verified",
+      "badge": "Проверено",
       "badgeHint": "Производитель прошёл добровольную верификацию AgroBridge.",
       "title": "Добровольная верификация производителя",
       "subtitle": "Рекомендуется. После подтверждения email, SMS и личности покупатели увидят бейдж Verified. Публикация товаров без верификации возможна.",
@@ -545,14 +545,14 @@
     "exportMarkets": "Экспортные рынки",
     "videos": {
       "title": "Видео продукции",
-      "publicTitle": "Product videos",
+      "publicTitle": "Видео товара",
       "subtitle": "Добавьте до {max} видео продукции (MP4, WebM или MOV, до 80 МБ).",
       "upload": "Загрузить видео",
       "empty": "Видео пока нет.",
-      "delete": "Delete",
-      "deleteConfirm": "Delete this video?",
-      "uploadError": "Could not upload the video.",
-      "deleteError": "Could not delete the video.",
+      "delete": "Удалить",
+      "deleteConfirm": "Удалить это видео?",
+      "uploadError": "Не удалось загрузить видео.",
+      "deleteError": "Не удалось удалить видео.",
       "maxReached": "Достигнут лимит в {max} видео."
     },
     "certificates": {
@@ -1211,11 +1211,11 @@
     "complete": "Карточка готова произвести хорошее впечатление на покупателей.",
     "certificates": {
       "globalGap": "GLOBALG.A.P.",
-      "organic": "Organic",
+      "organic": "Органик",
       "haccp": "HACCP",
       "iso": "ISO",
       "grasp": "GRASP",
-      "other": "Certificate"
+      "other": "Сертификат"
     }
   },
   "marketInsight": {
