@@ -965,6 +965,16 @@ body {
   margin-top: 1.25rem;
 }
 
+.cabinet-page .auth-form {
+  min-width: 0;
+}
+
+.cabinet-page .auth-form .field input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .field {
   display: grid;
   gap: 0.35rem;
@@ -3383,6 +3393,12 @@ body {
   width: 100%;
   min-width: 0;
   max-width: 100%;
+}
+
+.profile-edit-form .how-it-works__actions,
+.edit-profile__panel .how-it-works__actions {
+  justify-content: flex-start;
+  margin-top: 0.5rem;
 }
 
 .edit-profile__name-row {

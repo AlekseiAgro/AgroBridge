@@ -166,13 +166,18 @@ function cabinetFixture(css: string, page: 'account' | 'settings'): string {
 }
 
 const MEASURE_JS = `(() => {
-  const client = document.documentElement.clientWidth;
-  const scroll = document.documentElement.scrollWidth;
+  const measured = document.documentElement;
+  const client = measured.clientWidth;
+  const scroll = measured.scrollWidth;
+  const host = measured.getBoundingClientRect();
   const overflowers = [];
   for (const el of document.querySelectorAll('body *')) {
-    const extra = Math.round(el.scrollWidth - el.clientWidth);
-    if (extra > 1 && el.clientWidth > 0) {
-      overflowers.push({ cls: el.className?.toString?.().slice(0, 80) || el.tagName, extra });
+    const r = el.getBoundingClientRect();
+    if (r.width > 0 && r.right > host.right + 1) {
+      overflowers.push({
+        cls: String(el.className || el.tagName).slice(0, 80),
+        extra: Math.round(r.right - host.right),
+      });
     }
   }
   return {
