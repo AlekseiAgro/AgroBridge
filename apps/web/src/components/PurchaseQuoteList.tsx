@@ -75,10 +75,17 @@ export async function PurchaseQuoteList({ items, emptyLabel, empty }: Props) {
                 <span className="quote-list__price-label">{t('price')}</span>
                 {formatQuotePrice(item.priceAmount, item.currency)}
               </p>
-              <p className="product-list__meta">
-                {offeredQty ? `${t('quotedQuantity')}: ${offeredQty}` : null}
-                {offeredQty && requestedQty ? ' · ' : null}
-                {requestedQty ? `${t('requestedQuantity')}: ${requestedQty}` : null}
+              <p className="product-list__meta quote-list__facts">
+                {offeredQty ? (
+                  <span>
+                    {t('quotedQuantity')}: {offeredQty}
+                  </span>
+                ) : null}
+                {requestedQty ? (
+                  <span>
+                    {t('requestedQuantity')}: {requestedQty}
+                  </span>
+                ) : null}
               </p>
               <p className="product-list__meta">
                 <Link href={`/users/${item.request.buyer.id}`} className="profile-link">

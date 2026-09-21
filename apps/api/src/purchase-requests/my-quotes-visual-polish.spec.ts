@@ -204,7 +204,7 @@ describe('My Quotes visual polish', () => {
     const page = readWeb('app/[locale]/dashboard/quotes/page.tsx');
     const list = readWeb('components/PurchaseQuoteList.tsx');
     const shared = readFileSync(
-      join(__dirname, '../../../packages/shared/src/purchase-request.ts'),
+      join(__dirname, '../../../../packages/shared/src/purchase-request.ts'),
       'utf8',
     );
 
