@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ChatService } from './chat.service';
 
 describe('ChatService', () => {
@@ -342,6 +342,7 @@ describe('ChatService', () => {
       id: 'pr1',
       buyerId: buyer.id,
       status: 'fulfilled',
+      quotes: [{ status: 'accepted', farm: { ownerId: farmer.id } }],
     });
     prisma.conversation.upsert.mockResolvedValue({
       id: 'conv1',
@@ -374,6 +375,7 @@ describe('ChatService', () => {
       id: 'pr1',
       buyerId: buyer.id,
       status: 'fulfilled',
+      quotes: [{ status: 'accepted', farm: { ownerId: farmer.id } }],
     });
     prisma.user.findUnique.mockResolvedValue({ id: farmer.id, role: 'farmer' });
     prisma.conversation.upsert.mockResolvedValue({
@@ -403,5 +405,224 @@ describe('ChatService', () => {
       farmerId: farmer.id,
     });
     expect(detail.id).toBe('conv1');
+  });
+
+  describe('purchase request chat authorization', () => {
+    const outsider = {
+      ...farmer,
+      id: 'farmer-outsider',
+      email: 'outsider@example.com',
+      displayName: 'Outsider',
+    };
+    const otherBuyer = {
+      ...buyer,
+      id: 'buyer-other',
+      email: 'other-buyer@example.com',
+      displayName: 'Other Buyer',
+    };
+
+    function stubCreatedConversation() {
+      prisma.conversation.upsert.mockResolvedValue({
+        id: 'conv1',
+        farmerId: farmer.id,
+        buyerId: buyer.id,
+      });
+      prisma.user.update.mockResolvedValue({});
+      prisma.conversation.findUnique.mockResolvedValue({
+        id: 'conv1',
+        farmerId: farmer.id,
+        buyerId: buyer.id,
+        farmerLastReadAt: null,
+        buyerLastReadAt: null,
+        farmerLastDeliveredAt: null,
+        buyerLastDeliveredAt: null,
+        createdAt: new Date('2026-01-01'),
+        updatedAt: new Date('2026-01-01'),
+        farmer: {
+          id: farmer.id,
+          displayName: 'Farmer',
+          role: 'farmer',
+          locale: 'ru',
+          avatarUrl: null,
+        },
+        buyer: {
+          id: buyer.id,
+          displayName: 'Buyer',
+          role: 'buyer',
+          locale: 'en',
+          avatarUrl: null,
+        },
+      });
+      prisma.conversation.update.mockResolvedValue({});
+      prisma.message.findMany.mockResolvedValue([]);
+    }
+
+    it('lets the purchase request owner open chat with a quoted seller', async () => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue({
+        id: 'pr1',
+        buyerId: buyer.id,
+        status: 'open',
+        quotes: [{ status: 'pending', farm: { ownerId: farmer.id } }],
+      });
+      prisma.user.findUnique.mockResolvedValue({ id: farmer.id, role: 'farmer' });
+      stubCreatedConversation();
+
+      const detail = await service.createOrGet(buyer, {
+        purchaseRequestId: 'pr1',
+        farmerId: farmer.id,
+      });
+
+      expect(detail.id).toBe('conv1');
+      expect(prisma.conversation.upsert).toHaveBeenCalledTimes(1);
+    });
+
+    it('lets a seller with a quote open chat with the buyer', async () => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue({
+        id: 'pr1',
+        buyerId: buyer.id,
+        status: 'open',
+        quotes: [{ status: 'pending', farm: { ownerId: farmer.id } }],
+      });
+      stubCreatedConversation();
+
+      const detail = await service.createOrGet(farmer, { purchaseRequestId: 'pr1' });
+
+      expect(detail.id).toBe('conv1');
+      expect(prisma.conversation.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { farmerId_buyerId: { farmerId: farmer.id, buyerId: buyer.id } },
+        }),
+      );
+    });
+
+    it('forbids an unrelated authenticated user from creating a purchase request chat', async () => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue({
+        id: 'pr1',
+        buyerId: buyer.id,
+        status: 'open',
+        quotes: [{ status: 'pending', farm: { ownerId: farmer.id } }],
+      });
+
+      await expect(
+        service.createOrGet(otherBuyer, { purchaseRequestId: 'pr1' }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.conversation.upsert).not.toHaveBeenCalled();
+    });
+
+    it('forbids a seller with no quote from creating the chat', async () => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue({
+        id: 'pr1',
+        buyerId: buyer.id,
+        status: 'open',
+        quotes: [{ status: 'pending', farm: { ownerId: farmer.id } }],
+      });
+
+      await expect(
+        service.createOrGet(outsider, { purchaseRequestId: 'pr1' }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.conversation.upsert).not.toHaveBeenCalled();
+    });
+
+    it('forbids the buyer from opening chat with a seller who never quoted', async () => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue({
+        id: 'pr1',
+        buyerId: buyer.id,
+        status: 'open',
+        quotes: [{ status: 'pending', farm: { ownerId: farmer.id } }],
+      });
+      prisma.user.findUnique.mockResolvedValue({ id: outsider.id, role: 'farmer' });
+
+      await expect(
+        service.createOrGet(buyer, {
+          purchaseRequestId: 'pr1',
+          farmerId: outsider.id,
+        }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.conversation.upsert).not.toHaveBeenCalled();
+    });
+
+    it('does not create a chat for a nonexistent purchase request', async () => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.createOrGet(farmer, { purchaseRequestId: 'missing' }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.conversation.upsert).not.toHaveBeenCalled();
+    });
+
+    it('returns the existing conversation when an authorized seller opens chat again', async () => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue({
+        id: 'pr1',
+        buyerId: buyer.id,
+        status: 'open',
+        quotes: [{ status: 'pending', farm: { ownerId: farmer.id } }],
+      });
+      stubCreatedConversation();
+
+      const first = await service.createOrGet(farmer, { purchaseRequestId: 'pr1' });
+      const again = await service.createOrGet(farmer, { purchaseRequestId: 'pr1' });
+
+      expect(first.id).toBe('conv1');
+      expect(again.id).toBe('conv1');
+      expect(prisma.conversation.upsert).toHaveBeenCalledTimes(2);
+    });
+
+    it('lets authorized participants keep sending messages after createOrGet', async () => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue({
+        id: 'pr1',
+        buyerId: buyer.id,
+        status: 'open',
+        quotes: [{ status: 'pending', farm: { ownerId: farmer.id } }],
+      });
+      stubCreatedConversation();
+
+      const detail = await service.createOrGet(farmer, { purchaseRequestId: 'pr1' });
+      expect(detail.id).toBe('conv1');
+
+      prisma.message.create.mockResolvedValue({
+        id: 'm2',
+        conversationId: 'conv1',
+        senderId: farmer.id,
+        sourceLocale: 'ru',
+        sourceText: 'Цена',
+        createdAt: new Date('2026-01-03'),
+      });
+      prisma.message.findUniqueOrThrow.mockResolvedValue({
+        id: 'm2',
+        conversationId: 'conv1',
+        senderId: farmer.id,
+        sourceLocale: 'ru',
+        sourceText: 'Цена',
+        createdAt: new Date('2026-01-03'),
+        translations: [],
+      });
+
+      const view = await service.sendMessage(farmer, 'conv1', {
+        text: 'Цена',
+        sourceLocale: 'ru',
+      });
+      expect(view).toMatchObject({
+        isMine: true,
+        displayText: 'Цена',
+        conversationId: 'conv1',
+      });
+    });
+
+    it('forbids a declined seller from opening chat after the request is fulfilled', async () => {
+      prisma.purchaseRequest.findUnique.mockResolvedValue({
+        id: 'pr1',
+        buyerId: buyer.id,
+        status: 'fulfilled',
+        quotes: [
+          { status: 'accepted', farm: { ownerId: farmer.id } },
+          { status: 'declined', farm: { ownerId: outsider.id } },
+        ],
+      });
+
+      await expect(
+        service.createOrGet(outsider, { purchaseRequestId: 'pr1' }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(prisma.conversation.upsert).not.toHaveBeenCalled();
+    });
   });
 });

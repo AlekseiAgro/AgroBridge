@@ -13,7 +13,7 @@ import type {
   UnreadMessagesCount,
 } from '@agrobridge/shared';
 import { canTrade, detectMessageLocale, isLocale } from '@agrobridge/shared';
-import { LocaleCode, Prisma, UserRole } from '@prisma/client';
+import { LocaleCode, Prisma, PurchaseQuoteStatus, PurchaseRequestStatus, UserRole } from '@prisma/client';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { AuthenticatedUser } from '../auth/auth.types';
@@ -420,15 +420,33 @@ export class ChatService {
     if (dto.purchaseRequestId) {
       const request = await this.prisma.purchaseRequest.findUnique({
         where: { id: dto.purchaseRequestId },
+        include: {
+          quotes: {
+            select: {
+              status: true,
+              farm: { select: { ownerId: true } },
+            },
+          },
+        },
       });
       if (!request) {
         throw new NotFoundException('Purchase request not found');
       }
 
       const isBuyer = request.buyerId === user.id;
-      const isSellerSide = canTrade(user.role) && user.id !== request.buyerId;
+      const isAdmin = user.role === 'admin';
+      const requestOpen = request.status === PurchaseRequestStatus.open;
+      const sellerQuoted = (sellerId: string) =>
+        request.quotes.some((quote) => quote.farm.ownerId === sellerId);
+      const sellerWon = (sellerId: string) =>
+        request.quotes.some(
+          (quote) =>
+            quote.status === PurchaseQuoteStatus.accepted && quote.farm.ownerId === sellerId,
+        );
+      const sellerMayChat = (sellerId: string) =>
+        sellerQuoted(sellerId) && (requestOpen || sellerWon(sellerId) || isAdmin);
 
-      if (isBuyer) {
+      if (isBuyer || (isAdmin && dto.farmerId)) {
         if (!dto.farmerId) {
           throw new BadRequestException('farmerId is required when buyer opens chat');
         }
@@ -436,10 +454,13 @@ export class ChatService {
         if (!farmer || !canTrade(farmer.role)) {
           throw new NotFoundException('Farmer not found');
         }
+        if (!sellerMayChat(farmer.id)) {
+          throw new ForbiddenException('Not allowed to open chat for this purchase request');
+        }
         return { farmerId: farmer.id, buyerId: request.buyerId };
       }
 
-      if (isSellerSide) {
+      if (user.id !== request.buyerId && sellerMayChat(user.id)) {
         return { farmerId: user.id, buyerId: request.buyerId };
       }
 
