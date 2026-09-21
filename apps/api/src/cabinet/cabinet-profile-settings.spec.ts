@@ -495,6 +495,9 @@ describe('read-only account overview and settings profile editing', () => {
     expect(css).toContain('.cabinet-page--settings');
     expect(css).toMatch(/\.cabinet-page--settings\s*\{[\s\S]*?max-width:\s*46rem|\.cabinet-page--settings\s*\{[\s\S]*?width:\s*min\(100%, 46rem\)/);
     expect(css).toMatch(/\.settings-row__action\s*\{[\s\S]*?flex-shrink:\s*0/);
+    expect(css).toMatch(
+      /\.cabinet-page--settings \.cabinet-profile\s*\{[\s\S]*?border-top:\s*0/,
+    );
     expect(css).not.toContain('.cabinet-profile__identity');
   });
 

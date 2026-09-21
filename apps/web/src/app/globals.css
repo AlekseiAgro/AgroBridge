@@ -620,6 +620,10 @@ body {
   max-width: 28rem;
 }
 
+.settings-row--editing .settings-row__actions {
+  justify-content: flex-start;
+}
+
 .cabinet-page--settings .user-card__avatar {
   width: 2.75rem;
   height: 2.75rem;
@@ -3351,6 +3355,16 @@ body {
 
 .cabinet-page--settings {
   width: min(100%, 46rem);
+}
+
+.cabinet-page--settings > .page__heading-row {
+  margin-bottom: 0.35rem;
+}
+
+.cabinet-page--settings .cabinet-profile {
+  margin-top: 0.85rem;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .cabinet-page--narrow {
