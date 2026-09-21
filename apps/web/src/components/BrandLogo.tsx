@@ -1,4 +1,4 @@
-/** Official AgroBridge lockup. Serves the supplied PNG unchanged. */
+/** Official AgroBridge lockup. Serves the official PNG with a transparent canvas. */
 export const AGROBRIDGE_LOGO_SRC = '/brand/agrobridge-logo.png';
 export const AGROBRIDGE_LOGO_WIDTH = 1773;
 export const AGROBRIDGE_LOGO_HEIGHT = 887;
