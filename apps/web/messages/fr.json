@@ -945,7 +945,15 @@
     "viewPrivacy": "Politique de confidentialité",
     "privacyTransparency": "La Politique de confidentialité décrit le traitement des données personnelles. La consulter n'est pas enregistrée comme un consentement.",
     "privacyNotAccepted": "Le consentement à la Politique de confidentialité n'est pas recueilli à l'inscription.",
-    "legalLoadError": "Impossible de charger les informations d'acceptation juridique."
+    "legalLoadError": "Impossible de charger les informations d'acceptation juridique.",
+    "notificationsSettingsTitle": "Notifications",
+    "notificationsSettingsSubtitle": "Choisissez les e-mails à recevoir et gérez les alertes de récolte déjà créées.",
+    "emailNotificationsTitle": "Notifications e-mail",
+    "harvestNotificationsTitle": "Alertes de récolte",
+    "harvestNotificationsHint": "Ici figurent uniquement les produits déjà suivis. Une nouvelle alerte se crée depuis la fiche produit.",
+    "harvestNotificationsEmpty": "Aucune alerte de récolte pour le moment.",
+    "harvestNotificationsBrowse": "Ouvrir le catalogue",
+    "notificationsLoadError": "Impossible de charger les paramètres de notification."
   },
   "rating": {
     "title": "Noter votre partenaire",

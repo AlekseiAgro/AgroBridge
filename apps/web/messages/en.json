@@ -945,7 +945,15 @@
     "viewPrivacy": "Privacy Policy",
     "privacyTransparency": "The Privacy Policy explains how personal data is processed. Viewing it is not recorded as consent.",
     "privacyNotAccepted": "Privacy Policy consent is not collected at registration.",
-    "legalLoadError": "Legal acceptance details could not be loaded."
+    "legalLoadError": "Legal acceptance details could not be loaded.",
+    "notificationsSettingsTitle": "Notifications",
+    "notificationsSettingsSubtitle": "Choose which emails you receive and manage harvest watches you already created.",
+    "emailNotificationsTitle": "Email notifications",
+    "harvestNotificationsTitle": "Harvest notifications",
+    "harvestNotificationsHint": "Only products you already watch. Start a new watch from a product page.",
+    "harvestNotificationsEmpty": "No harvest notifications yet.",
+    "harvestNotificationsBrowse": "Open catalog",
+    "notificationsLoadError": "Could not load notification settings."
   },
   "rating": {
     "title": "Rate your partner",

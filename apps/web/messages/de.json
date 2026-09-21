@@ -945,7 +945,15 @@
     "viewPrivacy": "Datenschutzrichtlinie",
     "privacyTransparency": "Die Datenschutzrichtlinie beschreibt die Verarbeitung personenbezogener Daten. Das Öffnen gilt nicht als Einwilligung.",
     "privacyNotAccepted": "Eine Einwilligung zur Datenschutzrichtlinie wird bei der Registrierung nicht eingeholt.",
-    "legalLoadError": "Angaben zur rechtlichen Annahme konnten nicht geladen werden."
+    "legalLoadError": "Angaben zur rechtlichen Annahme konnten nicht geladen werden.",
+    "notificationsSettingsTitle": "Benachrichtigungen",
+    "notificationsSettingsSubtitle": "Legen Sie fest, welche E-Mails Sie erhalten, und verwalten Sie vorhandene Ernte-Benachrichtigungen.",
+    "emailNotificationsTitle": "E-Mail-Benachrichtigungen",
+    "harvestNotificationsTitle": "Erntebenachrichtigungen",
+    "harvestNotificationsHint": "Hier erscheinen nur Produkte, die Sie bereits beobachten. Eine neue Beobachtung starten Sie auf der Produktseite.",
+    "harvestNotificationsEmpty": "Noch keine Erntebenachrichtigungen.",
+    "harvestNotificationsBrowse": "Katalog öffnen",
+    "notificationsLoadError": "Benachrichtigungseinstellungen konnten nicht geladen werden."
   },
   "rating": {
     "title": "Partner bewerten",
