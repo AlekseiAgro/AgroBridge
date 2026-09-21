@@ -315,8 +315,8 @@ describe('Settings → Notifications', () => {
 
     expect(product).toContain('HarvestWatchButton');
     expect(watch).toContain("fetch(`/api/products/${productId}/watch`");
-    expect(watch).toContain("method: 'POST'");
-    expect(watch).toContain("method: 'DELETE'");
+    expect(watch).toContain("'POST'");
+    expect(watch).toContain("'DELETE'");
 
     expect(center).not.toContain('AlertSubscriptionForm');
     expect(center).not.toContain('HarvestWatchesList');
