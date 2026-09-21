@@ -39,11 +39,6 @@ export default async function MyQuotesPage({ params }: Props) {
           {t('browseBoard')}
         </Link>
       </div>
-      <p className="eyebrow">
-        <Link href="/requests">{t('boardTitle')}</Link>
-        {' · '}
-        {t('myQuotesTitle')}
-      </p>
       {loadError ? (
         <p className="form-error">{loadError}</p>
       ) : (
