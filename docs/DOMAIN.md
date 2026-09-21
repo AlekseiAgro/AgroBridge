@@ -1,48 +1,51 @@
 # Domain setup & migration
 
 AgroBridge does **not** bake a brand domain into application logic.
-Public URLs come from environment variables, so you can launch on `agrobrid.ge`
+Public URLs come from environment variables, so you can launch on `agrobridge.ge`
 and later move to another domain without rewriting product code.
+
+The previous hostname `agrobrid.ge` is retired. Keep it only as a 301/CNAME
+redirect to `agrobridge.ge` if leftover bookmarks still exist.
 
 ## Hosting on Railway (no VPS IP)
 
 If the app runs on Railway, Cloudflare uses **CNAME** targets from Railway Custom Domains — not an A record to a VPS IP.
 See [`docs/RAILWAY.md`](RAILWAY.md).
 
-## Current target: agrobrid.ge
+## Current target: agrobridge.ge
 
 | Role | URL |
 |------|-----|
-| Website | `https://agrobrid.ge` |
-| API | `https://api.agrobrid.ge` |
+| Website | `https://agrobridge.ge` |
+| API | `https://api.agrobridge.ge` |
 
 Env mapping (see `.env.production.example`):
 
 ```bash
-WEB_ORIGIN=https://agrobrid.ge
-WEB_PUBLIC_URL=https://agrobrid.ge
-API_PUBLIC_URL=https://api.agrobrid.ge
-NEXT_PUBLIC_API_URL=https://api.agrobrid.ge/api
-MAIL_FROM=AgroBridge <noreply@agrobrid.ge>
+WEB_ORIGIN=https://agrobridge.ge
+WEB_PUBLIC_URL=https://agrobridge.ge
+API_PUBLIC_URL=https://api.agrobridge.ge
+NEXT_PUBLIC_API_URL=https://api.agrobridge.ge/api
+MAIL_FROM=AgroBridge <no-reply@agrobridge.ge>
 ```
 
 DNS:
 
-1. `A` / `AAAA` for `agrobrid.ge` → VPS
-2. `A` / `AAAA` for `api.agrobrid.ge` → same VPS (or CNAME to apex)
+1. `A` / `AAAA` for `agrobridge.ge` → VPS
+2. `A` / `AAAA` for `api.agrobridge.ge` → same VPS (or CNAME to apex)
 3. TLS via Caddy (`deploy/Caddyfile`) or another reverse proxy
 
 Why a subdomain for API? Next.js already uses `/api/*` as BFF routes on the web app.
-Putting Nest on `api.agrobrid.ge` avoids path clashes.
+Putting Nest on `api.agrobridge.ge` avoids path clashes.
 
 ## Moving to a new domain later
 
-Example: `agrobrid.ge` → `new-domain.example`
+Example: `agrobridge.ge` → `new-domain.example`
 
 1. **Prepare DNS + TLS** for `new-domain.example` and `api.new-domain.example`.
 2. **Update `.env.production`** only:
    ```bash
-   WEB_ORIGIN=https://agrobrid.ge,https://new-domain.example
+   WEB_ORIGIN=https://agrobridge.ge,https://new-domain.example
    WEB_PUBLIC_URL=https://new-domain.example
    API_PUBLIC_URL=https://api.new-domain.example
    NEXT_PUBLIC_API_URL=https://api.new-domain.example/api
@@ -61,12 +64,14 @@ Example: `agrobrid.ge` → `new-domain.example`
 ## Keep media URLs stable across a move
 
 If product photos are stored with `STORAGE_DRIVER=local`, public file URLs include `API_PUBLIC_URL`.
-After an API hostname change, old absolute links can break unless you redirect `api.agrobrid.ge` → `api.new-domain.example`.
+After an API hostname change, old absolute links can break unless you redirect `api.agrobridge.ge` → `api.new-domain.example`.
 
 Better before launch (or before the move):
 
 - use `STORAGE_DRIVER=s3` (S3 / Cloudflare R2)
 - set `STORAGE_PUBLIC_BASE_URL` to a CDN host you keep forever
+
+Railway production requires object storage — see [`docs/RAILWAY.md`](RAILWAY.md).
 
 ## Checklist
 

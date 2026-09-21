@@ -2,7 +2,7 @@
 
 This guide covers a single-host Docker deploy (VPS) using `docker-compose.prod.yml`.
 
-For **agrobrid.ge** now and a later domain move, see [`docs/DOMAIN.md`](DOMAIN.md).
+For **agrobridge.ge** now and a later domain move, see [`docs/DOMAIN.md`](DOMAIN.md).
 
 ## What you need
 
@@ -18,7 +18,7 @@ Auth cookies are `secure` when `NODE_ENV=production`, so **login will not stick 
 cp .env.production.example .env.production
 ```
 
-The example is pre-filled for **agrobrid.ge** / **api.agrobrid.ge**. Change secrets at minimum:
+The example is pre-filled for **agrobridge.ge** / **api.agrobridge.ge**. Change secrets at minimum:
 
 | Variable | Purpose |
 |----------|---------|
@@ -35,7 +35,7 @@ Optional production upgrades:
 
 - `MAIL_DRIVER=resend` plus `RESEND_API_KEY` and `MAIL_FROM` for real email over HTTPS (`POST https://api.resend.com/emails`). Incomplete resend config fails API startup (no silent console fallback). `NODE_ENV=production` also refuses `MAIL_DRIVER=console` unless `MAIL_ALLOW_CONSOLE=true` (staging). Local/dev `MAIL_DRIVER=console` stays valid without `RESEND_API_KEY`. SMTP (`MAIL_DRIVER=smtp` + `SMTP_*`) remains in code for local/legacy use and is unused when the driver is `resend`. Never log `RESEND_API_KEY`, `SMTP_PASSWORD`, reset tokens, or verification codes. Never set `RESEND_API_KEY` as `NEXT_PUBLIC_*`.
 - `SMS_DRIVER=infobip` plus `INFOBIP_API_KEY`, `INFOBIP_BASE_URL`, and `INFOBIP_SENDER` for production SMS over HTTPS. OTP generation, hashing, TTL, attempts, and rate limits stay in AgroBridge PostgreSQL; Infobip is delivery only. Incomplete Infobip config fails API startup. `NODE_ENV=production` refuses `SMS_DRIVER=console` unless `SMS_ALLOW_CONSOLE=true`. Never log `INFOBIP_API_KEY`, OTP codes, or full phone numbers. Never set `INFOBIP_*` as `NEXT_PUBLIC_*`.
-- `STORAGE_DRIVER=s3` + S3_* for durable media (R2/S3) — recommended before any domain move
+- `STORAGE_DRIVER=s3` + S3_* for durable media (R2/S3) — required on Railway; recommended on VPS before any domain move
 - `TRANSLATION_PROVIDER=openai` + `OPENAI_API_KEY` for chat translation
 - `GOOGLE_MAPS_API_KEY` for product origin place autocomplete (Places API New; settlements only)
 
@@ -55,8 +55,8 @@ Services:
 Health:
 
 ```bash
-curl -sS https://api.agrobrid.ge/api/health
-curl -sS -o /dev/null -w '%{http_code}\n' https://agrobrid.ge
+curl -sS https://api.agrobridge.ge/api/health
+curl -sS -o /dev/null -w '%{http_code}\n' https://agrobridge.ge
 ```
 
 ## 3. Admin login (no demo marketplace seed)
@@ -82,18 +82,18 @@ node ./prisma/run-cleanup-demo.cjs --apply
 
 Live test records that do not use `@agrobridge.local` (for example a farm named BBB or a draft titled «Новый товар») are **not** deleted by this script.
 
-## 4. Reverse proxy (agrobrid.ge)
+## 4. Reverse proxy (agrobridge.ge)
 
 Point HTTPS to containers (see `deploy/Caddyfile`):
 
-- `https://agrobrid.ge` → `127.0.0.1:3000` (web)
-- `https://api.agrobrid.ge` → `127.0.0.1:3001` (api)
+- `https://agrobridge.ge` → `127.0.0.1:3000` (web)
+- `https://api.agrobridge.ge` → `127.0.0.1:3001` (api)
 
-Do **not** mount Nest at `https://agrobrid.ge/api` — Next.js already owns `/api/*` as BFF routes.
+Do **not** mount Nest at `https://agrobridge.ge/api` — Next.js already owns `/api/*` as BFF routes.
 
 ## 5. Production checklist
 
-- [ ] DNS for `agrobrid.ge` and `api.agrobrid.ge`
+- [ ] DNS for `agrobridge.ge` and `api.agrobridge.ge`
 - [ ] HTTPS enabled; env URLs use `https://`
 - [ ] Strong `JWT_SECRET` and `POSTGRES_PASSWORD`
 - [ ] Client addresses resolve correctly through the proxy chain (check the API boot log for the trusted-proxy setting)
