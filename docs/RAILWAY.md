@@ -9,7 +9,7 @@ Railway replaces a single VPS: you run **four services** in one project.
 | `api` | NestJS (`apps/api`) |
 | `web` | Next.js (`apps/web`) |
 
-Custom domain later: `agrobrid.ge` → web, `api.agrobrid.ge` → api (Cloudflare CNAME, not an A→IP).
+Custom domain later: `agrobridge.ge` → web, `api.agrobridge.ge` → api (Cloudflare CNAME, not an A→IP).
 
 ## 1. Create the project (your current screen)
 
@@ -172,12 +172,12 @@ To inspect leftover `@agrobridge.local` demo users (dry-run, no deletes):
 node ./prisma/run-cleanup-demo.cjs
 ```
 
-## 5. Point agrobrid.ge (Cloudflare)
+## 5. Point agrobridge.ge (Cloudflare)
 
 After Railway domains work:
 
-1. Railway → `web` → Custom Domain → `agrobrid.ge` (and optionally `www`).
-2. Railway → `api` → Custom Domain → `api.agrobrid.ge`.
+1. Railway → `web` → Custom Domain → `agrobridge.ge` (and optionally `www`).
+2. Railway → `api` → Custom Domain → `api.agrobridge.ge`.
 3. Cloudflare DNS (follow Railway’s CNAME target exactly), usually:
 
 | Type | Name | Target | Proxy |
@@ -189,10 +189,10 @@ After Railway domains work:
 4. Update Railway variables to the real domains and **redeploy web**:
 
 ```bash
-WEB_ORIGIN=https://agrobrid.ge
-WEB_PUBLIC_URL=https://agrobrid.ge
-API_PUBLIC_URL=https://api.agrobrid.ge
-NEXT_PUBLIC_API_URL=https://api.agrobrid.ge/api
+WEB_ORIGIN=https://agrobridge.ge
+WEB_PUBLIC_URL=https://agrobridge.ge
+API_PUBLIC_URL=https://api.agrobridge.ge
+NEXT_PUBLIC_API_URL=https://api.agrobridge.ge/api
 ```
 
 ## 6. Backups later
