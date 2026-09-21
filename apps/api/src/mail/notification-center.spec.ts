@@ -21,6 +21,7 @@ function loadMessages(locale: string) {
       subtitle: string;
       empty: string;
       emptyHint?: string;
+      loadError: string;
       markAllRead: string;
       markRead: string;
     };
@@ -93,6 +94,41 @@ function notificationsFixture(css: string): string {
               </li>
             </ul>
           </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function notificationsErrorFixture(css: string): string {
+  return `<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>${css}</style>
+</head>
+<body>
+  <div class="cabinet">
+    <aside class="cabinet__sidebar">
+      <a class="cabinet__brand" href="/">AgroBridge</a>
+      <nav class="cabinet__nav">
+        <a href="/account">Account</a>
+        <a href="/account/settings">Settings</a>
+      </nav>
+    </aside>
+    <div class="cabinet__main">
+      <div class="cabinet__content">
+        <main class="cabinet-page">
+          <div class="page__heading-row">
+            <div>
+              <h1>Уведомления</h1>
+              <p class="page__subtitle">Здесь отображаются важные события, связанные с вашими запросами, предложениями и товарами.</p>
+            </div>
+          </div>
+          <p class="form-error">Не удалось загрузить уведомления.</p>
         </main>
       </div>
     </div>
@@ -395,11 +431,51 @@ describe('dedicated Notification Center', () => {
     expect(ru.notifications.markRead).toBe('Прочитано');
     const en = loadMessages('en');
     expect(en.notifications.empty).toBe('No notifications yet');
+    expect(en.notifications.loadError).toBe('Could not load notifications.');
     expect(en.notifications.subtitle).toBe(
       'Important events about your purchase requests, quotes, and products appear here.',
     );
     expect(en.notifications.markAllRead).toBe('Mark all as read');
     expect(en.notifications.markRead).toBe('Read');
+  });
+
+  it('shows only the load error when the notification API fails', () => {
+    const page = readWeb('app/[locale]/dashboard/notifications/page.tsx');
+    const list = readWeb('components/UserNotificationsList.tsx');
+
+    expect(page).toContain("t('loadError')");
+    expect(page).toMatch(
+      /loadError \? \(\s*<p className="form-error">\{t\('loadError'\)\}<\/p>\s*\) : \(/,
+    );
+    const errorBranch = page.slice(page.indexOf('{loadError ? ('));
+    expect(errorBranch.indexOf('UserNotificationsList')).toBeGreaterThan(
+      errorBranch.indexOf("t('loadError')"),
+    );
+    expect(errorBranch).not.toContain('empty-state');
+    expect(page).not.toContain('className="empty-state"');
+    expect(page).not.toContain("t('empty')");
+    expect(list).not.toContain('loadError');
+  });
+
+  it('shows the empty state after a successful response with no notifications', () => {
+    const page = readWeb('app/[locale]/dashboard/notifications/page.tsx');
+    const list = readWeb('components/UserNotificationsList.tsx');
+
+    expect(page).toContain('<UserNotificationsList initial={items} copyNamespace="notifications" />');
+    expect(list).toContain('if (items.length === 0)');
+    expect(list).toContain('className="empty-state"');
+    expect(list).toContain("t('empty')");
+    expect(list).not.toContain('emptyHint');
+  });
+
+  it('shows the notification list after a successful response with items', () => {
+    const list = readWeb('components/UserNotificationsList.tsx');
+
+    expect(list).toContain('className="user-notifications"');
+    expect(list).toContain('items.map((item)');
+    expect(list.indexOf('className="user-notifications"')).toBeGreaterThan(
+      list.indexOf('if (items.length === 0)'),
+    );
   });
 
   const chrome = findChrome();
@@ -420,9 +496,14 @@ describe('dedicated Notification Center', () => {
       const server = await startStaticServer({
         'notifications.html': notificationsFixture(css),
         'notifications-empty.html': notificationsEmptyFixture(css),
+        'notifications-error.html': notificationsErrorFixture(css),
       });
       try {
-        for (const page of ['notifications.html', 'notifications-empty.html'] as const) {
+        for (const page of [
+          'notifications.html',
+          'notifications-empty.html',
+          'notifications-error.html',
+        ] as const) {
           for (const viewport of viewports) {
             const result = await cdpEvaluate(
               launched.wsUrl,
