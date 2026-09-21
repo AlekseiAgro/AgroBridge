@@ -988,7 +988,7 @@
     "mineEmpty": "Vous n'avez encore publié aucune demande d'achat.",
     "myQuotesTitle": "Mes offres",
     "myQuotesSubtitle": "Offres que vous avez envoyées aux acheteurs.",
-    "myQuotesEmpty": "Vous n’avez encore envoyé aucune offre.",
+    "myQuotesEmpty": "Les offres envoyées apparaîtront ici.",
     "myQuotesLoadError": "Impossible de charger vos offres. L’API est-elle lancée ?",
     "openRequest": "Ouvrir la demande",
     "requestUnavailable": "Cette demande n’est plus disponible.",
@@ -1000,6 +1000,9 @@
     "quoteMessagePlaceholder": "Délai, qualité, logistique…",
     "submitQuote": "Envoyer l'offre",
     "price": "Prix",
+    "quotedQuantity": "Quantité proposée",
+    "requestedQuantity": "Quantité demandée",
+    "sentAt": "Envoyée le {date}",
     "currency": "Devise",
     "yourQuote": "Votre offre",
     "quoteStatus": "Statut de l'offre",
@@ -1021,6 +1024,12 @@
       "accepted": "Acceptée",
       "declined": "Refusée",
       "withdrawn": "Retirée"
+    },
+    "quoteStatusHints": {
+      "pending": "En attente de la décision de l'acheteur",
+      "accepted": "Offre acceptée",
+      "declined": "Offre refusée",
+      "withdrawn": "Offre retirée"
     },
     "actions": {
       "cancel": "Annuler la demande",

@@ -988,7 +988,7 @@
     "mineEmpty": "Sie haben noch keine Kaufanfragen veröffentlicht.",
     "myQuotesTitle": "Meine Angebote",
     "myQuotesSubtitle": "Angebote, die Sie an Käufer gesendet haben.",
-    "myQuotesEmpty": "Sie haben noch keine Angebote gesendet.",
+    "myQuotesEmpty": "Gesendete Angebote erscheinen hier.",
     "myQuotesLoadError": "Angebote konnten nicht geladen werden. Läuft die API?",
     "openRequest": "Anfrage öffnen",
     "requestUnavailable": "Diese Anfrage ist nicht mehr verfügbar.",
@@ -1000,6 +1000,9 @@
     "quoteMessagePlaceholder": "Lieferzeit, Qualität, Logistik…",
     "submitQuote": "Angebot senden",
     "price": "Preis",
+    "quotedQuantity": "Angebotene Menge",
+    "requestedQuantity": "Angefragte Menge",
+    "sentAt": "Gesendet {date}",
     "currency": "Währung",
     "yourQuote": "Ihr Angebot",
     "quoteStatus": "Angebotsstatus",
@@ -1021,6 +1024,12 @@
       "accepted": "Angenommen",
       "declined": "Abgelehnt",
       "withdrawn": "Zurückgezogen"
+    },
+    "quoteStatusHints": {
+      "pending": "Wartet auf die Entscheidung des Käufers",
+      "accepted": "Angebot angenommen",
+      "declined": "Angebot abgelehnt",
+      "withdrawn": "Angebot zurückgezogen"
     },
     "actions": {
       "cancel": "Anfrage stornieren",

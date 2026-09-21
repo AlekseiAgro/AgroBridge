@@ -19,6 +19,7 @@ export default async function MyQuotesPage({ params }: Props) {
   if (!user) redirect({ href: '/login', locale });
 
   const t = await getTranslations('purchaseRequests');
+  const tn = await getTranslations('nav');
   let items: PurchaseQuoteMineItem[] = [];
   let loadError: string | null = null;
   try {
@@ -44,21 +45,29 @@ export default async function MyQuotesPage({ params }: Props) {
         {' · '}
         <Link href="/dashboard/purchase-requests">{t('mineTitle')}</Link>
       </p>
-      {loadError ? <p className="form-error">{loadError}</p> : null}
-      <PurchaseQuoteList
-        items={items}
-        empty={
-          <EmptyState
-            title={t('myQuotesEmptyTitle')}
-            body={t('myQuotesEmpty')}
-            actions={
-              <Link href="/requests" className="button button--primary">
-                {t('boardTitle')}
-              </Link>
-            }
-          />
-        }
-      />
+      {loadError ? (
+        <p className="form-error">{loadError}</p>
+      ) : (
+        <PurchaseQuoteList
+          items={items}
+          empty={
+            <EmptyState
+              title={t('myQuotesEmptyTitle')}
+              body={t('myQuotesEmpty')}
+              actions={
+                <>
+                  <Link href="/requests" className="button button--primary">
+                    {t('boardTitle')}
+                  </Link>
+                  <Link href="/catalog" className="button button--ghost">
+                    {tn('catalog')}
+                  </Link>
+                </>
+              }
+            />
+          }
+        />
+      )}
     </main>
   );
 }

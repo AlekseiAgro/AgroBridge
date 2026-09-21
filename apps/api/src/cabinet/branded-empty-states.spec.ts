@@ -109,6 +109,7 @@ describe('branded 404 and empty states', () => {
     expect(mine).toContain("href=\"/requests/new\"");
     expect(quotes).toContain('myQuotesEmptyTitle');
     expect(quotes).toContain("href=\"/requests\"");
+    expect(quotes).toContain("href=\"/catalog\"");
     expect(quotes).toContain('EmptyState');
     expect(products).toContain('EmptyState');
     expect(products).toContain('emptyPublishedTitle');

@@ -13,7 +13,7 @@ type Props = {
   requestId: string;
   action: PurchaseRequestAction;
   quoteId?: string;
-  variant?: 'primary' | 'ghost';
+  variant?: 'primary' | 'ghost' | 'danger-quiet';
 };
 
 export function PurchaseRequestActionButton({
@@ -65,10 +65,17 @@ export function PurchaseRequestActionButton({
     withdraw: t('actions.withdraw'),
   };
 
+  const buttonClass =
+    variant === 'primary'
+      ? 'button button--primary'
+      : variant === 'danger-quiet'
+        ? 'button button--danger-quiet'
+        : 'button button--ghost';
+
   return (
     <div>
       <button
-        className={variant === 'primary' ? 'button button--primary' : 'button button--ghost'}
+        className={buttonClass}
         type="button"
         onClick={onClick}
         disabled={pending}
