@@ -7,12 +7,9 @@ import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link } from '@/i18n/navigation';
+import { ProductPhotoPlaceholder } from '@/components/ProductPhotoPlaceholder';
 import { isPublicFarmProduct } from '@/lib/farm-profile';
-import {
-  formatCategoryFallbackAlt,
-  getProductCardImage,
-  getProductCardImageAlt,
-} from '@/lib/product-image';
+import { getProductCardImage, getProductCardImageAlt } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
@@ -148,13 +145,11 @@ export async function FarmProfileView({
         <ul className="product-list">
           {products.map((product) => {
             const image = getProductCardImage(product);
-            const imageAlt = image
-              ? getProductCardImageAlt({
-                  fromCategory: image.fromCategory,
-                  productTitle: formatProductTitle(product.title, locale),
-                  categoryFallbackAlt: formatCategoryFallbackAlt(product.category, tc),
-                })
-              : '';
+            const imageAlt = getProductCardImageAlt({
+              hasProductPhoto: Boolean(image),
+              productTitle: formatProductTitle(product.title, locale),
+              noPhotoAlt: tc('noProductPhotoAlt'),
+            });
             const quantity = formatProductQuantityRange(
               product,
               product.unit ? tp(`units.${product.unit as 'kg'}`) : null,
@@ -165,7 +160,11 @@ export async function FarmProfileView({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={image.url} alt={imageAlt} className="product-list__media" />
                 ) : (
-                  <div className="product-list__media product-list__media--empty" aria-hidden />
+                  <ProductPhotoPlaceholder
+                    label={tc('noProductPhoto')}
+                    alt={imageAlt}
+                    className="product-list__media"
+                  />
                 )}
                 <div>
                   <Link href={`/products/${product.id}`} className="product-list__title">

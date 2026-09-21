@@ -181,6 +181,8 @@
       "other": "Paysage agricole"
     },
     "categoryFallbackAlt": "Illustration de la catégorie : {category}",
+    "noProductPhoto": "Pas de photo du produit",
+    "noProductPhotoAlt": "Aucune photo de produit disponible",
     "allRegions": "Toutes les régions",
     "optional": "(facultatif)",
     "searchPlaceholder": "Nom ou description du produit",

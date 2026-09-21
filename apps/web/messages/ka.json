@@ -181,6 +181,8 @@
       "other": "ფერმის პეიზაჟი"
     },
     "categoryFallbackAlt": "კატეგორიის ილუსტრაცია: {category}",
+    "noProductPhoto": "პროდუქტის ფოტო არ არის",
+    "noProductPhotoAlt": "პროდუქტის ფოტო ხელმისაწვდომი არ არის",
     "allRegions": "ყველა რეგიონი",
     "optional": "(არასავალდებულო)",
     "searchPlaceholder": "პროდუქტის სახელი ან აღწერა",

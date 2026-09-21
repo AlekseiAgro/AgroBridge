@@ -9,6 +9,7 @@ import { MarketInsightButton } from '@/components/MarketInsightButton';
 import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { OpenChatButton } from '@/components/OpenChatButton';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
+import { ProductPhotoPlaceholder } from '@/components/ProductPhotoPlaceholder';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
 import { RfqRequestForm } from '@/components/RfqRequestForm';
@@ -18,12 +19,7 @@ import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
-import {
-  formatCategoryFallbackAlt,
-  getProductCardImage,
-  getProductCardImageAlt,
-  toPublicMediaUrl,
-} from '@/lib/product-image';
+import { getRenderableProductImages, toPublicMediaUrl } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
@@ -54,7 +50,7 @@ export default async function ProductDetailPage({ params }: Props) {
     throw error;
   }
 
-  const fallbackImage = product.images.length === 0 ? getProductCardImage(product) : null;
+  const galleryImages = getRenderableProductImages(product.images);
   const quantityLabel = formatProductQuantityRange(
     product,
     product.unit ? t(`units.${product.unit as 'kg'}`) : null,
@@ -137,13 +133,13 @@ export default async function ProductDetailPage({ params }: Props) {
             </div>
           ) : null}
         </div>
-        {product.images.length > 0 ? (
+        {galleryImages.length > 0 ? (
           <div className="product-gallery">
-            {product.images.map((image) => (
+            {galleryImages.map((image) => (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={image.id}
-                src={toPublicMediaUrl(image.url)}
+                src={image.url}
                 alt={formatProductTitle(product.title, locale)}
                 className={
                   image.isPrimary
@@ -153,20 +149,15 @@ export default async function ProductDetailPage({ params }: Props) {
               />
             ))}
           </div>
-        ) : fallbackImage ? (
+        ) : (
           <div className="product-gallery">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={fallbackImage.url}
-              alt={getProductCardImageAlt({
-                fromCategory: fallbackImage.fromCategory,
-                productTitle: formatProductTitle(product.title, locale),
-                categoryFallbackAlt: formatCategoryFallbackAlt(product.category, tc),
-              })}
+            <ProductPhotoPlaceholder
+              label={tc('noProductPhoto')}
+              alt={tc('noProductPhotoAlt')}
               className="product-gallery__image product-gallery__image--primary"
             />
           </div>
-        ) : null}
+        )}
 
         {product.isOwner ? (
           <ProductQualityWidget score={product.qualityScore} showGuidance />

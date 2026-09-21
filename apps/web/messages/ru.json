@@ -181,6 +181,8 @@
       "other": "Сельский пейзаж"
     },
     "categoryFallbackAlt": "Иллюстрация категории: {category}",
+    "noProductPhoto": "Нет фото товара",
+    "noProductPhotoAlt": "Фотография товара отсутствует",
     "allRegions": "Все регионы",
     "optional": "(необязательно)",
     "searchPlaceholder": "Название или описание продукта",

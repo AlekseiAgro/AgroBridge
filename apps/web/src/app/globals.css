@@ -1679,6 +1679,25 @@ body {
   border: 1px dashed var(--line);
 }
 
+.product-photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-align: center;
+  padding: 0.55rem 0.65rem;
+  color: var(--muted);
+  background: rgba(244, 248, 240, 0.96);
+  border: 1px dashed var(--line);
+}
+
+.product-photo-placeholder__label {
+  max-width: 9rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
 .product-gallery {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));

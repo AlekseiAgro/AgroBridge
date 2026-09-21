@@ -4,12 +4,13 @@ import type { HarvestWatchItem } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
+import { ProductPhotoPlaceholder } from '@/components/ProductPhotoPlaceholder';
 import { RatingStars } from '@/components/RatingStars';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
 import { Link, useRouter } from '@/i18n/navigation';
 import { formatRegionLabel } from '@/lib/region';
 import { formatProductTitle } from '@/lib/product-title';
-import { toPublicMediaUrl } from '@/lib/product-image';
+import { resolveProductImageUrl } from '@/lib/product-image';
 
 type Props = {
   initial: HarvestWatchItem[];
@@ -60,7 +61,8 @@ export function HarvestWatchesList({ initial }: Props) {
     <div className="harvest-watches">
       <ul className="harvest-watches__list">
         {items.map((item) => {
-          const imageUrl = item.imageUrl ? toPublicMediaUrl(item.imageUrl) : null;
+          const imageUrl = resolveProductImageUrl(item.imageUrl);
+          const title = formatProductTitle(item.productTitle, locale);
           const ownerLabel = item.owner.displayName?.trim() || tp('sellerFallback');
           return (
             <li key={item.id} className="harvest-watches__item product-list__item--with-media">
@@ -68,11 +70,15 @@ export function HarvestWatchesList({ initial }: Props) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={imageUrl}
-                  alt={formatProductTitle(item.productTitle, locale)}
+                  alt={title}
                   className="product-list__media"
                 />
               ) : (
-                <div className="product-list__media product-list__media--empty" aria-hidden />
+                <ProductPhotoPlaceholder
+                  label={tc('noProductPhoto')}
+                  alt={tc('noProductPhotoAlt')}
+                  className="product-list__media"
+                />
               )}
               <div className="harvest-watches__body">
                 <Link href={`/products/${item.productId}`} className="product-list__title">

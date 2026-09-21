@@ -8,13 +8,10 @@ import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
+import { ProductPhotoPlaceholder } from '@/components/ProductPhotoPlaceholder';
 import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
-import {
-  formatCategoryFallbackAlt,
-  getProductCardImage,
-  getProductCardImageAlt,
-} from '@/lib/product-image';
+import { getProductCardImage, getProductCardImageAlt } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
@@ -81,13 +78,11 @@ export default async function CatalogPage({ params, searchParams }: Props) {
           <ul className="product-list">
             {products.map((product) => {
               const image = getProductCardImage(product);
-              const imageAlt = image
-                ? getProductCardImageAlt({
-                    fromCategory: image.fromCategory,
-                    productTitle: formatProductTitle(product.title, locale),
-                    categoryFallbackAlt: formatCategoryFallbackAlt(product.category, t),
-                  })
-                : '';
+              const imageAlt = getProductCardImageAlt({
+                hasProductPhoto: Boolean(image),
+                productTitle: formatProductTitle(product.title, locale),
+                noPhotoAlt: t('noProductPhotoAlt'),
+              });
               const quantity = formatProductQuantityRange(
                 product,
                 product.unit ? tr(`product.units.${product.unit as 'kg'}`) : null,
@@ -103,7 +98,11 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={image.url} alt={imageAlt} className="product-list__media" />
                   ) : (
-                    <div className="product-list__media product-list__media--empty" aria-hidden />
+                    <ProductPhotoPlaceholder
+                      label={t('noProductPhoto')}
+                      alt={imageAlt}
+                      className="product-list__media"
+                    />
                   )}
                   <div>
                     <Link href={`/products/${product.id}`} className="product-list__title">
