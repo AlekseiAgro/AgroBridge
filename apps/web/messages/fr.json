@@ -889,6 +889,7 @@
     "avatarRemoveError": "Impossible de supprimer la photo.",
     "avatarRemoveConfirm": "Supprimer la photo de profil ?",
     "profileSettingsTitle": "Paramètres du profil",
+    "profileSettingsHint": "Modifiez votre nom d'affichage, votre photo de profil et votre adresse e-mail.",
     "displayNameLabel": "Nom affiché",
     "displayNameEdit": "Modifier le nom",
     "displayNameSave": "Enregistrer le nom",
@@ -924,7 +925,7 @@
       "noComment": "Pas d’avis écrit."
     },
     "settingsTitle": "Paramètres",
-    "settingsSubtitle": "Mot de passe, sécurité du compte et documents juridiques.",
+    "settingsSubtitle": "Profil, mot de passe, sécurité du compte et documents juridiques.",
     "securityTitle": "Sécurité",
     "unreadCard": "{label}, {count} non lues",
     "legalTitle": "Mentions légales",

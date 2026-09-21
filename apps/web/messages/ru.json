@@ -889,6 +889,7 @@
     "avatarRemoveError": "Не удалось удалить фото.",
     "avatarRemoveConfirm": "Удалить фото профиля?",
     "profileSettingsTitle": "Настройки профиля",
+    "profileSettingsHint": "Измените отображаемое имя, фото профиля и адрес электронной почты.",
     "displayNameLabel": "Имя в профиле",
     "displayNameEdit": "Изменить имя",
     "displayNameSave": "Сохранить имя",
@@ -924,7 +925,7 @@
       "noComment": "Без текстового отзыва."
     },
     "settingsTitle": "Настройки",
-    "settingsSubtitle": "Пароль, безопасность аккаунта и юридические документы.",
+    "settingsSubtitle": "Профиль, пароль, безопасность аккаунта и юридические документы.",
     "securityTitle": "Безопасность",
     "unreadCard": "{label}, непрочитанных: {count}",
     "legalTitle": "Правовые документы",

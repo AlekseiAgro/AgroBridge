@@ -471,6 +471,40 @@ body {
   border-top: 1px solid var(--line);
 }
 
+.cabinet-profile {
+  margin-top: 3.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 0.85rem;
+  max-width: 36rem;
+  min-width: 0;
+}
+
+.cabinet-profile__hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.cabinet-profile__identity {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.cabinet-profile__identity > .edit-profile {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.cabinet-profile .user-avatar-editor {
+  flex: 0 0 auto;
+}
+
 .cabinet-security {
   margin-top: 3.5rem;
   padding-top: 1.75rem;
@@ -3265,12 +3299,18 @@ body {
   border-radius: 1.1rem;
   background: var(--surface-strong);
   backdrop-filter: blur(8px);
+  min-width: 0;
 }
 
 .user-card__identity {
   display: flex;
   gap: 1rem;
   align-items: center;
+  min-width: 0;
+}
+
+.user-card__identity > div {
+  min-width: 0;
 }
 
 .user-card__avatar {
@@ -3335,6 +3375,14 @@ body {
 
 .profile-edit-form {
   max-width: 28rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.profile-edit-form .field input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .edit-profile__name-row {
@@ -3389,11 +3437,13 @@ body {
   margin: 0 0 0.3rem;
   font-size: 1.35rem;
   color: var(--brand-deep);
+  overflow-wrap: anywhere;
 }
 
 .user-card__meta {
   margin: 0.15rem 0 0;
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .user-card__rating-label {

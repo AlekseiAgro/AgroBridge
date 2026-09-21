@@ -889,6 +889,7 @@
     "avatarRemoveError": "ფოტოს წაშლა ვერ მოხერხდა.",
     "avatarRemoveConfirm": "წავშალოთ პროფილის ფოტო?",
     "profileSettingsTitle": "პროფილის პარამეტრები",
+    "profileSettingsHint": "შეცვალეთ გამოსახული სახელი, პროფილის ფოტო და ელფოსტა.",
     "displayNameLabel": "სახელი პროფილში",
     "displayNameEdit": "სახელის შეცვლა",
     "displayNameSave": "სახელის შენახვა",
@@ -924,7 +925,7 @@
       "noComment": "ტექსტური გამოხმაურება არ არის."
     },
     "settingsTitle": "პარამეტრები",
-    "settingsSubtitle": "პაროლი, ანგარიშის უსაფრთხოება და სამართლებრივი დოკუმენტები.",
+    "settingsSubtitle": "პროფილი, პაროლი, ანგარიშის უსაფრთხოება და სამართლებრივი დოკუმენტები.",
     "securityTitle": "უსაფრთხოება",
     "unreadCard": "{label}, წაუკითხავი: {count}",
     "legalTitle": "სამართლებრივი",

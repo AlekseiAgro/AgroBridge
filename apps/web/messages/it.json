@@ -889,6 +889,7 @@
     "avatarRemoveError": "Impossibile rimuovere la foto.",
     "avatarRemoveConfirm": "Rimuovere la foto del profilo?",
     "profileSettingsTitle": "Impostazioni profilo",
+    "profileSettingsHint": "Modifica nome visualizzato, foto del profilo e indirizzo e-mail.",
     "displayNameLabel": "Nome visualizzato",
     "displayNameEdit": "Modifica nome",
     "displayNameSave": "Salva nome",
@@ -924,7 +925,7 @@
       "noComment": "Nessuna recensione scritta."
     },
     "settingsTitle": "Impostazioni",
-    "settingsSubtitle": "Password, sicurezza dell'account e documenti legali.",
+    "settingsSubtitle": "Profilo, password, sicurezza dell'account e documenti legali.",
     "securityTitle": "Sicurezza",
     "unreadCard": "{label}, {count} non lette",
     "legalTitle": "Documenti legali",
