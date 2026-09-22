@@ -1031,6 +1031,7 @@
     "price": "Prix",
     "quotedQuantity": "Quantité proposée",
     "sentAt": "Envoyée le {date}",
+    "publishedAt": "Publiée le {date}",
     "currency": "Devise",
     "yourQuote": "Votre offre",
     "quoteStatus": "Statut de l'offre",

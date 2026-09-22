@@ -46,6 +46,9 @@ type Measure = {
   actionsDisplay: string;
   actionCols: number;
   actionWidth: number;
+  dateDisplay: string;
+  identityDisplay: string;
+  bodyCols: number;
   cards: CardMeasure[];
 };
 
@@ -107,6 +110,7 @@ function cardHtml(options: {
         <p class="product-list__context">${options.context}</p>
       </div>
     </div>
+    <p class="product-list__date">Отправлено 22 сент. 2026</p>
     <div class="product-list__actions">
       <a class="button button--ghost product-list__action--primary" href="#open">Открыть запрос</a>
     </div>
@@ -240,6 +244,9 @@ const MEASURE_JS = `(() => {
     actionsDisplay: getComputedStyle(document.querySelector('.product-list__item--quotes .product-list__actions')).display,
     actionCols: cols(document.querySelector('.product-list__item--quotes .product-list__actions')),
     actionWidth: action ? Math.round(action.getBoundingClientRect().width) : 0,
+    dateDisplay: getComputedStyle(document.querySelector('.product-list__item--quotes .product-list__date')).display,
+    identityDisplay: getComputedStyle(document.querySelector('.product-list__item--quotes .product-list__identity')).display,
+    bodyCols: cols(document.querySelector('.product-list__item--quotes .product-list__item-body')),
     cards,
   };
 })()`;
@@ -396,6 +403,7 @@ describe('My Quotes mobile cards', () => {
     expect(list).toContain('item.request.quantity');
     expect(list).toContain("t(`statuses.${item.request.status}`)");
     expect(list).toContain("t('openRequest')");
+    expect(list).toContain("t('sentAt', { date: formatCabinetDate(item.createdAt, locale) })");
     expect(list).toContain('product-list__action--primary');
     expect(list).not.toContain('quote-list');
     expect(list).not.toContain('quoteStatusHints');
@@ -429,9 +437,11 @@ describe('My Quotes mobile cards', () => {
       const withdrawn = readMsg(messages(locale), 'purchaseRequests.quoteStatuses.withdrawn');
       const openRequest = readMsg(messages(locale), 'purchaseRequests.openRequest');
       const fulfilled = readMsg(messages(locale), 'purchaseRequests.statuses.fulfilled');
-      const haystack = [pending, accepted, declined, withdrawn, openRequest, fulfilled]
+      const sentAt = readMsg(messages(locale), 'purchaseRequests.sentAt');
+      const haystack = [pending, accepted, declined, withdrawn, openRequest, fulfilled, sentAt]
         .join('\n')
         .toLowerCase();
+      expect(sentAt).toContain('{date}');
       expect(pending.trim().length).toBeGreaterThan(0);
       expect(accepted.trim().length).toBeGreaterThan(0);
       expect(openRequest.trim().length).toBeGreaterThan(0);
@@ -451,7 +461,8 @@ describe('My Quotes mobile cards', () => {
         for (const viewport of viewports) {
           const result = await cdpEvaluate(launched.wsUrl, `${server.url}/quotes.html`, viewport);
           const mobile = viewport.width <= 640;
-          const tablet = viewport.width === 768 || viewport.width === 820 || viewport.width === 1024;
+          const tablet = viewport.width === 768 || viewport.width === 820;
+          const desktop = viewport.width >= 1024;
 
           expect(result.documentOverflow).toBe(false);
           expect(result.diff).toBeLessThanOrEqual(1);
@@ -513,18 +524,18 @@ describe('My Quotes mobile cards', () => {
             expect(card.statusBackground).not.toBe('rgba(255, 255, 255, 0.7)');
           }
 
-          if (mobile || viewport.width === 768 || viewport.width === 820) {
+          if (mobile || tablet) {
             expect(result.itemDir).toBe('column');
             expect(result.actionsDisplay).toBe('grid');
             expect(result.actionCols).toBe(1);
             expect(result.actionWidth).toBeGreaterThan(result.contentWidth * 0.7);
+            expect(result.dateDisplay).toBe('none');
+            expect(result.identityDisplay).toBe('grid');
           }
 
           if (viewport.width === 1024) {
             expect(result.sidebarWidth).toBeGreaterThan(200);
             expect(result.mainWidth).toBeLessThan(800);
-            expect(result.actionsDisplay).toBe('grid');
-            expect(result.actionCols).toBe(1);
           }
 
           if (tablet) {
@@ -532,8 +543,10 @@ describe('My Quotes mobile cards', () => {
             expect(result.mainWidth).toBeLessThan(viewport.width - 200);
           }
 
-          if (viewport.width === 1280) {
-            expect(result.itemDir).toBe('row');
+          if (desktop) {
+            expect(result.dateDisplay).toBe('block');
+            expect(result.identityDisplay).toBe('flex');
+            expect(result.bodyCols).toBe(4);
             expect(result.actionsDisplay).toBe('flex');
             expect(result.actionWidth).toBeLessThan(280);
             expect(result.sidebarWidth).toBeGreaterThan(200);

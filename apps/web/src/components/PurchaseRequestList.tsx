@@ -1,7 +1,8 @@
 import type { PurchaseRequestSummary } from '@agrobridge/shared';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
+import { formatCabinetDate } from '@/lib/quote-card-presentation';
 import { requestStatusBadgeClass } from '@/lib/request-card-presentation';
 
 type Props = {
@@ -22,6 +23,7 @@ export async function PurchaseRequestList({
   const t = await getTranslations('purchaseRequests');
   const tc = await getTranslations('catalog');
   const tp = await getTranslations('product');
+  const locale = await getLocale();
 
   if (items.length === 0) {
     return empty ?? <p className="empty-state">{emptyLabel}</p>;
@@ -61,11 +63,20 @@ export async function PurchaseRequestList({
                       {ownerName}
                     </Link>
                   </p>
-                  {item.quoteCount > 0 ? (
-                    <p className="product-list__context">{t('quoteCount', { count: item.quoteCount })}</p>
-                  ) : null}
+                  <p
+                    className={
+                      item.quoteCount > 0
+                        ? 'product-list__context'
+                        : 'product-list__context product-list__context--desktop'
+                    }
+                  >
+                    {t('quoteCount', { count: item.quoteCount })}
+                  </p>
                 </div>
               </div>
+              <p className="product-list__date">
+                {t('publishedAt', { date: formatCabinetDate(item.createdAt, locale) })}
+              </p>
               <div className="product-list__actions">
                 <Link
                   href={`${detailBasePath}/${item.id}`}
