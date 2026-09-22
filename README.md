@@ -166,6 +166,7 @@ Configured by default for **agrobridge.ge** (API on **api.agrobridge.ge**). Doma
 **Hosting options**
 
 - **Railway (PaaS):** [`docs/RAILWAY.md`](docs/RAILWAY.md) — GitHub + Postgres + Redis + web/api services
+- **PostgreSQL backups (Phase 1 code only):** [`docs/POSTGRES_BACKUP.md`](docs/POSTGRES_BACKUP.md) — isolated `pg_dump` tool; production Cron/R2 are not active
 - **VPS / Docker:** [`docs/DEPLOY.md`](docs/DEPLOY.md) — `pnpm docker:prod:up` + [`deploy/Caddyfile`](deploy/Caddyfile)
 
 ```bash
