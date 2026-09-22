@@ -346,12 +346,50 @@ describe('demo catalog price data-fix', () => {
     }
   });
 
+  it('loads the compiled dist artifact instead of ts-node and src', () => {
+    const cli = source('prisma/run-fix-demo-catalog-prices.cjs');
+    expect(cli).toContain("path.join(");
+    expect(cli).toContain("'dist'");
+    expect(cli).toContain("'demo-data'");
+    expect(cli).toContain("'fix-demo-catalog-prices.js'");
+    expect(cli).not.toContain('ts-node');
+    expect(cli).not.toContain("require('../src/demo-data/fix-demo-catalog-prices')");
+    expect(cli).not.toContain('TS_NODE_PROJECT');
+  });
+
+  it('compiles the data-fix and its price-table dependencies into dist', () => {
+    const { execFileSync } = require('child_process');
+    const { existsSync } = require('fs');
+    execFileSync(
+      'pnpm',
+      ['exec', 'tsc', '-p', 'tsconfig.build.json', '--pretty', 'false'],
+      { cwd: API_ROOT, stdio: 'pipe' },
+    );
+    const compiled = [
+      'dist/demo-data/fix-demo-catalog-prices.js',
+      'dist/demo-data/demo-catalog-prices.js',
+      'dist/demo-data/demo-marketplace-identities.js',
+    ];
+    for (const rel of compiled) {
+      expect(existsSync(join(API_ROOT, rel))).toBe(true);
+    }
+    const loaded = require(join(API_ROOT, 'dist/demo-data/fix-demo-catalog-prices.js'));
+    expect(loaded.EXPECTED_DEMO_CATALOG_PRODUCT_COUNT).toBe(39);
+    expect([...loaded.DEMO_CATALOG_PRICE_FIX_FIELDS]).toEqual([
+      'priceFrom',
+      'priceCurrency',
+      'unit',
+    ]);
+    expect(typeof loaded.runDemoCatalogPriceFix).toBe('function');
+  });
+
   it('is an explicit package script and is not hooked into seed or production startup', () => {
     const apiPackage = source('package.json');
     const rootPackage = readFileSync(join(API_ROOT, '../../package.json'), 'utf8');
     const seed = source('prisma/seed.ts');
     const seedRunner = source('prisma/run-seed.cjs');
     const entry = source('docker-entrypoint.sh');
+    const dockerfile = source('Dockerfile');
 
     expect(apiPackage).toContain('"db:fix-demo-catalog-prices": "node ./prisma/run-fix-demo-catalog-prices.cjs"');
     expect(apiPackage).toContain('"seed": "node ./prisma/run-seed.cjs"');
@@ -362,5 +400,9 @@ describe('demo catalog price data-fix', () => {
     expect(entry).not.toContain('fix-demo-catalog-prices');
     expect(entry).not.toContain('db seed');
     expect(entry).toContain('ensure-admin.cjs');
+    expect(entry).toContain('exec node dist/main.js');
+    expect(dockerfile).toContain('COPY --from=build /app/apps/api/dist ./apps/api/dist');
+    expect(dockerfile).toContain('COPY --from=build /app/apps/api/prisma ./apps/api/prisma');
+    expect(dockerfile).not.toContain('apps/api/src');
   });
 });

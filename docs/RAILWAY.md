@@ -172,7 +172,7 @@ To inspect leftover `@agrobridge.local` demo users (dry-run, no deletes):
 node ./prisma/run-cleanup-demo.cjs
 ```
 
-To preview or apply the one-time demo catalog price/unit data-fix (not a seed; default dry-run; only `priceFrom` / `priceCurrency` / `unit` on the 39 demo products):
+To preview or apply the one-time demo catalog price/unit data-fix (not a seed; default dry-run; only `priceFrom` / `priceCurrency` / `unit` on the 39 demo products). The CLI loads compiled `dist/demo-data`, not TypeScript source:
 
 ```bash
 node ./prisma/run-fix-demo-catalog-prices.cjs
