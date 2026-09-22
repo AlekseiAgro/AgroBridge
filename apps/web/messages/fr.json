@@ -858,6 +858,8 @@
   },
   "cabinet": {
     "shellLabel": "Espace personnel",
+    "openMenu": "Menu",
+    "closeMenu": "Fermer",
     "overview": "Vue d’ensemble",
     "title": "Votre espace",
     "subtitle": "Profil, activité et note de deals au même endroit.",

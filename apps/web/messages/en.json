@@ -858,6 +858,8 @@
   },
   "cabinet": {
     "shellLabel": "Personal cabinet",
+    "openMenu": "Menu",
+    "closeMenu": "Close",
     "overview": "Overview",
     "title": "Your cabinet",
     "subtitle": "Profile, activity, and deal reputation in one place.",

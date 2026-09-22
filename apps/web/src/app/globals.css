@@ -3124,10 +3124,12 @@ body {
 }
 
 /*
- * Marketplace pages sit in CabinetShell for signed-in users. The sidebar stays
- * two-column until 640px, so the content column is already "mobile-narrow" at
- * tablet viewports. Query the available container, not the viewport, so guests
- * keep the public wide layout while cabinet catalog/requests can stack.
+ * Marketplace pages sit in CabinetShell for signed-in users. `.cabinet__content`
+ * and `.page__main` both establish the `marketplace` container so layout can
+ * follow the actual main-column width. The sidebar stays two-column until
+ * 640px, so the content column is already "mobile-narrow" at tablet viewports.
+ * Query the available container, not only the viewport, so guests keep the
+ * public wide layout while cabinet content can stack.
  *
  * 52rem (~832px) is the public tablet band where a 4-column filter grid
  * collides; 40rem remains the phone/cabinet stacked layout.
@@ -3167,6 +3169,27 @@ body {
     width: 100%;
     white-space: normal;
   }
+
+  .chat-messenger {
+    grid-template-columns: 1fr;
+    height: calc(100dvh - 8.5rem);
+    max-height: calc(100dvh - 8.5rem);
+    min-height: 18rem;
+  }
+
+  .chat-messenger__sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    max-height: none;
+  }
+
+  .cabinet-page--chat:has(.chat-messenger__pane-head) .chat-messenger__sidebar {
+    display: none;
+  }
+
+  .chat-messenger__back {
+    display: inline-flex;
+  }
 }
 
 @container marketplace (max-width: 40rem) {
@@ -3174,14 +3197,47 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .page__heading-row,
-  .product-list__item--row {
+  .page__heading-row {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .product-list__item-main {
+  /*
+   * Public catalog/request rows live in `.page__main`. Cabinet product rows
+   * stay on their existing card layout until that work is scoped separately.
+   */
+  .page__main .product-list__item--row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page__main .product-list__item-main {
     flex-wrap: wrap;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .user-card {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-summary__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .completed-deals__ratings {
+    grid-template-columns: 1fr;
+  }
+
+  .farm-profile__header--with-cover {
+    grid-template-columns: 1fr;
+  }
+
+  .farm-profile__cover-image {
+    max-height: 8.5rem;
+    aspect-ratio: 16 / 9;
   }
 
   .floating-cta {
@@ -3339,11 +3395,29 @@ body {
   margin-bottom: 1.25rem;
 }
 
+.cabinet__top-start {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.cabinet__top-start > div {
+  min-width: 0;
+}
+
+.cabinet__mobile-nav,
+.cabinet__brand--bar {
+  display: none;
+}
+
 .cabinet__title {
   margin: 0;
   font-family: var(--font-display), Georgia, serif;
   font-size: clamp(1.7rem, 3vw, 2.2rem);
   color: var(--brand-deep);
+  overflow-wrap: anywhere;
 }
 
 .cabinet__subtitle {
@@ -3418,6 +3492,7 @@ body {
 
 .cabinet__content {
   min-width: 0;
+  container: marketplace / inline-size;
 }
 
 .cabinet-page {
@@ -3528,21 +3603,121 @@ body {
   }
 
   .cabinet__sidebar {
-    position: static;
-    min-height: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--line);
+    display: none;
   }
 
-  .cabinet__nav {
+  .cabinet__mobile-nav {
+    display: block;
+    flex: 0 0 auto;
+  }
+
+  .cabinet__brand--bar {
+    display: block;
+    flex: 0 0 auto;
+    max-width: 6.75rem;
+  }
+
+  .cabinet__brand--bar .brand-logo {
+    height: 2.25rem;
+  }
+
+  .cabinet__menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.45rem;
+    height: 2.45rem;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface-strong);
+    color: var(--brand-deep);
+    cursor: pointer;
+  }
+
+  .cabinet__menu-button:hover,
+  .cabinet__menu-button:focus-visible {
+    background: rgba(47, 107, 58, 0.08);
+  }
+
+  .cabinet__menu-icon {
+    display: block;
+    width: 1.05rem;
+    height: 0.12rem;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow:
+      0 -0.32rem 0 currentColor,
+      0 0.32rem 0 currentColor;
+  }
+
+  .cabinet__drawer-root {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+  }
+
+  .cabinet__drawer-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    padding: 0;
+    background: rgba(29, 42, 31, 0.45);
+    cursor: pointer;
+  }
+
+  .cabinet__drawer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
+    flex-direction: column;
+    gap: 1rem;
+    width: min(18rem, calc(100vw - 2rem));
+    max-width: 100%;
+    min-width: 0;
+    overflow: auto;
+    padding: 1.25rem 1.1rem;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 240, 0.94)),
+      radial-gradient(circle at 10% 0%, rgba(111, 155, 76, 0.16), transparent 45%);
+    box-shadow: 16px 0 40px rgba(29, 42, 31, 0.16);
+  }
+
+  .cabinet__drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .cabinet__drawer-close {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.2rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface-strong);
+    color: var(--brand-deep);
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  .cabinet__drawer .cabinet__nav {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .cabinet__drawer .cabinet__sidebar-foot {
+    margin-top: auto;
   }
 
   .cabinet__main,
   .cabinet__content,
-  .cabinet__top {
+  .cabinet__top,
+  .cabinet__top-start {
     min-width: 0;
   }
 
@@ -3555,9 +3730,10 @@ body {
   }
 
   .cabinet__user-chip {
-    max-width: 100%;
-    white-space: normal;
-    overflow-wrap: anywhere;
+    max-width: min(9.5rem, 42vw);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .cabinet__main {

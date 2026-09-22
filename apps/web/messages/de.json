@@ -858,6 +858,8 @@
   },
   "cabinet": {
     "shellLabel": "Persönlicher Bereich",
+    "openMenu": "Menü",
+    "closeMenu": "Schließen",
     "overview": "Übersicht",
     "title": "Ihr Bereich",
     "subtitle": "Profil, Aktivität und Deal-Bewertung an einem Ort.",
