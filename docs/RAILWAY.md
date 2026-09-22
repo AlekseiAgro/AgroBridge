@@ -172,6 +172,16 @@ To inspect leftover `@agrobridge.local` demo users (dry-run, no deletes):
 node ./prisma/run-cleanup-demo.cjs
 ```
 
+To preview or apply the one-time demo catalog price/unit data-fix (not a seed; default dry-run; only `priceFrom` / `priceCurrency` / `unit` on the 39 demo products):
+
+```bash
+node ./prisma/run-fix-demo-catalog-prices.cjs
+# explicit apply only after reviewing the dry-run plan:
+node ./prisma/run-fix-demo-catalog-prices.cjs --apply
+```
+
+Do **not** run full demo seed on public production. Production start does not run this script.
+
 ## 5. Point agrobridge.ge (Cloudflare)
 
 After Railway domains work:
