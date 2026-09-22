@@ -1,4 +1,7 @@
 # Isolated AgroBridge PostgreSQL backup image.
+# Build context MUST be the repository root (same as apps/api and apps/web).
+# Railway: leave Root Directory empty; Dockerfile path = apps/db-backup/Dockerfile.
+# A Root Directory of apps/db-backup fails with: "/apps/db-backup": not found.
 # Does NOT use apps/api/docker-entrypoint.sh and never runs Prisma.
 #
 # PG_CLIENT_MAJOR / PG_DUMP_IMAGE_TAG default to 16 because local

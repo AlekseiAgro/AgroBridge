@@ -211,7 +211,9 @@ Native Railway Postgres backups / PITR are plan-dependent and are **not** assume
 
 Phase 1 code for an isolated `pg_dump` → R2 tool lives in [`apps/db-backup`](../apps/db-backup) and is documented in [`POSTGRES_BACKUP.md`](POSTGRES_BACKUP.md).
 
-**FUTURE / PHASE 2:** Railway Cron service, production R2 backup bucket, production secrets, and a production schedule are not configured by that code. Production backup is not active.
+If you add a `db-backup` Railway service, match `api` / `web`: **Root Directory empty (repo root)**, Dockerfile path `apps/db-backup/Dockerfile`, config path `apps/db-backup/railway.toml`, Watch Paths `/apps/db-backup/**`. A Root Directory of `apps/db-backup` breaks the image (`COPY apps/db-backup` not found).
+
+**FUTURE / PHASE 2:** Railway Cron schedule, production R2 backup bucket, production secrets, and a production schedule are not configured by that code. Production backup is not active.
 
 ## Troubleshooting
 
