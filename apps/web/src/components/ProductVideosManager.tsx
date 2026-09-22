@@ -9,9 +9,10 @@ import { toPublicMediaUrl } from '@/lib/product-image';
 type Props = {
   productId: string;
   initialVideos: ProductVideo[];
+  embedded?: boolean;
 };
 
-export function ProductVideosManager({ productId, initialVideos }: Props) {
+export function ProductVideosManager({ productId, initialVideos, embedded = false }: Props) {
   const t = useTranslations('product');
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -72,10 +73,20 @@ export function ProductVideosManager({ productId, initialVideos }: Props) {
     }
   }
 
+  const HeadingTag = embedded ? 'h3' : 'h2';
+
   return (
-    <section className="product-images product-videos product-form__section">
+    <section
+      className={
+        embedded
+          ? 'product-images product-videos product-media-block product-media-block--secondary'
+          : 'product-images product-videos product-form__section'
+      }
+    >
       <div className="product-images__header">
-        <h2 className="section-title">{t('videos.title')}</h2>
+        <HeadingTag className={embedded ? 'product-form__subheading' : 'section-title'}>
+          {embedded ? t('videos.optionalLabel') : t('videos.title')}
+        </HeadingTag>
         <p className="page__subtitle">{t('videos.subtitle', { max: PRODUCT_VIDEO_MAX_COUNT })}</p>
       </div>
       {videos.length ? (

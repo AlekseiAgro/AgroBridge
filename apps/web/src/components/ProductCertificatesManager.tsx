@@ -102,7 +102,8 @@ export function ProductCertificatesManager({ productId, initialCertificates }: P
     <section className="product-images product-form__section">
       <div className="product-images__header">
         <h2 className="section-title">{t('certificates.title')}</h2>
-        <p className="page__subtitle">
+        <p className="page__subtitle">{t('certificates.optionalHint')}</p>
+        <p className="field-hint">
           {t('certificates.subtitle', { max: FARM_DOCUMENT_MAX_COUNT })}
         </p>
       </div>

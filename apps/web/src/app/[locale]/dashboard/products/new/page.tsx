@@ -19,7 +19,7 @@ export default async function NewProductPage({ params }: Props) {
 
   const t = await getTranslations('product');
 
-  // Create a draft first so photo/video uploads are available before Basics.
+  // Create a draft first so photo/video uploads are available on the edit form.
   const product = await apiRequestAuthed<ProductDetail>('/products', {
     method: 'POST',
     body: {

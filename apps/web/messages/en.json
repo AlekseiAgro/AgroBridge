@@ -470,6 +470,11 @@
       "pricing": "Pricing",
       "farmStory": "About the farm"
     },
+    "formSections": {
+      "basics": "Main product information",
+      "media": "Product photos and video",
+      "priceAndVolume": "Price and available volume"
+    },
     "variety": "Variety",
     "country": "Country",
     "originPlace": "Place of origin",
@@ -561,6 +566,7 @@
     "videos": {
       "title": "Product video",
       "publicTitle": "Product videos",
+      "optionalLabel": "Video · optional",
       "subtitle": "Add up to {max} product video (MP4, WebM or MOV, up to 80 MB).",
       "upload": "Upload video",
       "empty": "No videos yet.",
@@ -571,7 +577,8 @@
       "maxReached": "Video limit of {max} reached."
     },
     "certificates": {
-      "title": "Product certificates",
+      "title": "Certificates and documents",
+      "optionalHint": "Optional. Add documents that confirm product quality or compliance.",
       "subtitle": "Upload a PDF or image for moderator review. Buyers only see approved certificates. Up to {max} files.",
       "type": "Certificate type",
       "titleField": "Certificate title",
@@ -1267,6 +1274,7 @@
       "pricing": "Add a starting price or pricing terms",
       "farmStory": "Complete your farm story"
     },
+    "scoreWithTier": "{score}/100 · {tier}",
     "nextHint": "Best next steps",
     "complete": "This product card is ready to impress buyers.",
     "certificates": {
