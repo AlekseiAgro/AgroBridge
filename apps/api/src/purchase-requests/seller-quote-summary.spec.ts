@@ -193,7 +193,7 @@ describe('seller quote summary on purchase request detail', () => {
     expect(summary).toContain('product-list__item');
     expect(summary).toContain('seller-quote__card');
     expect(css).toContain('.seller-quote__card');
-    expect(css).toContain('.quote-status--pending');
+    expect(css).toContain('.harvest-badge.quote-status--pending');
     expect(css).not.toContain('.quote-list__item');
     expect(css).not.toContain('.quote-list__price-label');
     expect(css).not.toMatch(/linear-gradient.*quote/);

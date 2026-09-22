@@ -2377,25 +2377,29 @@ body {
   max-width: 100%;
 }
 
-.quote-status--pending {
+/*
+ * `.harvest-badge` is declared later with the same 0,1,0 specificity and a
+ * white fill. Quote pills reuse that class, so these fills must win the cascade.
+ */
+.harvest-badge.quote-status--pending {
   border-color: rgba(196, 163, 90, 0.45);
-  background: rgba(196, 163, 90, 0.18);
+  background: rgba(196, 163, 90, 0.22);
 }
 
-.quote-status--accepted {
+.harvest-badge.quote-status--accepted {
   border-color: rgba(47, 107, 58, 0.35);
-  background: rgba(47, 107, 58, 0.12);
+  background: rgba(47, 107, 58, 0.16);
 }
 
-.quote-status--declined {
-  border-color: rgba(139, 107, 74, 0.35);
-  background: rgba(139, 107, 74, 0.12);
+.harvest-badge.quote-status--declined {
+  border-color: rgba(160, 70, 60, 0.38);
+  background: rgba(160, 70, 60, 0.16);
   color: var(--muted);
 }
 
-.quote-status--withdrawn {
-  border-color: var(--line);
-  background: rgba(255, 255, 255, 0.55);
+.harvest-badge.quote-status--withdrawn {
+  border-color: rgba(139, 107, 74, 0.35);
+  background: rgba(139, 107, 74, 0.16);
   color: var(--muted);
 }
 
