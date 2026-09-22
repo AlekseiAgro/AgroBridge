@@ -858,6 +858,8 @@
   },
   "cabinet": {
     "shellLabel": "Area personale",
+    "openMenu": "Menu",
+    "closeMenu": "Chiudi",
     "overview": "Panoramica",
     "title": "La tua area",
     "subtitle": "Profilo, attività e rating delle trattative in un unico posto.",

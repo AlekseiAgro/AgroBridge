@@ -858,6 +858,8 @@
   },
   "cabinet": {
     "shellLabel": "Área personal",
+    "openMenu": "Menú",
+    "closeMenu": "Cerrar",
     "overview": "Resumen",
     "title": "Tu área",
     "subtitle": "Perfil, actividad y valoración de operaciones en un solo lugar.",
