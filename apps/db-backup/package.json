@@ -1,0 +1,34 @@
+{
+  "name": "@agrobridge/db-backup",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Isolated PostgreSQL backup tool for AgroBridge. Not part of the API runtime.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "backup": "node dist/main.js",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "test": "jest --testPathPatterns='src/.*\\.spec\\.ts$'",
+    "test:integration": "BACKUP_INTEGRATION=1 jest --testPathPatterns='.*\\.integration\\.spec\\.ts$'"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1101.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.0",
+    "jest": "^30.0.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.7.3"
+  },
+  "jest": {
+    "moduleFileExtensions": ["js", "json", "ts"],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "testEnvironment": "node"
+  }
+}

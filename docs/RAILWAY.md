@@ -205,10 +205,13 @@ API_PUBLIC_URL=https://api.agrobridge.ge
 NEXT_PUBLIC_API_URL=https://api.agrobridge.ge/api
 ```
 
-## 6. Backups later
+## 6. Backups
 
-- Start: Railway Postgres backups / snapshots (plan-dependent).
-- Later: periodic `pg_dump` to B2 / R2 / S3 (another provider), same as planned for Hetzner.
+Native Railway Postgres backups / PITR are plan-dependent and are **not** assumed to be enabled.
+
+Phase 1 code for an isolated `pg_dump` → R2 tool lives in [`apps/db-backup`](../apps/db-backup) and is documented in [`POSTGRES_BACKUP.md`](POSTGRES_BACKUP.md).
+
+**FUTURE / PHASE 2:** Railway Cron service, production R2 backup bucket, production secrets, and a production schedule are not configured by that code. Production backup is not active.
 
 ## Troubleshooting
 

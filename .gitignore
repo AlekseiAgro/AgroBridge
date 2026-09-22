@@ -35,3 +35,7 @@ apps/api/prisma/*.db-journal
 # Misc
 *.tsbuildinfo
 .eslintcache
+
+# Local PostgreSQL backup dumps (never commit)
+*.dump
+apps/db-backup/.tmp/
