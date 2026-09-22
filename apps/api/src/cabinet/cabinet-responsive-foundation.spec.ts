@@ -28,6 +28,7 @@ type Measure = {
   fieldCols: number;
   chatCols: number;
   userCardCols: number;
+  farmCols: number;
   cabinetRowDir: string;
   pageMainRowDir: string;
   drawerWidth: number;
@@ -168,6 +169,13 @@ function cabinetFixture(css: string, options: { drawerOpen?: boolean } = {}): st
               <div class="user-card__identity"><strong>Kakheti Honey Farm</strong></div>
               <div>Rating 4.8</div>
             </section>
+            <section class="farm-profile__header farm-profile__header--with-cover">
+              <div class="farm-profile__cover"><div class="farm-profile__cover-image"></div></div>
+              <div>
+                <h2>Farm profile</h2>
+                <p>Imereti</p>
+              </div>
+            </section>
             <ul class="product-list">
               <li class="product-list__item product-list__item--row">
                 <div class="product-list__item-main">
@@ -242,6 +250,7 @@ const MEASURE_JS = `(() => {
     fieldCols: cols(document.querySelector('.field-row')),
     chatCols: cols(document.querySelector('.chat-messenger')),
     userCardCols: cols(document.querySelector('.user-card')),
+    farmCols: cols(document.querySelector('.farm-profile__header--with-cover')),
     cabinetRowDir: getComputedStyle(document.querySelector('.cabinet-page .product-list__item--row')).flexDirection,
     pageMainRowDir: getComputedStyle(document.querySelector('#public-main .product-list__item--row')).flexDirection,
     drawerWidth: Math.round(box('.cabinet__drawer').width),
@@ -407,6 +416,14 @@ describe('cabinet responsive foundation', () => {
     expect(css).toMatch(/\.cabinet-page\s*\{[\s\S]*?width:\s*min\(100%,\s*56rem\)/);
     expect(css).toContain('.page__main .product-list__item--row');
     expect(css).toContain('.page__main .product-list__item-main');
+    const farmBase = css.lastIndexOf(
+      '.farm-profile__header--with-cover {\n  display: grid;\n  grid-template-columns: minmax(7.5rem, 11.5rem) minmax(0, 1fr);',
+    );
+    const farmContainer = css.lastIndexOf(
+      '.farm-profile__header--with-cover {\n    grid-template-columns: 1fr;',
+    );
+    expect(farmBase).toBeGreaterThan(0);
+    expect(farmContainer).toBeGreaterThan(farmBase);
   });
 
   (chrome ? it : it.skip)(
@@ -466,6 +483,7 @@ describe('cabinet responsive foundation', () => {
           if (viewport.width === 768 || viewport.width === 820) {
             expect(result.fieldCols).toBe(1);
             expect(result.chatCols).toBe(1);
+            expect(result.farmCols).toBe(1);
             expect(result.pageMainRowDir).toBe('column');
           }
 
@@ -473,12 +491,14 @@ describe('cabinet responsive foundation', () => {
             expect(result.fieldCols).toBe(2);
             expect(result.chatCols).toBe(1);
             expect(result.userCardCols).toBe(2);
+            expect(result.farmCols).toBe(2);
           }
 
           if (viewport.width === 1280) {
             expect(result.fieldCols).toBe(2);
             expect(result.chatCols).toBe(2);
             expect(result.userCardCols).toBe(2);
+            expect(result.farmCols).toBe(2);
             expect(result.pageMainRowDir).toBe('row');
           }
         }

@@ -3219,25 +3219,8 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .user-card {
-    grid-template-columns: 1fr;
-  }
-
-  .activity-summary__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .completed-deals__ratings {
     grid-template-columns: 1fr;
-  }
-
-  .farm-profile__header--with-cover {
-    grid-template-columns: 1fr;
-  }
-
-  .farm-profile__cover-image {
-    max-height: 8.5rem;
-    aspect-ratio: 16 / 9;
   }
 
   .floating-cta {
@@ -4209,6 +4192,30 @@ body {
 }
 
 @media (max-width: 640px) {
+  .farm-profile__header--with-cover {
+    grid-template-columns: 1fr;
+  }
+
+  .farm-profile__cover-image {
+    max-height: 8.5rem;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/*
+ * These selectors are defined later than the shared marketplace container
+ * block, so the container rules must follow them or the base two-column
+ * declarations win.
+ */
+@container marketplace (max-width: 40rem) {
+  .user-card {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-summary__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .farm-profile__header--with-cover {
     grid-template-columns: 1fr;
   }

@@ -25,11 +25,11 @@ export function CabinetMobileMenu({ openLabel, closeLabel, children }: Props) {
       if (event.key === 'Escape') setOpen(false);
     };
     document.addEventListener('keydown', onKey);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const previousOverflowY = document.body.style.overflowY;
+    document.body.style.overflowY = 'hidden';
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = previousOverflow;
+      document.body.style.overflowY = previousOverflowY;
     };
   }, [open]);
 
