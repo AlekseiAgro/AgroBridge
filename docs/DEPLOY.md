@@ -82,6 +82,20 @@ node ./prisma/run-cleanup-demo.cjs --apply
 
 Live test records that do not use `@agrobridge.local` (for example a farm named BBB or a draft titled «Новый товар») are **not** deleted by this script.
 
+To align the existing 39 `@agrobridge.local` demo catalog products with `DEMO_CATALOG_PRICES` (PR #185) **without** reseeding:
+
+```bash
+# default is dry-run — no writes
+pnpm db:fix-demo-catalog-prices
+# or from /app/apps/api:
+node ./prisma/run-fix-demo-catalog-prices.cjs
+
+# only after reviewing the plan, and only with explicit approval:
+node ./prisma/run-fix-demo-catalog-prices.cjs --apply
+```
+
+This is **not** a seed. It never deletes or recreates records. It updates only `Product.priceFrom`, `Product.priceCurrency`, and `Product.unit` for those 39 titles. Full `prisma db seed` / demo marketplace seed must **not** be used on the public marketplace. The script aborts with zero writes unless it can uniquely map exactly those 39 titles to demo-owned products. Production startup and `db:seed` do not invoke it.
+
 ## 4. Reverse proxy (agrobridge.ge)
 
 Point HTTPS to containers (see `deploy/Caddyfile`):
