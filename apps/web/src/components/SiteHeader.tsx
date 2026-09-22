@@ -28,6 +28,7 @@ export async function SiteHeader({ tone = 'default' }: Props) {
           brand={
             <Link href="/" className="auth-brand">
               <BrandLogo />
+              <span className="auth-brand__wordmark">AgroBridge</span>
             </Link>
           }
           toolbar={<LanguageSwitcher />}
