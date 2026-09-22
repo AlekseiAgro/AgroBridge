@@ -2155,6 +2155,70 @@ body {
   display: contents;
 }
 
+.product-list__item--quotes {
+  min-width: 0;
+}
+
+.product-list__item--quotes .product-list__item-main,
+.product-list__item--quotes .product-list__item-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.product-list__item--quotes .product-list__item-body {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.product-list__item--quotes .product-list__identity {
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.product-list__item--quotes .product-list__title {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.product-list__item--quotes .quote-status {
+  display: inline-flex;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  width: auto;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.product-list__item--quotes .product-list__price,
+.product-list__item--quotes .product-list__qty,
+.product-list__item--quotes .product-list__party,
+.product-list__item--quotes .product-list__context,
+.product-list__item--quotes .product-list__meta {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.product-list__item--quotes .product-list__qty,
+.product-list__item--quotes .product-list__party,
+.product-list__item--quotes .product-list__context {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.product-list__item--quotes .product-list__actions {
+  align-self: center;
+  min-width: 0;
+}
+
+.product-list__item--quotes .product-list__action--primary {
+  white-space: normal;
+}
+
 .seller-quote {
   margin-top: 1.5rem;
   min-width: 0;
@@ -3267,6 +3331,28 @@ body {
     width: 100%;
     white-space: normal;
   }
+
+  .product-list__item--quotes {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .product-list__item--quotes .product-list__item-main {
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+
+  .product-list__item--quotes .product-list__actions {
+    flex: 1 1 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .product-list__item--quotes .product-list__action--primary {
+    width: 100%;
+    white-space: normal;
+  }
 }
 
 @container marketplace (max-width: 40rem) {
@@ -3281,7 +3367,8 @@ body {
 
   /*
    * Public catalog/request rows live in `.page__main`. My Products cards use
-   * `.product-list__item--mine` so only that seller list reflows here.
+   * `.product-list__item--mine` and My Quotes cards use `--quotes` so only
+   * those seller lists reflow here.
    */
   .page__main .product-list__item--row {
     flex-direction: column;
@@ -3339,6 +3426,34 @@ body {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 0.5rem;
     min-width: 0;
+  }
+
+  .product-list__item--quotes {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+
+  .product-list__item--quotes .product-list__item-main {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .product-list__item--quotes .product-list__actions {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .product-list__item--quotes .product-list__action--primary {
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
   }
 
   .field-row {
