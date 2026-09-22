@@ -118,6 +118,21 @@ describe('MarketInsightService', () => {
     expect(insight.opportunity.markets).toEqual(['Germany', 'Poland']);
   });
 
+  it('falls back to GEL only when the stored product currency is missing', async () => {
+    prisma.product.findUnique.mockResolvedValue(publicProduct({ priceCurrency: null }));
+    const missing = await service.forProduct('p1', 'en');
+    expect(missing.highlights.some((item) => item.includes('Listed price: 0.85 GEL'))).toBe(true);
+    expect(missing.highlights.some((item) => item.includes('EUR'))).toBe(false);
+
+    prisma.product.findUnique.mockResolvedValue(publicProduct({ priceCurrency: 'EUR' }));
+    const euro = await service.forProduct('p1', 'en');
+    expect(euro.highlights.some((item) => item.includes('Listed price: 0.85 EUR'))).toBe(true);
+
+    prisma.product.findUnique.mockResolvedValue(publicProduct({ priceCurrency: 'USD' }));
+    const usd = await service.forProduct('p1', 'en');
+    expect(usd.highlights.some((item) => item.includes('Listed price: 0.85 USD'))).toBe(true);
+  });
+
   it('does not invent price movement in any locale', async () => {
     prisma.product.findUnique.mockResolvedValue(publicProduct());
 

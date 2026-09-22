@@ -1,4 +1,4 @@
-import { isPriceCurrency, type PriceCurrency } from './quality';
+import { isPriceCurrency, type PriceCurrency } from './currency';
 
 const CURRENCY_SYMBOLS: Record<PriceCurrency, string> = {
   EUR: '€',

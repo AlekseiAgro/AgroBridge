@@ -217,7 +217,14 @@ export async function buildEnrichedProductData(params: {
     leadTimeDays: richness === 'full' ? 7 + (globalIndex % 10) : null,
     customDelivery: richness === 'full' ? 'Reefer truck to Poti / Batumi on request' : null,
     priceFrom,
-    priceCurrency: priceFrom != null ? 'EUR' : null,
+    priceCurrency:
+      priceFrom == null
+        ? null
+        : title === 'Saperavi qvevri 2024'
+          ? 'EUR'
+          : title === 'Georgian hazelnuts (shelled)'
+            ? 'USD'
+            : 'GEL',
     priceNegotiable: richness === 'medium' || richness === 'full',
     priceDependsOnVolume: richness === 'full',
     currentStock:

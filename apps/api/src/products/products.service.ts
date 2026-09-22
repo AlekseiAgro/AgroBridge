@@ -374,10 +374,7 @@ export class ProductsService {
         deliveryAvailable: input.deliveryAvailable ?? false,
         leadTimeDays: this.normalizeNullableNumber(input.leadTimeDays),
         priceFrom: this.normalizeNullableNumber(input.priceFrom),
-        priceCurrency:
-          typeof input.priceCurrency === 'string' && isPriceCurrency(input.priceCurrency)
-            ? input.priceCurrency
-            : null,
+        priceCurrency: this.normalizePriceCurrency(input.priceCurrency),
         priceNegotiable: input.priceNegotiable ?? false,
         priceDependsOnVolume: input.priceDependsOnVolume ?? false,
         isPublished,
@@ -470,9 +467,7 @@ export class ProductsService {
     const priceCurrency =
       input.priceCurrency === undefined
         ? undefined
-        : typeof input.priceCurrency === 'string' && isPriceCurrency(input.priceCurrency)
-          ? input.priceCurrency
-          : null;
+        : this.normalizePriceCurrency(input.priceCurrency);
     const priceNegotiable = input.priceNegotiable === undefined ? undefined : input.priceNegotiable;
     const priceDependsOnVolume =
       input.priceDependsOnVolume === undefined ? undefined : input.priceDependsOnVolume;
@@ -1234,6 +1229,16 @@ export class ProductsService {
 
   private normalizeOptionalString(value: unknown): string | null {
     return typeof value === 'string' ? value.trim() || null : null;
+  }
+
+  private normalizePriceCurrency(value: unknown) {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+    if (typeof value === 'string' && isPriceCurrency(value)) {
+      return value;
+    }
+    throw new BadRequestException('priceCurrency must be GEL, EUR, or USD');
   }
 
   private normalizeNullableNumber(value: unknown): number | null {

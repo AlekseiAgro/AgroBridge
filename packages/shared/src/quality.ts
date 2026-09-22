@@ -67,12 +67,12 @@ export function isPackagingType(value: string): value is PackagingType {
   return (PACKAGING_TYPES as readonly string[]).includes(value);
 }
 
-export const PRICE_CURRENCIES = ['EUR', 'USD', 'GEL'] as const;
-export type PriceCurrency = (typeof PRICE_CURRENCIES)[number];
-
-export function isPriceCurrency(value: string): value is PriceCurrency {
-  return (PRICE_CURRENCIES as readonly string[]).includes(value);
-}
+export {
+  DEFAULT_PRODUCT_CURRENCY,
+  PRICE_CURRENCIES,
+  isPriceCurrency,
+  type PriceCurrency,
+} from './currency';
 
 export type AttributeFieldType = 'text' | 'number' | 'boolean' | 'select';
 
