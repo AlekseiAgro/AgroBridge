@@ -69,6 +69,27 @@ describe('catalog listed price', () => {
     expect(detail).toContain('formatListedPrice(product)');
     expect(detail).toContain("t('priceFrom')");
   });
+
+  it('places a compact listed-price summary with the CTAs and the Price card before volume', () => {
+    const detail = source('app/[locale]/products/[id]/page.tsx');
+    expect(detail).toContain('listedPrice = formatListedPrice(product)');
+    expect(detail).toContain('product-detail-cta-price');
+    expect(detail).toContain('product-detail-cta-price__value');
+    expect(detail.indexOf("t('sections.pricing')")).toBeLessThan(detail.indexOf("t('sections.volume')"));
+    expect(detail.indexOf('product-detail-cta-price')).toBeLessThan(detail.indexOf("t('sections.volume')"));
+
+    const compact = detail.slice(
+      detail.indexOf('product-detail-cta-price'),
+      detail.indexOf('#request-quote'),
+    );
+    expect(compact).toContain("t('priceFrom')");
+    expect(compact).toContain('{listedPrice}');
+    expect(compact).not.toContain('priceNegotiable');
+    expect(compact).not.toContain('priceDependsOnVolume');
+    expect(detail).not.toMatch(/1\.80|4\.50|7\.00|15\.00|24\.00/);
+    expect(detail).toContain('QualityScoreChip');
+    expect(detail).toContain('product-quality-summary--detail');
+  });
 });
 
 describe('Available / Pre-order presentation', () => {
