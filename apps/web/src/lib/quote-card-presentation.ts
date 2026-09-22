@@ -17,6 +17,13 @@ export function formatQuoteQuantity(
   return unitLabel ? `${amount} ${unitLabel}` : amount;
 }
 
+/** Locale-aware medium date from an existing ISO timestamp. No new fields. */
+export function formatCabinetDate(value: string, locale: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date);
+}
+
 export function sellerQuoteActions(input: {
   canMessageBuyer: boolean;
   canWithdraw: boolean;

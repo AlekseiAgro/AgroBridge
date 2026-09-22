@@ -1,8 +1,9 @@
 import type { PurchaseQuoteMineItem } from '@agrobridge/shared';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
 import {
+  formatCabinetDate,
   formatQuotePrice,
   formatQuoteQuantity,
   quoteStatusBadgeClass,
@@ -17,6 +18,7 @@ type Props = {
 export async function PurchaseQuoteList({ items, emptyLabel, empty }: Props) {
   const t = await getTranslations('purchaseRequests');
   const tp = await getTranslations('product');
+  const locale = await getLocale();
 
   if (items.length === 0) {
     return empty ?? <p className="empty-state">{emptyLabel}</p>;
@@ -66,6 +68,9 @@ export async function PurchaseQuoteList({ items, emptyLabel, empty }: Props) {
                 )}
               </div>
             </div>
+            <p className="product-list__date">
+              {t('sentAt', { date: formatCabinetDate(item.createdAt, locale) })}
+            </p>
             <div className="product-list__actions">
               {item.canOpenRequest ? (
                 <Link

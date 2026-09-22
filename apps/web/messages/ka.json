@@ -1031,6 +1031,7 @@
     "price": "ფასი",
     "quotedQuantity": "შეთავაზებული რაოდენობა",
     "sentAt": "გაგზავნილია {date}",
+    "publishedAt": "გამოქვეყნებულია {date}",
     "currency": "ვალუტა",
     "yourQuote": "თქვენი შეთავაზება",
     "quoteStatus": "შეთავაზების სტატუსი",

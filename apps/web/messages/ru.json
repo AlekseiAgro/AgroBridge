@@ -1031,6 +1031,7 @@
     "price": "Цена",
     "quotedQuantity": "Предложенное количество",
     "sentAt": "Отправлено {date}",
+    "publishedAt": "Опубликован {date}",
     "currency": "Валюта",
     "yourQuote": "Ваше предложение",
     "quoteStatus": "Статус предложения",
