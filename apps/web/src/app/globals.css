@@ -3909,6 +3909,95 @@ body {
   }
 }
 
+/*
+ * Mobile-only polish for My Quotes / My Purchase Requests.
+ * Tablet 768+ and the desktop 1024 block above stay unchanged.
+ */
+@media (max-width: 767px) {
+  .product-list__item--quotes,
+  .product-list__item--mine-requests {
+    padding: 0.8rem 0.9rem;
+  }
+
+  .product-list__item--quotes .product-list__item-body,
+  .product-list__item--mine-requests .product-list__item-body {
+    gap: 0.18rem;
+  }
+
+  .product-list__item--quotes .product-list__identity,
+  .product-list__item--mine-requests .product-list__identity {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.3rem 0.65rem;
+  }
+
+  .product-list__item--quotes .product-list__title,
+  .product-list__item--mine-requests .product-list__title {
+    flex: 1 1 8rem;
+    font-size: 1.02rem;
+    line-height: 1.3;
+  }
+
+  .product-list__item--quotes .quote-status,
+  .product-list__item--mine-requests .request-status {
+    flex: 0 1 auto;
+    margin-top: 0.1rem;
+  }
+
+  .product-list__item--quotes .product-list__price {
+    margin-top: 0.45rem;
+    color: var(--brand-deep);
+    font-size: 1.12rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .product-list__item--quotes .product-list__qty,
+  .product-list__item--mine-requests .product-list__qty {
+    margin-bottom: 0.28rem;
+  }
+
+  .product-list__item--mine-requests .product-list__category {
+    margin-top: 0.4rem;
+  }
+
+  .product-list__item--quotes .product-list__party,
+  .product-list__item--quotes .product-list__context,
+  .product-list__item--mine-requests .product-list__context {
+    font-size: 0.88rem;
+  }
+
+  .product-list__item--quotes .product-list__context,
+  .product-list__item--mine-requests .product-list__context {
+    margin-top: 0.28rem;
+  }
+
+  .product-list__item--mine-requests .product-list__party {
+    display: none;
+  }
+
+  .product-list__context--desktop {
+    display: block;
+  }
+
+  .product-list__item--quotes .product-list__date,
+  .product-list__item--mine-requests .product-list__date {
+    display: block;
+    margin: 0.08rem 0 0;
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .product-list__item--quotes .product-list__actions,
+  .product-list__item--mine-requests .product-list__actions {
+    margin-top: 0.55rem;
+  }
+}
+
 .admin-day-stats {
   list-style: none;
   margin: 0 0 1.5rem;

@@ -433,6 +433,8 @@ describe('My Purchase Requests mobile cards', () => {
     expect(rfqList).not.toContain('product-list__item--mine-requests');
     expect(css).toContain('.product-list__item--mine-requests .product-list__title');
     expect(css).toContain('.product-list__item--mine-requests .request-status');
+    expect(css).toContain('@media (min-width: 1024px)');
+    expect(css).toContain('@media (max-width: 767px)');
     expect(css).toContain('.harvest-badge.request-status--open');
     expect(css).toContain('.harvest-badge.request-status--closed');
     expect(css).toContain('.harvest-badge.request-status--cancelled');
@@ -555,6 +557,15 @@ describe('My Purchase Requests mobile cards', () => {
             expect(result.actionsDisplay).toBe('grid');
             expect(result.actionCols).toBe(1);
             expect(result.actionWidth).toBeGreaterThan(result.contentWidth * 0.7);
+          }
+
+          if (mobile) {
+            expect(result.dateDisplay).toBe('block');
+            expect(result.identityDisplay).toBe('flex');
+            expect(result.partyDisplay).toBe('none');
+          }
+
+          if (tablet) {
             expect(result.dateDisplay).toBe('none');
             expect(result.identityDisplay).toBe('grid');
             expect(result.partyDisplay).not.toBe('none');
