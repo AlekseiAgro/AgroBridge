@@ -4,7 +4,7 @@ import { createServer } from 'http';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { AddressInfo } from 'net';
-import { requestStatusBadgeClass } from '../../web/src/lib/request-card-presentation';
+import { requestStatusBadgeClass } from '../../../web/src/lib/request-card-presentation';
 
 const WEB = join(__dirname, '../../../web');
 const WEB_SRC = join(WEB, 'src');
@@ -423,10 +423,10 @@ describe('My Purchase Requests mobile cards', () => {
     expect(rfqList).not.toContain('product-list__item--mine-requests');
     expect(css).toContain('.product-list__item--mine-requests .product-list__title');
     expect(css).toContain('.product-list__item--mine-requests .request-status');
-    expect(css).toContain('.request-status--open');
-    expect(css).toContain('.request-status--closed');
-    expect(css).toContain('.request-status--cancelled');
-    expect(css).toContain('.request-status--fulfilled');
+    expect(css).toContain('.harvest-badge.request-status--open');
+    expect(css).toContain('.harvest-badge.request-status--closed');
+    expect(css).toContain('.harvest-badge.request-status--cancelled');
+    expect(css).toContain('.harvest-badge.request-status--fulfilled');
     expect(css).not.toMatch(/\.product-list__item--mine-requests[^{]*\{[^}]*overflow-x:\s*hidden/);
     expect(css).not.toMatch(/html[^{]*\{[^}]*overflow-x:\s*hidden/);
     expect(css).not.toMatch(/\.cabinet\s*\{[^}]*overflow-x:\s*hidden/);
@@ -532,6 +532,7 @@ describe('My Purchase Requests mobile cards', () => {
             expect(card.slots).toEqual(open?.slots);
             expect(card.statusBackground).not.toBe('rgba(0, 0, 0, 0)');
             expect(card.statusBackground).not.toBe('transparent');
+            expect(card.statusBackground).not.toBe('rgba(255, 255, 255, 0.7)');
           }
 
           if (mobile || viewport.width === 768 || viewport.width === 820) {
