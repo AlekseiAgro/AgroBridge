@@ -395,10 +395,37 @@ describe('read-only account overview and settings profile editing', () => {
     expect(overview).toContain('memberSince');
     expect(overview).toContain('RatingStars');
     expect(overview).toContain('viewPublicProfile');
+    expect(overview).toContain('href={`/users/${user.id}`}');
     expect(overview).toContain('activity-summary');
     expect(overview).toContain("href: '/dashboard/deals'");
     expect(overview).toContain("href: '/dashboard/purchase-requests'");
     expect(overview).toContain("href: '/dashboard/quotes'");
+  });
+
+  it('uses view-not-enable wording for the public profile CTA in all locales', () => {
+    const expected: Record<(typeof LOCALES)[number], string> = {
+      en: 'View public profile',
+      ru: 'Посмотреть публичный профиль',
+      de: 'Öffentliches Profil ansehen',
+      fr: 'Voir le profil public',
+      it: 'Vedi il profilo pubblico',
+      es: 'Ver perfil público',
+      ka: 'საჯარო პროფილის ნახვა',
+    };
+    const openLike = /открыть|öffnen|apri |გახსნა|enable|make profile public/i;
+    const en = expected.en;
+
+    for (const locale of LOCALES) {
+      const messages = JSON.parse(
+        readFileSync(join(MESSAGES_DIR, `${locale}.json`), 'utf8'),
+      ) as { profile: { viewPublicProfile: string } };
+      const label = messages.profile.viewPublicProfile;
+      expect(label).toBe(expected[locale]);
+      expect(label).not.toMatch(openLike);
+      if (locale !== 'en') {
+        expect(label).not.toBe(en);
+      }
+    }
   });
 
   it('moves profile, avatar, and email editing onto Account Settings without duplicating flows', () => {
