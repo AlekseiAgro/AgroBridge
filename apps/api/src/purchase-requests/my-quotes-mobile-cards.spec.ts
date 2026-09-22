@@ -26,6 +26,7 @@ type CardMeasure = {
   buttonExtras: number[];
   status: string;
   statusClass: string;
+  statusBackground: string;
   slots: string[];
   cardBackground: string;
 };
@@ -147,8 +148,8 @@ function fixture(css: string): string {
                 context: 'Предложение принято',
               })}
               ${cardHtml({
-                status: 'pending',
-                statusLabel: 'Pending',
+                status: 'withdrawn',
+                statusLabel: 'Withdrawn',
                 title: 'Kakheti walnuts awaiting buyer decision with a long English title',
                 price: '3.00 GEL',
                 qty: '500 kg',
@@ -212,6 +213,9 @@ const MEASURE_JS = `(() => {
       buttonExtras: buttons.map((button) => extra(card, button)),
       status: card.getAttribute('data-quote-status') || '',
       statusClass: card.querySelector('.quote-status')?.className || '',
+      statusBackground: card.querySelector('.quote-status')
+        ? getComputedStyle(card.querySelector('.quote-status')).backgroundColor
+        : '',
       slots: [...(body ? body.children : [])].map((el) => el.className.split(' ')[0]),
       cardBackground: getComputedStyle(card).backgroundColor,
     };
@@ -360,6 +364,12 @@ async function cdpEvaluate(
   return result.result.value;
 }
 
+function parseRgb(value: string): [number, number, number] {
+  const match = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (!match) return [255, 255, 255];
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
 describe('My Quotes mobile cards', () => {
   const css = readGlobalsCss();
   const page = readFileSync(QUOTES_PAGE, 'utf8');
@@ -394,8 +404,10 @@ describe('My Quotes mobile cards', () => {
     expect(list).not.toContain('транзакц');
     expect(css).toContain('.product-list__item--quotes .product-list__title');
     expect(css).toContain('.product-list__item--quotes .quote-status');
-    expect(css).toContain('.quote-status--pending');
-    expect(css).toContain('.quote-status--accepted');
+    expect(css).toContain('.harvest-badge.quote-status--pending');
+    expect(css).toContain('.harvest-badge.quote-status--accepted');
+    expect(css).toContain('.harvest-badge.quote-status--declined');
+    expect(css).toContain('.harvest-badge.quote-status--withdrawn');
     expect(css).not.toContain('.quote-list__item');
     expect(css).not.toMatch(/\.product-list__item--quotes[^{]*\{[^}]*overflow-x:\s*hidden/);
     expect(css).not.toMatch(/html[^{]*\{[^}]*overflow-x:\s*hidden/);
@@ -453,8 +465,12 @@ describe('My Quotes mobile cards', () => {
 
           const pending = result.cards.find((card) => card.status === 'pending');
           const accepted = result.cards.find((card) => card.status === 'accepted');
+          const declined = result.cards.find((card) => card.status === 'declined');
+          const withdrawn = result.cards.find((card) => card.status === 'withdrawn');
           expect(pending).toBeDefined();
           expect(accepted).toBeDefined();
+          expect(declined).toBeDefined();
+          expect(withdrawn).toBeDefined();
           expect(pending?.slots).toEqual(accepted?.slots);
           expect(pending?.slots).toEqual([
             'product-list__identity',
@@ -465,7 +481,21 @@ describe('My Quotes mobile cards', () => {
           ]);
           expect(pending?.statusClass).toContain('quote-status--pending');
           expect(accepted?.statusClass).toContain('quote-status--accepted');
+          expect(declined?.statusClass).toContain('quote-status--declined');
+          expect(withdrawn?.statusClass).toContain('quote-status--withdrawn');
           expect(pending?.cardBackground).toBe(accepted?.cardBackground);
+          expect(pending?.statusBackground).not.toBe(pending?.cardBackground);
+          expect(pending?.statusBackground).not.toBe(accepted?.statusBackground);
+          expect(pending?.statusBackground).not.toBe(declined?.statusBackground);
+          expect(accepted?.statusBackground).not.toBe(withdrawn?.statusBackground);
+          expect(declined?.statusBackground).not.toBe(withdrawn?.statusBackground);
+
+          const pendingRgb = parseRgb(pending?.statusBackground || '');
+          const acceptedRgb = parseRgb(accepted?.statusBackground || '');
+          const declinedRgb = parseRgb(declined?.statusBackground || '');
+          expect(pendingRgb[0]).toBeGreaterThan(pendingRgb[2]);
+          expect(acceptedRgb[1]).toBeGreaterThan(acceptedRgb[0]);
+          expect(declinedRgb[0]).toBeGreaterThan(declinedRgb[1]);
 
           for (const card of result.cards) {
             expect(card.extra).toBe(0);
@@ -478,6 +508,9 @@ describe('My Quotes mobile cards', () => {
             expect(card.actionsExtra).toBe(0);
             expect(card.buttonExtras.every((value) => value === 0)).toBe(true);
             expect(card.slots).toEqual(pending?.slots);
+            expect(card.statusBackground).not.toBe('rgba(0, 0, 0, 0)');
+            expect(card.statusBackground).not.toBe('transparent');
+            expect(card.statusBackground).not.toBe('rgba(255, 255, 255, 0.7)');
           }
 
           if (mobile || viewport.width === 768 || viewport.width === 820) {
