@@ -87,7 +87,7 @@ To align the existing 39 `@agrobridge.local` demo catalog products with `DEMO_CA
 ```bash
 # default is dry-run — no writes
 pnpm db:fix-demo-catalog-prices
-# or from /app/apps/api:
+# or from /app/apps/api (loads compiled dist/, not src/ts-node):
 node ./prisma/run-fix-demo-catalog-prices.cjs
 
 # only after reviewing the plan, and only with explicit approval:
