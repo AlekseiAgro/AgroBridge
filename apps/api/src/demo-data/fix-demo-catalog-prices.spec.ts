@@ -352,7 +352,8 @@ describe('demo catalog price data-fix', () => {
     expect(cli).toContain("'dist'");
     expect(cli).toContain("'demo-data'");
     expect(cli).toContain("'fix-demo-catalog-prices.js'");
-    expect(cli).not.toContain('ts-node');
+    expect(cli).not.toContain("require('ts-node/register/transpile-only')");
+    expect(cli).not.toContain('ts-node/register');
     expect(cli).not.toContain("require('../src/demo-data/fix-demo-catalog-prices')");
     expect(cli).not.toContain('TS_NODE_PROJECT');
   });
@@ -362,7 +363,7 @@ describe('demo catalog price data-fix', () => {
     const { existsSync } = require('fs');
     execFileSync(
       'pnpm',
-      ['exec', 'tsc', '-p', 'tsconfig.build.json', '--pretty', 'false'],
+      ['exec', 'tsc', '-p', 'tsconfig.build.json', '--incremental', 'false', '--pretty', 'false'],
       { cwd: API_ROOT, stdio: 'pipe' },
     );
     const compiled = [
