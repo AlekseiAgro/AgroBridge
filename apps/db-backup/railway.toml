@@ -1,0 +1,13 @@
+# Railway must build this image from the repository root.
+# Settings → Build → Root Directory: leave empty.
+# Settings → Config-as-code → Config file path: apps/db-backup/railway.toml
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "apps/db-backup/Dockerfile"
+watchPatterns = ["/apps/db-backup/**"]
+
+[deploy]
+# Isolated backup process. Do not use apps/api/docker-entrypoint.sh.
+startCommand = "node dist/main.js"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5

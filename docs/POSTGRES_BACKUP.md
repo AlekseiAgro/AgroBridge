@@ -18,6 +18,7 @@ On failure the process exits `1` and may send a Resend alert. It never runs Pris
 
 - Isolated package: `@agrobridge/db-backup`
 - Isolated image: `apps/db-backup/Dockerfile`
+- Railway config: `apps/db-backup/railway.toml` (same pattern as `api` / `web`)
 - Not part of the NestJS API runtime
 - PostgreSQL is only read (`pg_dump`, `SHOW server_version`)
 - Object storage uses the `BACKUP_R2_*` namespace, never media `S3_*` keys
@@ -31,6 +32,7 @@ The image defaults to client **16** only because local `docker-compose.yml` uses
 Build-time overrides:
 
 ```bash
+# context is the repository root — do not build with -f from apps/db-backup as context
 docker build -f apps/db-backup/Dockerfile \
   --build-arg PG_CLIENT_MAJOR=16 \
   --build-arg PG_DUMP_IMAGE_TAG=16-alpine \
@@ -132,11 +134,36 @@ Phase 1 does **not** automate restore. A later drill should:
 
 Because the API still runs `prisma migrate deploy` on start, restore of an older dump must be paired with a compatible API image. See the backup architecture notes: an old database under a newer API image will re-apply forward migrations.
 
+## Railway build settings
+
+The Dockerfile is written for a **repository-root** Docker context, like `apps/api/Dockerfile`. It copies `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, and `apps/db-backup/**`.
+
+If Railway **Root Directory** is `apps/db-backup`, the build context is only that folder and the build fails with:
+
+```text
+COPY apps/db-backup ./apps/db-backup
+"/apps/db-backup": not found
+```
+
+Required dashboard settings (do not change `api` / `web`):
+
+| Setting | Value |
+|---------|--------|
+| Builder | **Dockerfile** |
+| Dockerfile path | `apps/db-backup/Dockerfile` |
+| Root Directory | *(leave empty — repo root)* |
+| Watch Paths | `/apps/db-backup/**` |
+| Config-as-code path | `apps/db-backup/railway.toml` |
+
+`railway.toml` cannot set Root Directory. Clearing Root Directory is a dashboard setting.
+
+Do not point this service at `apps/api/docker-entrypoint.sh`. Do not add `apps/api` or `packages/shared` to Watch Paths: the backup package does not depend on them.
+
 ## FUTURE / PHASE 2+
 
 Not implemented here:
 
-- Railway Cron service and schedule
+- Railway Cron schedule (do not set from this docs-only build fix)
 - Production R2 backup bucket
 - Production secrets
 - Production `DATABASE_URL` wiring
