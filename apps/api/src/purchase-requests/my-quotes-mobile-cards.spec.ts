@@ -412,6 +412,8 @@ describe('My Quotes mobile cards', () => {
     expect(list).not.toContain('транзакц');
     expect(css).toContain('.product-list__item--quotes .product-list__title');
     expect(css).toContain('.product-list__item--quotes .quote-status');
+    expect(css).toContain('@media (min-width: 1024px)');
+    expect(css).toContain('@media (max-width: 767px)');
     expect(css).toContain('.harvest-badge.quote-status--pending');
     expect(css).toContain('.harvest-badge.quote-status--accepted');
     expect(css).toContain('.harvest-badge.quote-status--declined');
@@ -529,6 +531,14 @@ describe('My Quotes mobile cards', () => {
             expect(result.actionsDisplay).toBe('grid');
             expect(result.actionCols).toBe(1);
             expect(result.actionWidth).toBeGreaterThan(result.contentWidth * 0.7);
+          }
+
+          if (mobile) {
+            expect(result.dateDisplay).toBe('block');
+            expect(result.identityDisplay).toBe('flex');
+          }
+
+          if (tablet) {
             expect(result.dateDisplay).toBe('none');
             expect(result.identityDisplay).toBe('grid');
           }
