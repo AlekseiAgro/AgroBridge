@@ -2,6 +2,7 @@ import {
   attributeFieldsForCategory,
   type ProductImageKind,
 } from '@agrobridge/shared';
+import { demoCatalogPrice } from '../src/demo-data/demo-catalog-prices';
 import {
   CertificateType,
   DocumentReviewStatus,
@@ -27,23 +28,6 @@ const EXPORT_MARKET_SETS = [
   ['Germany', 'UK'],
   ['Italy', 'Spain'],
 ] as const;
-
-const PRICE_FROM: Record<string, number> = {
-  fruits: 1.85,
-  berries: 6.4,
-  vegetables: 0.95,
-  nuts: 8.9,
-  wine: 11.5,
-  dairy: 4.2,
-  honey: 14.5,
-  mineralWater: 0.55,
-  spices: 9.8,
-  tea: 7.2,
-  bayLeaf: 5.4,
-  essentialOils: 48,
-  organic: 2.4,
-  other: 3.1,
-};
 
 const VARIETY_BY_TITLE: Record<string, string> = {
   'Fresh Kakheti peaches': 'Freestone peach',
@@ -176,11 +160,7 @@ export async function buildEnrichedProductData(params: {
         ? `${region.charAt(0).toUpperCase()}${region.slice(1)} district`
         : 'Georgia';
 
-  const basePrice = PRICE_FROM[category] ?? 3;
-  const priceFrom =
-    richness === 'sparse'
-      ? null
-      : Number((basePrice * (0.85 + (globalIndex % 5) * 0.08)).toFixed(2));
+  const listed = demoCatalogPrice(title);
 
   const fillRatio =
     richness === 'full' ? 1 : richness === 'medium' ? 0.7 : richness === 'light' ? 0.4 : 0;
@@ -216,15 +196,8 @@ export async function buildEnrichedProductData(params: {
     deliveryAvailable: richness === 'full',
     leadTimeDays: richness === 'full' ? 7 + (globalIndex % 10) : null,
     customDelivery: richness === 'full' ? 'Reefer truck to Poti / Batumi on request' : null,
-    priceFrom,
-    priceCurrency:
-      priceFrom == null
-        ? null
-        : title === 'Saperavi qvevri 2024'
-          ? 'EUR'
-          : title === 'Georgian hazelnuts (shelled)'
-            ? 'USD'
-            : 'GEL',
+    priceFrom: listed.priceFrom,
+    priceCurrency: listed.priceCurrency,
     priceNegotiable: richness === 'medium' || richness === 'full',
     priceDependsOnVolume: richness === 'full',
     currentStock:

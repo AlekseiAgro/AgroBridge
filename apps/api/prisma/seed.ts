@@ -17,6 +17,7 @@ import * as bcrypt from 'bcrypt';
 import { mkdir, rm, writeFile } from 'fs/promises';
 import { dirname, join, resolve } from 'path';
 import { PRODUCT_CATEGORIES } from '@agrobridge/shared';
+import { demoCatalogPrice } from '../src/demo-data/demo-catalog-prices';
 import { demoMarketplaceSeedPlan } from '../src/demo-data/demo-seed-guard';
 import {
   buildEnrichedProductData,
@@ -134,7 +135,7 @@ const FARMERS_BY_CATEGORY: Record<string, DemoFarmer[]> = {
       product: {
         title: 'Guria mandarins',
         description: 'Sweet seedless mandarins from Guria hillside groves.',
-        unit: 'box',
+        unit: 'kg',
       },
     },
     {
@@ -188,7 +189,7 @@ const FARMERS_BY_CATEGORY: Record<string, DemoFarmer[]> = {
       product: {
         title: 'Imereti potatoes',
         description: 'Washed table potatoes, graded by size.',
-        unit: 'ton',
+        unit: 'kg',
       },
     },
     {
@@ -201,7 +202,7 @@ const FARMERS_BY_CATEGORY: Record<string, DemoFarmer[]> = {
       product: {
         title: 'Sweet peppers mix',
         description: 'Color mix of sweet peppers, harvest-to-order packing.',
-        unit: 'box',
+        unit: 'kg',
       },
     },
     {
@@ -824,13 +825,20 @@ async function seedFarmer(
   }
   await prisma.product.deleteMany({ where: { farmId: farm.id } });
 
+  const listed = demoCatalogPrice(farmer.product.title);
+  if (farmer.product.unit !== listed.unit) {
+    throw new Error(
+      `Demo product "${farmer.product.title}" unit "${farmer.product.unit}" does not match listed unit "${listed.unit}"`,
+    );
+  }
+
   const quantity =
     farmer.product.minQuantity != null && farmer.product.maxQuantity != null
       ? {
           minQuantity: farmer.product.minQuantity,
           maxQuantity: farmer.product.maxQuantity,
         }
-      : quantityForUnit(farmer.product.unit, globalIndex);
+      : quantityForUnit(listed.unit, globalIndex);
 
   const harvestPlan = harvestPlanFor(richness, globalIndex);
   const now = new Date();
