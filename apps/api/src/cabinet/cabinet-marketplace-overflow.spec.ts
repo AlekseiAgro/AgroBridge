@@ -159,6 +159,29 @@ function extractAtRuleBlock(css: string, query: string): string {
   return '';
 }
 
+function extractAtRuleBlockContaining(css: string, query: string, needle: string): string {
+  let from = 0;
+  while (from < css.length) {
+    const start = css.indexOf(query, from);
+    if (start < 0) return '';
+    const open = css.indexOf('{', start);
+    let depth = 0;
+    for (let i = open; i < css.length; i += 1) {
+      if (css[i] === '{') depth += 1;
+      if (css[i] === '}') {
+        depth -= 1;
+        if (depth === 0) {
+          const block = css.slice(start, i + 1);
+          if (block.includes(needle)) return block;
+          from = i + 1;
+          break;
+        }
+      }
+    }
+  }
+  return '';
+}
+
 const MEASURE_JS = `(() => {
   const measured = document.getElementById('host') || document.documentElement;
   const client = measured.clientWidth;
@@ -400,7 +423,11 @@ describe('cabinet marketplace tablet overflow (S1)', () => {
     expect(tablet).toContain('position: static');
     expect(tablet).toContain('repeat(2, minmax(0, 1fr))');
 
-    const phone = extractAtRuleBlock(css, '@media (max-width: 640px)');
+    const phone = extractAtRuleBlockContaining(
+      css,
+      '@media (max-width: 640px)',
+      '.catalog-filters',
+    );
     expect(phone).not.toMatch(/\.floating-cta\s*\{[\s\S]*bottom:\s*0/);
     expect(phone).toContain('grid-template-columns: 1fr');
 
