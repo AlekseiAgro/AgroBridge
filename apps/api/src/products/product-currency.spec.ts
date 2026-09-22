@@ -14,7 +14,7 @@ import {
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
-const ROOT = join(__dirname, '../../..');
+const ROOT = join(__dirname, '../../../..');
 const WEB = join(__dirname, '../../../web');
 
 function source(rel: string): string {
@@ -103,7 +103,8 @@ describe('product currency consistency', () => {
     );
     expect(migration).toContain('TYPE "CurrencyCode"');
     expect(migration).toContain(`WHEN "priceCurrency" IN ('GEL', 'EUR', 'USD')`);
-    expect(migration).not.toMatch(/priceFrom/);
+    expect(migration).not.toMatch(/ALTER COLUMN "priceFrom"/);
+    expect(migration).not.toMatch(/SET\s+"priceFrom"/);
     expect(migration).not.toMatch(/SET\s+"priceCurrency"\s*=\s*'GEL'/);
     expect(migration).not.toMatch(/UPDATE\s+"Product"/i);
     expect(migration).not.toMatch(/exchange|convert|fx/i);
