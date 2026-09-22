@@ -51,6 +51,7 @@ export default async function BuyerPurchaseRequestsPage({ params }: Props) {
       <>
       <PurchaseRequestList
         items={items}
+        variant="mine"
         empty={
           <EmptyState
             title={t('mineEmptyTitle')}

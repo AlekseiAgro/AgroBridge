@@ -2254,6 +2254,73 @@ body {
   white-space: normal;
 }
 
+.product-list__item--mine-requests {
+  min-width: 0;
+}
+
+.product-list__item--mine-requests .product-list__item-main,
+.product-list__item--mine-requests .product-list__item-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.product-list__item--mine-requests .product-list__item-body {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.product-list__item--mine-requests .product-list__identity {
+  display: grid;
+  justify-items: start;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.product-list__item--mine-requests .product-list__title {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.product-list__item--mine-requests .request-status {
+  display: inline-flex;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+  width: auto;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.product-list__item--mine-requests .product-list__category,
+.product-list__item--mine-requests .product-list__qty,
+.product-list__item--mine-requests .product-list__destination,
+.product-list__item--mine-requests .product-list__party,
+.product-list__item--mine-requests .product-list__context,
+.product-list__item--mine-requests .product-list__meta {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.product-list__item--mine-requests .product-list__category,
+.product-list__item--mine-requests .product-list__qty,
+.product-list__item--mine-requests .product-list__destination,
+.product-list__item--mine-requests .product-list__party,
+.product-list__item--mine-requests .product-list__context {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.product-list__item--mine-requests .product-list__actions {
+  align-self: center;
+  min-width: 0;
+}
+
+.product-list__item--mine-requests .product-list__action--primary {
+  white-space: normal;
+}
+
 .seller-quote {
   margin-top: 1.5rem;
   min-width: 0;
@@ -2330,6 +2397,32 @@ body {
   border-color: var(--line);
   background: rgba(255, 255, 255, 0.55);
   color: var(--muted);
+}
+
+.request-status {
+  white-space: normal;
+  max-width: 100%;
+}
+
+.request-status--open {
+  border-color: rgba(47, 107, 58, 0.38);
+  background: rgba(47, 107, 58, 0.16);
+}
+
+.request-status--closed {
+  border-color: rgba(122, 132, 118, 0.4);
+  background: rgba(122, 132, 118, 0.16);
+  color: var(--muted);
+}
+
+.request-status--cancelled {
+  border-color: rgba(160, 70, 60, 0.38);
+  background: rgba(160, 70, 60, 0.16);
+}
+
+.request-status--fulfilled {
+  border-color: rgba(47, 107, 90, 0.4);
+  background: rgba(47, 107, 90, 0.16);
 }
 
 @media (max-width: 640px) {
@@ -3529,6 +3622,28 @@ body {
     width: 100%;
     white-space: normal;
   }
+
+  .product-list__item--mine-requests {
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .product-list__item--mine-requests .product-list__item-main {
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+
+  .product-list__item--mine-requests .product-list__actions {
+    flex: 1 1 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .product-list__item--mine-requests .product-list__action--primary {
+    width: 100%;
+    white-space: normal;
+  }
 }
 
 @container marketplace (max-width: 40rem) {
@@ -3543,8 +3658,9 @@ body {
 
   /*
    * Public catalog/request rows live in `.page__main`. My Products cards use
-   * `.product-list__item--mine` and My Quotes cards use `--quotes` so only
-   * those seller lists reflow here.
+   * `.product-list__item--mine`, My Quotes cards use `--quotes`, and My
+   * Purchase Requests cards use `--mine-requests` so only those cabinet lists
+   * reflow here.
    */
   .page__main .product-list__item--row {
     flex-direction: column;
@@ -3627,6 +3743,34 @@ body {
   }
 
   .product-list__item--quotes .product-list__action--primary {
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .product-list__item--mine-requests {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+
+  .product-list__item--mine-requests .product-list__item-main {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .product-list__item--mine-requests .product-list__actions {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .product-list__item--mine-requests .product-list__action--primary {
     width: 100%;
     min-width: 0;
     white-space: normal;
