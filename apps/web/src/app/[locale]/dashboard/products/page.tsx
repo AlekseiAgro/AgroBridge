@@ -102,8 +102,18 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
               product,
               product.unit ? t(`units.${product.unit as 'kg'}`) : null,
             );
+            const meta = [
+              product.category ? tc(`categories.${product.category as 'fruits'}`) : null,
+              quantity,
+              product.moderationNote,
+            ]
+              .filter(Boolean)
+              .join(' · ');
             return (
-              <li key={product.id} className="product-list__item product-list__item--row">
+              <li
+                key={product.id}
+                className="product-list__item product-list__item--row product-list__item--mine"
+              >
                 <div className="product-list__item-main">
                   {image ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -119,35 +129,38 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
                       className="product-list__media product-list__media--sm"
                     />
                   )}
-                  <div>
-                    <p className="product-list__title">
-                      {formatProductTitle(product.title, locale)}
-                    </p>
-                    <p className="product-list__meta">
-                      {t(`moderation.${product.moderationStatus}`)}
-                      {product.category
-                        ? ` · ${tc(`categories.${product.category as 'fruits'}`)}`
-                        : ''}
-                      {quantity ? ` · ${quantity}` : ''}
-                      {product.moderationNote ? ` · ${product.moderationNote}` : ''}
-                    </p>
+                  <div className="product-list__item-body">
+                    <div className="product-list__identity">
+                      <p className="product-list__title">
+                        {formatProductTitle(product.title, locale)}
+                      </p>
+                      <p className="product-list__status">
+                        {t(`moderation.${product.moderationStatus}`)}
+                      </p>
+                    </div>
                     <div className="product-quality-summary">
                       <QualityScoreChip score={product.qualityScore} />
                       <CertificateBadges badges={product.certificateBadges} />
                     </div>
+                    {meta ? <p className="product-list__meta">{meta}</p> : null}
                   </div>
                 </div>
                 <div className="product-list__actions">
-                  <Link className="button button--ghost" href={`/products/${product.id}`}>
+                  <Link
+                    className="button button--ghost product-list__action--primary"
+                    href={`/products/${product.id}`}
+                  >
                     {t('preview')}
                   </Link>
-                  <Link
-                    className="button button--ghost"
-                    href={`/dashboard/products/${product.id}/edit`}
-                  >
-                    {t('edit')}
-                  </Link>
-                  <DeleteProductButton productId={product.id} />
+                  <div className="product-list__actions-secondary">
+                    <Link
+                      className="button button--ghost"
+                      href={`/dashboard/products/${product.id}/edit`}
+                    >
+                      {t('edit')}
+                    </Link>
+                    <DeleteProductButton productId={product.id} />
+                  </div>
                 </div>
               </li>
             );
