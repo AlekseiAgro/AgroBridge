@@ -134,6 +134,157 @@ describe('ProductsService', () => {
     expect(result.farm).toBeNull();
   });
 
+  it('stores GEL, EUR, and USD and rejects an invalid product currency', async () => {
+    const farmer = {
+      id: 'u1',
+      email: 'f@example.com',
+      role: 'farmer' as const,
+      locale: 'en' as const,
+      displayName: null,
+    };
+    const created = {
+      id: 'p1',
+      ownerUserId: 'u1',
+      farmId: null,
+      title: 'Hazelnuts',
+      description: null,
+      category: null,
+      variety: null,
+      country: 'Georgia',
+      originPlace: null,
+      unit: null,
+      minQuantity: null,
+      maxQuantity: null,
+      currentStock: null,
+      monthlyProduction: null,
+      maxAnnualProduction: null,
+      seasonMonths: [],
+      harvestStartAt: null,
+      harvestEndAt: null,
+      forecastQuantity: null,
+      harvestStatus: null,
+      preorderEnabled: false,
+      attributes: {},
+      packagingTypes: [],
+      packagingWeights: [],
+      palletSize: null,
+      incoterms: [],
+      carriers: [],
+      customDelivery: null,
+      nearestPort: null,
+      deliveryAvailable: false,
+      leadTimeDays: null,
+      priceFrom: 2.62,
+      priceCurrency: 'EUR',
+      priceNegotiable: false,
+      priceDependsOnVolume: false,
+      isPublished: false,
+      moderationStatus: 'draft',
+      moderationNote: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      owner: { id: 'u1', displayName: null },
+      farm: null,
+      images: [],
+      videos: [],
+      certificates: [],
+    };
+    prisma.farm.findUnique.mockResolvedValue(null);
+    prisma.product.create.mockResolvedValue(created);
+
+    for (const currency of ['GEL', 'EUR', 'USD'] as const) {
+      await service.create(farmer, { title: 'Hazelnuts', priceCurrency: currency } as never);
+      expect(prisma.product.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ priceCurrency: currency, priceFrom: null }),
+        }),
+      );
+    }
+
+    await expect(
+      service.create(farmer, { title: 'Hazelnuts', priceCurrency: 'GBP' } as never),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('does not overwrite a saved EUR or USD currency unless a new valid code is sent', async () => {
+    const farmer = {
+      id: 'u1',
+      email: 'f@example.com',
+      role: 'farmer' as const,
+      locale: 'en' as const,
+      displayName: null,
+    };
+    const existing = {
+      id: 'p1',
+      ownerUserId: 'u1',
+      farmId: null,
+      title: 'Hazelnuts',
+      description: null,
+      category: null,
+      variety: null,
+      country: 'Georgia',
+      originPlace: null,
+      unit: null,
+      minQuantity: null,
+      maxQuantity: null,
+      currentStock: null,
+      monthlyProduction: null,
+      maxAnnualProduction: null,
+      seasonMonths: [],
+      harvestStartAt: null,
+      harvestEndAt: null,
+      forecastQuantity: null,
+      harvestStatus: null,
+      preorderEnabled: false,
+      attributes: {},
+      packagingTypes: [],
+      packagingWeights: [],
+      palletSize: null,
+      incoterms: [],
+      carriers: [],
+      customDelivery: null,
+      nearestPort: null,
+      deliveryAvailable: false,
+      leadTimeDays: null,
+      priceFrom: 2.62,
+      priceCurrency: 'EUR',
+      priceNegotiable: false,
+      priceDependsOnVolume: false,
+      isPublished: false,
+      moderationStatus: 'draft',
+      moderationNote: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      owner: { id: 'u1', displayName: null, avatarUrl: null },
+      farm: null,
+      images: [],
+      videos: [],
+      certificates: [],
+    };
+    prisma.product.findUnique.mockResolvedValue(existing);
+    prisma.product.update.mockResolvedValue(existing);
+
+    await service.update(farmer, 'p1', { title: 'Hazelnuts' } as never);
+    expect(prisma.product.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ priceCurrency: undefined, priceFrom: undefined }),
+      }),
+    );
+
+    prisma.product.findUnique.mockResolvedValue({ ...existing, priceCurrency: 'USD' });
+    prisma.product.update.mockResolvedValue({ ...existing, priceCurrency: 'USD' });
+    await service.update(farmer, 'p1', { priceCurrency: 'USD' } as never);
+    expect(prisma.product.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ priceCurrency: 'USD', priceFrom: undefined }),
+      }),
+    );
+
+    await expect(service.update(farmer, 'p1', { priceCurrency: 'GBP' } as never)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+  });
+
   it('allows buyers to manage products', async () => {
     prisma.product.findMany.mockResolvedValue([]);
 

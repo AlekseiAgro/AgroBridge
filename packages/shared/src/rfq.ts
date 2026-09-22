@@ -1,4 +1,5 @@
 import type { ProductUnit } from './catalog';
+import { CURRENCIES, isCurrencyCode, type CurrencyCode } from './currency';
 
 export const RFQ_STATUSES = [
   'pending',
@@ -11,16 +12,10 @@ export const RFQ_STATUSES = [
 
 export type RfqStatus = (typeof RFQ_STATUSES)[number];
 
-export const CURRENCIES = ['GEL', 'EUR', 'USD'] as const;
-
-export type CurrencyCode = (typeof CURRENCIES)[number];
+export { CURRENCIES, isCurrencyCode, type CurrencyCode };
 
 export function isRfqStatus(value: string): value is RfqStatus {
   return (RFQ_STATUSES as readonly string[]).includes(value);
-}
-
-export function isCurrencyCode(value: string): value is CurrencyCode {
-  return (CURRENCIES as readonly string[]).includes(value);
 }
 
 export type RfqOfferView = {

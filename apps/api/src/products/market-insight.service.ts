@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
+  DEFAULT_PRODUCT_CURRENCY,
   evaluateMarketOpportunity,
   isLocale,
   isPubliclyListedProduct,
@@ -236,7 +237,7 @@ export class MarketInsightService {
     const marketLabel = this.joinMarkets(localizedMarkets, locale);
     const weeksToSeason = this.weeksUntil(product.harvestStartAt);
     const listedPrice = toNumberOrNull(product.priceFrom);
-    const currency = product.priceCurrency ?? 'EUR';
+    const currency = product.priceCurrency ?? DEFAULT_PRODUCT_CURRENCY;
 
     const summary = this.summaryText({
       locale,

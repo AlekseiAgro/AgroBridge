@@ -423,7 +423,7 @@ model Product {
   deliveryAvailable    Boolean          @default(false)
   leadTimeDays         Int?
   priceFrom            Decimal?         @db.Decimal(12, 2)
-  priceCurrency        String?
+  priceCurrency        CurrencyCode?
   priceNegotiable      Boolean          @default(false)
   priceDependsOnVolume Boolean          @default(false)
   isPublished          Boolean          @default(false)

@@ -1,4 +1,5 @@
 import {
+  isCurrencyCode,
   isHarvestStatus,
   isProductCategory,
   isProductUnit,
@@ -74,6 +75,20 @@ class SeasonMonthsConstraint implements ValidatorConstraintInterface {
 
   defaultMessage() {
     return 'seasonMonths must be integers from 1 to 12';
+  }
+}
+
+@ValidatorConstraint({ name: 'productPriceCurrency', async: false })
+class ProductPriceCurrencyConstraint implements ValidatorConstraintInterface {
+  validate(value: unknown) {
+    if (value === undefined || value === null || value === '') {
+      return true;
+    }
+    return typeof value === 'string' && isCurrencyCode(value);
+  }
+
+  defaultMessage() {
+    return 'priceCurrency must be GEL, EUR, or USD';
   }
 }
 
@@ -210,9 +225,8 @@ export class CreateProductDto {
   priceFrom?: number | null;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(8)
-  priceCurrency?: string;
+  @Validate(ProductPriceCurrencyConstraint)
+  priceCurrency?: string | null;
 
   @IsOptional()
   @IsBoolean()

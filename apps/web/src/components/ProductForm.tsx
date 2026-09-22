@@ -5,6 +5,7 @@ import {
   HARVEST_STATUSES,
   INCOTERMS,
   PACKAGING_TYPES,
+  DEFAULT_PRODUCT_CURRENCY,
   PRICE_CURRENCIES,
   PRODUCT_CATEGORIES,
   PRODUCT_UNITS,
@@ -116,7 +117,9 @@ export function ProductForm({ mode, initial, leading }: Props) {
   const [deliveryAvailable, setDeliveryAvailable] = useState(initial?.deliveryAvailable ?? false);
   const [leadTimeDays, setLeadTimeDays] = useState(numberString(initial?.leadTimeDays));
   const [priceFrom, setPriceFrom] = useState(numberString(initial?.priceFrom));
-  const [priceCurrency, setPriceCurrency] = useState(initial?.priceCurrency ?? 'EUR');
+  const [priceCurrency, setPriceCurrency] = useState(
+    initial?.priceCurrency ?? DEFAULT_PRODUCT_CURRENCY,
+  );
   const [priceNegotiable, setPriceNegotiable] = useState(initial?.priceNegotiable ?? false);
   const [priceDependsOnVolume, setPriceDependsOnVolume] = useState(
     initial?.priceDependsOnVolume ?? false,
