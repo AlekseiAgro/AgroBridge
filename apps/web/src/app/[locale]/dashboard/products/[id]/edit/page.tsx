@@ -42,15 +42,26 @@ export default async function EditProductPage({ params }: Props) {
       <ProductForm
         mode="edit"
         initial={product}
-        leading={
-          <>
-            <ProductImagesManager productId={product.id} initialImages={product.images} />
-            <ProductVideosManager productId={product.id} initialVideos={product.videos} />
-            <ProductCertificatesManager
+        media={
+          <section className="product-form__section product-media-section">
+            <h2 className="section-title">{t('formSections.media')}</h2>
+            <ProductImagesManager
               productId={product.id}
-              initialCertificates={product.certificates}
+              initialImages={product.images}
+              embedded
             />
-          </>
+            <ProductVideosManager
+              productId={product.id}
+              initialVideos={product.videos}
+              embedded
+            />
+          </section>
+        }
+        certificates={
+          <ProductCertificatesManager
+            productId={product.id}
+            initialCertificates={product.certificates}
+          />
         }
       />
     </main>

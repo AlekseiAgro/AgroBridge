@@ -30,8 +30,10 @@ import { Link, useRouter } from '@/i18n/navigation';
 type Props = {
   mode: 'create' | 'edit';
   initial?: ProductDetail | null;
-  /** Rendered under the quality widget and above the form sections (e.g. media uploads). */
-  leading?: ReactNode;
+  /** Photos and video, rendered after main product information. */
+  media?: ReactNode;
+  /** Certificates, rendered after harvest planning and before save actions. */
+  certificates?: ReactNode;
 };
 
 type SubmitIntent = 'save' | 'publish';
@@ -77,7 +79,16 @@ function toggleValue<T extends string>(values: T[], value: T): T[] {
   return values.includes(value) ? values.filter((item) => item !== value) : [...values, value];
 }
 
-export function ProductForm({ mode, initial, leading }: Props) {
+function stopNestedEnterSubmit(event: { key: string; target: EventTarget; preventDefault: () => void }) {
+  if (event.key !== 'Enter') return;
+  const target = event.target as HTMLElement | null;
+  if (!target) return;
+  if (target.tagName === 'TEXTAREA' || target.tagName === 'BUTTON') return;
+  if (target.closest('button, [type="submit"]')) return;
+  event.preventDefault();
+}
+
+export function ProductForm({ mode, initial, media, certificates }: Props) {
   const t = useTranslations('product');
   const th = useTranslations('harvest');
   const tc = useTranslations('catalog');
@@ -342,11 +353,10 @@ export function ProductForm({ mode, initial, leading }: Props) {
 
   return (
     <div className="product-editor">
-      <ProductQualityWidget score={qualityScore} />
-      {leading}
+      <ProductQualityWidget score={qualityScore} compact />
       <form className="auth-form product-form" onSubmit={onSubmit}>
       <fieldset className="field-group product-form__section">
-        <legend className="section-title">{t('sections.basics')}</legend>
+        <legend className="section-title">{t('formSections.basics')}</legend>
         <div className="field-row">
           <label className="field">
             <span>{t('title')}</span>
@@ -426,6 +436,17 @@ export function ProductForm({ mode, initial, leading }: Props) {
             onChange={(event) => setDescription(event.target.value)}
           />
         </label>
+      </fieldset>
+
+      {media ? (
+        <div className="product-form__slot" onKeyDown={stopNestedEnterSubmit}>
+          {media}
+        </div>
+      ) : null}
+
+      <fieldset className="field-group product-form__section">
+        <legend className="section-title">{t('formSections.priceAndVolume')}</legend>
+        <h3 className="product-form__subheading">{t('sections.pricing')}</h3>
         <div className="field-row">
           <label className="field">
             <span>{t('priceFrom')}</span>
@@ -470,10 +491,7 @@ export function ProductForm({ mode, initial, leading }: Props) {
           />
           <span>{t('priceDependsOnVolume')}</span>
         </label>
-      </fieldset>
-
-      <fieldset className="field-group product-form__section">
-        <legend className="section-title">{t('sections.volume')}</legend>
+        <h3 className="product-form__subheading">{t('sections.volume')}</h3>
         <label className="field">
           <span>{t('unit')}</span>
           <input
@@ -774,6 +792,12 @@ export function ProductForm({ mode, initial, leading }: Props) {
           <span>{th('preorderEnable')}</span>
         </label>
       </fieldset>
+
+      {certificates ? (
+        <div className="product-form__slot" onKeyDown={stopNestedEnterSubmit}>
+          {certificates}
+        </div>
+      ) : null}
 
       {initial?.moderationStatus ? (
         <p className="product-list__meta">

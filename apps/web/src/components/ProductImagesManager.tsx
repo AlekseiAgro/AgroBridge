@@ -9,9 +9,10 @@ import { useRef, useState } from 'react';
 type Props = {
   productId: string;
   initialImages: ProductImage[];
+  embedded?: boolean;
 };
 
-export function ProductImagesManager({ productId, initialImages }: Props) {
+export function ProductImagesManager({ productId, initialImages, embedded = false }: Props) {
   const t = useTranslations('product');
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -102,10 +103,20 @@ export function ProductImagesManager({ productId, initialImages }: Props) {
 
   const canUpload = images.length < PRODUCT_IMAGE_MAX_COUNT;
 
+  const HeadingTag = embedded ? 'h3' : 'h2';
+
   return (
-    <section className="product-images product-form__section">
+    <section
+      className={
+        embedded
+          ? 'product-images product-media-block'
+          : 'product-images product-form__section'
+      }
+    >
       <div className="product-images__header">
-        <h2 className="section-title">{t('images.title')}</h2>
+        <HeadingTag className={embedded ? 'product-form__subheading' : 'section-title'}>
+          {t('images.title')}
+        </HeadingTag>
         <p className="page__subtitle">{t('images.subtitle', { max: PRODUCT_IMAGE_MAX_COUNT })}</p>
         {images.length > 0 ? <p className="field-hint">{t('images.coverHint')}</p> : null}
       </div>

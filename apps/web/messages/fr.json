@@ -470,6 +470,11 @@
       "pricing": "Prix",
       "farmStory": "À propos de l’exploitation"
     },
+    "formSections": {
+      "basics": "Informations principales",
+      "media": "Photos et vidéo du produit",
+      "priceAndVolume": "Prix et volume disponible"
+    },
     "variety": "Variété",
     "country": "Pays",
     "originPlace": "Lieu d’origine",
@@ -561,6 +566,7 @@
     "videos": {
       "title": "Vidéo du produit",
       "publicTitle": "Vidéos du produit",
+      "optionalLabel": "Vidéo · facultatif",
       "subtitle": "Ajoutez jusqu’à {max} vidéo du produit (MP4, WebM ou MOV, 80 Mo max).",
       "upload": "Téléverser une vidéo",
       "empty": "Aucune vidéo pour le moment.",
@@ -571,7 +577,8 @@
       "maxReached": "Limite de {max} vidéo atteinte."
     },
     "certificates": {
-      "title": "Certificats du produit",
+      "title": "Certificats et documents",
+      "optionalHint": "Facultatif. Ajoutez des documents attestant la qualité ou la conformité du produit.",
       "subtitle": "Téléversez un PDF ou une image pour relecture par un modérateur. Les acheteurs ne voient que les certificats approuvés. Jusqu’à {max} fichiers.",
       "type": "Type de certificat",
       "titleField": "Titre du certificat",
@@ -1267,6 +1274,7 @@
       "pricing": "Ajouter un prix de départ ou des conditions",
       "farmStory": "Compléter l’histoire de l’exploitation"
     },
+    "scoreWithTier": "{score}/100 · {tier}",
     "nextHint": "Prochaines étapes",
     "complete": "Cette fiche est prête à convaincre les acheteurs.",
     "certificates": {
