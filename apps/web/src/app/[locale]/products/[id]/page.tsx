@@ -56,6 +56,7 @@ export default async function ProductDetailPage({ params }: Props) {
     product.unit ? t(`units.${product.unit as 'kg'}`) : null,
   );
   const unitLabel = product.unit ? t(`units.${product.unit as 'kg'}`) : null;
+  const listedPrice = formatListedPrice(product);
   const canRequest = Boolean(user) && !product.isOwner;
   const showPreorder =
     product.preorderEnabled &&
@@ -113,6 +114,12 @@ export default async function ProductDetailPage({ params }: Props) {
           </div>
           {!product.isOwner ? (
             <div className="product-detail-header__actions">
+              {listedPrice ? (
+                <div className="product-detail-cta-price">
+                  <p className="product-detail-cta-price__label">{t('priceFrom')}</p>
+                  <p className="product-detail-cta-price__value">{listedPrice}</p>
+                </div>
+              ) : null}
               <a href="#request-quote" className="button button--primary">
                 {tr('submitRequest')}
               </a>
@@ -161,11 +168,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
         {product.isOwner ? (
           <ProductQualityWidget score={product.qualityScore} showGuidance />
-        ) : (
-          <div className="product-quality-summary product-quality-summary--detail">
-            <QualityScoreChip score={product.qualityScore} showTier />
-          </div>
-        )}
+        ) : null}
 
         <div className="product-detail-sections">
           <section className="product-detail-section">
@@ -208,6 +211,30 @@ export default async function ProductDetailPage({ params }: Props) {
               </p>
             ) : null}
           </section>
+
+          {product.priceFrom != null || product.priceNegotiable || product.priceDependsOnVolume ? (
+            <section className="product-detail-section">
+              <h2 className="section-title">{t('sections.pricing')}</h2>
+              <dl className="account-details product-detail-grid">
+                {product.priceFrom != null ? (
+                  <div className="product-detail-price-lead">
+                    <dt>{t('priceFrom')}</dt>
+                    <dd className="product-detail-price-lead__value">
+                      {listedPrice ?? `${product.priceFrom} ${product.priceCurrency}`}
+                    </dd>
+                  </div>
+                ) : null}
+                <div>
+                  <dt>{t('priceNegotiable')}</dt>
+                  <dd>{t(product.priceNegotiable ? 'yes' : 'no')}</dd>
+                </div>
+                <div>
+                  <dt>{t('priceDependsOnVolume')}</dt>
+                  <dd>{t(product.priceDependsOnVolume ? 'yes' : 'no')}</dd>
+                </div>
+              </dl>
+            </section>
+          ) : null}
 
           <section className="product-detail-section">
             <h2 className="section-title">{t('sections.volume')}</h2>
@@ -322,28 +349,6 @@ export default async function ProductDetailPage({ params }: Props) {
             </section>
           ) : null}
 
-          {product.priceFrom != null || product.priceNegotiable || product.priceDependsOnVolume ? (
-            <section className="product-detail-section">
-              <h2 className="section-title">{t('sections.pricing')}</h2>
-              <dl className="account-details product-detail-grid">
-                {product.priceFrom != null ? (
-                  <div>
-                    <dt>{t('priceFrom')}</dt>
-                    <dd>{formatListedPrice(product) ?? `${product.priceFrom} ${product.priceCurrency}`}</dd>
-                  </div>
-                ) : null}
-                <div>
-                  <dt>{t('priceNegotiable')}</dt>
-                  <dd>{t(product.priceNegotiable ? 'yes' : 'no')}</dd>
-                </div>
-                <div>
-                  <dt>{t('priceDependsOnVolume')}</dt>
-                  <dd>{t(product.priceDependsOnVolume ? 'yes' : 'no')}</dd>
-                </div>
-              </dl>
-            </section>
-          ) : null}
-
           {product.farm &&
           (product.farm.foundedYear ||
             product.farm.farmSizeHectares != null ||
@@ -382,6 +387,12 @@ export default async function ProductDetailPage({ params }: Props) {
             </section>
           ) : null}
         </div>
+
+        {!product.isOwner ? (
+          <div className="product-quality-summary product-quality-summary--detail">
+            <QualityScoreChip score={product.qualityScore} showTier />
+          </div>
+        ) : null}
 
         {product.videos.length ? (
           <section className="product-detail-section">
