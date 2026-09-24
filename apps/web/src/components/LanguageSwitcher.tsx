@@ -54,29 +54,31 @@ function LanguageSwitcherMenu({ search }: { search: string }) {
         <GlobeIcon />
         <span className="language-switcher__code">{locale.toUpperCase()}</span>
       </summary>
-      <ul className="language-switcher__menu" role="menu" aria-label={t('language')}>
-        {routing.locales.map((code) => {
-          const active = code === locale;
-          return (
-            <li key={code}>
-              <Link
-                href={href}
-                locale={code as Locale}
-                hrefLang={code}
-                role="menuitem"
-                aria-current={active ? 'true' : undefined}
-                className={
-                  active
-                    ? 'language-switcher__option language-switcher__option--active'
-                    : 'language-switcher__option'
-                }
-              >
-                {LOCALE_LABELS[code]}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="language-switcher__panel">
+        <ul className="language-switcher__menu" role="menu" aria-label={t('language')}>
+          {routing.locales.map((code) => {
+            const active = code === locale;
+            return (
+              <li key={code}>
+                <Link
+                  href={href}
+                  locale={code as Locale}
+                  hrefLang={code}
+                  role="menuitem"
+                  aria-current={active ? 'true' : undefined}
+                  className={
+                    active
+                      ? 'language-switcher__option language-switcher__option--active'
+                      : 'language-switcher__option'
+                  }
+                >
+                  {LOCALE_LABELS[code]}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
     </details>
   );
 }

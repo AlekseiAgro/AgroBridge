@@ -85,4 +85,21 @@ describe('route-preserving language switcher', () => {
       expect(readWeb(`../messages/${locale}.json`)).toContain('"language"');
     }
   });
+
+  it('anchors the public-header menu in a layout panel without changing locale routing', () => {
+    const switcher = readWeb('components/LanguageSwitcher.tsx');
+    const css = readWeb('app/globals.css');
+
+    expect(switcher).toContain('language-switcher__panel');
+    expect(switcher).toContain('localeSwitchHref');
+    expect(switcher).toContain('locale={code as Locale}');
+    expect(css).toContain('.language-switcher__panel {\n  display: block;\n}');
+    expect(css).toContain('.site-header .language-switcher__panel');
+    expect(css).toContain('align-items: flex-end');
+    expect(css).toMatch(
+      /\.language-switcher__menu \{[^}]*position:\s*absolute;[^}]*top:\s*calc\(100% \+ 0\.3rem\);[^}]*right:\s*0;/,
+    );
+    expect(css).not.toMatch(/\.language-switcher__menu \{[^}]*z-index:\s*[5-9]\d/);
+    expect(css).not.toMatch(/\.language-switcher \{[^}]*z-index:\s*[5-9]\d/);
+  });
 });
