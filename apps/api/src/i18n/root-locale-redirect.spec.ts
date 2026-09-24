@@ -5,7 +5,8 @@ import { languageAlternates, localizedPublicUrl } from '../../../web/src/lib/seo
 import { publicPageHtmlMetadata } from '../../../web/src/lib/seo-html-metadata';
 import { localeSwitchHref, localeSwitchPathname } from '../../../web/src/lib/locale-switch-href';
 import {
-  BARE_ROOT_LANDING_PATH,
+  BARE_ROOT_LANDING_LOCALE,
+  NEXT_LOCALE_COOKIE,
   bareRootRedirectPath,
 } from '../../../web/src/lib/bare-root-redirect';
 
@@ -16,18 +17,43 @@ function readWeb(path: string): string {
 }
 
 describe('bare root landing locale', () => {
-  it('redirects only the unprefixed root to /ka', () => {
+  it('sends first-time visitors on / to /ka regardless of Accept-Language', () => {
     expect(DEFAULT_LOCALE).toBe('en');
-    expect(BARE_ROOT_LANDING_PATH).toBe('/ka');
+    expect(BARE_ROOT_LANDING_LOCALE).toBe('ka');
+    expect(NEXT_LOCALE_COOKIE).toBe('NEXT_LOCALE');
     expect(bareRootRedirectPath('/')).toBe('/ka');
+    expect(bareRootRedirectPath('/', null)).toBe('/ka');
+    expect(bareRootRedirectPath('/', undefined)).toBe('/ka');
+    expect(bareRootRedirectPath('/', '')).toBe('/ka');
+  });
+
+  it('honors a valid NEXT_LOCALE cookie on / and ignores invalid values', () => {
+    for (const locale of LOCALES) {
+      expect(bareRootRedirectPath('/', locale)).toBe(`/${locale}`);
+    }
+
+    expect(bareRootRedirectPath('/', 'invalid')).toBe('/ka');
+    expect(bareRootRedirectPath('/', 'ru-RU')).toBe('/ka');
+    expect(bareRootRedirectPath('/', 'EN')).toBe('/ka');
+    expect(bareRootRedirectPath('/', ' uk ')).toBe('/ka');
+  });
+
+  it('does not use Accept-Language for the bare root decision', () => {
+    const helper = readWeb('lib/bare-root-redirect.ts');
+    const middleware = readWeb('middleware.ts');
+    expect(helper).not.toMatch(/accept-language/i);
+    expect(helper).toContain('isLocale');
+    expect(middleware).not.toMatch(/accept-language/i);
+    expect(middleware).toContain('cookies.get(NEXT_LOCALE_COOKIE)');
+    expect(bareRootRedirectPath('/', undefined)).toBe('/ka');
   });
 
   it('does not rewrite explicit locale homes or prefixed public/auth paths', () => {
     for (const locale of LOCALES) {
-      expect(bareRootRedirectPath(`/${locale}`)).toBeNull();
-      expect(bareRootRedirectPath(`/${locale}/catalog`)).toBeNull();
-      expect(bareRootRedirectPath(`/${locale}/login`)).toBeNull();
-      expect(bareRootRedirectPath(`/${locale}/account`)).toBeNull();
+      expect(bareRootRedirectPath(`/${locale}`, 'ru')).toBeNull();
+      expect(bareRootRedirectPath(`/${locale}/catalog`, 'en')).toBeNull();
+      expect(bareRootRedirectPath(`/${locale}/login`, 'ka')).toBeNull();
+      expect(bareRootRedirectPath(`/${locale}/account`, 'de')).toBeNull();
     }
 
     expect(bareRootRedirectPath('/en/catalog')).toBeNull();
@@ -43,8 +69,9 @@ describe('bare root landing locale', () => {
   it('wires the root rule in middleware before next-intl and keeps the matcher', () => {
     const middleware = readWeb('middleware.ts');
     expect(middleware).toContain("from './lib/bare-root-redirect'");
-    expect(middleware).toContain('bareRootRedirectPath(request.nextUrl.pathname)');
+    expect(middleware).toContain('bareRootRedirectPath(');
     expect(middleware).toContain('NextResponse.redirect(url)');
+    expect(middleware).toContain('request.nextUrl.clone()');
     expect(middleware).toContain('return intlMiddleware(request)');
     expect(middleware).toContain('createMiddleware');
     expect(middleware).toContain("'/'");
