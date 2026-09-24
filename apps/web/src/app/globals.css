@@ -1055,35 +1055,23 @@ body {
 }
 
 @media (max-width: 640px) {
-  .site-header:has(.language-switcher[open]) {
-    align-items: start;
+  .site-header {
+    z-index: 2;
   }
 
   .site-header .language-switcher {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
     isolation: isolate;
   }
 
-  .site-header .language-switcher__panel {
-    display: block;
-    width: 0;
-    max-width: 0;
-    overflow: visible;
-  }
-
   .site-header .language-switcher__menu {
-    position: relative;
-    top: auto;
-    right: auto;
+    position: absolute;
+    top: calc(100% + 0.3rem);
+    right: 0;
     left: auto;
     box-sizing: border-box;
     width: 10rem;
     min-width: 10rem;
     max-width: min(10rem, calc(100vw - 1.5rem));
-    margin-top: 0.4rem;
-    margin-left: calc(0px - min(10rem, calc(100vw - 1.5rem)));
     padding: 0.45rem 0.4rem;
     max-height: min(22rem, calc(100dvh - 6.5rem));
     overflow: auto;

@@ -22,15 +22,16 @@ type Measure = {
   optionCount: number;
   optionLabels: string[];
   activeLabel: string | null;
+  headerHeight: number;
   button: Box;
   menu: Box | null;
+  hamburger: Box;
   wordmark: Box;
   heroLogo: Box;
   headline: Box;
   subtitle: Box;
   cta: Box;
-  overlapsHero: boolean;
-  overlapsWordmark: boolean;
+  overlapsChrome: boolean;
   menuRightAligned: boolean;
   menuInViewport: boolean;
 };
@@ -146,6 +147,7 @@ const MEASURE_JS = `(() => {
     }
   }
   const switcher = document.querySelector('.language-switcher');
+  const header = document.querySelector('.site-header');
   const menuEl = document.querySelector('.language-switcher__menu');
   const menuVisible =
     Boolean(switcher && switcher.open) &&
@@ -154,6 +156,7 @@ const MEASURE_JS = `(() => {
     menuEl.getBoundingClientRect().height > 0;
   const menu = menuVisible ? box(menuEl) : null;
   const button = box(document.querySelector('.language-switcher__button'));
+  const hamburger = box(document.querySelector('.site-header__menu-button'));
   const wordmark = box(document.querySelector('.auth-brand__wordmark'));
   const heroLogo = box(document.querySelector('.home__brand .brand-logo'));
   const headline = box(document.querySelector('.home__headline'));
@@ -171,21 +174,18 @@ const MEASURE_JS = `(() => {
     optionCount: options.length,
     optionLabels: options.map((el) => el.textContent.trim()),
     activeLabel: (document.querySelector('.language-switcher__option--active') || {}).textContent || null,
+    headerHeight: header ? Math.round(header.getBoundingClientRect().height) : 0,
     button,
     menu,
+    hamburger,
     wordmark,
     heroLogo,
     headline,
     subtitle,
     cta,
-    overlapsHero: Boolean(
-      menu &&
-        (intersects(menu, heroLogo) ||
-          intersects(menu, headline) ||
-          intersects(menu, subtitle) ||
-          intersects(menu, cta)),
+    overlapsChrome: Boolean(
+      menu && (intersects(menu, hamburger) || intersects(menu, wordmark) || intersects(menu, button)),
     ),
-    overlapsWordmark: Boolean(menu && intersects(menu, wordmark)),
     menuRightAligned: Boolean(menu && Math.abs(menu.right - button.right) <= 2),
     menuInViewport: Boolean(
       menu &&
@@ -337,19 +337,19 @@ describe('public header language menu mobile layout', () => {
     { width: 1280, height: 900 },
   ];
 
-  it('keeps locale switching and only changes mobile menu layout', () => {
+  it('keeps locale switching and overlays the mobile menu without changing flow', () => {
     expect(switcher).toContain('language-switcher__panel');
     expect(switcher).toContain('localeSwitchHref');
     expect(switcher).toContain('routing.locales.map');
     expect(css).toMatch(/\.language-switcher__menu \{[\s\S]*?position:\s*absolute;/);
-    expect(css).toContain('.site-header .language-switcher__panel');
-    expect(css).toContain('width: 0');
-    expect(css).toContain('margin-left: calc(0px - min(10rem, calc(100vw - 1.5rem)))');
+    expect(css).toContain('.site-header .language-switcher__menu {\n    position: absolute;\n    top: calc(100% + 0.3rem);\n    right: 0;');
+    expect(css).not.toContain('margin-left: calc(0px - min(10rem, calc(100vw - 1.5rem)))');
+    expect(css).not.toMatch(/\.site-header \.language-switcher__menu \{[^}]*position:\s*relative/);
     expect(css).not.toMatch(/\.language-switcher__menu \{[^}]*z-index:\s*(1\d{2}|[5-9]\d)/);
   });
 
   (chrome ? it : it.skip)(
-    'anchors the open menu to the language control without covering hero content',
+    'drops the open menu over the hero without moving the header or page content',
     async () => {
       if (!chrome) return;
       const launched = await launchChrome(chrome);
@@ -368,7 +368,12 @@ describe('public header language menu mobile layout', () => {
             expect(open.diff).toBeLessThanOrEqual(1);
             expect(open.overflowers).toEqual([]);
             expect(open.menu).not.toBeNull();
-            expect(open.menuPosition).toBe('relative');
+            expect(open.menuPosition).toBe('absolute');
+            expect(open.headerHeight).toBe(closed.headerHeight);
+            expect(Math.abs(open.headline.top - closed.headline.top)).toBeLessThanOrEqual(1);
+            expect(Math.abs(open.heroLogo.top - closed.heroLogo.top)).toBeLessThanOrEqual(1);
+            expect(Math.abs(open.subtitle.top - closed.subtitle.top)).toBeLessThanOrEqual(1);
+            expect(Math.abs(open.cta.top - closed.cta.top)).toBeLessThanOrEqual(1);
             expect(open.menuWidth).toBeGreaterThanOrEqual(140);
             expect(open.menuWidth).toBeLessThanOrEqual(Math.min(168, viewport.width - 16));
             expect(open.optionCount).toBe(7);
@@ -384,14 +389,14 @@ describe('public header language menu mobile layout', () => {
             expect(open.activeLabel).toContain('English');
             expect(open.menuRightAligned).toBe(true);
             expect(open.menuInViewport).toBe(true);
-            expect(open.overlapsWordmark).toBe(false);
-            expect(open.overlapsHero).toBe(false);
+            expect(open.overlapsChrome).toBe(false);
             expect(open.menu!.top).toBeGreaterThanOrEqual(open.button.bottom);
 
             await session.evaluate('document.getElementById("switcher").open = false');
             const restored = (await session.evaluate(MEASURE_JS)) as Measure;
             expect(restored.menu).toBeNull();
             expect(restored.documentOverflow).toBe(false);
+            expect(restored.headerHeight).toBe(closed.headerHeight);
             expect(Math.abs(restored.headline.top - closed.headline.top)).toBeLessThanOrEqual(1);
           } finally {
             session.close();
@@ -401,12 +406,15 @@ describe('public header language menu mobile layout', () => {
         for (const viewport of desktopViewports) {
           const session = await cdpSession(launched.wsUrl, `${server.url}/home.html`, viewport);
           try {
+            const closed = (await session.evaluate(MEASURE_JS)) as Measure;
             await session.evaluate('document.getElementById("switcher").open = true');
             const open = (await session.evaluate(MEASURE_JS)) as Measure;
             expect(open.menuPosition).toBe('absolute');
             expect(open.menuRightAligned).toBe(true);
             expect(open.optionCount).toBe(7);
             expect(open.documentOverflow).toBe(false);
+            expect(open.headerHeight).toBe(closed.headerHeight);
+            expect(Math.abs(open.headline.top - closed.headline.top)).toBeLessThanOrEqual(1);
           } finally {
             session.close();
           }
