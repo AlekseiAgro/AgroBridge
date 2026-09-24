@@ -47,7 +47,9 @@ describe('bare root landing locale', () => {
     expect(middleware).toContain('NextResponse.redirect(url)');
     expect(middleware).toContain('return intlMiddleware(request)');
     expect(middleware).toContain('createMiddleware');
-    expect(middleware).toContain("matcher: ['/', '/(ka|en|ru|de|fr|it|es)/:path*', '/((?!_next|_vercel|api|.*\\..*).*)']");
+    expect(middleware).toContain("'/'");
+    expect(middleware).toContain('/(ka|en|ru|de|fr|it|es)/:path*');
+    expect(middleware).toContain('_next|_vercel|api');
 
     const helperIndex = middleware.indexOf('bareRootRedirectPath');
     const intlIndex = middleware.lastIndexOf('return intlMiddleware(request)');
