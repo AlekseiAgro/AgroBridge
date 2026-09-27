@@ -240,16 +240,28 @@ export class VerificationService {
     ip?: string | null,
   ): Promise<ProducerVerificationStatus> {
     this.assertProducer(user);
+    const dbUser = await this.requireUser(user.id);
     await this.codes.consume({
       userId: user.id,
       channel: VerificationChannel.email,
       code,
       ip,
     });
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { emailVerifiedAt: new Date() },
-    });
+    if (!dbUser.emailVerifiedAt) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerifiedAt: new Date() },
+      });
+      // Fire-and-forget: verification must not fail if welcome mail is down.
+      void this.notifications
+        .notifyWelcome({
+          email: dbUser.email,
+          locale: dbUser.locale,
+          displayName: dbUser.displayName,
+          role: user.role,
+        })
+        .catch(() => undefined);
+    }
     await this.tryCompleteVerification(user.id);
     await this.ensureIdentityReviewSubmitted(user.id);
     return this.getStatus(user);

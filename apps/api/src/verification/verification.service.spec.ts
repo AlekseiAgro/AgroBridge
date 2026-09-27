@@ -30,6 +30,7 @@ describe('VerificationService', () => {
 
   const notifications = {
     notifyVerificationCode: jest.fn().mockResolvedValue(undefined),
+    notifyWelcome: jest.fn().mockResolvedValue(undefined),
     // Mirrors production: the notification reports whether the mail was actually delivered.
     notifyVerificationPendingModeration: jest.fn().mockResolvedValue(true),
     notifyVerificationApproved: jest.fn().mockResolvedValue(true),
@@ -64,6 +65,7 @@ describe('VerificationService', () => {
     jest.clearAllMocks();
     codes.issue.mockResolvedValue('123456');
     codes.consume.mockResolvedValue({ id: 'c1', destination: 'farmer@example.com' });
+    notifications.notifyWelcome.mockResolvedValue(undefined);
     notifications.notifyVerificationPendingModeration.mockResolvedValue(true);
     notifications.notifyVerificationApproved.mockResolvedValue(true);
     notifications.notifyVerificationRejected.mockResolvedValue(true);
@@ -118,6 +120,7 @@ describe('VerificationService', () => {
     const result = await service.sendEmailCode(farmer, '203.0.113.7');
     expect(result.sent).toBe(true);
     expect(notifications.notifyVerificationCode).toHaveBeenCalled();
+    expect(notifications.notifyWelcome).not.toHaveBeenCalled();
     expect(codes.issue).toHaveBeenCalledWith({
       userId: 'u1',
       channel: 'email',
@@ -304,15 +307,52 @@ describe('VerificationService', () => {
       where: { id: 'u1' },
       data: { emailVerifiedAt: expect.any(Date) },
     });
+    await Promise.resolve();
+    expect(notifications.notifyWelcome).toHaveBeenCalledTimes(1);
+    expect(notifications.notifyWelcome).toHaveBeenCalledWith({
+      email: 'farmer@example.com',
+      locale: 'en',
+      displayName: 'Farmer',
+      role: 'farmer',
+    });
   });
 
   it('does not verify the email when the code is rejected', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      locale: 'en',
+      displayName: 'Farmer',
+      emailVerifiedAt: null,
+      phoneVerifiedAt: null,
+      sellerType: 'privateFarmer',
+    });
     codes.consume.mockRejectedValue(new BadRequestException('Invalid or expired verification code'));
 
     await expect(
       service.confirmEmailCode(farmer, '000000', '203.0.113.7'),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(prisma.user.update).not.toHaveBeenCalled();
+    expect(notifications.notifyWelcome).not.toHaveBeenCalled();
+  });
+
+  it('does not send a second welcome email when the account is already verified', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u1',
+      email: 'farmer@example.com',
+      locale: 'en',
+      displayName: 'Farmer',
+      emailVerifiedAt: new Date('2026-01-01T00:00:00.000Z'),
+      phoneVerifiedAt: null,
+      sellerType: 'privateFarmer',
+    });
+    prisma.farm.findUnique.mockResolvedValue(null);
+
+    await service.confirmEmailCode(farmer, '123456', '203.0.113.7');
+
+    expect(codes.consume).toHaveBeenCalled();
+    expect(prisma.user.update).not.toHaveBeenCalled();
+    expect(notifications.notifyWelcome).not.toHaveBeenCalled();
   });
 
   it('stores seller type on the user and returns the matching verification path', async () => {

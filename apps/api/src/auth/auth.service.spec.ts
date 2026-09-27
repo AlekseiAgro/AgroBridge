@@ -152,13 +152,8 @@ describe('AuthService', () => {
         documentVersion: '1.0',
       },
     });
-    expect(notifications.notifyWelcome).toHaveBeenCalledWith({
-      email: 'farmer@example.com',
-      locale: 'ka',
-      displayName: 'Nino',
-      role: 'farmer',
-    });
-    // Mail is fire-and-forget after account creation.
+    expect(notifications.notifyWelcome).not.toHaveBeenCalled();
+    // Verification mail is fire-and-forget after account creation.
     await Promise.resolve();
     expect(verification.sendEmailCode).toHaveBeenCalled();
   });
@@ -191,6 +186,9 @@ describe('AuthService', () => {
     expect(result.user.buyerType).toBeNull();
     expect(result.user.sellerType).toBeNull();
     expect(result.user.emailVerified).toBe(false);
+    expect(notifications.notifyWelcome).not.toHaveBeenCalled();
+    await Promise.resolve();
+    expect(verification.sendEmailCode).toHaveBeenCalled();
     expect(prisma.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
