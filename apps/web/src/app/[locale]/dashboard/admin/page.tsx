@@ -278,7 +278,9 @@ async function ProductsSection({
           {products.map((product) => (
             <li key={product.id} className="product-list__item">
               <p className="product-list__title">
-                {formatProductTitle(product.title, locale)}
+                <Link href={`/dashboard/admin/products/${product.id}`}>
+                  {formatProductTitle(product.title, locale)}
+                </Link>
               </p>
               <p className="product-list__meta">
                 {product.farm
@@ -303,6 +305,9 @@ async function ProductsSection({
                   {t('note')}: {product.moderationNote}
                 </p>
               ) : null}
+              <p className="product-list__meta">
+                <Link href={`/dashboard/admin/products/${product.id}`}>{t('openPreview')}</Link>
+              </p>
               <div style={{ marginTop: '0.85rem' }}>
                 <ModerationActions productId={product.id} />
               </div>

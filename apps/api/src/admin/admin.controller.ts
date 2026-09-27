@@ -38,6 +38,11 @@ export class AdminController {
     return this.adminService.listProducts(status);
   }
 
+  @Get('products/:id')
+  getProduct(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.adminService.getProduct(user, id);
+  }
+
   @Post('products/:id/approve')
   approve(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.adminService.approve(user, id);

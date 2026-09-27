@@ -6,9 +6,10 @@ import { useRouter } from '@/i18n/navigation';
 
 type Props = {
   productId: string;
+  returnHref?: string;
 };
 
-export function ModerationActions({ productId }: Props) {
+export function ModerationActions({ productId, returnHref }: Props) {
   const t = useTranslations('admin');
   const router = useRouter();
   const [pending, setPending] = useState<'approve' | 'reject' | null>(null);
@@ -29,7 +30,11 @@ export function ModerationActions({ productId }: Props) {
         setError(data.message ?? t('genericError'));
         return;
       }
-      router.refresh();
+      if (returnHref) {
+        router.push(returnHref);
+      } else {
+        router.refresh();
+      }
     } catch {
       setError(t('genericError'));
     } finally {
