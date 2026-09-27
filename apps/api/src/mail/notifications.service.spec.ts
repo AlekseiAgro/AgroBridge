@@ -113,6 +113,7 @@ describe('NotificationsService', () => {
   it('sends a localized chat message email', async () => {
     await service.notifyChatMessage({
       recipient: {
+        id: 'b1',
         email: 'buyer@example.com',
         locale: 'ru',
         displayName: 'Buyer',
@@ -263,7 +264,7 @@ describe('NotificationsService', () => {
   describe('purchase request lifecycle emails', () => {
     it('mails opted-in suppliers a new purchase request in their locale', async () => {
       await service.notifyNewPurchaseRequest({
-        user: { email: 'farmer@example.com', locale: 'ru', displayName: 'Нино' },
+        user: { id: 'f1', email: 'farmer@example.com', locale: 'ru', displayName: 'Нино' },
         title: 'Blueberries',
         requestId: 'r1',
         buyerName: 'Buyer Ltd',
@@ -432,7 +433,7 @@ describe('NotificationsService', () => {
 
     it('still links public-board emails to the purchase request, not My Quotes', async () => {
       await service.notifyNewPurchaseRequest({
-        user: { email: 'farmer@example.com', locale: 'ka', displayName: 'ნინო' },
+        user: { id: 'f1', email: 'farmer@example.com', locale: 'ka', displayName: 'ნინო' },
         title: 'Blueberries',
         requestId: 'r1',
         buyerName: 'Buyer Ltd',
@@ -511,7 +512,7 @@ describe('NotificationsService', () => {
 
     it('leaves Product RFQ emails on inbox/rfq destinations', async () => {
       await service.notifyRfqCreated({
-        farmer: { email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
+        farmer: { id: 'f1', email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
         buyerName: 'Buyer Ltd',
         productTitle: 'Hazelnuts',
         quantity: '1',
@@ -525,7 +526,7 @@ describe('NotificationsService', () => {
 
       mail.send.mockClear();
       await service.notifyRfqCancelled({
-        farmer: { email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
+        farmer: { id: 'f1', email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
         buyerName: 'Buyer Ltd',
         productTitle: 'Hazelnuts',
       });
@@ -789,6 +790,194 @@ describe('NotificationsService', () => {
         updated: 0,
       });
       expect(userNotification.updateMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('marketplace in-app coverage for missing events', () => {
+    function createdNotification() {
+      expect(userNotification.create).toHaveBeenCalledTimes(1);
+      return userNotification.create.mock.calls[0][0].data as {
+        userId: string;
+        type: string;
+        title: string;
+        body: string;
+        href: string;
+      };
+    }
+
+    it('creates one unread in-app alert for a matching seller on a new purchase request', async () => {
+      await service.notifyNewPurchaseRequest({
+        user: { id: 'seller-1', email: 'seller@example.com', locale: 'en', displayName: 'Nino' },
+        title: 'Blueberries',
+        requestId: 'r1',
+        buyerName: 'Buyer Ltd',
+        category: 'berries',
+        quantity: '1t',
+        unit: 't',
+      });
+
+      expect(createdNotification()).toEqual({
+        userId: 'seller-1',
+        type: 'newPurchaseRequest',
+        productId: null,
+        title: 'New purchase request',
+        body: 'Buyer Ltd published the purchase request “Blueberries”.',
+        href: '/requests/r1',
+      });
+      expect(mail.send).toHaveBeenCalledTimes(1);
+      expect(mail.send.mock.calls[0][0].to).toBe('seller@example.com');
+    });
+
+    it('creates one unread in-app alert for the buyer when a product offer arrives', async () => {
+      await service.notifyRfqOfferCreated({
+        buyer: { id: 'buyer-1', email: 'buyer@example.com', locale: 'en', displayName: 'Buyer Ltd' },
+        farmName: 'Kakheti Farm',
+        productTitle: 'Hazelnuts',
+        priceAmount: '12.50',
+        currency: 'USD',
+        rfqId: 'rfq1',
+      });
+
+      expect(createdNotification()).toEqual({
+        userId: 'buyer-1',
+        type: 'rfqOfferCreated',
+        productId: null,
+        title: 'New offer',
+        body: 'Kakheti Farm sent an offer for “Hazelnuts”.',
+        href: '/dashboard/rfqs/rfq1',
+      });
+      expect(mail.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('creates one unread in-app alert for the seller when an offer is accepted', async () => {
+      await service.notifyPurchaseQuoteAccepted({
+        farmer: { id: 'seller-1', email: 'seller@example.com', locale: 'en', displayName: 'Nino' },
+        buyerName: 'buyer@secret.test',
+        buyerDisplayName: 'Buyer Ltd',
+        title: 'Blueberries',
+        requestId: 'r1',
+      });
+
+      expect(createdNotification()).toEqual(
+        expect.objectContaining({
+          userId: 'seller-1',
+          type: 'purchaseQuoteAccepted',
+          href: '/requests/r1',
+        }),
+      );
+      expect(mail.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('creates the seller in-app alert when an offer is rejected', async () => {
+      await service.notifyPurchaseQuoteDeclined({
+        farmer: { id: 'seller-1', email: 'seller@example.com', locale: 'en', displayName: 'Nino' },
+        buyerName: 'Buyer Ltd',
+        buyerDisplayName: 'Buyer Ltd',
+        title: 'Blueberries',
+      });
+
+      expect(createdNotification()).toEqual(
+        expect.objectContaining({
+          userId: 'seller-1',
+          type: 'purchaseQuoteDeclined',
+          href: '/dashboard/quotes',
+        }),
+      );
+      expect(mail.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('creates one unread in-app alert for the chat recipient and keeps email', async () => {
+      await service.notifyChatMessage({
+        recipient: {
+          id: 'buyer-1',
+          email: 'buyer@example.com',
+          locale: 'en',
+          displayName: 'Buyer',
+        },
+        senderName: 'Nino',
+        preview: 'Ready to ship',
+        conversationId: 'c1',
+      });
+
+      expect(createdNotification()).toEqual({
+        userId: 'buyer-1',
+        type: 'chatMessage',
+        productId: null,
+        title: 'New message',
+        body: 'Nino: Ready to ship',
+        href: '/dashboard/chat/c1',
+      });
+      expect(mail.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the in-app chat alert when the email is skipped for an active peer', async () => {
+      await service.notifyChatMessage({
+        recipient: {
+          id: 'buyer-1',
+          email: 'buyer@example.com',
+          locale: 'en',
+          displayName: 'Buyer',
+        },
+        senderName: 'Nino',
+        preview: 'Ready to ship',
+        conversationId: 'c1',
+        deliverEmail: false,
+      });
+
+      expect(createdNotification()).toEqual(
+        expect.objectContaining({ userId: 'buyer-1', type: 'chatMessage' }),
+      );
+      expect(mail.send).not.toHaveBeenCalled();
+    });
+
+    it('writes localized in-app copy for every supported locale', async () => {
+      const locales = ['en', 'ru', 'ka', 'de', 'fr', 'it', 'es'] as const;
+      for (const locale of locales) {
+        userNotification.create.mockClear();
+        await service.notifyNewPurchaseRequest({
+          user: { id: 'seller-1', email: 'seller@example.com', locale, displayName: 'Nino' },
+          title: 'Blueberries',
+          requestId: 'r1',
+          buyerName: 'Buyer Ltd',
+          category: 'berries',
+          quantity: '1t',
+          unit: 't',
+        });
+        const created = userNotification.create.mock.calls[0][0].data as {
+          title: string;
+          body: string;
+        };
+        expect(created.title.trim().length).toBeGreaterThan(0);
+        expect(created.body).toContain('Buyer Ltd');
+        expect(created.body).toContain('Blueberries');
+        expect(created.body.toLowerCase()).not.toContain('котир');
+        expect(created.title.toLowerCase()).not.toContain('quot');
+      }
+    });
+
+    it('marks an unread notification read for the owner only', async () => {
+      const existing = {
+        id: 'n1',
+        type: 'newPurchaseRequest',
+        productId: null,
+        title: 'New purchase request',
+        body: 'Buyer Ltd published the purchase request “Blueberries”.',
+        href: '/requests/r1',
+        readAt: null,
+        createdAt: new Date('2026-09-27T00:00:00.000Z'),
+      };
+      userNotification.findFirst.mockResolvedValue(existing);
+      userNotification.update.mockResolvedValue({
+        ...existing,
+        readAt: new Date('2026-09-27T00:01:00.000Z'),
+      });
+
+      const updated = await service.markRead('seller-1', 'n1');
+
+      expect(userNotification.findFirst).toHaveBeenCalledWith({
+        where: { id: 'n1', userId: 'seller-1' },
+      });
+      expect(updated?.readAt).toBe('2026-09-27T00:01:00.000Z');
     });
   });
 });

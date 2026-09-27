@@ -422,7 +422,7 @@ describe('dedicated Notification Center', () => {
     const ru = loadMessages('ru');
     expect(ru.notifications.empty).toBe('Пока нет уведомлений');
     expect(ru.notifications.subtitle).toBe(
-      'Здесь отображаются важные события, связанные с вашими запросами, предложениями и товарами.',
+      'Здесь отображаются важные события, связанные с вашими запросами, предложениями и сообщениями.',
     );
     expect(ru.notifications.subtitle).not.toBe(
       'Здесь появятся важные события, связанные с вашими запросами, предложениями и товарами.',
@@ -433,7 +433,7 @@ describe('dedicated Notification Center', () => {
     expect(en.notifications.empty).toBe('No notifications yet');
     expect(en.notifications.loadError).toBe('Could not load notifications.');
     expect(en.notifications.subtitle).toBe(
-      'Important events about your purchase requests, quotes, and products appear here.',
+      'Important events about your purchase requests, offers, and messages appear here.',
     );
     expect(en.notifications.markAllRead).toBe('Mark all as read');
     expect(en.notifications.markRead).toBe('Read');

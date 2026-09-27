@@ -1190,7 +1190,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "subtitle": "Les événements importants concernant vos demandes d’achat, offres et produits apparaissent ici.",
+    "subtitle": "Les événements importants concernant vos demandes d’achat, offres et messages apparaissent ici.",
     "empty": "Aucune notification pour le moment",
     "markAllRead": "Tout marquer comme lu",
     "markRead": "Lu",

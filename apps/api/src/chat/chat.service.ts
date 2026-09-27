@@ -266,16 +266,10 @@ export class ChatService {
         ? conversation.farmerLastReadAt
         : conversation.buyerLastReadAt;
 
-    if (
-      peerLastReadAt &&
-      Date.now() - peerLastReadAt.getTime() < CHAT_EMAIL_ACTIVE_WINDOW_MS
-    ) {
-      return;
-    }
-
     const peer = await this.prisma.user.findUnique({
       where: { id: peerId },
       select: {
+        id: true,
         email: true,
         locale: true,
         displayName: true,
@@ -291,8 +285,13 @@ export class ChatService {
         ? `${text.slice(0, CHAT_EMAIL_PREVIEW_MAX - 1)}…`
         : text;
 
+    const recentlyActive = Boolean(
+      peerLastReadAt && Date.now() - peerLastReadAt.getTime() < CHAT_EMAIL_ACTIVE_WINDOW_MS,
+    );
+
     await this.notifications.notifyChatMessage({
       recipient: {
+        id: peer.id,
         email: peer.email,
         locale: peer.locale,
         displayName: peer.displayName,
@@ -300,6 +299,7 @@ export class ChatService {
       senderName: sender.displayName?.trim() || sender.email,
       preview,
       conversationId: conversation.id,
+      deliverEmail: !recentlyActive,
     });
   }
 

@@ -143,6 +143,7 @@ export class SubscriptionsService {
       include: {
         user: {
           select: {
+            id: true,
             email: true,
             locale: true,
             displayName: true,
