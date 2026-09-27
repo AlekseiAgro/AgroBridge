@@ -108,16 +108,8 @@ export class AuthService {
 
     const authUser = this.toAuthenticatedUser(user);
 
-    // Never block registration on outbound mail (broken/slow SMTP caused Cloudflare HTML 524s).
-    void this.notifications
-      .notifyWelcome({
-        email: user.email,
-        locale: user.locale,
-        displayName: user.displayName,
-        role: user.role,
-      })
-      .catch(() => undefined);
-
+    // Only the verification code goes out at signup. The welcome / account-ready
+    // email waits for a successful confirmEmailCode transition.
     void this.verification.sendEmailCode(authUser, ip).catch(() => undefined);
 
     return this.issueToken(authUser, 0);
