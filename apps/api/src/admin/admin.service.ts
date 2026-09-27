@@ -224,7 +224,11 @@ export class AdminService {
 
     if (isPubliclyListedProduct(product)) {
       await this.notifications.notifyProductApproved({
-        farmer: product.owner,
+        farmer: this.moderationRecipient(
+          product.owner,
+          user.id,
+          existing.moderationStatus === PrismaModerationStatus.approved,
+        ),
         productTitle: product.title,
         productId: product.id,
       });
@@ -254,7 +258,7 @@ export class AdminService {
     id: string,
     dto: RejectProductDto,
   ): Promise<ModeratedProduct> {
-    await this.requireProduct(id);
+    const existing = await this.requireProduct(id);
 
     const product = await this.prisma.product.update({
       where: { id },
@@ -268,7 +272,11 @@ export class AdminService {
     });
 
     await this.notifications.notifyProductRejected({
-      farmer: product.owner,
+      farmer: this.moderationRecipient(
+        product.owner,
+        user.id,
+        existing.moderationStatus === PrismaModerationStatus.rejected,
+      ),
       productTitle: product.title,
       productId: product.id,
       note: product.moderationNote ?? 'Rejected by moderator',
@@ -554,12 +562,24 @@ export class AdminService {
   ): Promise<FarmDocument> {
     const existing = await this.prisma.farmDocument.findUnique({
       where: { id: documentId },
-      include: { farm: { select: { ownerId: true } } },
+      include: {
+        farm: {
+          select: {
+            ownerId: true,
+            owner: {
+              select: { id: true, email: true, locale: true, displayName: true },
+            },
+          },
+        },
+      },
     });
     if (!existing) {
       throw new NotFoundException('Document not found');
     }
 
+    const nextStatus = approve
+      ? DocumentReviewStatus.approved
+      : DocumentReviewStatus.rejected;
     const doc = await this.prisma.farmDocument.update({
       where: { id: documentId },
       data: approve
@@ -580,6 +600,16 @@ export class AdminService {
     // Only the primary document of a seller type drives the farm-level state. Completion is
     // attempted first: whatever it cannot finish (registry check, unconfirmed contact) is then
     // reconciled so the farm never stays in moderation without a document under review.
+    if (existing.reviewStatus !== nextStatus) {
+      const note = approve ? dto.note?.trim() || null : doc.reviewNote;
+      await this.notifications.notifyFarmDocumentReviewed({
+        farmer: this.moderationRecipient(existing.farm.owner, admin.id, false),
+        documentTitle: existing.title,
+        approve,
+        note,
+      });
+    }
+
     if (isPrimaryVerificationDocumentKind(existing.kind)) {
       if (approve) {
         await this.verification.tryCompleteVerification(existing.farm.ownerId);
@@ -602,12 +632,28 @@ export class AdminService {
 
     const existing = await this.prisma.productCertificate.findUnique({
       where: { id: certificateId },
-      select: { id: true, productId: true },
+      select: {
+        id: true,
+        productId: true,
+        title: true,
+        reviewStatus: true,
+        product: {
+          select: {
+            title: true,
+            owner: {
+              select: { id: true, email: true, locale: true, displayName: true },
+            },
+          },
+        },
+      },
     });
     if (!existing) {
       throw new NotFoundException('Certificate not found');
     }
 
+    const nextStatus = approve
+      ? DocumentReviewStatus.approved
+      : DocumentReviewStatus.rejected;
     const cert = await this.prisma.productCertificate.update({
       where: { id: certificateId },
       data: approve
@@ -624,6 +670,17 @@ export class AdminService {
             reviewedById: admin.id,
           },
     });
+
+    if (existing.reviewStatus !== nextStatus) {
+      await this.notifications.notifyProductCertificateReviewed({
+        farmer: this.moderationRecipient(existing.product.owner, admin.id, false),
+        certificateTitle: existing.title,
+        productTitle: existing.product.title,
+        productId: existing.productId,
+        approve,
+        note: approve ? dto.note?.trim() || null : cert.reviewNote,
+      });
+    }
 
     return {
       id: cert.id,
@@ -678,7 +735,7 @@ export class AdminService {
     const existing = await this.prisma.purchaseRequest.findUnique({
       where: { id },
       include: {
-        buyer: { select: { id: true, email: true, displayName: true } },
+        buyer: { select: { id: true, email: true, locale: true, displayName: true } },
         _count: { select: { quotes: true } },
       },
     });
@@ -695,10 +752,18 @@ export class AdminService {
         moderatedById: admin.id,
       },
       include: {
-        buyer: { select: { id: true, email: true, displayName: true } },
+        buyer: { select: { id: true, email: true, locale: true, displayName: true } },
         _count: { select: { quotes: true } },
       },
     });
+
+    if (existing.status !== PurchaseRequestStatus.cancelled) {
+      await this.notifications.notifyPurchaseRequestModerated({
+        buyer: this.moderationRecipient(request.buyer, admin.id, false),
+        title: request.title,
+        note: request.moderationNote,
+      });
+    }
 
     return {
       id: request.id,
@@ -855,6 +920,27 @@ export class AdminService {
         }),
       ),
     );
+  }
+
+  /**
+   * In-app rows are created only when the recipient has an id. Drop it for
+   * self-actions and for repeated decisions so the email path stays unchanged.
+   */
+  private moderationRecipient<
+    T extends { id: string; email: string; locale: string; displayName: string | null },
+  >(
+    user: T,
+    actorId: string,
+    alreadyNotified: boolean,
+  ): { id?: string; email: string; locale: string; displayName: string | null } {
+    if (alreadyNotified || user.id === actorId) {
+      return {
+        email: user.email,
+        locale: user.locale,
+        displayName: user.displayName,
+      };
+    }
+    return user;
   }
 
   private async requireProduct(id: string) {

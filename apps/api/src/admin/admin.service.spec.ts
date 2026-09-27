@@ -12,7 +12,7 @@ describe('AdminService', () => {
     farm: { count: jest.fn(), findUnique: jest.fn(), findUniqueOrThrow: jest.fn() },
     user: { count: jest.fn(), findMany: jest.fn() },
     rfq: { count: jest.fn() },
-    purchaseRequest: { count: jest.fn() },
+    purchaseRequest: { count: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
     farmDocument: { count: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
     productCertificate: { findUnique: jest.fn(), update: jest.fn(), updateMany: jest.fn() },
   };
@@ -26,6 +26,9 @@ describe('AdminService', () => {
   const notifications = {
     notifyProductApproved: jest.fn().mockResolvedValue(undefined),
     notifyProductRejected: jest.fn().mockResolvedValue(undefined),
+    notifyFarmDocumentReviewed: jest.fn().mockResolvedValue(undefined),
+    notifyProductCertificateReviewed: jest.fn().mockResolvedValue(undefined),
+    notifyPurchaseRequestModerated: jest.fn().mockResolvedValue(undefined),
   };
 
   const subscriptions = {
@@ -325,7 +328,16 @@ describe('AdminService', () => {
   });
 
   it('lets an admin approve or reject a certificate without exposing a storage URL', async () => {
-    prisma.productCertificate.findUnique.mockResolvedValue({ id: 'c1', productId: 'p1' });
+    prisma.productCertificate.findUnique.mockResolvedValue({
+      id: 'c1',
+      productId: 'p1',
+      title: 'Organic',
+      reviewStatus: 'pending',
+      product: {
+        title: 'Hazelnuts',
+        owner: { id: 'u1', email: 'f@example.com', locale: 'en', displayName: 'Nino' },
+      },
+    });
     prisma.productCertificate.update.mockResolvedValue({
       id: 'c1',
       productId: 'p1',
@@ -344,7 +356,16 @@ describe('AdminService', () => {
   });
 
   it('lets an admin reject a certificate independently of the listing', async () => {
-    prisma.productCertificate.findUnique.mockResolvedValue({ id: 'c1', productId: 'p1' });
+    prisma.productCertificate.findUnique.mockResolvedValue({
+      id: 'c1',
+      productId: 'p1',
+      title: 'Organic',
+      reviewStatus: 'pending',
+      product: {
+        title: 'Hazelnuts',
+        owner: { id: 'u1', email: 'f@example.com', locale: 'en', displayName: 'Nino' },
+      },
+    });
     prisma.productCertificate.update.mockResolvedValue({
       id: 'c1',
       productId: 'p1',
@@ -390,7 +411,12 @@ describe('AdminService', () => {
       prisma.farmDocument.findUnique.mockResolvedValue({
         id: 'doc1',
         kind: 'idCard',
-        farm: { ownerId: 'owner1' },
+        title: 'ID card',
+        reviewStatus: 'pending',
+        farm: {
+          ownerId: 'owner1',
+          owner: { id: 'owner1', email: 'f@example.com', locale: 'en', displayName: 'Farmer' },
+        },
       });
       prisma.farmDocument.update.mockResolvedValue(reviewedDocument('approved'));
 
@@ -404,7 +430,12 @@ describe('AdminService', () => {
       prisma.farmDocument.findUnique.mockResolvedValue({
         id: 'doc3',
         kind: 'businessRegistration',
-        farm: { ownerId: 'owner2' },
+        title: 'Business registration',
+        reviewStatus: 'pending',
+        farm: {
+          ownerId: 'owner2',
+          owner: { id: 'owner2', email: 'c@example.com', locale: 'en', displayName: 'Company' },
+        },
       });
       prisma.farmDocument.update.mockResolvedValue({
         ...reviewedDocument('approved'),
@@ -423,7 +454,12 @@ describe('AdminService', () => {
       prisma.farmDocument.findUnique.mockResolvedValue({
         id: 'doc1',
         kind: 'idCard',
-        farm: { ownerId: 'owner1' },
+        title: 'ID card',
+        reviewStatus: 'pending',
+        farm: {
+          ownerId: 'owner1',
+          owner: { id: 'owner1', email: 'f@example.com', locale: 'en', displayName: 'Farmer' },
+        },
       });
       prisma.farmDocument.update.mockResolvedValue(reviewedDocument('rejected'));
 
@@ -433,11 +469,38 @@ describe('AdminService', () => {
       expect(verification.tryCompleteVerification).not.toHaveBeenCalled();
     });
 
+    it('does not notify again when the same document decision is repeated', async () => {
+      prisma.farmDocument.findUnique.mockResolvedValue({
+        id: 'doc2',
+        kind: 'other',
+        title: 'Supporting scan',
+        reviewStatus: 'rejected',
+        farm: {
+          ownerId: 'owner1',
+          owner: { id: 'owner1', email: 'f@example.com', locale: 'en', displayName: 'Farmer' },
+        },
+      });
+      prisma.farmDocument.update.mockResolvedValue({
+        ...reviewedDocument('rejected'),
+        id: 'doc2',
+        kind: 'other',
+      });
+
+      await service.reviewDocument(admin, 'doc2', false, {});
+
+      expect(notifications.notifyFarmDocumentReviewed).not.toHaveBeenCalled();
+    });
+
     it('leaves verification state alone for supporting documents', async () => {
       prisma.farmDocument.findUnique.mockResolvedValue({
         id: 'doc2',
         kind: 'other',
-        farm: { ownerId: 'owner1' },
+        title: 'Supporting scan',
+        reviewStatus: 'pending',
+        farm: {
+          ownerId: 'owner1',
+          owner: { id: 'owner1', email: 'f@example.com', locale: 'en', displayName: 'Farmer' },
+        },
       });
       prisma.farmDocument.update.mockResolvedValue({
         ...reviewedDocument('rejected'),
@@ -450,5 +513,174 @@ describe('AdminService', () => {
       expect(verification.syncPrimaryDocumentState).not.toHaveBeenCalled();
       expect(verification.tryCompleteVerification).not.toHaveBeenCalled();
     });
+  });
+
+  it('passes the seller id on the first product approval so an in-app alert can be stored', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      isPublished: false,
+      moderationStatus: 'pending',
+      harvestStatus: null,
+      preorderEnabled: false,
+    });
+    prisma.product.update.mockResolvedValue({
+      id: 'p1',
+      title: 'Hazelnuts',
+      category: null,
+      isPublished: true,
+      moderationStatus: 'approved',
+      harvestStatus: null,
+      preorderEnabled: false,
+      moderationNote: null,
+      moderatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      owner: { id: 'u1', email: 'f@example.com', displayName: 'Nino', locale: 'en' },
+      farm: null,
+    });
+
+    await service.approve(admin, 'p1');
+
+    expect(notifications.notifyProductApproved).toHaveBeenCalledWith(
+      expect.objectContaining({
+        farmer: expect.objectContaining({ id: 'u1' }),
+      }),
+    );
+  });
+
+  it('does not persist a second in-app product alert when approval is repeated', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      isPublished: true,
+      moderationStatus: 'approved',
+      harvestStatus: null,
+      preorderEnabled: false,
+    });
+    prisma.product.update.mockResolvedValue({
+      id: 'p1',
+      title: 'Hazelnuts',
+      category: null,
+      isPublished: true,
+      moderationStatus: 'approved',
+      harvestStatus: null,
+      preorderEnabled: false,
+      moderationNote: null,
+      moderatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      owner: { id: 'u1', email: 'f@example.com', displayName: 'Nino', locale: 'en' },
+      farm: null,
+    });
+
+    await service.approve(admin, 'p1');
+
+    expect(notifications.notifyProductApproved).toHaveBeenCalledWith(
+      expect.objectContaining({
+        farmer: { email: 'f@example.com', locale: 'en', displayName: 'Nino' },
+      }),
+    );
+  });
+
+  it('does not notify an admin who approves their own listing', async () => {
+    prisma.product.findUnique.mockResolvedValue({
+      id: 'p1',
+      isPublished: false,
+      moderationStatus: 'pending',
+      harvestStatus: null,
+      preorderEnabled: false,
+    });
+    prisma.product.update.mockResolvedValue({
+      id: 'p1',
+      title: 'Hazelnuts',
+      category: null,
+      isPublished: true,
+      moderationStatus: 'approved',
+      harvestStatus: null,
+      preorderEnabled: false,
+      moderationNote: null,
+      moderatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      owner: { id: 'admin1', email: 'admin@example.com', displayName: 'Admin', locale: 'en' },
+      farm: null,
+    });
+
+    await service.approve(admin, 'p1');
+
+    expect(notifications.notifyProductApproved).toHaveBeenCalledWith(
+      expect.objectContaining({
+        farmer: { email: 'admin@example.com', locale: 'en', displayName: 'Admin' },
+      }),
+    );
+  });
+
+  it('notifies the buyer once when a moderator removes an open purchase request', async () => {
+    prisma.purchaseRequest.findUnique.mockResolvedValue({
+      id: 'r1',
+      title: 'Blueberries',
+      category: 'berries',
+      quantity: 1,
+      unit: 't',
+      status: 'open',
+      moderationNote: null,
+      moderatedAt: null,
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      buyer: { id: 'buyer1', email: 'b@example.com', locale: 'en', displayName: 'Buyer' },
+      _count: { quotes: 0 },
+    });
+    prisma.purchaseRequest.update.mockResolvedValue({
+      id: 'r1',
+      title: 'Blueberries',
+      category: 'berries',
+      quantity: 1,
+      unit: 't',
+      status: 'cancelled',
+      moderationNote: 'Spam',
+      moderatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      buyer: { id: 'buyer1', email: 'b@example.com', locale: 'en', displayName: 'Buyer' },
+      _count: { quotes: 0 },
+    });
+
+    await service.cancelPurchaseRequest(admin, 'r1', { note: 'Spam' });
+
+    expect(notifications.notifyPurchaseRequestModerated).toHaveBeenCalledWith({
+      buyer: expect.objectContaining({ id: 'buyer1' }),
+      title: 'Blueberries',
+      note: 'Spam',
+    });
+  });
+
+  it('does not notify again when the purchase request is already cancelled', async () => {
+    prisma.purchaseRequest.findUnique.mockResolvedValue({
+      id: 'r1',
+      title: 'Blueberries',
+      category: 'berries',
+      quantity: 1,
+      unit: 't',
+      status: 'cancelled',
+      moderationNote: 'Spam',
+      moderatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      buyer: { id: 'buyer1', email: 'b@example.com', locale: 'en', displayName: 'Buyer' },
+      _count: { quotes: 0 },
+    });
+    prisma.purchaseRequest.update.mockResolvedValue({
+      id: 'r1',
+      title: 'Blueberries',
+      category: 'berries',
+      quantity: 1,
+      unit: 't',
+      status: 'cancelled',
+      moderationNote: 'Spam',
+      moderatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+      buyer: { id: 'buyer1', email: 'b@example.com', locale: 'en', displayName: 'Buyer' },
+      _count: { quotes: 0 },
+    });
+
+    await service.cancelPurchaseRequest(admin, 'r1', { note: 'Spam' });
+
+    expect(notifications.notifyPurchaseRequestModerated).not.toHaveBeenCalled();
   });
 });

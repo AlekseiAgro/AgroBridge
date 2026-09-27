@@ -15,6 +15,15 @@ export const USER_NOTIFICATION_TYPES = [
   'rfqDeclinedByBuyer',
   'rfqDeclinedByFarmer',
   'rfqCancelled',
+  'productApproved',
+  'productRejected',
+  'verificationApproved',
+  'verificationRejected',
+  'farmDocumentApproved',
+  'farmDocumentRejected',
+  'productCertificateApproved',
+  'productCertificateRejected',
+  'purchaseRequestModerated',
 ] as const;
 
 export type UserNotificationType = (typeof USER_NOTIFICATION_TYPES)[number];
@@ -91,7 +100,8 @@ function sumTypes(
 
 /**
  * Fold per-type unread rows into cabinet badge totals.
- * Harvest, new-purchase-request, chat, and product-inbox types count only toward the bell total.
+ * Harvest, new-purchase-request, chat, product-inbox, and admin-decision types
+ * count only toward the bell total.
  */
 export function summarizeUnreadByType(
   rows: ReadonlyArray<{ type: string; count: number }>,

@@ -25,6 +25,9 @@ describeWithDatabase()('producer verification submission (database)', () => {
     notifyVerificationRejected: jest.fn().mockResolvedValue(true),
     notifyProductApproved: jest.fn().mockResolvedValue(undefined),
     notifyProductRejected: jest.fn().mockResolvedValue(undefined),
+    notifyFarmDocumentReviewed: jest.fn().mockResolvedValue(undefined),
+    notifyProductCertificateReviewed: jest.fn().mockResolvedValue(undefined),
+    notifyPurchaseRequestModerated: jest.fn().mockResolvedValue(undefined),
   };
 
   const registry = { lookup: jest.fn() };
