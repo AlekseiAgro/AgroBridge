@@ -64,7 +64,8 @@ describe('admin product moderation preview', () => {
     expect(presentation).not.toContain('RfqRequestForm');
     expect(presentation).not.toContain('HarvestWatchButton');
     expect(presentation).not.toContain('OpenChatButton');
-    expect(preview).toContain("t('previewPending')");
+    expect(preview).toContain("t(previewStatusKey(product.moderationStatus))");
+    expect(preview).toContain("if (status === 'pending') return 'previewPending'");
   });
 
   it('keeps existing approve and reject actions', () => {

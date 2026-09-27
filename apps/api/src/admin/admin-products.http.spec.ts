@@ -275,7 +275,7 @@ describe('Admin product moderation HTTP authorization', () => {
     const response = await request(app.getHttpServer())
       .post(`/api/admin/products/${PRODUCT_ID}/approve`)
       .set('Authorization', `Bearer ${tokenFor('admin')}`)
-      .expect(200);
+      .expect(201);
 
     expect(adminService.approve).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'admin1', role: 'admin' }),
@@ -294,7 +294,7 @@ describe('Admin product moderation HTTP authorization', () => {
       .post(`/api/admin/products/${PRODUCT_ID}/reject`)
       .set('Authorization', `Bearer ${tokenFor('admin')}`)
       .send({ note: 'Unclear photos' })
-      .expect(200);
+      .expect(201);
 
     expect(adminService.reject).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'admin1', role: 'admin' }),
