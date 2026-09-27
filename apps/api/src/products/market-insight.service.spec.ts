@@ -110,7 +110,7 @@ describe('MarketInsightService', () => {
     expect(insight.source).toBe('heuristic');
     expect(insight.summary).toContain('Superior');
     expect(insight.summary).toContain('Германия');
-    expect(insight.summary).toMatch(/сигнал/i);
+    expect(insight.summary).toMatch(/рыночн/i);
     expect(insight.highlights.some((item) => item.includes('Экспортные рынки'))).toBe(true);
     expect(insight.highlights.some((item) => item.includes('Цена в карточке: 0.85 EUR'))).toBe(true);
     expect(insight.highlights.some((item) => /сезон/i.test(item))).toBe(true);
@@ -177,6 +177,8 @@ describe('honest Market Insight copy', () => {
   it('removes AI and unsupported price-growth claims from all seven locales', () => {
     const requiredInsight = ['button', 'title', 'close', 'loading', 'error', 'disclaimer'] as const;
     const requiredTooltip = [
+      'whatItMeans',
+      'whyItMatters',
       'signalBasis',
       'exportMarkets',
       'exportMarketsUnknown',

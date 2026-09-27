@@ -1316,13 +1316,16 @@
     "disclaimer": "Signal indicatif calculé à partir des caractéristiques de la fiche, de la saisonnalité et des marchés d’export indiqués. Il ne repose pas sur des statistiques de marché externes ni sur un historique de prix."
   },
   "opportunity": {
+    "helpMark": "?",
     "tiers": {
-      "excellent": "Signal d’opportunité fort",
-      "good": "Signal d’opportunité",
-      "fair": "Signal d’opportunité modéré",
-      "watch": "Fiche à surveiller"
+      "excellent": "Forte opportunité de marché",
+      "good": "Bonne opportunité de marché",
+      "fair": "Opportunité de marché modérée",
+      "watch": "Faible opportunité de marché"
     },
     "tooltip": {
+      "whatItMeans": "Il s’agit d’une opportunité de marché indicative d’après les marchés d’export, le stock restant et le calendrier de récolte de la fiche.",
+      "whyItMatters": "Un niveau plus élevé signifie que davantage de ces facteurs de fiche s’alignent. Ce n’est pas une demande ou un prix en temps réel.",
       "signalBasis": "Calculé à partir des champs de la fiche, pas de statistiques de marché.",
       "exportMarkets": "Marchés d’export pris en compte : {markets}.",
       "exportMarketsUnknown": "Aucun marché d’export n’est indiqué sur la fiche.",

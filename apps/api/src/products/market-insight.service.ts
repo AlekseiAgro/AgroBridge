@@ -290,19 +290,19 @@ export class MarketInsightService {
 
     switch (params.locale) {
       case 'ru':
-        return `Сигнал возможности по карточке «${variety}» из ${origin}. Указанные экспортные рынки: ${marketLabel}. ${timing}`;
+        return `Ориентировочная рыночная возможность по карточке «${variety}» из ${origin}. Указанные экспортные рынки: ${marketLabel}. ${timing}`;
       case 'ka':
-        return `შესაძლებლობის სიგნალი ბარათის მიხედვით: ${variety} (${origin}). მითითებული საექსპორტო ბაზრები: ${marketLabel}. ${timing}`;
+        return `სავარაუდო საბაზრო შესაძლებლობა ბარათის მიხედვით: ${variety} (${origin}). მითითებული საექსპორტო ბაზრები: ${marketLabel}. ${timing}`;
       case 'de':
-        return `Ein Marktsignal aus den Angaben zu ${variety} aus ${origin}. Genannte Exportmärkte: ${marketLabel}. ${timing}`;
+        return `Eine orientierende Marktchance aus den Angaben zu ${variety} aus ${origin}. Genannte Exportmärkte: ${marketLabel}. ${timing}`;
       case 'fr':
-        return `Signal d’opportunité calculé à partir de la fiche ${variety} (${origin}). Marchés d’export indiqués : ${marketLabel}. ${timing}`;
+        return `Opportunité de marché indicative d’après la fiche ${variety} (${origin}). Marchés d’export indiqués : ${marketLabel}. ${timing}`;
       case 'it':
-        return `Segnale di opportunità dalla scheda di ${variety} da ${origin}. Mercati di export indicati: ${marketLabel}. ${timing}`;
+        return `Opportunità di mercato indicativa dalla scheda di ${variety} da ${origin}. Mercati di export indicati: ${marketLabel}. ${timing}`;
       case 'es':
-        return `Señal de oportunidad a partir de la ficha de ${variety} de ${origin}. Mercados de exportación indicados: ${marketLabel}. ${timing}`;
+        return `Oportunidad de mercado orientativa a partir de la ficha de ${variety} de ${origin}. Mercados de exportación indicados: ${marketLabel}. ${timing}`;
       default:
-        return `An opportunity signal from the ${variety} listing from ${origin}. Stated export markets: ${marketLabel}. ${timing}`;
+        return `An indicative market opportunity from the ${variety} listing from ${origin}. Stated export markets: ${marketLabel}. ${timing}`;
     }
   }
 
