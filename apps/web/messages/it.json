@@ -1316,13 +1316,16 @@
     "disclaimer": "Segnale indicativo calcolato dalle caratteristiche della scheda, dalla stagionalità e dai mercati di export indicati. Non si basa su statistiche di mercato esterne né su dati storici di prezzo."
   },
   "opportunity": {
+    "helpMark": "?",
     "tiers": {
-      "excellent": "Segnale di opportunità forte",
-      "good": "Segnale di opportunità",
-      "fair": "Segnale di opportunità moderato",
-      "watch": "Scheda da osservare"
+      "excellent": "Alta opportunità di mercato",
+      "good": "Buona opportunità di mercato",
+      "fair": "Opportunità di mercato moderata",
+      "watch": "Bassa opportunità di mercato"
     },
     "tooltip": {
+      "whatItMeans": "È un’opportunità di mercato indicativa dai mercati di export, dalle scorte residue e dal calendario di raccolto della scheda.",
+      "whyItMatters": "Un livello più alto significa che più di questi fattori della scheda coincidono. Non è domanda o prezzo in tempo reale.",
       "signalBasis": "Calcolato dai campi della scheda, non da statistiche di mercato.",
       "exportMarkets": "Mercati di export considerati: {markets}.",
       "exportMarketsUnknown": "Nessun mercato di export è indicato sulla scheda.",

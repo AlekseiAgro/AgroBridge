@@ -1316,13 +1316,16 @@
     "disclaimer": "Ein indikatives Signal aus Angebotsmerkmalen, Saisonalität und genannten Exportmärkten. Es beruht nicht auf externen Marktstatistiken oder historischen Preisdaten."
   },
   "opportunity": {
+    "helpMark": "?",
     "tiers": {
-      "excellent": "Starkes Marktsignal",
-      "good": "Marktsignal",
-      "fair": "Mäßiges Marktsignal",
-      "watch": "Anzeige beobachten"
+      "excellent": "Hohe Marktchance",
+      "good": "Gute Marktchance",
+      "fair": "Mäßige Marktchance",
+      "watch": "Geringe Marktchance"
     },
     "tooltip": {
+      "whatItMeans": "Das ist eine orientierende Marktchance aus Exportmärkten, Restbestand und Erntezeitpunkt dieses Angebots.",
+      "whyItMatters": "Ein höheres Niveau bedeutet, dass mehr dieser Angebotsfaktoren zusammenpassen. Es sind keine Live-Nachfrage- oder Preisdaten.",
       "signalBasis": "Berechnet aus Angebotsfeldern, nicht aus Marktstatistik.",
       "exportMarkets": "Berücksichtigte Exportmärkte: {markets}.",
       "exportMarketsUnknown": "In der Anzeige sind keine Exportmärkte angegeben.",

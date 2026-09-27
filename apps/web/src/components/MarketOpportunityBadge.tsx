@@ -1,6 +1,6 @@
 'use client';
 
-import type { MarketOpportunity } from '@agrobridge/shared';
+import type { MarketOpportunity, MarketOpportunityTier } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
 
 type Props = {
@@ -131,6 +131,13 @@ const MARKET_LABELS: Record<string, Record<string, string>> = {
   },
 };
 
+const TIER_BARS: Record<MarketOpportunityTier, number> = {
+  excellent: 4,
+  good: 3,
+  fair: 2,
+  watch: 1,
+};
+
 function joinMarkets(markets: string[], locale: string): string {
   const map = MARKET_LABELS[locale] ?? {};
   const labels = markets.map((market) => map[market] ?? market);
@@ -182,7 +189,15 @@ export function MarketOpportunityBadge({ opportunity, className = '' }: Props) {
         ? t('tooltip.seasonStarted')
         : t('tooltip.seasonUnstated');
 
-  const tooltip = `${t('tooltip.signalBasis')} ${marketsLine} ${supply} ${season}`;
+  const tooltip = [
+    t('tooltip.whatItMeans'),
+    t('tooltip.whyItMatters'),
+    t('tooltip.signalBasis'),
+    marketsLine,
+    supply,
+    season,
+  ].join(' ');
+  const barsOn = TIER_BARS[opportunity.tier];
 
   return (
     <span
@@ -191,8 +206,22 @@ export function MarketOpportunityBadge({ opportunity, className = '' }: Props) {
       tabIndex={0}
       aria-label={`${t(`tiers.${opportunity.tier}`)}. ${tooltip}`}
     >
-      <span className="opportunity-badge__dot" aria-hidden />
+      <span className="opportunity-badge__meter" aria-hidden>
+        {[1, 2, 3, 4].map((bar) => (
+          <span
+            key={bar}
+            className={
+              bar <= barsOn
+                ? 'opportunity-badge__bar opportunity-badge__bar--on'
+                : 'opportunity-badge__bar'
+            }
+          />
+        ))}
+      </span>
       <span className="opportunity-badge__label">{t(`tiers.${opportunity.tier}`)}</span>
+      <span className="opportunity-badge__help" aria-hidden>
+        {t('helpMark')}
+      </span>
       <span className="opportunity-badge__tip" role="tooltip">
         {tooltip}
       </span>

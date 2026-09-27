@@ -1316,13 +1316,16 @@
     "disclaimer": "An indicative signal calculated from listing characteristics, seasonality and stated export markets. It is not based on external market statistics or historical price data."
   },
   "opportunity": {
+    "helpMark": "?",
     "tiers": {
-      "excellent": "Strong opportunity signal",
-      "good": "Opportunity signal",
-      "fair": "Moderate opportunity signal",
-      "watch": "Listing to watch"
+      "excellent": "High market opportunity",
+      "good": "Good market opportunity",
+      "fair": "Moderate market opportunity",
+      "watch": "Low market opportunity"
     },
     "tooltip": {
+      "whatItMeans": "This is an indicative market opportunity from this listing’s export markets, remaining stock, and harvest timing.",
+      "whyItMatters": "A higher level means more of those listing factors line up. It is not live demand or price data.",
       "signalBasis": "Calculated from listing fields, not market statistics.",
       "exportMarkets": "Export markets considered: {markets}.",
       "exportMarketsUnknown": "No export markets are stated on this listing.",
