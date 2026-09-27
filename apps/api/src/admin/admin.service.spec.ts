@@ -32,7 +32,8 @@ describe('AdminService', () => {
     notifyNewProduct: jest.fn().mockResolvedValue(undefined),
   };
 
-  const harvest = {
+  const products = {
+    getById: jest.fn(),
     dispatchHarvestWatchNotifications: jest.fn().mockResolvedValue(undefined),
   };
 
@@ -53,7 +54,7 @@ describe('AdminService', () => {
       notifications as never,
       subscriptions as never,
       verification as never,
-      harvest as never,
+      products as never,
     );
   });
 
@@ -147,6 +148,108 @@ describe('AdminService', () => {
     });
   });
 
+  it('returns the full product detail for an authorized moderator', async () => {
+    const detail = {
+      id: 'p1',
+      title: 'Kakheti hazelnuts',
+      description: 'Export grade',
+      category: 'nuts',
+      variety: 'Anakliuri',
+      country: 'Georgia',
+      originPlace: 'Gurjaani',
+      unit: 'kg',
+      minQuantity: 100,
+      maxQuantity: 5000,
+      currentStock: 800,
+      monthlyProduction: 200,
+      maxAnnualProduction: 4000,
+      seasonMonths: [8, 9, 10],
+      harvestStartAt: null,
+      harvestEndAt: null,
+      forecastQuantity: null,
+      harvestStatus: null,
+      preorderEnabled: false,
+      attributes: { organic: true, caliber: '13-15' },
+      packagingTypes: ['bag'],
+      packagingWeights: ['25 kg'],
+      palletSize: null,
+      incoterms: ['EXW'],
+      carriers: [],
+      customDelivery: null,
+      nearestPort: 'Poti',
+      deliveryAvailable: true,
+      leadTimeDays: 7,
+      priceFrom: 4.2,
+      priceCurrency: 'USD',
+      priceNegotiable: true,
+      priceDependsOnVolume: true,
+      isPublished: false,
+      moderationStatus: 'pending',
+      moderationNote: null,
+      images: [
+        {
+          id: 'img1',
+          url: '/api/uploads/products/p1/photo.jpg',
+          sortOrder: 0,
+          isPrimary: true,
+          kind: 'photo',
+        },
+      ],
+      videoCount: 0,
+      certificateBadges: [],
+      qualityScore: { score: 40, tier: 'basic', missing: [] },
+      opportunity: { kind: 'none' },
+      ownerUserId: 'farmer1',
+      owner: { id: 'farmer1', displayName: 'Nino' },
+      sellerRating: { average: null, count: 0 },
+      farm: {
+        id: 'farm1',
+        name: 'Kakheti Farm',
+        region: 'kakheti',
+        verificationStatus: 'approved',
+        verified: true,
+        foundedYear: 2012,
+        farmSizeHectares: 12,
+        ownershipType: 'family',
+        exportMarkets: ['DE'],
+        history: 'Family orchard',
+      },
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+      videos: [],
+      certificates: [],
+    };
+    products.getById.mockResolvedValue(detail);
+
+    const result = await service.getProduct(admin, 'p1');
+
+    expect(products.getById).toHaveBeenCalledWith('p1', admin);
+    expect(result.title).toBe('Kakheti hazelnuts');
+    expect(result.description).toBe('Export grade');
+    expect(result.category).toBe('nuts');
+    expect(result.priceFrom).toBe(4.2);
+    expect(result.priceCurrency).toBe('USD');
+    expect(result.minQuantity).toBe(100);
+    expect(result.unit).toBe('kg');
+    expect(result.images).toEqual([
+      expect.objectContaining({ url: '/api/uploads/products/p1/photo.jpg' }),
+    ]);
+    expect(result.attributes).toEqual({ organic: true, caliber: '13-15' });
+    expect(result.farm?.name).toBe('Kakheti Farm');
+    expect(result.farm?.region).toBe('kakheti');
+    expect(prisma.farmDocument.findUnique).not.toHaveBeenCalled();
+    expect(prisma.user.findMany).not.toHaveBeenCalled();
+  });
+
+  it('does not treat a farm document id as a product', async () => {
+    products.getById.mockRejectedValue(new NotFoundException('Product not found'));
+
+    await expect(service.getProduct(admin, 'doc1')).rejects.toBeInstanceOf(NotFoundException);
+    expect(products.getById).toHaveBeenCalledWith('doc1', admin);
+    expect(prisma.farmDocument.findUnique).not.toHaveBeenCalled();
+    expect(prisma.productCertificate.findUnique).not.toHaveBeenCalled();
+  });
+
   it('rejects approve for missing product', async () => {
     prisma.product.findUnique.mockResolvedValue(null);
     await expect(service.approve(admin, 'missing')).rejects.toBeInstanceOf(NotFoundException);
@@ -186,7 +289,7 @@ describe('AdminService', () => {
     expect(subscriptions.notifyNewProduct).toHaveBeenCalledWith(
       expect.objectContaining({ productTitle: 'Hazelnuts', productId: 'p1' }),
     );
-    expect(harvest.dispatchHarvestWatchNotifications).toHaveBeenCalled();
+    expect(products.dispatchHarvestWatchNotifications).toHaveBeenCalled();
   });
 
   it('does not announce a draft-title listing to marketplace subscribers after approve', async () => {
@@ -218,7 +321,7 @@ describe('AdminService', () => {
     expect(result.title).toBe('Новый товар');
     expect(notifications.notifyProductApproved).not.toHaveBeenCalled();
     expect(subscriptions.notifyNewProduct).not.toHaveBeenCalled();
-    expect(harvest.dispatchHarvestWatchNotifications).not.toHaveBeenCalled();
+    expect(products.dispatchHarvestWatchNotifications).not.toHaveBeenCalled();
   });
 
   it('lets an admin approve or reject a certificate without exposing a storage URL', async () => {

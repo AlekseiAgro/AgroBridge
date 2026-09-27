@@ -597,6 +597,102 @@ describe('ProductsService', () => {
     expect(detail.title).toBe('Новый товар');
   });
 
+  it('hides a pending listing from the public catalog and other buyers', async () => {
+    const pending = {
+      id: 'p1',
+      ownerUserId: 'u1',
+      farmId: 'farm1',
+      title: 'Kakheti hazelnuts',
+      description: 'Export grade',
+      category: 'nuts',
+      variety: 'Anakliuri',
+      country: 'Georgia',
+      originPlace: 'Gurjaani',
+      unit: 'kg',
+      minQuantity: 100,
+      maxQuantity: 5000,
+      currentStock: 800,
+      monthlyProduction: 200,
+      maxAnnualProduction: 4000,
+      seasonMonths: [8, 9],
+      harvestStartAt: null,
+      harvestEndAt: null,
+      forecastQuantity: null,
+      harvestStatus: null,
+      preorderEnabled: false,
+      attributes: { organic: true },
+      packagingTypes: ['bag'],
+      packagingWeights: ['25 kg'],
+      palletSize: null,
+      incoterms: ['EXW'],
+      carriers: [],
+      customDelivery: null,
+      nearestPort: 'Poti',
+      deliveryAvailable: true,
+      leadTimeDays: 7,
+      priceFrom: 4.2,
+      priceCurrency: 'USD',
+      priceNegotiable: true,
+      priceDependsOnVolume: false,
+      isPublished: false,
+      moderationStatus: 'pending',
+      moderationNote: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      owner: { id: 'u1', displayName: 'Nino' },
+      farm: {
+        id: 'farm1',
+        name: 'Kakheti Farm',
+        region: 'kakheti',
+        verificationStatus: 'approved',
+        foundedYear: 2012,
+        farmSizeHectares: 12,
+        ownershipType: 'family',
+        exportMarkets: ['DE'],
+        history: null,
+      },
+      images: [
+        {
+          id: 'img1',
+          url: '/api/uploads/products/p1/photo.jpg',
+          sortOrder: 0,
+          isPrimary: true,
+          kind: 'photo',
+        },
+      ],
+      videos: [],
+      certificates: [],
+    };
+    prisma.product.findUnique.mockResolvedValue(pending);
+
+    await expect(service.getById('p1', null)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      service.getById('p1', {
+        id: 'buyer1',
+        email: 'buyer@example.com',
+        role: 'buyer',
+        locale: 'en',
+        displayName: 'Buyer',
+      }),
+    ).rejects.toBeInstanceOf(NotFoundException);
+
+    const adminDetail = await service.getById('p1', {
+      id: 'admin1',
+      email: 'admin@example.com',
+      role: 'admin',
+      locale: 'en',
+      displayName: 'Admin',
+    });
+    expect(adminDetail.title).toBe('Kakheti hazelnuts');
+    expect(adminDetail.priceFrom).toBe(4.2);
+    expect(adminDetail.priceCurrency).toBe('USD');
+    expect(adminDetail.images).toEqual([
+      expect.objectContaining({ url: '/api/uploads/products/p1/photo.jpg' }),
+    ]);
+    expect(adminDetail.attributes).toEqual({ organic: true });
+    expect(adminDetail.farm?.name).toBe('Kakheti Farm');
+  });
+
   it('lists harvest watches for the current user', async () => {
     const createdAt = new Date('2026-08-01T10:00:00.000Z');
     prisma.harvestWatch.findMany.mockResolvedValue([

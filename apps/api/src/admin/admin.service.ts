@@ -15,6 +15,7 @@ import type {
   ModeratedProduct,
   ModerationStatus,
   ProductCertificate,
+  ProductDetail,
   VerificationStatus,
 } from '@agrobridge/shared';
 import {
@@ -190,6 +191,15 @@ export class AdminService {
     });
 
     return products.map((product) => this.toModerated(product));
+  }
+
+  /**
+   * Full listing payload for an authorized moderator. Reuses ProductsService.getById
+   * so pending cards stay hidden from the public catalog while admins see every field
+   * a buyer would see after approval.
+   */
+  async getProduct(user: AuthenticatedUser, id: string): Promise<ProductDetail> {
+    return this.products.getById(id, user);
   }
 
   async approve(user: AuthenticatedUser, id: string): Promise<ModeratedProduct> {
