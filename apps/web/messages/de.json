@@ -1190,7 +1190,7 @@
   },
   "notifications": {
     "title": "Benachrichtigungen",
-    "subtitle": "Hier erscheinen wichtige Ereignisse zu Ihren Kaufanfragen, Angeboten und Produkten.",
+    "subtitle": "Hier erscheinen wichtige Ereignisse zu Ihren Kaufanfragen, Angeboten und Nachrichten.",
     "empty": "Noch keine Benachrichtigungen",
     "markAllRead": "Alle als gelesen markieren",
     "markRead": "Gelesen",

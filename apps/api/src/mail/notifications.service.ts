@@ -16,6 +16,16 @@ import {
 } from '@agrobridge/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { renderEmailTemplate } from './email-templates';
+import {
+  chatMessageCopy,
+  newPurchaseRequestCopy,
+  rfqAcceptedCopy,
+  rfqCancelledCopy,
+  rfqCreatedCopy,
+  rfqDeclinedByBuyerCopy,
+  rfqDeclinedByFarmerCopy,
+  rfqOfferCreatedCopy,
+} from './in-app-notification-copy';
 import { sanitizeMailError } from './mail.config';
 import { MailService } from './mail.service';
 import type { MailRecipient } from './mail.types';
@@ -176,7 +186,7 @@ export class NotificationsService {
   }
 
   async notifyRfqCreated(params: {
-    farmer: MailRecipient;
+    farmer: MailRecipient & { id: string };
     buyerName: string;
     productTitle: string;
     quantity: string;
@@ -184,18 +194,28 @@ export class NotificationsService {
     rfqId: string;
   }): Promise<void> {
     const locale = this.localeOf(params.farmer.locale);
+    const href = `/dashboard/inbox/${params.rfqId}`;
+    const copy = rfqCreatedCopy(locale, params.buyerName, params.productTitle);
+    await this.createUserNotification({
+      userId: params.farmer.id,
+      type: PrismaUserNotificationType.rfqCreated,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.farmer, 'rfqCreated', {
       name: this.displayName(params.farmer),
       buyerName: params.buyerName,
       productTitle: params.productTitle,
       quantity: params.quantity,
       unit: params.unit ? ` ${params.unit}` : '',
-      link: this.appLink(locale, `/dashboard/inbox/${params.rfqId}`),
+      link: this.appLink(locale, href),
     });
   }
 
   async notifyRfqOfferCreated(params: {
-    buyer: MailRecipient;
+    buyer: MailRecipient & { id: string };
     farmName: string;
     productTitle: string;
     priceAmount: string;
@@ -203,72 +223,122 @@ export class NotificationsService {
     rfqId: string;
   }): Promise<void> {
     const locale = this.localeOf(params.buyer.locale);
+    const href = `/dashboard/rfqs/${params.rfqId}`;
+    const copy = rfqOfferCreatedCopy(locale, params.farmName, params.productTitle);
+    await this.createUserNotification({
+      userId: params.buyer.id,
+      type: PrismaUserNotificationType.rfqOfferCreated,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.buyer, 'rfqOfferCreated', {
       name: this.displayName(params.buyer),
       farmName: params.farmName,
       productTitle: params.productTitle,
       priceAmount: params.priceAmount,
       currency: params.currency,
-      link: this.appLink(locale, `/dashboard/rfqs/${params.rfqId}`),
+      link: this.appLink(locale, href),
     });
   }
 
   async notifyRfqAccepted(params: {
-    farmer: MailRecipient;
+    farmer: MailRecipient & { id: string };
     buyerName: string;
     productTitle: string;
     rfqId: string;
   }): Promise<void> {
     const locale = this.localeOf(params.farmer.locale);
+    const href = `/dashboard/inbox/${params.rfqId}`;
+    const copy = rfqAcceptedCopy(locale, params.buyerName, params.productTitle);
+    await this.createUserNotification({
+      userId: params.farmer.id,
+      type: PrismaUserNotificationType.rfqAccepted,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.farmer, 'rfqAccepted', {
       name: this.displayName(params.farmer),
       buyerName: params.buyerName,
       productTitle: params.productTitle,
-      link: this.appLink(locale, `/dashboard/inbox/${params.rfqId}`),
+      link: this.appLink(locale, href),
     });
   }
 
   async notifyRfqDeclinedByBuyer(params: {
-    farmer: MailRecipient;
+    farmer: MailRecipient & { id: string };
     buyerName: string;
     productTitle: string;
     rfqId: string;
   }): Promise<void> {
     const locale = this.localeOf(params.farmer.locale);
+    const href = `/dashboard/inbox/${params.rfqId}`;
+    const copy = rfqDeclinedByBuyerCopy(locale, params.buyerName, params.productTitle);
+    await this.createUserNotification({
+      userId: params.farmer.id,
+      type: PrismaUserNotificationType.rfqDeclinedByBuyer,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.farmer, 'rfqDeclinedByBuyer', {
       name: this.displayName(params.farmer),
       buyerName: params.buyerName,
       productTitle: params.productTitle,
-      link: this.appLink(locale, `/dashboard/inbox/${params.rfqId}`),
+      link: this.appLink(locale, href),
     });
   }
 
   async notifyRfqDeclinedByFarmer(params: {
-    buyer: MailRecipient;
+    buyer: MailRecipient & { id: string };
     farmName: string;
     productTitle: string;
     rfqId: string;
   }): Promise<void> {
     const locale = this.localeOf(params.buyer.locale);
+    const href = `/dashboard/rfqs/${params.rfqId}`;
+    const copy = rfqDeclinedByFarmerCopy(locale, params.farmName, params.productTitle);
+    await this.createUserNotification({
+      userId: params.buyer.id,
+      type: PrismaUserNotificationType.rfqDeclinedByFarmer,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.buyer, 'rfqDeclinedByFarmer', {
       name: this.displayName(params.buyer),
       farmName: params.farmName,
       productTitle: params.productTitle,
-      link: this.appLink(locale, `/dashboard/rfqs/${params.rfqId}`),
+      link: this.appLink(locale, href),
     });
   }
 
   async notifyRfqCancelled(params: {
-    farmer: MailRecipient;
+    farmer: MailRecipient & { id: string };
     buyerName: string;
     productTitle: string;
   }): Promise<void> {
     const locale = this.localeOf(params.farmer.locale);
+    const href = '/dashboard/inbox';
+    const copy = rfqCancelledCopy(locale, params.buyerName, params.productTitle);
+    await this.createUserNotification({
+      userId: params.farmer.id,
+      type: PrismaUserNotificationType.rfqCancelled,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.farmer, 'rfqCancelled', {
       name: this.displayName(params.farmer),
       buyerName: params.buyerName,
       productTitle: params.productTitle,
-      link: this.appLink(locale, '/dashboard/inbox'),
+      link: this.appLink(locale, href),
     });
   }
 
@@ -557,7 +627,7 @@ export class NotificationsService {
   }
 
   async notifyNewPurchaseRequest(params: {
-    user: MailRecipient;
+    user: MailRecipient & { id: string };
     title: string;
     requestId: string;
     buyerName: string;
@@ -566,6 +636,16 @@ export class NotificationsService {
     unit: string | null;
   }): Promise<void> {
     const locale = this.localeOf(params.user.locale);
+    const href = `/requests/${params.requestId}`;
+    const copy = newPurchaseRequestCopy(locale, params.buyerName, params.title);
+    await this.createUserNotification({
+      userId: params.user.id,
+      type: PrismaUserNotificationType.newPurchaseRequest,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.user, 'newPurchaseRequest', {
       name: this.displayName(params.user),
       title: params.title,
@@ -573,7 +653,7 @@ export class NotificationsService {
       quantity: params.quantity,
       unit: params.unit ? ` ${params.unit}` : '',
       categoryPart: params.category ? ` · ${params.category}` : '',
-      link: this.appLink(locale, `/requests/${params.requestId}`),
+      link: this.appLink(locale, href),
       settingsLink: this.appLink(locale, '/account/settings#notifications'),
     });
   }
@@ -820,17 +900,31 @@ export class NotificationsService {
   }
 
   async notifyChatMessage(params: {
-    recipient: MailRecipient;
+    recipient: MailRecipient & { id: string };
     senderName: string;
     preview: string;
     conversationId: string;
+    deliverEmail?: boolean;
   }): Promise<void> {
     const locale = this.localeOf(params.recipient.locale);
+    const href = `/dashboard/chat/${params.conversationId}`;
+    const copy = chatMessageCopy(locale, params.senderName, params.preview);
+    await this.createUserNotification({
+      userId: params.recipient.id,
+      type: PrismaUserNotificationType.chatMessage,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
+    if (params.deliverEmail === false) {
+      return;
+    }
     await this.sendTemplate(params.recipient, 'chatMessage', {
       name: this.displayName(params.recipient),
       senderName: params.senderName,
       preview: params.preview,
-      link: this.appLink(locale, `/dashboard/chat/${params.conversationId}`),
+      link: this.appLink(locale, href),
     });
   }
 
@@ -842,6 +936,9 @@ export class NotificationsService {
     body: string;
     href: string;
   }): Promise<void> {
+    if (!params.userId) {
+      return;
+    }
     try {
       await this.prisma.userNotification.create({
         data: {

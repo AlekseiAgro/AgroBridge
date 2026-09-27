@@ -1190,7 +1190,7 @@
   },
   "notifications": {
     "title": "Notifiche",
-    "subtitle": "Qui compaiono gli eventi importanti su richieste di acquisto, offerte e prodotti.",
+    "subtitle": "Qui compaiono gli eventi importanti su richieste di acquisto, offerte e messaggi.",
     "empty": "Nessuna notifica al momento",
     "markAllRead": "Segna tutte come lette",
     "markRead": "Letto",

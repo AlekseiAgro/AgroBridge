@@ -322,6 +322,14 @@ describe('ChatService', () => {
         translations: [],
       });
 
+      prisma.user.findUnique.mockResolvedValue({
+        id: farmer.id,
+        email: farmer.email,
+        locale: farmer.locale,
+        displayName: farmer.displayName,
+        blockedAt: null,
+      });
+
       const view = await service.sendMessage(buyer, 'conv1', {
         text: 'Offer?',
         sourceLocale: 'en',
@@ -334,6 +342,16 @@ describe('ChatService', () => {
         canShowOriginal: false,
         deliveryStatus: 'sent',
       });
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(notifications.notifyChatMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipient: expect.objectContaining({ id: farmer.id }),
+          conversationId: 'conv1',
+          preview: 'Offer?',
+        }),
+      );
+      expect(notifications.notifyChatMessage.mock.calls[0][0].recipient.id).not.toBe(buyer.id);
     });
   });
 

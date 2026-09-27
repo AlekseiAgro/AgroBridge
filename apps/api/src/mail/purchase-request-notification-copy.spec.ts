@@ -137,7 +137,9 @@ describe('purchase request notification copy', () => {
     expect(SERVICE_SOURCE).toMatch(
       /async notifyPurchaseRequestWithdrawn[\s\S]*?const href = '\/dashboard\/quotes';[\s\S]*?link: this\.appLink\(locale, href\)/,
     );
-    expect(SERVICE_SOURCE).toContain("link: this.appLink(locale, `/requests/${params.requestId}`)");
+    expect(SERVICE_SOURCE).toMatch(
+      /const href = `\/requests\/\$\{params\.requestId\}`;[\s\S]*?link: this\.appLink\(locale, href\)/,
+    );
     expect(SERVICE_SOURCE).not.toMatch(
       /notifyPurchaseQuoteDeclined[\s\S]*?link: this\.appLink\(locale, '\/requests'\)/,
     );

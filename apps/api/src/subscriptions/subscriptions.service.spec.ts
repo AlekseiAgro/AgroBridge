@@ -26,7 +26,7 @@ describe('SubscriptionsService', () => {
       categories: [],
       allRegions: true,
       regions: [],
-      user: { email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
+      user: { id: 'f1', email: 'farmer@example.com', locale: 'en', displayName: 'Nino' },
       ...overrides,
     };
   }
@@ -35,12 +35,12 @@ describe('SubscriptionsService', () => {
     prisma.alertSubscription.findMany.mockResolvedValue([
       sub(),
       sub({
-        user: { email: 'berries@example.com', locale: 'ru', displayName: 'Berries' },
+        user: { id: 'f2', email: 'berries@example.com', locale: 'ru', displayName: 'Berries' },
         allCategories: false,
         categories: ['berries'],
       }),
       sub({
-        user: { email: 'nuts@example.com', locale: 'en', displayName: 'Nuts' },
+        user: { id: 'f3', email: 'nuts@example.com', locale: 'en', displayName: 'Nuts' },
         allCategories: false,
         categories: ['nuts'],
       }),
@@ -75,8 +75,10 @@ describe('SubscriptionsService', () => {
         buyerName: 'Buyer Ltd',
         quantity: '1t',
         unit: 't',
+        user: expect.objectContaining({ id: 'f1' }),
       }),
     );
+    expect(recipients).not.toContain('buyer@example.com');
   });
 
   it('sends a catalog alert for a real public product title', async () => {

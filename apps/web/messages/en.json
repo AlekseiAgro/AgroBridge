@@ -1190,7 +1190,7 @@
   },
   "notifications": {
     "title": "Notifications",
-    "subtitle": "Important events about your purchase requests, quotes, and products appear here.",
+    "subtitle": "Important events about your purchase requests, offers, and messages appear here.",
     "empty": "No notifications yet",
     "markAllRead": "Mark all as read",
     "markRead": "Read",

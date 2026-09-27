@@ -54,6 +54,20 @@ describe('cabinet notification unread mapping', () => {
     expect(summary.quotesUnread).toBe(0);
   });
 
+  it('counts new purchase requests, chat, and product-inbox alerts only on the bell total', () => {
+    const summary = summarizeUnreadByType([
+      { type: 'newPurchaseRequest', count: 1 },
+      { type: 'chatMessage', count: 2 },
+      { type: 'rfqCreated', count: 1 },
+      { type: 'rfqOfferCreated', count: 1 },
+      { type: 'rfqAccepted', count: 1 },
+    ]);
+    expect(summary.totalUnread).toBe(6);
+    expect(summary.count).toBe(6);
+    expect(summary.purchaseRequestsUnread).toBe(0);
+    expect(summary.quotesUnread).toBe(0);
+  });
+
   it('keeps buyer and seller groups disjoint', () => {
     expect(PURCHASE_REQUEST_UNREAD_TYPES.some((type) => (QUOTE_UNREAD_TYPES as readonly string[]).includes(type))).toBe(
       false,

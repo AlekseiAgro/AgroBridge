@@ -211,6 +211,14 @@ enum UserNotificationType {
   purchaseRequestClosed
   purchaseRequestCancelled
   purchaseQuoteWithdrawn
+  newPurchaseRequest
+  chatMessage
+  rfqCreated
+  rfqOfferCreated
+  rfqAccepted
+  rfqDeclinedByBuyer
+  rfqDeclinedByFarmer
+  rfqCancelled
 }
 
 /// In-app cabinet alerts (harvest watches, purchase-request and quote events).
