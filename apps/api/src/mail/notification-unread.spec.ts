@@ -61,9 +61,13 @@ describe('cabinet notification unread mapping', () => {
       { type: 'rfqCreated', count: 1 },
       { type: 'rfqOfferCreated', count: 1 },
       { type: 'rfqAccepted', count: 1 },
+      { type: 'productApproved', count: 1 },
+      { type: 'verificationRejected', count: 1 },
+      { type: 'farmDocumentApproved', count: 1 },
+      { type: 'purchaseRequestModerated', count: 1 },
     ]);
-    expect(summary.totalUnread).toBe(6);
-    expect(summary.count).toBe(6);
+    expect(summary.totalUnread).toBe(10);
+    expect(summary.count).toBe(10);
     expect(summary.purchaseRequestsUnread).toBe(0);
     expect(summary.quotesUnread).toBe(0);
   });

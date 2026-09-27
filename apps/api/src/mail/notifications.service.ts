@@ -17,6 +17,17 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { renderEmailTemplate } from './email-templates';
 import {
+  farmDocumentApprovedCopy,
+  farmDocumentRejectedCopy,
+  productApprovedCopy,
+  productCertificateApprovedCopy,
+  productCertificateRejectedCopy,
+  productRejectedCopy,
+  purchaseRequestModeratedCopy,
+  verificationApprovedCopy,
+  verificationRejectedCopy,
+} from './admin-moderation-notification-copy';
+import {
   chatMessageCopy,
   newPurchaseRequestCopy,
   rfqAcceptedCopy,
@@ -504,30 +515,48 @@ export class NotificationsService {
   }
 
   async notifyProductApproved(params: {
-    farmer: MailRecipient;
+    farmer: MailRecipient & { id?: string };
     productTitle: string;
     productId: string;
   }): Promise<void> {
     const locale = this.localeOf(params.farmer.locale);
+    const href = `/products/${params.productId}`;
+    const copy = productApprovedCopy(locale, params.productTitle);
+    await this.persistInAppIfRecipient(params.farmer, {
+      type: PrismaUserNotificationType.productApproved,
+      productId: params.productId,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.farmer, 'productApproved', {
       name: this.displayName(params.farmer),
       productTitle: params.productTitle,
-      link: this.appLink(locale, `/products/${params.productId}`),
+      link: this.appLink(locale, href),
     });
   }
 
   async notifyProductRejected(params: {
-    farmer: MailRecipient;
+    farmer: MailRecipient & { id?: string };
     productTitle: string;
     productId: string;
     note: string;
   }): Promise<void> {
     const locale = this.localeOf(params.farmer.locale);
+    const href = `/dashboard/products/${params.productId}/edit`;
+    const copy = productRejectedCopy(locale, params.productTitle, params.note);
+    await this.persistInAppIfRecipient(params.farmer, {
+      type: PrismaUserNotificationType.productRejected,
+      productId: params.productId,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     await this.sendTemplate(params.farmer, 'productRejected', {
       name: this.displayName(params.farmer),
       productTitle: params.productTitle,
       note: params.note,
-      link: this.appLink(locale, `/dashboard/products/${params.productId}/edit`),
+      link: this.appLink(locale, href),
     });
   }
 
@@ -574,14 +603,23 @@ export class NotificationsService {
 
   /** Producer email for a verification that a moderator (or the rules) just approved. */
   async notifyVerificationApproved(params: {
-    farmer: MailRecipient;
+    farmer: MailRecipient & { id?: string };
     farmName: string;
   }): Promise<boolean> {
     const locale = this.localeOf(params.farmer.locale);
+    const href = '/dashboard/farm';
+    const copy = verificationApprovedCopy(locale, params.farmName);
+    await this.persistInAppIfRecipient(params.farmer, {
+      type: PrismaUserNotificationType.verificationApproved,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     return this.sendTemplate(params.farmer, 'verificationApproved', {
       name: this.displayName(params.farmer),
       farmName: params.farmName,
-      link: this.appLink(locale, '/dashboard/farm'),
+      link: this.appLink(locale, href),
     });
   }
 
@@ -590,19 +628,97 @@ export class NotificationsService {
    * here; a moderator's free-text comment is appended separately and stays as written.
    */
   async notifyVerificationRejected(params: {
-    farmer: MailRecipient;
+    farmer: MailRecipient & { id?: string };
     farmName: string;
     reasonCode: VerificationReasonCode | null;
     moderatorComment: string | null;
   }): Promise<boolean> {
     const locale = this.localeOf(params.farmer.locale);
+    const href = '/dashboard/farm';
     const comment = params.moderatorComment?.trim();
+    const reason = VERIFICATION_REASON_LABELS[locale][params.reasonCode ?? 'unspecified'];
+    const copy = verificationRejectedCopy(locale, params.farmName, reason, comment);
+    await this.persistInAppIfRecipient(params.farmer, {
+      type: PrismaUserNotificationType.verificationRejected,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
     return this.sendTemplate(params.farmer, 'verificationRejected', {
       name: this.displayName(params.farmer),
       farmName: params.farmName,
-      reason: VERIFICATION_REASON_LABELS[locale][params.reasonCode ?? 'unspecified'],
+      reason,
       comment: comment ? `\n${MODERATOR_COMMENT_LABELS[locale]}: ${comment}` : '',
-      link: this.appLink(locale, '/dashboard/farm'),
+      link: this.appLink(locale, href),
+    });
+  }
+
+  async notifyFarmDocumentReviewed(params: {
+    farmer: MailRecipient & { id?: string };
+    documentTitle: string;
+    approve: boolean;
+    note: string | null;
+  }): Promise<void> {
+    const locale = this.localeOf(params.farmer.locale);
+    const href = '/dashboard/farm';
+    const copy = params.approve
+      ? farmDocumentApprovedCopy(locale, params.documentTitle)
+      : farmDocumentRejectedCopy(locale, params.documentTitle, params.note);
+    await this.persistInAppIfRecipient(params.farmer, {
+      type: params.approve
+        ? PrismaUserNotificationType.farmDocumentApproved
+        : PrismaUserNotificationType.farmDocumentRejected,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
+  }
+
+  async notifyProductCertificateReviewed(params: {
+    farmer: MailRecipient & { id?: string };
+    certificateTitle: string;
+    productTitle: string;
+    productId: string;
+    approve: boolean;
+    note: string | null;
+  }): Promise<void> {
+    const locale = this.localeOf(params.farmer.locale);
+    const href = `/dashboard/products/${params.productId}/edit`;
+    const copy = params.approve
+      ? productCertificateApprovedCopy(locale, params.certificateTitle, params.productTitle)
+      : productCertificateRejectedCopy(
+          locale,
+          params.certificateTitle,
+          params.productTitle,
+          params.note,
+        );
+    await this.persistInAppIfRecipient(params.farmer, {
+      type: params.approve
+        ? PrismaUserNotificationType.productCertificateApproved
+        : PrismaUserNotificationType.productCertificateRejected,
+      productId: params.productId,
+      title: copy.title,
+      body: copy.body,
+      href,
+    });
+  }
+
+  async notifyPurchaseRequestModerated(params: {
+    buyer: MailRecipient & { id?: string };
+    title: string;
+    note: string | null;
+  }): Promise<void> {
+    const locale = this.localeOf(params.buyer.locale);
+    const href = '/dashboard/purchase-requests';
+    const copy = purchaseRequestModeratedCopy(locale, params.title, params.note);
+    await this.persistInAppIfRecipient(params.buyer, {
+      type: PrismaUserNotificationType.purchaseRequestModerated,
+      productId: null,
+      title: copy.title,
+      body: copy.body,
+      href,
     });
   }
 
@@ -925,6 +1041,29 @@ export class NotificationsService {
       senderName: params.senderName,
       preview: params.preview,
       link: this.appLink(locale, href),
+    });
+  }
+
+  private async persistInAppIfRecipient(
+    recipient: MailRecipient & { id?: string },
+    params: {
+      type: PrismaUserNotificationType;
+      productId: string | null;
+      title: string;
+      body: string;
+      href: string;
+    },
+  ): Promise<void> {
+    if (!recipient.id) {
+      return;
+    }
+    await this.createUserNotification({
+      userId: recipient.id,
+      type: params.type,
+      productId: params.productId,
+      title: params.title,
+      body: params.body,
+      href: params.href,
     });
   }
 

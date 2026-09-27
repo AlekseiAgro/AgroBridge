@@ -668,7 +668,13 @@ export class VerificationService {
     if (changed.count !== 1) return false;
 
     if (approved || params.to === VerificationStatus.rejected) {
-      await this.notifyProducerDecision(params.farmId, params.to, params.reasonCode, params.note);
+      await this.notifyProducerDecision(
+        params.farmId,
+        params.to,
+        params.reasonCode,
+        params.note,
+        params.verifiedById,
+      );
     }
     return true;
   }
@@ -682,26 +688,36 @@ export class VerificationService {
     status: VerificationStatus,
     reasonCode: VerificationReasonCode | null,
     moderatorComment: string | null,
+    actorId: string | null,
   ): Promise<void> {
     try {
       const farm = await this.prisma.farm.findUnique({
         where: { id: farmId },
         select: {
           name: true,
-          owner: { select: { email: true, locale: true, displayName: true } },
+          owner: { select: { id: true, email: true, locale: true, displayName: true } },
         },
       });
       if (!farm) return;
 
+      const farmer =
+        actorId && farm.owner.id === actorId
+          ? {
+              email: farm.owner.email,
+              locale: farm.owner.locale,
+              displayName: farm.owner.displayName,
+            }
+          : farm.owner;
+
       if (status === VerificationStatus.approved) {
         await this.notifications.notifyVerificationApproved({
-          farmer: farm.owner,
+          farmer,
           farmName: farm.name,
         });
         return;
       }
       await this.notifications.notifyVerificationRejected({
-        farmer: farm.owner,
+        farmer,
         farmName: farm.name,
         reasonCode,
         moderatorComment,

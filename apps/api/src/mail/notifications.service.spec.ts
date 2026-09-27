@@ -955,6 +955,168 @@ describe('NotificationsService', () => {
       }
     });
 
+    it('creates an unread product-approved alert for the seller and keeps email', async () => {
+      await service.notifyProductApproved({
+        farmer: { id: 'seller-1', email: 'seller@example.com', locale: 'en', displayName: 'Nino' },
+        productTitle: 'Hazelnuts',
+        productId: 'p1',
+      });
+
+      expect(createdNotification()).toEqual({
+        userId: 'seller-1',
+        type: 'productApproved',
+        productId: 'p1',
+        title: 'Product approved',
+        body: 'The listing “Hazelnuts” is now published.',
+        href: '/products/p1',
+      });
+      expect(mail.send).toHaveBeenCalledTimes(1);
+      expect(mail.send.mock.calls[0][0].to).toBe('seller@example.com');
+    });
+
+    it('includes the rejection note on a product-rejected alert', async () => {
+      await service.notifyProductRejected({
+        farmer: { id: 'seller-1', email: 'seller@example.com', locale: 'ru', displayName: 'Нино' },
+        productTitle: 'Hazelnuts',
+        productId: 'p1',
+        note: 'Unclear photos',
+      });
+
+      expect(createdNotification()).toEqual(
+        expect.objectContaining({
+          userId: 'seller-1',
+          type: 'productRejected',
+          productId: 'p1',
+          href: '/dashboard/products/p1/edit',
+        }),
+      );
+      expect(userNotification.create.mock.calls[0][0].data.body).toContain('Unclear photos');
+      expect(mail.send).toHaveBeenCalledTimes(1);
+      expect(mail.send.mock.calls[0][0].text).toContain('Unclear photos');
+    });
+
+    it('does not persist an in-app row when the product recipient has no user id', async () => {
+      await service.notifyProductApproved({
+        farmer: { email: 'seller@example.com', locale: 'en', displayName: 'Nino' },
+        productTitle: 'Hazelnuts',
+        productId: 'p1',
+      });
+      expect(userNotification.create).not.toHaveBeenCalled();
+      expect(mail.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('creates a verification-approved alert for the producer', async () => {
+      await service.notifyVerificationApproved({
+        farmer: { id: 'seller-1', email: 'seller@example.com', locale: 'en', displayName: 'Nino' },
+        farmName: 'Kakheti Farm',
+      });
+
+      expect(createdNotification()).toEqual({
+        userId: 'seller-1',
+        type: 'verificationApproved',
+        productId: null,
+        title: 'Verification approved',
+        body: '“Kakheti Farm” is now a verified producer.',
+        href: '/dashboard/farm',
+      });
+      expect(mail.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('translates the verification rejection reason and keeps the comment', async () => {
+      await service.notifyVerificationRejected({
+        farmer: { id: 'seller-1', email: 'seller@example.com', locale: 'ru', displayName: 'Нино' },
+        farmName: 'Kakheti Farm',
+        reasonCode: 'documentRejected',
+        moderatorComment: 'Scan is unreadable',
+      });
+
+      const created = createdNotification();
+      expect(created.type).toBe('verificationRejected');
+      expect(created.href).toBe('/dashboard/farm');
+      expect(created.body).toContain('Модератор не принял документ для верификации.');
+      expect(created.body).toContain('Scan is unreadable');
+      expect(created.body).not.toContain('documentRejected');
+      expect(mail.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('creates a farm-document rejection alert without email', async () => {
+      await service.notifyFarmDocumentReviewed({
+        farmer: { id: 'seller-1', email: 'seller@example.com', locale: 'en', displayName: 'Nino' },
+        documentTitle: 'ID card',
+        approve: false,
+        note: 'illegible scan',
+      });
+
+      expect(createdNotification()).toEqual(
+        expect.objectContaining({
+          userId: 'seller-1',
+          type: 'farmDocumentRejected',
+          href: '/dashboard/farm',
+        }),
+      );
+      expect(userNotification.create.mock.calls[0][0].data.body).toContain('illegible scan');
+      expect(mail.send).not.toHaveBeenCalled();
+    });
+
+    it('creates a certificate approval alert for the product owner', async () => {
+      await service.notifyProductCertificateReviewed({
+        farmer: { id: 'seller-1', email: 'seller@example.com', locale: 'en', displayName: 'Nino' },
+        certificateTitle: 'Organic',
+        productTitle: 'Hazelnuts',
+        productId: 'p1',
+        approve: true,
+        note: null,
+      });
+
+      expect(createdNotification()).toEqual({
+        userId: 'seller-1',
+        type: 'productCertificateApproved',
+        productId: 'p1',
+        title: 'Certificate approved',
+        body: 'The certificate “Organic” for “Hazelnuts” was accepted.',
+        href: '/dashboard/products/p1/edit',
+      });
+      expect(mail.send).not.toHaveBeenCalled();
+    });
+
+    it('creates a moderated purchase-request alert for the buyer', async () => {
+      await service.notifyPurchaseRequestModerated({
+        buyer: { id: 'buyer-1', email: 'buyer@example.com', locale: 'en', displayName: 'Buyer' },
+        title: 'Blueberries',
+        note: 'Spam',
+      });
+
+      expect(createdNotification()).toEqual(
+        expect.objectContaining({
+          userId: 'buyer-1',
+          type: 'purchaseRequestModerated',
+          href: '/dashboard/purchase-requests',
+        }),
+      );
+      expect(userNotification.create.mock.calls[0][0].data.body).toContain('Spam');
+      expect(mail.send).not.toHaveBeenCalled();
+    });
+
+    it('localizes admin-decision in-app copy for every supported locale', async () => {
+      const locales = ['en', 'ru', 'ka', 'de', 'fr', 'it', 'es'] as const;
+      for (const locale of locales) {
+        userNotification.create.mockClear();
+        await service.notifyProductRejected({
+          farmer: { id: 'seller-1', email: 'seller@example.com', locale, displayName: 'Nino' },
+          productTitle: 'Hazelnuts',
+          productId: 'p1',
+          note: 'Unclear photos',
+        });
+        const created = userNotification.create.mock.calls[0][0].data as {
+          title: string;
+          body: string;
+        };
+        expect(created.title.trim().length).toBeGreaterThan(0);
+        expect(created.body).toContain('Hazelnuts');
+        expect(created.body).toContain('Unclear photos');
+      }
+    });
+
     it('marks an unread notification read for the owner only', async () => {
       const existing = {
         id: 'n1',

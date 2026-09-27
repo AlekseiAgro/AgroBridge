@@ -219,6 +219,15 @@ enum UserNotificationType {
   rfqDeclinedByBuyer
   rfqDeclinedByFarmer
   rfqCancelled
+  productApproved
+  productRejected
+  verificationApproved
+  verificationRejected
+  farmDocumentApproved
+  farmDocumentRejected
+  productCertificateApproved
+  productCertificateRejected
+  purchaseRequestModerated
 }
 
 /// In-app cabinet alerts (harvest watches, purchase-request and quote events).
