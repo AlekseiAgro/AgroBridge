@@ -16,6 +16,9 @@ import {
   canTrade,
   catalogSearchCanonicalMatches,
   isPubliclyListedProduct,
+  publishedListingIncompleteMessage,
+  publishedListingIssues,
+  type ListingFields,
   isCarrier,
   isCertificateType,
   isFarmDocumentMimeType,
@@ -341,6 +344,17 @@ export class ProductsService {
     const incoterms = sanitizeStringArray(input.incoterms).filter(isIncoterm);
     const carriers = sanitizeStringArray(input.carriers).filter(isCarrier);
 
+    this.assertPublishedListingFields({
+      nextPublished: isPublished,
+      next: {
+        title: dto.title.trim(),
+        category: dto.category || null,
+        unit: dto.unit || null,
+        priceFrom: this.normalizeNullableNumber(input.priceFrom),
+        priceCurrency: this.normalizePriceCurrency(input.priceCurrency),
+      },
+    });
+
     const product = await this.prisma.product.create({
       data: {
         ownerUserId: user.id,
@@ -541,6 +555,26 @@ export class ProductsService {
       moderatedAt = null;
       moderatedById = null;
     }
+
+    this.assertPublishedListingFields({
+      nextPublished,
+      next: {
+        title: dto.title !== undefined ? dto.title.trim() : product.title,
+        category: dto.category !== undefined ? dto.category || null : product.category,
+        unit: dto.unit !== undefined ? dto.unit || null : product.unit,
+        priceFrom: priceFrom !== undefined ? priceFrom : toNumberOrNull(product.priceFrom),
+        priceCurrency:
+          priceCurrency !== undefined ? priceCurrency : product.priceCurrency,
+      },
+      previousPublished: product.isPublished,
+      previous: {
+        title: product.title,
+        category: product.category,
+        unit: product.unit,
+        priceFrom: toNumberOrNull(product.priceFrom),
+        priceCurrency: product.priceCurrency,
+      },
+    });
 
     const previousStatus = product.harvestStatus;
     const previousPreorder = product.preorderEnabled;
@@ -1198,6 +1232,18 @@ export class ProductsService {
   private assertFarmer(user: AuthenticatedUser) {
     if (!canTrade(user.role)) {
       throw new ForbiddenException('Sign in to manage products');
+    }
+  }
+
+  private assertPublishedListingFields(args: {
+    nextPublished: boolean;
+    next: ListingFields;
+    previousPublished?: boolean;
+    previous?: ListingFields;
+  }) {
+    const issues = publishedListingIssues(args);
+    if (issues.length > 0) {
+      throw new BadRequestException(publishedListingIncompleteMessage(issues));
     }
   }
 

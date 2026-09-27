@@ -395,6 +395,16 @@
     "savedDraftHint": "Als Entwurf gespeichert. Öffnen Sie „Karte ansehen“, um die Ansicht nach der Veröffentlichung zu prüfen.",
     "publishedPendingHint": "Zur Moderation gesendet. Nach Freigabe durch einen Administrator erscheint die Karte im öffentlichen Katalog.",
     "publishHint": "„Speichern“ behält einen Entwurf. „Veröffentlichen“ sendet die Karte zur Moderation an einen Administrator.",
+    "requiredMark": "*",
+    "requiredToPublish": "Zum Veröffentlichen erforderlich",
+    "listingRequiredHint": "Titel, Kategorie, Einheit, Preis und Währung sind vor der Veröffentlichung erforderlich. Einen unvollständigen Entwurf können Sie trotzdem speichern.",
+    "listingErrors": {
+      "title": "Geben Sie vor der Veröffentlichung einen echten Produkttitel ein.",
+      "category": "Wählen Sie vor der Veröffentlichung eine Kategorie.",
+      "unit": "Wählen Sie vor der Veröffentlichung eine Einheit.",
+      "priceFrom": "Geben Sie vor der Veröffentlichung einen Preis größer als null ein.",
+      "priceCurrency": "Wählen Sie vor der Veröffentlichung GEL, EUR oder USD."
+    },
     "pleaseWait": "Bitte warten…",
     "genericError": "Produkt konnte nicht gespeichert werden.",
     "edit": "Bearbeiten",

@@ -1886,6 +1886,12 @@ body {
   font-size: 0.85em;
 }
 
+.field__required {
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 0.95em;
+}
+
 .product-list {
   list-style: none;
   margin: 0;

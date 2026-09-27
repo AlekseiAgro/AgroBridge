@@ -395,6 +395,16 @@
     "savedDraftHint": "Saved as a draft. Open Preview card to see how it will look after publication.",
     "publishedPendingHint": "Sent for moderation. After an administrator approves it, the card will appear in the public catalog.",
     "publishHint": "Save keeps a draft. Publish sends the card to an administrator for moderation before it appears in the catalog.",
+    "requiredMark": "*",
+    "requiredToPublish": "Required to publish",
+    "listingRequiredHint": "Title, category, unit, price, and currency are required before publishing. You can still save an incomplete draft.",
+    "listingErrors": {
+      "title": "Enter a real product title before publishing.",
+      "category": "Choose a category before publishing.",
+      "unit": "Choose a unit before publishing.",
+      "priceFrom": "Enter a price greater than zero before publishing.",
+      "priceCurrency": "Choose GEL, EUR, or USD before publishing."
+    },
     "pleaseWait": "Please wait…",
     "genericError": "Could not save the product.",
     "edit": "Edit",

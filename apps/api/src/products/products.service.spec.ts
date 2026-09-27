@@ -889,4 +889,202 @@ describe('ProductsService', () => {
     });
     expect(result).toEqual([]);
   });
+
+  const farmer = {
+    id: 'u1',
+    email: 'f@example.com',
+    role: 'farmer' as const,
+    locale: 'en' as const,
+    displayName: null,
+  };
+
+  const completeListing = {
+    title: 'Kakheti hazelnuts',
+    category: 'nuts',
+    unit: 'kg',
+    priceFrom: 4.2,
+    priceCurrency: 'GEL' as const,
+  };
+
+  function productRow(overrides: Record<string, unknown> = {}) {
+    return {
+      id: 'p1',
+      ownerUserId: 'u1',
+      farmId: null,
+      title: 'Hazelnuts',
+      description: null,
+      category: null,
+      variety: null,
+      country: 'Georgia',
+      originPlace: null,
+      unit: null,
+      minQuantity: null,
+      maxQuantity: null,
+      currentStock: null,
+      monthlyProduction: null,
+      maxAnnualProduction: null,
+      seasonMonths: [],
+      harvestStartAt: null,
+      harvestEndAt: null,
+      forecastQuantity: null,
+      harvestStatus: null,
+      preorderEnabled: false,
+      attributes: {},
+      packagingTypes: [],
+      packagingWeights: [],
+      palletSize: null,
+      incoterms: [],
+      carriers: [],
+      customDelivery: null,
+      nearestPort: null,
+      deliveryAvailable: false,
+      leadTimeDays: null,
+      priceFrom: null,
+      priceCurrency: null,
+      priceNegotiable: false,
+      priceDependsOnVolume: false,
+      isPublished: false,
+      moderationStatus: 'draft',
+      moderationNote: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      owner: { id: 'u1', displayName: null },
+      farm: null,
+      images: [],
+      videos: [],
+      certificates: [],
+      ...overrides,
+    };
+  }
+
+  it('creates a published listing when required fields are present and keeps optional fields empty', async () => {
+    prisma.farm.findUnique.mockResolvedValue(null);
+    prisma.product.create.mockResolvedValue(
+      productRow({
+        ...completeListing,
+        isPublished: true,
+        moderationStatus: 'pending',
+      }),
+    );
+
+    const result = await service.create(farmer, {
+      ...completeListing,
+      isPublished: true,
+    } as never);
+
+    expect(prisma.product.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          title: 'Kakheti hazelnuts',
+          category: 'nuts',
+          unit: 'kg',
+          priceFrom: 4.2,
+          priceCurrency: 'GEL',
+          isPublished: true,
+          moderationStatus: 'pending',
+          description: null,
+        }),
+      }),
+    );
+    expect(result.moderationStatus).toBe('pending');
+  });
+
+  it.each([
+    ['title', { ...completeListing, title: 'Untitled product', isPublished: true }],
+    ['priceFrom', { ...completeListing, priceFrom: undefined, isPublished: true }],
+    ['category', { ...completeListing, category: undefined, isPublished: true }],
+    ['unit', { ...completeListing, unit: undefined, isPublished: true }],
+    ['priceCurrency', { ...completeListing, priceCurrency: undefined, isPublished: true }],
+  ] as const)('rejects published create missing %s', async (field, dto) => {
+    prisma.farm.findUnique.mockResolvedValue(null);
+
+    await expect(service.create(farmer, dto as never)).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.product.create).not.toHaveBeenCalled();
+    void field;
+  });
+
+  it('still creates a title-only draft', async () => {
+    prisma.farm.findUnique.mockResolvedValue(null);
+    prisma.product.create.mockResolvedValue(productRow({ title: 'Untitled product' }));
+
+    await service.create(farmer, { title: 'Untitled product', isPublished: false } as never);
+
+    expect(prisma.product.create).toHaveBeenCalled();
+  });
+
+  it('rejects publishing an incomplete draft and allows a complete publish', async () => {
+    const draft = productRow({ title: 'Hazelnuts' });
+    prisma.product.findUnique.mockResolvedValue(draft);
+
+    await expect(
+      service.update(farmer, 'p1', { isPublished: true } as never),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.product.update).not.toHaveBeenCalled();
+
+    prisma.product.findUnique.mockResolvedValue(draft);
+    prisma.product.update.mockResolvedValue(
+      productRow({
+        ...completeListing,
+        isPublished: true,
+        moderationStatus: 'pending',
+      }),
+    );
+
+    await service.update(farmer, 'p1', { ...completeListing, isPublished: true } as never);
+
+    expect(prisma.product.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          isPublished: true,
+          moderationStatus: 'pending',
+          title: 'Kakheti hazelnuts',
+          priceFrom: 4.2,
+        }),
+      }),
+    );
+  });
+
+  it('rejects clearing the price on a complete published listing', async () => {
+    const live = productRow({
+      ...completeListing,
+      isPublished: true,
+      moderationStatus: 'approved',
+    });
+    prisma.product.findUnique.mockResolvedValue(live);
+
+    await expect(
+      service.update(farmer, 'p1', { priceFrom: null, isPublished: true } as never),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.product.update).not.toHaveBeenCalled();
+  });
+
+  it('updates a complete published listing and keeps it approved', async () => {
+    const live = productRow({
+      ...completeListing,
+      isPublished: true,
+      moderationStatus: 'approved',
+      moderatedAt: new Date('2026-01-01T00:00:00.000Z'),
+      moderatedById: 'admin1',
+    });
+    prisma.product.findUnique.mockResolvedValue(live);
+    prisma.product.update.mockResolvedValue({
+      ...live,
+      title: 'Updated hazelnuts',
+    });
+
+    await service.update(farmer, 'p1', {
+      title: 'Updated hazelnuts',
+      isPublished: true,
+    } as never);
+
+    expect(prisma.product.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          title: 'Updated hazelnuts',
+          isPublished: true,
+          moderationStatus: 'approved',
+        }),
+      }),
+    );
+  });
 });
