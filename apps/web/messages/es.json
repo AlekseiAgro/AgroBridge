@@ -395,6 +395,16 @@
     "savedDraftHint": "Guardada como borrador. Abre «Ver ficha» para ver cómo se verá tras la publicación.",
     "publishedPendingHint": "Enviada a moderación. Tras la aprobación de un administrador, la ficha aparecerá en el catálogo público.",
     "publishHint": "«Guardar» deja un borrador. «Publicar» envía la ficha a un administrador para moderación antes del catálogo.",
+    "requiredMark": "*",
+    "requiredToPublish": "Obligatorio para publicar",
+    "listingRequiredHint": "El título, la categoría, la unidad, el precio y la moneda son obligatorios antes de publicar. Aun así puedes guardar un borrador incompleto.",
+    "listingErrors": {
+      "title": "Indica un título real del producto antes de publicar.",
+      "category": "Elige una categoría antes de publicar.",
+      "unit": "Elige una unidad antes de publicar.",
+      "priceFrom": "Indica un precio mayor que cero antes de publicar.",
+      "priceCurrency": "Elige GEL, EUR o USD antes de publicar."
+    },
     "pleaseWait": "Espera…",
     "genericError": "No se pudo guardar el producto.",
     "edit": "Editar",

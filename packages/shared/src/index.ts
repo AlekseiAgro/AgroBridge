@@ -11,6 +11,7 @@ export * from './quality';
 export * from './market-insight';
 export * from './catalog';
 export * from './product-titles';
+export * from './product-listing-requirements';
 export * from './product-descriptions';
 export * from './catalog-search';
 export * from './rfq';

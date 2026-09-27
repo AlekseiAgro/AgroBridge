@@ -395,6 +395,16 @@
     "savedDraftHint": "Salvata come bozza. Apri «Vedi scheda» per vedere come apparirà dopo la pubblicazione.",
     "publishedPendingHint": "Inviata in moderazione. Dopo l’approvazione di un amministratore, la scheda comparirà nel catalogo pubblico.",
     "publishHint": "«Salva» mantiene una bozza. «Pubblica» invia la scheda a un amministratore per la moderazione prima del catalogo.",
+    "requiredMark": "*",
+    "requiredToPublish": "Obbligatorio per pubblicare",
+    "listingRequiredHint": "Titolo, categoria, unità, prezzo e valuta sono obbligatori prima della pubblicazione. Puoi comunque salvare una bozza incompleta.",
+    "listingErrors": {
+      "title": "Inserisci un vero titolo del prodotto prima di pubblicare.",
+      "category": "Scegli una categoria prima di pubblicare.",
+      "unit": "Scegli un’unità prima di pubblicare.",
+      "priceFrom": "Inserisci un prezzo maggiore di zero prima di pubblicare.",
+      "priceCurrency": "Scegli GEL, EUR o USD prima di pubblicare."
+    },
     "pleaseWait": "Attendere…",
     "genericError": "Impossibile salvare il prodotto.",
     "edit": "Modifica",

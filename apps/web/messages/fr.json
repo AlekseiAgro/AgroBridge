@@ -395,6 +395,16 @@
     "savedDraftHint": "Enregistré comme brouillon. Ouvrez « Voir la fiche » pour prévisualiser l’apparence après publication.",
     "publishedPendingHint": "Envoyé en modération. Après validation par un administrateur, la fiche apparaîtra dans le catalogue public.",
     "publishHint": "« Enregistrer » conserve un brouillon. « Publier » envoie la fiche à un administrateur pour modération avant le catalogue.",
+    "requiredMark": "*",
+    "requiredToPublish": "Obligatoire pour publier",
+    "listingRequiredHint": "Le titre, la catégorie, l’unité, le prix et la devise sont requis avant publication. Vous pouvez toujours enregistrer un brouillon incomplet.",
+    "listingErrors": {
+      "title": "Saisissez un vrai titre de produit avant de publier.",
+      "category": "Choisissez une catégorie avant de publier.",
+      "unit": "Choisissez une unité avant de publier.",
+      "priceFrom": "Saisissez un prix supérieur à zéro avant de publier.",
+      "priceCurrency": "Choisissez GEL, EUR ou USD avant de publier."
+    },
     "pleaseWait": "Veuillez patienter…",
     "genericError": "Impossible d’enregistrer le produit.",
     "edit": "Modifier",

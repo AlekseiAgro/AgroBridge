@@ -12,9 +12,12 @@ import {
   SEASON_MONTHS,
   computeProductQualityScore,
   defaultUnitForCategory,
+  listingRequirementIssues,
+  publishedListingIssues,
   type Carrier,
   type HarvestStatus,
   type Incoterm,
+  type ListingRequiredField,
   type PackagingType,
   type ProductDetail,
   type ProductUnit,
@@ -94,6 +97,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
   const tc = useTranslations('catalog');
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [fieldIssues, setFieldIssues] = useState<ListingRequiredField[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [lastIntent, setLastIntent] = useState<SubmitIntent>('save');
@@ -230,6 +234,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
     event.preventDefault();
     setPending(true);
     setError(null);
+    setFieldIssues([]);
     setSuccess(null);
 
     const form = new FormData(event.currentTarget);
@@ -273,6 +278,39 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
 
     const parsedHarvestStartAt = String(form.get('harvestStartAt') ?? '').trim() || null;
     const parsedHarvestEndAt = String(form.get('harvestEndAt') ?? '').trim() || null;
+
+    const nextListing = {
+      title: title.trim(),
+      category: category || null,
+      unit: unit || null,
+      priceFrom: parsedPriceFrom,
+      priceCurrency,
+    };
+    const listingIssues =
+      intent === 'publish'
+        ? listingRequirementIssues(nextListing)
+        : publishedListingIssues({
+            nextPublished: Boolean(
+              initial?.isPublished && initial?.moderationStatus === 'approved',
+            ),
+            next: nextListing,
+            previousPublished: Boolean(initial?.isPublished),
+            previous: initial
+              ? {
+                  title: initial.title,
+                  category: initial.category,
+                  unit: initial.unit,
+                  priceFrom: initial.priceFrom,
+                  priceCurrency: initial.priceCurrency,
+                }
+              : undefined,
+          });
+    if (listingIssues.length > 0) {
+      setFieldIssues(listingIssues);
+      setError(listingIssues.map((issue) => t(`listingErrors.${issue}`)).join(' '));
+      setPending(false);
+      return;
+    }
 
     const payload = {
       title: title.trim(),
@@ -359,19 +397,33 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
         <legend className="section-title">{t('formSections.basics')}</legend>
         <div className="field-row">
           <label className="field">
-            <span>{t('title')}</span>
+            <span>
+              {t('title')}{' '}
+              <span className="field__required" title={t('requiredToPublish')}>
+                {t('requiredMark')}
+              </span>
+            </span>
             <input
               name="title"
               required
               minLength={2}
+              aria-required="true"
+              aria-invalid={fieldIssues.includes('title')}
               value={title}
               onChange={(event) => setTitle(event.target.value)}
             />
           </label>
           <label className="field">
-            <span>{t('category')}</span>
+            <span>
+              {t('category')}{' '}
+              <span className="field__required" title={t('requiredToPublish')}>
+                {t('requiredMark')}
+              </span>
+            </span>
             <select
               name="category"
+              aria-required="true"
+              aria-invalid={fieldIssues.includes('category')}
               value={category}
               onChange={(event) => {
                 const nextCategory = event.target.value;
@@ -394,9 +446,16 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
             <input value={variety} onChange={(event) => setVariety(event.target.value)} />
           </label>
           <label className="field">
-            <span>{t('unit')}</span>
+            <span>
+              {t('unit')}{' '}
+              <span className="field__required" title={t('requiredToPublish')}>
+                {t('requiredMark')}
+              </span>
+            </span>
             <select
               name="unit"
+              aria-required="true"
+              aria-invalid={fieldIssues.includes('unit')}
               value={unit}
               onChange={(event) => {
                 setUnitTouched(true);
@@ -449,19 +508,33 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
         <h3 className="product-form__subheading">{t('sections.pricing')}</h3>
         <div className="field-row">
           <label className="field">
-            <span>{t('priceFrom')}</span>
+            <span>
+              {t('priceFrom')}{' '}
+              <span className="field__required" title={t('requiredToPublish')}>
+                {t('requiredMark')}
+              </span>
+            </span>
             <input
               name="priceFrom"
               type="number"
-              min={0}
+              min={0.01}
               step="0.01"
+              aria-required="true"
+              aria-invalid={fieldIssues.includes('priceFrom')}
               value={priceFrom}
               onChange={(event) => setPriceFrom(event.target.value)}
             />
           </label>
           <label className="field">
-            <span>{t('priceCurrency')}</span>
+            <span>
+              {t('priceCurrency')}{' '}
+              <span className="field__required" title={t('requiredToPublish')}>
+                {t('requiredMark')}
+              </span>
+            </span>
             <select
+              aria-required="true"
+              aria-invalid={fieldIssues.includes('priceCurrency')}
               value={priceCurrency}
               onChange={(event) =>
                 setPriceCurrency(event.target.value as (typeof PRICE_CURRENCIES)[number])
@@ -832,6 +905,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
           {pending && lastIntent === 'publish' ? t('pleaseWait') : t('publish')}
         </button>
       </div>
+      <p className="field-hint">{t('listingRequiredHint')}</p>
       <p className="field-hint">
         {initial?.moderationStatus === 'approved' && initial?.isPublished
           ? t('publishLiveHint')
