@@ -7,6 +7,23 @@ function source(rel: string): string {
   return readFileSync(join(WEB, 'src', rel), 'utf8');
 }
 
+/** Each `if (intent === 'publish')` success branch, in source order. */
+function publishSuccessBlocks(form: string): string[] {
+  const marker = "if (intent === 'publish') {";
+  const blocks: string[] = [];
+  let from = 0;
+  while (from < form.length) {
+    const start = form.indexOf(marker, from);
+    if (start < 0) break;
+    const next = form.indexOf(marker, start + marker.length);
+    const catchAt = form.indexOf('} catch {', start);
+    const end = next > start ? next : catchAt;
+    blocks.push(form.slice(start, end < 0 ? form.length : end));
+    from = start + marker.length;
+  }
+  return blocks;
+}
+
 describe('publish redirects to My Products', () => {
   const form = source('components/ProductForm.tsx');
   const list = source('app/[locale]/dashboard/products/page.tsx');
@@ -43,13 +60,28 @@ describe('publish redirects to My Products', () => {
     expect(failBlock).not.toContain('router.push');
     expect(failBlock).not.toContain('router.replace');
 
-    expect(form).toContain("t('savedDraftHint')");
-    expect(form).toContain('router.refresh()');
-    expect(form.indexOf("t('savedDraftHint')")).toBeGreaterThan(
-      form.indexOf("router.push('/dashboard/products')"),
-    );
-    const saveBlock = form.slice(form.indexOf("t('savedDraftHint')") - 80, form.indexOf('router.refresh()') + 20);
+    const [createSuccess, editSuccess] = publishSuccessBlocks(form);
+    expect(createSuccess).toBeDefined();
+    expect(editSuccess).toBeDefined();
+
+    expect(createSuccess).toContain("router.push('/dashboard/products')");
+    const createSave = createSuccess.slice(createSuccess.indexOf('} else {'));
+    expect(createSave).toContain('router.replace(`/dashboard/products/${data.id}/edit`)');
+    expect(createSave).not.toContain("router.push('/dashboard/products')");
+
+    const publishPush = editSuccess.indexOf("router.push('/dashboard/products')");
+    const publishReturn = editSuccess.indexOf('return;', publishPush);
+    const saveStart = editSuccess.indexOf("setSuccess(t('savedDraftHint'))", publishReturn);
+    const saveRefresh = editSuccess.indexOf('router.refresh()', saveStart);
+    expect(publishPush).toBeGreaterThan(-1);
+    expect(publishReturn).toBeGreaterThan(publishPush);
+    expect(saveStart).toBeGreaterThan(publishReturn);
+    expect(saveRefresh).toBeGreaterThan(saveStart);
+
+    const saveBlock = editSuccess.slice(publishReturn + 'return;'.length, saveRefresh);
+    expect(saveBlock).toContain("setSuccess(t('savedDraftHint'))");
     expect(saveBlock).not.toContain('router.push');
+    expect(saveBlock).not.toContain('router.replace');
     expect(form).not.toContain("router.push('/catalog");
     expect(form).not.toMatch(/router\.push\('\/dashboard'\)/);
     expect(form).not.toContain("router.push('/products/");
