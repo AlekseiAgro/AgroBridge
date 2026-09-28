@@ -29,6 +29,7 @@ export function toPublicFarmProfile(farm: FarmDetail): FarmDetail {
     owner: farm.owner,
     productCount: products.length,
     photos: farm.photos,
+    updatedAt: farm.updatedAt,
     createdAt: farm.createdAt,
     verificationNote: null,
     verifiedAt: farm.verifiedAt,

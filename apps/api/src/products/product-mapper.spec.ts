@@ -132,6 +132,8 @@ describe('mapProductDetail certificate visibility', () => {
   it('does not put owner analytics counts on public catalog or detail payloads', () => {
     const summary = mapProductSummary(product);
     const detail = mapProductDetail(product, null, false, false, false);
+    expect(summary.updatedAt).toBe('2026-01-01T00:00:00.000Z');
+    expect(detail.updatedAt).toBe('2026-01-01T00:00:00.000Z');
     expect(summary).not.toHaveProperty('viewCount');
     expect(summary).not.toHaveProperty('watchCount');
     expect(detail).not.toHaveProperty('viewCount');

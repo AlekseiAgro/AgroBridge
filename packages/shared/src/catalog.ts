@@ -120,6 +120,8 @@ export type FarmSummary = {
   };
   productCount: number;
   photos: FarmPhoto[];
+  /** ISO timestamp of the farm row. Not a photo or product timestamp. */
+  updatedAt: string;
 };
 
 export type FarmDetail = FarmSummary & {
@@ -216,6 +218,8 @@ export type ProductSummary = {
   qualityScore: ProductQualityScore;
   opportunity: MarketOpportunity;
   ownerUserId: string;
+  /** ISO timestamp of the product row. Not an image or moderation timestamp. */
+  updatedAt: string;
   owner: {
     id: string;
     displayName: string | null;
