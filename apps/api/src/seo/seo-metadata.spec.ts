@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { LOCALES } from '@agrobridge/shared';
+import { LOCALES, type FarmDetail, type ProductDetail, type PurchaseRequestDetail } from '@agrobridge/shared';
 import {
   composeSeoDescription,
   composeSeoTitle,
@@ -9,6 +9,47 @@ import {
   productMetadataCopy,
   requestMetadataCopy,
 } from '../../../web/src/lib/seo-page-metadata';
+import {
+  farmPageMetadata,
+  productPageMetadata,
+  purchaseRequestPageMetadata,
+  staticPublicMetadata,
+} from '../../../web/src/lib/seo-public-metadata';
+
+jest.mock('next-intl/server', () => {
+  const { readFileSync: readMessages } = require('fs');
+  const { join: joinPath } = require('path');
+  const cache = new Map<string, unknown>();
+
+  function messages(locale: string) {
+    const cached = cache.get(locale);
+    if (cached) return cached;
+    const parsed = JSON.parse(
+      readMessages(joinPath(__dirname, `../../../web/messages/${locale}.json`), 'utf8'),
+    );
+    cache.set(locale, parsed);
+    return parsed;
+  }
+
+  function lookup(root: unknown, key: string): unknown {
+    return key.split('.').reduce<unknown>((acc, part) => {
+      if (!acc || typeof acc !== 'object') return undefined;
+      return (acc as Record<string, unknown>)[part];
+    }, root);
+  }
+
+  return {
+    getTranslations: async ({ locale, namespace }: { locale: string; namespace?: string }) => {
+      const root = namespace ? lookup(messages(locale), namespace) : messages(locale);
+      return (key: string, values?: Record<string, string | number>) => {
+        const found = lookup(root, key);
+        if (typeof found !== 'string') return key;
+        if (!values) return found;
+        return found.replace(/\{(\w+)\}/g, (_match, name: string) => String(values[name] ?? ''));
+      };
+    },
+  };
+});
 
 const WEB_ROOT = join(__dirname, '../../../web');
 const WEB_SRC = join(WEB_ROOT, 'src');
@@ -359,7 +400,7 @@ describe('server metadata wiring', () => {
     expect(helper).toContain('distinctPublicOrigin');
     expect(helper).toContain('formatProductTitle');
     expect(helper).toContain('formatProductDescription');
-    expect(helper).not.toContain('openGraph');
+    expect(helper).toContain('openGraph');
     expect(helper).not.toContain('twitter');
     expect(helper).not.toContain('alternates');
     expect(helper).not.toContain('application/ld+json');
@@ -404,5 +445,216 @@ describe('server metadata wiring', () => {
     expect(readWeb('lib/seo-page-metadata.ts')).not.toMatch(
       /openGraph|twitter|alternates|ld\+json|canonical|hreflang/,
     );
+    expect(readWeb('app/[locale]/layout.tsx')).not.toContain('openGraph');
+    expect(readWeb('lib/seo-jsonld.ts')).not.toContain('openGraph');
+    expect(readWeb('lib/seo-html-metadata.ts')).not.toContain('openGraph');
+  });
+});
+
+const LOGO = {
+  url: 'https://agrobridge.ge/brand/agrobridge-logo.png',
+  width: 1773,
+  height: 887,
+};
+
+function ogImages(metadata: { openGraph?: { images?: unknown } }) {
+  const images = metadata.openGraph?.images;
+  if (!Array.isArray(images)) throw new Error('expected an Open Graph image list');
+  return images as Array<Record<string, unknown>>;
+}
+
+function expectLocalizedUrl(url: unknown, locale: 'en' | 'ru', path: string) {
+  expect(url).toBe(`https://agrobridge.ge/${locale}${path}`);
+  expect(String(url)).not.toContain('?');
+  expect(String(url)).not.toContain('x-default');
+  expect(String(url)).not.toMatch(/^https:\/\/agrobridge\.ge\/(catalog|products|farms|requests|buyers)/);
+}
+
+function product(overrides: Record<string, unknown> = {}): ProductDetail {
+  return {
+    id: 'prod12345',
+    title: 'Fresh Kakheti peaches',
+    description: 'Seasonal peaches.',
+    category: null,
+    variety: null,
+    country: null,
+    originPlace: null,
+    unit: null,
+    minQuantity: null,
+    maxQuantity: null,
+    priceFrom: null,
+    priceCurrency: null,
+    harvestStatus: null,
+    seasonMonths: [],
+    isPublished: true,
+    moderationStatus: 'approved',
+    images: [],
+    farm: null,
+    ...overrides,
+  } as ProductDetail;
+}
+
+function image(url: string, id = 'img1') {
+  return { id, url, sortOrder: 0, isPrimary: id === 'img1', kind: 'overview' as const };
+}
+
+function farm(overrides: Record<string, unknown> = {}): FarmDetail {
+  return {
+    id: 'farm12345',
+    name: 'Tanya Farm',
+    region: null,
+    description: 'A farm in Kakheti.',
+    products: [],
+    exportMarkets: [],
+    verified: false,
+    photos: [],
+    ...overrides,
+  } as FarmDetail;
+}
+
+function request(overrides: Record<string, unknown> = {}): PurchaseRequestDetail {
+  return {
+    id: 'req123456',
+    title: 'Peaches for August',
+    category: 'fruits',
+    quantity: '100',
+    unit: null,
+    variety: null,
+    packaging: null,
+    destinationCountry: null,
+    message: null,
+    status: 'open',
+    ...overrides,
+  } as PurchaseRequestDetail;
+}
+
+describe('public Open Graph metadata', () => {
+  it('uses the first real product photo and the current locale', async () => {
+    const listed = product({
+      images: [
+        image('/images/categories/fruits.jpg', 'category'),
+        image('/api/uploads/products/prod12345/certificates/cert.pdf', 'certificate'),
+        image('/api/uploads/products/prod12345/peach.jpg', 'peach'),
+        image('https://cdn.example.com/products/closeup.jpg', 'cdn'),
+      ],
+    });
+
+    const en = await productPageMetadata(listed, 'en');
+    const ru = await productPageMetadata(listed, 'ru');
+
+    expect(en.openGraph).toMatchObject({
+      title: en.title,
+      description: en.description,
+      type: 'website',
+    });
+    expectLocalizedUrl(en.openGraph?.url, 'en', '/products/prod12345');
+    expectLocalizedUrl(ru.openGraph?.url, 'ru', '/products/prod12345');
+    expect(ru.title).toContain('Свежие персики из Кахетии');
+    expect(ogImages(en)).toEqual([
+      {
+        url: 'https://agrobridge.ge/api/uploads/products/prod12345/peach.jpg',
+        alt: 'Fresh Kakheti peaches',
+      },
+    ]);
+    expect(ogImages(ru)[0]).toMatchObject({
+      url: 'https://agrobridge.ge/api/uploads/products/prod12345/peach.jpg',
+      alt: 'Свежие персики из Кахетии',
+    });
+    expect(ogImages(en)[0]).not.toHaveProperty('width');
+    expect(ogImages(en)[0]).not.toHaveProperty('height');
+    expect(en).not.toHaveProperty('twitter');
+    expect(en).not.toHaveProperty('alternates');
+  });
+
+  it('falls back to the brand logo when a product has no public photo', async () => {
+    const metadata = await productPageMetadata(
+      product({
+        images: [
+          image('/images/categories/fruits.jpg', 'category'),
+          image('//cdn.example.com/hidden.jpg', 'protocol-relative'),
+          image('/api/uploads/products/prod12345/certificates/cert.pdf', 'certificate'),
+        ],
+      }),
+      'en',
+    );
+    expect(ogImages(metadata)).toEqual([
+      { ...LOGO, alt: 'Fresh Kakheti peaches' },
+    ]);
+    expect(await productPageMetadata(product({ isPublished: false }), 'en')).toEqual({});
+    expect(await productPageMetadata(product({ moderationStatus: 'pending' }), 'en')).toEqual({});
+    expect(await productPageMetadata(product({ moderationStatus: 'rejected' }), 'en')).toEqual({});
+  });
+
+  it('uses the first public farm photo and ignores documents', async () => {
+    const listed = farm({
+      photos: [
+        { id: 'doc', url: '/api/uploads/farms/farm12345/documents/passport.jpg', sortOrder: 0, isPrimary: false },
+        { id: 'cover', url: '/api/uploads/farms/farm12345/photos/cover.jpg', sortOrder: 1, isPrimary: true },
+        { id: 'extra', url: 'https://cdn.example.com/farms/extra.jpg', sortOrder: 2, isPrimary: false },
+      ],
+    });
+    const en = await farmPageMetadata(listed, 'en');
+    const ru = await farmPageMetadata(listed, 'ru');
+    expect(en.openGraph).toMatchObject({ title: en.title, description: en.description, type: 'website' });
+    expectLocalizedUrl(en.openGraph?.url, 'en', '/farms/farm12345');
+    expectLocalizedUrl(ru.openGraph?.url, 'ru', '/farms/farm12345');
+    expect(ogImages(en)).toEqual([
+      { url: 'https://agrobridge.ge/api/uploads/farms/farm12345/photos/cover.jpg', alt: 'Tanya Farm' },
+    ]);
+    expect(ogImages(en)[0]).not.toHaveProperty('width');
+    expect(readWeb('lib/seo-public-metadata.ts')).not.toContain('avatar');
+    expect(readWeb('lib/seo-public-metadata.ts')).not.toContain('/users/');
+
+    const empty = await farmPageMetadata(farm(), 'ka');
+    expect(ogImages(empty)).toEqual([{ ...LOGO, alt: 'Tanya Farm' }]);
+    expect(empty.openGraph?.url).toBe('https://agrobridge.ge/ka/farms/farm12345');
+    expect(await farmPageMetadata(farm({ name: '   ' }), 'en')).toEqual({});
+  });
+
+  it('uses the logo for an open request and omits closed requests', async () => {
+    const en = await purchaseRequestPageMetadata(request(), 'en');
+    const ru = await purchaseRequestPageMetadata(request(), 'ru');
+    expect(en.openGraph).toMatchObject({ title: en.title, description: en.description, type: 'website' });
+    expectLocalizedUrl(en.openGraph?.url, 'en', '/requests/req123456');
+    expectLocalizedUrl(ru.openGraph?.url, 'ru', '/requests/req123456');
+    expect(ogImages(en)).toEqual([{ ...LOGO, alt: 'Peaches for August' }]);
+    expect(en).not.toHaveProperty('twitter');
+    expect(en).not.toHaveProperty('alternates');
+
+    for (const status of ['closed', 'cancelled', 'fulfilled'] as const) {
+      expect(await purchaseRequestPageMetadata(request({ status }), 'en')).toEqual({});
+    }
+    expect(await purchaseRequestPageMetadata(request({ title: '   ' }), 'en')).toEqual({});
+  });
+
+  it('uses the brand logo and a query-free localized url on generic pages', async () => {
+    const pages = ['home', 'catalog', 'requests', 'buyers', 'sellers', 'howItWorks', 'support', 'legal', 'terms', 'privacy'] as const;
+    const paths: Record<(typeof pages)[number], string> = {
+      home: '',
+      catalog: '/catalog',
+      requests: '/requests',
+      buyers: '/buyers',
+      sellers: '/sellers',
+      howItWorks: '/how-it-works',
+      support: '/support',
+      legal: '/legal',
+      terms: '/terms',
+      privacy: '/privacy',
+    };
+
+    for (const page of pages) {
+      for (const locale of ['en', 'ru'] as const) {
+        const metadata = await staticPublicMetadata(locale, page);
+        expect(metadata.openGraph).toMatchObject({
+          title: metadata.title,
+          description: metadata.description,
+          type: 'website',
+        });
+        expectLocalizedUrl(metadata.openGraph?.url, locale, paths[page]);
+        expect(ogImages(metadata)).toEqual([{ ...LOGO, alt: 'AgroBridge' }]);
+        expect(metadata).not.toHaveProperty('twitter');
+        expect(metadata).not.toHaveProperty('alternates');
+      }
+    }
   });
 });
