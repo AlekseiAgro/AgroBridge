@@ -14,7 +14,10 @@ export async function POST(request: Request) {
     });
 
     await setAuthCookie(result.accessToken);
-    return NextResponse.json({ user: result.user });
+    return NextResponse.json({
+      user: result.user,
+      verificationEmailSent: result.verificationEmailSent !== false,
+    });
   } catch (error) {
     if (error instanceof ApiError) {
       return NextResponse.json(
