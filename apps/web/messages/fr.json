@@ -1355,6 +1355,7 @@
     "subtitle": "Saisissez le code à 6 chiffres reçu par e-mail pour ouvrir votre compte.",
     "code": "Code de vérification",
     "confirm": "Confirmer l’e-mail",
+    "productGate": "Confirmez votre e-mail pour continuer avec ce produit.",
     "resend": "Renvoyer le code",
     "sent": "Code envoyé à {destination}",
     "sentHint": "Nous avons envoyé un code à {email}. Vérifiez votre boîte de réception et vos spams.",

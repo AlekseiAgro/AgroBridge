@@ -1355,6 +1355,7 @@
     "subtitle": "Geben Sie den 6-stelligen Code aus Ihrer E-Mail ein, um Ihr Konto zu öffnen.",
     "code": "Bestätigungscode",
     "confirm": "E-Mail bestätigen",
+    "productGate": "Bestätigen Sie Ihre E-Mail, um mit diesem Produkt fortzufahren.",
     "resend": "Code erneut senden",
     "sent": "Code an {destination} gesendet",
     "sentHint": "Wir haben einen Code an {email} gesendet. Prüfen Sie Posteingang und Spam.",

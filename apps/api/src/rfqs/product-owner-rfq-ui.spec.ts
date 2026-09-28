@@ -26,7 +26,7 @@ describe('product owner RFQ UI', () => {
   });
 
   it('shows the RFQ form only for an authenticated non-owner', () => {
-    expect(page).toContain('const canRequest = Boolean(user) && !product.isOwner');
+    expect(page).toContain('const canRequest = Boolean(user?.emailVerified) && !product.isOwner');
     expect(page).toContain('<RfqRequestForm');
     expect(page).toContain('productId={product.id}');
     expect(form).toContain("fetch('/api/rfqs'");
@@ -36,7 +36,7 @@ describe('product owner RFQ UI', () => {
     expect(page).toContain('{!product.isOwner ? (');
     expect(page).toContain('href="#request-quote"');
     expect(page.indexOf('{!product.isOwner ? (')).toBeLessThan(page.indexOf('href="#request-quote"'));
-    expect(page).toContain('const canRequest = Boolean(user) && !product.isOwner');
+    expect(page).toContain('const canRequest = Boolean(user?.emailVerified) && !product.isOwner');
     expect(page).not.toContain('const canRequest = Boolean(user);');
   });
 

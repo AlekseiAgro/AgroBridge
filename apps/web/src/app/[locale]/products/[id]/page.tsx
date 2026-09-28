@@ -24,6 +24,7 @@ import { getRenderableProductImages, toPublicMediaUrl } from '@/lib/product-imag
 import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
+import { verifyEmailRedirectHref } from '@/lib/protected-next-path';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -37,6 +38,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const tc = await getTranslations('catalog');
   const th = await getTranslations('harvest');
   const tr = await getTranslations('rfq');
+  const tVerify = await getTranslations('verifyEmail');
   const tRoot = await getTranslations();
   const token = await getAuthToken();
   const user = await getCurrentUser();
@@ -58,7 +60,12 @@ export default async function ProductDetailPage({ params }: Props) {
   );
   const unitLabel = product.unit ? t(`units.${product.unit as 'kg'}`) : null;
   const listedPrice = formatListedPrice(product);
-  const canRequest = Boolean(user) && !product.isOwner;
+  const needsEmailVerification = Boolean(user && !user.emailVerified);
+  const canRequest = Boolean(user?.emailVerified) && !product.isOwner;
+  const productPath = `/products/${product.id}`;
+  const verifyProductHref = verifyEmailRedirectHref(productPath);
+  const verifyRequestHref = verifyEmailRedirectHref(`${productPath}#request-quote`);
+  const verifyWatchHref = verifyEmailRedirectHref(`${productPath}#harvest-alerts`);
   const soldOut = product.harvestStatus === 'soldOut';
   const showPreorder =
     product.preorderEnabled &&
@@ -124,15 +131,29 @@ export default async function ProductDetailPage({ params }: Props) {
                 </div>
               ) : null}
               {soldOut ? (
-                <a href="#harvest-alerts" className="button button--ghost">
-                  {th('notifyWhenAvailable')}
-                </a>
+                needsEmailVerification ? (
+                  <Link href={verifyWatchHref} className="button button--ghost">
+                    {tVerify('confirm')}
+                  </Link>
+                ) : (
+                  <a href="#harvest-alerts" className="button button--ghost">
+                    {th('notifyWhenAvailable')}
+                  </a>
+                )
+              ) : needsEmailVerification ? (
+                <Link href={verifyRequestHref} className="button button--primary">
+                  {tVerify('confirm')}
+                </Link>
               ) : (
                 <a href="#request-quote" className="button button--primary">
                   {tr('submitRequest')}
                 </a>
               )}
-              {user ? (
+              {needsEmailVerification ? (
+                <Link href={verifyProductHref} className="button button--ghost">
+                  {tVerify('confirm')}
+                </Link>
+              ) : user ? (
                 <OpenChatButton
                   farmerId={product.ownerUserId}
                   label={t('messageSeller')}
@@ -438,6 +459,7 @@ export default async function ProductDetailPage({ params }: Props) {
             isLoggedIn={Boolean(user)}
             isOwner={Boolean(product.isOwner)}
             unavailable={soldOut}
+            verifyHref={needsEmailVerification ? verifyWatchHref : undefined}
           />
         </section>
 
@@ -448,6 +470,13 @@ export default async function ProductDetailPage({ params }: Props) {
               defaultUnit={product.unit}
               preorder={showPreorder}
             />
+          </div>
+        ) : needsEmailVerification && !product.isOwner ? (
+          <div id="request-quote" className="product-login-cta product-request-anchor">
+            <p className="page__subtitle">{tVerify('productGate')}</p>
+            <Link href={verifyRequestHref} className="button button--primary">
+              {tVerify('confirm')}
+            </Link>
           </div>
         ) : !user ? (
           <div id="request-quote" className="product-login-cta product-request-anchor">

@@ -11,6 +11,8 @@ type Props = {
   isOwner?: boolean;
   /** Sold-out listings reuse this control instead of the quote form. */
   unavailable?: boolean;
+  /** Signed-in user who still needs the existing email verification flow. */
+  verifyHref?: string;
 };
 
 export function HarvestWatchButton({
@@ -19,8 +21,10 @@ export function HarvestWatchButton({
   isLoggedIn,
   isOwner = false,
   unavailable = false,
+  verifyHref,
 }: Props) {
   const t = useTranslations('harvest');
+  const tVerify = useTranslations('verifyEmail');
   const router = useRouter();
   const [watching, setWatching] = useState(initialWatching);
   const [pending, setPending] = useState(false);
@@ -40,6 +44,17 @@ export function HarvestWatchButton({
     return (
       <div className="harvest-watch">
         <p className="page__subtitle">{t('ownerWatchHint')}</p>
+      </div>
+    );
+  }
+
+  if (verifyHref) {
+    return (
+      <div className="harvest-watch">
+        <Link href={verifyHref} className="button button--primary harvest-watch__login">
+          {tVerify('confirm')}
+        </Link>
+        <p className="page__subtitle">{tVerify('productGate')}</p>
       </div>
     );
   }
