@@ -107,7 +107,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
               product.owner.displayName?.trim() ||
               tr('product.sellerFallback');
             return (
-              <li key={product.id} className="product-list__item product-list__item--with-media">
+              <li key={product.id} className="product-list__item product-list__item--with-media entity-card">
                 {image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={image.url} alt={imageAlt} className="product-list__media" />

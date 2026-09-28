@@ -121,7 +121,7 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
             return (
               <li
                 key={product.id}
-                className="product-list__item product-list__item--row product-list__item--mine"
+                className="product-list__item product-list__item--row product-list__item--mine entity-card"
               >
                 <div className="product-list__item-main">
                   <Link

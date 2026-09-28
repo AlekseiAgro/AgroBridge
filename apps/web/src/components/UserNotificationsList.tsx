@@ -80,24 +80,31 @@ export function UserNotificationsList({ initial, copyNamespace = 'subscriptions'
       <ul className="user-notifications">
         {items.map((item) => {
           const created = new Date(item.createdAt).toLocaleString(locale);
+          const destination = item.href.trim();
           return (
             <li
               key={item.id}
-              className={
-                item.readAt
-                  ? 'user-notifications__item'
-                  : 'user-notifications__item user-notifications__item--unread'
-              }
+              className={[
+                'user-notifications__item',
+                item.readAt ? '' : 'user-notifications__item--unread',
+                destination ? 'entity-card' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
             >
               <div className="user-notifications__main">
                 {unreadLabel && !item.readAt ? <span className="sr-only">{unreadLabel}</span> : null}
-                <Link
-                  href={item.href}
-                  className="product-list__title"
-                  onClick={() => void markRead(item.id)}
-                >
-                  {item.title}
-                </Link>
+                {destination ? (
+                  <Link
+                    href={destination}
+                    className="product-list__title"
+                    onClick={() => void markRead(item.id)}
+                  >
+                    {item.title}
+                  </Link>
+                ) : (
+                  <p className="product-list__title">{item.title}</p>
+                )}
                 <p className="product-list__meta">{item.body}</p>
                 <p className="product-list__meta">{created}</p>
               </div>

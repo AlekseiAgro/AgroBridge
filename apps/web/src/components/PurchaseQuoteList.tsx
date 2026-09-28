@@ -34,7 +34,14 @@ export async function PurchaseQuoteList({ items, emptyLabel, empty }: Props) {
         return (
           <li
             key={item.id}
-            className="product-list__item product-list__item--row product-list__item--quotes"
+            className={[
+              'product-list__item',
+              'product-list__item--row',
+              'product-list__item--quotes',
+              item.canOpenRequest ? 'entity-card' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
             data-quote-status={item.status}
           >
             <div className="product-list__item-main">

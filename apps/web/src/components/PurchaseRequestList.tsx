@@ -42,7 +42,7 @@ export async function PurchaseRequestList({
           return (
             <li
               key={item.id}
-              className="product-list__item product-list__item--row product-list__item--mine-requests"
+              className="product-list__item product-list__item--row product-list__item--mine-requests entity-card"
               data-request-status={item.status}
             >
               <div className="product-list__item-main">
@@ -90,7 +90,7 @@ export async function PurchaseRequestList({
         }
 
         return (
-          <li key={item.id} className="product-list__item product-list__item--row">
+          <li key={item.id} className="product-list__item product-list__item--row entity-card">
             <div className="product-list__item-main">
               <Link href={`${detailBasePath}/${item.id}`} className="product-list__title">
                 {item.title}
