@@ -81,6 +81,12 @@ describe('public product titles', () => {
     ).toBe(false);
     expect(
       isPubliclyListedProduct({
+        isPublished: true,
+        moderationStatus: 'approved',
+      }),
+    ).toBe(false);
+    expect(
+      isPubliclyListedProduct({
         isPublished: false,
         moderationStatus: 'approved',
         title: 'Fresh Kakheti peaches',

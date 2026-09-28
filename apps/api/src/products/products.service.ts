@@ -357,6 +357,7 @@ export class ProductsService {
       select: {
         id: true,
         ownerUserId: true,
+        title: true,
         isPublished: true,
         moderationStatus: true,
       },

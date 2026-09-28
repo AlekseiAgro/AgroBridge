@@ -85,10 +85,14 @@ describe('My Products card metrics', () => {
     expect(viewsRoute).toContain('visitorAddressOf(request)');
     expect(viewsRoute).toContain('getAuthToken()');
     const controller = apiSource('products.controller.ts');
+    const service = apiSource('products.service.ts');
     expect(controller).toContain("@Post(':id/views')");
     expect(controller).toContain('OptionalJwtAuthGuard');
     expect(controller).toContain('recordPublicProductView');
     expect(controller).not.toContain('harvestWatch.findMany');
+    expect(service).toMatch(
+      /recordPublicProductView[\s\S]{0,400}select:\s*\{[\s\S]{0,200}title:\s*true/,
+    );
   });
 
   it('does not show seller metrics on the public catalog', () => {

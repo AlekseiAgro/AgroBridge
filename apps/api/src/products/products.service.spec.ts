@@ -1222,8 +1222,21 @@ describe('ProductsService', () => {
     const live = productRow({
       isPublished: true,
       moderationStatus: 'approved',
+      title: 'Kakheti hazelnuts',
     });
-    prisma.product.findUnique.mockResolvedValue(live);
+    // Honour Prisma `select`. Returning the full row hid the production bug:
+    // isPubliclyListedProduct treats a missing title as an internal draft.
+    prisma.product.findUnique.mockImplementation(
+      async (args: { select?: Record<string, boolean> }) => {
+        const select = args?.select;
+        if (!select) return live;
+        return Object.fromEntries(
+          Object.entries(select)
+            .filter(([, include]) => include)
+            .map(([key]) => [key, live[key as keyof typeof live]]),
+        );
+      },
+    );
     prisma.productView.findFirst.mockResolvedValue(null);
     prisma.productView.create.mockResolvedValue({ id: 'v1' });
 
@@ -1232,6 +1245,17 @@ describe('ProductsService', () => {
       userAgent: 'Mozilla/5.0',
     });
     expect(guest).toEqual({ recorded: true });
+    expect(prisma.product.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'p1' },
+        select: expect.objectContaining({
+          title: true,
+          isPublished: true,
+          moderationStatus: true,
+          ownerUserId: true,
+        }),
+      }),
+    );
     expect(prisma.productView.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         productId: 'p1',
@@ -1252,6 +1276,35 @@ describe('ProductsService', () => {
     });
     expect(owner).toEqual({ recorded: false });
     expect(prisma.productView.create).not.toHaveBeenCalled();
+  });
+
+  it('does not 404 a published listing when Prisma select omits unused columns', async () => {
+    const live = productRow({
+      isPublished: true,
+      moderationStatus: 'approved',
+      title: 'Kakheti hazelnuts',
+    });
+    prisma.product.findUnique.mockImplementation(
+      async (args: { select?: Record<string, boolean> }) => {
+        const select = args?.select;
+        if (!select) return live;
+        return Object.fromEntries(
+          Object.entries(select)
+            .filter(([, include]) => include)
+            .map(([key]) => [key, live[key as keyof typeof live]]),
+        );
+      },
+    );
+    prisma.productView.findFirst.mockResolvedValue(null);
+    prisma.productView.create.mockResolvedValue({ id: 'v1' });
+
+    await expect(
+      service.recordPublicProductView('p1', null, {
+        ip: '198.51.100.8',
+        userAgent: 'Mozilla/5.0',
+      }),
+    ).resolves.toEqual({ recorded: true });
+    expect(prisma.productView.create).toHaveBeenCalled();
   });
 
   it('does not count a repeat view from the same visitor within 24 hours', async () => {
