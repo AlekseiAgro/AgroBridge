@@ -155,3 +155,47 @@ export function buildProductJsonLd(
 
   return data;
 }
+
+export type BreadcrumbJsonLdItem = {
+  name: string;
+  path: string;
+};
+
+function isBreadcrumbPath(path: string): boolean {
+  if (path === '') return true;
+  if (!path.startsWith('/') || path.startsWith('//')) return false;
+  return !path.includes('?') && !path.includes('#');
+}
+
+/**
+ * Standalone BreadcrumbList. `@id` stays on the English URL.
+ * Item URLs use the current locale. Blank names and query paths are omitted.
+ */
+export function buildBreadcrumbJsonLd(input: {
+  locale: string;
+  idPath: string;
+  items: BreadcrumbJsonLdItem[];
+}): JsonLdNode | null {
+  if (!isLocale(input.locale)) return null;
+  if (input.idPath === '' || !isBreadcrumbPath(input.idPath)) return null;
+  if (input.items.length < 2) return null;
+
+  const itemListElement: JsonLdNode[] = [];
+  for (const [index, item] of input.items.entries()) {
+    const name = item.name.trim();
+    if (!name || !isBreadcrumbPath(item.path)) return null;
+    itemListElement.push({
+      '@type': 'ListItem',
+      position: index + 1,
+      name,
+      item: localizedPublicUrl(input.locale, item.path),
+    });
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    '@id': `${localizedPublicUrl(DEFAULT_LOCALE, input.idPath)}#breadcrumb`,
+    itemListElement,
+  };
+}

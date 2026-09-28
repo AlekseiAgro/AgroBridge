@@ -159,6 +159,12 @@
     "locale": "Lingua preferita",
     "noDisplayName": "Non impostato"
   },
+  "breadcrumbs": {
+    "label": "Percorso di navigazione",
+    "home": "Home",
+    "catalog": "Catalogo",
+    "requests": "Richieste di acquisto"
+  },
   "nav": {
     "catalog": "Catalogo",
     "myFarm": "La mia azienda",

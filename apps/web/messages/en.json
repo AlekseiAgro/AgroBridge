@@ -159,6 +159,12 @@
     "locale": "Preferred language",
     "noDisplayName": "Not set"
   },
+  "breadcrumbs": {
+    "label": "Breadcrumb",
+    "home": "Home",
+    "catalog": "Catalog",
+    "requests": "Purchase requests"
+  },
   "nav": {
     "catalog": "Catalog",
     "myFarm": "My farm",

@@ -159,6 +159,12 @@
     "locale": "Langue préférée",
     "noDisplayName": "Non défini"
   },
+  "breadcrumbs": {
+    "label": "Fil d'Ariane",
+    "home": "Accueil",
+    "catalog": "Catalogue",
+    "requests": "Demandes d'achat"
+  },
   "nav": {
     "catalog": "Catalogue",
     "myFarm": "Ma ferme",
