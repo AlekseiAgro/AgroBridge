@@ -45,7 +45,10 @@ export function FarmForm({ initial, mode, onSaved }: Props) {
   const [pending, setPending] = useState(false);
   const [photos, setPhotos] = useState<PendingPhoto[]>([]);
   const photosRef = useRef(photos);
-  photosRef.current = photos;
+
+  useEffect(() => {
+    photosRef.current = photos;
+  }, [photos]);
 
   useEffect(() => {
     return () => {
