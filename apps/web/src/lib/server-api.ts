@@ -7,6 +7,7 @@ export async function apiRequestAuthed<T>(
     method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
     body?: unknown;
     forwardedFor?: string | null;
+    userAgent?: string | null;
   } = {},
 ): Promise<T> {
   const token = await getAuthToken();

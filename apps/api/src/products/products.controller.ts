@@ -24,6 +24,7 @@ import {
   isFarmDocumentMimeType,
 } from '@agrobridge/shared';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { clientIpOf } from '../http/client-ip';
 import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
@@ -78,6 +79,17 @@ export class ProductsController {
   @UseGuards(OptionalJwtAuthGuard)
   getById(@Param('id') id: string, @Req() req: Request & { user?: AuthenticatedUser }) {
     return this.productsService.getById(id, req.user ?? null);
+  }
+
+  @Post(':id/views')
+  @UseGuards(OptionalJwtAuthGuard, RateLimitGuard)
+  @RateLimit('productViewPerVisitor')
+  recordView(@Param('id') id: string, @Req() req: Request & { user?: AuthenticatedUser }) {
+    const userAgentHeader = req.headers['user-agent'];
+    return this.productsService.recordPublicProductView(id, req.user ?? null, {
+      ip: clientIpOf(req),
+      userAgent: typeof userAgentHeader === 'string' ? userAgentHeader : '',
+    });
   }
 
   @Post()

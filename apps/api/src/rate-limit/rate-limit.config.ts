@@ -135,6 +135,13 @@ const SPECS = {
     windowSec: 10 * MINUTE,
     maxLimit: 2000,
   },
+  /** Public product-detail view beacon; guests share an IP bucket, accounts do not. */
+  productViewPerVisitor: {
+    prefix: 'RATE_LIMIT_PRODUCT_VIEW',
+    limit: 60,
+    windowSec: 5 * MINUTE,
+    maxLimit: 1000,
+  },
 } satisfies Record<string, PolicySpec>;
 
 const CODE_SEND_COOLDOWN_SEC_DEFAULT = 60;
@@ -153,6 +160,7 @@ export type EndpointPolicyName = Extract<
   | 'contentCreatePerAccount'
   | 'tradeActionPerAccount'
   | 'placesAutocompletePerAccount'
+  | 'productViewPerVisitor'
 >;
 
 @Injectable()

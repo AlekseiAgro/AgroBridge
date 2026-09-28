@@ -1,4 +1,4 @@
-import { mapProductCertificates, mapProductDetail } from './product-mapper';
+import { mapProductCertificates, mapProductDetail, mapProductSummary } from './product-mapper';
 import type { ProductRowSlice } from './product-mapper';
 
 const pending = {
@@ -127,5 +127,14 @@ describe('mapProductDetail certificate visibility', () => {
   it('includes pending certificates for a privileged viewer', () => {
     const detail = mapProductDetail(product, null, false, true, true);
     expect(detail.certificates).toHaveLength(3);
+  });
+
+  it('does not put owner analytics counts on public catalog or detail payloads', () => {
+    const summary = mapProductSummary(product);
+    const detail = mapProductDetail(product, null, false, false, false);
+    expect(summary).not.toHaveProperty('viewCount');
+    expect(summary).not.toHaveProperty('watchCount');
+    expect(detail).not.toHaveProperty('viewCount');
+    expect(detail).not.toHaveProperty('watchCount');
   });
 });

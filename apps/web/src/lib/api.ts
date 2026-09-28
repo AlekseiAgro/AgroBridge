@@ -18,6 +18,8 @@ type RequestOptions = {
   token?: string | null;
   /** Visitor address to relay; see `visitorAddressOf` in `lib/client-address`. */
   forwardedFor?: string | null;
+  /** Browser user-agent, relayed so guest view dedup is not the Next.js server UA. */
+  userAgent?: string | null;
 };
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -35,6 +37,10 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   if (options.forwardedFor) {
     headers['X-Forwarded-For'] = options.forwardedFor;
+  }
+
+  if (options.userAgent) {
+    headers['User-Agent'] = options.userAgent;
   }
 
   const response = await fetch(`${serverApiUrl()}${path}`, {

@@ -164,6 +164,20 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
                       <p className="product-list__status">
                         {t(`moderation.${product.moderationStatus}`)}
                       </p>
+                      <p className="product-list__metrics" aria-label={t('cardMetricsLabel')}>
+                        <span>
+                          <span className="product-list__metric-icon" aria-hidden="true">
+                            👁
+                          </span>{' '}
+                          {t('viewCount', { count: product.viewCount ?? 0 })}
+                        </span>
+                        <span>
+                          <span className="product-list__metric-icon" aria-hidden="true">
+                            🔔
+                          </span>{' '}
+                          {t('subscriberCount', { count: product.watchCount ?? 0 })}
+                        </span>
+                      </p>
                     </div>
                     <div className="product-quality-summary">
                       <QualityScoreChip score={product.qualityScore} />
