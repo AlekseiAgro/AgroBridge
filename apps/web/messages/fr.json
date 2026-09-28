@@ -397,7 +397,7 @@
     "publishHint": "« Enregistrer » conserve un brouillon. « Publier » envoie la fiche à un administrateur pour modération avant le catalogue.",
     "requiredMark": "*",
     "requiredToPublish": "Obligatoire pour publier",
-    "listingRequiredHint": "Le titre, la catégorie, l’unité, le prix et la devise sont requis avant publication. Vous pouvez toujours enregistrer un brouillon incomplet.",
+    "listingRequiredHint": "Un titre est requis pour enregistrer un brouillon. La catégorie, l’unité, le prix et la devise peuvent être complétés plus tard, avant la publication.",
     "listingErrors": {
       "title": "Saisissez un vrai titre de produit avant de publier.",
       "category": "Choisissez une catégorie avant de publier.",

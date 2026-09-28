@@ -397,7 +397,7 @@
     "publishHint": "«Salva» mantiene una bozza. «Pubblica» invia la scheda a un amministratore per la moderazione prima del catalogo.",
     "requiredMark": "*",
     "requiredToPublish": "Obbligatorio per pubblicare",
-    "listingRequiredHint": "Titolo, categoria, unità, prezzo e valuta sono obbligatori prima della pubblicazione. Puoi comunque salvare una bozza incompleta.",
+    "listingRequiredHint": "Per salvare una bozza serve un titolo. Categoria, unità, prezzo e valuta si possono completare dopo, prima della pubblicazione.",
     "listingErrors": {
       "title": "Inserisci un vero titolo del prodotto prima di pubblicare.",
       "category": "Scegli una categoria prima di pubblicare.",

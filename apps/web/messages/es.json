@@ -397,7 +397,7 @@
     "publishHint": "«Guardar» deja un borrador. «Publicar» envía la ficha a un administrador para moderación antes del catálogo.",
     "requiredMark": "*",
     "requiredToPublish": "Obligatorio para publicar",
-    "listingRequiredHint": "El título, la categoría, la unidad, el precio y la moneda son obligatorios antes de publicar. Aun así puedes guardar un borrador incompleto.",
+    "listingRequiredHint": "Para guardar un borrador hace falta un título. La categoría, la unidad, el precio y la moneda se pueden completar después, antes de publicar.",
     "listingErrors": {
       "title": "Indica un título real del producto antes de publicar.",
       "category": "Elige una categoría antes de publicar.",

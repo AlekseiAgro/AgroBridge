@@ -397,7 +397,7 @@
     "publishHint": "Save keeps a draft. Publish sends the card to an administrator for moderation before it appears in the catalog.",
     "requiredMark": "*",
     "requiredToPublish": "Required to publish",
-    "listingRequiredHint": "Title, category, unit, price, and currency are required before publishing. You can still save an incomplete draft.",
+    "listingRequiredHint": "A title is required to save a draft. Category, unit, price, and currency can be completed later, before publishing.",
     "listingErrors": {
       "title": "Enter a real product title before publishing.",
       "category": "Choose a category before publishing.",
