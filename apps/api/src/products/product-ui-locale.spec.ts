@@ -19,6 +19,10 @@ const REQUIRED_KEYS = [
   'product.sections.farmStory',
   'product.variety',
   'product.currentStock',
+  'product.updateAvailability',
+  'product.moreActions',
+  'product.markSoldOut',
+  'product.markSoldOutConfirm',
   'product.country',
   'product.originPlace',
   'product.monthlyProduction',
@@ -75,6 +79,7 @@ describe('public product UI localization (S1)', () => {
     expect(read(en, 'product.sections.volume')).toBe('Available volume');
     expect(read(en, 'product.variety')).toBe('Variety');
     expect(read(en, 'product.currentStock')).toBe('Current stock');
+    expect(read(en, 'product.updateAvailability')).toBe('Update availability');
     expect(read(en, 'quality.tiers.fair')).toBe('Fair');
   });
 

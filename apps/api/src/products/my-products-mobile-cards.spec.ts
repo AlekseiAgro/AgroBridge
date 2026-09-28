@@ -8,6 +8,7 @@ import { AddressInfo } from 'net';
 const WEB_SRC = join(__dirname, '../../../web/src');
 const GLOBALS_CSS = join(WEB_SRC, 'app/globals.css');
 const PRODUCTS_PAGE = join(WEB_SRC, 'app/[locale]/dashboard/products/page.tsx');
+const PRODUCT_ACTIONS = join(WEB_SRC, 'components/MyProductCardActions.tsx');
 
 type CardMeasure = {
   extra: number;
@@ -32,7 +33,7 @@ type Measure = {
   mainDir: string;
   titleDisplay: string;
   actionsDisplay: string;
-  secondaryDisplay: string;
+  menuDisplay: string;
   actionCols: number;
   secondaryCols: number;
   mediaWidth: number;
@@ -63,6 +64,9 @@ function findChrome(): string | null {
 function cardHtml(options: {
   title: string;
   status: string;
+  harvest: string;
+  stock: string;
+  price: string;
   meta: string;
   score: string;
   photo: boolean;
@@ -72,10 +76,17 @@ function cardHtml(options: {
     : `<span class="product-list__media product-list__media--sm product-photo-placeholder"><span class="product-photo-placeholder__label">No product photo</span></span>`;
   return `<li class="product-list__item product-list__item--row product-list__item--mine">
     <div class="product-list__item-main">
-      ${media}
+      <a class="product-list__media-link" href="#preview">${media}</a>
       <div class="product-list__item-body">
         <div class="product-list__identity">
-          <p class="product-list__title">${options.title}</p>
+          <a class="product-list__title" href="#preview">${options.title}</a>
+          <div class="product-list__availability">
+            <span class="harvest-badges">
+              <span class="harvest-badge harvest-badge--available">${options.harvest}</span>
+            </span>
+            <p class="product-list__stock">${options.stock}</p>
+            <p class="product-list__price">${options.price}</p>
+          </div>
           <p class="product-list__status">${options.status}</p>
         </div>
         <div class="product-quality-summary">
@@ -88,11 +99,15 @@ function cardHtml(options: {
       </div>
     </div>
     <div class="product-list__actions">
-      <a class="button button--ghost product-list__action--primary" href="#preview">Посмотреть карточку</a>
-      <div class="product-list__actions-secondary">
-        <a class="button button--ghost" href="#edit">Изменить</a>
-        <button class="button button--ghost" type="button">Удалить</button>
-      </div>
+      <a class="button button--primary product-list__action--primary" href="#edit">Обновить наличие</a>
+      <details class="mine-card-menu">
+        <summary class="button button--ghost mine-card-menu__trigger" aria-label="Ещё действия">⋯</summary>
+        <div class="mine-card-menu__panel">
+          <a class="mine-card-menu__item" href="#edit">Изменить</a>
+          <button class="mine-card-menu__item" type="button">Отметить как распродано</button>
+          <button class="mine-card-menu__item mine-card-menu__item--danger" type="button">Удалить</button>
+        </div>
+      </details>
     </div>
   </li>`;
 }
@@ -115,6 +130,9 @@ function fixture(css: string): string {
               ${cardHtml({
                 title: 'Honey',
                 status: 'Черновик',
+                harvest: 'Available',
+                stock: '200 kg',
+                price: '₾ 12.00 / kg',
                 meta: 'Honey · 200 kg',
                 score: '72/100',
                 photo: false,
@@ -123,6 +141,9 @@ function fixture(css: string): string {
                 title:
                   'Organic Imereti mountain honey extra long harvest title for export to Germany and the Netherlands',
                 status: 'Pending review after administrator clarification',
+                harvest: 'Limited',
+                stock: '1200 kg',
+                price: '€ 4.50 / kg',
                 meta: 'Honey · 1200–1800 kg · Needs clearer harvest window and origin wording',
                 score: '5/100',
                 photo: true,
@@ -130,6 +151,9 @@ function fixture(css: string): string {
               ${cardHtml({
                 title: 'Новый товар',
                 status: 'Черновик',
+                harvest: 'Growing',
+                stock: '500 kg',
+                price: '$ 24.00 / kg',
                 meta: 'Nuts · 500 kg',
                 score: '5/100',
                 photo: false,
@@ -137,6 +161,9 @@ function fixture(css: string): string {
               ${cardHtml({
                 title: 'Kakheti walnuts',
                 status: 'Опубликован',
+                harvest: 'Sold out',
+                stock: '3 ton',
+                price: '₾ 8.00 / kg',
                 meta: 'Nuts · 3 ton',
                 score: '88/100',
                 photo: true,
@@ -203,9 +230,9 @@ const MEASURE_JS = `(() => {
     mainDir: getComputedStyle(document.querySelector('.product-list__item--mine .product-list__item-main')).flexDirection,
     titleDisplay: getComputedStyle(document.querySelector('.product-list__item--mine .product-list__title')).display,
     actionsDisplay: getComputedStyle(document.querySelector('.product-list__item--mine .product-list__actions')).display,
-    secondaryDisplay: getComputedStyle(document.querySelector('.product-list__item--mine .product-list__actions-secondary')).display,
+    menuDisplay: getComputedStyle(document.querySelector('.product-list__item--mine .mine-card-menu')).display,
     actionCols: cols(document.querySelector('.product-list__item--mine .product-list__actions')),
-    secondaryCols: cols(document.querySelector('.product-list__item--mine .product-list__actions-secondary')),
+    secondaryCols: 0,
     mediaWidth: Math.round(document.querySelector('.product-list__item--mine .product-list__media').getBoundingClientRect().width),
     cards,
   };
@@ -334,6 +361,7 @@ async function cdpEvaluate(
 describe('My Products mobile cards', () => {
   const css = readGlobalsCss();
   const page = readFileSync(PRODUCTS_PAGE, 'utf8');
+  const actions = readFileSync(PRODUCT_ACTIONS, 'utf8');
   const chrome = findChrome();
   const viewports = [
     { width: 320, height: 720 },
@@ -350,15 +378,14 @@ describe('My Products mobile cards', () => {
     expect(page).toContain('product-list__item--mine');
     expect(page).toContain('product-list__identity');
     expect(page).toContain('product-list__status');
-    expect(page).toContain('product-list__action--primary');
-    expect(page).toContain('product-list__actions-secondary');
+    expect(actions).toContain('product-list__action--primary');
+    expect(page).toContain('MyProductCardActions');
     expect(page).toContain("t('preview')");
-    expect(page).toContain("t('edit')");
-    expect(page).toContain('DeleteProductButton');
+    expect(page).toContain('HarvestStatusBadge');
     expect(page).toContain("t(`moderation.${product.moderationStatus}`)");
     expect(css).toContain('.product-list__item--mine .product-list__title');
     expect(css).toContain('overflow-wrap: anywhere');
-    expect(css).toContain('.product-list__item--mine .product-list__actions-secondary');
+    expect(css).toContain('.mine-card-menu');
     expect(css).toContain('flex-wrap: nowrap');
     expect(css).toMatch(/\.product-list__item--mine \.product-list__item-main \{[\s\S]*?flex:\s*none/);
     expect(css).toMatch(/\.product-list__item--mine \.product-list__actions \{[\s\S]*?flex:\s*none/);
@@ -401,8 +428,8 @@ describe('My Products mobile cards', () => {
             expect(result.itemDir).toBe('column');
             expect(result.mainDir).toBe('column');
             expect(result.actionsDisplay).toBe('grid');
-            expect(result.actionCols).toBe(1);
-            expect(result.secondaryCols).toBe(2);
+            expect(result.actionCols).toBe(2);
+            expect(result.menuDisplay).not.toBe('none');
             expect(result.mediaWidth).toBeGreaterThan(result.contentWidth * 0.8);
           }
 
@@ -410,8 +437,7 @@ describe('My Products mobile cards', () => {
             expect(result.sidebarWidth).toBeGreaterThan(200);
             expect(result.mainWidth).toBeLessThan(800);
             expect(result.actionsDisplay).toBe('grid');
-            expect(result.actionCols).toBe(1);
-            expect(result.secondaryCols).toBe(2);
+            expect(result.actionCols).toBe(2);
           }
 
           if (tablet) {
@@ -423,7 +449,7 @@ describe('My Products mobile cards', () => {
             expect(result.itemDir).toBe('row');
             expect(result.mainDir).toBe('row');
             expect(result.actionsDisplay).toBe('flex');
-            expect(result.secondaryDisplay).toBe('contents');
+            expect(result.menuDisplay).not.toBe('none');
             expect(result.mediaWidth).toBeLessThan(90);
             expect(result.sidebarWidth).toBeGreaterThan(200);
           }
