@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { staticPublicMetadata } from '@/lib/seo-public-metadata';
 import { RoleHub } from '@/components/RoleHub';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
@@ -6,6 +8,11 @@ import { SiteHeader } from '@/components/SiteHeader';
 type Props = {
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return staticPublicMetadata(locale, 'buyers');
+}
 
 export default async function BuyersHubPage({ params }: Props) {
   const { locale } = await params;

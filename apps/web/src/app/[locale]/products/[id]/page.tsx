@@ -1,6 +1,8 @@
 import { formatListedPrice, type ProductDetail } from '@agrobridge/shared';
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import { CertificateBadges } from '@/components/CertificateBadges';
 import { HarvestPlanSummary } from '@/components/HarvestPlanSummary';
 import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
@@ -25,11 +27,26 @@ import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
 import { verifyEmailRedirectHref } from '@/lib/protected-next-path';
+import { productPageMetadata } from '@/lib/seo-public-metadata';
 import { getCurrentUser } from '@/lib/session';
+
+const loadProduct = cache(async (id: string, token: string | null) => {
+  return apiRequest<ProductDetail>(`/products/${id}`, { token });
+});
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, id } = await params;
+  try {
+    const product = await loadProduct(id, await getAuthToken());
+    return productPageMetadata(product, locale);
+  } catch {
+    return {};
+  }
+}
 
 export default async function ProductDetailPage({ params }: Props) {
   const { locale, id } = await params;
@@ -45,7 +62,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   let product: ProductDetail;
   try {
-    product = await apiRequest<ProductDetail>(`/products/${id}`, { token });
+    product = await loadProduct(id, token);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
       notFound();

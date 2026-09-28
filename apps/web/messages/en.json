@@ -3,6 +3,68 @@
     "title": "AgroBridge",
     "description": "Connect Georgian agricultural producers with buyers worldwide."
   },
+  "seo": {
+    "home": {
+      "title": "Georgian farms. Global buyers | AgroBridge",
+      "description": "AgroBridge connects Georgian agricultural producers with buyers. Browse published farm offers or publish a purchase request."
+    },
+    "catalog": {
+      "title": "Agricultural products from Georgian farms | AgroBridge",
+      "description": "Browse published offers from Georgian farms."
+    },
+    "requests": {
+      "title": "Purchase requests | AgroBridge",
+      "description": "Buyers publish what they need to source. An open request lists the product, quantity, and destination so farms can reply with a quote."
+    },
+    "buyers": {
+      "title": "For buyers | AgroBridge",
+      "description": "Browse Georgian farm offers or publish a purchase request with the product, quantity, and destination you need."
+    },
+    "sellers": {
+      "title": "For sellers | AgroBridge",
+      "description": "Reply to open purchase requests or publish a product offer for the AgroBridge catalog."
+    },
+    "howItWorks": {
+      "title": "How it works | AgroBridge",
+      "description": "Find or publish a product, connect with a trade partner, and agree on supply terms between Georgian farms and buyers."
+    },
+    "support": {
+      "title": "Support | AgroBridge",
+      "description": "Send a support request. The AgroBridge team replies by email."
+    },
+    "legal": {
+      "title": "Legal information | AgroBridge",
+      "description": "Legal information for using AgroBridge."
+    },
+    "terms": {
+      "title": "Terms of Use | AgroBridge",
+      "description": "Terms of Use for AgroBridge."
+    },
+    "privacy": {
+      "title": "Privacy Policy | AgroBridge",
+      "description": "Privacy Policy for personal data on AgroBridge."
+    },
+    "product": {
+      "price": "Listed price: {price}.",
+      "availability": "Availability: {status}.",
+      "quantity": "Quantity: {quantity}.",
+      "origin": "Origin: {origin}.",
+      "variety": "Variety: {variety}.",
+      "season": "Season: {months}."
+    },
+    "farm": {
+      "fallback": "{name} is a producer profile on AgroBridge.",
+      "categories": "Public products: {categories}.",
+      "exports": "Export markets: {markets}.",
+      "verified": "This profile shows the Verified badge."
+    },
+    "request": {
+      "fallback": "Open purchase request.",
+      "quantity": "Quantity: {quantity}.",
+      "variety": "Variety: {variety}.",
+      "packaging": "Packaging: {packaging}."
+    }
+  },
   "notFound": {
     "title": "Page not found",
     "body": "This AgroBridge page does not exist or is no longer available. Go home or continue in the marketplace.",

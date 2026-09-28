@@ -3,6 +3,68 @@
     "title": "AgroBridge",
     "description": "Georgische Agrarproduzenten mit Käufern weltweit verbinden."
   },
+  "seo": {
+    "home": {
+      "title": "Georgische Betriebe. Globale Käufer | AgroBridge",
+      "description": "AgroBridge verbindet georgische Agrarproduzenten mit Käufern. Sehen Sie veröffentlichte Angebote oder veröffentlichen Sie eine Kaufanfrage."
+    },
+    "catalog": {
+      "title": "Agrarprodukte von georgischen Betrieben | AgroBridge",
+      "description": "Entdecken Sie veröffentlichte Angebote georgischer Betriebe."
+    },
+    "requests": {
+      "title": "Kaufanfragen | AgroBridge",
+      "description": "Käufer veröffentlichen, was sie beschaffen möchten. Eine offene Anfrage nennt Produkt, Menge und Bestimmungsland, damit Betriebe ein Angebot senden können."
+    },
+    "buyers": {
+      "title": "Für Käufer | AgroBridge",
+      "description": "Sehen Sie Angebote georgischer Betriebe oder veröffentlichen Sie eine Kaufanfrage mit Produkt, Menge und Bestimmung."
+    },
+    "sellers": {
+      "title": "Für Verkäufer | AgroBridge",
+      "description": "Antworten Sie auf offene Kaufanfragen oder veröffentlichen Sie ein Produktangebot für den AgroBridge-Katalog."
+    },
+    "howItWorks": {
+      "title": "So funktioniert’s | AgroBridge",
+      "description": "Finden oder veröffentlichen Sie ein Produkt, verbinden Sie sich mit einem Handelspartner und vereinbaren Sie Lieferbedingungen zwischen georgischen Betrieben und Käufern."
+    },
+    "support": {
+      "title": "Support | AgroBridge",
+      "description": "Senden Sie eine Support-Anfrage. Das AgroBridge-Team antwortet per E-Mail."
+    },
+    "legal": {
+      "title": "Rechtliche Informationen | AgroBridge",
+      "description": "Rechtliche Informationen zur Nutzung von AgroBridge."
+    },
+    "terms": {
+      "title": "Nutzungsbedingungen | AgroBridge",
+      "description": "Nutzungsbedingungen von AgroBridge."
+    },
+    "privacy": {
+      "title": "Datenschutzrichtlinie | AgroBridge",
+      "description": "Datenschutzrichtlinie von AgroBridge zu personenbezogenen Daten."
+    },
+    "product": {
+      "price": "Angegebener Preis: {price}.",
+      "availability": "Verfügbarkeit: {status}.",
+      "quantity": "Menge: {quantity}.",
+      "origin": "Herkunft: {origin}.",
+      "variety": "Sorte: {variety}.",
+      "season": "Saison: {months}."
+    },
+    "farm": {
+      "fallback": "{name} ist ein Erzeugerprofil auf AgroBridge.",
+      "categories": "Öffentliche Produkte: {categories}.",
+      "exports": "Exportmärkte: {markets}.",
+      "verified": "Dieses Profil zeigt das Abzeichen „Verifiziert“."
+    },
+    "request": {
+      "fallback": "Offene Kaufanfrage.",
+      "quantity": "Menge: {quantity}.",
+      "variety": "Sorte: {variety}.",
+      "packaging": "Verpackung: {packaging}."
+    }
+  },
   "notFound": {
     "title": "Seite nicht gefunden",
     "body": "Diese AgroBridge-Seite existiert nicht oder ist nicht mehr verfügbar. Gehen Sie zur Startseite oder weiter zum Marktplatz.",

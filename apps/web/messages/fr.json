@@ -3,6 +3,68 @@
     "title": "AgroBridge",
     "description": "Relier les producteurs agricoles géorgiens aux acheteurs du monde entier."
   },
+  "seo": {
+    "home": {
+      "title": "Fermes géorgiennes. Acheteurs mondiaux | AgroBridge",
+      "description": "AgroBridge relie les producteurs agricoles géorgiens aux acheteurs. Consultez les offres publiées ou publiez une demande d'achat."
+    },
+    "catalog": {
+      "title": "Produits agricoles des fermes géorgiennes | AgroBridge",
+      "description": "Parcourez les offres publiées des fermes géorgiennes."
+    },
+    "requests": {
+      "title": "Demandes d'achat | AgroBridge",
+      "description": "Les acheteurs publient ce qu'ils souhaitent sourcer. Une demande ouverte indique le produit, la quantité et le pays de destination pour qu'une ferme puisse répondre par une offre."
+    },
+    "buyers": {
+      "title": "Pour les acheteurs | AgroBridge",
+      "description": "Consultez les offres des fermes géorgiennes ou publiez une demande d'achat avec le produit, la quantité et la destination."
+    },
+    "sellers": {
+      "title": "Pour les vendeurs | AgroBridge",
+      "description": "Répondez aux demandes d'achat ouvertes ou publiez une offre de produit pour le catalogue AgroBridge."
+    },
+    "howItWorks": {
+      "title": "Comment ça marche | AgroBridge",
+      "description": "Trouvez ou publiez un produit, entrez en contact avec un partenaire commercial et convenez des conditions de fourniture entre fermes géorgiennes et acheteurs."
+    },
+    "support": {
+      "title": "Assistance | AgroBridge",
+      "description": "Envoyez une demande d'assistance. L'équipe AgroBridge répond par e-mail."
+    },
+    "legal": {
+      "title": "Informations juridiques | AgroBridge",
+      "description": "Informations juridiques sur l'utilisation d'AgroBridge."
+    },
+    "terms": {
+      "title": "Conditions d'utilisation | AgroBridge",
+      "description": "Conditions d'utilisation d'AgroBridge."
+    },
+    "privacy": {
+      "title": "Politique de confidentialité | AgroBridge",
+      "description": "Politique de confidentialité d'AgroBridge concernant les données personnelles."
+    },
+    "product": {
+      "price": "Prix indiqué : {price}.",
+      "availability": "Disponibilité : {status}.",
+      "quantity": "Quantité : {quantity}.",
+      "origin": "Origine : {origin}.",
+      "variety": "Variété : {variety}.",
+      "season": "Saison : {months}."
+    },
+    "farm": {
+      "fallback": "{name} est un profil de producteur sur AgroBridge.",
+      "categories": "Produits publics : {categories}.",
+      "exports": "Marchés d'exportation : {markets}.",
+      "verified": "Ce profil affiche le badge « Vérifié »."
+    },
+    "request": {
+      "fallback": "Demande d'achat ouverte.",
+      "quantity": "Quantité : {quantity}.",
+      "variety": "Variété : {variety}.",
+      "packaging": "Conditionnement : {packaging}."
+    }
+  },
   "notFound": {
     "title": "Page introuvable",
     "body": "Cette page AgroBridge n'existe pas ou n'est plus disponible. Revenez à l'accueil ou continuez sur la place de marché.",
