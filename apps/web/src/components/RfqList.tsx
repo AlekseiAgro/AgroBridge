@@ -42,6 +42,7 @@ export async function RfqList({
             className={[
               'product-list__item',
               'product-list__item--row',
+              'entity-card',
               cancelled ? 'product-list__item--cancelled' : '',
             ]
               .filter(Boolean)

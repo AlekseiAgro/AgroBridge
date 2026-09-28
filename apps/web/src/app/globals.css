@@ -2127,6 +2127,26 @@ body {
   gap: 0.4rem;
 }
 
+/* Stretch the existing title link across the card. Do not position the title
+   itself, or the hit area collapses back to the title box. */
+.entity-card {
+  position: relative;
+}
+
+.entity-card .product-list__title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.entity-card :is(a, button, summary, input, select, textarea, label):not(.product-list__title),
+.entity-card .product-list__actions,
+.entity-card .mine-card-menu,
+.entity-card .harvest-watches__actions {
+  position: relative;
+  z-index: 1;
+}
+
 .product-list__meta {
   margin: 0.35rem 0 0;
   color: var(--muted);

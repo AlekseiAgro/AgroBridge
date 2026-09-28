@@ -65,7 +65,7 @@ export function HarvestWatchesList({ initial }: Props) {
           const title = formatProductTitle(item.productTitle, locale);
           const ownerLabel = item.owner.displayName?.trim() || tp('sellerFallback');
           return (
-            <li key={item.id} className="harvest-watches__item product-list__item--with-media">
+            <li key={item.id} className="harvest-watches__item product-list__item--with-media entity-card">
               {imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img

@@ -114,7 +114,7 @@ export default async function PublicUserProfilePage({ params }: Props) {
         {profile.farm ? (
           <section className="profile-farm">
             <h2 className="section-title">{t('farmTitle')}</h2>
-            <div className="product-list__item">
+            <div className="product-list__item entity-card">
               <Link href={`/farms/${profile.farm.id}`} className="product-list__title">
                 {profile.farm.name}
               </Link>

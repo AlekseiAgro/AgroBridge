@@ -156,7 +156,7 @@ export async function FarmProfileView({
             );
             const listedPrice = formatListedPrice(product);
             return (
-              <li key={product.id} className="product-list__item product-list__item--with-media">
+              <li key={product.id} className="product-list__item product-list__item--with-media entity-card">
                 {image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={image.url} alt={imageAlt} className="product-list__media" />
