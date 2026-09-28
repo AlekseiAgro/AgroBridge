@@ -1,5 +1,7 @@
 import type { PurchaseRequestSummary } from '@agrobridge/shared';
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { staticPublicMetadata } from '@/lib/seo-public-metadata';
 import { PurchaseRequestFilters } from '@/components/PurchaseRequestFilters';
 import { PurchaseRequestList } from '@/components/PurchaseRequestList';
 import { EmptyState } from '@/components/EmptyState';
@@ -14,6 +16,11 @@ type Props = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ q?: string; category?: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return staticPublicMetadata(locale, 'requests');
+}
 
 export default async function PurchaseRequestsPage({ params, searchParams }: Props) {
   const { locale } = await params;

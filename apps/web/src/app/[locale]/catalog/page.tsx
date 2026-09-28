@@ -1,5 +1,7 @@
 import { formatListedPrice, type ProductSummary } from '@agrobridge/shared';
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { staticPublicMetadata } from '@/lib/seo-public-metadata';
 import { CertificateBadges } from '@/components/CertificateBadges';
 import { CatalogFilters } from '@/components/CatalogFilters';
 import { CatalogPurchaseCta } from '@/components/CatalogPurchaseCta';
@@ -28,6 +30,11 @@ type Props = {
     inSeason?: string;
   }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return staticPublicMetadata(locale, 'catalog');
+}
 
 export default async function CatalogPage({ params, searchParams }: Props) {
   const { locale } = await params;

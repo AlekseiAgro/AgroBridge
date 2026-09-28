@@ -1,6 +1,8 @@
 import type { PurchaseRequestDetail } from '@agrobridge/shared';
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 import { OpenChatButton } from '@/components/OpenChatButton';
 import { PurchaseQuoteForm } from '@/components/PurchaseQuoteForm';
 import { PurchaseRequestActionButton } from '@/components/PurchaseRequestActionButton';
@@ -10,11 +12,26 @@ import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
 import { loginRedirectHref } from '@/lib/protected-next-path';
 import { formatRegionLabel } from '@/lib/region';
+import { purchaseRequestPageMetadata } from '@/lib/seo-public-metadata';
 import { getCurrentUser } from '@/lib/session';
+
+const loadPurchaseRequest = cache(async (id: string, token: string | null) => {
+  return apiRequest<PurchaseRequestDetail>(`/purchase-requests/${id}`, { token });
+});
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, id } = await params;
+  try {
+    const request = await loadPurchaseRequest(id, await getAuthToken());
+    return purchaseRequestPageMetadata(request, locale);
+  } catch {
+    return {};
+  }
+}
 
 export default async function PurchaseRequestDetailPage({ params }: Props) {
   const { locale, id } = await params;
@@ -29,7 +46,7 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
 
   let request: PurchaseRequestDetail;
   try {
-    request = await apiRequest<PurchaseRequestDetail>(`/purchase-requests/${id}`, { token });
+    request = await loadPurchaseRequest(id, token);
   } catch (error) {
     if (error instanceof ApiError && (error.status === 404 || error.status === 403)) {
       notFound();

@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { staticPublicMetadata } from '@/lib/seo-public-metadata';
 import { BrandLogo } from '@/components/BrandLogo';
 import { CategoryShowcase } from '@/components/CategoryShowcase';
 import { HowItWorksSection } from '@/components/HowItWorksSection';
@@ -9,6 +11,11 @@ import { Link } from '@/i18n/navigation';
 type Props = {
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  return staticPublicMetadata(locale, 'home');
+}
 
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
