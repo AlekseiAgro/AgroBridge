@@ -153,9 +153,8 @@ describe('AuthService', () => {
       },
     });
     expect(notifications.notifyWelcome).not.toHaveBeenCalled();
-    // Verification mail is fire-and-forget after account creation.
-    await Promise.resolve();
     expect(verification.sendEmailCode).toHaveBeenCalled();
+    expect(result.verificationEmailSent).toBe(true);
   });
 
   it('registers a buyer without seller/buyer subtypes', async () => {
@@ -187,8 +186,8 @@ describe('AuthService', () => {
     expect(result.user.sellerType).toBeNull();
     expect(result.user.emailVerified).toBe(false);
     expect(notifications.notifyWelcome).not.toHaveBeenCalled();
-    await Promise.resolve();
     expect(verification.sendEmailCode).toHaveBeenCalled();
+    expect(result.verificationEmailSent).toBe(true);
     expect(prisma.user.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -241,6 +240,43 @@ describe('AuthService', () => {
         ...acceptedRegister,
       }),
     ).rejects.toBeInstanceOf(ConflictException);
+    expect(verification.sendEmailCode).not.toHaveBeenCalled();
+    expect(prisma.user.create).not.toHaveBeenCalled();
+  });
+
+  it('keeps the account when the first verification email cannot be sent', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+    prisma.user.create.mockResolvedValue({
+      id: 'user_1',
+      email: 'farmer@example.com',
+      role: 'farmer',
+      sellerType: null,
+      buyerType: null,
+      locale: 'en',
+      displayName: 'Nino',
+      passwordHash: 'hash',
+      emailVerifiedAt: null,
+    });
+    verification.sendEmailCode.mockRejectedValueOnce(
+      new Error('SMTP 535 authentication failed\n    at MailService.send'),
+    );
+
+    const result = await service.register({
+      email: 'farmer@example.com',
+      password: 'password1',
+      role: 'farmer',
+      displayName: 'Nino',
+      locale: 'en',
+      ...acceptedRegister,
+    });
+
+    expect(result.accessToken).toBe('test-token');
+    expect(result.user.emailVerified).toBe(false);
+    expect(result.verificationEmailSent).toBe(false);
+    expect(prisma.user.create).toHaveBeenCalled();
+    expect(notifications.notifyWelcome).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).not.toContain('SMTP');
+    expect(JSON.stringify(result)).not.toContain('MailService');
   });
 
   it('rejects invalid login', async () => {

@@ -109,10 +109,17 @@ export class AuthService {
     const authUser = this.toAuthenticatedUser(user);
 
     // Only the verification code goes out at signup. The welcome / account-ready
-    // email waits for a successful confirmEmailCode transition.
-    void this.verification.sendEmailCode(authUser, ip).catch(() => undefined);
+    // email waits for a successful confirmEmailCode transition. A delivery failure
+    // must not roll back the account or surface provider errors.
+    let verificationEmailSent = false;
+    try {
+      await this.verification.sendEmailCode(authUser, ip);
+      verificationEmailSent = true;
+    } catch {
+      verificationEmailSent = false;
+    }
 
-    return this.issueToken(authUser, 0);
+    return { ...(await this.issueToken(authUser, 0)), verificationEmailSent };
   }
 
   async login(dto: LoginDto, ip?: string | null): Promise<AuthTokenResponse> {

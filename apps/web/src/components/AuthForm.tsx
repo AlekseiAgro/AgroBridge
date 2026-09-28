@@ -71,16 +71,24 @@ export function AuthForm({ mode, nextPath, termsVersion, termsLocale }: Props) {
         body: JSON.stringify(payload),
       });
 
-      const data = (await response.json()) as { message?: string; user?: PublicUser };
+      const data = (await response.json()) as {
+        message?: string;
+        user?: PublicUser;
+        verificationEmailSent?: boolean;
+      };
 
       if (!response.ok) {
         setError(data.message ?? t('genericError'));
         return;
       }
 
+      const verifyParams = new URLSearchParams({ next: redirectTo });
+      if (mode === 'register' && data.verificationEmailSent === false) {
+        verifyParams.set('verificationEmail', 'unsent');
+      }
       const destination =
         data.user && !data.user.emailVerified
-          ? `/verify-email?next=${encodeURIComponent(redirectTo)}`
+          ? `/verify-email?${verifyParams.toString()}`
           : redirectTo;
 
       router.replace(destination);

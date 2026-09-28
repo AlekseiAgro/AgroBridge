@@ -14,12 +14,12 @@ export const metadata = {
 
 type Props = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; verificationEmail?: string }>;
 };
 
 export default async function VerifyEmailPage({ params, searchParams }: Props) {
   const { locale } = await params;
-  const { next } = await searchParams;
+  const { next, verificationEmail } = await searchParams;
   setRequestLocale(locale);
 
   const nextPath = safeNextPath(next, '/account');
@@ -47,7 +47,11 @@ export default async function VerifyEmailPage({ params, searchParams }: Props) {
       <main className="auth-card">
         <h1>{t('title')}</h1>
         <p className="auth-card__subtitle">{t('subtitle')}</p>
-        <VerifyEmailForm email={user!.email} nextPath={nextPath} />
+        <VerifyEmailForm
+          email={user!.email}
+          nextPath={nextPath}
+          initialEmailUnsent={verificationEmail === 'unsent'}
+        />
         <AuthLegalLinks />
       </main>
     </div>

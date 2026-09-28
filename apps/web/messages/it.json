@@ -1359,6 +1359,7 @@
     "resend": "Invia di nuovo il codice",
     "sent": "Codice inviato a {destination}",
     "sentHint": "Abbiamo inviato un codice a {email}. Controlla posta in arrivo e spam.",
+    "initialSendFailed": "Non è stato possibile inviare l’email di conferma. Puoi inviare di nuovo il codice.",
     "confirmed": "Email confermata. Apertura dell’account…",
     "pleaseWait": "Attendere…",
     "genericError": "Qualcosa è andato storto. Riprova."

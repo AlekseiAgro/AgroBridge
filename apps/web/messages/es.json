@@ -1359,6 +1359,7 @@
     "resend": "Reenviar código",
     "sent": "Código enviado a {destination}",
     "sentHint": "Enviamos un código a {email}. Revisa la bandeja de entrada y el spam.",
+    "initialSendFailed": "No se pudo enviar el correo de confirmación. Puedes volver a enviar el código.",
     "confirmed": "Correo confirmado. Abriendo tu cuenta…",
     "pleaseWait": "Espera…",
     "genericError": "Algo salió mal. Inténtalo de nuevo."

@@ -1359,6 +1359,7 @@
     "resend": "Code erneut senden",
     "sent": "Code an {destination} gesendet",
     "sentHint": "Wir haben einen Code an {email} gesendet. Prüfen Sie Posteingang und Spam.",
+    "initialSendFailed": "Die Bestätigungs-E-Mail konnte nicht gesendet werden. Sie können den Code erneut senden.",
     "confirmed": "E-Mail bestätigt. Konto wird geöffnet…",
     "pleaseWait": "Bitte warten…",
     "genericError": "Etwas ist schiefgelaufen. Bitte erneut versuchen."

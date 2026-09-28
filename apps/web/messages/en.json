@@ -1359,6 +1359,7 @@
     "resend": "Resend code",
     "sent": "Code sent to {destination}",
     "sentHint": "We sent a code to {email}. Check your inbox and spam folder.",
+    "initialSendFailed": "We could not send the verification email. You can send the code again.",
     "confirmed": "Email confirmed. Opening your account…",
     "pleaseWait": "Please wait…",
     "genericError": "Something went wrong. Please try again."

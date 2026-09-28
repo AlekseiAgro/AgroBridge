@@ -8,6 +8,8 @@ import { LogoutButton } from '@/components/LogoutButton';
 type Props = {
   email: string;
   nextPath: string;
+  /** Registration succeeded, but the first verification email was not sent. */
+  initialEmailUnsent?: boolean;
 };
 
 async function postJson<T>(url: string, body?: Record<string, unknown>): Promise<T> {
@@ -38,13 +40,15 @@ async function postJson<T>(url: string, body?: Record<string, unknown>): Promise
   return (data ?? {}) as T;
 }
 
-export function VerifyEmailForm({ email, nextPath }: Props) {
+export function VerifyEmailForm({ email, nextPath, initialEmailUnsent = false }: Props) {
   const t = useTranslations('verifyEmail');
   const router = useRouter();
   const [code, setCode] = useState('');
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    initialEmailUnsent ? t('initialSendFailed') : null,
+  );
 
   async function run(action: () => Promise<void>) {
     setPending(true);

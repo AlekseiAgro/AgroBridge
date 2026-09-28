@@ -60,4 +60,9 @@ export type AuthTokenResponse = {
   tokenType: 'Bearer';
   expiresIn: string;
   user: PublicUser;
+  /**
+   * Set only by registration. False when the account was created but the first
+   * verification email could not be sent. Login omits it.
+   */
+  verificationEmailSent?: boolean;
 };
