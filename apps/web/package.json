@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack --port 3000",
     "build": "next build --webpack",
     "start": "next start --port 3000",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@agrobridge/shared": "workspace:*",
