@@ -10,6 +10,7 @@ import {
 import { useLocale, useTranslations } from 'next-intl';
 import { FormEvent, useState } from 'react';
 import { LegalDocumentDialog } from '@/components/LegalDocumentDialog';
+import { PasswordField } from '@/components/PasswordField';
 import { Link, useRouter } from '@/i18n/navigation';
 import { safeNextPath } from '@/lib/safe-next-path';
 
@@ -32,6 +33,8 @@ export function AuthForm({ mode, nextPath, termsVersion, termsLocale }: Props) {
   const [role, setRole] = useState<RegisterableRole>(
     nextPath?.includes('/requests/new') ? 'buyer' : 'farmer',
   );
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const redirectTo = safeNextPath(nextPath, '/account');
   const acceptedTermsVersion = termsVersion ?? CURRENT_LEGAL_VERSION;
   const acceptedTermsLocale = termsLocale ?? 'en';
@@ -46,6 +49,15 @@ export function AuthForm({ mode, nextPath, termsVersion, termsLocale }: Props) {
       setError(t('termsRequired'));
       setPending(false);
       return;
+    }
+    if (mode === 'register') {
+      const password = String(form.get('password') ?? '');
+      const confirmPassword = String(form.get('confirmPassword') ?? '');
+      if (password !== confirmPassword) {
+        setError(t('passwordsDoNotMatch'));
+        setPending(false);
+        return;
+      }
     }
     const payload =
       mode === 'login'
@@ -133,16 +145,41 @@ export function AuthForm({ mode, nextPath, termsVersion, termsLocale }: Props) {
         <input name="email" type="email" required autoComplete="email" />
       </label>
 
-      <label className="field">
-        <span>{t('password')}</span>
-        <input
-          name="password"
-          type="password"
-          required
-          minLength={8}
-          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-        />
-      </label>
+      {mode === 'login' ? (
+        <label className="field">
+          <span>{t('password')}</span>
+          <input
+            name="password"
+            type="password"
+            required
+            minLength={8}
+            autoComplete="current-password"
+          />
+        </label>
+      ) : (
+        <>
+          <PasswordField
+            id="register-password"
+            name="password"
+            label={t('password')}
+            autoComplete="new-password"
+            shown={showPassword}
+            onToggle={() => setShowPassword((current) => !current)}
+            showLabel={t('showPassword')}
+            hideLabel={t('hidePassword')}
+          />
+          <PasswordField
+            id="register-confirm-password"
+            name="confirmPassword"
+            label={t('confirmPassword')}
+            autoComplete="new-password"
+            shown={showConfirmPassword}
+            onToggle={() => setShowConfirmPassword((current) => !current)}
+            showLabel={t('showPassword')}
+            hideLabel={t('hidePassword')}
+          />
+        </>
+      )}
 
       {mode === 'login' ? (
         <p className="auth-form__forgot">
