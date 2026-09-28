@@ -358,6 +358,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
         Boolean(initial?.isPublished && initial?.moderationStatus === 'approved'),
     };
 
+    let created = false;
     try {
       const response = await fetch(
         mode === 'create' ? '/api/products' : `/api/products/${initial?.id}`,
@@ -377,22 +378,34 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
         return;
       }
 
+      if (mode === 'create') {
+        if (!data.id) {
+          setError(t('genericError'));
+          return;
+        }
+        created = true;
+        if (intent === 'publish') {
+          router.push('/dashboard/products');
+        } else {
+          router.replace(`/dashboard/products/${data.id}/edit`);
+        }
+        return;
+      }
+
       if (intent === 'publish') {
         router.push('/dashboard/products');
         return;
       }
 
-      if (mode === 'create' && data.id) {
-        router.replace(`/dashboard/products/${data.id}/edit`);
-      } else {
-        setSuccess(t('savedDraftHint'));
-        router.refresh();
-      }
+      setSuccess(t('savedDraftHint'));
+      router.refresh();
     } catch {
       setError(t('genericError'));
     } finally {
-      submitLock.current = false;
-      setPending(false);
+      if (!created) {
+        submitLock.current = false;
+        setPending(false);
+      }
     }
   }
 
