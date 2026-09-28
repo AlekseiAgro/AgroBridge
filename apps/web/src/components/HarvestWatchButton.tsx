@@ -9,6 +9,8 @@ type Props = {
   initialWatching?: boolean;
   isLoggedIn: boolean;
   isOwner?: boolean;
+  /** Sold-out listings reuse this control instead of the quote form. */
+  unavailable?: boolean;
 };
 
 export function HarvestWatchButton({
@@ -16,6 +18,7 @@ export function HarvestWatchButton({
   initialWatching = false,
   isLoggedIn,
   isOwner = false,
+  unavailable = false,
 }: Props) {
   const t = useTranslations('harvest');
   const router = useRouter();
@@ -27,7 +30,7 @@ export function HarvestWatchButton({
     return (
       <div className="harvest-watch">
         <Link href="/login" className="button button--primary harvest-watch__login">
-          {t('loginToWatch')}
+          {unavailable ? t('soldOutLogin') : t('loginToWatch')}
         </Link>
       </div>
     );
@@ -72,9 +75,23 @@ export function HarvestWatchButton({
           void toggle();
         }}
       >
-        {pending ? t('pleaseWait') : watching ? t('unwatch') : t('watch')}
+        {pending
+          ? t('pleaseWait')
+          : watching
+            ? t('unwatch')
+            : unavailable
+              ? t('notifyWhenAvailable')
+              : t('watch')}
       </button>
-      <p className="page__subtitle">{watching ? t('watchingHint') : t('watchHint')}</p>
+      <p className="page__subtitle">
+        {unavailable
+          ? watching
+            ? t('soldOutWatching')
+            : t('soldOutWatchHint')
+          : watching
+            ? t('watchingHint')
+            : t('watchHint')}
+      </p>
       {error ? <p className="form-error">{error}</p> : null}
     </div>
   );

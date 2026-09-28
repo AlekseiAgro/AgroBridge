@@ -1278,6 +1278,12 @@
       "12": "dic"
     },
     "ownerWatchHint": "Este es tu anuncio, no necesitas alertas de cosecha aquí.",
+    "soldOutTitle": "No disponible ahora",
+    "soldOutSubtitle": "Esta cosecha está agotada. La ficha sigue visible: suscríbete a las alertas de cosecha que ya existen.",
+    "notifyWhenAvailable": "Avisarme cuando esté disponible",
+    "soldOutWatchHint": "Son las alertas de cosecha que ya existen. No hay otra suscripción.",
+    "soldOutWatching": "✓ Te avisaremos cuando vuelva a estar disponible",
+    "soldOutLogin": "Inicia sesión para recibir el aviso",
     "forecastUnitHint": "Usa la unidad de Datos básicos ({unit})."
   },
   "quality": {

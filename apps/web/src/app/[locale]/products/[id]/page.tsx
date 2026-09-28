@@ -59,6 +59,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const unitLabel = product.unit ? t(`units.${product.unit as 'kg'}`) : null;
   const listedPrice = formatListedPrice(product);
   const canRequest = Boolean(user) && !product.isOwner;
+  const soldOut = product.harvestStatus === 'soldOut';
   const showPreorder =
     product.preorderEnabled &&
     (product.harvestStatus === 'growing' ||
@@ -122,9 +123,15 @@ export default async function ProductDetailPage({ params }: Props) {
                   <p className="product-detail-cta-price__value">{listedPrice}</p>
                 </div>
               ) : null}
-              <a href="#request-quote" className="button button--primary">
-                {tr('submitRequest')}
-              </a>
+              {soldOut ? (
+                <a href="#harvest-alerts" className="button button--ghost">
+                  {th('notifyWhenAvailable')}
+                </a>
+              ) : (
+                <a href="#request-quote" className="button button--primary">
+                  {tr('submitRequest')}
+                </a>
+              )}
               {user ? (
                 <OpenChatButton
                   farmerId={product.ownerUserId}
@@ -420,18 +427,21 @@ export default async function ProductDetailPage({ params }: Props) {
           unitLabel={unitLabel}
         />
 
-        <section className="harvest-watch-section">
-          <h2 className="section-title">{th('alertsTitle')}</h2>
-          <p className="page__subtitle">{th('alertsSubtitle')}</p>
+        <section id="harvest-alerts" className="harvest-watch-section">
+          <h2 className="section-title">{soldOut ? th('soldOutTitle') : th('alertsTitle')}</h2>
+          <p className="page__subtitle">
+            {soldOut ? th('soldOutSubtitle') : th('alertsSubtitle')}
+          </p>
           <HarvestWatchButton
             productId={product.id}
             initialWatching={Boolean(product.watching)}
             isLoggedIn={Boolean(user)}
             isOwner={Boolean(product.isOwner)}
+            unavailable={soldOut}
           />
         </section>
 
-        {canRequest ? (
+        {soldOut ? null : canRequest ? (
           <div id="request-quote" className="product-request-anchor" style={{ marginTop: '1.75rem' }}>
             <RfqRequestForm
               productId={product.id}

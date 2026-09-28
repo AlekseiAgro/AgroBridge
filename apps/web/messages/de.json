@@ -1278,6 +1278,12 @@
       "12": "Dez."
     },
     "ownerWatchHint": "Das ist Ihr Angebot – Erntebenachrichtigungen sind hier nicht nötig.",
+    "soldOutTitle": "Derzeit nicht verfügbar",
+    "soldOutSubtitle": "Diese Ernte ist ausverkauft. Das Angebot bleibt sichtbar — abonnieren Sie die bestehende Erntebenachrichtigung.",
+    "notifyWhenAvailable": "Benachrichtigen, wenn verfügbar",
+    "soldOutWatchHint": "Das sind die bestehenden Erntebenachrichtigungen. Kein separates Abo.",
+    "soldOutWatching": "✓ Sie werden benachrichtigt, sobald es wieder verfügbar ist",
+    "soldOutLogin": "Anmelden, um benachrichtigt zu werden",
     "forecastUnitHint": "Verwendet die Einheit aus den Basisdaten ({unit})."
   },
   "quality": {

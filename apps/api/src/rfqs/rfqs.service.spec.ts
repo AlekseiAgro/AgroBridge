@@ -164,6 +164,127 @@ describe('RfqsService', () => {
     expect(notifications.notifyRfqCreated).not.toHaveBeenCalled();
   });
 
+  function listedProduct(harvestStatus: string | null) {
+    return {
+      id: 'p1',
+      title: 'Hazelnuts',
+      ownerUserId: farmer.id,
+      farmId: 'f1',
+      unit: 'kg',
+      isPublished: true,
+      moderationStatus: 'approved',
+      harvestStatus,
+      owner: {
+        id: farmer.id,
+        email: farmer.email,
+        locale: farmer.locale,
+        displayName: farmer.displayName,
+      },
+      farm: { id: 'f1', name: 'Farm' },
+    };
+  }
+
+  it.each(['available', 'limited'] as const)(
+    'allows an RFQ when harvest status is %s',
+    async (harvestStatus) => {
+      prisma.product.findUnique.mockResolvedValue(listedProduct(harvestStatus));
+      prisma.rfq.create.mockResolvedValue({
+        id: 'rfq1',
+        buyerId: buyer.id,
+        status: 'pending',
+        quantity: '100',
+        unit: 'kg',
+        message: null,
+        createdAt: new Date('2026-08-01T10:00:00.000Z'),
+        updatedAt: new Date('2026-08-01T10:00:00.000Z'),
+        completedAt: null,
+        product: {
+          id: 'p1',
+          title: 'Hazelnuts',
+          ownerUserId: farmer.id,
+          owner: {
+            id: farmer.id,
+            email: farmer.email,
+            locale: farmer.locale,
+            displayName: farmer.displayName,
+          },
+        },
+        farm: { id: 'f1', name: 'Farm', region: null, ownerId: farmer.id },
+        buyer: {
+          id: buyer.id,
+          displayName: buyer.displayName,
+          email: buyer.email,
+          locale: buyer.locale,
+        },
+        offer: null,
+        ratings: [],
+      });
+
+      const result = await service.create(buyer, { productId: 'p1', quantity: '100' });
+      expect(result.id).toBe('rfq1');
+      expect(prisma.rfq.create).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('rejects a direct RFQ create when the product is sold out', async () => {
+    prisma.product.findUnique.mockResolvedValue(listedProduct('soldOut'));
+
+    await expect(
+      service.create(buyer, { productId: 'p1', quantity: '100' }),
+    ).rejects.toMatchObject({
+      message: 'This product is currently unavailable',
+    });
+    expect(prisma.rfq.create).not.toHaveBeenCalled();
+    expect(notifications.notifyRfqCreated).not.toHaveBeenCalled();
+  });
+
+  it('allows an RFQ again after the harvest returns to available or limited', async () => {
+    prisma.rfq.create.mockResolvedValue({
+      id: 'rfq-back',
+      buyerId: buyer.id,
+      status: 'pending',
+      quantity: '100',
+      unit: 'kg',
+      message: null,
+      createdAt: new Date('2026-08-02T10:00:00.000Z'),
+      updatedAt: new Date('2026-08-02T10:00:00.000Z'),
+      completedAt: null,
+      product: {
+        id: 'p1',
+        title: 'Hazelnuts',
+        ownerUserId: farmer.id,
+        owner: {
+          id: farmer.id,
+          email: farmer.email,
+          locale: farmer.locale,
+          displayName: farmer.displayName,
+        },
+      },
+      farm: { id: 'f1', name: 'Farm', region: null, ownerId: farmer.id },
+      buyer: {
+        id: buyer.id,
+        displayName: buyer.displayName,
+        email: buyer.email,
+        locale: buyer.locale,
+      },
+      offer: null,
+      ratings: [],
+    });
+
+    prisma.product.findUnique.mockResolvedValue(listedProduct('soldOut'));
+    await expect(service.create(buyer, { productId: 'p1', quantity: '10' })).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+
+    for (const harvestStatus of ['available', 'limited'] as const) {
+      prisma.rfq.create.mockClear();
+      prisma.product.findUnique.mockResolvedValue(listedProduct(harvestStatus));
+      const result = await service.create(buyer, { productId: 'p1', quantity: '10' });
+      expect(result.id).toBe('rfq-back');
+      expect(prisma.rfq.create).toHaveBeenCalledTimes(1);
+    }
+  });
+
   it('rejects RFQ for a hidden draft product', async () => {
     prisma.product.findUnique.mockResolvedValue({
       id: 'p1',

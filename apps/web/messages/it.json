@@ -1278,6 +1278,12 @@
       "12": "dic"
     },
     "ownerWatchHint": "Questo è il tuo annuncio: qui non servono avvisi sul raccolto.",
+    "soldOutTitle": "Attualmente non disponibile",
+    "soldOutSubtitle": "Questo raccolto è esaurito. La scheda resta visibile — iscriviti agli avvisi di raccolto già esistenti.",
+    "notifyWhenAvailable": "Avvisami quando è disponibile",
+    "soldOutWatchHint": "Sono gli avvisi di raccolto già esistenti. Nessun abbonamento separato.",
+    "soldOutWatching": "✓ Ti avviseremo quando sarà di nuovo disponibile",
+    "soldOutLogin": "Accedi per ricevere l’avviso",
     "forecastUnitHint": "Usa l’unità da Dati principali ({unit})."
   },
   "quality": {
