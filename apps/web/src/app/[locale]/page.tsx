@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { JsonLd } from '@/components/JsonLd';
 import { staticPublicMetadata } from '@/lib/seo-public-metadata';
+import { buildHomeJsonLd } from '@/lib/seo-jsonld';
 import { BrandLogo } from '@/components/BrandLogo';
 import { CategoryShowcase } from '@/components/CategoryShowcase';
 import { HowItWorksSection } from '@/components/HowItWorksSection';
@@ -21,9 +23,15 @@ export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('home');
+  const homeJsonLd = buildHomeJsonLd({
+    locale,
+    description: t('subtitle'),
+    slogan: t('headline'),
+  });
 
   return (
     <div className="home">
+      {homeJsonLd ? <JsonLd data={homeJsonLd} /> : null}
       <section className="home-hero">
         <div className="home-hero__media" aria-hidden>
           {/* eslint-disable-next-line @next/next/no-img-element */}

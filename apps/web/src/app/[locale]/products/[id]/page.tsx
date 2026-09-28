@@ -12,6 +12,7 @@ import { MarketInsightButton } from '@/components/MarketInsightButton';
 import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { OpenChatButton } from '@/components/OpenChatButton';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
+import { JsonLd } from '@/components/JsonLd';
 import { ProductPhotoPlaceholder } from '@/components/ProductPhotoPlaceholder';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
@@ -27,6 +28,7 @@ import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
 import { verifyEmailRedirectHref } from '@/lib/protected-next-path';
+import { buildProductJsonLd } from '@/lib/seo-jsonld';
 import { productPageMetadata } from '@/lib/seo-public-metadata';
 import { getCurrentUser } from '@/lib/session';
 
@@ -83,6 +85,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const verifyProductHref = verifyEmailRedirectHref(productPath);
   const verifyRequestHref = verifyEmailRedirectHref(`${productPath}#request-quote`);
   const verifyWatchHref = verifyEmailRedirectHref(`${productPath}#harvest-alerts`);
+  const productJsonLd = buildProductJsonLd(product, locale);
   const soldOut = product.harvestStatus === 'soldOut';
   const showPreorder =
     product.preorderEnabled &&
@@ -92,6 +95,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <div className="page">
+      {productJsonLd ? <JsonLd data={productJsonLd} /> : null}
       <SiteHeader />
       <RecordProductView productId={product.id} isOwner={Boolean(product.isOwner)} />
       <main className="page__main">
