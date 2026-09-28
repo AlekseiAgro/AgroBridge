@@ -3,8 +3,9 @@
 import type { HarvestStatus } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
-import { Link, useRouter } from '@/i18n/navigation';
 import { DeleteProductButton } from '@/components/DeleteProductButton';
+import { Link, useRouter } from '@/i18n/navigation';
+import { HARVEST_STATUS_FOCUS_HASH } from '@/lib/harvest-availability-focus';
 
 type Props = {
   productId: string;
@@ -17,6 +18,7 @@ export function MyProductCardActions({ productId, harvestStatus }: Props) {
   const menuRef = useRef<HTMLDetailsElement>(null);
   const [pending, setPending] = useState(false);
   const editHref = `/dashboard/products/${productId}/edit`;
+  const availabilityHref = `${editHref}${HARVEST_STATUS_FOCUS_HASH}`;
   const showMarkSoldOut = harvestStatus !== 'soldOut';
 
   function closeMenu() {
@@ -47,7 +49,10 @@ export function MyProductCardActions({ productId, harvestStatus }: Props) {
 
   return (
     <div className="product-list__actions">
-      <Link className="button button--primary product-list__action--primary" href={editHref}>
+      <Link
+        className="button button--primary product-list__action--primary"
+        href={availabilityHref}
+      >
         {t('updateAvailability')}
       </Link>
       <details ref={menuRef} className="mine-card-menu">

@@ -5590,6 +5590,35 @@ body {
   background: var(--surface);
 }
 
+#harvest-planning,
+#harvest-status {
+  scroll-margin-top: 5rem;
+  scroll-margin-bottom: 1.5rem;
+}
+
+#harvest-status.harvest-status--focus {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+  background-color: rgba(47, 107, 58, 0.1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #harvest-status.harvest-status--focus {
+    animation: harvest-status-pulse 1.4s ease;
+  }
+}
+
+@keyframes harvest-status-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(47, 107, 58, 0);
+  }
+
+  40% {
+    box-shadow: 0 0 0 0.4rem rgba(47, 107, 58, 0.28);
+  }
+}
+
 .season-months {
   display: grid;
   gap: 0.55rem;
