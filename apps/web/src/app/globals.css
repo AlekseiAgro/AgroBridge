@@ -1234,6 +1234,50 @@ body {
   font: inherit;
 }
 
+.password-field {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.field .password-field input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  border-radius: 0.65rem 0 0 0.65rem;
+  background: transparent;
+}
+
+.password-field__toggle {
+  display: inline-flex;
+  flex: 0 0 2.75rem;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.7rem;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 0 0.65rem 0.65rem 0;
+  background: transparent;
+  color: var(--brand-deep);
+  cursor: pointer;
+}
+
+.password-field:focus-within {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.password-field__toggle:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+
 .place-autocomplete {
   display: grid;
   gap: 0.35rem;
