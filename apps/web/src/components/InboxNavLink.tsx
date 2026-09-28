@@ -26,10 +26,12 @@ function formatCount(count: number): string {
 export function InboxNavLink({ className, initialCount = 0 }: Props) {
   const t = useTranslations('nav');
   const [count, setCount] = useState(initialCount);
+  const [seenInitialCount, setSeenInitialCount] = useState(initialCount);
 
-  useEffect(() => {
+  if (initialCount !== seenInitialCount) {
+    setSeenInitialCount(initialCount);
     setCount(initialCount);
-  }, [initialCount]);
+  }
 
   useEffect(() => {
     let cancelled = false;

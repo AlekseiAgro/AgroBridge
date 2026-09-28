@@ -12,12 +12,14 @@ type Props = {
 export function CabinetMobileMenu({ openLabel, closeLabel, children }: Props) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const [menuPath, setMenuPath] = useState(pathname);
   const titleId = useId();
   const panelId = useId();
 
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+  if (pathname !== menuPath) {
+    setMenuPath(pathname);
+    if (open) setOpen(false);
+  }
 
   useEffect(() => {
     if (!open) return undefined;

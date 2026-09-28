@@ -2,7 +2,7 @@
 
 import type { UserNotificationItem } from '@agrobridge/shared';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
 
 type Props = {
@@ -15,14 +15,16 @@ export function UserNotificationsList({ initial, copyNamespace = 'subscriptions'
   const locale = useLocale();
   const router = useRouter();
   const [items, setItems] = useState(initial);
+  const [seenInitial, setSeenInitial] = useState(initial);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [markingAll, setMarkingAll] = useState(false);
   const emptyLabel = copyNamespace === 'notifications' ? t('empty') : t('inboxEmpty');
   const unreadLabel = copyNamespace === 'notifications' ? t('unread') : null;
 
-  useEffect(() => {
+  if (initial !== seenInitial) {
+    setSeenInitial(initial);
     setItems(initial);
-  }, [initial]);
+  }
 
   async function markRead(id: string) {
     setPendingId(id);

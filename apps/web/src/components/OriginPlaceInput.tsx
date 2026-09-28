@@ -25,16 +25,16 @@ export function OriginPlaceInput({ value, country, onChange, placeholder }: Prop
   const [enabled, setEnabled] = useState(true);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [loading, setLoading] = useState(false);
+  const query = value.trim();
+  const canSearch = enabled && query.length >= PLACE_AUTOCOMPLETE_MIN_CHARS;
+
+  if (!canSearch && (suggestions.length > 0 || activeIndex !== -1)) {
+    setSuggestions([]);
+    setActiveIndex(-1);
+  }
 
   useEffect(() => {
-    if (!enabled) return;
-
-    const query = value.trim();
-    if (query.length < PLACE_AUTOCOMPLETE_MIN_CHARS) {
-      setSuggestions([]);
-      setActiveIndex(-1);
-      return;
-    }
+    if (!canSearch) return;
 
     const controller = new AbortController();
     const timer = window.setTimeout(() => {
@@ -78,7 +78,7 @@ export function OriginPlaceInput({ value, country, onChange, placeholder }: Prop
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [value, country, locale, enabled]);
+  }, [canSearch, query, country, locale]);
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
