@@ -24,7 +24,7 @@ import {
   type SeasonMonth,
 } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
-import { FormEvent, useMemo, useState, type ReactNode } from 'react';
+import { FormEvent, useMemo, useRef, useState, type ReactNode } from 'react';
 import { MultiSelectDropdown } from '@/components/MultiSelectDropdown';
 import { OriginPlaceInput } from '@/components/OriginPlaceInput';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
@@ -100,6 +100,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
   const [fieldIssues, setFieldIssues] = useState<ListingRequiredField[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const submitLock = useRef(false);
   const [lastIntent, setLastIntent] = useState<SubmitIntent>('save');
   const [title, setTitle] = useState(initial?.title ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
@@ -232,6 +233,10 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending || submitLock.current) {
+      return;
+    }
+    submitLock.current = true;
     setPending(true);
     setError(null);
     setFieldIssues([]);
@@ -263,6 +268,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
       ].some(Number.isNaN)
     ) {
       setError(t('quantityInvalid'));
+      submitLock.current = false;
       setPending(false);
       return;
     }
@@ -272,6 +278,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
       parsedMinQuantity > parsedMaxQuantity
     ) {
       setError(t('quantityRangeInvalid'));
+      submitLock.current = false;
       setPending(false);
       return;
     }
@@ -308,6 +315,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
     if (listingIssues.length > 0) {
       setFieldIssues(listingIssues);
       setError(listingIssues.map((issue) => t(`listingErrors.${issue}`)).join(' '));
+      submitLock.current = false;
       setPending(false);
       return;
     }
@@ -369,22 +377,21 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
         return;
       }
 
+      if (intent === 'publish') {
+        router.push('/dashboard/products');
+        return;
+      }
+
       if (mode === 'create' && data.id) {
         router.replace(`/dashboard/products/${data.id}/edit`);
       } else {
-        const wasApproved = initial?.moderationStatus === 'approved' && initial?.isPublished;
-        setSuccess(
-          intent === 'publish'
-            ? wasApproved
-              ? t('publishedLiveHint')
-              : t('publishedPendingHint')
-            : t('savedDraftHint'),
-        );
+        setSuccess(t('savedDraftHint'));
         router.refresh();
       }
     } catch {
       setError(t('genericError'));
     } finally {
+      submitLock.current = false;
       setPending(false);
     }
   }
