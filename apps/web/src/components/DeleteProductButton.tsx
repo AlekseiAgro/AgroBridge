@@ -6,9 +6,10 @@ import { useRouter } from '@/i18n/navigation';
 
 type Props = {
   productId: string;
+  className?: string;
 };
 
-export function DeleteProductButton({ productId }: Props) {
+export function DeleteProductButton({ productId, className = 'button button--ghost' }: Props) {
   const t = useTranslations('product');
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -26,7 +27,7 @@ export function DeleteProductButton({ productId }: Props) {
   }
 
   return (
-    <button className="button button--ghost" type="button" onClick={onDelete} disabled={pending}>
+    <button className={className} type="button" role="menuitem" onClick={onDelete} disabled={pending}>
       {pending ? t('pleaseWait') : t('delete')}
     </button>
   );

@@ -1087,4 +1087,98 @@ describe('ProductsService', () => {
       }),
     );
   });
+
+  it('marks an owned product soldOut without deleting it or changing other fields', async () => {
+    const live = productRow({
+      ...completeListing,
+      description: 'Keep this description',
+      currentStock: 800,
+      harvestStatus: 'available',
+      preorderEnabled: false,
+      isPublished: true,
+      moderationStatus: 'approved',
+      images: [
+        {
+          id: 'img1',
+          url: '/photo.jpg',
+          sortOrder: 0,
+          isPrimary: true,
+          kind: 'photo',
+        },
+      ],
+      certificates: [],
+    });
+    const updated = { ...live, harvestStatus: 'soldOut' };
+    prisma.product.findUnique.mockResolvedValue(live);
+    prisma.product.update.mockResolvedValue(updated);
+
+    const result = await service.update(farmer, 'p1', { harvestStatus: 'soldOut' } as never);
+
+    expect(prisma.product.delete).not.toHaveBeenCalled();
+    expect(prisma.product.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'p1' },
+        data: expect.objectContaining({
+          harvestStatus: 'soldOut',
+          currentStock: undefined,
+          title: undefined,
+          description: undefined,
+          isPublished: true,
+          moderationStatus: 'approved',
+        }),
+      }),
+    );
+    expect(result.harvestStatus).toBe('soldOut');
+    expect(result.title).toBe('Kakheti hazelnuts');
+    expect(result.description).toBe('Keep this description');
+    expect(result.currentStock).toBe(800);
+    expect(result.images).toEqual([
+      expect.objectContaining({ url: '/photo.jpg' }),
+    ]);
+    expect(prisma.harvestWatch.findMany).not.toHaveBeenCalled();
+  });
+
+  it('rejects harvestStatus updates for a product owned by another seller', async () => {
+    prisma.product.findUnique.mockResolvedValue(
+      productRow({
+        ownerUserId: 'other-seller',
+        harvestStatus: 'available',
+      }),
+    );
+
+    await expect(
+      service.update(farmer, 'p1', { harvestStatus: 'soldOut' } as never),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.product.update).not.toHaveBeenCalled();
+    expect(prisma.product.delete).not.toHaveBeenCalled();
+  });
+
+  it('does not notify harvest watchers when a listing is marked soldOut', async () => {
+    const notifications = {
+      notifyHarvestAvailable: jest.fn().mockResolvedValue(undefined),
+      notifyHarvestPreorderOpen: jest.fn().mockResolvedValue(undefined),
+      notifyProductPendingModeration: jest.fn().mockResolvedValue(undefined),
+    };
+    const localService = new ProductsService(
+      prisma as never,
+      storage as never,
+      ratings as never,
+      { enabledIds: jest.fn().mockResolvedValue(null) } as never,
+      notifications as never,
+    );
+    const live = productRow({
+      ...completeListing,
+      harvestStatus: 'available',
+      isPublished: true,
+      moderationStatus: 'approved',
+    });
+    prisma.product.findUnique.mockResolvedValue(live);
+    prisma.product.update.mockResolvedValue({ ...live, harvestStatus: 'soldOut' });
+
+    await localService.update(farmer, 'p1', { harvestStatus: 'soldOut' } as never);
+
+    expect(notifications.notifyHarvestAvailable).not.toHaveBeenCalled();
+    expect(notifications.notifyHarvestPreorderOpen).not.toHaveBeenCalled();
+    expect(prisma.harvestWatch.findMany).not.toHaveBeenCalled();
+  });
 });

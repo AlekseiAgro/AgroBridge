@@ -2203,6 +2203,40 @@ body {
   overflow-wrap: anywhere;
 }
 
+.product-list__item--mine .product-list__media-link {
+  display: block;
+  flex-shrink: 0;
+  min-width: 0;
+  line-height: 0;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 0.7rem;
+}
+
+.product-list__item--mine .product-list__availability {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.7rem;
+  min-width: 0;
+}
+
+.product-list__item--mine .product-list__availability .harvest-badges {
+  margin: 0;
+}
+
+.product-list__item--mine .product-list__stock,
+.product-list__item--mine .product-list__price {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.product-list__item--mine .product-list__stock {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
 .product-list__item--mine .product-list__status {
   margin: 0;
   color: var(--muted);
@@ -2220,8 +2254,80 @@ body {
   margin-top: 0.1rem;
 }
 
-.product-list__item--mine .product-list__actions-secondary {
-  display: contents;
+.product-list__item--mine .product-list__actions {
+  align-items: center;
+}
+
+.mine-card-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.mine-card-menu__trigger {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  padding-left: 0;
+  padding-right: 0;
+  font-size: 1.35rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  list-style: none;
+}
+
+.mine-card-menu__trigger::-webkit-details-marker,
+.mine-card-menu__trigger::marker {
+  display: none;
+  content: '';
+}
+
+.mine-card-menu__panel {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  right: 0;
+  z-index: 30;
+  display: grid;
+  min-width: 12.5rem;
+  max-width: min(18rem, calc(100vw - 1.5rem));
+  padding: 0.3rem;
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(29, 42, 31, 0.12);
+}
+
+.mine-card-menu__item {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mine-card-menu__item:hover,
+.mine-card-menu__item:focus-visible {
+  background: rgba(47, 107, 58, 0.08);
+}
+
+.mine-card-menu__item:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.mine-card-menu__item--danger {
+  color: #8a4034;
+}
+
+.mine-card-menu__item--danger:hover,
+.mine-card-menu__item--danger:focus-visible {
+  background: rgba(155, 59, 47, 0.08);
 }
 
 .product-list__item--quotes {
@@ -3625,7 +3731,8 @@ body {
   .product-list__item--mine .product-list__actions {
     flex: 1 1 100%;
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
     gap: 0.5rem;
   }
 
@@ -3634,15 +3741,8 @@ body {
     white-space: normal;
   }
 
-  .product-list__item--mine .product-list__actions-secondary {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 0.5rem;
-  }
-
-  .product-list__item--mine .product-list__actions-secondary .button {
-    width: 100%;
-    white-space: normal;
+  .product-list__item--mine .mine-card-menu__trigger {
+    height: 100%;
   }
 
   .product-list__item--quotes {
@@ -3732,10 +3832,15 @@ body {
     gap: 0.85rem;
   }
 
+  .product-list__item--mine .product-list__media-link,
   .product-list__item--mine .product-list__media,
   .product-list__item--mine .product-list__media--sm {
     width: 100%;
     max-width: 100%;
+  }
+
+  .product-list__item--mine .product-list__media,
+  .product-list__item--mine .product-list__media--sm {
     height: 10rem;
     flex-shrink: 0;
   }
@@ -3746,22 +3851,19 @@ body {
     max-width: 100%;
     min-width: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
     gap: 0.5rem;
   }
 
-  .product-list__item--mine .product-list__action--primary,
-  .product-list__item--mine .product-list__actions-secondary .button {
+  .product-list__item--mine .product-list__action--primary {
     width: 100%;
     min-width: 0;
     white-space: normal;
   }
 
-  .product-list__item--mine .product-list__actions-secondary {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 0.5rem;
-    min-width: 0;
+  .product-list__item--mine .mine-card-menu__trigger {
+    height: 100%;
   }
 
   .product-list__item--quotes {

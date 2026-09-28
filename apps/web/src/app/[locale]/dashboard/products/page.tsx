@@ -1,13 +1,14 @@
-import type { ProductSummary } from '@agrobridge/shared';
+import { formatListedPrice, type ProductSummary } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CertificateBadges } from '@/components/CertificateBadges';
-import { DeleteProductButton } from '@/components/DeleteProductButton';
+import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
+import { MyProductCardActions } from '@/components/MyProductCardActions';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { Link, redirect } from '@/i18n/navigation';
 import { EmptyState } from '@/components/EmptyState';
 import { ProductPhotoPlaceholder } from '@/components/ProductPhotoPlaceholder';
 import { getProductCardImage, getProductCardImageAlt } from '@/lib/product-image';
-import { formatProductQuantityRange } from '@/lib/product-quantity';
+import { formatCurrentStock, formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductTitle } from '@/lib/product-title';
 import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
@@ -102,6 +103,14 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
               product,
               product.unit ? t(`units.${product.unit as 'kg'}`) : null,
             );
+            const stock = formatCurrentStock(product);
+            const listedPrice = formatListedPrice(product);
+            const previewHref = `/products/${product.id}`;
+            const hasAvailability =
+              Boolean(product.harvestStatus) ||
+              product.preorderEnabled ||
+              Boolean(stock) ||
+              Boolean(listedPrice);
             const meta = [
               product.category ? tc(`categories.${product.category as 'fruits'}`) : null,
               quantity,
@@ -115,25 +124,43 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
                 className="product-list__item product-list__item--row product-list__item--mine"
               >
                 <div className="product-list__item-main">
-                  {image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={image.url}
-                      alt={imageAlt}
-                      className="product-list__media product-list__media--sm"
-                    />
-                  ) : (
-                    <ProductPhotoPlaceholder
-                      label={tc('noProductPhoto')}
-                      alt={imageAlt}
-                      className="product-list__media product-list__media--sm"
-                    />
-                  )}
+                  <Link
+                    href={previewHref}
+                    className="product-list__media-link"
+                    aria-label={t('preview')}
+                  >
+                    {image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={image.url}
+                        alt={imageAlt}
+                        className="product-list__media product-list__media--sm"
+                      />
+                    ) : (
+                      <ProductPhotoPlaceholder
+                        label={tc('noProductPhoto')}
+                        alt={imageAlt}
+                        className="product-list__media product-list__media--sm"
+                      />
+                    )}
+                  </Link>
                   <div className="product-list__item-body">
                     <div className="product-list__identity">
-                      <p className="product-list__title">
+                      <Link href={previewHref} className="product-list__title">
                         {formatProductTitle(product.title, locale)}
-                      </p>
+                      </Link>
+                      {hasAvailability ? (
+                        <div className="product-list__availability">
+                          <HarvestStatusBadge
+                            status={product.harvestStatus}
+                            preorderEnabled={product.preorderEnabled}
+                          />
+                          {stock ? <p className="product-list__stock">{stock}</p> : null}
+                          {listedPrice ? (
+                            <p className="product-list__price">{listedPrice}</p>
+                          ) : null}
+                        </div>
+                      ) : null}
                       <p className="product-list__status">
                         {t(`moderation.${product.moderationStatus}`)}
                       </p>
@@ -145,23 +172,10 @@ export default async function DashboardProductsPage({ params, searchParams }: Pr
                     {meta ? <p className="product-list__meta">{meta}</p> : null}
                   </div>
                 </div>
-                <div className="product-list__actions">
-                  <Link
-                    className="button button--ghost product-list__action--primary"
-                    href={`/products/${product.id}`}
-                  >
-                    {t('preview')}
-                  </Link>
-                  <div className="product-list__actions-secondary">
-                    <Link
-                      className="button button--ghost"
-                      href={`/dashboard/products/${product.id}/edit`}
-                    >
-                      {t('edit')}
-                    </Link>
-                    <DeleteProductButton productId={product.id} />
-                  </div>
-                </div>
+                <MyProductCardActions
+                  productId={product.id}
+                  harvestStatus={product.harvestStatus}
+                />
               </li>
             );
           })}
