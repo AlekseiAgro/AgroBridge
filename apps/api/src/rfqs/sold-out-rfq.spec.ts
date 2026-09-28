@@ -56,7 +56,7 @@ describe('sold-out product blocks new RFQs', () => {
     expect(watch).toContain('if (isOwner)');
     expect(watch).toContain("fetch(`/api/products/${productId}/watch`");
     expect(watch).toContain("method: watching ? 'DELETE' : 'POST'");
-    expect(watch).toContain('href="/login"');
+    expect(watch).toContain('loginRedirectHref(`/products/${productId}#harvest-alerts`)');
   });
 
   it('rejects sold-out RFQ creation in the service, not only in the page', () => {

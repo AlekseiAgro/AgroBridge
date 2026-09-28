@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
+import { loginRedirectHref } from '@/lib/protected-next-path';
 
 type Props = {
   productId: string;
@@ -33,7 +34,10 @@ export function HarvestWatchButton({
   if (!isLoggedIn) {
     return (
       <div className="harvest-watch">
-        <Link href="/login" className="button button--primary harvest-watch__login">
+        <Link
+          href={loginRedirectHref(`/products/${productId}#harvest-alerts`)}
+          className="button button--primary harvest-watch__login"
+        >
           {unavailable ? t('soldOutLogin') : t('loginToWatch')}
         </Link>
       </div>

@@ -8,6 +8,7 @@ import { SellerQuoteSummary } from '@/components/SellerQuoteSummary';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
+import { loginRedirectHref } from '@/lib/protected-next-path';
 import { formatRegionLabel } from '@/lib/region';
 import { getCurrentUser } from '@/lib/session';
 
@@ -121,7 +122,10 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
               <PurchaseRequestActionButton requestId={request.id} action="close" />
             ) : null}
             {!user ? (
-              <Link href="/login" className="button button--primary">
+              <Link
+                href={loginRedirectHref(`/requests/${request.id}`)}
+                className="button button--primary"
+              >
                 {t('loginToRespond')}
               </Link>
             ) : null}

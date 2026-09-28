@@ -77,7 +77,7 @@ describe('unverified buyers on a public product', () => {
   it('keeps guests, owners, verified buyers, and sold-out RFQ rules', () => {
     expect(page).toContain("href={`/login?next=${encodeURIComponent(`/products/${product.id}`)}`}");
     expect(page).toContain("tr('loginToRequest')");
-    expect(watch).toContain('href="/login"');
+    expect(watch).toContain('loginRedirectHref(`/products/${productId}#harvest-alerts`)');
     expect(watch).toContain("t('soldOutLogin')");
     expect(watch).toContain("t('ownerWatchHint')");
     expect(page).toContain('{!product.isOwner ? (');
