@@ -15,6 +15,65 @@ function messages(locale: string): Nested {
   return JSON.parse(readFileSync(join(MESSAGES_DIR, `${locale}.json`), 'utf8')) as Nested;
 }
 
+/** Top-level CSS declarations only, so a nested media-query rule cannot shadow the base selector. */
+function topLevelRuleBodies(css: string, exactSelector: string): string[] {
+  const bodies: string[] = [];
+  let i = 0;
+  let depth = 0;
+
+  while (i < css.length) {
+    if (css.startsWith('/*', i)) {
+      const end = css.indexOf('*/', i + 2);
+      i = end < 0 ? css.length : end + 2;
+      continue;
+    }
+    if (css[i] === '{') {
+      depth += 1;
+      i += 1;
+      continue;
+    }
+    if (css[i] === '}') {
+      depth = Math.max(0, depth - 1);
+      i += 1;
+      continue;
+    }
+    if (depth !== 0) {
+      i += 1;
+      continue;
+    }
+
+    const brace = css.indexOf('{', i);
+    if (brace < 0) break;
+    const selectors = css
+      .slice(i, brace)
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean);
+    if (!selectors.includes(exactSelector)) {
+      i = brace;
+      continue;
+    }
+
+    let nested = 1;
+    let j = brace + 1;
+    while (j < css.length && nested > 0) {
+      if (css.startsWith('/*', j)) {
+        const end = css.indexOf('*/', j + 2);
+        j = end < 0 ? css.length : end + 2;
+        continue;
+      }
+      if (css[j] === '{') nested += 1;
+      else if (css[j] === '}') nested -= 1;
+      j += 1;
+    }
+    bodies.push(css.slice(brace + 1, j - 1));
+    i = j;
+  }
+
+  return bodies;
+}
+
 function read(obj: Nested, path: string): string {
   const value = path.split('.').reduce<unknown>((acc, key) => {
     if (!acc || typeof acc !== 'object') return undefined;
@@ -104,14 +163,17 @@ describe('public header marketplace discoverability', () => {
 
   it('lets the public header wrap instead of hiding overflow', () => {
     const css = readWeb('app/globals.css');
-    const headerBlock = css.match(/\.site-header\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
-    const navBlock = css.match(/\.site-header__nav\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
-    const linkBlock = css.match(/\.site-header__nav a\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
+    const headerBlocks = topLevelRuleBodies(css, '.site-header');
+    const navBlocks = topLevelRuleBodies(css, '.site-header__nav');
+    const linkBlocks = topLevelRuleBodies(css, '.site-header__nav a');
 
-    expect(headerBlock).toContain('min-width: 0');
-    expect(navBlock).toContain('flex-wrap: wrap');
-    expect(navBlock).toContain('min-width: 0');
-    expect(linkBlock).toContain('overflow-wrap: break-word');
+    expect(headerBlocks).toHaveLength(1);
+    expect(headerBlocks[0]).toContain('display: flex');
+    expect(headerBlocks[0]).toContain('min-width: 0');
+    expect(navBlocks.some((block) => block.includes('flex-wrap: wrap') && block.includes('min-width: 0'))).toBe(
+      true,
+    );
+    expect(linkBlocks.some((block) => block.includes('overflow-wrap: break-word'))).toBe(true);
     expect(css).not.toMatch(/\.site-header[^{]*\{[^}]*overflow-x:\s*hidden/);
     expect(css).not.toMatch(/html[^{]*\{[^}]*overflow-x:\s*hidden/);
     expect(css).not.toMatch(/body[^{]*\{[^}]*overflow-x:\s*hidden/);
