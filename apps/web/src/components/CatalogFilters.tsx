@@ -7,7 +7,7 @@ import {
 } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 
 type Props = {
   initialQ?: string;
@@ -36,22 +36,38 @@ export function CatalogFilters({
   const [harvestStatus, setHarvestStatus] = useState(initialHarvestStatus);
   const [preorder, setPreorder] = useState(initialPreorder);
   const [inSeason, setInSeason] = useState(initialInSeason);
-
-  useEffect(() => {
-    setQ(initialQ);
-    setCategory(initialCategory);
-    setRegion(initialRegion);
-    setHarvestStatus(initialHarvestStatus);
-    setPreorder(initialPreorder);
-    setInSeason(initialInSeason);
-  }, [
+  const [appliedFilters, setAppliedFilters] = useState({
     initialQ,
     initialCategory,
     initialRegion,
     initialHarvestStatus,
     initialPreorder,
     initialInSeason,
-  ]);
+  });
+
+  if (
+    appliedFilters.initialQ !== initialQ ||
+    appliedFilters.initialCategory !== initialCategory ||
+    appliedFilters.initialRegion !== initialRegion ||
+    appliedFilters.initialHarvestStatus !== initialHarvestStatus ||
+    appliedFilters.initialPreorder !== initialPreorder ||
+    appliedFilters.initialInSeason !== initialInSeason
+  ) {
+    setAppliedFilters({
+      initialQ,
+      initialCategory,
+      initialRegion,
+      initialHarvestStatus,
+      initialPreorder,
+      initialInSeason,
+    });
+    setQ(initialQ);
+    setCategory(initialCategory);
+    setRegion(initialRegion);
+    setHarvestStatus(initialHarvestStatus);
+    setPreorder(initialPreorder);
+    setInSeason(initialInSeason);
+  }
 
   function onSubmit(event: FormEvent) {
     event.preventDefault();

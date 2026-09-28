@@ -19,13 +19,16 @@ export function LegalDocumentDialog({ open, kind, uiLocale, onClose }: Props) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const [legalLocale, setLegalLocale] = useState<LegalLocale>(legalLocaleFor(uiLocale));
+  const localeSyncKey = open ? `${uiLocale}\0${kind ?? ''}` : null;
+  const [seenLocaleSyncKey, setSeenLocaleSyncKey] = useState(localeSyncKey);
   const document = kind ? legalDocumentView(kind, legalLocale) : null;
 
-  useEffect(() => {
-    if (open) {
+  if (localeSyncKey !== seenLocaleSyncKey) {
+    setSeenLocaleSyncKey(localeSyncKey);
+    if (localeSyncKey !== null) {
       setLegalLocale(legalLocaleFor(uiLocale));
     }
-  }, [open, uiLocale, kind]);
+  }
 
   useEffect(() => {
     const dialog = dialogRef.current;

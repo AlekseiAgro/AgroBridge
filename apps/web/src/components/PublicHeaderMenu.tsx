@@ -1,8 +1,10 @@
 'use client';
 
 import { usePathname } from '@/i18n/navigation';
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+
+const subscribeToHydration = () => () => {};
 
 type Props = {
   openLabel: string;
@@ -14,18 +16,16 @@ type Props = {
 
 export function PublicHeaderMenu({ openLabel, closeLabel, brand, toolbar, children }: Props) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(subscribeToHydration, () => true, () => false);
   const pathname = usePathname();
+  const [menuPath, setMenuPath] = useState(pathname);
   const titleId = useId();
   const panelId = useId();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+  if (pathname !== menuPath) {
+    setMenuPath(pathname);
+    if (open) setOpen(false);
+  }
 
   useEffect(() => {
     const media = window.matchMedia('(min-width: 641px)');
