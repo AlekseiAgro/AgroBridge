@@ -1,4 +1,5 @@
 import type { PublicRatingReviews, PublicUserProfile } from '@agrobridge/shared';
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { RatingStars } from '@/components/RatingStars';
@@ -6,6 +7,11 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
+import { noindexFollowRobots } from '@/lib/seo-robots';
+
+export const metadata: Metadata = {
+  robots: noindexFollowRobots,
+};
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
