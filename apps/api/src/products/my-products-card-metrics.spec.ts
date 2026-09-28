@@ -48,9 +48,7 @@ describe('My Products card metrics', () => {
     expect(page.indexOf('product-list__metrics')).toBeGreaterThan(
       page.indexOf('product-list__status'),
     );
-    expect(page.indexOf('product-list__metrics')).toBeLessThan(
-      page.indexOf('MyProductCardActions'),
-    );
+    expect(page).toMatch(/product-list__metrics[\s\S]*<MyProductCardActions/);
   });
 
   it('keeps metrics secondary and does not turn them into buttons or a dashboard', () => {
