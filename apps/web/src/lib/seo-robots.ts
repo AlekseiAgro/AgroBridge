@@ -11,6 +11,12 @@ export const noindexRobots = {
   follow: false,
 } as const satisfies Metadata['robots'];
 
+/** Public profiles and standalone review lists stay crawlable, but are not landing pages. */
+export const noindexFollowRobots = {
+  index: false,
+  follow: true,
+} as const satisfies Metadata['robots'];
+
 /**
  * Path suffixes after `/{locale}` that must not be crawled.
  * Auth/recovery pages are omitted so crawlers can fetch their noindex meta.

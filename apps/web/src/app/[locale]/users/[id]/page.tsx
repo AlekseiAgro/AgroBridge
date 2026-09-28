@@ -1,4 +1,5 @@
 import type { PublicUserProfile } from '@agrobridge/shared';
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { RatingStars } from '@/components/RatingStars';
@@ -9,7 +10,12 @@ import { ApiError, apiRequest } from '@/lib/api';
 import { formatMemberSinceMonthYear } from '@/lib/member-since';
 import { toPublicMediaUrl } from '@/lib/product-image';
 import { formatRegionLabel } from '@/lib/region';
+import { noindexFollowRobots } from '@/lib/seo-robots';
 import { getCurrentUser } from '@/lib/session';
+
+export const metadata: Metadata = {
+  robots: noindexFollowRobots,
+};
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
