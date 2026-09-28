@@ -397,7 +397,7 @@
     "publishHint": "„Speichern“ behält einen Entwurf. „Veröffentlichen“ sendet die Karte zur Moderation an einen Administrator.",
     "requiredMark": "*",
     "requiredToPublish": "Zum Veröffentlichen erforderlich",
-    "listingRequiredHint": "Titel, Kategorie, Einheit, Preis und Währung sind vor der Veröffentlichung erforderlich. Einen unvollständigen Entwurf können Sie trotzdem speichern.",
+    "listingRequiredHint": "Zum Speichern eines Entwurfs ist ein Titel erforderlich. Kategorie, Einheit, Preis und Währung können Sie später, vor der Veröffentlichung, ergänzen.",
     "listingErrors": {
       "title": "Geben Sie vor der Veröffentlichung einen echten Produkttitel ein.",
       "category": "Wählen Sie vor der Veröffentlichung eine Kategorie.",

@@ -189,6 +189,22 @@ describe('listing requirement i18n', () => {
     }
   });
 
+  it('says a draft still needs a title and leaves other listing fields for later', () => {
+    const en = read(messages('en'), 'product.listingRequiredHint').toLowerCase();
+    expect(en).toContain('title is required to save a draft');
+    expect(en).not.toContain('incomplete draft');
+
+    const ru = read(messages('ru'), 'product.listingRequiredHint');
+    expect(ru).toContain('Чтобы сохранить черновик, нужно название');
+    expect(ru).toContain('перед публикацией');
+    expect(ru.toLowerCase()).not.toContain('котиров');
+    expect(ru).not.toContain('Неполную карточку');
+
+    expect(read(messages('en'), 'product.requiredToPublish')).toBe('Required to publish');
+    expect(read(messages('ru'), 'product.requiredToPublish')).toBe('Обязательно для публикации');
+    expect(read(messages('en'), 'product.publishHint')).toContain('Save keeps a draft');
+  });
+
   it.each(['ka', 'ru', 'de', 'fr', 'it', 'es'] as const)(
     '%s does not leave listing keys in English',
     (locale) => {
