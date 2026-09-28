@@ -3,7 +3,9 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
+import { JsonLd } from '@/components/JsonLd';
 import { OpenChatButton } from '@/components/OpenChatButton';
+import { PublicBreadcrumbs } from '@/components/PublicBreadcrumbs';
 import { PurchaseQuoteForm } from '@/components/PurchaseQuoteForm';
 import { PurchaseRequestActionButton } from '@/components/PurchaseRequestActionButton';
 import { SellerQuoteSummary } from '@/components/SellerQuoteSummary';
@@ -12,6 +14,7 @@ import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
 import { loginRedirectHref } from '@/lib/protected-next-path';
 import { formatRegionLabel } from '@/lib/region';
+import { buildBreadcrumbJsonLd } from '@/lib/seo-jsonld';
 import { purchaseRequestPageMetadata } from '@/lib/seo-public-metadata';
 import { getCurrentUser } from '@/lib/session';
 
@@ -38,6 +41,7 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('purchaseRequests');
+  const tBreadcrumbs = await getTranslations('breadcrumbs');
   const tc = await getTranslations('catalog');
   const tp = await getTranslations('product');
   const tr = await getTranslations();
@@ -56,12 +60,36 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
 
   const isOwner = Boolean(user && user.id === request.buyer.id);
   const buyerName = request.buyer.displayName || t('anonymousBuyer');
+  const isOpenRequest = request.status === 'open';
+  const breadcrumbJsonLd = isOpenRequest
+    ? buildBreadcrumbJsonLd({
+        locale,
+        idPath: `/requests/${request.id}`,
+        items: [
+          { name: tBreadcrumbs('home'), path: '' },
+          { name: tBreadcrumbs('requests'), path: '/requests' },
+          { name: request.title, path: `/requests/${request.id}` },
+        ],
+      })
+    : null;
 
   return (
     <main className="page__main">
-        <p className="eyebrow">
-          <Link href="/requests">{t('boardTitle')}</Link>
-        </p>
+        {breadcrumbJsonLd ? <JsonLd data={breadcrumbJsonLd} /> : null}
+        {isOpenRequest ? (
+          <PublicBreadcrumbs
+            ariaLabel={tBreadcrumbs('label')}
+            items={[
+              { href: '/', label: tBreadcrumbs('home') },
+              { href: '/requests', label: tBreadcrumbs('requests') },
+            ]}
+            current={request.title}
+          />
+        ) : (
+          <p className="eyebrow">
+            <Link href="/requests">{t('boardTitle')}</Link>
+          </p>
+        )}
         <div className="page__heading-row">
           <div>
             <h1>{request.title}</h1>

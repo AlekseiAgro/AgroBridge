@@ -3,6 +3,7 @@ import { join } from 'path';
 import type { ProductImage } from '@agrobridge/shared';
 import { formatProductTitle } from '../../../web/src/lib/product-title';
 import {
+  buildBreadcrumbJsonLd,
   buildHomeJsonLd,
   buildProductJsonLd,
   type ProductJsonLdSource,
@@ -315,5 +316,213 @@ describe('JSON-LD page wiring', () => {
     expect(readWeb('app/[locale]/layout.tsx')).not.toContain('seo-jsonld');
     expect(readWeb('app/sitemap.ts')).not.toContain('seo-jsonld');
     expect(readWeb('app/robots.ts')).not.toContain('seo-jsonld');
+  });
+});
+
+describe('breadcrumb JSON-LD', () => {
+  it('builds a three-item product trail in the current locale with a stable English id', () => {
+    const data = buildBreadcrumbJsonLd({
+      locale: 'ru',
+      idPath: '/products/prod12345',
+      items: [
+        { name: 'Home', path: '' },
+        { name: 'Catalog', path: '/catalog' },
+        { name: 'Свежие персики из Кахетии', path: '/products/prod12345' },
+      ],
+    });
+
+    expect(data).toMatchObject({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      '@id': 'https://agrobridge.ge/en/products/prod12345#breadcrumb',
+    });
+    expect(data?.itemListElement).toEqual([
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://agrobridge.ge/ru',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Catalog',
+        item: 'https://agrobridge.ge/ru/catalog',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Свежие персики из Кахетии',
+        item: 'https://agrobridge.ge/ru/products/prod12345',
+      },
+    ]);
+    expect(JSON.stringify(data)).not.toContain('?');
+    expect(buildBreadcrumbJsonLd({
+      locale: 'en',
+      idPath: '/products/prod12345',
+      items: [
+        { name: 'Home', path: '' },
+        { name: 'Catalog', path: '/catalog' },
+        { name: 'Fresh Kakheti peaches', path: '/products/prod12345' },
+      ],
+    })?.['@id']).toBe('https://agrobridge.ge/en/products/prod12345#breadcrumb');
+  });
+
+  it('builds a two-item farm trail without a catalog parent', () => {
+    const data = buildBreadcrumbJsonLd({
+      locale: 'ka',
+      idPath: '/farms/farm12345',
+      items: [
+        { name: 'მთავარი', path: '' },
+        { name: 'Tanya Farm', path: '/farms/farm12345' },
+      ],
+    });
+
+    expect(data?.itemListElement).toEqual([
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'მთავარი',
+        item: 'https://agrobridge.ge/ka',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Tanya Farm',
+        item: 'https://agrobridge.ge/ka/farms/farm12345',
+      },
+    ]);
+    expect(data?.['@id']).toBe('https://agrobridge.ge/en/farms/farm12345#breadcrumb');
+    expect(JSON.stringify(data)).not.toContain('/catalog');
+    expect(JSON.stringify(data)).not.toContain('?');
+  });
+
+  it('builds a three-item open purchase-request trail in the current locale', () => {
+    const data = buildBreadcrumbJsonLd({
+      locale: 'de',
+      idPath: '/requests/req123456',
+      items: [
+        { name: 'Startseite', path: '' },
+        { name: 'Kaufanfragen', path: '/requests' },
+        { name: 'Peaches for August', path: '/requests/req123456' },
+      ],
+    });
+
+    expect(data?.itemListElement).toEqual([
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Startseite',
+        item: 'https://agrobridge.ge/de',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Kaufanfragen',
+        item: 'https://agrobridge.ge/de/requests',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Peaches for August',
+        item: 'https://agrobridge.ge/de/requests/req123456',
+      },
+    ]);
+    expect(data?.['@id']).toBe('https://agrobridge.ge/en/requests/req123456#breadcrumb');
+    expect(JSON.stringify(data)).not.toContain('?');
+  });
+
+  it('keeps BreadcrumbList out of Product and homepage JSON-LD', () => {
+    expect(keysDeep(buildProductJsonLd(publicProduct(), 'en'))).not.toContain('BreadcrumbList');
+    expect(keysDeep(buildHomeJsonLd({
+      locale: 'en',
+      description: 'From Georgian Farms to Global Markets',
+      slogan: 'Georgian farms. Global buyers.',
+    }))).not.toContain('BreadcrumbList');
+
+    const builder = readWeb('lib/seo-jsonld.ts');
+    const homeFn = builder.slice(
+      builder.indexOf('export function buildHomeJsonLd'),
+      builder.indexOf('export function buildProductJsonLd'),
+    );
+    const productFn = builder.slice(
+      builder.indexOf('export function buildProductJsonLd'),
+      builder.indexOf('export type BreadcrumbJsonLdItem'),
+    );
+    expect(homeFn).not.toContain('BreadcrumbList');
+    expect(productFn).not.toContain('BreadcrumbList');
+    expect(builder).toContain('export function buildBreadcrumbJsonLd');
+  });
+
+  it('omits a list when a name is blank, the locale is unknown, or a path has a query', () => {
+    const items = [
+      { name: 'Home', path: '' },
+      { name: 'Catalog', path: '/catalog' },
+      { name: 'Peaches', path: '/products/prod12345' },
+    ];
+    expect(buildBreadcrumbJsonLd({
+      locale: 'en',
+      idPath: '/products/prod12345',
+      items: [{ name: 'Home', path: '' }, { name: '   ', path: '/products/prod12345' }],
+    })).toBeNull();
+    expect(buildBreadcrumbJsonLd({
+      locale: 'xx',
+      idPath: '/products/prod12345',
+      items,
+    })).toBeNull();
+    expect(buildBreadcrumbJsonLd({
+      locale: 'en',
+      idPath: '/products/prod12345',
+      items: [
+        { name: 'Home', path: '' },
+        { name: 'Catalog', path: '/catalog?category=fruits' },
+        { name: 'Peaches', path: '/products/prod12345' },
+      ],
+    })).toBeNull();
+  });
+
+  it('wires breadcrumbs only on public product, farm, and open request pages', () => {
+    const product = readWeb('app/[locale]/products/[id]/page.tsx');
+    expect(product).toContain('PublicBreadcrumbs');
+    expect(product).toContain('isPubliclyListedProduct(product)');
+    expect(product).toContain('buildBreadcrumbJsonLd');
+    expect(product).not.toContain('className="eyebrow"');
+    expect(product).not.toContain("path: '/catalog?category=");
+
+    const farm = readWeb('app/[locale]/farms/[id]/page.tsx');
+    expect(farm).toContain('PublicBreadcrumbs');
+    expect(farm).toContain('buildBreadcrumbJsonLd');
+    expect(farm).toContain("path: `/farms/${farm.id}`");
+    expect(farm).not.toContain("path: '/catalog'");
+    expect(readWeb('components/FarmProfileView.tsx')).not.toContain('PublicBreadcrumbs');
+
+    const request = readWeb('app/[locale]/requests/[id]/page.tsx');
+    expect(request).toContain("request.status === 'open'");
+    expect(request).toContain('buildBreadcrumbJsonLd');
+    expect(request).toContain('PublicBreadcrumbs');
+    expect(request).toContain('breadcrumbJsonLd ? <JsonLd');
+
+    const component = readWeb('components/PublicBreadcrumbs.tsx');
+    expect(component).toContain('<nav');
+    expect(component).toContain('<ol');
+    expect(component).toContain('aria-current="page"');
+    expect(component).not.toContain("'use client'");
+    expect(component).not.toContain('apiRequest');
+
+    for (const path of [
+      'app/[locale]/page.tsx',
+      'app/[locale]/catalog/page.tsx',
+      'app/[locale]/buyers/page.tsx',
+      'app/[locale]/sellers/page.tsx',
+      'app/[locale]/how-it-works/page.tsx',
+      'app/[locale]/support/page.tsx',
+      'app/[locale]/legal/page.tsx',
+      'app/[locale]/terms/page.tsx',
+      'app/[locale]/privacy/page.tsx',
+    ]) {
+      const source = readWeb(path);
+      expect(source).not.toContain('PublicBreadcrumbs');
+      expect(source).not.toContain('buildBreadcrumbJsonLd');
+    }
   });
 });

@@ -1,4 +1,4 @@
-import { formatListedPrice, type ProductDetail } from '@agrobridge/shared';
+import { formatListedPrice, isPubliclyListedProduct, type ProductDetail } from '@agrobridge/shared';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -13,6 +13,7 @@ import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { OpenChatButton } from '@/components/OpenChatButton';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
 import { JsonLd } from '@/components/JsonLd';
+import { PublicBreadcrumbs } from '@/components/PublicBreadcrumbs';
 import { ProductPhotoPlaceholder } from '@/components/ProductPhotoPlaceholder';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
@@ -28,7 +29,7 @@ import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
 import { formatRegionLabel } from '@/lib/region';
 import { verifyEmailRedirectHref } from '@/lib/protected-next-path';
-import { buildProductJsonLd } from '@/lib/seo-jsonld';
+import { buildBreadcrumbJsonLd, buildProductJsonLd } from '@/lib/seo-jsonld';
 import { productPageMetadata } from '@/lib/seo-public-metadata';
 import { getCurrentUser } from '@/lib/session';
 
@@ -55,6 +56,7 @@ export default async function ProductDetailPage({ params }: Props) {
   setRequestLocale(locale);
   const t = await getTranslations('product');
   const tc = await getTranslations('catalog');
+  const tBreadcrumbs = await getTranslations('breadcrumbs');
   const th = await getTranslations('harvest');
   const tr = await getTranslations('rfq');
   const tVerify = await getTranslations('verifyEmail');
@@ -85,7 +87,19 @@ export default async function ProductDetailPage({ params }: Props) {
   const verifyProductHref = verifyEmailRedirectHref(productPath);
   const verifyRequestHref = verifyEmailRedirectHref(`${productPath}#request-quote`);
   const verifyWatchHref = verifyEmailRedirectHref(`${productPath}#harvest-alerts`);
+  const productName = formatProductTitle(product.title, locale);
   const productJsonLd = buildProductJsonLd(product, locale);
+  const breadcrumbJsonLd = isPubliclyListedProduct(product)
+    ? buildBreadcrumbJsonLd({
+        locale,
+        idPath: `/products/${product.id}`,
+        items: [
+          { name: tBreadcrumbs('home'), path: '' },
+          { name: tBreadcrumbs('catalog'), path: '/catalog' },
+          { name: productName, path: `/products/${product.id}` },
+        ],
+      })
+    : null;
   const soldOut = product.harvestStatus === 'soldOut';
   const showPreorder =
     product.preorderEnabled &&
@@ -96,16 +110,22 @@ export default async function ProductDetailPage({ params }: Props) {
   return (
     <div className="page">
       {productJsonLd ? <JsonLd data={productJsonLd} /> : null}
+      {breadcrumbJsonLd ? <JsonLd data={breadcrumbJsonLd} /> : null}
       <SiteHeader />
       <RecordProductView productId={product.id} isOwner={Boolean(product.isOwner)} />
       <main className="page__main">
         <div className="product-detail-header">
           <div className="product-detail-header__main">
-            <p className="eyebrow">
-              <Link href="/catalog">{tc('title')}</Link>
-            </p>
+            <PublicBreadcrumbs
+              ariaLabel={tBreadcrumbs('label')}
+              items={[
+                { href: '/', label: tBreadcrumbs('home') },
+                { href: '/catalog', label: tBreadcrumbs('catalog') },
+              ]}
+              current={productName}
+            />
             <h1 className="farm-title-row">
-              {formatProductTitle(product.title, locale)}
+              {productName}
               <HarvestStatusBadge
                 status={product.harvestStatus}
                 preorderEnabled={product.preorderEnabled}
