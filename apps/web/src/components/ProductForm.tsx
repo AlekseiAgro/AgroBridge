@@ -25,10 +25,12 @@ import {
 } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { FormEvent, useMemo, useRef, useState, type ReactNode } from 'react';
+import { HarvestAvailabilityFocus } from '@/components/HarvestAvailabilityFocus';
 import { MultiSelectDropdown } from '@/components/MultiSelectDropdown';
 import { OriginPlaceInput } from '@/components/OriginPlaceInput';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
 import { Link, useRouter } from '@/i18n/navigation';
+import { HARVEST_PLANNING_ID, HARVEST_STATUS_ID } from '@/lib/harvest-availability-focus';
 
 type Props = {
   mode: 'create' | 'edit';
@@ -767,8 +769,9 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
         ) : null}
       </fieldset>
 
-      <fieldset className="field-group harvest-form product-form__section">
+      <fieldset id={HARVEST_PLANNING_ID} className="field-group harvest-form product-form__section">
         <legend className="section-title">{th('formTitle')}</legend>
+        {mode === 'edit' ? <HarvestAvailabilityFocus /> : null}
         <p className="page__subtitle">{th('formSubtitle')}</p>
 
         <div className="season-months">
@@ -864,6 +867,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
         <label className="field">
           <span>{th('statusLabel')}</span>
           <select
+            id={HARVEST_STATUS_ID}
             value={harvestStatus}
             onChange={(event) => setHarvestStatus(event.target.value as HarvestStatus | '')}
           >
