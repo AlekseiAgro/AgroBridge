@@ -1,7 +1,6 @@
-import type { ProductDetail } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { ProductForm } from '@/components/ProductForm';
 import { redirect } from '@/i18n/navigation';
-import { apiRequestAuthed } from '@/lib/server-api';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -19,14 +18,11 @@ export default async function NewProductPage({ params }: Props) {
 
   const t = await getTranslations('product');
 
-  // Create a draft first so photo/video uploads are available on the edit form.
-  const product = await apiRequestAuthed<ProductDetail>('/products', {
-    method: 'POST',
-    body: {
-      title: t('draftTitle'),
-      isPublished: false,
-    },
-  });
-
-  redirect({ href: `/dashboard/products/${product.id}/edit`, locale });
+  return (
+    <main className="cabinet-page cabinet-page--narrow">
+      <h1>{t('createTitle')}</h1>
+      <p className="page__subtitle">{t('createSubtitle')}</p>
+      <ProductForm mode="create" />
+    </main>
+  );
 }
