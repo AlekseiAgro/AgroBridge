@@ -136,6 +136,7 @@ export class FarmsService {
             isPublished: true,
             moderationStatus: true,
             moderationNote: true,
+            updatedAt: true,
             farmId: true,
             images: {
               orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
@@ -244,6 +245,7 @@ export class FarmsService {
             isPublished: true,
             moderationStatus: true,
             moderationNote: true,
+            updatedAt: true,
             images: {
               orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }, { createdAt: 'asc' }],
               select: {
@@ -680,6 +682,7 @@ export class FarmsService {
     history: string | null;
     verificationStatus: PrismaVerificationStatus;
     owner: { id: string; displayName: string | null };
+    updatedAt: Date;
     images?: Array<{
       id: string;
       url: string;
@@ -709,6 +712,7 @@ export class FarmsService {
       owner: farm.owner,
       productCount: farm._count.products,
       photos: (farm.images ?? []).map((image) => this.toPhoto(image)),
+      updatedAt: farm.updatedAt.toISOString(),
     };
   }
 

@@ -122,6 +122,13 @@ export type ProductRowSlice = {
   updatedAt?: Date;
 };
 
+function requireUpdatedAt(value: Date | undefined): string {
+  if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
+    throw new Error('Public summary requires updatedAt');
+  }
+  return value.toISOString();
+}
+
 export function toNumberOrNull(value: Prisma.Decimal | number | null | undefined): number | null {
   if (value === null || value === undefined) return null;
   return typeof value === 'number' ? value : Number(value);
@@ -298,6 +305,7 @@ export function mapProductSummary(
       exportMarkets: product.farm?.exportMarkets ?? [],
     }),
     ownerUserId: product.ownerUserId,
+    updatedAt: requireUpdatedAt(product.updatedAt),
     owner: {
       id: product.owner.id,
       displayName: product.owner.displayName,

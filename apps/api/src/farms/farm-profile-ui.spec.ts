@@ -133,6 +133,7 @@ function farm(overrides: Partial<FarmDetail> = {}): FarmDetail {
     owner: { id: 'u1', displayName: 'Owner' },
     productCount: 2,
     photos: [{ id: 'ph1', url: '/media/farm.jpg', sortOrder: 0, isPrimary: true }],
+    updatedAt: '2026-01-02T00:00:00.000Z',
     createdAt: '2026-01-01T00:00:00.000Z',
     verificationNote: 'internal moderator note',
     verifiedAt: null,

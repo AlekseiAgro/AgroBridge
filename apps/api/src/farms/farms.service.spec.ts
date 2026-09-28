@@ -82,6 +82,7 @@ describe('FarmsService', () => {
         companyRegistrationNumber: null,
         companyRegistryValid: null,
         createdAt: new Date(),
+        updatedAt: new Date('2026-01-02T00:00:00.000Z'),
         owner: { id: 'u1', displayName: 'Nino' },
         documents: [],
         images: [],
@@ -107,6 +108,33 @@ describe('FarmsService', () => {
       where: { ownerUserId: 'u1', farmId: null },
       data: { farmId: 'farm1' },
     });
+  });
+
+  it('returns farm updatedAt as an ISO string on the public list', async () => {
+    prisma.farm.findMany.mockResolvedValue([
+      {
+        id: 'farm12345',
+        name: 'Tea garden',
+        region: 'kakheti',
+        description: 'Leaves',
+        foundedYear: null,
+        farmSizeHectares: null,
+        ownershipType: null,
+        exportMarkets: [],
+        history: 'Since 1990',
+        verificationStatus: 'approved',
+        owner: { id: 'u1', displayName: 'Nino' },
+        images: [],
+        _count: { products: 1 },
+        updatedAt: new Date('2026-03-04T05:06:07.000Z'),
+      },
+    ]);
+
+    const farms = await service.list();
+
+    expect(farms).toHaveLength(1);
+    expect(farms[0]?.updatedAt).toBe('2026-03-04T05:06:07.000Z');
+    expect(farms[0]?.productCount).toBe(1);
   });
 
   it('rejects second farm for same owner', async () => {
@@ -178,6 +206,7 @@ describe('FarmsService', () => {
         companyRegistrationNumber: null,
         companyRegistryValid: null,
         createdAt: new Date(),
+        updatedAt: new Date('2026-01-02T00:00:00.000Z'),
         owner: { id: 'u1', displayName: 'Nino' },
         documents: [],
         images: [],
