@@ -58,6 +58,11 @@ import {
   sanitizeStringArray,
   toNumberOrNull,
 } from './product-mapper';
+import {
+  PRODUCT_VIEW_DEDUP_WINDOW_MS,
+  PRODUCT_VIEW_SOURCE_ORGANIC,
+  productViewVisitorKey,
+} from './product-view';
 import { publicProductWhereAnd } from './public-product.where';
 
 const imageOrderBy: Prisma.ProductImageOrderByWithRelationInput[] = [
@@ -328,8 +333,71 @@ export class ProductsService {
       include: productListInclude,
     });
     const sellerRating = await this.ratings.summaryForUser(user.id);
+    const metrics = await this.ownerListingMetrics(products.map((product) => product.id));
 
-    return products.map((product) => this.toSummary(product, sellerRating));
+    return products.map((product) => ({
+      ...this.toSummary(product, sellerRating),
+      viewCount: metrics.viewCountByProduct.get(product.id) ?? 0,
+      watchCount: metrics.watchCountByProduct.get(product.id) ?? 0,
+    }));
+  }
+
+  /**
+   * Record a view of the public product detail page.
+   * Skips the product owner, unpublished listings, and repeat visits from the
+   * same visitor within 24 hours. Never returns visitor or watcher identities.
+   */
+  async recordPublicProductView(
+    productId: string,
+    viewer: AuthenticatedUser | null,
+    visitor: { ip: string; userAgent: string },
+  ): Promise<{ recorded: boolean }> {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: {
+        id: true,
+        ownerUserId: true,
+        isPublished: true,
+        moderationStatus: true,
+      },
+    });
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+    if (viewer?.id === product.ownerUserId) {
+      return { recorded: false };
+    }
+    if (!isPubliclyListedProduct(product)) {
+      throw new NotFoundException('Product not found');
+    }
+
+    const visitorKey = productViewVisitorKey({
+      userId: viewer?.id ?? null,
+      ip: visitor.ip,
+      userAgent: visitor.userAgent,
+    });
+    const since = new Date(Date.now() - PRODUCT_VIEW_DEDUP_WINDOW_MS);
+    const existing = await this.prisma.productView.findFirst({
+      where: {
+        productId: product.id,
+        visitorKey,
+        createdAt: { gte: since },
+      },
+      select: { id: true },
+    });
+    if (existing) {
+      return { recorded: false };
+    }
+
+    await this.prisma.productView.create({
+      data: {
+        productId: product.id,
+        visitorKey,
+        viewerUserId: viewer?.id ?? null,
+        source: PRODUCT_VIEW_SOURCE_ORGANIC,
+      },
+    });
+    return { recorded: true };
   }
 
   async create(user: AuthenticatedUser, dto: CreateProductDto): Promise<ProductDetail> {
@@ -1319,6 +1387,36 @@ export class ProductsService {
     sellerRating?: RatingSummary | null,
   ): ProductSummary {
     return mapProductSummary(product, sellerRating);
+  }
+
+  private async ownerListingMetrics(productIds: string[]): Promise<{
+    viewCountByProduct: Map<string, number>;
+    watchCountByProduct: Map<string, number>;
+  }> {
+    if (productIds.length === 0) {
+      return {
+        viewCountByProduct: new Map(),
+        watchCountByProduct: new Map(),
+      };
+    }
+
+    const [views, watches] = await Promise.all([
+      this.prisma.productView.groupBy({
+        by: ['productId'],
+        where: { productId: { in: productIds } },
+        _count: { _all: true },
+      }),
+      this.prisma.harvestWatch.groupBy({
+        by: ['productId'],
+        where: { productId: { in: productIds } },
+        _count: { _all: true },
+      }),
+    ]);
+
+    return {
+      viewCountByProduct: new Map(views.map((row) => [row.productId, row._count._all])),
+      watchCountByProduct: new Map(watches.map((row) => [row.productId, row._count._all])),
+    };
   }
 
   private toDetail(

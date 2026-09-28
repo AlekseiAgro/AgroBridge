@@ -29,6 +29,12 @@ describe('ProductsService', () => {
       findUnique: jest.fn(),
       upsert: jest.fn(),
       deleteMany: jest.fn(),
+      groupBy: jest.fn().mockResolvedValue([]),
+    },
+    productView: {
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      groupBy: jest.fn().mockResolvedValue([]),
     },
     $transaction: jest.fn(),
   };
@@ -47,6 +53,9 @@ describe('ProductsService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    prisma.productView.groupBy.mockResolvedValue([]);
+    prisma.harvestWatch.groupBy.mockResolvedValue([]);
+    prisma.productView.findFirst.mockResolvedValue(null);
     service = new ProductsService(
       prisma as never,
       storage as never,
@@ -1180,5 +1189,95 @@ describe('ProductsService', () => {
     expect(notifications.notifyHarvestAvailable).not.toHaveBeenCalled();
     expect(notifications.notifyHarvestPreorderOpen).not.toHaveBeenCalled();
     expect(prisma.harvestWatch.findMany).not.toHaveBeenCalled();
+  });
+
+  it('attaches owner-only view and HarvestWatch counts on listMine without watcher identities', async () => {
+    prisma.product.findMany.mockResolvedValue([
+      productRow({
+        id: 'p1',
+        isPublished: true,
+        moderationStatus: 'approved',
+      }),
+    ]);
+    prisma.productView.groupBy.mockResolvedValue([
+      { productId: 'p1', _count: { _all: 124 } },
+    ]);
+    prisma.harvestWatch.groupBy.mockResolvedValue([
+      { productId: 'p1', _count: { _all: 8 } },
+    ]);
+
+    const listed = await service.listMine(farmer);
+
+    expect(listed).toHaveLength(1);
+    expect(listed[0].viewCount).toBe(124);
+    expect(listed[0].watchCount).toBe(8);
+    expect(JSON.stringify(listed)).not.toContain('visitorKey');
+    expect(JSON.stringify(listed)).not.toContain('viewerUserId');
+    expect(listed[0]).not.toHaveProperty('harvestWatches');
+    expect(listed[0]).not.toHaveProperty('views');
+    expect(prisma.harvestWatch.findMany).not.toHaveBeenCalled();
+  });
+
+  it('records a public product-detail view for a guest and skips the seller', async () => {
+    const live = productRow({
+      isPublished: true,
+      moderationStatus: 'approved',
+    });
+    prisma.product.findUnique.mockResolvedValue(live);
+    prisma.productView.findFirst.mockResolvedValue(null);
+    prisma.productView.create.mockResolvedValue({ id: 'v1' });
+
+    const guest = await service.recordPublicProductView('p1', null, {
+      ip: '203.0.113.10',
+      userAgent: 'Mozilla/5.0',
+    });
+    expect(guest).toEqual({ recorded: true });
+    expect(prisma.productView.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        productId: 'p1',
+        source: 'organic',
+        viewerUserId: null,
+      }),
+    });
+    const created = prisma.productView.create.mock.calls[0][0] as {
+      data: { visitorKey: string };
+    };
+    expect(created.data.visitorKey.startsWith('guest:')).toBe(true);
+    expect(created.data.visitorKey).not.toContain('203.0.113.10');
+
+    prisma.productView.create.mockClear();
+    const owner = await service.recordPublicProductView('p1', farmer, {
+      ip: '203.0.113.11',
+      userAgent: 'Mozilla/5.0',
+    });
+    expect(owner).toEqual({ recorded: false });
+    expect(prisma.productView.create).not.toHaveBeenCalled();
+  });
+
+  it('does not count a repeat view from the same visitor within 24 hours', async () => {
+    prisma.product.findUnique.mockResolvedValue(
+      productRow({
+        isPublished: true,
+        moderationStatus: 'approved',
+      }),
+    );
+    prisma.productView.findFirst.mockResolvedValue({ id: 'existing' });
+
+    const result = await service.recordPublicProductView(
+      'p1',
+      { ...farmer, id: 'buyer-1' },
+      { ip: '198.51.100.20', userAgent: 'Mozilla/5.0' },
+    );
+
+    expect(result).toEqual({ recorded: false });
+    expect(prisma.productView.create).not.toHaveBeenCalled();
+    expect(prisma.productView.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          productId: 'p1',
+          visitorKey: 'user:buyer-1',
+        }),
+      }),
+    );
   });
 });

@@ -122,6 +122,7 @@ describe('endpoint rate-limit policies', () => {
     ['contentCreatePerAccount', 30, 3600],
     ['tradeActionPerAccount', 60, 3600],
     ['placesAutocompletePerAccount', 120, 600],
+    ['productViewPerVisitor', 60, 300],
   ] as const)('%s allows %i per %i seconds by default', (name, limit, windowSec) => {
     expect(limits.policy(name)).toEqual({ limit, windowMs: windowSec * 1000 });
   });

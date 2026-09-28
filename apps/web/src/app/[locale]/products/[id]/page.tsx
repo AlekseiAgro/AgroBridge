@@ -5,6 +5,7 @@ import { CertificateBadges } from '@/components/CertificateBadges';
 import { HarvestPlanSummary } from '@/components/HarvestPlanSummary';
 import { HarvestStatusBadge } from '@/components/HarvestStatusBadge';
 import { HarvestWatchButton } from '@/components/HarvestWatchButton';
+import { RecordProductView } from '@/components/RecordProductView';
 import { MarketInsightButton } from '@/components/MarketInsightButton';
 import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { OpenChatButton } from '@/components/OpenChatButton';
@@ -67,6 +68,7 @@ export default async function ProductDetailPage({ params }: Props) {
   return (
     <div className="page">
       <SiteHeader />
+      <RecordProductView productId={product.id} isOwner={Boolean(product.isOwner)} />
       <main className="page__main">
         <div className="product-detail-header">
           <div className="product-detail-header__main">

@@ -235,6 +235,18 @@ export type ProductSummary = {
     exportMarkets: string[];
     history: string | null;
   } | null;
+  /**
+   * Owner-only (GET /products/mine): public product-detail page views.
+   * Seller's own views are not written. The same visitor is counted at most once
+   * per 24 hours. Omitted from catalog and public product detail.
+   */
+  viewCount?: number;
+  /**
+   * Owner-only (GET /products/mine): currently active HarvestWatch rows.
+   * Aggregate count only; watcher identities are never included.
+   * Omitted from catalog and public product detail.
+   */
+  watchCount?: number;
 };
 
 export type ProductDetail = ProductSummary & {

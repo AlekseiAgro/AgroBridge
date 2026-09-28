@@ -117,6 +117,13 @@ enum HarvestStatus {
   soldOut
 }
 
+/// Attribution for a public product-detail view. Paid placement is not live yet;
+/// new rows are stored as `organic` so later reporting can split organic vs promoted.
+enum ProductViewSource {
+  organic
+  promoted
+}
+
 enum ProductImageKind {
   overview
   closeup
@@ -459,6 +466,7 @@ model Product {
   videos         ProductVideo[]
   certificates   ProductCertificate[]
   harvestWatches HarvestWatch[]
+  views          ProductView[]
 
   @@index([ownerUserId])
   @@index([farmId])
@@ -467,6 +475,24 @@ model Product {
   @@index([isPublished, moderationStatus])
   @@index([harvestStatus])
   @@index([preorderEnabled])
+}
+
+/// One public product-detail page view. Owner views are never written.
+/// Dedup is per (productId, visitorKey) inside a rolling 24h window in application code.
+model ProductView {
+  id           String            @id @default(cuid())
+  productId    String
+  visitorKey   String
+  viewerUserId String?
+  source       ProductViewSource @default(organic)
+  createdAt    DateTime          @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, createdAt])
+  @@index([productId, visitorKey, createdAt])
+  @@index([productId, source])
+  @@map("product_views")
 }
 
 /// Buyer opt-in alerts when a product becomes available or opens pre-orders.
