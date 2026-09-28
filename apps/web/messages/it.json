@@ -1355,6 +1355,7 @@
     "subtitle": "Inserisci il codice a 6 cifre inviato via email per aprire il tuo account.",
     "code": "Codice di verifica",
     "confirm": "Conferma email",
+    "productGate": "Conferma l’email per continuare con questo prodotto.",
     "resend": "Invia di nuovo il codice",
     "sent": "Codice inviato a {destination}",
     "sentHint": "Abbiamo inviato un codice a {email}. Controlla posta in arrivo e spam.",
