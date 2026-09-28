@@ -1278,6 +1278,12 @@
       "12": "Dec"
     },
     "ownerWatchHint": "You own this listing, so harvest alerts are not needed here.",
+    "soldOutTitle": "Currently unavailable",
+    "soldOutSubtitle": "This harvest is sold out. The listing stays open — subscribe to be notified when it is available again.",
+    "notifyWhenAvailable": "Notify me when available",
+    "soldOutWatchHint": "Uses the existing harvest alerts. No separate subscription.",
+    "soldOutWatching": "✓ You'll be notified when available",
+    "soldOutLogin": "Sign in to get notified when available",
     "forecastUnitHint": "Uses the unit from Basics ({unit})."
   },
   "quality": {

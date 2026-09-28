@@ -91,6 +91,10 @@ export class RfqsService {
       throw new BadRequestException('You cannot request a quote for your own product');
     }
 
+    if (product.harvestStatus === 'soldOut') {
+      throw new BadRequestException('This product is currently unavailable');
+    }
+
     const rfq = await this.prisma.rfq.create({
       data: {
         productId: product.id,

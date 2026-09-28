@@ -1191,6 +1191,65 @@ describe('ProductsService', () => {
     expect(prisma.harvestWatch.findMany).not.toHaveBeenCalled();
   });
 
+  it('notifies existing HarvestWatch subscribers when a sold-out listing becomes available or limited', async () => {
+    const notifications = {
+      notifyHarvestAvailable: jest.fn().mockResolvedValue(undefined),
+      notifyHarvestPreorderOpen: jest.fn().mockResolvedValue(undefined),
+      notifyProductPendingModeration: jest.fn().mockResolvedValue(undefined),
+    };
+    const localService = new ProductsService(
+      prisma as never,
+      storage as never,
+      ratings as never,
+      { enabledIds: jest.fn().mockResolvedValue(null) } as never,
+      notifications as never,
+    );
+    prisma.harvestWatch.findMany.mockResolvedValue([
+      {
+        user: {
+          id: 'buyer1',
+          email: 'buyer@example.com',
+          locale: 'en',
+          displayName: 'Buyer',
+          blockedAt: null,
+        },
+      },
+    ]);
+
+    for (const harvestStatus of ['available', 'limited'] as const) {
+      notifications.notifyHarvestAvailable.mockClear();
+      prisma.product.findUnique.mockResolvedValue({
+        id: 'p1',
+        ownerUserId: 'farmer1',
+        title: 'Hazelnuts',
+        harvestStatus,
+        preorderEnabled: false,
+        isPublished: true,
+        moderationStatus: 'approved',
+        owner: { id: 'farmer1', displayName: 'Nino', email: 'n@example.com' },
+        farm: { name: 'Kakheti Farm' },
+        images: [],
+        videos: [],
+        certificates: [],
+      });
+
+      await localService.dispatchHarvestWatchNotifications({
+        productId: 'p1',
+        previousStatus: 'soldOut',
+        previousPreorder: false,
+        wasPublic: true,
+      });
+
+      expect(notifications.notifyHarvestAvailable).toHaveBeenCalledWith(
+        expect.objectContaining({
+          productId: 'p1',
+          harvestStatus,
+          user: expect.objectContaining({ id: 'buyer1' }),
+        }),
+      );
+    }
+  });
+
   it('attaches owner-only view and HarvestWatch counts on listMine without watcher identities', async () => {
     prisma.product.findMany.mockResolvedValue([
       productRow({

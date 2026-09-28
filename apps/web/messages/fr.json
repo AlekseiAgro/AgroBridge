@@ -1278,6 +1278,12 @@
       "12": "déc."
     },
     "ownerWatchHint": "C’est votre annonce : les alertes de récolte ne sont pas nécessaires ici.",
+    "soldOutTitle": "Indisponible pour le moment",
+    "soldOutSubtitle": "Cette récolte est épuisée. La fiche reste visible — abonnez-vous aux alertes de récolte existantes.",
+    "notifyWhenAvailable": "Me prévenir quand ce sera disponible",
+    "soldOutWatchHint": "Ce sont les alertes de récolte déjà en place. Pas d’abonnement séparé.",
+    "soldOutWatching": "✓ Vous serez prévenu dès que ce sera de nouveau disponible",
+    "soldOutLogin": "Connectez-vous pour être prévenu",
     "forecastUnitHint": "Utilise l’unité des Informations de base ({unit})."
   },
   "quality": {
