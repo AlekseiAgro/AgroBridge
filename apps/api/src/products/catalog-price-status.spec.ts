@@ -78,14 +78,21 @@ describe('catalog listed price', () => {
     expect(detail.indexOf("t('sections.pricing')")).toBeLessThan(detail.indexOf("t('sections.volume')"));
     expect(detail.indexOf('product-detail-cta-price')).toBeLessThan(detail.indexOf("t('sections.volume')"));
 
-    const compact = detail.slice(
-      detail.indexOf('product-detail-cta-price'),
-      detail.indexOf('#request-quote'),
-    );
+    const actionsStart = detail.indexOf('className="product-detail-header__actions"');
+    const actionsEnd = detail.indexOf('product-detail-sections', actionsStart);
+    expect(actionsStart).toBeGreaterThan(-1);
+    expect(actionsEnd).toBeGreaterThan(actionsStart);
+    const actions = detail.slice(actionsStart, actionsEnd);
+    const priceStart = actions.indexOf('product-detail-cta-price');
+    const quoteStart = actions.indexOf('href="#request-quote"');
+    expect(priceStart).toBeGreaterThan(-1);
+    expect(quoteStart).toBeGreaterThan(priceStart);
+    const compact = actions.slice(priceStart, quoteStart);
     expect(compact).toContain("t('priceFrom')");
     expect(compact).toContain('{listedPrice}');
-    expect(compact).not.toContain('priceNegotiable');
-    expect(compact).not.toContain('priceDependsOnVolume');
+    expect(compact).toContain('product-detail-cta-price__value');
+    expect(actions).not.toContain('priceNegotiable');
+    expect(actions).not.toContain('priceDependsOnVolume');
     expect(detail).not.toMatch(/1\.80|4\.50|7\.00|15\.00|24\.00/);
     expect(detail).toContain('QualityScoreChip');
     expect(detail).toContain('product-quality-summary--detail');

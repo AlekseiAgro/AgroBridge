@@ -45,14 +45,16 @@ export function ChatRoom({ conversationId, initial, viewer, peer }: Props) {
   const t = useTranslations('chat');
   const locale = useLocale();
   const [messages, setMessages] = useState<ChatMessageView[]>(initial.messages);
+  const [seenInitial, setSeenInitial] = useState(initial);
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const threadRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
+  if (initial !== seenInitial) {
+    setSeenInitial(initial);
     setMessages(initial.messages);
-  }, [initial]);
+  }
 
   useEffect(() => {
     const node = threadRef.current;
