@@ -7,6 +7,7 @@ import { RequestsSellCta } from '@/components/RequestsSellCta';
 import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
+import { loginRedirectHref } from '@/lib/protected-next-path';
 import { getCurrentUser } from '@/lib/session';
 
 type Props = {
@@ -38,6 +39,8 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
 
   const canCreate = Boolean(user);
   const hasFilters = query.toString().length > 0;
+  const requestsPath = hasFilters ? `/requests?${query.toString()}` : '/requests';
+  const loginHref = loginRedirectHref(requestsPath);
 
   return (
     <main className="page__main">
@@ -51,7 +54,7 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
             {t('createCta')}
           </Link>
         ) : !user ? (
-          <Link href="/login" className="button button--primary">
+          <Link href={loginHref} className="button button--primary">
             {t('loginToCreate')}
           </Link>
         ) : null}
@@ -80,7 +83,7 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
                       {t('createCta')}
                     </Link>
                   ) : !user ? (
-                    <Link href="/login" className="button button--primary">
+                    <Link href={loginHref} className="button button--primary">
                       {t('loginToCreate')}
                     </Link>
                   ) : null}
