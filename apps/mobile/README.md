@@ -21,4 +21,4 @@ The app calls Nest directly with `Authorization: Bearer`. It does not call the N
 
 ## Not in this package yet
 
-Catalog, product detail, farms, purchase-request and offer workflows, chat, the notification center, push, subscriptions, My Products, product editing, KYC, payments, and admin stay out of this foundation. Home uses a clearly marked presentation feed until those screens call the existing API.
+Home, the Requests tab, and product/request details read the public Nest catalog (`GET /products`, `GET /categories`, `GET /purchase-requests`, and the matching detail routes). Sign-in UI, offers, chat, push, subscriptions, My Products, editing, KYC, payments, and admin are still not in this package.

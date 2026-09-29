@@ -345,16 +345,14 @@ describe('ProductsService', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
-  it('searches catalog by localized title via canonical title keys', async () => {
+  it('keeps catalog text search out of SQL so translations and ё/е can match in memory', async () => {
     prisma.product.findMany.mockResolvedValue([]);
 
-    await service.catalog({ q: 'персики' });
+    await service.catalog({ q: 'виноград' });
 
-    expect(prisma.product.findMany).toHaveBeenCalled();
-    const arg = prisma.product.findMany.mock.calls[0][0] as {
-      where: { AND: Array<{ OR?: Array<Record<string, unknown>> }> };
-    };
-    expect(arg.where.AND.some((clause) => Array.isArray(clause.OR))).toBe(true);
+    const where = JSON.stringify(prisma.product.findMany.mock.calls[0][0].where);
+    expect(where).not.toContain('виноград');
+    expect(where).not.toContain('contains');
   });
 
   it('keeps approved published products live after content edits', async () => {
@@ -439,6 +437,91 @@ describe('ProductsService', () => {
         }),
       }),
     );
+  });
+
+  it('requeues catalog translations only when source text changes', async () => {
+    const syncProduct = jest.fn().mockResolvedValue(undefined);
+    const local = new ProductsService(
+      prisma as never,
+      storage as never,
+      ratings as never,
+      { enabledIds: jest.fn().mockResolvedValue(null) } as never,
+      {
+        notifyHarvestAvailable: jest.fn().mockResolvedValue(undefined),
+        notifyHarvestPreorderOpen: jest.fn().mockResolvedValue(undefined),
+        notifyProductPendingModeration: jest.fn().mockResolvedValue(undefined),
+      } as never,
+      { syncProduct } as never,
+    );
+    const farmer = {
+      id: 'u1',
+      email: 'f@example.com',
+      role: 'farmer' as const,
+      locale: 'ka' as const,
+      displayName: null,
+      sellerType: null,
+      buyerType: null,
+    };
+    const existing = {
+      id: 'p1',
+      ownerUserId: 'u1',
+      farmId: null,
+      title: 'ყურძენი',
+      description: null,
+      category: 'fruits',
+      variety: null,
+      country: 'Georgia',
+      originPlace: null,
+      unit: 'kg',
+      minQuantity: null,
+      maxQuantity: null,
+      currentStock: null,
+      monthlyProduction: null,
+      maxAnnualProduction: null,
+      seasonMonths: [],
+      harvestStartAt: null,
+      harvestEndAt: null,
+      forecastQuantity: null,
+      harvestStatus: null,
+      preorderEnabled: false,
+      attributes: {},
+      packagingTypes: [],
+      packagingWeights: [],
+      palletSize: null,
+      incoterms: [],
+      carriers: [],
+      customDelivery: null,
+      nearestPort: null,
+      deliveryAvailable: false,
+      leadTimeDays: null,
+      priceFrom: null,
+      priceCurrency: null,
+      priceNegotiable: false,
+      priceDependsOnVolume: false,
+      isPublished: true,
+      moderationStatus: 'approved',
+      moderationNote: null,
+      moderatedAt: new Date('2026-01-01T00:00:00.000Z'),
+      moderatedById: 'admin1',
+      sourceLocale: 'ka',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      owner: { id: 'u1', displayName: null, avatarUrl: null },
+      farm: null,
+      images: [],
+      videos: [],
+      certificates: [],
+      translations: [],
+    };
+    prisma.product.findUnique.mockResolvedValue(existing);
+    prisma.product.update.mockResolvedValue(existing);
+
+    await local.update(farmer, 'p1', { leadTimeDays: 3 });
+    expect(syncProduct).not.toHaveBeenCalled();
+
+    prisma.product.update.mockResolvedValue({ ...existing, title: 'ყურძენი აჭარული' });
+    await local.update(farmer, 'p1', { title: 'ყურძენი აჭარული' });
+    expect(syncProduct).toHaveBeenCalledWith('p1');
   });
 
   it('keeps draft-title filters when listing the public catalog', async () => {

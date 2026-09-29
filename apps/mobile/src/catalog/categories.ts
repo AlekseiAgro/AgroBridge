@@ -22,7 +22,17 @@ export const PRODUCT_CATEGORIES = [
 
 export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
 
-export const SHOWCASE_CATEGORIES = PRODUCT_CATEGORIES.filter((category) => category !== 'other');
+export function isProductCategory(value: string): value is ProductCategory {
+  return (PRODUCT_CATEGORIES as readonly string[]).includes(value);
+}
+
+export const PRODUCT_UNITS = ['kg', 'ton', 'box', 'liter', 'bottle', 'piece'] as const;
+
+export type ProductUnit = (typeof PRODUCT_UNITS)[number];
+
+export function isProductUnit(value: string): value is ProductUnit {
+  return (PRODUCT_UNITS as readonly string[]).includes(value);
+}
 
 export const GEORGIA_REGIONS = [
   'tbilisi',
@@ -39,6 +49,10 @@ export const GEORGIA_REGIONS = [
 ] as const;
 
 export type GeorgiaRegion = (typeof GEORGIA_REGIONS)[number];
+
+export function isGeorgiaRegion(value: string): value is GeorgiaRegion {
+  return (GEORGIA_REGIONS as readonly string[]).includes(value);
+}
 
 export const AVAILABILITY = ['growing', 'available', 'limited', 'soldOut'] as const;
 

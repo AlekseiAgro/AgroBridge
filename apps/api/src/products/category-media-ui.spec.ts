@@ -203,7 +203,8 @@ describe('category localization and catalog surfaces', () => {
     expect(detail).toContain('getRenderableProductImages');
     expect(detail).toContain('ProductPhotoPlaceholder');
     expect(detail).not.toContain('formatCategoryFallbackAlt');
-    expect(detail).toMatch(/galleryImages\.map[\s\S]*alt=\{formatProductTitle\(product\.title, locale\)\}/);
+    expect(detail).toMatch(/galleryImages\.map[\s\S]*alt=\{productName\}/);
+    expect(detail).toContain('catalogDisplayTitle(product)');
   });
 
   it('does not weaken public product visibility rules', () => {

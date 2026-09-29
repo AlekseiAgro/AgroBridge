@@ -7,7 +7,6 @@ import {
   type ProductImage,
 } from '@agrobridge/shared';
 import { getRenderableProductImages, resolveProductImageUrl } from './product-image';
-import { formatProductDescription, formatProductTitle } from './product-title';
 import { SEO_BRAND } from './seo-page-metadata';
 import { PRODUCTION_WEB_ORIGIN } from './seo-robots';
 import { localizedPublicUrl } from './seo-sitemap';
@@ -47,6 +46,7 @@ export type ProductJsonLdSource = {
   id: string;
   title?: string | null;
   description?: string | null;
+  display?: { title?: string | null; description?: string | null } | null;
   category?: string | null;
   country?: string | null;
   images?: ProductImage[] | null;
@@ -124,7 +124,7 @@ export function buildProductJsonLd(
   if (!isLocale(locale)) return null;
   if (!isPubliclyListedProduct(product)) return null;
 
-  const name = formatProductTitle(product.title, locale).trim();
+  const name = (product.display?.title?.trim() || product.title || '').trim();
   const id = product.id.trim();
   if (!name || !id) return null;
 
@@ -136,7 +136,7 @@ export function buildProductJsonLd(
     name,
   };
 
-  const description = formatProductDescription(product.description, locale).trim();
+  const description = (product.display?.description?.trim() || product.description || '').trim();
   if (description) data.description = description;
 
   const images = productImages(product.images);

@@ -12,14 +12,18 @@ import { SellerQuoteSummary } from '@/components/SellerQuoteSummary';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
+import { catalogDisplayField, catalogDisplayTitle, catalogOriginalTitle } from '@/lib/catalog-display';
 import { loginRedirectHref } from '@/lib/protected-next-path';
 import { formatRegionLabel } from '@/lib/region';
 import { buildBreadcrumbJsonLd } from '@/lib/seo-jsonld';
 import { purchaseRequestPageMetadata } from '@/lib/seo-public-metadata';
 import { getCurrentUser } from '@/lib/session';
 
-const loadPurchaseRequest = cache(async (id: string, token: string | null) => {
-  return apiRequest<PurchaseRequestDetail>(`/purchase-requests/${id}`, { token });
+const loadPurchaseRequest = cache(async (id: string, token: string | null, locale: string) => {
+  return apiRequest<PurchaseRequestDetail>(
+    `/purchase-requests/${id}?locale=${encodeURIComponent(locale)}`,
+    { token },
+  );
 });
 
 type Props = {
@@ -29,7 +33,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params;
   try {
-    const request = await loadPurchaseRequest(id, await getAuthToken());
+    const request = await loadPurchaseRequest(id, await getAuthToken(), locale);
     return purchaseRequestPageMetadata(request, locale);
   } catch {
     return {};
@@ -50,7 +54,7 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
 
   let request: PurchaseRequestDetail;
   try {
-    request = await loadPurchaseRequest(id, token);
+    request = await loadPurchaseRequest(id, token, locale);
   } catch (error) {
     if (error instanceof ApiError && (error.status === 404 || error.status === 403)) {
       notFound();
@@ -58,6 +62,8 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
     throw error;
   }
 
+  const requestTitle = catalogDisplayTitle(request);
+  const originalTitle = catalogOriginalTitle(request);
   const isOwner = Boolean(user && user.id === request.buyer.id);
   const buyerName = request.buyer.displayName || t('anonymousBuyer');
   const isOpenRequest = request.status === 'open';
@@ -68,7 +74,7 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
         items: [
           { name: tBreadcrumbs('home'), path: '' },
           { name: tBreadcrumbs('requests'), path: '/requests' },
-          { name: request.title, path: `/requests/${request.id}` },
+          { name: requestTitle, path: `/requests/${request.id}` },
         ],
       })
     : null;
@@ -83,7 +89,7 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
               { href: '/', label: tBreadcrumbs('home') },
               { href: '/requests', label: tBreadcrumbs('requests') },
             ]}
-            current={request.title}
+            current={requestTitle}
           />
         ) : (
           <p className="eyebrow">
@@ -92,7 +98,10 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
         )}
         <div className="page__heading-row">
           <div>
-            <h1>{request.title}</h1>
+            <h1>{requestTitle}</h1>
+            {originalTitle ? (
+              <p className="page__subtitle">{t('originalText', { text: originalTitle })}</p>
+            ) : null}
             <p className="page__subtitle">
               {t(`statuses.${request.status}`)} ·{' '}
               <Link href={`/users/${request.buyer.id}`} className="profile-link">
@@ -132,28 +141,30 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
               {request.unit ? ` ${tp(`units.${request.unit as 'kg'}`)}` : ''}
             </dd>
           </div>
-          {request.variety ? (
+          {catalogDisplayField(request.display?.variety, request.variety) ? (
             <div>
               <dt>{t('variety')}</dt>
-              <dd>{request.variety}</dd>
+              <dd>{catalogDisplayField(request.display?.variety, request.variety)}</dd>
             </div>
           ) : null}
-          {request.packaging ? (
+          {catalogDisplayField(request.display?.packaging, request.packaging) ? (
             <div>
               <dt>{t('packaging')}</dt>
-              <dd>{request.packaging}</dd>
+              <dd>{catalogDisplayField(request.display?.packaging, request.packaging)}</dd>
             </div>
           ) : null}
-          {request.destinationCountry ? (
+          {catalogDisplayField(request.display?.destinationCountry, request.destinationCountry) ? (
             <div>
               <dt>{t('destinationCountry')}</dt>
-              <dd>{request.destinationCountry}</dd>
+              <dd>
+                {catalogDisplayField(request.display?.destinationCountry, request.destinationCountry)}
+              </dd>
             </div>
           ) : null}
-          {request.message ? (
+          {catalogDisplayField(request.display?.message, request.message) ? (
             <div>
               <dt>{t('message')}</dt>
-              <dd>{request.message}</dd>
+              <dd>{catalogDisplayField(request.display?.message, request.message)}</dd>
             </div>
           ) : null}
         </dl>

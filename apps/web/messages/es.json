@@ -226,6 +226,7 @@
     "allCategories": "Todas las categorías",
     "applyFilters": "Buscar",
     "empty": "Ningún producto coincide con los filtros.",
+    "originalText": "Original: {text}",
     "loadError": "No se pudo cargar el catálogo. ¿Está la API en marcha?",
     "categories": {
       "fruits": "Frutas",
@@ -1082,6 +1083,7 @@
   "purchaseRequests": {
     "boardTitle": "Solicitudes de compra",
     "boardSubtitle": "Los compradores publican lo que necesitan. Los agricultores responden con una oferta o por chat.",
+    "originalText": "Original: {text}",
     "boardEmpty": "Aún no hay solicitudes de compra abiertas.",
     "createCta": "Publicar solicitud",
     "loginToCreate": "Inicia sesión para publicar una solicitud",

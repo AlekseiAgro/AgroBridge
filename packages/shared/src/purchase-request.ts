@@ -1,4 +1,5 @@
 import type { ProductCategory, ProductUnit } from './catalog';
+import type { PurchaseRequestDisplayText, PurchaseRequestSourceText } from './catalog-locale';
 import type { CurrencyCode } from './rfq';
 
 export const PURCHASE_REQUEST_STATUSES = ['open', 'closed', 'cancelled', 'fulfilled'] as const;
@@ -58,6 +59,10 @@ export type PurchaseRequestSummary = {
   createdAt: string;
   updatedAt: string;
   buyer: PurchaseRequestBuyer;
+  /** Original buyer text. Never replaced by a translation. */
+  source?: PurchaseRequestSourceText;
+  /** Text for the requested viewer locale, falling back to `source`. */
+  display?: PurchaseRequestDisplayText;
   quoteCount: number;
   /** Current farmer's quote on this request, if any. */
   myQuote: PurchaseQuoteView | null;

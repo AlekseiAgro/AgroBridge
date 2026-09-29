@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import {
@@ -14,8 +15,12 @@ import {
   PRODUCT_VIDEO_MAX_COUNT,
   PRODUCT_VIDEO_MIME_TYPES,
   canTrade,
-  catalogSearchCanonicalMatches,
+  catalogTextMatches,
+  completedTranslationSearchParts,
+  detectCatalogSourceLocale,
   isPubliclyListedProduct,
+  presentCatalogText,
+  resolveCatalogLocale,
   publishedListingIncompleteMessage,
   publishedListingIssues,
   type ListingFields,
@@ -30,17 +35,16 @@ import {
   isProductImageMimeType,
   normalizeSeasonMonths,
   type HarvestWatchItem,
+  type Locale,
   type ProductDetail,
   type ProductSummary,
   type RatingSummary,
   type SeasonMonth,
 } from '@agrobridge/shared';
 import {
-  CertificateType as PrismaCertificateType,
   HarvestStatus as PrismaHarvestStatus,
   ModerationStatus as PrismaModerationStatus,
   Prisma,
-  ProductImageKind as PrismaProductImageKind,
 } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { NotificationsService } from '../mail/notifications.service';
@@ -48,6 +52,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
 import { StorageService } from '../storage/storage.service';
 import { CategoriesService } from '../categories/categories.service';
+import {
+  CatalogTranslationService,
+  productSourceHash,
+} from '../catalog/catalog-translation.service';
 import { CatalogQueryDto } from './dto/catalog-query.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -105,6 +113,7 @@ const productListInclude = {
   certificates: {
     orderBy: { createdAt: 'desc' },
   },
+  translations: true,
 } satisfies Prisma.ProductInclude;
 
 const productDetailInclude = {
@@ -123,6 +132,7 @@ const productDetailInclude = {
   certificates: {
     orderBy: { createdAt: 'desc' },
   },
+  translations: true,
 } satisfies Prisma.ProductInclude;
 
 type ProductWithFarmAndImages = Prisma.ProductGetPayload<{
@@ -141,10 +151,15 @@ export class ProductsService {
     private readonly ratings: RatingsService,
     private readonly categories: CategoriesService,
     private readonly notifications: NotificationsService,
+    @Optional() private readonly catalogTranslations?: CatalogTranslationService,
   ) {}
 
-  async catalog(query: CatalogQueryDto): Promise<ProductSummary[]> {
+  async catalog(
+    query: CatalogQueryDto,
+    viewer: AuthenticatedUser | null = null,
+  ): Promise<ProductSummary[]> {
     const q = query.q?.trim() || undefined;
+    const locale = resolveCatalogLocale(query.locale, viewer?.locale);
     const category = query.category?.trim() || undefined;
     const region = query.region?.trim() || undefined;
     const harvestStatus =
@@ -178,26 +193,8 @@ export class ProductsService {
       });
     }
 
-    if (q) {
-      const localized = catalogSearchCanonicalMatches(q);
-      const searchOr: Prisma.ProductWhereInput[] = [
-        { title: { contains: q, mode: 'insensitive' } },
-        { description: { contains: q, mode: 'insensitive' } },
-        { variety: { contains: q, mode: 'insensitive' } },
-        { farm: { name: { contains: q, mode: 'insensitive' } } },
-        { owner: { displayName: { contains: q, mode: 'insensitive' } } },
-      ];
-      if (localized.titles.length > 0) {
-        searchOr.push({ title: { in: localized.titles } });
-      }
-      if (localized.descriptions.length > 0) {
-        searchOr.push({ description: { in: localized.descriptions } });
-      }
-      and.push({ OR: searchOr });
-    }
-
     if (harvestStatus) {
-      and.push({ harvestStatus: harvestStatus as PrismaHarvestStatus });
+      and.push({ harvestStatus: harvestStatus });
     }
 
     if (preorder) {
@@ -220,10 +217,30 @@ export class ProductsService {
       products.map((product) => product.ownerUserId),
     );
 
-    return products.map((product) => this.toSummary(product, ratings.get(product.ownerUserId)));
+    const matched = q
+      ? products.filter((product) =>
+          catalogTextMatches(q, [
+            product.title,
+            product.description,
+            product.variety,
+            product.originPlace,
+            product.farm?.name,
+            product.owner.displayName,
+            ...completedTranslationSearchParts(product.translations),
+          ]),
+        )
+      : products;
+
+    return matched.map((product) =>
+      this.toSummary(product, ratings.get(product.ownerUserId), locale),
+    );
   }
 
-  async getById(id: string, viewer?: AuthenticatedUser | null): Promise<ProductDetail> {
+  async getById(
+    id: string,
+    viewer?: AuthenticatedUser | null,
+    requestedLocale?: string | null,
+  ): Promise<ProductDetail> {
     const product = await this.prisma.product.findUnique({
       where: { id },
       include: productDetailInclude,
@@ -253,7 +270,8 @@ export class ProductsService {
         )
       : false;
     const isCardOwner = Boolean(viewer && product.ownerUserId === viewer.id);
-    return this.toDetail(product, sellerRating, watching, isCardOwner, Boolean(isOwner));
+    const locale = resolveCatalogLocale(requestedLocale, viewer?.locale);
+    return this.toDetail(product, sellerRating, watching, isCardOwner, Boolean(isOwner), locale);
   }
 
   async listMyWatches(user: AuthenticatedUser): Promise<HarvestWatchItem[]> {
@@ -336,7 +354,7 @@ export class ProductsService {
     const metrics = await this.ownerListingMetrics(products.map((product) => product.id));
 
     return products.map((product) => ({
-      ...this.toSummary(product, sellerRating),
+      ...this.toSummary(product, sellerRating, resolveCatalogLocale(undefined, user.locale)),
       viewCount: metrics.viewCountByProduct.get(product.id) ?? 0,
       watchCount: metrics.watchCountByProduct.get(product.id) ?? 0,
     }));
@@ -404,7 +422,7 @@ export class ProductsService {
   async create(user: AuthenticatedUser, dto: CreateProductDto): Promise<ProductDetail> {
     this.assertFarmer(user);
     const farm = await this.prisma.farm.findUnique({ where: { ownerId: user.id } });
-    const input = dto as any;
+    const input = dto;
     const isPublished = dto.isPublished ?? false;
     const quantity = this.normalizeQuantityRange(dto.minQuantity, dto.maxQuantity);
     const harvest = this.normalizeHarvestInput(dto);
@@ -465,6 +483,10 @@ export class ProductsService {
           ? PrismaModerationStatus.pending
           : PrismaModerationStatus.draft,
         moderationNote: null,
+        sourceLocale: detectCatalogSourceLocale(
+          [dto.title, dto.description, input.variety, input.originPlace].filter(Boolean).join('\n'),
+          user.locale,
+        ),
       },
       include: productDetailInclude,
     });
@@ -473,13 +495,21 @@ export class ProductsService {
       this.queuePendingModerationEmail(product, user);
     }
 
-    return this.toDetail(product, null, false, true, true);
+    void this.catalogTranslations?.syncProduct(product.id);
+    return this.toDetail(
+      product,
+      null,
+      false,
+      true,
+      true,
+      resolveCatalogLocale(undefined, user.locale),
+    );
   }
 
   async update(user: AuthenticatedUser, id: string, dto: UpdateProductDto): Promise<ProductDetail> {
     this.assertFarmer(user);
     const product = await this.requireOwnedProduct(user.id, id);
-    const input = dto as any;
+    const input = dto;
 
     const nextPublished = dto.isPublished ?? product.isPublished;
     const nextMin =
@@ -554,6 +584,25 @@ export class ProductsService {
     const priceNegotiable = input.priceNegotiable === undefined ? undefined : input.priceNegotiable;
     const priceDependsOnVolume =
       input.priceDependsOnVolume === undefined ? undefined : input.priceDependsOnVolume;
+
+    const nextTitle = dto.title !== undefined ? dto.title.trim() : product.title;
+    const nextDescription =
+      dto.description === undefined ? product.description : dto.description.trim() || null;
+    const nextVariety = variety === undefined ? product.variety : variety;
+    const nextOriginPlace = originPlace === undefined ? product.originPlace : originPlace;
+    const translatableChanged =
+      productSourceHash({
+        title: nextTitle,
+        description: nextDescription,
+        variety: nextVariety,
+        originPlace: nextOriginPlace,
+      }) !==
+      productSourceHash({
+        title: product.title,
+        description: product.description,
+        variety: product.variety,
+        originPlace: product.originPlace,
+      });
 
     const contentChanged =
       (dto.title !== undefined && dto.title.trim() !== product.title) ||
@@ -632,8 +681,7 @@ export class ProductsService {
         category: dto.category !== undefined ? dto.category || null : product.category,
         unit: dto.unit !== undefined ? dto.unit || null : product.unit,
         priceFrom: priceFrom !== undefined ? priceFrom : toNumberOrNull(product.priceFrom),
-        priceCurrency:
-          priceCurrency !== undefined ? priceCurrency : product.priceCurrency,
+        priceCurrency: priceCurrency !== undefined ? priceCurrency : product.priceCurrency,
       },
       previousPublished: product.isPublished,
       previous: {
@@ -690,6 +738,12 @@ export class ProductsService {
         priceCurrency,
         priceNegotiable,
         priceDependsOnVolume,
+        sourceLocale: translatableChanged
+          ? detectCatalogSourceLocale(
+              [nextTitle, nextDescription, nextVariety, nextOriginPlace].filter(Boolean).join('\n'),
+              user.locale,
+            )
+          : undefined,
         isPublished: nextPublished,
         moderationStatus,
         moderationNote,
@@ -716,7 +770,18 @@ export class ProductsService {
       this.queuePendingModerationEmail(updated, user);
     }
 
-    return this.toDetail(updated, null, false, true, true);
+    if (translatableChanged) {
+      void this.catalogTranslations?.syncProduct(updated.id);
+    }
+
+    return this.toDetail(
+      updated,
+      null,
+      false,
+      true,
+      true,
+      resolveCatalogLocale(undefined, user.locale),
+    );
   }
 
   async getWatchStatus(
@@ -864,7 +929,7 @@ export class ProductsService {
             key: stored.key,
             sortOrder: existingCount,
             isPrimary,
-            kind: kind as PrismaProductImageKind,
+            kind: kind,
           },
         });
 
@@ -1022,7 +1087,7 @@ export class ProductsService {
         await tx.productCertificate.create({
           data: {
             productId: product.id,
-            type: typeRaw as PrismaCertificateType,
+            type: typeRaw,
             title: trimmedTitle,
             fileName: file.originalname || 'certificate',
             url: '',
@@ -1386,8 +1451,15 @@ export class ProductsService {
   private toSummary(
     product: ProductWithFarmAndImages | ProductWithOwnerAndImages,
     sellerRating?: RatingSummary | null,
+    locale: Locale = 'en',
   ): ProductSummary {
-    return mapProductSummary(product, sellerRating);
+    const summary = mapProductSummary(product, sellerRating);
+    const text = presentCatalogText(product, locale);
+    return {
+      ...summary,
+      source: text.source,
+      display: text.display,
+    };
   }
 
   private async ownerListingMetrics(productIds: string[]): Promise<{
@@ -1426,14 +1498,21 @@ export class ProductsService {
     watching = false,
     isOwner = false,
     includePrivateCertificates = false,
+    locale: Locale = 'en',
   ): ProductDetail {
-    return mapProductDetail(
+    const detail = mapProductDetail(
       product,
       sellerRating,
       watching,
       isOwner,
       includePrivateCertificates,
     );
+    const text = presentCatalogText(product, locale);
+    return {
+      ...detail,
+      source: text.source,
+      display: text.display,
+    };
   }
 
   private normalizeHarvestInput(
@@ -1497,7 +1576,7 @@ export class ProductsService {
       if (dto.harvestStatus === null || dto.harvestStatus === '') {
         harvestStatus = null;
       } else if (isHarvestStatus(dto.harvestStatus)) {
-        harvestStatus = dto.harvestStatus as PrismaHarvestStatus;
+        harvestStatus = dto.harvestStatus;
       } else {
         throw new BadRequestException('harvestStatus is invalid');
       }
@@ -1602,8 +1681,7 @@ export class ProductsService {
     // Also fire when a card with sellable status / preorder first becomes public
     // (e.g. save-as-draft then publish, or admin approval), not only on field diffs.
     const becameAvailable =
-      statusIsSellable &&
-      (params.nextStatus !== params.previousStatus || becamePublic);
+      statusIsSellable && (params.nextStatus !== params.previousStatus || becamePublic);
 
     const preorderOpened =
       params.nextPreorder === true && (!params.previousPreorder || becamePublic);
@@ -1626,9 +1704,7 @@ export class ProductsService {
     });
 
     const sellerLabel =
-      params.product.farm?.name ||
-      params.product.owner.displayName?.trim() ||
-      'Seller';
+      params.product.farm?.name || params.product.owner.displayName?.trim() || 'Seller';
 
     await Promise.all(
       watches

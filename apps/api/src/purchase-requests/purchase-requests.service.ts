@@ -5,9 +5,16 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import {
   canTrade,
+  catalogTextMatches,
+  completedTranslationSearchParts,
+  detectCatalogSourceLocale,
+  presentPurchaseRequestText,
+  resolveCatalogLocale,
+  type Locale,
   type PurchaseQuoteMineItem,
   type PurchaseQuoteView,
   type PurchaseRequestDetail,
@@ -17,6 +24,7 @@ import { CurrencyCode, Prisma, PurchaseQuoteStatus, PurchaseRequestStatus } from
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CatalogTranslationService } from '../catalog/catalog-translation.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { CreatePurchaseQuoteDto } from './dto/create-purchase-quote.dto';
 import { CreatePurchaseRequestDto } from './dto/create-purchase-request.dto';
@@ -58,6 +66,7 @@ const requestInclude = {
     include: quoteInclude,
     orderBy: { createdAt: 'desc' as const },
   },
+  translations: true,
 } satisfies Prisma.PurchaseRequestInclude;
 
 type RequestEntity = Prisma.PurchaseRequestGetPayload<{ include: typeof requestInclude }>;
@@ -71,36 +80,41 @@ export class PurchaseRequestsService {
     private readonly prisma: PrismaService,
     private readonly subscriptions: SubscriptionsService,
     private readonly notifications: NotificationsService,
+    @Optional() private readonly catalogTranslations?: CatalogTranslationService,
   ) {}
 
   async listOpen(
     filters: {
       category?: string;
       q?: string;
+      locale?: string;
     },
     viewer: AuthenticatedUser | null = null,
   ): Promise<PurchaseRequestSummary[]> {
+    const locale = resolveCatalogLocale(filters.locale, viewer?.locale);
+    const q = filters.q?.trim() || undefined;
     const items = await this.prisma.purchaseRequest.findMany({
       where: {
         status: PurchaseRequestStatus.open,
         ...(filters.category ? { category: filters.category } : {}),
-        ...(filters.q
-          ? {
-              OR: [
-                { title: { contains: filters.q, mode: 'insensitive' } },
-                { variety: { contains: filters.q, mode: 'insensitive' } },
-                { packaging: { contains: filters.q, mode: 'insensitive' } },
-                { destinationCountry: { contains: filters.q, mode: 'insensitive' } },
-                { message: { contains: filters.q, mode: 'insensitive' } },
-              ],
-            }
-          : {}),
       },
       orderBy: { createdAt: 'desc' },
       include: requestInclude,
     });
+    const matched = q
+      ? items.filter((item) =>
+          catalogTextMatches(q, [
+            item.title,
+            item.variety,
+            item.packaging,
+            item.destinationCountry,
+            item.message,
+            ...completedTranslationSearchParts(item.translations),
+          ]),
+        )
+      : items;
 
-    return items.map((item) => this.toSummary(item, viewer));
+    return matched.map((item) => this.toSummary(item, viewer, undefined, locale));
   }
 
   async listMine(user: AuthenticatedUser): Promise<PurchaseRequestSummary[]> {
@@ -112,7 +126,9 @@ export class PurchaseRequestsService {
       include: requestInclude,
     });
 
-    return items.map((item) => this.toSummary(item, user));
+    return items.map((item) =>
+      this.toSummary(item, user, undefined, resolveCatalogLocale(undefined, user.locale)),
+    );
   }
 
   /**
@@ -161,6 +177,12 @@ export class PurchaseRequestsService {
         destinationCountry: dto.destinationCountry?.trim() || null,
         message: dto.message?.trim() || null,
         status: PurchaseRequestStatus.open,
+        sourceLocale: detectCatalogSourceLocale(
+          [dto.title, dto.variety, dto.packaging, dto.destinationCountry, dto.message]
+            .filter(Boolean)
+            .join('\n'),
+          user.locale,
+        ),
       },
       include: requestInclude,
     });
@@ -179,10 +201,15 @@ export class PurchaseRequestsService {
       }),
     );
 
-    return this.toDetail(created, user);
+    void this.catalogTranslations?.syncPurchaseRequest(created.id);
+    return this.toDetail(created, user, resolveCatalogLocale(undefined, user.locale));
   }
 
-  async getById(user: AuthenticatedUser | null, id: string): Promise<PurchaseRequestDetail> {
+  async getById(
+    user: AuthenticatedUser | null,
+    id: string,
+    requestedLocale?: string | null,
+  ): Promise<PurchaseRequestDetail> {
     const request = await this.prisma.purchaseRequest.findUnique({
       where: { id },
       include: requestInclude,
@@ -199,7 +226,7 @@ export class PurchaseRequestsService {
       throw new ForbiddenException('This purchase request is no longer public');
     }
 
-    return this.toDetail(request, user);
+    return this.toDetail(request, user, resolveCatalogLocale(requestedLocale, user?.locale));
   }
 
   async cancel(user: AuthenticatedUser, id: string): Promise<PurchaseRequestDetail> {
@@ -669,6 +696,7 @@ export class PurchaseRequestsService {
     request: RequestEntity,
     viewer: AuthenticatedUser | null,
     farmId?: string | null,
+    locale: Locale = 'en',
   ): PurchaseRequestSummary {
     const myQuoteEntity = farmId
       ? (request.quotes.find((quote) => quote.farmId === farmId) ?? null)
@@ -699,12 +727,14 @@ export class PurchaseRequestsService {
       },
       quoteCount: publicQuoteCount,
       myQuote: myQuoteEntity ? this.toQuoteView(myQuoteEntity, viewer, request) : null,
+      ...presentPurchaseRequestText(request, locale),
     };
   }
 
   private toDetail(
     request: RequestEntity,
     viewer: AuthenticatedUser | null,
+    locale: Locale = 'en',
   ): PurchaseRequestDetail {
     const isOwner = Boolean(viewer && request.buyerId === viewer.id);
     const isAdmin = viewer?.role === 'admin';
@@ -719,7 +749,7 @@ export class PurchaseRequestsService {
       ),
     );
 
-    const summary = this.toSummary(request, viewer);
+    const summary = this.toSummary(request, viewer, undefined, locale);
     const quotes = this.visibleQuotes(request, viewer).map((quote) =>
       this.toQuoteView(quote, viewer, request),
     );

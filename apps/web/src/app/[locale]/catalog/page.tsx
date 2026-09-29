@@ -16,7 +16,7 @@ import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
 import { getProductCardImage, getProductCardImageAlt } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
-import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
+import { catalogDisplayDescription, catalogDisplayTitle, catalogOriginalTitle } from '@/lib/catalog-display';
 import { formatRegionLabel } from '@/lib/region';
 
 type Props = {
@@ -50,17 +50,25 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   if (filters.harvestStatus) query.set('harvestStatus', filters.harvestStatus);
   if (filters.preorder === 'true') query.set('preorder', 'true');
   if (filters.inSeason === 'true') query.set('inSeason', 'true');
+  query.set('locale', locale);
 
   let products: ProductSummary[] = [];
   let loadError: string | null = null;
   try {
-    const path = query.toString() ? `/products?${query.toString()}` : '/products';
+    const path = `/products?${query.toString()}`;
     products = await apiRequest<ProductSummary[]>(path);
   } catch {
     loadError = t('loadError');
   }
 
-  const hasFilters = query.toString().length > 0;
+  const hasFilters = Boolean(
+    filters.q ||
+      filters.category ||
+      filters.region ||
+      filters.harvestStatus ||
+      filters.preorder === 'true' ||
+      filters.inSeason === 'true',
+  );
 
   return (
     <main className="page__main">
@@ -100,7 +108,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
             const image = getProductCardImage(product);
             const imageAlt = getProductCardImageAlt({
               hasProductPhoto: Boolean(image),
-              productTitle: formatProductTitle(product.title, locale),
+              productTitle: catalogDisplayTitle(product),
               noPhotoAlt: t('noProductPhotoAlt'),
             });
             const quantity = formatProductQuantityRange(
@@ -127,8 +135,13 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                 )}
                 <div>
                   <Link href={`/products/${product.id}`} className="product-list__title">
-                    {formatProductTitle(product.title, locale)}
+                    {catalogDisplayTitle(product)}
                   </Link>
+                  {catalogOriginalTitle(product) ? (
+                    <p className="product-list__meta">
+                      {t('originalText', { text: catalogOriginalTitle(product) ?? '' })}
+                    </p>
+                  ) : null}
                   <p className="product-list__meta">
                     {product.farm ? (
                       <>
@@ -175,10 +188,8 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                       {t('availableQuantity')}: {quantity}
                     </p>
                   ) : null}
-                  {product.description ? (
-                    <p className="product-list__desc">
-                      {formatProductDescription(product.description, locale)}
-                    </p>
+                  {catalogDisplayDescription(product) ? (
+                    <p className="product-list__desc">{catalogDisplayDescription(product)}</p>
                   ) : null}
                 </div>
               </li>

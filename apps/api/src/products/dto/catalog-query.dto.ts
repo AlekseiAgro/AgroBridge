@@ -17,6 +17,11 @@ export class CatalogQueryDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(8)
+  locale?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(60)
   category?: string;
 

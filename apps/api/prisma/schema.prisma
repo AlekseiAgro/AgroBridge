@@ -455,10 +455,13 @@ model Product {
   moderationNote       String?
   moderatedAt          DateTime?
   moderatedById        String?
+  /// Language of title, description, variety, and originPlace. Those columns stay the original text.
+  sourceLocale         LocaleCode       @default(en)
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
 
   owner          User                 @relation("ProductOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  translations   ProductTranslation[]
   farm           Farm?                @relation(fields: [farmId], references: [id], onDelete: SetNull)
   moderatedBy    User?                @relation("ProductModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
   rfqs           Rfq[]
@@ -475,6 +478,30 @@ model Product {
   @@index([isPublished, moderationStatus])
   @@index([harvestStatus])
   @@index([preorderEnabled])
+  @@index([sourceLocale])
+}
+
+/// Cached translation of a product's original text. The Product row is never overwritten.
+model ProductTranslation {
+  id            String                   @id @default(cuid())
+  productId     String
+  locale        LocaleCode
+  title         String?
+  description   String?
+  variety       String?
+  originPlace   String?
+  status        MessageTranslationStatus @default(pending)
+  provider      String?
+  error         String?
+  sourceHash    String?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, locale])
+  @@index([locale, status])
+  @@map("product_translations")
 }
 
 /// One public product-detail page view. Owner views are never written.
@@ -644,17 +671,45 @@ model PurchaseRequest {
   moderationNote      String?
   moderatedAt         DateTime?
   moderatedById       String?
+  /// Language of title, variety, packaging, destinationCountry, and message.
+  sourceLocale        LocaleCode            @default(en)
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 
-  buyer       User            @relation("BuyerPurchaseRequests", fields: [buyerId], references: [id], onDelete: Cascade)
+  buyer        User                         @relation("BuyerPurchaseRequests", fields: [buyerId], references: [id], onDelete: Cascade)
+  translations PurchaseRequestTranslation[]
   moderatedBy User?           @relation("PurchaseRequestModerator", fields: [moderatedById], references: [id], onDelete: SetNull)
   quotes      PurchaseQuote[]
 
   @@index([status, createdAt])
   @@index([buyerId, createdAt])
   @@index([category, status])
+  @@index([sourceLocale])
   @@map("purchase_requests")
+}
+
+/// Cached translation of a purchase request. The request row stays the original text.
+model PurchaseRequestTranslation {
+  id                 String                   @id @default(cuid())
+  requestId          String
+  locale             LocaleCode
+  title              String?
+  variety            String?
+  packaging          String?
+  destinationCountry String?
+  message            String?
+  status             MessageTranslationStatus @default(pending)
+  provider           String?
+  error              String?
+  sourceHash         String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  request PurchaseRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, locale])
+  @@index([locale, status])
+  @@map("purchase_request_translations")
 }
 
 model PurchaseQuote {

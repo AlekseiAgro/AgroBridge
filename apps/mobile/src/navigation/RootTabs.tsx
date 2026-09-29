@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { useI18n } from '../i18n/I18nProvider';
 import type { MessageKey } from '../i18n/en';
@@ -48,14 +48,25 @@ export function RootTabs() {
           elevation: 0,
           shadowOpacity: 0,
         },
-        tabBarIcon: ({ color }) => (
-          <Ionicons name={tabIcon[route.name]} size={iconSize.md} color={color} />
+        tabBarItemStyle: styles.item,
+        tabBarIcon: ({ color, focused }) => (
+          <View style={styles.iconSlot}>
+            <Ionicons name={tabIcon[route.name]} size={iconSize.md} color={color} />
+            <View
+              style={[
+                styles.indicator,
+                { backgroundColor: focused ? colors.brand : 'transparent' },
+              ]}
+            />
+          </View>
         ),
         tabBarLabel: ({ color }) => (
           <Text
             allowFontScaling
-            maxFontSizeMultiplier={1.4}
-            numberOfLines={2}
+            maxFontSizeMultiplier={1.15}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.68}
             style={[styles.label, { color }]}
           >
             {t(tabLabelKey[route.name])}
@@ -93,9 +104,26 @@ export function RootTabs() {
 }
 
 const styles = StyleSheet.create({
+  item: {
+    minWidth: 0,
+    paddingHorizontal: 2,
+  },
+  iconSlot: {
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    width: '100%',
+    height: '100%',
+  },
+  indicator: {
+    width: 16,
+    height: 3,
+    borderRadius: 2,
+    marginTop: 2,
+  },
   label: {
-    fontSize: 12,
-    lineHeight: 15,
+    width: '100%',
+    fontSize: 11,
+    lineHeight: 13,
     textAlign: 'center',
   },
 });

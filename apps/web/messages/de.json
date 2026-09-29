@@ -226,6 +226,7 @@
     "allCategories": "Alle Kategorien",
     "applyFilters": "Suchen",
     "empty": "Keine Produkte passen zu Ihren Filtern.",
+    "originalText": "Original: {text}",
     "loadError": "Katalog konnte nicht geladen werden. Läuft die API?",
     "categories": {
       "fruits": "Obst",
@@ -1082,6 +1083,7 @@
   "purchaseRequests": {
     "boardTitle": "Kaufanfragen",
     "boardSubtitle": "Käufer veröffentlichen Bedarf. Landwirte antworten mit einem Angebot oder per Chat.",
+    "originalText": "Original: {text}",
     "boardEmpty": "Noch keine offenen Kaufanfragen.",
     "createCta": "Anfrage veröffentlichen",
     "loginToCreate": "Melden Sie sich an, um eine Anfrage zu veröffentlichen",

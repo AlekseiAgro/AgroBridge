@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { useEffect, useMemo, useState } from 'react';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,35 +10,31 @@ import { resolveMediaUrl } from '../../api/media-url';
 import type { BadgeTone } from '../../components/Badge';
 import { AppIconButton } from '../../components/AppIconButton';
 import { AppText } from '../../components/AppText';
-import { Card } from '../../components/Card';
 import { Chip } from '../../components/Chip';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
 import { LoadingSkeleton } from '../../components/LoadingSkeleton';
 import { ProductCard } from '../../components/ProductCard';
+import { RequestCard } from '../../components/RequestCard';
 import { SearchBar } from '../../components/SearchBar';
 import { SectionHeader } from '../../components/SectionHeader';
 import {
-  SHOWCASE_CATEGORIES,
-  type Availability,
-  type ProductCategory,
-} from '../../catalog/categories';
+  categoryLabel,
+  countryLabel,
+  isHarvestStatus,
+  regionLabel,
+  unitLabel,
+} from '../../catalog/labels';
+import type { CatalogProduct, CatalogRequest } from '../../catalog/model';
+import { primaryProductImageUrl } from '../../catalog/model';
+import { normalizeQueryParam } from '../../catalog/query';
+import { useHomeFeed } from '../../catalog/use-home-feed';
 import { useI18n } from '../../i18n/I18nProvider';
-import type { RootTabParamList } from '../../navigation/types';
+import type { RootStackParamList, RootTabParamList } from '../../navigation/types';
 import { useTheme } from '../../theme/ThemeProvider';
-import { filterHomeFeed } from './filter-home-feed';
-import { loadHomeFeed } from './fixtures';
-import {
-  availabilityLabelKey,
-  categoryLabelKey,
-  regionLabelKey,
-  type HomeFeed,
-  type PresentationProduct,
-  type PresentationRequest,
-} from './types';
 
-function badgeTone(availability: Availability): BadgeTone {
-  switch (availability) {
+function badgeTone(status: string): BadgeTone {
+  switch (status) {
     case 'available':
       return 'success';
     case 'limited':
@@ -54,56 +51,41 @@ export function HomeScreen() {
   const { colors, spacing } = useTheme();
   const { width } = useWindowDimensions();
   const navigation = useNavigation<BottomTabNavigationProp<RootTabParamList>>();
+  const stack = navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
   const [query, setQuery] = useState('');
-  const [categoryId, setCategoryId] = useState<ProductCategory | null>(null);
-  const [feed, setFeed] = useState<HomeFeed | null>(null);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [requestId, setRequestId] = useState(0);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const feed = useHomeFeed(categoryId, query);
+  const cardWidth = Math.min(300, Math.max(200, Math.round(width * 0.72)));
+  const queryParam = normalizeQueryParam(query);
 
-  const featuredWidth = Math.min(300, Math.max(200, Math.round(width * 0.72)));
+  const products = queryParam ? feed.serverProducts : feed.products;
+  const requests = queryParam ? feed.serverRequests : feed.requests;
 
-  const reload = () => {
-    setStatus('loading');
-    setFeed(null);
-    setRequestId((current) => current + 1);
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-    loadHomeFeed()
-      .then((next) => {
-        if (!cancelled) {
-          setFeed(next);
-          setStatus('ready');
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setFeed(null);
-          setStatus('error');
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [requestId]);
-
-  const filtered = useMemo(() => {
-    if (!feed) {
-      return null;
-    }
-    return filterHomeFeed(feed, { query, categoryId, text: t });
-  }, [feed, query, categoryId, t]);
-
-  const featured = filtered?.products.filter((product) => product.placement === 'featured') ?? [];
-  const fresh = filtered?.products.filter((product) => product.placement === 'new') ?? [];
-  const requests = filtered?.requests ?? [];
+  const hasFilters = Boolean(queryParam || categoryId);
+  const waitingForSearch =
+    feed.searchPending && products.length === 0 && requests.length === 0;
   const isEmpty =
-    status === 'ready' && featured.length === 0 && fresh.length === 0 && requests.length === 0;
+    feed.status === 'ready' &&
+    !waitingForSearch &&
+    !feed.searchError &&
+    products.length === 0 &&
+    requests.length === 0;
+  const showResults =
+    feed.status === 'ready' &&
+    !waitingForSearch &&
+    !(feed.searchError && products.length === 0 && requests.length === 0);
 
   const clearFilters = () => {
     setQuery('');
     setCategoryId(null);
+  };
+
+  const openProduct = (productId: string) => {
+    stack?.navigate('ProductDetail', { productId });
+  };
+
+  const openRequest = (requestId: string) => {
+    stack?.navigate('RequestDetail', { requestId });
   };
 
   return (
@@ -139,21 +121,19 @@ export function HomeScreen() {
           clearLabel={t('home.clearSearch')}
         />
 
-        <AppText variant="caption" tone="muted">
-          {t('home.presentationNote')}
-        </AppText>
-
-        {status === 'loading' ? <LoadingSkeleton accessibilityLabel={t('home.loading')} /> : null}
-        {status === 'error' ? (
+        {feed.status === 'loading' && !feed.bootstrapped ? (
+          <LoadingSkeleton accessibilityLabel={t('home.loading')} />
+        ) : null}
+        {feed.status === 'error' ? (
           <ErrorState
             title={t('home.loadErrorTitle')}
             body={t('home.loadErrorBody')}
             retryLabel={t('home.retry')}
-            onRetry={reload}
+            onRetry={feed.reload}
           />
         ) : null}
 
-        {status === 'ready' && filtered ? (
+        {feed.status !== 'error' && (feed.status === 'ready' || feed.bootstrapped) ? (
           <View style={{ gap: spacing.xl }}>
             <View>
               <SectionHeader title={t('home.categories')} />
@@ -162,12 +142,12 @@ export function HomeScreen() {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={[styles.chips, { gap: spacing.sm }]}
               >
-                {SHOWCASE_CATEGORIES.map((category) => {
-                  const selected = categoryId === category;
-                  const label = t(categoryLabelKey(category));
+                {feed.categories.map((category) => {
+                  const selected = categoryId === category.id;
+                  const label = categoryLabel(category.id, t) ?? category.id;
                   return (
                     <Chip
-                      key={category}
+                      key={category.id}
                       label={label}
                       selected={selected}
                       accessibilityLabel={
@@ -175,60 +155,51 @@ export function HomeScreen() {
                           ? t('a11y.clearCategory')
                           : t('a11y.selectCategory', { category: label })
                       }
-                      onPress={() => setCategoryId(selected ? null : category)}
+                      onPress={() => setCategoryId(selected ? null : category.id)}
                     />
                   );
                 })}
               </ScrollView>
             </View>
 
-            {isEmpty ? (
-              <EmptyState
-                title={t('home.emptySearchTitle')}
-                body={t('home.emptySearchBody')}
-                actionLabel={t('home.clearSearch')}
-                onAction={clearFilters}
+            {feed.status === 'loading' || waitingForSearch ? (
+              <LoadingSkeleton accessibilityLabel={t('home.loading')} />
+            ) : null}
+            {feed.searchError && products.length === 0 && requests.length === 0 ? (
+              <ErrorState
+                title={t('home.loadErrorTitle')}
+                body={t('home.loadErrorBody')}
+                retryLabel={t('home.retry')}
+                onRetry={feed.reload}
               />
-            ) : (
+            ) : null}
+            {showResults && isEmpty ? (
+              <EmptyState
+                title={hasFilters ? t('home.emptySearchTitle') : t('home.emptyCatalogTitle')}
+                body={hasFilters ? t('home.emptySearchBody') : t('home.emptyCatalogBody')}
+                actionLabel={hasFilters ? t('home.clearSearch') : undefined}
+                onAction={hasFilters ? clearFilters : undefined}
+              />
+            ) : null}
+            {showResults && !isEmpty ? (
               <>
-                {featured.length > 0 ? (
+                {products.length > 0 ? (
                   <View>
-                    <SectionHeader title={t('home.featured')} />
+                    <SectionHeader title={t('home.newProducts')} />
                     <ScrollView
                       horizontal
                       showsHorizontalScrollIndicator={false}
                       contentContainerStyle={[styles.chips, { gap: spacing.md }]}
                     >
-                      {featured.map((product) => (
+                      {products.map((product) => (
                         <ProductTile
                           key={product.id}
                           product={product}
-                          width={featuredWidth}
-                          country={t('home.country.georgia')}
-                          region={t(regionLabelKey(product.regionId))}
-                          badgeLabel={t(availabilityLabelKey(product.availability))}
-                          verifiedLabel={product.verified ? t('home.verifiedFarm') : null}
-                          noPhotoLabel={t('common.noPhoto')}
+                          width={cardWidth}
+                          onPress={() => openProduct(product.id)}
                         />
                       ))}
                     </ScrollView>
-                  </View>
-                ) : null}
-
-                {fresh.length > 0 ? (
-                  <View style={{ gap: spacing.md }}>
-                    <SectionHeader title={t('home.newProducts')} />
-                    {fresh.map((product) => (
-                      <ProductTile
-                        key={product.id}
-                        product={product}
-                        country={t('home.country.georgia')}
-                        region={t(regionLabelKey(product.regionId))}
-                        badgeLabel={t(availabilityLabelKey(product.availability))}
-                        verifiedLabel={product.verified ? t('home.verifiedFarm') : null}
-                        noPhotoLabel={t('common.noPhoto')}
-                      />
-                    ))}
                   </View>
                 ) : null}
 
@@ -236,12 +207,16 @@ export function HomeScreen() {
                   <View style={{ gap: spacing.md }}>
                     <SectionHeader title={t('home.opportunities')} />
                     {requests.map((request) => (
-                      <RequestTile key={request.id} request={request} />
+                      <RequestTile
+                        key={request.id}
+                        request={request}
+                        onPress={() => openRequest(request.id)}
+                      />
                     ))}
                   </View>
                 ) : null}
               </>
-            )}
+            ) : null}
           </View>
         ) : null}
       </ScrollView>
@@ -252,54 +227,53 @@ export function HomeScreen() {
 function ProductTile({
   product,
   width,
-  country,
-  region,
-  badgeLabel,
-  verifiedLabel,
-  noPhotoLabel,
+  onPress,
 }: {
-  product: PresentationProduct;
-  width?: number;
-  country: string;
-  region: string;
-  badgeLabel: string;
-  verifiedLabel: string | null;
-  noPhotoLabel: string;
+  product: CatalogProduct;
+  width: number;
+  onPress: () => void;
 }) {
   const { t } = useI18n();
-  const name = t(product.nameKey);
+  const region = regionLabel(product.farm?.region, t);
+  const country = countryLabel(product.country, t);
+  const meta = [product.farm?.name, region, country].filter(Boolean).join(' · ');
+  const harvest = product.harvestStatus && isHarvestStatus(product.harvestStatus)
+    ? product.harvestStatus
+    : null;
+  const badge = harvest ? t(`availability.${harvest}`) : '';
 
   return (
     <ProductCard
-      name={name}
-      imageUrl={resolveMediaUrl(product.imageUrl, apiBaseUrlFromEnv())}
-      meta={`${region} · ${country}`}
-      badgeLabel={badgeLabel}
-      badgeTone={badgeTone(product.availability)}
-      verifiedLabel={verifiedLabel}
-      noPhotoLabel={noPhotoLabel}
-      accessibilityLabel={`${name}, ${region}, ${badgeLabel}`}
+      name={product.title}
+      imageUrl={resolveMediaUrl(primaryProductImageUrl(product.images), apiBaseUrlFromEnv())}
+      meta={meta}
+      badgeLabel={badge}
+      badgeTone={harvest ? badgeTone(harvest) : 'neutral'}
+      verifiedLabel={product.farm?.verified ? t('home.verifiedFarm') : null}
+      noPhotoLabel={t('common.noPhoto')}
+      accessibilityLabel={t('a11y.openProduct', { name: product.title })}
       width={width}
+      onPress={onPress}
     />
   );
 }
 
-function RequestTile({ request }: { request: PresentationRequest }) {
+function RequestTile({ request, onPress }: { request: CatalogRequest; onPress: () => void }) {
   const { t } = useI18n();
-  const { spacing } = useTheme();
-  const title = t(request.titleKey);
-  const meta = `${t(regionLabelKey(request.regionId))} · ${t('home.country.georgia')} · ${t(request.quantityKey)}`;
+  const quantity = [request.quantity, unitLabel(request.unit, t)].filter(Boolean).join(' ');
+  const meta = [quantity, request.destinationCountry, request.buyer.displayName]
+    .filter(Boolean)
+    .join(' · ');
+  const category = categoryLabel(request.category, t) ?? request.category;
 
   return (
-    <Card padded accessibilityLabel={`${title}. ${meta}`}>
-      <View style={{ gap: spacing.sm }}>
-        <AppText variant="bodyStrong">{title}</AppText>
-        <AppText variant="caption" tone="secondary">
-          {meta}
-        </AppText>
-        <Chip label={t(categoryLabelKey(request.categoryId))} />
-      </View>
-    </Card>
+    <RequestCard
+      title={request.title}
+      meta={meta}
+      categoryLabel={category}
+      accessibilityLabel={t('a11y.openRequest', { name: request.title })}
+      onPress={onPress}
+    />
   );
 }
 

@@ -6,7 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider } from './src/auth/AuthProvider';
 import { I18nProvider } from './src/i18n/I18nProvider';
-import { RootTabs } from './src/navigation/RootTabs';
+import { RootStack } from './src/navigation/RootStack';
 import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
 
 function RootNavigation() {
@@ -27,7 +27,7 @@ function RootNavigation() {
   return (
     <NavigationContainer theme={navigationTheme}>
       <StatusBar style="dark" />
-      <RootTabs />
+      <RootStack />
     </NavigationContainer>
   );
 }

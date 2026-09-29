@@ -147,6 +147,7 @@ import type {
   ProductQualityScore,
   ProductVideo,
 } from './quality';
+import type { CatalogDisplayText, CatalogSourceText } from './catalog-locale';
 import type { MarketOpportunity } from './market-insight';
 
 export const PRODUCT_IMAGE_MAX_COUNT = 5;
@@ -226,6 +227,16 @@ export type ProductSummary = {
   };
   /** Aggregate deal rating of the product owner (seller). */
   sellerRating: RatingSummary;
+  /**
+   * Original seller text. Never replaced by a translation.
+   * Present on catalog and public product reads.
+   */
+  source?: CatalogSourceText;
+  /**
+   * Text for the requested viewer locale. Falls back to `source` until a
+   * completed translation exists.
+   */
+  display?: CatalogDisplayText;
   /** Optional farm profile enrichment; null when the seller has not created one. */
   farm: {
     id: string;
@@ -266,6 +277,8 @@ export type ProductDetail = ProductSummary & {
 
 export type CatalogQuery = {
   q?: string;
+  /** Viewer locale. Omitted requests use the signed-in user locale, or English. */
+  locale?: string;
   category?: string;
   region?: string;
   harvestStatus?: HarvestStatus;

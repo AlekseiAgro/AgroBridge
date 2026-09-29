@@ -26,15 +26,22 @@ import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
 import { getRenderableProductImages, toPublicMediaUrl } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
-import { formatProductDescription, formatProductTitle } from '@/lib/product-title';
+import {
+  catalogDisplayDescription,
+  catalogDisplayField,
+  catalogDisplayTitle,
+  catalogOriginalTitle,
+} from '@/lib/catalog-display';
 import { formatRegionLabel } from '@/lib/region';
 import { verifyEmailRedirectHref } from '@/lib/protected-next-path';
 import { buildBreadcrumbJsonLd, buildProductJsonLd } from '@/lib/seo-jsonld';
 import { productPageMetadata } from '@/lib/seo-public-metadata';
 import { getCurrentUser } from '@/lib/session';
 
-const loadProduct = cache(async (id: string, token: string | null) => {
-  return apiRequest<ProductDetail>(`/products/${id}`, { token });
+const loadProduct = cache(async (id: string, token: string | null, locale: string) => {
+  return apiRequest<ProductDetail>(`/products/${id}?locale=${encodeURIComponent(locale)}`, {
+    token,
+  });
 });
 
 type Props = {
@@ -44,7 +51,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params;
   try {
-    const product = await loadProduct(id, await getAuthToken());
+    const product = await loadProduct(id, await getAuthToken(), locale);
     return productPageMetadata(product, locale);
   } catch {
     return {};
@@ -66,7 +73,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   let product: ProductDetail;
   try {
-    product = await loadProduct(id, token);
+    product = await loadProduct(id, token, locale);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
       notFound();
@@ -87,7 +94,8 @@ export default async function ProductDetailPage({ params }: Props) {
   const verifyProductHref = verifyEmailRedirectHref(productPath);
   const verifyRequestHref = verifyEmailRedirectHref(`${productPath}#request-quote`);
   const verifyWatchHref = verifyEmailRedirectHref(`${productPath}#harvest-alerts`);
-  const productName = formatProductTitle(product.title, locale);
+  const productName = catalogDisplayTitle(product);
+  const originalTitle = catalogOriginalTitle(product);
   const productJsonLd = buildProductJsonLd(product, locale);
   const breadcrumbJsonLd = isPubliclyListedProduct(product)
     ? buildBreadcrumbJsonLd({
@@ -131,6 +139,9 @@ export default async function ProductDetailPage({ params }: Props) {
                 preorderEnabled={product.preorderEnabled}
               />
             </h1>
+            {originalTitle ? (
+              <p className="page__subtitle">{tc('originalText', { text: originalTitle })}</p>
+            ) : null}
             <div className="product-opportunity-row">
               <MarketOpportunityBadge opportunity={product.opportunity} />
             </div>
@@ -218,7 +229,7 @@ export default async function ProductDetailPage({ params }: Props) {
               <img
                 key={image.id}
                 src={image.url}
-                alt={formatProductTitle(product.title, locale)}
+                alt={productName}
                 className={
                   image.isPrimary
                     ? 'product-gallery__image product-gallery__image--primary'
@@ -251,10 +262,10 @@ export default async function ProductDetailPage({ params }: Props) {
                   <dd>{tc(`categories.${product.category as 'fruits'}`)}</dd>
                 </div>
               ) : null}
-              {product.variety ? (
+              {catalogDisplayField(product.display?.variety, product.variety) ? (
                 <div>
                   <dt>{t('variety')}</dt>
-                  <dd>{product.variety}</dd>
+                  <dd>{catalogDisplayField(product.display?.variety, product.variety)}</dd>
                 </div>
               ) : null}
               {product.country ? (
@@ -263,10 +274,10 @@ export default async function ProductDetailPage({ params }: Props) {
                   <dd>{product.country}</dd>
                 </div>
               ) : null}
-              {product.originPlace ? (
+              {catalogDisplayField(product.display?.originPlace, product.originPlace) ? (
                 <div>
                   <dt>{t('originPlace')}</dt>
-                  <dd>{product.originPlace}</dd>
+                  <dd>{catalogDisplayField(product.display?.originPlace, product.originPlace)}</dd>
                 </div>
               ) : null}
               {product.unit ? (
@@ -276,10 +287,8 @@ export default async function ProductDetailPage({ params }: Props) {
                 </div>
               ) : null}
             </dl>
-            {product.description ? (
-              <p className="detail-text">
-                {formatProductDescription(product.description, locale)}
-              </p>
+            {catalogDisplayDescription(product) ? (
+              <p className="detail-text">{catalogDisplayDescription(product)}</p>
             ) : null}
           </section>
 

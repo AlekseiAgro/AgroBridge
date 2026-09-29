@@ -1,7 +1,6 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import type { ProductImage } from '@agrobridge/shared';
-import { formatProductTitle } from '../../../web/src/lib/product-title';
 import {
   buildBreadcrumbJsonLd,
   buildHomeJsonLd,
@@ -168,14 +167,23 @@ describe('product JSON-LD', () => {
   it('describes a public product with localized visible fields', () => {
     const product = publicProduct();
     const en = buildProductJsonLd(product, 'en');
-    const ru = buildProductJsonLd(product, 'ru');
+    const ru = buildProductJsonLd(
+      {
+        ...product,
+        display: {
+          title: 'Свежие персики из Кахетии',
+          description: 'Сезонные персики свободной косточки, собранные вручную на экспорт.',
+        },
+      },
+      'ru',
+    );
 
     expect(en).toMatchObject({
       '@context': 'https://schema.org',
       '@type': 'Product',
       '@id': 'https://agrobridge.ge/en/products/prod12345#product',
       url: 'https://agrobridge.ge/en/products/prod12345',
-      name: formatProductTitle(product.title, 'en'),
+      name: product.title,
       description: 'Seasonal freestone peaches, hand-picked for export.',
       image: ['https://agrobridge.ge/api/uploads/products/prod12345/peach.jpg'],
       category: 'Fruits',

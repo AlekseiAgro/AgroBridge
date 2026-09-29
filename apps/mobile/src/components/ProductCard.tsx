@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../theme/ThemeProvider';
 import { Badge, type BadgeTone } from './Badge';
@@ -17,6 +17,7 @@ type ProductCardProps = {
   noPhotoLabel: string;
   accessibilityLabel: string;
   width?: number;
+  onPress?: () => void;
 };
 
 export function ProductCard({
@@ -29,13 +30,14 @@ export function ProductCard({
   noPhotoLabel,
   accessibilityLabel,
   width,
+  onPress,
 }: ProductCardProps) {
   const { colors, spacing } = useTheme();
   const [failed, setFailed] = useState(false);
   const showImage = Boolean(imageUrl) && !failed;
 
-  return (
-    <Card accessibilityLabel={accessibilityLabel} style={width ? { width } : undefined}>
+  const card = (
+    <Card accessibilityLabel={onPress ? undefined : accessibilityLabel} style={width && !onPress ? { width } : undefined}>
       <View style={styles.media}>
         {showImage ? (
           <Image
@@ -56,19 +58,38 @@ export function ProductCard({
       </View>
       <View style={{ padding: spacing.md, gap: spacing.sm }}>
         <AppText variant="bodyStrong">{name}</AppText>
-        <AppText variant="caption" tone="secondary">
-          {meta}
-        </AppText>
-        <View style={[styles.signals, { gap: spacing.sm }]}>
-          <Badge label={badgeLabel} tone={badgeTone} />
-          {verifiedLabel ? (
-            <AppText variant="caption" tone="brand" style={styles.verified}>
-              {verifiedLabel}
-            </AppText>
-          ) : null}
-        </View>
+        {meta ? (
+          <AppText variant="caption" tone="secondary">
+            {meta}
+          </AppText>
+        ) : null}
+        {badgeLabel || verifiedLabel ? (
+          <View style={[styles.signals, { gap: spacing.sm }]}>
+            {badgeLabel ? <Badge label={badgeLabel} tone={badgeTone} /> : null}
+            {verifiedLabel ? (
+              <AppText variant="caption" tone="brand" style={styles.verified}>
+                {verifiedLabel}
+              </AppText>
+            ) : null}
+          </View>
+        ) : null}
       </View>
     </Card>
+  );
+
+  if (!onPress) {
+    return card;
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      onPress={onPress}
+      style={({ pressed }) => [width ? { width } : undefined, pressed ? styles.pressed : null]}
+    >
+      {card}
+    </Pressable>
   );
 }
 
@@ -93,5 +114,8 @@ const styles = StyleSheet.create({
   },
   verified: {
     flexShrink: 1,
+  },
+  pressed: {
+    opacity: 0.92,
   },
 });

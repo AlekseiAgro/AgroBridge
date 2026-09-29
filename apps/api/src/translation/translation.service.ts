@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Locale } from '@agrobridge/shared';
-import { LocaleCode, MessageTranslationStatus } from '@prisma/client';
+import type { TranslateInput, TranslateResult } from './translation.types';
+import { MessageTranslationStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MockTranslationProvider } from './mock-translation.provider';
 import { OpenAiTranslationProvider } from './openai-translation.provider';
@@ -27,6 +28,18 @@ export class TranslationService {
     this.logger.log(`Using translation provider: ${this.provider.name}`);
   }
 
+  get providerName(): string {
+    return this.provider.name;
+  }
+
+  /** Translate one string. Does not write chat rows and does not run on catalog reads. */
+  async translateText(input: TranslateInput): Promise<TranslateResult> {
+    if (input.sourceLocale === input.targetLocale) {
+      return { translatedText: input.text, provider: this.provider.name };
+    }
+    return this.provider.translate(input);
+  }
+
   async translateMessage(params: {
     messageId: string;
     sourceText: string;
@@ -38,12 +51,12 @@ export class TranslationService {
         where: {
           messageId_targetLocale: {
             messageId: params.messageId,
-            targetLocale: params.targetLocale as LocaleCode,
+            targetLocale: params.targetLocale,
           },
         },
         create: {
           messageId: params.messageId,
-          targetLocale: params.targetLocale as LocaleCode,
+          targetLocale: params.targetLocale,
           translatedText: params.sourceText,
           status: MessageTranslationStatus.completed,
           provider: this.provider.name,
@@ -61,12 +74,12 @@ export class TranslationService {
       where: {
         messageId_targetLocale: {
           messageId: params.messageId,
-          targetLocale: params.targetLocale as LocaleCode,
+          targetLocale: params.targetLocale,
         },
       },
       create: {
         messageId: params.messageId,
-        targetLocale: params.targetLocale as LocaleCode,
+        targetLocale: params.targetLocale,
         status: MessageTranslationStatus.pending,
         provider: this.provider.name,
       },
@@ -88,7 +101,7 @@ export class TranslationService {
         where: {
           messageId_targetLocale: {
             messageId: params.messageId,
-            targetLocale: params.targetLocale as LocaleCode,
+            targetLocale: params.targetLocale,
           },
         },
         data: {
@@ -106,7 +119,7 @@ export class TranslationService {
         where: {
           messageId_targetLocale: {
             messageId: params.messageId,
-            targetLocale: params.targetLocale as LocaleCode,
+            targetLocale: params.targetLocale,
           },
         },
         data: {
