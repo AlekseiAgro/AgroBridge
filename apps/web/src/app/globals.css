@@ -143,6 +143,7 @@ body {
   text-shadow: 0 2px 18px rgba(0, 0, 0, 0.28);
 }
 
+.home-hero__content .home__platform,
 .home-hero__content .home__subtitle {
   color: rgba(244, 248, 241, 0.9);
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.25);
@@ -162,6 +163,10 @@ body {
 
 .home-hero__content > *:nth-child(4) {
   animation-delay: 230ms;
+}
+
+.home-hero__content > *:nth-child(5) {
+  animation-delay: 300ms;
 }
 
 .home__brand {
@@ -184,11 +189,42 @@ body {
   line-height: 1.25;
 }
 
+.home__platform {
+  margin: 0 auto 0.55rem;
+  max-width: 36rem;
+  font-size: 0.98rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+
 .home__subtitle {
   margin: 0 auto 1.75rem;
-  max-width: 34rem;
+  max-width: 36rem;
   color: var(--muted);
-  font-size: 1.05rem;
+  font-size: 1.02rem;
+  line-height: 1.55;
+}
+
+.home-marketplace {
+  max-width: 38rem;
+  margin: 0 auto 2rem;
+  text-align: center;
+}
+
+.home-marketplace__title {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.25rem, 2.4vw, 1.55rem);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--brand-deep);
+}
+
+.home-marketplace__text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.02rem;
   line-height: 1.55;
 }
 

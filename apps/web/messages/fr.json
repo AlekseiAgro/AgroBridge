@@ -5,7 +5,7 @@
   },
   "seo": {
     "home": {
-      "title": "Fermes géorgiennes. Acheteurs mondiaux | AgroBridge",
+      "title": "AgroBridge — Plateforme mondiale B2B de commerce agricole",
       "description": "AgroBridge relie les producteurs agricoles géorgiens aux acheteurs. Consultez les offres publiées ou publiez une demande d'achat."
     },
     "catalog": {
@@ -73,7 +73,10 @@
   "home": {
     "brand": "AgroBridge",
     "headline": "Fermes géorgiennes. Acheteurs mondiaux.",
-    "subtitle": "Des fermes géorgiennes aux marchés mondiaux",
+    "platform": "Plateforme mondiale B2B de commerce agricole",
+    "subtitle": "Entrez en contact avec des producteurs agricoles géorgiens, découvrez des produits, publiez des demandes d'achat et construisez des relations commerciales directes avec des acheteurs dans le monde.",
+    "marketplaceTitle": "Une place de marché pour le commerce agricole",
+    "marketplaceBody": "Découvrez les produits agricoles de producteurs géorgiens, échangez directement avec des fournisseurs et des acheteurs, publiez des demandes d'achat et des offres au même endroit.",
     "ctaPrimary": "Voir les produits",
     "ctaSecondary": "Créer un compte",
     "ctaAccount": "Ouvrir mon compte",

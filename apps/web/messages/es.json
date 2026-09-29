@@ -5,7 +5,7 @@
   },
   "seo": {
     "home": {
-      "title": "Granjas georgianas. Compradores globales | AgroBridge",
+      "title": "AgroBridge — Plataforma global B2B de comercio agrícola",
       "description": "AgroBridge conecta a productores agrícolas georgianos con compradores. Consulta las ofertas publicadas o publica una solicitud de compra."
     },
     "catalog": {
@@ -73,7 +73,10 @@
   "home": {
     "brand": "AgroBridge",
     "headline": "Granjas georgianas. Compradores globales.",
-    "subtitle": "De las granjas georgianas a los mercados globales",
+    "platform": "Plataforma global B2B de comercio agrícola",
+    "subtitle": "Conecta con productores agrícolas georgianos, descubre productos, publica solicitudes de compra y crea relaciones comerciales directas con compradores de todo el mundo.",
+    "marketplaceTitle": "Un mercado para el comercio agrícola",
+    "marketplaceBody": "Descubre productos agrícolas de productores georgianos, conecta directamente con proveedores y compradores, publica solicitudes de compra e intercambia ofertas en un solo lugar.",
     "ctaPrimary": "Ver productos",
     "ctaSecondary": "Crear cuenta",
     "ctaAccount": "Abrir mi cuenta",
