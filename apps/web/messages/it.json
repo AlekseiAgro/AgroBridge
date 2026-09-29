@@ -226,6 +226,7 @@
     "allCategories": "Tutte le categorie",
     "applyFilters": "Cerca",
     "empty": "Nessun prodotto corrisponde ai filtri.",
+    "originalText": "Originale: {text}",
     "loadError": "Impossibile caricare il catalogo. L’API è attiva?",
     "categories": {
       "fruits": "Frutta",
@@ -1082,6 +1083,7 @@
   "purchaseRequests": {
     "boardTitle": "Richieste di acquisto",
     "boardSubtitle": "Gli acquirenti pubblicano il fabbisogno. Gli agricoltori rispondono con un'offerta o in chat.",
+    "originalText": "Originale: {text}",
     "boardEmpty": "Nessuna richiesta di acquisto aperta al momento.",
     "createCta": "Pubblica richiesta",
     "loginToCreate": "Accedi per pubblicare una richiesta",

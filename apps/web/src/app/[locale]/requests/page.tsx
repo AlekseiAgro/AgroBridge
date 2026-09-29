@@ -34,18 +34,19 @@ export default async function PurchaseRequestsPage({ params, searchParams }: Pro
   const query = new URLSearchParams();
   if (filters.q) query.set('q', filters.q);
   if (filters.category) query.set('category', filters.category);
+  query.set('locale', locale);
 
   let items: PurchaseRequestSummary[] = [];
   let loadError: string | null = null;
   try {
-    const path = query.toString() ? `/purchase-requests?${query.toString()}` : '/purchase-requests';
+    const path = `/purchase-requests?${query.toString()}`;
     items = await apiRequest<PurchaseRequestSummary[]>(path, { token });
   } catch {
     loadError = t('loadError');
   }
 
   const canCreate = Boolean(user);
-  const hasFilters = query.toString().length > 0;
+  const hasFilters = Boolean(filters.q || filters.category);
   const requestsPath = hasFilters ? `/requests?${query.toString()}` : '/requests';
   const loginHref = loginRedirectHref(requestsPath);
 

@@ -13,7 +13,6 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { getRenderableProductImages, toPublicMediaUrl } from './product-image';
 import { formatProductQuantityRange } from './product-quantity';
-import { formatProductDescription, formatProductTitle } from './product-title';
 import { formatRegionLabel } from './region';
 import {
   farmMetadataCopy,
@@ -159,7 +158,7 @@ export async function productPageMetadata(
   const th = await getTranslations({ locale, namespace: 'harvest' });
   const tRoot = await getTranslations({ locale });
 
-  const title = formatProductTitle(product.title, locale);
+  const title = product.display?.title?.trim() || product.title;
   const category =
     product.category && isProductCategory(product.category)
       ? tc(`categories.${product.category}`)
@@ -179,13 +178,15 @@ export async function productPageMetadata(
     title,
     category,
     place,
-    description: formatProductDescription(product.description, locale) || null,
+    description: product.display?.description?.trim() || product.description?.trim() || null,
     price: price ? t('product.price', { price }) : null,
     availability: availability ? t('product.availability', { status: availability }) : null,
     quantity: quantity ? t('product.quantity', { quantity }) : null,
     origin: originValue ? t('product.origin', { origin: originValue }) : null,
-    variety: product.variety?.trim()
-      ? t('product.variety', { variety: product.variety.trim() })
+    variety: (product.display?.variety || product.variety)?.trim()
+      ? t('product.variety', {
+          variety: (product.display?.variety || product.variety)?.trim() ?? '',
+        })
       : null,
     season: season ? t('product.season', { months: season }) : null,
   });
@@ -247,7 +248,7 @@ export async function purchaseRequestPageMetadata(
   locale: string,
 ): Promise<Metadata> {
   if (request.status !== 'open') return {};
-  const title = request.title?.trim() ?? '';
+  const title = request.display?.title?.trim() || request.title?.trim() || '';
   if (!title) return {};
 
   const t = await getTranslations({ locale, namespace: 'seo' });

@@ -125,7 +125,7 @@ describe('public product UI localization (S1)', () => {
     expect(detail).toContain("t('currentStock')");
     expect(detail).toContain('<VerifiedBadge');
     expect(detail).toContain('showTier');
-    expect(detail).toContain('{product.variety}');
+    expect(detail).toContain('catalogDisplayField(product.display?.variety, product.variety)');
     expect(detail).toContain('{product.currentStock}');
 
     const catalog = source('app/[locale]/catalog/page.tsx');
@@ -137,10 +137,11 @@ describe('public product UI localization (S1)', () => {
 
   it('does not translate seller-entered product fields', () => {
     const detail = source('app/[locale]/products/[id]/page.tsx');
-    expect(detail).toContain('{product.variety}');
-    expect(detail).not.toContain('localizeProductTitle(product.variety');
-    expect(detail).toContain('formatProductTitle(product.title, locale)');
-    expect(detail).toContain('formatProductDescription(product.description, locale)');
+    expect(detail).toContain('catalogDisplayField(product.display?.variety, product.variety)');
+    expect(detail).not.toContain('localizeProductTitle');
+    expect(detail).not.toContain('formatProductTitle');
+    expect(detail).toContain('catalogDisplayTitle(product)');
+    expect(detail).toContain('catalogDisplayDescription(product)');
   });
 
   it('keeps product-image honesty and marketplace CTA placement from #143/#144', () => {

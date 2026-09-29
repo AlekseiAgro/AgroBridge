@@ -22,8 +22,9 @@ export class PurchaseRequestsController {
     @CurrentUser() user: AuthenticatedUser | undefined,
     @Query('category') category?: string,
     @Query('q') q?: string,
+    @Query('locale') locale?: string,
   ) {
-    return this.purchaseRequestsService.listOpen({ category, q }, user ?? null);
+    return this.purchaseRequestsService.listOpen({ category, q, locale }, user ?? null);
   }
 
   @Get('mine')
@@ -50,8 +51,12 @@ export class PurchaseRequestsController {
 
   @Get(':id')
   @UseGuards(OptionalJwtAuthGuard)
-  getById(@CurrentUser() user: AuthenticatedUser | undefined, @Param('id') id: string) {
-    return this.purchaseRequestsService.getById(user ?? null, id);
+  getById(
+    @CurrentUser() user: AuthenticatedUser | undefined,
+    @Param('id') id: string,
+    @Query('locale') locale?: string,
+  ) {
+    return this.purchaseRequestsService.getById(user ?? null, id, locale);
   }
 
   @Post(':id/cancel')

@@ -14,6 +14,7 @@ export * from './product-titles';
 export * from './product-listing-requirements';
 export * from './product-descriptions';
 export * from './catalog-search';
+export * from './catalog-locale';
 export * from './rfq';
 export * from './purchase-request';
 export * from './chat';

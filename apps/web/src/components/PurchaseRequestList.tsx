@@ -3,6 +3,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
 import { formatCabinetDate } from '@/lib/quote-card-presentation';
+import { catalogDisplayTitle, catalogOriginalTitle } from '@/lib/catalog-display';
 import { requestStatusBadgeClass } from '@/lib/request-card-presentation';
 
 type Props = {
@@ -35,8 +36,13 @@ export async function PurchaseRequestList({
         const category = tc(`categories.${item.category as 'fruits'}`);
         const unit = item.unit ? ` ${tp(`units.${item.unit as 'kg'}`)}` : '';
         const quantity = `${item.quantity}${unit}`;
-        const destination = item.destinationCountry;
+        const destination =
+          variant === 'mine'
+            ? item.destinationCountry
+            : item.display?.destinationCountry || item.destinationCountry;
         const ownerName = item.buyer.displayName || t('anonymousBuyer');
+        const title = variant === 'mine' ? item.title : catalogDisplayTitle(item);
+        const original = variant === 'mine' ? null : catalogOriginalTitle(item);
 
         if (variant === 'mine') {
           return (
@@ -93,8 +99,11 @@ export async function PurchaseRequestList({
           <li key={item.id} className="product-list__item product-list__item--row entity-card">
             <div className="product-list__item-main">
               <Link href={`${detailBasePath}/${item.id}`} className="product-list__title">
-                {item.title}
+                {title}
               </Link>
+              {original ? (
+                <p className="product-list__meta">{t('originalText', { text: original })}</p>
+              ) : null}
               <p className="product-list__meta">
                 {category}
                 {' · '}

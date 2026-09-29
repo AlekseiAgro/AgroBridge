@@ -226,6 +226,7 @@
     "allCategories": "All categories",
     "applyFilters": "Search",
     "empty": "No products match your filters yet.",
+    "originalText": "Original: {text}",
     "loadError": "Could not load the catalog. Is the API running?",
     "categories": {
       "fruits": "Fruits",
@@ -1082,6 +1083,7 @@
   "purchaseRequests": {
     "boardTitle": "Purchase requests",
     "boardSubtitle": "Buyers publish what they need. Farmers reply with a quote or open a chat.",
+    "originalText": "Original: {text}",
     "boardEmpty": "No open purchase requests yet.",
     "createCta": "Post a request",
     "loginToCreate": "Log in to post a request",

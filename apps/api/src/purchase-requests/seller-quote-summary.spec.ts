@@ -208,7 +208,8 @@ describe('seller quote summary on purchase request detail', () => {
     );
 
     expect(list).not.toContain('canAccept');
-    expect(detail).toContain("apiRequest<PurchaseRequestDetail>(`/purchase-requests/${id}`");
+    expect(detail).toContain('apiRequest<PurchaseRequestDetail>');
+    expect(detail).toContain('/purchase-requests/${id}?locale=');
     expect(detail).not.toContain('createPurchaseQuote');
     expect(shared).toContain("'pending', 'accepted', 'declined', 'withdrawn'");
     expect(shared).toContain('canWithdraw: boolean');

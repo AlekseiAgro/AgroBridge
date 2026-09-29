@@ -398,8 +398,8 @@ describe('server metadata wiring', () => {
     expect(helper).toContain('if (!isPubliclyListedProduct(product)) return {};');
     expect(helper).toContain("if (request.status !== 'open') return {};");
     expect(helper).toContain('distinctPublicOrigin');
-    expect(helper).toContain('formatProductTitle');
-    expect(helper).toContain('formatProductDescription');
+    expect(helper).toContain('product.display?.title');
+    expect(helper).toContain('product.display?.description');
     expect(helper).toContain('openGraph');
     expect(helper).not.toContain('twitter');
     expect(helper).not.toContain('alternates');
@@ -540,7 +540,20 @@ describe('public Open Graph metadata', () => {
     });
 
     const en = await productPageMetadata(listed, 'en');
-    const ru = await productPageMetadata(listed, 'ru');
+    const ru = await productPageMetadata(
+      product({
+        ...listed,
+        display: {
+          locale: 'ru',
+          title: 'Свежие персики из Кахетии',
+          description: 'Seasonal peaches.',
+          variety: null,
+          originPlace: null,
+          translationStatus: 'completed',
+        },
+      }),
+      'ru',
+    );
 
     expect(en.openGraph).toMatchObject({
       title: en.title,

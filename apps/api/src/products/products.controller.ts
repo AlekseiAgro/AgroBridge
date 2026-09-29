@@ -53,8 +53,9 @@ export class ProductsController {
   ) {}
 
   @Get()
-  catalog(@Query() query: CatalogQueryDto) {
-    return this.productsService.catalog(query);
+  @UseGuards(OptionalJwtAuthGuard)
+  catalog(@Query() query: CatalogQueryDto, @Req() req: Request & { user?: AuthenticatedUser }) {
+    return this.productsService.catalog(query, req.user ?? null);
   }
 
   @Get('mine')
@@ -77,8 +78,12 @@ export class ProductsController {
 
   @Get(':id')
   @UseGuards(OptionalJwtAuthGuard)
-  getById(@Param('id') id: string, @Req() req: Request & { user?: AuthenticatedUser }) {
-    return this.productsService.getById(id, req.user ?? null);
+  getById(
+    @Param('id') id: string,
+    @Req() req: Request & { user?: AuthenticatedUser },
+    @Query('locale') locale?: string,
+  ) {
+    return this.productsService.getById(id, req.user ?? null, locale);
   }
 
   @Post(':id/views')
@@ -228,10 +233,7 @@ export class ProductsController {
       throw new NotFoundException('Certificate not found');
     }
 
-    const stream = await this.storage.openReadStream(
-      document.key,
-      STORAGE_VISIBILITY.PRIVATE,
-    );
+    const stream = await this.storage.openReadStream(document.key, STORAGE_VISIBILITY.PRIVATE);
 
     res.setHeader(
       'Content-Type',
