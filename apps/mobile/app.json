@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "AgroBridge",
+    "slug": "agrobridge",
+    "scheme": "agrobridge",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ge.agrobridge.app"
+    },
+    "android": {
+      "package": "ge.agrobridge.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#F6F4F1"
+      }
+    },
+    "plugins": ["expo-secure-store", "expo-localization"]
+  }
+}
