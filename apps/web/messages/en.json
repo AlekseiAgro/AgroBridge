@@ -5,7 +5,7 @@
   },
   "seo": {
     "home": {
-      "title": "Georgian farms. Global buyers | AgroBridge",
+      "title": "AgroBridge — Global B2B Agricultural Trade Platform",
       "description": "AgroBridge connects Georgian agricultural producers with buyers. Browse published farm offers or publish a purchase request."
     },
     "catalog": {
@@ -73,7 +73,10 @@
   "home": {
     "brand": "AgroBridge",
     "headline": "Georgian farms. Global buyers.",
-    "subtitle": "From Georgian Farms to Global Markets",
+    "platform": "Global B2B Agricultural Trade Platform",
+    "subtitle": "Connect with Georgian agricultural producers, discover products, publish purchase requests, and build direct trade relationships with buyers worldwide.",
+    "marketplaceTitle": "A marketplace built for agricultural trade",
+    "marketplaceBody": "Discover agricultural products from Georgian producers, connect directly with suppliers and buyers, publish purchase requests, and exchange offers in one place.",
     "ctaPrimary": "Browse products",
     "ctaSecondary": "Create account",
     "ctaAccount": "Open my account",

@@ -50,6 +50,7 @@ export default async function HomePage({ params }: Props) {
               <BrandLogo />
             </p>
             <h1 className="home__headline">{t('headline')}</h1>
+            <p className="home__platform">{t('platform')}</p>
             <p className="home__subtitle">{t('subtitle')}</p>
 
             <div className="home__actions">
@@ -67,6 +68,12 @@ export default async function HomePage({ params }: Props) {
       <div className="home-body">
         <CategoryShowcase />
         <div className="home-panel">
+          <section className="home-marketplace" aria-labelledby="home-marketplace-title">
+            <h2 id="home-marketplace-title" className="home-marketplace__title">
+              {t('marketplaceTitle')}
+            </h2>
+            <p className="home-marketplace__text">{t('marketplaceBody')}</p>
+          </section>
           <HowItWorksSection />
         </div>
       </div>
