@@ -226,7 +226,7 @@ export async function farmPageMetadata(farm: FarmDetail, locale: string): Promis
   const copy = farmMetadataCopy({
     name,
     region,
-    description: farm.description?.trim() || null,
+    description: farm.display?.description?.trim() || farm.description?.trim() || null,
     fallback: t('farm.fallback', { name }),
     categories: categories.length
       ? t('farm.categories', { categories: categories.join(', ') })

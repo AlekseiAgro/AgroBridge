@@ -25,6 +25,16 @@ import esMessages from '../../messages/es.json';
 
 const ORGANIZATION_ID = `${PRODUCTION_WEB_ORIGIN}/#organization`;
 const WEBSITE_ID = `${PRODUCTION_WEB_ORIGIN}/#website`;
+/** Official site origin. The same Organization node is published on every locale homepage. */
+const ORGANIZATION_URL = `${PRODUCTION_WEB_ORIGIN}/`;
+/**
+ * Operator facts from `content/legal/information.en.ts`.
+ * legalName is the individual entrepreneur who operates the marketplace, not a company name.
+ */
+const ORGANIZATION_LEGAL_NAME = 'P/E VANO MEGVINETUKHUTSESI';
+const ORGANIZATION_EMAIL = 'Support@agrobridge.ge';
+const ORGANIZATION_DESCRIPTION =
+  'AgroBridge is a Georgian B2B agricultural marketplace connecting Georgian farms and agricultural producers with buyers in Georgia and international markets.';
 
 const CATEGORY_LABELS: Record<Locale, Record<string, string>> = {
   ka: kaMessages.catalog.categories,
@@ -100,7 +110,25 @@ export function buildHomeJsonLd(input: HomeJsonLdInput): JsonLdNode | null {
     '@type': 'Organization',
     '@id': ORGANIZATION_ID,
     name: SEO_BRAND,
-    url: localizedPublicUrl(DEFAULT_LOCALE),
+    legalName: ORGANIZATION_LEGAL_NAME,
+    url: ORGANIZATION_URL,
+    description: ORGANIZATION_DESCRIPTION,
+    email: ORGANIZATION_EMAIL,
+    identifier: {
+      '@type': 'PropertyValue',
+      name: 'Identification Number',
+      value: '01501157152',
+    },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Adam Mitskevichi St. 29/5',
+      addressLocality: 'Tbilisi',
+      addressCountry: 'GE',
+    },
+    areaServed: [
+      { '@type': 'Country', name: 'Georgia' },
+      { '@type': 'Place', name: 'International markets' },
+    ],
     logo: {
       '@type': 'ImageObject',
       url: `${PRODUCTION_WEB_ORIGIN}${LOGO_SRC}`,

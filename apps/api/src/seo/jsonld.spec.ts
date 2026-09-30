@@ -55,12 +55,8 @@ function publicProduct(overrides: Partial<ProductJsonLdSource> = {}): ProductJso
 const FORBIDDEN_HOME_KEYS = [
   'sameAs',
   'telephone',
-  'email',
   'contactPoint',
-  'address',
-  'legalName',
   'taxID',
-  'identifier',
   'foundingDate',
   'SearchAction',
 ];
@@ -136,20 +132,47 @@ describe('homepage JSON-LD', () => {
       url: 'https://agrobridge.ge/en',
       inLanguage: 'en',
     });
-    expect(kaGraph[1]).toEqual({
+    const stableOrganization = {
       '@type': 'Organization',
       '@id': 'https://agrobridge.ge/#organization',
       name: 'AgroBridge',
-      url: 'https://agrobridge.ge/en',
+      legalName: 'P/E VANO MEGVINETUKHUTSESI',
+      url: 'https://agrobridge.ge/',
+      description:
+        'AgroBridge is a Georgian B2B agricultural marketplace connecting Georgian farms and agricultural producers with buyers in Georgia and international markets.',
+      email: 'Support@agrobridge.ge',
+      identifier: {
+        '@type': 'PropertyValue',
+        name: 'Identification Number',
+        value: '01501157152',
+      },
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'Adam Mitskevichi St. 29/5',
+        addressLocality: 'Tbilisi',
+        addressCountry: 'GE',
+      },
+      areaServed: [
+        { '@type': 'Country', name: 'Georgia' },
+        { '@type': 'Place', name: 'International markets' },
+      ],
       logo: {
         '@type': 'ImageObject',
         url: 'https://agrobridge.ge/brand/agrobridge-logo.png',
         width: 1773,
         height: 887,
       },
+    };
+    expect(kaGraph[1]).toEqual({
+      ...stableOrganization,
       slogan: 'ქართული მეურნეობები. გლობალური მყიდველები.',
     });
-    expect(enGraph[1]).toMatchObject({ url: 'https://agrobridge.ge/en' });
+    expect(enGraph[1]).toEqual({
+      ...stableOrganization,
+      slogan: 'Georgian farms. Global buyers.',
+    });
+    expect(JSON.stringify(kaGraph[1])).not.toContain('sameAs');
+    expect(JSON.stringify(enGraph[1])).not.toContain('company');
 
     const logoSource = readWeb('components/BrandLogo.tsx');
     expect(logoSource).toContain("AGROBRIDGE_LOGO_SRC = '/brand/agrobridge-logo.png'");

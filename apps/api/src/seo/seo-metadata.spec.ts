@@ -361,6 +361,55 @@ describe('localized SEO message templates', () => {
     expect(english['requests.description']).toContain('Buyers publish what they need');
     expect(english['requests.description']).not.toMatch(/buyer name|email/i);
   });
+
+  it('states the Georgian marketplace identity on every homepage', () => {
+    const homes: Record<string, { title: string; description: string }> = {
+      en: {
+        title: 'AgroBridge — Georgian B2B agricultural marketplace',
+        description:
+          'AgroBridge connects Georgian farms and agricultural producers with buyers in Georgia and international markets.',
+      },
+      ka: {
+        title: 'AgroBridge — ქართული B2B აგრარული მარკეტპლეისი',
+        description:
+          'AgroBridge აკავშირებს ქართულ მეურნეობებსა და აგრომწარმოებლებს მყიდველებთან საქართველოში და საერთაშორისო ბაზრებზე.',
+      },
+      ru: {
+        title: 'AgroBridge — грузинский B2B-маркетплейс сельхозпродукции',
+        description:
+          'AgroBridge связывает грузинские хозяйства и сельхозпроизводителей с покупателями в Грузии и на международных рынках.',
+      },
+      de: {
+        title: 'AgroBridge — georgischer B2B-Marktplatz für Agrarprodukte',
+        description:
+          'AgroBridge verbindet georgische Betriebe und Agrarproduzenten mit Käufern in Georgien und auf internationalen Märkten.',
+      },
+      fr: {
+        title: 'AgroBridge — place de marché agricole B2B géorgienne',
+        description:
+          'AgroBridge relie les fermes et producteurs agricoles géorgiens aux acheteurs en Géorgie et sur les marchés internationaux.',
+      },
+      it: {
+        title: 'AgroBridge — marketplace agricolo B2B georgiano',
+        description:
+          'AgroBridge collega aziende agricole e produttori georgiani con acquirenti in Georgia e sui mercati internazionali.',
+      },
+      es: {
+        title: 'AgroBridge — mercado agrícola B2B georgiano',
+        description:
+          'AgroBridge conecta granjas y productores agrícolas georgianos con compradores en Georgia y en mercados internacionales.',
+      },
+    };
+
+    for (const locale of LOCALES) {
+      const home = JSON.parse(readFileSync(join(WEB_ROOT, `messages/${locale}.json`), 'utf8')).seo
+        .home;
+      expect(home).toEqual(homes[locale]);
+      expect(`${home.title} ${home.description}`.toLowerCase()).not.toMatch(
+        /\b(largest|leading|number one|the only|biggest|company)\b/,
+      );
+    }
+  });
 });
 
 describe('server metadata wiring', () => {
@@ -622,6 +671,39 @@ describe('public Open Graph metadata', () => {
     expect(ogImages(empty)).toEqual([{ ...LOGO, alt: 'Tanya Farm' }]);
     expect(empty.openGraph?.url).toBe('https://agrobridge.ge/ka/farms/farm12345');
     expect(await farmPageMetadata(farm({ name: '   ' }), 'en')).toEqual({});
+
+    const translated = await farmPageMetadata(
+      farm({
+        description: 'Traditional qvevri wines.',
+        display: {
+          locale: 'ru',
+          description: 'Традиционные вина квеври.',
+          history: null,
+          ownershipType: null,
+          exportMarkets: [],
+          translationStatus: 'completed',
+        },
+      }),
+      'ru',
+    );
+    expect(translated.description).toContain('Традиционные вина квеври.');
+    expect(translated.description).not.toContain('Traditional qvevri wines.');
+
+    const stored = await farmPageMetadata(
+      farm({
+        description: 'A farm in Kakheti.',
+        display: {
+          locale: 'ru',
+          description: '   ',
+          history: null,
+          ownershipType: null,
+          exportMarkets: [],
+          translationStatus: 'pending',
+        },
+      }),
+      'ru',
+    );
+    expect(stored.description).toContain('A farm in Kakheti.');
   });
 
   it('uses the logo for an open request and omits closed requests', async () => {
