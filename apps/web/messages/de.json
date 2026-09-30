@@ -278,7 +278,11 @@
     "emptyReset": "Filter zurücksetzen",
     "showOriginal": "Original anzeigen",
     "showTranslation": "Übersetzung anzeigen",
-    "originalLanguage": "Original · {language}"
+    "originalLanguage": "Original · {language}",
+    "translatedAutomatically": "Automatisch übersetzt · Original anzeigen",
+    "showingOriginal": "Original · {language} · Übersetzung anzeigen",
+    "translatedMark": "Übersetzt",
+    "originalMark": "Original"
   },
   "farm": {
     "createTitle": "Betriebsprofil erstellen",
