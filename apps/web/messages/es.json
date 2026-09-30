@@ -554,6 +554,9 @@
       "moveLater": "Después",
       "fileType": "Usa una foto JPEG, PNG o WebP.",
       "fileTooLarge": "Cada foto debe pesar 5 MB o menos.",
+      "setCover": "Establecer como portada",
+      "coverSelected": "✓ Portada del catálogo",
+      "deletePhoto": "Eliminar foto",
       "maxReached": "Se alcanzó el máximo de {max} fotos.",
       "kind": "Photo type",
       "kinds": {

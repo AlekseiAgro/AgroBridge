@@ -554,6 +554,9 @@
       "moveLater": "გვიან",
       "fileType": "გამოიყენეთ JPEG, PNG ან WebP ფოტო.",
       "fileTooLarge": "თითოეული ფოტო უნდა იყოს 5 მბ-მდე.",
+      "setCover": "ყდად დაყენება",
+      "coverSelected": "✓ კატალოგის ყდა",
+      "deletePhoto": "ფოტოს წაშლა",
       "maxReached": "მიღწეულია {max} ფოტო.",
       "kind": "Photo type",
       "kinds": {

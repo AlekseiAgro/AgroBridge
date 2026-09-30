@@ -184,8 +184,12 @@ describe('new product form media wiring', () => {
     expect(form).toContain("mode === 'create'");
     expect(staged).toContain('URL.createObjectURL');
     expect(staged).toContain('previewUrl');
-    expect(staged).toContain("t('images.setPrimary')");
-    expect(staged).toContain("t('images.delete')");
+    expect(staged).toContain("t('images.setCover')");
+    expect(staged).toContain("t('images.coverSelected')");
+    expect(staged).toContain("t('images.deletePhoto')");
+    expect(staged).not.toContain('moveStagedPhoto');
+    expect(staged).not.toContain("t('images.moveEarlier')");
+    expect(staged).not.toContain("t('images.moveLater')");
     expect(staged).toContain('PRODUCT_IMAGE_MAX_COUNT');
     expect(staged).toContain("t('videos.optionalLabel')");
     expect(edit).toContain('ProductImagesManager');

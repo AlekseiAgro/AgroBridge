@@ -554,6 +554,9 @@
       "moveLater": "Nach hinten",
       "fileType": "Verwenden Sie ein JPEG-, PNG- oder WebP-Foto.",
       "fileTooLarge": "Jedes Foto darf höchstens 5 MB groß sein.",
+      "setCover": "Als Titelbild festlegen",
+      "coverSelected": "✓ Katalog-Titelbild",
+      "deletePhoto": "Foto löschen",
       "maxReached": "Maximal {max} Fotos erreicht.",
       "kind": "Photo type",
       "kinds": {

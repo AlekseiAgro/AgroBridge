@@ -554,6 +554,9 @@
       "moveLater": "Move later",
       "fileType": "Use a JPEG, PNG, or WebP photo.",
       "fileTooLarge": "Each photo must be 5 MB or smaller.",
+      "setCover": "Set as cover",
+      "coverSelected": "✓ Catalog cover",
+      "deletePhoto": "Delete photo",
       "maxReached": "Maximum of {max} photos reached.",
       "kind": "Photo type",
       "kinds": {

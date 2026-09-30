@@ -6,7 +6,6 @@ import { useEffect, useId, useRef } from 'react';
 import {
   addStagedPhotos,
   discardStagedPhoto,
-  moveStagedPhoto,
   revokePreviewUrl,
   revokeStagedPreviews,
   selectStagedCover,
@@ -154,54 +153,46 @@ export function ProductStagedMedia({
           {photos.length > 0 ? <p className="field-hint">{t('images.coverHint')}</p> : null}
         </div>
         {photos.length > 0 ? (
-          <ul className="product-images__grid">
-            {photos.map((photo, index) => {
+          <ul className="product-images__grid product-staged-grid">
+            {photos.map((photo) => {
               const isCover = photo.clientId === coverClientId;
-              const orderLocked = photos.some((item) => item.uploadedImageId);
               return (
-                <li key={photo.clientId} className="product-images__item">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={photo.previewUrl} alt="" className="product-images__thumb" />
-                  <div className="product-images__meta">
+                <li key={photo.clientId} className="product-staged-card">
+                  <div className="product-staged-card__frame">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photo.previewUrl} alt="" className="product-images__thumb" />
+                    <button
+                      type="button"
+                      className="product-staged-card__delete"
+                      disabled={disabled}
+                      aria-label={t('images.deletePhoto')}
+                      title={t('images.deletePhoto')}
+                      onClick={() => void removePhoto(photo)}
+                    >
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                        <path
+                          fill="currentColor"
+                          d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9zm-1 12h12a1 1 0 0 0 1-1V8H5v12a1 1 0 0 0 1 1z"
+                        />
+                      </svg>
+                    </button>
                     {isCover ? (
-                      <span className="product-images__badge">{t('images.primary')}</span>
+                      <span className="product-staged-card__cover product-staged-card__cover--selected">
+                        {t('images.coverSelected')}
+                      </span>
                     ) : (
                       <button
                         type="button"
-                        className="button button--ghost"
+                        className="product-staged-card__cover"
                         disabled={disabled}
                         onClick={() => {
                           const cover = selectStagedCover(photos, photo.clientId);
                           if (cover) onPhotosChange(photos, cover);
                         }}
                       >
-                        {t('images.setPrimary')}
+                        {t('images.setCover')}
                       </button>
                     )}
-                    <button
-                      type="button"
-                      className="button button--ghost"
-                        disabled={disabled || orderLocked || index === 0}
-                      onClick={() => onPhotosChange(moveStagedPhoto(photos, photo.clientId, -1), coverClientId)}
-                    >
-                      {t('images.moveEarlier')}
-                    </button>
-                    <button
-                      type="button"
-                      className="button button--ghost"
-                        disabled={disabled || orderLocked || index === photos.length - 1}
-                      onClick={() => onPhotosChange(moveStagedPhoto(photos, photo.clientId, 1), coverClientId)}
-                    >
-                      {t('images.moveLater')}
-                    </button>
-                    <button
-                      type="button"
-                      className="button button--ghost"
-                      disabled={disabled}
-                      onClick={() => void removePhoto(photo)}
-                    >
-                      {t('images.delete')}
-                    </button>
                   </div>
                 </li>
               );

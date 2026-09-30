@@ -554,6 +554,9 @@
       "moveLater": "Позже",
       "fileType": "Используйте фото JPEG, PNG или WebP.",
       "fileTooLarge": "Каждое фото должно быть не больше 5 МБ.",
+      "setCover": "Сделать обложкой",
+      "coverSelected": "✓ Обложка в каталоге",
+      "deletePhoto": "Удалить фото",
       "maxReached": "Достигнут лимит в {max} фото.",
       "kind": "Photo type",
       "kinds": {

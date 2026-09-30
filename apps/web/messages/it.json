@@ -554,6 +554,9 @@
       "moveLater": "Dopo",
       "fileType": "Usa una foto JPEG, PNG o WebP.",
       "fileTooLarge": "Ogni foto deve essere di massimo 5 MB.",
+      "setCover": "Imposta come copertina",
+      "coverSelected": "✓ Copertina del catalogo",
+      "deletePhoto": "Elimina foto",
       "maxReached": "Raggiunto il massimo di {max} foto.",
       "kind": "Photo type",
       "kinds": {
