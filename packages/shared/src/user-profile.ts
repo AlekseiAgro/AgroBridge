@@ -18,7 +18,14 @@ export type PublicUserProfile = {
     id: string;
     name: string;
     region: string | null;
+    /** Original farm description. Never replaced by a translation. */
     description: string | null;
+    source?: { locale: string; description: string | null };
+    display?: {
+      locale: string;
+      description: string | null;
+      translationStatus: 'source' | 'completed' | 'pending' | 'failed';
+    };
     productCount: number;
   } | null;
 };

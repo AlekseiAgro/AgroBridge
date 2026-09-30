@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { PublicUserProfile } from '@agrobridge/shared';
+import { presentFarmText, resolveCatalogLocale, type PublicUserProfile } from '@agrobridge/shared';
 import { RfqStatus as PrismaRfqStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { publicProductWhere } from '../products/public-product.where';
@@ -12,7 +12,11 @@ export class UsersService {
     private readonly ratings: RatingsService,
   ) {}
 
-  async getPublicProfile(id: string): Promise<PublicUserProfile> {
+  async getPublicProfile(
+    id: string,
+    localeInput?: string | null,
+    viewerLocale?: string | null,
+  ): Promise<PublicUserProfile> {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: {
@@ -22,6 +26,20 @@ export class UsersService {
             name: true,
             region: true,
             description: true,
+            sourceLocale: true,
+            history: true,
+            ownershipType: true,
+            exportMarkets: true,
+            translations: {
+              select: {
+                locale: true,
+                description: true,
+                history: true,
+                ownershipType: true,
+                exportMarkets: true,
+                status: true,
+              },
+            },
             _count: {
               select: {
                 products: {
@@ -62,14 +80,46 @@ export class UsersService {
       rating,
       completedDeals: completedAsBuyer + completedAsSeller,
       farm: user.farm
-        ? {
-            id: user.farm.id,
-            name: user.farm.name,
-            region: user.farm.region,
-            description: user.farm.description,
-            productCount: user.farm._count.products,
-          }
+        ? this.toPublicFarm(user.farm, resolveCatalogLocale(localeInput, viewerLocale))
         : null,
+    };
+  }
+
+  private toPublicFarm(
+    farm: {
+      id: string;
+      name: string;
+      region: string | null;
+      description: string | null;
+      sourceLocale: string | null;
+      history: string | null;
+      ownershipType: string | null;
+      exportMarkets: string[];
+      translations: {
+        locale: string;
+        description: string | null;
+        history: string | null;
+        ownershipType: string | null;
+        exportMarkets: string[];
+        status: string;
+      }[];
+      _count: { products: number };
+    },
+    locale: Parameters<typeof presentFarmText>[1],
+  ): NonNullable<PublicUserProfile['farm']> {
+    const copy = presentFarmText(farm, locale);
+    return {
+      id: farm.id,
+      name: farm.name,
+      region: farm.region,
+      description: farm.description,
+      source: { locale: copy.source.locale, description: copy.source.description },
+      display: {
+        locale: copy.display.locale,
+        description: copy.display.description,
+        translationStatus: copy.display.translationStatus,
+      },
+      productCount: farm._count.products,
     };
   }
 }

@@ -24,6 +24,30 @@ export type ListingFields = {
 export const PUBLISHED_LISTING_INCOMPLETE_MESSAGE =
   'Published listings require a real title, category, unit, price, and currency';
 
+export const PUBLICATION_PHOTO_REQUIRED_MESSAGE = 'At least 1 photo is required to publish';
+
+/**
+ * A first publication needs one photo. Drafts do not.
+ * An already published listing stays editable without a photo so existing
+ * catalog rows are not blocked or unpublished.
+ */
+export function publicationBlockedForMissingPhoto(args: {
+  nextPublished: boolean;
+  previousPublished?: boolean;
+  photoCount: number;
+}): boolean {
+  if (!args.nextPublished) {
+    return false;
+  }
+  if (args.photoCount >= 1) {
+    return false;
+  }
+  if (args.previousPublished) {
+    return false;
+  }
+  return true;
+}
+
 function hasRealTitle(title: string | null | undefined): boolean {
   const normalized = title?.trim() ?? '';
   return normalized.length >= 2 && !isInternalDraftProductTitle(normalized);

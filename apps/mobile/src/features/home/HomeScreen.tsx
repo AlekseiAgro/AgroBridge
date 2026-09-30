@@ -84,6 +84,10 @@ export function HomeScreen() {
     stack?.navigate('ProductDetail', { productId });
   };
 
+  const openFarm = (farmId: string) => {
+    stack?.navigate('FarmDetail', { farmId });
+  };
+
   const openRequest = (requestId: string) => {
     stack?.navigate('RequestDetail', { requestId });
   };
@@ -197,6 +201,9 @@ export function HomeScreen() {
                           product={product}
                           width={cardWidth}
                           onPress={() => openProduct(product.id)}
+                          onOpenFarm={
+                            product.farm ? () => openFarm(product.farm?.id ?? '') : undefined
+                          }
                         />
                       ))}
                     </ScrollView>
@@ -228,25 +235,28 @@ function ProductTile({
   product,
   width,
   onPress,
+  onOpenFarm,
 }: {
   product: CatalogProduct;
   width: number;
   onPress: () => void;
+  onOpenFarm?: () => void;
 }) {
   const { t } = useI18n();
   const region = regionLabel(product.farm?.region, t);
   const country = countryLabel(product.country, t);
-  const meta = [product.farm?.name, region, country].filter(Boolean).join(' · ');
+  const place = [region, country].filter(Boolean).join(', ');
   const harvest = product.harvestStatus && isHarvestStatus(product.harvestStatus)
     ? product.harvestStatus
     : null;
   const badge = harvest ? t(`availability.${harvest}`) : '';
+  const farmName = product.farm?.name;
 
   return (
     <ProductCard
       name={product.title}
       imageUrl={resolveMediaUrl(primaryProductImageUrl(product.images), apiBaseUrlFromEnv())}
-      meta={meta}
+      meta={farmName ? '' : [region, country].filter(Boolean).join(', ')}
       badgeLabel={badge}
       badgeTone={harvest ? badgeTone(harvest) : 'neutral'}
       verifiedLabel={product.farm?.verified ? t('home.verifiedFarm') : null}
@@ -254,6 +264,16 @@ function ProductTile({
       accessibilityLabel={t('a11y.openProduct', { name: product.title })}
       width={width}
       onPress={onPress}
+      farmLink={
+        farmName && onOpenFarm
+          ? {
+              name: farmName,
+              place,
+              onPress: onOpenFarm,
+              accessibilityLabel: t('a11y.openFarm', { name: farmName }),
+            }
+          : null
+      }
     />
   );
 }

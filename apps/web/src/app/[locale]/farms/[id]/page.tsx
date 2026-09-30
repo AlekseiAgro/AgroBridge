@@ -12,7 +12,9 @@ import { ApiError, apiRequest } from '@/lib/api';
 import { buildBreadcrumbJsonLd } from '@/lib/seo-jsonld';
 import { farmPageMetadata } from '@/lib/seo-public-metadata';
 
-const loadFarm = cache(async (id: string) => apiRequest<FarmDetail>(`/farms/${id}`));
+const loadFarm = cache(async (id: string, locale: string) =>
+  apiRequest<FarmDetail>(`/farms/${id}?locale=${encodeURIComponent(locale)}`),
+);
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
@@ -21,7 +23,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params;
   try {
-    return farmPageMetadata(await loadFarm(id), locale);
+    return farmPageMetadata(await loadFarm(id, locale), locale);
   } catch {
     return {};
   }
@@ -35,7 +37,7 @@ export default async function FarmDetailPage({ params }: Props) {
 
   let farm: FarmDetail;
   try {
-    farm = await loadFarm(id);
+    farm = await loadFarm(id, locale);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
       notFound();

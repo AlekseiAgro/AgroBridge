@@ -275,7 +275,10 @@
     "emptyTitle": "No products yet",
     "emptyFilteredTitle": "No matching products",
     "emptyUnfiltered": "There are no published products to show right now. Post a purchase request so farms can reply.",
-    "emptyReset": "Clear filters"
+    "emptyReset": "Clear filters",
+    "showOriginal": "Show original",
+    "showTranslation": "Show translation",
+    "originalLanguage": "Original · {language}"
   },
   "farm": {
     "createTitle": "Create farm profile",
@@ -448,7 +451,8 @@
     "cancelEdit": "Cancel",
     "aboutHeading": "About the farm",
     "size": "Farm size",
-    "hectaresValue": "{count} ha"
+    "hectaresValue": "{count} ha",
+    "registeredName": "Registered name"
   },
   "product": {
     "dashboardTitle": "My products",
@@ -699,7 +703,8 @@
     "messageSeller": "Message seller",
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Changes are live in the catalog. No new moderation is required.",
-    "publishLiveHint": "Save and Publish both update the live catalog listing immediately (without unpublishing)."
+    "publishLiveHint": "Save and Publish both update the live catalog listing immediately (without unpublishing).",
+    "photoRequiredToPublish": "At least 1 photo is required to publish."
   },
   "rfq": {
     "requestTitle": "Request a quote",

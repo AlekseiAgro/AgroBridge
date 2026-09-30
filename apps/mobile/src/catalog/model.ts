@@ -38,6 +38,48 @@ export type CatalogProduct = {
   farm: CatalogFarm | null;
   /** Original title when it differs from the locale shown in `title`. */
   sourceTitle: string | null;
+  source: CatalogText | null;
+};
+
+export type CatalogText = {
+  locale: string | null;
+  title: string | null;
+  description: string | null;
+  variety: string | null;
+  originPlace: string | null;
+  packaging: string | null;
+  destinationCountry: string | null;
+  message: string | null;
+};
+
+export type CatalogFarmProfile = {
+  id: string;
+  name: string;
+  region: string | null;
+  verified: boolean;
+  description: string | null;
+  history: string | null;
+  ownershipType: string | null;
+  exportMarkets: string[];
+  foundedYear: number | null;
+  farmSizeHectares: number | null;
+  companyRegistryName: string | null;
+  owner: CatalogParty;
+  source: {
+    locale: string | null;
+    description: string | null;
+    history: string | null;
+    ownershipType: string | null;
+    exportMarkets: string[];
+  };
+  display: {
+    locale: string | null;
+    description: string | null;
+    history: string | null;
+    ownershipType: string | null;
+    exportMarkets: string[];
+  };
+  products: CatalogProduct[];
 };
 
 /** Public purchase-request fields. Matches GET /purchase-requests. */
@@ -56,6 +98,7 @@ export type CatalogRequest = {
   buyer: CatalogParty;
   /** Original title when it differs from the locale shown in `title`. */
   sourceTitle: string | null;
+  source: CatalogText | null;
 };
 
 /** Enabled catalog category from GET /categories. */
@@ -95,6 +138,30 @@ function sourceTitleOf(row: Record<string, unknown>, shownTitle: string): string
   const source = readRecord(row.source);
   const original = readString(source?.title) ?? readString(row.title);
   return original && original !== shownTitle ? original : null;
+}
+
+function readText(row: Record<string, unknown>): CatalogText {
+  const source = readRecord(row.source);
+  return {
+    locale: readString(source?.locale),
+    title: readString(source?.title) ?? readString(row.title),
+    description: readString(source?.description) ?? readString(row.description),
+    variety: readString(source?.variety) ?? readString(row.variety),
+    originPlace: readString(source?.originPlace) ?? readString(row.originPlace),
+    packaging: readString(source?.packaging) ?? readString(row.packaging),
+    destinationCountry: readString(source?.destinationCountry) ?? readString(row.destinationCountry),
+    message: readString(source?.message) ?? readString(row.message),
+  };
+}
+
+function readStringList(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.flatMap((item) => {
+    const text = readString(item);
+    return text ? [text] : [];
+  });
 }
 
 function readNumber(value: unknown): number | null {
@@ -194,6 +261,7 @@ export function parseCatalogProduct(value: unknown): CatalogProduct | null {
     owner: readParty(row.owner),
     farm: readFarm(row.farm),
     sourceTitle: sourceTitleOf(row, title),
+    source: readText(row),
   };
 }
 
@@ -233,6 +301,52 @@ export function parseCatalogRequest(value: unknown): CatalogRequest | null {
     createdAt: readString(row.createdAt),
     buyer: readParty(row.buyer),
     sourceTitle: sourceTitleOf(row, title),
+    source: readText(row),
+  };
+}
+
+export function parseFarmProfile(value: unknown): CatalogFarmProfile | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+  const row = value as Record<string, unknown>;
+  const id = readString(row.id);
+  const name = readString(row.name);
+  if (!id || !name) {
+    return null;
+  }
+  const source = readRecord(row.source);
+  const display = readRecord(row.display);
+  const sourceMarkets = readStringList(source?.exportMarkets ?? row.exportMarkets);
+  const displayMarkets = readStringList(display?.exportMarkets);
+  return {
+    id,
+    name,
+    region: readString(row.region),
+    verified: row.verified === true,
+    description: readString(display?.description) ?? readString(row.description),
+    history: readString(display?.history) ?? readString(row.history),
+    ownershipType: readString(display?.ownershipType) ?? readString(row.ownershipType),
+    exportMarkets: displayMarkets.length > 0 ? displayMarkets : readStringList(row.exportMarkets),
+    foundedYear: readNumber(row.foundedYear),
+    farmSizeHectares: readNumber(row.farmSizeHectares),
+    companyRegistryName: readString(row.companyRegistryName),
+    owner: readParty(row.owner),
+    source: {
+      locale: readString(source?.locale),
+      description: readString(source?.description) ?? readString(row.description),
+      history: readString(source?.history) ?? readString(row.history),
+      ownershipType: readString(source?.ownershipType) ?? readString(row.ownershipType),
+      exportMarkets: sourceMarkets,
+    },
+    display: {
+      locale: readString(display?.locale),
+      description: readString(display?.description) ?? readString(row.description),
+      history: readString(display?.history) ?? readString(row.history),
+      ownershipType: readString(display?.ownershipType) ?? readString(row.ownershipType),
+      exportMarkets: displayMarkets.length > 0 ? displayMarkets : sourceMarkets,
+    },
+    products: Array.isArray(row.products) ? parseCatalogProducts(row.products) : [],
   };
 }
 

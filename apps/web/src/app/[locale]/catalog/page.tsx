@@ -10,6 +10,8 @@ import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
+import { CardOriginalTitle } from '@/components/OriginalToggle';
+import { FarmLink } from '@/components/FarmLink';
 import { ProductPhotoPlaceholder } from '@/components/ProductPhotoPlaceholder';
 import { EmptyState } from '@/components/EmptyState';
 import { Link } from '@/i18n/navigation';
@@ -130,34 +132,40 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                   <ProductPhotoPlaceholder
                     label={t('noProductPhoto')}
                     alt={imageAlt}
-                    className="product-list__media"
+                    className="product-list__media product-list__media--empty"
                   />
                 )}
                 <div>
                   <Link href={`/products/${product.id}`} className="product-list__title">
                     {catalogDisplayTitle(product)}
                   </Link>
-                  {catalogOriginalTitle(product) ? (
+                  <CardOriginalTitle
+                    original={catalogOriginalTitle(product)}
+                    showOriginalLabel={t('showOriginal')}
+                    showTranslationLabel={t('showTranslation')}
+                  />
+                  <FarmLink
+                    href={product.farm ? `/farms/${product.farm.id}` : `/users/${product.owner.id}`}
+                    name={product.farm ? product.farm.name : sellerLabel}
+                    place={
+                      [
+                        product.farm?.region
+                          ? formatRegionLabel(product.farm.region, tr) ?? product.farm.region
+                          : null,
+                        product.country,
+                      ]
+                        .filter(Boolean)
+                        .join(', ') || null
+                    }
+                    badge={
+                      product.farm ? <VerifiedBadge verified={product.farm.verified} /> : undefined
+                    }
+                  />
+                  {product.category ? (
                     <p className="product-list__meta">
-                      {t('originalText', { text: catalogOriginalTitle(product) ?? '' })}
+                      {t(`categories.${product.category as 'fruits'}`)}
                     </p>
                   ) : null}
-                  <p className="product-list__meta">
-                    {product.farm ? (
-                      <>
-                        <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
-                        <VerifiedBadge verified={product.farm.verified} />
-                        {product.farm.region
-                          ? ` · ${formatRegionLabel(product.farm.region, tr) ?? product.farm.region}`
-                          : ''}
-                      </>
-                    ) : (
-                      <Link href={`/users/${product.owner.id}`}>{sellerLabel}</Link>
-                    )}
-                    {product.category
-                      ? ` · ${t(`categories.${product.category as 'fruits'}`)}`
-                      : ''}
-                  </p>
                   <HarvestStatusBadge
                     status={product.harvestStatus}
                     preorderEnabled={product.preorderEnabled}

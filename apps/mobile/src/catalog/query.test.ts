@@ -29,6 +29,7 @@ function product(overrides: Partial<CatalogProduct> = {}): CatalogProduct {
     owner: { id: 'u1', displayName: null },
     farm: null,
     sourceTitle: null,
+    source: null,
     ...overrides,
   };
 }
@@ -48,6 +49,7 @@ function request(overrides: Partial<CatalogRequest> = {}): CatalogRequest {
     createdAt: null,
     buyer: { id: 'b1', displayName: null },
     sourceTitle: null,
+    source: null,
     ...overrides,
   };
 }

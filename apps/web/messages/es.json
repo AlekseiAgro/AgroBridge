@@ -275,7 +275,10 @@
     "emptyTitle": "Aún no hay productos",
     "emptyFilteredTitle": "No hay productos coincidentes",
     "emptyUnfiltered": "Ahora mismo no hay productos publicados. Publica una solicitud de compra para que las granjas puedan responder.",
-    "emptyReset": "Borrar filtros"
+    "emptyReset": "Borrar filtros",
+    "showOriginal": "Mostrar original",
+    "showTranslation": "Mostrar traducción",
+    "originalLanguage": "Original · {language}"
   },
   "farm": {
     "createTitle": "Crear perfil de granja",
@@ -448,7 +451,8 @@
     "cancelEdit": "Cancelar",
     "aboutHeading": "Sobre la granja",
     "size": "Superficie",
-    "hectaresValue": "{count} ha"
+    "hectaresValue": "{count} ha",
+    "registeredName": "Nombre registrado"
   },
   "product": {
     "dashboardTitle": "Mis productos",
@@ -699,7 +703,8 @@
     "messageSeller": "Escribir al vendedor",
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Los cambios ya están visibles en el catálogo. No hace falta nueva moderación.",
-    "publishLiveHint": "«Guardar» y «Publicar» actualizan el anuncio en el catálogo de inmediato (sin despublicar)."
+    "publishLiveHint": "«Guardar» y «Publicar» actualizan el anuncio en el catálogo de inmediato (sin despublicar).",
+    "photoRequiredToPublish": "Se necesita al menos una foto para publicar."
   },
   "rfq": {
     "requestTitle": "Solicitar cotización",

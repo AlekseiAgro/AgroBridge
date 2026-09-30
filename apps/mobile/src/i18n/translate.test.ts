@@ -1,6 +1,6 @@
-import { en } from './en';
+import { en, type MessageKey } from './en';
 import { ru } from './ru';
-import { localeFromLanguageCode } from './locales';
+import { APP_LOCALES, localeFromLanguageCode } from './locales';
 import { translate } from './translate';
 
 describe('translate', () => {
@@ -20,6 +20,22 @@ describe('translate', () => {
     expect(translate('fr', 'home.searchPlaceholder')).toBe(en['home.searchPlaceholder']);
     expect(translate('it', 'tabs.account')).toBe(en['tabs.account']);
     expect(translate('es', 'tabs.messages')).toBe(en['tabs.messages']);
+  });
+
+  it('translates every new farm-screen string in all seven locales', () => {
+    const farmKeys = (Object.keys(en) as MessageKey[]).filter((key) => key.startsWith('farm.'));
+    expect(farmKeys.length).toBeGreaterThan(0);
+    for (const locale of APP_LOCALES) {
+      if (locale === 'en') {
+        continue;
+      }
+      for (const key of farmKeys) {
+        const value = translate(locale, key);
+        expect(value.trim().length).toBeGreaterThan(0);
+        expect(value).not.toBe(en[key]);
+      }
+    }
+    expect(translate('ru', 'farm.about')).toBe(ru['farm.about']);
   });
 
   it('interpolates parameters', () => {

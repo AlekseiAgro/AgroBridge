@@ -5,8 +5,10 @@ import {
   parseCatalogProducts,
   parseCatalogRequest,
   parseCatalogRequests,
+  parseFarmProfile,
   type CatalogCategory,
   type CatalogProduct,
+  type CatalogFarmProfile,
   type CatalogRequest,
 } from './model';
 import { productsPath, purchaseRequestsPath } from './query';
@@ -45,6 +47,20 @@ export function getProduct(
 ): Promise<CatalogProduct | null> {
   const path = productsPath({ locale }).replace('/products', `/products/${encodeURIComponent(productId)}`);
   return api.request<unknown>(path, { auth: false }).then((body) => parseCatalogProduct(body));
+}
+
+export function getFarm(
+  api: ApiClient,
+  farmId: string,
+  locale?: string | null,
+): Promise<CatalogFarmProfile | null> {
+  const params = new URLSearchParams();
+  if (locale) {
+    params.set('locale', locale);
+  }
+  const query = params.toString();
+  const path = `/farms/${encodeURIComponent(farmId)}${query ? `?${query}` : ''}`;
+  return api.request<unknown>(path, { auth: false }).then((body) => parseFarmProfile(body));
 }
 
 export function getPurchaseRequest(

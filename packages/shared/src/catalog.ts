@@ -122,12 +122,17 @@ export type FarmSummary = {
   photos: FarmPhoto[];
   /** ISO timestamp of the farm row. Not a photo or product timestamp. */
   updatedAt: string;
+  /** Original public description. The farm name is not translated. */
+  source?: FarmSourceText;
+  display?: FarmDisplayText;
 };
 
 export type FarmDetail = FarmSummary & {
   createdAt: string;
   verificationNote: string | null;
   verifiedAt: string | null;
+  /** Legal registry name. Shown as stored. Never machine-translated. */
+  companyRegistryName?: string | null;
   companyRegistrationNumber?: string | null;
   companyRegistryValid?: boolean | null;
   documents?: FarmDocument[];
@@ -147,7 +152,7 @@ import type {
   ProductQualityScore,
   ProductVideo,
 } from './quality';
-import type { CatalogDisplayText, CatalogSourceText } from './catalog-locale';
+import type { CatalogDisplayText, CatalogSourceText, FarmDisplayText, FarmSourceText } from './catalog-locale';
 import type { MarketOpportunity } from './market-insight';
 
 export const PRODUCT_IMAGE_MAX_COUNT = 5;
@@ -249,6 +254,8 @@ export type ProductSummary = {
     ownershipType: string | null;
     exportMarkets: string[];
     history: string | null;
+    source?: FarmSourceText;
+    display?: FarmDisplayText;
   } | null;
   /**
    * Owner-only (GET /products/mine): public product-detail page views.

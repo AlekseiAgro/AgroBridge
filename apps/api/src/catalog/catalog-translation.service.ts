@@ -47,6 +47,31 @@ export function purchaseRequestSourceHash(fields: PurchaseRequestSourceFields): 
   ]);
 }
 
+export type FarmSourceFields = {
+  description: string | null;
+  history: string | null;
+  ownershipType: string | null;
+  exportMarkets: string[];
+};
+
+export function farmSourceHash(fields: FarmSourceFields): string {
+  return catalogSourceHash([
+    fields.description,
+    fields.history,
+    fields.ownershipType,
+    ...fields.exportMarkets,
+  ]);
+}
+
+export function farmHasPublicCopy(fields: FarmSourceFields): boolean {
+  return Boolean(
+    fields.description?.trim() ||
+      fields.history?.trim() ||
+      fields.ownershipType?.trim() ||
+      fields.exportMarkets.some((market) => market.trim()),
+  );
+}
+
 export function sameCatalogSource(left: string | null | undefined, right: string): boolean {
   return left === right;
 }
@@ -98,6 +123,15 @@ export class CatalogTranslationService implements OnModuleInit {
     }
   }
 
+  async syncFarm(farmId: string): Promise<void> {
+    try {
+      await this.syncFarmNow(farmId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Farm translation failed';
+      this.logger.warn(`Farm ${farmId}: ${message}`);
+    }
+  }
+
   async syncPurchaseRequest(requestId: string): Promise<void> {
     try {
       await this.syncPurchaseRequestNow(requestId);
@@ -144,6 +178,39 @@ export class CatalogTranslationService implements OnModuleInit {
       );
       if (targets.some((locale) => !ready.has(locale))) {
         await this.syncPurchaseRequest(request.id);
+      }
+    }
+
+    const farms = await this.prisma.farm.findMany({
+      select: {
+        id: true,
+        sourceLocale: true,
+        description: true,
+        history: true,
+        ownershipType: true,
+        exportMarkets: true,
+        translations: { select: { locale: true, status: true } },
+      },
+    });
+    for (const farm of farms) {
+      if (
+        !farmHasPublicCopy({
+          description: farm.description,
+          history: farm.history,
+          ownershipType: farm.ownershipType,
+          exportMarkets: farm.exportMarkets,
+        })
+      ) {
+        continue;
+      }
+      const targets = CATALOG_LOCALES.filter((locale) => locale !== farm.sourceLocale);
+      const ready = new Set(
+        farm.translations
+          .filter((row) => row.status === MessageTranslationStatus.completed)
+          .map((row) => row.locale),
+      );
+      if (targets.some((locale) => !ready.has(locale))) {
+        await this.syncFarm(farm.id);
       }
     }
   }
@@ -429,6 +496,143 @@ export class CatalogTranslationService implements OnModuleInit {
         });
       }
     }
+  }
+
+  private async syncFarmNow(farmId: string): Promise<void> {
+    const farm = await this.prisma.farm.findUnique({
+      where: { id: farmId },
+      include: {
+        translations: true,
+        owner: { select: { locale: true } },
+      },
+    });
+    if (!farm) {
+      return;
+    }
+    const fields: FarmSourceFields = {
+      description: farm.description,
+      history: farm.history,
+      ownershipType: farm.ownershipType,
+      exportMarkets: farm.exportMarkets,
+    };
+    const sourceLocale = detectCatalogSourceLocale(
+      [fields.description, fields.history, fields.ownershipType, ...fields.exportMarkets]
+        .filter(Boolean)
+        .join('\n'),
+      farm.owner.locale,
+    );
+    if (farm.sourceLocale !== sourceLocale) {
+      await this.prisma.farm.update({
+        where: { id: farm.id },
+        data: { sourceLocale },
+      });
+    }
+    if (!farmHasPublicCopy(fields)) {
+      return;
+    }
+    await this.translateFarmLocales(
+      farm.id,
+      sourceLocale,
+      farmSourceHash(fields),
+      fields,
+      farm.translations,
+    );
+  }
+
+  private async translateFarmLocales(
+    farmId: string,
+    sourceLocale: Locale,
+    hash: string,
+    fields: FarmSourceFields,
+    existing: { locale: LocaleCode; status: MessageTranslationStatus; sourceHash: string | null }[],
+  ): Promise<void> {
+    for (const locale of CATALOG_LOCALES) {
+      if (locale === sourceLocale) {
+        continue;
+      }
+      const current = existing.find((row) => row.locale === locale);
+      if (
+        current?.status === MessageTranslationStatus.completed &&
+        sameCatalogSource(current.sourceHash, hash)
+      ) {
+        continue;
+      }
+      const where = { farmId_locale: { farmId, locale } };
+      await this.prisma.farmTranslation.upsert({
+        where,
+        create: {
+          farmId,
+          locale,
+          status: MessageTranslationStatus.pending,
+          provider: this.translation.providerName,
+          error: null,
+          sourceHash: hash,
+          exportMarkets: [],
+        },
+        update: {
+          status: MessageTranslationStatus.pending,
+          provider: this.translation.providerName,
+          error: null,
+          sourceHash: hash,
+        },
+      });
+      try {
+        const description = await this.translateOptional(sourceLocale, locale, fields.description);
+        const history = await this.translateOptional(sourceLocale, locale, fields.history);
+        const ownershipType = await this.translateOptional(
+          sourceLocale,
+          locale,
+          fields.ownershipType,
+        );
+        const exportMarkets: string[] = [];
+        for (const market of fields.exportMarkets) {
+          const translated = await this.translateOptional(sourceLocale, locale, market);
+          if (translated) {
+            exportMarkets.push(translated);
+          }
+        }
+        await this.prisma.farmTranslation.update({
+          where,
+          data: {
+            description,
+            history,
+            ownershipType,
+            exportMarkets,
+            status: MessageTranslationStatus.completed,
+            provider: this.translation.providerName,
+            error: null,
+            sourceHash: hash,
+          },
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Translation failed';
+        this.logger.warn(`Translation to ${locale} failed: ${message}`);
+        await this.prisma.farmTranslation.update({
+          where,
+          data: {
+            status: MessageTranslationStatus.failed,
+            error: message,
+            sourceHash: hash,
+          },
+        });
+      }
+    }
+  }
+
+  private async translateOptional(
+    sourceLocale: Locale,
+    targetLocale: Locale,
+    value: string | null,
+  ): Promise<string | null> {
+    if (!value?.trim()) {
+      return null;
+    }
+    const result = await this.translation.translateText({
+      text: value,
+      sourceLocale,
+      targetLocale,
+    });
+    return result.translatedText;
   }
 
   private async translateFields(

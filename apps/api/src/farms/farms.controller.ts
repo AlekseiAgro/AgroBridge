@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -112,8 +113,8 @@ export class FarmsController {
   }
 
   @Get(':id')
-  getById(@Param('id') id: string) {
-    return this.farmsService.getById(id);
+  getById(@Param('id') id: string, @Query('locale') locale?: string) {
+    return this.farmsService.getById(id, locale);
   }
 
   @Post()

@@ -56,6 +56,7 @@ describe('ProductsService', () => {
     prisma.productView.groupBy.mockResolvedValue([]);
     prisma.harvestWatch.groupBy.mockResolvedValue([]);
     prisma.productView.findFirst.mockResolvedValue(null);
+    prisma.productImage.count.mockResolvedValue(1);
     service = new ProductsService(
       prisma as never,
       storage as never,
@@ -1049,36 +1050,194 @@ describe('ProductsService', () => {
     };
   }
 
-  it('creates a published listing when required fields are present and keeps optional fields empty', async () => {
+  it('rejects a new publication that has no photo and still saves a draft', async () => {
     prisma.farm.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.create(farmer, { ...completeListing, isPublished: true } as never),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.product.create).not.toHaveBeenCalled();
+
     prisma.product.create.mockResolvedValue(
       productRow({
         ...completeListing,
-        isPublished: true,
-        moderationStatus: 'pending',
+        isPublished: false,
+        moderationStatus: 'draft',
       }),
     );
+    await service.create(farmer, { ...completeListing, isPublished: false } as never);
+    expect(prisma.product.create).toHaveBeenCalled();
+  });
 
-    const result = await service.create(farmer, {
+  it('keeps an already published product without a photo editable', async () => {
+    const live = productRow({
       ...completeListing,
+      isPublished: true,
+      moderationStatus: 'approved',
+    });
+    prisma.product.findUnique.mockResolvedValue(live);
+    prisma.productImage.count.mockResolvedValue(0);
+    prisma.product.update.mockResolvedValue({ ...live, title: 'Updated hazelnuts' });
+
+    await service.update(farmer, 'p1', {
+      title: 'Updated hazelnuts',
       isPublished: true,
     } as never);
 
-    expect(prisma.product.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          title: 'Kakheti hazelnuts',
-          category: 'nuts',
-          unit: 'kg',
-          priceFrom: 4.2,
-          priceCurrency: 'GEL',
-          isPublished: true,
-          moderationStatus: 'pending',
-          description: null,
+    expect(prisma.product.update).toHaveBeenCalled();
+    expect(prisma.productImage.count).not.toHaveBeenCalled();
+  });
+
+  it('rejects publishing a draft that has no photo', async () => {
+    prisma.product.findUnique.mockResolvedValue(productRow({ ...completeListing, isPublished: false }));
+    prisma.productImage.count.mockResolvedValue(0);
+
+    await expect(
+      service.update(farmer, 'p1', { ...completeListing, isPublished: true } as never),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.product.update).not.toHaveBeenCalled();
+  });
+
+  type StoredImage = {
+    id: string;
+    key: string;
+    isPrimary: boolean;
+    productId: string;
+  };
+
+  /**
+   * Runs transaction callbacks one at a time, which is what
+   * `SELECT ... FOR UPDATE` does for a single product row. This is not a
+   * two-session Postgres test.
+   */
+  function installLockedImages(initial: StoredImage[], productOverrides: Record<string, unknown> = {}) {
+    let images = initial.map((image) => ({ ...image }));
+    const tx = {
+      $queryRaw: jest.fn().mockResolvedValue([]),
+      productImage: {
+        findFirst: jest.fn(async ({ where }: { where: { id?: string; productId?: string } }) => {
+          return (
+            images.find((image) => {
+              if (where.id && image.id !== where.id) {
+                return false;
+              }
+              if (where.productId && image.productId !== where.productId) {
+                return false;
+              }
+              return true;
+            }) ?? null
+          );
         }),
+        count: jest.fn(async () => images.length),
+        delete: jest.fn(async ({ where }: { where: { id: string } }) => {
+          images = images.filter((image) => image.id !== where.id);
+        }),
+        update: jest.fn(async ({ where, data }: { where: { id: string }; data: { isPrimary?: boolean } }) => {
+          images = images.map((image) => (image.id === where.id ? { ...image, ...data } : image));
+        }),
+      },
+      product: { update: jest.fn() },
+    };
+    let tail = Promise.resolve();
+    prisma.$transaction.mockImplementation((fn: (client: typeof tx) => Promise<unknown>) => {
+      const run = tail.then(() => fn(tx));
+      tail = run.then(
+        () => undefined,
+        () => undefined,
+      );
+      return run;
+    });
+    prisma.product.findUnique.mockResolvedValue(
+      productRow({
+        isPublished: true,
+        moderationStatus: 'approved',
+        ...productOverrides,
       }),
     );
-    expect(result.moderationStatus).toBe('pending');
+    jest.spyOn(service, 'getById').mockResolvedValue({ id: 'p1' } as never);
+    return {
+      tx,
+      remaining: () => images,
+    };
+  }
+
+  it('deletes one photo from a published product that still has another', async () => {
+    const store = installLockedImages([
+      { id: 'img1', key: 'k1', isPrimary: true, productId: 'p1' },
+      { id: 'img2', key: 'k2', isPrimary: false, productId: 'p1' },
+    ]);
+
+    await service.removeImage(farmer, 'p1', 'img1');
+
+    expect(store.remaining()).toEqual([
+      { id: 'img2', key: 'k2', isPrimary: true, productId: 'p1' },
+    ]);
+    expect(store.tx.$queryRaw).toHaveBeenCalled();
+    expect(prisma.product.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects deleting the last photo of a published product', async () => {
+    const store = installLockedImages([
+      { id: 'img1', key: 'k1', isPrimary: true, productId: 'p1' },
+    ]);
+
+    await expect(service.removeImage(farmer, 'p1', 'img1')).rejects.toBeInstanceOf(BadRequestException);
+    expect(store.remaining()).toHaveLength(1);
+    expect(store.tx.product.update).not.toHaveBeenCalled();
+    expect(prisma.product.update).not.toHaveBeenCalled();
+  });
+
+  it('does not let two concurrent deletions empty a published product', async () => {
+    const store = installLockedImages([
+      { id: 'img1', key: 'k1', isPrimary: true, productId: 'p1' },
+      { id: 'img2', key: 'k2', isPrimary: false, productId: 'p1' },
+    ]);
+
+    const results = await Promise.allSettled([
+      service.removeImage(farmer, 'p1', 'img1'),
+      service.removeImage(farmer, 'p1', 'img2'),
+    ]);
+
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    const rejected = results.find((result) => result.status === 'rejected');
+    expect(rejected?.status).toBe('rejected');
+    if (rejected?.status === 'rejected') {
+      expect(rejected.reason).toBeInstanceOf(BadRequestException);
+    }
+    expect(store.remaining()).toHaveLength(1);
+    expect(store.tx.$queryRaw).toHaveBeenCalled();
+  });
+
+  it('still lets a draft delete its last photo', async () => {
+    const store = installLockedImages(
+      [{ id: 'img1', key: 'k1', isPrimary: true, productId: 'p1' }],
+      { isPublished: false, moderationStatus: 'draft' },
+    );
+
+    await service.removeImage(farmer, 'p1', 'img1');
+
+    expect(store.remaining()).toHaveLength(0);
+  });
+
+  it('does not unpublish a legacy published product that already has no photos', async () => {
+    const live = productRow({ isPublished: true, moderationStatus: 'approved' });
+    prisma.product.findUnique.mockResolvedValue(live);
+    const tx = {
+      $queryRaw: jest.fn().mockResolvedValue([]),
+      productImage: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        count: jest.fn(),
+        delete: jest.fn(),
+      },
+      product: { update: jest.fn() },
+    };
+    prisma.$transaction.mockImplementation((fn: (client: typeof tx) => Promise<unknown>) => fn(tx));
+
+    await expect(service.removeImage(farmer, 'p1', 'missing')).rejects.toBeInstanceOf(NotFoundException);
+    expect(tx.productImage.delete).not.toHaveBeenCalled();
+    expect(tx.product.update).not.toHaveBeenCalled();
+    expect(prisma.product.update).not.toHaveBeenCalled();
+    expect(live.isPublished).toBe(true);
   });
 
   it.each([

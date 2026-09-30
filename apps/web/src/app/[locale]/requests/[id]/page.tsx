@@ -1,9 +1,10 @@
-import type { PurchaseRequestDetail } from '@agrobridge/shared';
+import { LOCALE_ENDONYM, type PurchaseRequestDetail } from '@agrobridge/shared';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { JsonLd } from '@/components/JsonLd';
+import { OriginalText, OriginalToggleButton, OriginalToggleFrame } from '@/components/OriginalToggle';
 import { OpenChatButton } from '@/components/OpenChatButton';
 import { PublicBreadcrumbs } from '@/components/PublicBreadcrumbs';
 import { PurchaseQuoteForm } from '@/components/PurchaseQuoteForm';
@@ -12,7 +13,7 @@ import { SellerQuoteSummary } from '@/components/SellerQuoteSummary';
 import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
-import { catalogDisplayField, catalogDisplayTitle, catalogOriginalTitle } from '@/lib/catalog-display';
+import { catalogCopyDiffers, catalogDisplayTitle } from '@/lib/catalog-display';
 import { loginRedirectHref } from '@/lib/protected-next-path';
 import { formatRegionLabel } from '@/lib/region';
 import { buildBreadcrumbJsonLd } from '@/lib/seo-jsonld';
@@ -63,7 +64,6 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
   }
 
   const requestTitle = catalogDisplayTitle(request);
-  const originalTitle = catalogOriginalTitle(request);
   const isOwner = Boolean(user && user.id === request.buyer.id);
   const buyerName = request.buyer.displayName || t('anonymousBuyer');
   const isOpenRequest = request.status === 'open';
@@ -96,12 +96,19 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
             <Link href="/requests">{t('boardTitle')}</Link>
           </p>
         )}
+        <OriginalToggleFrame differs={catalogCopyDiffers(request)}>
         <div className="page__heading-row">
           <div>
-            <h1>{requestTitle}</h1>
-            {originalTitle ? (
-              <p className="page__subtitle">{t('originalText', { text: originalTitle })}</p>
-            ) : null}
+            <h1>
+              <OriginalText display={requestTitle} source={request.source?.title ?? request.title} />
+            </h1>
+            <OriginalToggleButton
+              showOriginalLabel={tc('showOriginal')}
+              showTranslationLabel={tc('showTranslation')}
+              originalLanguageLabel={tc('originalLanguage', {
+                language: request.source?.locale ? LOCALE_ENDONYM[request.source.locale] : '',
+              })}
+            />
             <p className="page__subtitle">
               {t(`statuses.${request.status}`)} ·{' '}
               <Link href={`/users/${request.buyer.id}`} className="profile-link">
@@ -141,33 +148,52 @@ export default async function PurchaseRequestDetailPage({ params }: Props) {
               {request.unit ? ` ${tp(`units.${request.unit as 'kg'}`)}` : ''}
             </dd>
           </div>
-          {catalogDisplayField(request.display?.variety, request.variety) ? (
+          {request.display?.variety || request.variety ? (
             <div>
               <dt>{t('variety')}</dt>
-              <dd>{catalogDisplayField(request.display?.variety, request.variety)}</dd>
-            </div>
-          ) : null}
-          {catalogDisplayField(request.display?.packaging, request.packaging) ? (
-            <div>
-              <dt>{t('packaging')}</dt>
-              <dd>{catalogDisplayField(request.display?.packaging, request.packaging)}</dd>
-            </div>
-          ) : null}
-          {catalogDisplayField(request.display?.destinationCountry, request.destinationCountry) ? (
-            <div>
-              <dt>{t('destinationCountry')}</dt>
               <dd>
-                {catalogDisplayField(request.display?.destinationCountry, request.destinationCountry)}
+                <OriginalText
+                  display={request.display?.variety ?? request.variety}
+                  source={request.source?.variety ?? request.variety}
+                />
               </dd>
             </div>
           ) : null}
-          {catalogDisplayField(request.display?.message, request.message) ? (
+          {request.display?.packaging || request.packaging ? (
+            <div>
+              <dt>{t('packaging')}</dt>
+              <dd>
+                <OriginalText
+                  display={request.display?.packaging ?? request.packaging}
+                  source={request.source?.packaging ?? request.packaging}
+                />
+              </dd>
+            </div>
+          ) : null}
+          {request.display?.destinationCountry || request.destinationCountry ? (
+            <div>
+              <dt>{t('destinationCountry')}</dt>
+              <dd>
+                <OriginalText
+                  display={request.display?.destinationCountry ?? request.destinationCountry}
+                  source={request.source?.destinationCountry ?? request.destinationCountry}
+                />
+              </dd>
+            </div>
+          ) : null}
+          {request.display?.message || request.message ? (
             <div>
               <dt>{t('message')}</dt>
-              <dd>{catalogDisplayField(request.display?.message, request.message)}</dd>
+              <dd>
+                <OriginalText
+                  display={request.display?.message ?? request.message}
+                  source={request.source?.message ?? request.message}
+                />
+              </dd>
             </div>
           ) : null}
         </dl>
+            </OriginalToggleFrame>
 
         {request.canCancel || request.canClose || !user ? (
           <div className="home__actions" style={{ marginTop: '1.25rem' }}>

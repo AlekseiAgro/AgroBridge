@@ -20,7 +20,10 @@ import {
   detectCatalogSourceLocale,
   isPubliclyListedProduct,
   presentCatalogText,
+  presentFarmText,
   resolveCatalogLocale,
+  PUBLICATION_PHOTO_REQUIRED_MESSAGE,
+  publicationBlockedForMissingPhoto,
   publishedListingIncompleteMessage,
   publishedListingIssues,
   type ListingFields,
@@ -95,6 +98,18 @@ const productFarmSelect = {
   ownershipType: true,
   exportMarkets: true,
   history: true,
+  description: true,
+  sourceLocale: true,
+  translations: {
+    select: {
+      locale: true,
+      description: true,
+      history: true,
+      ownershipType: true,
+      exportMarkets: true,
+      status: true,
+    },
+  },
 } as const;
 
 const productListInclude = {
@@ -441,6 +456,7 @@ export class ProductsService {
         priceCurrency: this.normalizePriceCurrency(input.priceCurrency),
       },
     });
+    await this.assertPublicationPhoto({ nextPublished: isPublished });
 
     const product = await this.prisma.product.create({
       data: {
@@ -691,6 +707,11 @@ export class ProductsService {
         priceFrom: toNumberOrNull(product.priceFrom),
         priceCurrency: product.priceCurrency,
       },
+    });
+    await this.assertPublicationPhoto({
+      nextPublished,
+      previousPublished: product.isPublished,
+      productId: product.id,
     });
 
     const previousStatus = product.harvestStatus;
@@ -1210,15 +1231,23 @@ export class ProductsService {
     this.assertFarmer(user);
     const product = await this.requireOwnedProduct(user.id, productId);
 
-    const image = await this.prisma.productImage.findFirst({
-      where: { id: imageId, productId: product.id },
-    });
+    const removed = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Product" WHERE id = ${product.id} FOR UPDATE`;
 
-    if (!image) {
-      throw new NotFoundException('Image not found');
-    }
+      const image = await tx.productImage.findFirst({
+        where: { id: imageId, productId: product.id },
+      });
+      if (!image) {
+        throw new NotFoundException('Image not found');
+      }
 
-    const enteredPending = await this.prisma.$transaction(async (tx) => {
+      if (product.isPublished) {
+        const photoCount = await tx.productImage.count({ where: { productId: product.id } });
+        if (photoCount <= 1) {
+          throw new BadRequestException(PUBLICATION_PHOTO_REQUIRED_MESSAGE);
+        }
+      }
+
       await tx.productImage.delete({ where: { id: image.id } });
 
       if (image.isPrimary) {
@@ -1234,15 +1263,18 @@ export class ProductsService {
         }
       }
 
-      return this.markPendingForImageChange(tx, product);
+      return {
+        image,
+        enteredPending: await this.markPendingForImageChange(tx, product),
+      };
     });
 
-    if (enteredPending) {
+    if (removed.enteredPending) {
       this.queuePendingModerationEmail(product, user);
     }
 
     try {
-      await this.storage.delete(image.key);
+      await this.storage.delete(removed.image.key);
     } catch {
       // Best-effort cleanup.
     }
@@ -1369,6 +1401,28 @@ export class ProductsService {
     }
   }
 
+  private async assertPublicationPhoto(args: {
+    nextPublished: boolean;
+    previousPublished?: boolean;
+    productId?: string;
+  }) {
+    if (!args.nextPublished || args.previousPublished) {
+      return;
+    }
+    const photoCount = args.productId
+      ? await this.prisma.productImage.count({ where: { productId: args.productId } })
+      : 0;
+    if (
+      publicationBlockedForMissingPhoto({
+        nextPublished: args.nextPublished,
+        previousPublished: args.previousPublished,
+        photoCount,
+      })
+    ) {
+      throw new BadRequestException(PUBLICATION_PHOTO_REQUIRED_MESSAGE);
+    }
+  }
+
   private assertPublishedListingFields(args: {
     nextPublished: boolean;
     next: ListingFields;
@@ -1455,8 +1509,15 @@ export class ProductsService {
   ): ProductSummary {
     const summary = mapProductSummary(product, sellerRating);
     const text = presentCatalogText(product, locale);
+    const farm = summary.farm && product.farm
+      ? {
+          ...summary.farm,
+          ...presentFarmText(product.farm, locale),
+        }
+      : summary.farm;
     return {
       ...summary,
+      farm,
       source: text.source,
       display: text.display,
     };

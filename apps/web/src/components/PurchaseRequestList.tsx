@@ -1,6 +1,7 @@
 import type { PurchaseRequestSummary } from '@agrobridge/shared';
 import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { CardOriginalTitle } from '@/components/OriginalToggle';
 import { Link } from '@/i18n/navigation';
 import { formatCabinetDate } from '@/lib/quote-card-presentation';
 import { catalogDisplayTitle, catalogOriginalTitle } from '@/lib/catalog-display';
@@ -101,9 +102,11 @@ export async function PurchaseRequestList({
               <Link href={`${detailBasePath}/${item.id}`} className="product-list__title">
                 {title}
               </Link>
-              {original ? (
-                <p className="product-list__meta">{t('originalText', { text: original })}</p>
-              ) : null}
+              <CardOriginalTitle
+                original={original}
+                showOriginalLabel={tc('showOriginal')}
+                showTranslationLabel={tc('showTranslation')}
+              />
               <p className="product-list__meta">
                 {category}
                 {' · '}

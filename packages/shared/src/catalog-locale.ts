@@ -42,6 +42,9 @@ export type CatalogTranslationRow = {
   packaging?: string | null;
   destinationCountry?: string | null;
   message?: string | null;
+  history?: string | null;
+  ownershipType?: string | null;
+  exportMarkets?: readonly string[] | null;
 };
 
 /**
@@ -88,6 +91,9 @@ export function completedTranslationSearchParts(
       row.packaging,
       row.destinationCountry,
       row.message,
+      row.history,
+      row.ownershipType,
+      ...(row.exportMarkets ?? []),
     ]) {
       if (value && value.trim()) {
         parts.push(value);
@@ -267,3 +273,98 @@ export function presentPurchaseRequestText(
     },
   };
 }
+
+export type FarmSourceText = {
+  locale: Locale;
+  description: string | null;
+  history: string | null;
+  ownershipType: string | null;
+  exportMarkets: string[];
+};
+
+export type FarmDisplayText = FarmSourceText & {
+  translationStatus: CatalogTranslationStatus;
+};
+
+function marketsOf(value: readonly string[] | null | undefined): string[] {
+  if (!value) {
+    return [];
+  }
+  return value.map((item) => item.trim()).filter(Boolean);
+}
+
+function fallbackMarkets(translated: readonly string[] | null | undefined, source: string[]): string[] {
+  const next = marketsOf(translated);
+  return next.length > 0 ? next : source;
+}
+
+/** Public farm description. The farm name is not part of this payload. */
+export function presentFarmText(
+  farm: {
+    sourceLocale?: string | null;
+    description?: string | null;
+    history?: string | null;
+    ownershipType?: string | null;
+    exportMarkets?: readonly string[] | null;
+    translations?: readonly CatalogTranslationRow[] | null;
+  },
+  locale: Locale,
+): { source: FarmSourceText; display: FarmDisplayText } {
+  const description = textOrNull(farm.description);
+  const history = textOrNull(farm.history);
+  const ownershipType = textOrNull(farm.ownershipType);
+  const exportMarkets = marketsOf(farm.exportMarkets);
+  const sourceLocale = asLocale(
+    farm.sourceLocale,
+    [description, history, ownershipType, ...exportMarkets].filter(Boolean).join('\n'),
+  );
+  const source: FarmSourceText = {
+    locale: sourceLocale,
+    description,
+    history,
+    ownershipType,
+    exportMarkets,
+  };
+  if (locale === sourceLocale) {
+    return { source, display: { ...source, translationStatus: 'source' } };
+  }
+  const row = farm.translations?.find((item) => item.locale === locale);
+  const translatedMarkets = marketsOf(row?.exportMarkets);
+  const hasTranslation =
+    row?.status === 'completed' &&
+    Boolean(
+      row.description?.trim() ||
+        row.history?.trim() ||
+        row.ownershipType?.trim() ||
+        translatedMarkets.length > 0,
+    );
+  if (hasTranslation && row) {
+    return {
+      source,
+      display: {
+        locale,
+        description: fallbackField(row.description, description),
+        history: fallbackField(row.history, history),
+        ownershipType: fallbackField(row.ownershipType, ownershipType),
+        exportMarkets: fallbackMarkets(row.exportMarkets, exportMarkets),
+        translationStatus: 'completed',
+      },
+    };
+  }
+  const pendingStatus: CatalogTranslationStatus = row?.status === 'failed' ? 'failed' : 'pending';
+  return {
+    source,
+    display: { ...source, locale, translationStatus: pendingStatus },
+  };
+}
+
+/** Endonym of a catalog locale, used to label original text. */
+export const LOCALE_ENDONYM: Record<Locale, string> = {
+  ka: 'ქართული',
+  en: 'English',
+  ru: 'Русский',
+  de: 'Deutsch',
+  fr: 'Français',
+  it: 'Italiano',
+  es: 'Español',
+};
