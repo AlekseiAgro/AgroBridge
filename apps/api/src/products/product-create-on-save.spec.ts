@@ -22,16 +22,18 @@ describe('Add Product creates a record only on explicit save', () => {
   });
 
   it('creates the product only from the save submit handler', () => {
-    expect(form).toContain("if (pending || submitLock.current)");
+    const submit = source('lib/submit-new-product.ts');
+    expect(form).toContain('if (pending || submitLock.current)');
     expect(form).toContain('submitLock.current = true');
-    expect(form).toContain("mode === 'create' ? '/api/products' : `/api/products/${initial?.id}`");
-    expect(form).toContain("method: mode === 'create' ? 'POST' : 'PATCH'");
+    expect(form).toContain('submitNewProduct(createSessionRef.current');
     expect(form).toContain('let created = false');
     expect(form).toContain('created = true');
-    expect(form).toContain('if (!created)');
-    expect(form).toContain('router.replace(`/dashboard/products/${data.id}/edit`)');
-    expect(form).not.toContain('useEffect');
-    const posts = form.match(/method: mode === 'create' \? 'POST'/g) ?? [];
+    expect(form).toContain('if (!created && !keepLock)');
+    expect(form).toContain('router.replace(`/dashboard/products/${productId}/edit`)');
+    expect(page).not.toContain('useEffect');
+    expect(submit).toContain("creating ? '/api/products' : `/api/products/${existingId}`");
+    expect(submit).toContain("method: creating ? 'POST' : 'PATCH'");
+    const posts = submit.match(/method: creating \? 'POST'/g) ?? [];
     expect(posts).toHaveLength(1);
   });
 
@@ -42,6 +44,7 @@ describe('Add Product creates a record only on explicit save', () => {
     expect(edit).toContain('ProductVideosManager');
     expect(edit).toContain('ProductCertificatesManager');
     expect(edit).not.toContain("method: 'POST'");
-    expect(form).toContain("method: mode === 'create' ? 'POST' : 'PATCH'");
+    expect(form).toContain("method: 'PATCH'");
+    expect(form).not.toContain("method: 'POST'");
   });
 });

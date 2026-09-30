@@ -550,6 +550,10 @@
       "uploadError": "Impossible de téléverser la photo.",
       "deleteError": "Impossible de supprimer la photo.",
       "primaryError": "Impossible de mettre à jour la couverture catalogue.",
+      "moveEarlier": "Plus tôt",
+      "moveLater": "Plus tard",
+      "fileType": "Utilisez une photo JPEG, PNG ou WebP.",
+      "fileTooLarge": "Chaque photo doit faire 5 Mo ou moins.",
       "maxReached": "Limite de {max} photos atteinte.",
       "kind": "Photo type",
       "kinds": {
@@ -698,7 +702,9 @@
       "deleteConfirm": "Supprimer cette vidéo ?",
       "uploadError": "Impossible d’envoyer la vidéo.",
       "deleteError": "Impossible de supprimer la vidéo.",
-      "maxReached": "Limite de {max} vidéo atteinte."
+      "maxReached": "Limite de {max} vidéo atteinte.",
+      "fileType": "Utilisez une vidéo MP4, WebM ou MOV.",
+      "fileTooLarge": "La vidéo doit faire 80 Mo ou moins."
     },
     "certificates": {
       "title": "Certificats et documents",
@@ -731,7 +737,9 @@
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Les modifications sont immédiatement visibles dans le catalogue. Pas de nouvelle modération.",
     "publishLiveHint": "« Enregistrer » et « Publier » mettent à jour l’annonce en ligne immédiatement (sans dépublication).",
-    "photoRequiredToPublish": "Au moins une photo est requise pour publier."
+    "photoRequiredToPublish": "Au moins une photo est requise pour publier.",
+    "stagedMediaError": "L'annonce a été enregistrée comme brouillon, mais certains fichiers n'ont pas été envoyés. Réessayez sur cette page. Une deuxième annonce ne sera pas créée.",
+    "continueDraft": "Continuer à modifier ce brouillon"
   },
   "rfq": {
     "requestTitle": "Demander un devis",

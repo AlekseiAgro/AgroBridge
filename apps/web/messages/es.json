@@ -550,6 +550,10 @@
       "uploadError": "No se pudo subir la foto.",
       "deleteError": "No se pudo eliminar la foto.",
       "primaryError": "No se pudo actualizar la portada del catálogo.",
+      "moveEarlier": "Antes",
+      "moveLater": "Después",
+      "fileType": "Usa una foto JPEG, PNG o WebP.",
+      "fileTooLarge": "Cada foto debe pesar 5 MB o menos.",
       "maxReached": "Se alcanzó el máximo de {max} fotos.",
       "kind": "Photo type",
       "kinds": {
@@ -698,7 +702,9 @@
       "deleteConfirm": "¿Eliminar este vídeo?",
       "uploadError": "No se pudo subir el vídeo.",
       "deleteError": "No se pudo eliminar el vídeo.",
-      "maxReached": "Se alcanzó el límite de {max} vídeo."
+      "maxReached": "Se alcanzó el límite de {max} vídeo.",
+      "fileType": "Usa un vídeo MP4, WebM o MOV.",
+      "fileTooLarge": "El vídeo debe pesar 80 MB o menos."
     },
     "certificates": {
       "title": "Certificados y documentos",
@@ -731,7 +737,9 @@
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Los cambios ya están visibles en el catálogo. No hace falta nueva moderación.",
     "publishLiveHint": "«Guardar» y «Publicar» actualizan el anuncio en el catálogo de inmediato (sin despublicar).",
-    "photoRequiredToPublish": "Se necesita al menos una foto para publicar."
+    "photoRequiredToPublish": "Se necesita al menos una foto para publicar.",
+    "stagedMediaError": "El anuncio se guardó como borrador, pero algunos archivos no se subieron. Inténtalo de nuevo en esta página. No se creará un segundo anuncio.",
+    "continueDraft": "Seguir editando este borrador"
   },
   "rfq": {
     "requestTitle": "Solicitar cotización",

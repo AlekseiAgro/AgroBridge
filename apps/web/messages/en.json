@@ -550,6 +550,10 @@
       "uploadError": "Could not upload the photo.",
       "deleteError": "Could not delete the photo.",
       "primaryError": "Could not update the catalog cover.",
+      "moveEarlier": "Move earlier",
+      "moveLater": "Move later",
+      "fileType": "Use a JPEG, PNG, or WebP photo.",
+      "fileTooLarge": "Each photo must be 5 MB or smaller.",
       "maxReached": "Maximum of {max} photos reached.",
       "kind": "Photo type",
       "kinds": {
@@ -698,7 +702,9 @@
       "deleteConfirm": "Delete this video?",
       "uploadError": "Could not upload the video.",
       "deleteError": "Could not delete the video.",
-      "maxReached": "Video limit of {max} reached."
+      "maxReached": "Video limit of {max} reached.",
+      "fileType": "Use an MP4, WebM, or MOV video.",
+      "fileTooLarge": "The video must be 80 MB or smaller."
     },
     "certificates": {
       "title": "Certificates and documents",
@@ -731,7 +737,9 @@
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Changes are live in the catalog. No new moderation is required.",
     "publishLiveHint": "Save and Publish both update the live catalog listing immediately (without unpublishing).",
-    "photoRequiredToPublish": "At least 1 photo is required to publish."
+    "photoRequiredToPublish": "At least 1 photo is required to publish.",
+    "stagedMediaError": "The listing was saved as a draft, but some files did not upload. Try again on this page. A second listing will not be created.",
+    "continueDraft": "Continue editing this draft"
   },
   "rfq": {
     "requestTitle": "Request a quote",

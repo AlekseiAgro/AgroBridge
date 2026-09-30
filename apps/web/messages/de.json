@@ -550,6 +550,10 @@
       "uploadError": "Foto konnte nicht hochgeladen werden.",
       "deleteError": "Foto konnte nicht gelöscht werden.",
       "primaryError": "Katalogtitelbild konnte nicht aktualisiert werden.",
+      "moveEarlier": "Nach vorn",
+      "moveLater": "Nach hinten",
+      "fileType": "Verwenden Sie ein JPEG-, PNG- oder WebP-Foto.",
+      "fileTooLarge": "Jedes Foto darf höchstens 5 MB groß sein.",
       "maxReached": "Maximal {max} Fotos erreicht.",
       "kind": "Photo type",
       "kinds": {
@@ -698,7 +702,9 @@
       "deleteConfirm": "Dieses Video löschen?",
       "uploadError": "Video konnte nicht hochgeladen werden.",
       "deleteError": "Video konnte nicht gelöscht werden.",
-      "maxReached": "Limit von {max} Video erreicht."
+      "maxReached": "Limit von {max} Video erreicht.",
+      "fileType": "Verwenden Sie ein MP4-, WebM- oder MOV-Video.",
+      "fileTooLarge": "Das Video darf höchstens 80 MB groß sein."
     },
     "certificates": {
       "title": "Zertifikate und Dokumente",
@@ -731,7 +737,9 @@
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Änderungen sind sofort im Katalog sichtbar. Keine erneute Moderation nötig.",
     "publishLiveHint": "„Speichern“ und „Veröffentlichen“ aktualisieren die Live-Anzeige sofort (ohne Rücknahme).",
-    "photoRequiredToPublish": "Zum Veröffentlichen ist mindestens ein Foto erforderlich."
+    "photoRequiredToPublish": "Zum Veröffentlichen ist mindestens ein Foto erforderlich.",
+    "stagedMediaError": "Das Angebot wurde als Entwurf gespeichert, aber einige Dateien wurden nicht hochgeladen. Versuchen Sie es auf dieser Seite erneut. Ein zweites Angebot wird nicht erstellt.",
+    "continueDraft": "Diesen Entwurf weiter bearbeiten"
   },
   "rfq": {
     "requestTitle": "Angebot anfragen",

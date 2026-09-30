@@ -550,6 +550,10 @@
       "uploadError": "Impossibile caricare la foto.",
       "deleteError": "Impossibile eliminare la foto.",
       "primaryError": "Impossibile aggiornare la copertina in catalogo.",
+      "moveEarlier": "Prima",
+      "moveLater": "Dopo",
+      "fileType": "Usa una foto JPEG, PNG o WebP.",
+      "fileTooLarge": "Ogni foto deve essere di massimo 5 MB.",
       "maxReached": "Raggiunto il massimo di {max} foto.",
       "kind": "Photo type",
       "kinds": {
@@ -698,7 +702,9 @@
       "deleteConfirm": "Eliminare questo video?",
       "uploadError": "Impossibile caricare il video.",
       "deleteError": "Impossibile eliminare il video.",
-      "maxReached": "Raggiunto il limite di {max} video."
+      "maxReached": "Raggiunto il limite di {max} video.",
+      "fileType": "Usa un video MP4, WebM o MOV.",
+      "fileTooLarge": "Il video deve essere di massimo 80 MB."
     },
     "certificates": {
       "title": "Certificati e documenti",
@@ -731,7 +737,9 @@
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Le modifiche sono subito visibili nel catalogo. Non serve una nuova moderazione.",
     "publishLiveHint": "«Salva» e «Pubblica» aggiornano subito l’annuncio nel catalogo (senza ritirarlo).",
-    "photoRequiredToPublish": "Per pubblicare è necessaria almeno una foto."
+    "photoRequiredToPublish": "Per pubblicare è necessaria almeno una foto.",
+    "stagedMediaError": "L'annuncio è stato salvato come bozza, ma alcuni file non sono stati caricati. Riprova in questa pagina. Non verrà creato un secondo annuncio.",
+    "continueDraft": "Continua a modificare questa bozza"
   },
   "rfq": {
     "requestTitle": "Richiedi un preventivo",

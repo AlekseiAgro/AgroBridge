@@ -25,13 +25,16 @@ import {
   type SeasonMonth,
 } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
-import { FormEvent, useMemo, useRef, useState, type ReactNode } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { HarvestAvailabilityFocus } from '@/components/HarvestAvailabilityFocus';
 import { MultiSelectDropdown } from '@/components/MultiSelectDropdown';
 import { OriginPlaceInput } from '@/components/OriginPlaceInput';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
+import { ProductStagedMedia } from '@/components/ProductStagedMedia';
 import { Link, useRouter } from '@/i18n/navigation';
 import { HARVEST_PLANNING_ID, HARVEST_STATUS_ID } from '@/lib/harvest-availability-focus';
+import { submitNewProduct } from '@/lib/submit-new-product';
+import { type StagedPhoto, type StagedVideo } from '@/lib/staged-product-media';
 
 type Props = {
   mode: 'create' | 'edit';
@@ -152,6 +155,73 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
     initial?.harvestStatus ?? '',
   );
   const [preorderEnabled, setPreorderEnabled] = useState(initial?.preorderEnabled ?? false);
+  const [stagedPhotos, setStagedPhotos] = useState<StagedPhoto[]>([]);
+  const [coverClientId, setCoverClientId] = useState<string | null>(null);
+  const [stagedVideo, setStagedVideo] = useState<StagedVideo | null>(null);
+  const [createdProductId, setCreatedProductId] = useState<string | null>(null);
+  const stagedPhotosRef = useRef(stagedPhotos);
+  const coverClientIdRef = useRef(coverClientId);
+  const stagedVideoRef = useRef(stagedVideo);
+  const createdProductIdRef = useRef<string | null>(null);
+  const createSessionRef = useRef({ productId: null as string | null, locked: false });
+  useEffect(() => {
+    stagedPhotosRef.current = stagedPhotos;
+    coverClientIdRef.current = coverClientId;
+    stagedVideoRef.current = stagedVideo;
+  }, [stagedPhotos, coverClientId, stagedVideo]);
+
+  function rememberCreatedProduct(id: string) {
+    createdProductIdRef.current = id;
+    setCreatedProductId(id);
+  }
+
+  function updateStagedPhotos(photos: StagedPhoto[], cover: string | null) {
+    stagedPhotosRef.current = photos;
+    coverClientIdRef.current = cover;
+    setStagedPhotos(photos);
+    setCoverClientId(cover);
+  }
+
+  function updateStagedVideo(video: StagedVideo | null) {
+    stagedVideoRef.current = video;
+    setStagedVideo(video);
+  }
+
+  async function deleteUploadedPhoto(photo: StagedPhoto): Promise<boolean> {
+    const productId = createdProductIdRef.current;
+    if (!productId || !photo.uploadedImageId) return true;
+    try {
+      const response = await fetch(`/api/products/${productId}/images/${photo.uploadedImageId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        setError(t('images.deleteError'));
+        return false;
+      }
+      return true;
+    } catch {
+      setError(t('images.deleteError'));
+      return false;
+    }
+  }
+
+  async function deleteUploadedVideo(video: StagedVideo): Promise<boolean> {
+    const productId = createdProductIdRef.current;
+    if (!productId || !video.uploadedVideoId) return true;
+    try {
+      const response = await fetch(`/api/products/${productId}/videos/${video.uploadedVideoId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        setError(t('videos.deleteError'));
+        return false;
+      }
+      return true;
+    } catch {
+      setError(t('videos.deleteError'));
+      return false;
+    }
+  }
 
   const suggestedUnit = useMemo(() => defaultUnitForCategory(category) ?? '', [category]);
   const packagingWeights = useMemo(() => commaValues(packagingWeightsText), [packagingWeightsText]);
@@ -165,9 +235,12 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
         region: initial?.farm?.region,
         originPlace,
         description,
-        imageCount: initial?.images.length ?? 0,
-        imageKinds: initial?.images.map((image) => image.kind) ?? [],
-        videoCount: initial?.videos.length ?? 0,
+        imageCount: mode === 'create' ? stagedPhotos.length : (initial?.images.length ?? 0),
+        imageKinds:
+          mode === 'create'
+            ? stagedPhotos.map(() => 'overview')
+            : (initial?.images.map((image) => image.kind) ?? []),
+        videoCount: mode === 'create' ? (stagedVideo ? 1 : 0) : (initial?.videos.length ?? 0),
         hasSeasonality: seasonMonths.length > 0 || Boolean(harvestStartAt) || Boolean(harvestEndAt),
         currentStock: numberOrNull(currentStock),
         monthlyProduction: numberOrNull(monthlyProduction),
@@ -198,6 +271,9 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
       category,
       country,
       currentStock,
+      mode,
+      stagedPhotos,
+      stagedVideo,
       deliveryAvailable,
       description,
       incoterms,
@@ -320,7 +396,8 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
       publicationBlockedForMissingPhoto({
         nextPublished: true,
         previousPublished: Boolean(initial?.isPublished),
-        photoCount: initial?.images.length ?? 0,
+        photoCount:
+          mode === 'create' ? stagedPhotosRef.current.length : (initial?.images.length ?? 0),
       });
     if (publishNeedsPhoto) {
       setError(t('photoRequiredToPublish'));
@@ -370,20 +447,61 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
       harvestStatus: harvestStatus || null,
       preorderEnabled,
       isPublished:
-        intent === 'publish' ||
-        Boolean(initial?.isPublished && initial?.moderationStatus === 'approved'),
+        mode === 'create'
+          ? false
+          : intent === 'publish' ||
+            Boolean(initial?.isPublished && initial?.moderationStatus === 'approved'),
     };
 
     let created = false;
+    let keepLock = false;
     try {
-      const response = await fetch(
-        mode === 'create' ? '/api/products' : `/api/products/${initial?.id}`,
-        {
-          method: mode === 'create' ? 'POST' : 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        },
-      );
+      if (mode === 'create') {
+        const result = await submitNewProduct(createSessionRef.current, {
+          intent,
+          payload,
+          photos: stagedPhotosRef.current,
+          coverClientId: coverClientIdRef.current,
+          video: stagedVideoRef.current,
+        });
+        if (result.productId) rememberCreatedProduct(result.productId);
+        updateStagedPhotos(result.photos, coverClientIdRef.current);
+        updateStagedVideo(result.video);
+        if (result.status === 'ignored') {
+          keepLock = true;
+          return;
+        }
+        if (result.status === 'photo-required') {
+          setError(t('photoRequiredToPublish'));
+          return;
+        }
+        if (result.status === 'request-failed' || result.status === 'missing-id') {
+          setError(result.message ?? t('genericError'));
+          return;
+        }
+        if (result.status === 'media-failed') {
+          setError(t('stagedMediaError'));
+          return;
+        }
+        const productId = result.productId;
+        if (!productId) {
+          setError(t('genericError'));
+          return;
+        }
+        created = true;
+        if (result.status === 'published') {
+          router.push('/dashboard/products');
+          return;
+        }
+        router.replace(`/dashboard/products/${productId}/edit`);
+        return;
+      }
+
+      const response = await fetch(`/api/products/${initial?.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
       const data = (await response.json()) as {
         message?: string;
         id?: string;
@@ -391,20 +509,6 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
       };
       if (!response.ok) {
         setError(data.message ?? t('genericError'));
-        return;
-      }
-
-      if (mode === 'create') {
-        if (!data.id) {
-          setError(t('genericError'));
-          return;
-        }
-        created = true;
-        if (intent === 'publish') {
-          router.push('/dashboard/products');
-        } else {
-          router.replace(`/dashboard/products/${data.id}/edit`);
-        }
         return;
       }
 
@@ -418,7 +522,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
     } catch {
       setError(t('genericError'));
     } finally {
-      if (!created) {
+      if (!created && !keepLock) {
         submitLock.current = false;
         setPending(false);
       }
@@ -533,7 +637,21 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
         </label>
       </fieldset>
 
-      {media ? (
+      {mode === 'create' ? (
+        <div className="product-form__slot" onKeyDown={stopNestedEnterSubmit}>
+          <ProductStagedMedia
+            photos={stagedPhotos}
+            coverClientId={coverClientId}
+            video={stagedVideo}
+            disabled={pending}
+            onPhotosChange={updateStagedPhotos}
+            onVideoChange={updateStagedVideo}
+            onRemoveUploadedPhoto={deleteUploadedPhoto}
+            onRemoveUploadedVideo={deleteUploadedVideo}
+            onError={setError}
+          />
+        </div>
+      ) : media ? (
         <div className="product-form__slot" onKeyDown={stopNestedEnterSubmit}>
           {media}
         </div>
@@ -943,7 +1061,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
             publicationBlockedForMissingPhoto({
               nextPublished: true,
               previousPublished: Boolean(initial?.isPublished),
-              photoCount: initial?.images.length ?? 0,
+              photoCount: mode === 'create' ? stagedPhotos.length : (initial?.images.length ?? 0),
             })
           }
         >
@@ -953,9 +1071,14 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
       {publicationBlockedForMissingPhoto({
         nextPublished: true,
         previousPublished: Boolean(initial?.isPublished),
-        photoCount: initial?.images.length ?? 0,
+        photoCount: mode === 'create' ? stagedPhotos.length : (initial?.images.length ?? 0),
       }) ? (
         <p className="field-hint">{t('photoRequiredToPublish')}</p>
+      ) : null}
+      {mode === 'create' && createdProductId && error ? (
+        <p className="field-hint">
+          <Link href={`/dashboard/products/${createdProductId}/edit`}>{t('continueDraft')}</Link>
+        </p>
       ) : null}
       <p className="field-hint">{t('listingRequiredHint')}</p>
       <p className="field-hint">
