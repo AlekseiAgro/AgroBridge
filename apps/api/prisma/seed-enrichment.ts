@@ -1,5 +1,6 @@
 import {
   attributeFieldsForCategory,
+  producerTypeFromLegacyOwnership,
   type ProductImageKind,
 } from '@agrobridge/shared';
 import { demoCatalogPrice } from '../src/demo-data/demo-catalog-prices';
@@ -110,6 +111,7 @@ export async function enrichDemoFarm(params: {
         foundedYear: null,
         farmSizeHectares: null,
         ownershipType: null,
+        producerType: null,
         exportMarkets: [],
         history: null,
       },
@@ -124,13 +126,15 @@ export async function enrichDemoFarm(params: {
         ? [EXPORT_MARKET_SETS[globalIndex % EXPORT_MARKET_SETS.length][0]]
         : [];
 
+  const ownershipType = globalIndex % 3 === 0 ? 'cooperative' : globalIndex % 3 === 1 ? 'family' : 'llc';
   await prisma.farm.update({
     where: { id: farmId },
     data: {
       foundedYear: 1992 + (globalIndex % 28),
       farmSizeHectares:
         richness === 'light' ? null : Number((4 + (globalIndex % 37) * 1.7).toFixed(1)),
-      ownershipType: globalIndex % 3 === 0 ? 'cooperative' : globalIndex % 3 === 1 ? 'family' : 'llc',
+      ownershipType,
+      producerType: producerTypeFromLegacyOwnership(ownershipType),
       exportMarkets: markets,
       history:
         richness === 'full'

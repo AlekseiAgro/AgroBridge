@@ -52,14 +52,15 @@ export async function FarmProfileView({
   const extraPhotos = cover ? farm.photos.filter((photo) => photo.id !== cover.id) : [];
   const display = farm.display;
   const source = farm.source;
-  const ownership = display?.ownershipType ?? farm.ownershipType;
+  const producerTypeLabel = farm.producerType ? t(`producerTypes.${farm.producerType}`) : null;
+  const legacyOwnership = farm.producerType ? null : (source?.ownershipType ?? farm.ownershipType);
   const markets = display?.exportMarkets ?? farm.exportMarkets;
   const history = display?.history ?? farm.history;
   const description = display?.description ?? farm.description;
   const hasAbout =
     Boolean(farm.foundedYear) ||
     farm.farmSizeHectares != null ||
-    Boolean(ownership) ||
+    Boolean(producerTypeLabel || legacyOwnership) ||
     markets.length > 0 ||
     Boolean(history) ||
     Boolean(description) ||
@@ -140,8 +141,10 @@ export async function FarmProfileView({
             }}
             display={display}
             companyRegistryName={farm.companyRegistryName}
+            producerTypeLabel={producerTypeLabel}
+            legacyOwnership={legacyOwnership}
             labels={{
-              ownershipType: t('ownershipType'),
+              producerType: t('producerType'),
               exportMarkets: t('exportMarkets'),
               registeredName: t('registeredName'),
               showOriginal: tc('showOriginal'),

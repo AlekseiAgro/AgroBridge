@@ -4,6 +4,7 @@ import {
   isCarrier,
   isCertificateType,
   isIncoterm,
+  isProducerType,
   isPackagingType,
   isPriceCurrency,
   isProductImageKind,
@@ -36,6 +37,7 @@ export type ProductFarmSlice = {
   foundedYear: number | null;
   farmSizeHectares: Prisma.Decimal | number | null;
   ownershipType: string | null;
+  producerType?: string | null;
   exportMarkets: string[];
   history: string | null;
   ownerId?: string;
@@ -321,6 +323,9 @@ export function mapProductSummary(
           foundedYear: product.farm.foundedYear,
           farmSizeHectares: toNumberOrNull(product.farm.farmSizeHectares),
           ownershipType: product.farm.ownershipType,
+          producerType: isProducerType(product.farm.producerType)
+            ? product.farm.producerType
+            : null,
           exportMarkets: product.farm.exportMarkets ?? [],
           history: product.farm.history,
         }

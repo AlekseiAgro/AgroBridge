@@ -327,6 +327,7 @@ export class CatalogTranslationService implements OnModuleInit {
         update: {
           title,
           description: descriptions?.[locale] ?? null,
+          variety: null,
           status: MessageTranslationStatus.completed,
           provider: SEED_PROVIDER,
           error: null,
@@ -407,7 +408,7 @@ export class CatalogTranslationService implements OnModuleInit {
           data: {
             title: translated.title ?? null,
             description: translated.description ?? null,
-            variety: translated.variety ?? null,
+            variety: null,
             originPlace: translated.originPlace ?? null,
             status: MessageTranslationStatus.completed,
             provider: this.translation.providerName,
@@ -473,7 +474,7 @@ export class CatalogTranslationService implements OnModuleInit {
           where,
           data: {
             title: translated.title ?? null,
-            variety: translated.variety ?? null,
+            variety: null,
             packaging: translated.packaging ?? null,
             destinationCountry: translated.destinationCountry ?? null,
             message: translated.message ?? null,
@@ -579,11 +580,6 @@ export class CatalogTranslationService implements OnModuleInit {
       try {
         const description = await this.translateOptional(sourceLocale, locale, fields.description);
         const history = await this.translateOptional(sourceLocale, locale, fields.history);
-        const ownershipType = await this.translateOptional(
-          sourceLocale,
-          locale,
-          fields.ownershipType,
-        );
         const exportMarkets: string[] = [];
         for (const market of fields.exportMarkets) {
           const translated = await this.translateOptional(sourceLocale, locale, market);
@@ -596,7 +592,7 @@ export class CatalogTranslationService implements OnModuleInit {
           data: {
             description,
             history,
-            ownershipType,
+            ownershipType: null,
             exportMarkets,
             status: MessageTranslationStatus.completed,
             provider: this.translation.providerName,
@@ -642,7 +638,7 @@ export class CatalogTranslationService implements OnModuleInit {
   ): Promise<FieldMap> {
     const translated: FieldMap = {};
     for (const [key, value] of Object.entries(fields)) {
-      if (!value?.trim()) {
+      if (key === 'variety' || !value?.trim()) {
         translated[key] = null;
         continue;
       }

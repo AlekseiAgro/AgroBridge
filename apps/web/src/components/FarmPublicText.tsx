@@ -4,7 +4,7 @@ import type { FarmDisplayText, FarmSourceText } from '@agrobridge/shared';
 import { useState } from 'react';
 
 type Labels = {
-  ownershipType: string;
+  producerType: string;
   exportMarkets: string;
   registeredName: string;
   showOriginal: string;
@@ -16,6 +16,8 @@ type Props = {
   source?: FarmSourceText | null;
   display?: FarmDisplayText | null;
   companyRegistryName?: string | null;
+  producerTypeLabel?: string | null;
+  legacyOwnership?: string | null;
   labels: Labels;
 };
 
@@ -23,7 +25,14 @@ function same(left: string | null | undefined, right: string | null | undefined)
   return (left ?? '').trim() === (right ?? '').trim();
 }
 
-export function FarmPublicText({ source, display, companyRegistryName, labels }: Props) {
+export function FarmPublicText({
+  source,
+  display,
+  companyRegistryName,
+  producerTypeLabel,
+  legacyOwnership,
+  labels,
+}: Props) {
   const translated = display ?? source ?? null;
   const original = source ?? translated;
   const differs = Boolean(
@@ -31,9 +40,9 @@ export function FarmPublicText({ source, display, companyRegistryName, labels }:
       translated &&
       (!same(translated.description, original.description) ||
         !same(translated.history, original.history) ||
-        !same(translated.ownershipType, original.ownershipType) ||
         translated.exportMarkets.join('\n') !== original.exportMarkets.join('\n')),
   );
+  const producerValue = producerTypeLabel || legacyOwnership || null;
   const [open, setOpen] = useState(false);
   const text = open && original ? original : translated;
   if (!text && !companyRegistryName) {
@@ -48,10 +57,10 @@ export function FarmPublicText({ source, display, companyRegistryName, labels }:
           {labels.registeredName}: {companyRegistryName}
         </p>
       ) : null}
-      {text?.ownershipType ? (
+      {producerValue ? (
         <p className="detail-text">
-          <span className="farm-public-text__label">{labels.ownershipType}</span>
-          {text.ownershipType}
+          <span className="farm-public-text__label">{labels.producerType}</span>
+          {producerValue}
         </p>
       ) : null}
       {text && text.exportMarkets.length > 0 ? (

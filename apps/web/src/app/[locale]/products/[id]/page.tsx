@@ -131,8 +131,7 @@ export default async function ProductDetailPage({ params }: Props) {
             Boolean(
               product.farm?.source &&
                 product.farm.display &&
-                (product.farm.source.history !== product.farm.display.history ||
-                  product.farm.source.ownershipType !== product.farm.display.ownershipType ||
+                (                  product.farm.source.history !== product.farm.display.history ||
                   product.farm.source.exportMarkets.join('\n') !==
                     product.farm.display.exportMarkets.join('\n')),
             )
@@ -472,6 +471,7 @@ export default async function ProductDetailPage({ params }: Props) {
           {product.farm &&
           (product.farm.foundedYear ||
             product.farm.farmSizeHectares != null ||
+            product.farm.producerType ||
             product.farm.ownershipType ||
             product.farm.exportMarkets.length ||
             product.farm.history) ? (
@@ -490,14 +490,13 @@ export default async function ProductDetailPage({ params }: Props) {
                     <dd>{t('hectaresValue', { count: product.farm.farmSizeHectares })}</dd>
                   </div>
                 ) : null}
-                {product.farm.display?.ownershipType || product.farm.ownershipType ? (
+                {product.farm.producerType || product.farm.ownershipType ? (
                   <div>
-                    <dt>{t('ownershipType')}</dt>
+                    <dt>{t('producerType')}</dt>
                     <dd>
-                      <OriginalText
-                        display={product.farm.display?.ownershipType ?? product.farm.ownershipType}
-                        source={product.farm.source?.ownershipType ?? product.farm.ownershipType}
-                      />
+                      {product.farm.producerType
+                        ? t(`producerTypes.${product.farm.producerType}`)
+                        : (product.farm.source?.ownershipType ?? product.farm.ownershipType)}
                     </dd>
                   </div>
                 ) : null}

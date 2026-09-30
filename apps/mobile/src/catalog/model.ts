@@ -60,6 +60,7 @@ export type CatalogFarmProfile = {
   description: string | null;
   history: string | null;
   ownershipType: string | null;
+  producerType: 'individual' | 'family' | 'cooperative' | 'company' | 'other' | null;
   exportMarkets: string[];
   foundedYear: number | null;
   farmSizeHectares: number | null;
@@ -113,6 +114,18 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   USD: '$',
   GEL: '₾',
 };
+
+function readProducerType(
+  value: unknown,
+): CatalogFarmProfile['producerType'] {
+  return value === 'individual' ||
+    value === 'family' ||
+    value === 'cooperative' ||
+    value === 'company' ||
+    value === 'other'
+    ? value
+    : null;
+}
 
 function readString(value: unknown): string | null {
   if (typeof value !== 'string') {
@@ -326,7 +339,8 @@ export function parseFarmProfile(value: unknown): CatalogFarmProfile | null {
     verified: row.verified === true,
     description: readString(display?.description) ?? readString(row.description),
     history: readString(display?.history) ?? readString(row.history),
-    ownershipType: readString(display?.ownershipType) ?? readString(row.ownershipType),
+    ownershipType: readString(source?.ownershipType) ?? readString(row.ownershipType),
+    producerType: readProducerType(row.producerType),
     exportMarkets: displayMarkets.length > 0 ? displayMarkets : readStringList(row.exportMarkets),
     foundedYear: readNumber(row.foundedYear),
     farmSizeHectares: readNumber(row.farmSizeHectares),
