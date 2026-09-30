@@ -275,7 +275,10 @@
     "emptyTitle": "Nessun prodotto al momento",
     "emptyFilteredTitle": "Nessun prodotto corrispondente",
     "emptyUnfiltered": "Al momento non ci sono prodotti pubblicati. Pubblica una richiesta di acquisto così le aziende potranno rispondere.",
-    "emptyReset": "Cancella filtri"
+    "emptyReset": "Cancella filtri",
+    "showOriginal": "Mostra originale",
+    "showTranslation": "Mostra traduzione",
+    "originalLanguage": "Originale · {language}"
   },
   "farm": {
     "createTitle": "Crea profilo azienda",
@@ -448,7 +451,8 @@
     "cancelEdit": "Annulla",
     "aboutHeading": "L’azienda",
     "size": "Superficie",
-    "hectaresValue": "{count} ha"
+    "hectaresValue": "{count} ha",
+    "registeredName": "Nome registrato"
   },
   "product": {
     "dashboardTitle": "I miei prodotti",
@@ -699,7 +703,8 @@
     "messageSeller": "Scrivi al venditore",
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Le modifiche sono subito visibili nel catalogo. Non serve una nuova moderazione.",
-    "publishLiveHint": "«Salva» e «Pubblica» aggiornano subito l’annuncio nel catalogo (senza ritirarlo)."
+    "publishLiveHint": "«Salva» e «Pubblica» aggiornano subito l’annuncio nel catalogo (senza ritirarlo).",
+    "photoRequiredToPublish": "Per pubblicare è necessaria almeno una foto."
   },
   "rfq": {
     "requestTitle": "Richiedi un preventivo",

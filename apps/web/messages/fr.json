@@ -275,7 +275,10 @@
     "emptyTitle": "Aucun produit pour le moment",
     "emptyFilteredTitle": "Aucun produit correspondant",
     "emptyUnfiltered": "Aucun produit publié n'est visible pour le moment. Publiez une demande d'achat pour que les fermes puissent répondre.",
-    "emptyReset": "Effacer les filtres"
+    "emptyReset": "Effacer les filtres",
+    "showOriginal": "Afficher l’original",
+    "showTranslation": "Afficher la traduction",
+    "originalLanguage": "Original · {language}"
   },
   "farm": {
     "createTitle": "Créer le profil de ferme",
@@ -448,7 +451,8 @@
     "cancelEdit": "Annuler",
     "aboutHeading": "À propos de la ferme",
     "size": "Superficie",
-    "hectaresValue": "{count} ha"
+    "hectaresValue": "{count} ha",
+    "registeredName": "Nom enregistré"
   },
   "product": {
     "dashboardTitle": "Mes produits",
@@ -699,7 +703,8 @@
     "messageSeller": "Écrire au vendeur",
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Les modifications sont immédiatement visibles dans le catalogue. Pas de nouvelle modération.",
-    "publishLiveHint": "« Enregistrer » et « Publier » mettent à jour l’annonce en ligne immédiatement (sans dépublication)."
+    "publishLiveHint": "« Enregistrer » et « Publier » mettent à jour l’annonce en ligne immédiatement (sans dépublication).",
+    "photoRequiredToPublish": "Au moins une photo est requise pour publier."
   },
   "rfq": {
     "requestTitle": "Demander un devis",

@@ -205,6 +205,28 @@ describe('listing requirement i18n', () => {
     expect(read(messages('en'), 'product.publishHint')).toContain('Save keeps a draft');
   });
 
+  it.each(LOCALES)('%s localizes the photo rule and show-original control', (locale) => {
+    expect(read(messages(locale), 'product.photoRequiredToPublish').trim().length).toBeGreaterThan(0);
+    expect(read(messages(locale), 'catalog.showOriginal').trim().length).toBeGreaterThan(0);
+    expect(read(messages(locale), 'catalog.showTranslation').trim().length).toBeGreaterThan(0);
+    expect(read(messages(locale), 'catalog.originalLanguage')).toContain('{language}');
+    expect(read(messages(locale), 'farm.registeredName').trim().length).toBeGreaterThan(0);
+  });
+
+  it('links catalog and product pages to the farm profile', () => {
+    const catalog = readFileSync(join(WEB, 'src/app/[locale]/catalog/page.tsx'), 'utf8');
+    const product = readFileSync(join(WEB, 'src/app/[locale]/products/[id]/page.tsx'), 'utf8');
+    const mobileStack = readFileSync(
+      join(__dirname, '../../../mobile/src/navigation/RootStack.tsx'),
+      'utf8',
+    );
+    expect(catalog).toContain('FarmLink');
+    expect(catalog).toContain('/farms/');
+    expect(product).toContain('FarmLink');
+    expect(product).toContain('OriginalToggleButton');
+    expect(mobileStack).toContain('FarmDetail');
+  });
+
   it.each(['ka', 'ru', 'de', 'fr', 'it', 'es'] as const)(
     '%s does not leave listing keys in English',
     (locale) => {

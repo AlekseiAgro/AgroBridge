@@ -5,6 +5,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import type {
   FarmDetail,
@@ -20,10 +21,15 @@ import {
   FARM_PHOTO_MAX_BYTES,
   FARM_PHOTO_MAX_COUNT,
   canTrade,
+  detectCatalogSourceLocale,
   isFarmDocumentKind,
   isFarmDocumentMimeType,
   isFarmPhotoMimeType,
   isPrimaryVerificationDocumentKind,
+  presentCatalogText,
+  presentFarmText,
+  resolveCatalogLocale,
+  type Locale,
 } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
@@ -46,6 +52,7 @@ import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
 import { farmDocumentFileUrl } from './farm-document-url';
 import { publicProductWhere } from '../products/public-product.where';
+import { CatalogTranslationService, farmSourceHash } from '../catalog/catalog-translation.service';
 
 export type FarmDocumentDownload = {
   key: string;
@@ -72,6 +79,7 @@ export class FarmsService {
     private readonly ratings: RatingsService,
     private readonly storage: StorageService,
     private readonly verification: VerificationService,
+    @Optional() private readonly catalogTranslations?: CatalogTranslationService,
   ) {}
 
   async list(): Promise<FarmSummary[]> {
@@ -89,12 +97,13 @@ export class FarmsService {
     return farms.map((farm) => this.toSummary(farm));
   }
 
-  async getById(id: string): Promise<FarmDetail> {
+  async getById(id: string, localeInput?: string | null): Promise<FarmDetail> {
     const farm = await this.prisma.farm.findUnique({
       where: { id },
       include: {
-        owner: { select: { id: true, displayName: true } },
+        owner: { select: { id: true, displayName: true, locale: true } },
         images: farmImagesInclude,
+        translations: true,
         products: {
           where: publicProductWhere,
           orderBy: { updatedAt: 'desc' },
@@ -103,6 +112,17 @@ export class FarmsService {
             ownerUserId: true,
             title: true,
             description: true,
+            sourceLocale: true,
+            translations: {
+              select: {
+                locale: true,
+                title: true,
+                description: true,
+                variety: true,
+                originPlace: true,
+                status: true,
+              },
+            },
             category: true,
             variety: true,
             country: true,
@@ -186,13 +206,24 @@ export class FarmsService {
     }
 
     const sellerRating = await this.ratings.summaryForUser(farm.owner.id);
+    const locale = resolveCatalogLocale(localeInput, farm.owner.locale);
+    const copy = presentFarmText(farm, locale);
 
     return {
       ...this.toSummary(farm),
+      description: farm.description,
+      history: farm.history,
+      ownershipType: farm.ownershipType,
+      exportMarkets: farm.exportMarkets,
+      source: copy.source,
+      display: copy.display,
       createdAt: farm.createdAt.toISOString(),
       verificationNote: null,
       verifiedAt: farm.verifiedAt?.toISOString() ?? null,
-      products: farm.products.map((product) => this.toProductSummary(product, farm, sellerRating)),
+      companyRegistryName: farm.companyRegistryName,
+      products: farm.products.map((product) =>
+        this.toProductSummary(product, farm, sellerRating, locale),
+      ),
     };
   }
 
@@ -298,6 +329,7 @@ export class FarmsService {
       createdAt: farm.createdAt.toISOString(),
       verificationNote: farm.verificationNote,
       verifiedAt: farm.verifiedAt?.toISOString() ?? null,
+      companyRegistryName: farm.companyRegistryName,
       companyRegistrationNumber: farm.companyRegistrationNumber,
       companyRegistryValid: farm.companyRegistryValid,
       documents: farm.documents.map((doc) => this.toDocument(doc)),
@@ -313,18 +345,26 @@ export class FarmsService {
       throw new ConflictException('Farm profile already exists');
     }
 
+    const description = dto.description?.trim() || null;
+    const history = dto.history?.trim() || null;
+    const ownershipType = dto.ownershipType?.trim() || null;
+    const exportMarkets = sanitizeStringArray(dto.exportMarkets, 50);
     const farm = await this.prisma.farm.create({
       data: {
         ownerId: user.id,
         name: dto.name.trim(),
         region: dto.region?.trim() || null,
-        description: dto.description?.trim() || null,
+        description,
         foundedYear: dto.foundedYear ?? null,
         farmSizeHectares: dto.farmSizeHectares ?? null,
-        ownershipType: dto.ownershipType?.trim() || null,
-        exportMarkets: sanitizeStringArray(dto.exportMarkets, 50),
-        history: dto.history?.trim() || null,
+        ownershipType,
+        exportMarkets,
+        history,
         verificationStatus: PrismaVerificationStatus.unverified,
+        sourceLocale: detectCatalogSourceLocale(
+          [description, history, ownershipType, ...exportMarkets].filter(Boolean).join('\n'),
+          user.locale,
+        ),
       },
     });
 
@@ -338,6 +378,7 @@ export class FarmsService {
       data: { farmId: farm.id },
     });
 
+    void this.catalogTranslations?.syncFarm(farm.id);
     return (await this.getMine(user))!;
   }
 
@@ -349,21 +390,38 @@ export class FarmsService {
       throw new NotFoundException('Farm profile not found');
     }
 
+    const description =
+      dto.description === undefined ? farm.description : dto.description.trim() || null;
+    const history = dto.history === undefined ? farm.history : dto.history.trim() || null;
+    const ownershipType =
+      dto.ownershipType === undefined ? farm.ownershipType : dto.ownershipType.trim() || null;
+    const exportMarkets =
+      dto.exportMarkets === undefined ? farm.exportMarkets : sanitizeStringArray(dto.exportMarkets, 50);
+    const previousHash = farmSourceHash({
+      description: farm.description,
+      history: farm.history,
+      ownershipType: farm.ownershipType,
+      exportMarkets: farm.exportMarkets,
+    });
+    const nextHash = farmSourceHash({ description, history, ownershipType, exportMarkets });
+
     await this.prisma.farm.update({
       where: { id: farm.id },
       data: {
         name: dto.name?.trim(),
         region: dto.region === undefined ? undefined : dto.region.trim() || null,
-        description: dto.description === undefined ? undefined : dto.description.trim() || null,
+        description,
         foundedYear: dto.foundedYear,
         farmSizeHectares: dto.farmSizeHectares,
-        ownershipType:
-          dto.ownershipType === undefined ? undefined : dto.ownershipType.trim() || null,
-        exportMarkets:
-          dto.exportMarkets === undefined ? undefined : sanitizeStringArray(dto.exportMarkets, 50),
-        history: dto.history === undefined ? undefined : dto.history.trim() || null,
+        ownershipType,
+        exportMarkets,
+        history,
       },
     });
+
+    if (previousHash !== nextHash) {
+      void this.catalogTranslations?.syncFarm(farm.id);
+    }
 
     return (await this.getMine(user))!;
   }
@@ -717,11 +775,15 @@ export class FarmsService {
   }
 
   private toProductSummary(
-    product: Omit<ProductRowSlice, 'farm' | 'owner'>,
+    product: Omit<ProductRowSlice, 'farm' | 'owner'> & {
+      sourceLocale?: string | null;
+      translations?: Parameters<typeof presentCatalogText>[0]['translations'];
+    },
     farm: ProductFarmSlice & { owner: { id: string; displayName: string | null } },
     sellerRating?: RatingSummary | null,
+    locale?: Locale,
   ) {
-    return mapProductSummary(
+    const summary = mapProductSummary(
       {
         ...product,
         owner: farm.owner,
@@ -729,5 +791,14 @@ export class FarmsService {
       },
       sellerRating,
     );
+    if (!locale) {
+      return summary;
+    }
+    const text = presentCatalogText(product, locale);
+    return {
+      ...summary,
+      source: text.source,
+      display: text.display,
+    };
   }
 }

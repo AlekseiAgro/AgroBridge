@@ -1,4 +1,9 @@
-import { formatListedPrice, isPubliclyListedProduct, type ProductDetail } from '@agrobridge/shared';
+import {
+  formatListedPrice,
+  isPubliclyListedProduct,
+  LOCALE_ENDONYM,
+  type ProductDetail,
+} from '@agrobridge/shared';
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -10,6 +15,8 @@ import { HarvestWatchButton } from '@/components/HarvestWatchButton';
 import { RecordProductView } from '@/components/RecordProductView';
 import { MarketInsightButton } from '@/components/MarketInsightButton';
 import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
+import { FarmLink } from '@/components/FarmLink';
+import { OriginalText, OriginalToggleButton, OriginalToggleFrame } from '@/components/OriginalToggle';
 import { OpenChatButton } from '@/components/OpenChatButton';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
 import { JsonLd } from '@/components/JsonLd';
@@ -26,12 +33,7 @@ import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
 import { getRenderableProductImages, toPublicMediaUrl } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
-import {
-  catalogDisplayDescription,
-  catalogDisplayField,
-  catalogDisplayTitle,
-  catalogOriginalTitle,
-} from '@/lib/catalog-display';
+import { catalogCopyDiffers, catalogDisplayDescription, catalogDisplayTitle } from '@/lib/catalog-display';
 import { formatRegionLabel } from '@/lib/region';
 import { verifyEmailRedirectHref } from '@/lib/protected-next-path';
 import { buildBreadcrumbJsonLd, buildProductJsonLd } from '@/lib/seo-jsonld';
@@ -95,7 +97,8 @@ export default async function ProductDetailPage({ params }: Props) {
   const verifyRequestHref = verifyEmailRedirectHref(`${productPath}#request-quote`);
   const verifyWatchHref = verifyEmailRedirectHref(`${productPath}#harvest-alerts`);
   const productName = catalogDisplayTitle(product);
-  const originalTitle = catalogOriginalTitle(product);
+  const sourceLocale = product.source?.locale;
+  const originalLanguage = sourceLocale ? LOCALE_ENDONYM[sourceLocale] : sourceLocale;
   const productJsonLd = buildProductJsonLd(product, locale);
   const breadcrumbJsonLd = isPubliclyListedProduct(product)
     ? buildBreadcrumbJsonLd({
@@ -122,6 +125,19 @@ export default async function ProductDetailPage({ params }: Props) {
       <SiteHeader />
       <RecordProductView productId={product.id} isOwner={Boolean(product.isOwner)} />
       <main className="page__main">
+        <OriginalToggleFrame
+          differs={
+            catalogCopyDiffers(product) ||
+            Boolean(
+              product.farm?.source &&
+                product.farm.display &&
+                (product.farm.source.history !== product.farm.display.history ||
+                  product.farm.source.ownershipType !== product.farm.display.ownershipType ||
+                  product.farm.source.exportMarkets.join('\n') !==
+                    product.farm.display.exportMarkets.join('\n')),
+            )
+          }
+        >
         <div className="product-detail-header">
           <div className="product-detail-header__main">
             <PublicBreadcrumbs
@@ -133,33 +149,42 @@ export default async function ProductDetailPage({ params }: Props) {
               current={productName}
             />
             <h1 className="farm-title-row">
-              {productName}
+              <OriginalText
+                display={productName}
+                source={product.source?.title ?? product.title}
+              />
               <HarvestStatusBadge
                 status={product.harvestStatus}
                 preorderEnabled={product.preorderEnabled}
               />
             </h1>
-            {originalTitle ? (
-              <p className="page__subtitle">{tc('originalText', { text: originalTitle })}</p>
-            ) : null}
+            <OriginalToggleButton
+              showOriginalLabel={tc('showOriginal')}
+              showTranslationLabel={tc('showTranslation')}
+              originalLanguageLabel={tc('originalLanguage', { language: originalLanguage ?? '' })}
+            />
             <div className="product-opportunity-row">
               <MarketOpportunityBadge opportunity={product.opportunity} />
             </div>
-            <p className="page__subtitle">
-              {product.farm ? (
-                <>
-                  <Link href={`/farms/${product.farm.id}`}>{product.farm.name}</Link>
-                  <VerifiedBadge verified={product.farm.verified} />
-                  {product.farm.region
-                    ? ` · ${formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region}`
-                    : ''}
-                </>
-              ) : (
-                <Link href={`/users/${product.owner.id}`}>
-                  {product.owner.displayName?.trim() || t('sellerFallback')}
-                </Link>
-              )}
-            </p>
+            <FarmLink
+              href={product.farm ? `/farms/${product.farm.id}` : `/users/${product.owner.id}`}
+              name={
+                product.farm?.name || product.owner.displayName?.trim() || t('sellerFallback')
+              }
+              place={
+                [
+                  product.farm?.region
+                    ? formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region
+                    : null,
+                  product.country,
+                ]
+                  .filter(Boolean)
+                  .join(', ') || null
+              }
+              badge={
+                product.farm ? <VerifiedBadge verified={product.farm.verified} /> : undefined
+              }
+            />
             <div className="product-list__rating product-list__rating--detail">
               <span className="product-list__rating-label">{tc('sellerRating')}</span>
               <RatingStars
@@ -262,10 +287,15 @@ export default async function ProductDetailPage({ params }: Props) {
                   <dd>{tc(`categories.${product.category as 'fruits'}`)}</dd>
                 </div>
               ) : null}
-              {catalogDisplayField(product.display?.variety, product.variety) ? (
+              {product.display?.variety || product.variety ? (
                 <div>
                   <dt>{t('variety')}</dt>
-                  <dd>{catalogDisplayField(product.display?.variety, product.variety)}</dd>
+                  <dd>
+                    <OriginalText
+                      display={product.display?.variety ?? product.variety}
+                      source={product.source?.variety ?? product.variety}
+                    />
+                  </dd>
                 </div>
               ) : null}
               {product.country ? (
@@ -274,10 +304,15 @@ export default async function ProductDetailPage({ params }: Props) {
                   <dd>{product.country}</dd>
                 </div>
               ) : null}
-              {catalogDisplayField(product.display?.originPlace, product.originPlace) ? (
+              {product.display?.originPlace || product.originPlace ? (
                 <div>
                   <dt>{t('originPlace')}</dt>
-                  <dd>{catalogDisplayField(product.display?.originPlace, product.originPlace)}</dd>
+                  <dd>
+                    <OriginalText
+                      display={product.display?.originPlace ?? product.originPlace}
+                      source={product.source?.originPlace ?? product.originPlace}
+                    />
+                  </dd>
                 </div>
               ) : null}
               {product.unit ? (
@@ -287,8 +322,13 @@ export default async function ProductDetailPage({ params }: Props) {
                 </div>
               ) : null}
             </dl>
-            {catalogDisplayDescription(product) ? (
-              <p className="detail-text">{catalogDisplayDescription(product)}</p>
+            {catalogDisplayDescription(product) || product.description ? (
+              <p className="detail-text">
+                <OriginalText
+                  display={catalogDisplayDescription(product)}
+                  source={product.source?.description ?? product.description}
+                />
+              </p>
             ) : null}
           </section>
 
@@ -450,23 +490,41 @@ export default async function ProductDetailPage({ params }: Props) {
                     <dd>{t('hectaresValue', { count: product.farm.farmSizeHectares })}</dd>
                   </div>
                 ) : null}
-                {product.farm.ownershipType ? (
+                {product.farm.display?.ownershipType || product.farm.ownershipType ? (
                   <div>
                     <dt>{t('ownershipType')}</dt>
-                    <dd>{product.farm.ownershipType}</dd>
+                    <dd>
+                      <OriginalText
+                        display={product.farm.display?.ownershipType ?? product.farm.ownershipType}
+                        source={product.farm.source?.ownershipType ?? product.farm.ownershipType}
+                      />
+                    </dd>
                   </div>
                 ) : null}
-                {product.farm.exportMarkets.length ? (
+                {(product.farm.display?.exportMarkets.length || product.farm.exportMarkets.length) ? (
                   <div>
                     <dt>{t('exportMarkets')}</dt>
-                    <dd>{product.farm.exportMarkets.join(', ')}</dd>
+                    <dd>
+                      <OriginalText
+                        display={(product.farm.display?.exportMarkets ?? product.farm.exportMarkets).join(', ')}
+                        source={(product.farm.source?.exportMarkets ?? product.farm.exportMarkets).join(', ')}
+                      />
+                    </dd>
                   </div>
                 ) : null}
               </dl>
-              {product.farm.history ? <p className="detail-text">{product.farm.history}</p> : null}
+              {product.farm.display?.history || product.farm.history ? (
+                <p className="detail-text">
+                  <OriginalText
+                    display={product.farm.display?.history ?? product.farm.history}
+                    source={product.farm.source?.history ?? product.farm.history}
+                  />
+                </p>
+              ) : null}
             </section>
           ) : null}
         </div>
+        </OriginalToggleFrame>
 
         {!product.isOwner ? (
           <div className="product-quality-summary product-quality-summary--detail">

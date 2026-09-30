@@ -275,7 +275,10 @@
     "emptyTitle": "Товаров пока нет",
     "emptyFilteredTitle": "Нет подходящих товаров",
     "emptyUnfiltered": "Сейчас нет опубликованных товаров. Разместите запрос на покупку — хозяйства смогут ответить.",
-    "emptyReset": "Сбросить фильтры"
+    "emptyReset": "Сбросить фильтры",
+    "showOriginal": "Показать оригинал",
+    "showTranslation": "Показать перевод",
+    "originalLanguage": "Оригинал · {language}"
   },
   "farm": {
     "createTitle": "Создать профиль хозяйства",
@@ -448,7 +451,8 @@
     "cancelEdit": "Отмена",
     "aboutHeading": "О хозяйстве",
     "size": "Площадь",
-    "hectaresValue": "{count} га"
+    "hectaresValue": "{count} га",
+    "registeredName": "Зарегистрированное название"
   },
   "product": {
     "dashboardTitle": "Мои товары",
@@ -699,7 +703,8 @@
     "messageSeller": "Написать продавцу",
     "packagingWeightQuick": "{value} кг",
     "publishedLiveHint": "Изменения сразу видны в каталоге. Повторная модерация не нужна.",
-    "publishLiveHint": "«Сохранить» и «Опубликовать» сразу обновляют объявление в каталоге (без снятия с публикации)."
+    "publishLiveHint": "«Сохранить» и «Опубликовать» сразу обновляют объявление в каталоге (без снятия с публикации).",
+    "photoRequiredToPublish": "Для публикации нужна хотя бы одна фотография."
   },
   "rfq": {
     "requestTitle": "Запросить предложение",

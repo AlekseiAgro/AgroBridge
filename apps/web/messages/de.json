@@ -275,7 +275,10 @@
     "emptyTitle": "Noch keine Produkte",
     "emptyFilteredTitle": "Keine passenden Produkte",
     "emptyUnfiltered": "Derzeit sind keine veröffentlichten Produkte zu sehen. Veröffentlichen Sie eine Kaufanfrage, damit Betriebe antworten können.",
-    "emptyReset": "Filter zurücksetzen"
+    "emptyReset": "Filter zurücksetzen",
+    "showOriginal": "Original anzeigen",
+    "showTranslation": "Übersetzung anzeigen",
+    "originalLanguage": "Original · {language}"
   },
   "farm": {
     "createTitle": "Betriebsprofil erstellen",
@@ -448,7 +451,8 @@
     "cancelEdit": "Abbrechen",
     "aboutHeading": "Über den Hof",
     "size": "Fläche",
-    "hectaresValue": "{count} ha"
+    "hectaresValue": "{count} ha",
+    "registeredName": "Eingetragener Name"
   },
   "product": {
     "dashboardTitle": "Meine Produkte",
@@ -699,7 +703,8 @@
     "messageSeller": "Verkäufer anschreiben",
     "packagingWeightQuick": "{value} kg",
     "publishedLiveHint": "Änderungen sind sofort im Katalog sichtbar. Keine erneute Moderation nötig.",
-    "publishLiveHint": "„Speichern“ und „Veröffentlichen“ aktualisieren die Live-Anzeige sofort (ohne Rücknahme)."
+    "publishLiveHint": "„Speichern“ und „Veröffentlichen“ aktualisieren die Live-Anzeige sofort (ohne Rücknahme).",
+    "photoRequiredToPublish": "Zum Veröffentlichen ist mindestens ein Foto erforderlich."
   },
   "rfq": {
     "requestTitle": "Angebot anfragen",

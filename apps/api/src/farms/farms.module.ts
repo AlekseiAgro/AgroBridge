@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CatalogTranslationModule } from '../catalog/catalog-translation.module';
 import { RatingsModule } from '../ratings/ratings.module';
 import { StorageModule } from '../storage/storage.module';
 import { VerificationModule } from '../verification/verification.module';
@@ -7,7 +8,7 @@ import { FarmsController } from './farms.controller';
 import { FarmsService } from './farms.service';
 
 @Module({
-  imports: [RatingsModule, StorageModule, VerificationModule],
+  imports: [RatingsModule, StorageModule, VerificationModule, CatalogTranslationModule],
   controllers: [FarmDocumentsController, FarmsController],
   providers: [FarmsService],
   exports: [FarmsService],

@@ -297,10 +297,13 @@ model Farm {
   ownershipType              String?
   exportMarkets              String[]           @default([])
   history                    String?
+  /// Language of description, history, ownershipType, and exportMarkets. Name stays original.
+  sourceLocale               LocaleCode         @default(en)
   createdAt                  DateTime           @default(now())
   updatedAt                  DateTime           @updatedAt
 
   owner           User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  translations    FarmTranslation[]
   verifiedBy      User?           @relation("FarmVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
   products        Product[]
   rfqs            Rfq[]
@@ -309,6 +312,30 @@ model Farm {
   images          FarmImage[]
 
   @@index([verificationStatus])
+  @@index([sourceLocale])
+}
+
+/// Public descriptive farm text. The farm name and legal registry name are never translated.
+model FarmTranslation {
+  id            String                   @id @default(cuid())
+  farmId        String
+  locale        LocaleCode
+  description   String?
+  history       String?
+  ownershipType String?
+  exportMarkets String[]                 @default([])
+  status        MessageTranslationStatus @default(pending)
+  provider      String?
+  error         String?
+  sourceHash    String?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@unique([farmId, locale])
+  @@index([locale, status])
+  @@map("farm_translations")
 }
 
 model FarmImage {

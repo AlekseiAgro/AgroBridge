@@ -55,6 +55,14 @@ describe('CatalogTranslationService', () => {
     purchaseRequestTranslation: {
       upsert: jest.fn(),
     },
+    farm: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
+    farmTranslation: {
+      upsert: jest.fn(),
+      update: jest.fn(),
+    },
   };
   const translation = {
     providerName: 'mock',
@@ -116,6 +124,58 @@ describe('CatalogTranslationService', () => {
 
     expect(prisma.product.update).not.toHaveBeenCalled();
     expect(prisma.productTranslation.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          status: MessageTranslationStatus.failed,
+          error: 'provider down',
+        }),
+      }),
+    );
+  });
+
+  it('translates public farm copy and leaves the farm name untouched', async () => {
+    prisma.farm.findUnique.mockResolvedValue({
+      id: 'farm1',
+      name: 'Kakheti Rosé House',
+      description: 'საოჯახო მეურნეობა',
+      history: null,
+      ownershipType: null,
+      exportMarkets: [],
+      sourceLocale: LocaleCode.ka,
+      owner: { locale: LocaleCode.ka },
+      translations: [],
+    });
+    prisma.farmTranslation.upsert.mockResolvedValue({});
+    prisma.farmTranslation.update.mockResolvedValue({});
+
+    await service.syncFarm('farm1');
+
+    const texts = translation.translateText.mock.calls.map((call) => call[0].text);
+    expect(texts).toContain('საოჯახო მეურნეობა');
+    expect(texts).not.toContain('Kakheti Rosé House');
+    expect(prisma.farm.update).not.toHaveBeenCalled();
+  });
+
+  it('records a failed farm translation without changing the source description', async () => {
+    prisma.farm.findUnique.mockResolvedValue({
+      id: 'farm1',
+      name: 'Kakheti Rosé House',
+      description: 'Family farm',
+      history: null,
+      ownershipType: null,
+      exportMarkets: [],
+      sourceLocale: LocaleCode.en,
+      owner: { locale: LocaleCode.en },
+      translations: [],
+    });
+    prisma.farmTranslation.upsert.mockResolvedValue({});
+    prisma.farmTranslation.update.mockResolvedValue({});
+    translation.translateText.mockRejectedValue(new Error('provider down'));
+
+    await service.syncFarm('farm1');
+
+    expect(prisma.farm.update).not.toHaveBeenCalled();
+    expect(prisma.farmTranslation.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           status: MessageTranslationStatus.failed,

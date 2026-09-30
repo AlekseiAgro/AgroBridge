@@ -32,7 +32,9 @@ import { ErrorState } from '../components/ErrorState';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { ProductCard } from '../components/ProductCard';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { ShowOriginal } from '../components/ShowOriginal';
 import { useI18n } from '../i18n/I18nProvider';
+import { isAppLocale, LOCALE_LABELS } from '../i18n/locales';
 import type { RootStackParamList } from '../navigation/types';
 import { useTheme } from '../theme/ThemeProvider';
 
@@ -63,11 +65,13 @@ export function ProductDetailScreen() {
   const [seenKey, setSeenKey] = useState(requestKey);
   const [status, setStatus] = useState<Status>('loading');
   const [product, setProduct] = useState<CatalogProduct | null>(null);
+  const [showOriginal, setShowOriginal] = useState(false);
 
   if (seenKey !== requestKey) {
     setSeenKey(requestKey);
     setStatus('loading');
     setProduct(null);
+    setShowOriginal(false);
   }
 
   useEffect(() => {
@@ -104,11 +108,27 @@ export function ProductDetailScreen() {
   const quantity = product
     ? formatQuantityRange(product.minQuantity, product.maxQuantity, unit)
     : null;
-  const seller = product?.farm?.name || product?.owner.displayName || null;
   const region = regionLabel(product?.farm?.region, t);
-  const meta = [seller, region, product ? countryLabel(product.country, t) : null]
-    .filter(Boolean)
-    .join(' · ');
+  const place = [region, product ? countryLabel(product.country, t) : null].filter(Boolean).join(', ');
+  const source = product?.source;
+  const showing = showOriginal && source;
+  const title = showing && source.title ? source.title : product?.title;
+  const description = showing ? source.description : product?.description;
+  const variety = showing ? source.variety : product?.variety;
+  const originPlace = showing ? source.originPlace : product?.originPlace;
+  const differs = Boolean(
+    product &&
+      source &&
+      [source.title, source.description, source.variety, source.originPlace].some(
+        (original, index) => {
+          const shown = [product.title, product.description, product.variety, product.originPlace][index];
+          return Boolean(original?.trim()) && (original ?? '').trim() !== (shown ?? '').trim();
+        },
+      ),
+  );
+  const sourceLocale = source?.locale;
+  const language =
+    sourceLocale && isAppLocale(sourceLocale) ? LOCALE_LABELS[sourceLocale] : sourceLocale;
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>
@@ -121,7 +141,7 @@ export function ProductDetailScreen() {
         }}
       >
         <ScreenHeader
-          title={product?.title ?? t('home.newProducts')}
+          title={title ?? t('home.newProducts')}
           backLabel={t('common.back')}
           onBack={() => navigation.goBack()}
         />
@@ -140,27 +160,44 @@ export function ProductDetailScreen() {
         {status === 'ready' && product ? (
           <View style={{ gap: spacing.lg }}>
             <ProductCard
-              name={product.title}
+              name={title ?? product.title}
               imageUrl={resolveMediaUrl(primaryProductImageUrl(product.images), apiBaseUrlFromEnv())}
-              meta={meta}
+              meta=""
               badgeLabel={harvest ? t(`availability.${harvest}`) : ''}
               badgeTone={harvest ? badgeTone(harvest) : 'neutral'}
               verifiedLabel={product.farm?.verified ? t('home.verifiedFarm') : null}
               noPhotoLabel={t('common.noPhoto')}
               accessibilityLabel={product.title}
+              farmLink={
+                product.farm
+                  ? {
+                      name: product.farm.name,
+                      place,
+                      onPress: () =>
+                        navigation.navigate('FarmDetail', { farmId: product.farm?.id ?? '' }),
+                      accessibilityLabel: t('a11y.openFarm', { name: product.farm.name }),
+                    }
+                  : null
+              }
             />
             <Card padded>
               <View style={{ gap: spacing.md }}>
                 {categoryLabel(product.category, t) ? (
                   <Chip label={categoryLabel(product.category, t) ?? product.category ?? ''} />
                 ) : null}
-                <DetailRow label={t('product.seller')} value={seller} />
                 <DetailRow label={t('product.price')} value={price ?? t('product.priceOnRequest')} />
                 <DetailRow label={t('product.quantity')} value={quantity} />
-                <DetailRow label={t('product.original')} value={product.sourceTitle} />
-                <DetailRow label={t('product.description')} value={product.description} />
-                <DetailRow label={t('requests.variety')} value={product.variety} />
-                <DetailRow label={t('product.origin')} value={product.originPlace} />
+                <DetailRow label={t('product.description')} value={description} />
+                <DetailRow label={t('requests.variety')} value={variety} />
+                <DetailRow label={t('product.origin')} value={originPlace} />
+                <ShowOriginal
+                  differs={differs}
+                  open={showOriginal}
+                  onToggle={() => setShowOriginal((value) => !value)}
+                  showOriginalLabel={t('catalog.showOriginal')}
+                  showTranslationLabel={t('catalog.showTranslation')}
+                  originalLanguageLabel={t('catalog.originalLanguage', { language: language ?? '' })}
+                />
               </View>
             </Card>
           </View>

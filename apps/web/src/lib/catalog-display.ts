@@ -34,6 +34,33 @@ export function catalogDisplayField(
   return displayValue?.trim() || sourceValue?.trim() || null;
 }
 
+export function catalogCopyDiffers(item: {
+  title: string;
+  description?: string | null;
+  variety?: string | null;
+  originPlace?: string | null;
+  packaging?: string | null;
+  destinationCountry?: string | null;
+  message?: string | null;
+  display?: DisplayText | null;
+  source?: (SourceText & DisplayText) | null;
+}): boolean {
+  const pairs: Array<[string | null | undefined, string | null | undefined]> = [
+    [item.display?.title, item.source?.title ?? item.title],
+    [item.display?.description, item.source?.description ?? item.description],
+    [item.display?.variety, item.source?.variety ?? item.variety],
+    [item.display?.originPlace, item.source?.originPlace ?? item.originPlace],
+    [item.display?.packaging, item.source?.packaging ?? item.packaging],
+    [item.display?.destinationCountry, item.source?.destinationCountry ?? item.destinationCountry],
+    [item.display?.message, item.source?.message ?? item.message],
+  ];
+  return pairs.some(([shown, original]) => {
+    const left = shown?.trim() || '';
+    const right = original?.trim() || '';
+    return Boolean(right) && left !== right;
+  });
+}
+
 /** Original title when it differs from the text shown for the viewer locale. */
 export function catalogOriginalTitle(item: {
   title: string;

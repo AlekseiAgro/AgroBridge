@@ -3,7 +3,9 @@ import {
   completedTranslationSearchParts,
   normalizeCatalogSearchText,
   presentCatalogText,
+  presentFarmText,
   presentPurchaseRequestText,
+  publicationBlockedForMissingPhoto,
 } from '@agrobridge/shared';
 
 const grape = {
@@ -102,6 +104,90 @@ describe('multilingual catalog text', () => {
     expect(presentPurchaseRequestText(request, 'ru').display.title).toBe('виноград');
     expect(presentPurchaseRequestText(request, 'ru').source.title).toBe('ყურძენი');
     expect(presentPurchaseRequestText(request, 'es').display.title).toBe('ყურძენი');
+  });
+
+  it('shows a completed farm description in the requested locale and keeps the source', () => {
+    const farm = {
+      name: 'Kakheti Rosé House',
+      sourceLocale: 'ka',
+      description: 'საოჯახო მეურნეობა',
+      history: null,
+      ownershipType: null,
+      exportMarkets: ['ევროპა'],
+      translations: [
+        {
+          locale: 'ru',
+          status: 'completed',
+          description: 'Семейное хозяйство',
+          history: null,
+          ownershipType: null,
+          exportMarkets: ['Европа'],
+        },
+      ],
+    };
+    const presented = presentFarmText(farm, 'ru');
+    expect(presented.display.description).toBe('Семейное хозяйство');
+    expect(presented.display.exportMarkets).toEqual(['Европа']);
+    expect(presented.source.description).toBe('საოჯახო მეურნეობა');
+    expect(presented.source).not.toHaveProperty('name');
+    expect(farm.description).toBe('საოჯახო მეურნეობა');
+  });
+
+  it('falls back to the original farm text when translation failed', () => {
+    const farm = {
+      sourceLocale: 'en',
+      description: 'Family farm in Kakheti',
+      history: null,
+      ownershipType: null,
+      exportMarkets: [],
+      translations: [{ locale: 'ru', status: 'failed', description: null, exportMarkets: [] }],
+    };
+    const presented = presentFarmText(farm, 'ru');
+    expect(presented.display.description).toBe('Family farm in Kakheti');
+    expect(presented.display.translationStatus).toBe('failed');
+    expect(presented.source.description).toBe('Family farm in Kakheti');
+  });
+
+  it('hides a translation toggle when the viewer locale is the source locale', () => {
+    const presented = presentFarmText(
+      {
+        sourceLocale: 'ru',
+        description: 'Семейное хозяйство',
+        history: null,
+        ownershipType: null,
+        exportMarkets: [],
+      },
+      'ru',
+    );
+    expect(presented.display.translationStatus).toBe('source');
+    expect(presented.display.description).toBe(presented.source.description);
+  });
+
+  it('requires a photo only for a new publication', () => {
+    expect(
+      publicationBlockedForMissingPhoto({ nextPublished: false, photoCount: 0 }),
+    ).toBe(false);
+    expect(
+      publicationBlockedForMissingPhoto({
+        nextPublished: true,
+        previousPublished: false,
+        photoCount: 0,
+      }),
+    ).toBe(true);
+    expect(
+      publicationBlockedForMissingPhoto({
+        nextPublished: true,
+        previousPublished: true,
+        photoCount: 0,
+      }),
+    ).toBe(false);
+    expect(
+      publicationBlockedForMissingPhoto({
+        nextPublished: true,
+        previousPublished: false,
+        photoCount: 1,
+      }),
+    ).toBe(false);
   });
 
   it('does not search pending translation text', () => {

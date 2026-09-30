@@ -56,6 +56,7 @@ describe('ProductsService', () => {
     prisma.productView.groupBy.mockResolvedValue([]);
     prisma.harvestWatch.groupBy.mockResolvedValue([]);
     prisma.productView.findFirst.mockResolvedValue(null);
+    prisma.productImage.count.mockResolvedValue(1);
     service = new ProductsService(
       prisma as never,
       storage as never,
@@ -1049,36 +1050,52 @@ describe('ProductsService', () => {
     };
   }
 
-  it('creates a published listing when required fields are present and keeps optional fields empty', async () => {
+  it('rejects a new publication that has no photo and still saves a draft', async () => {
     prisma.farm.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.create(farmer, { ...completeListing, isPublished: true } as never),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.product.create).not.toHaveBeenCalled();
+
     prisma.product.create.mockResolvedValue(
       productRow({
         ...completeListing,
-        isPublished: true,
-        moderationStatus: 'pending',
+        isPublished: false,
+        moderationStatus: 'draft',
       }),
     );
+    await service.create(farmer, { ...completeListing, isPublished: false } as never);
+    expect(prisma.product.create).toHaveBeenCalled();
+  });
 
-    const result = await service.create(farmer, {
+  it('keeps an already published product without a photo editable', async () => {
+    const live = productRow({
       ...completeListing,
+      isPublished: true,
+      moderationStatus: 'approved',
+    });
+    prisma.product.findUnique.mockResolvedValue(live);
+    prisma.productImage.count.mockResolvedValue(0);
+    prisma.product.update.mockResolvedValue({ ...live, title: 'Updated hazelnuts' });
+
+    await service.update(farmer, 'p1', {
+      title: 'Updated hazelnuts',
       isPublished: true,
     } as never);
 
-    expect(prisma.product.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          title: 'Kakheti hazelnuts',
-          category: 'nuts',
-          unit: 'kg',
-          priceFrom: 4.2,
-          priceCurrency: 'GEL',
-          isPublished: true,
-          moderationStatus: 'pending',
-          description: null,
-        }),
-      }),
-    );
-    expect(result.moderationStatus).toBe('pending');
+    expect(prisma.product.update).toHaveBeenCalled();
+    expect(prisma.productImage.count).not.toHaveBeenCalled();
+  });
+
+  it('rejects publishing a draft that has no photo', async () => {
+    prisma.product.findUnique.mockResolvedValue(productRow({ ...completeListing, isPublished: false }));
+    prisma.productImage.count.mockResolvedValue(0);
+
+    await expect(
+      service.update(farmer, 'p1', { ...completeListing, isPublished: true } as never),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(prisma.product.update).not.toHaveBeenCalled();
   });
 
   it.each([

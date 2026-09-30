@@ -18,6 +18,12 @@ type ProductCardProps = {
   accessibilityLabel: string;
   width?: number;
   onPress?: () => void;
+  farmLink?: {
+    name: string;
+    place?: string | null;
+    onPress: () => void;
+    accessibilityLabel: string;
+  } | null;
 };
 
 export function ProductCard({
@@ -31,6 +37,7 @@ export function ProductCard({
   accessibilityLabel,
   width,
   onPress,
+  farmLink,
 }: ProductCardProps) {
   const { colors, spacing } = useTheme();
   const [failed, setFailed] = useState(false);
@@ -38,7 +45,7 @@ export function ProductCard({
 
   const card = (
     <Card accessibilityLabel={onPress ? undefined : accessibilityLabel} style={width && !onPress ? { width } : undefined}>
-      <View style={styles.media}>
+      <View style={[styles.media, showImage ? null : styles.mediaEmpty]}>
         {showImage ? (
           <Image
             source={{ uri: imageUrl ?? undefined }}
@@ -77,19 +84,46 @@ export function ProductCard({
     </Card>
   );
 
+  const farmRow = farmLink ? (
+    <Pressable
+      accessibilityRole="link"
+      accessibilityLabel={farmLink.accessibilityLabel}
+      onPress={farmLink.onPress}
+      style={({ pressed }) => [styles.farmLink, pressed ? styles.pressed : null]}
+    >
+      <AppText variant="bodyStrong">
+        {farmLink.name}
+        {' →'}
+      </AppText>
+      {farmLink.place ? (
+        <AppText variant="caption" tone="secondary">
+          {farmLink.place}
+        </AppText>
+      ) : null}
+    </Pressable>
+  ) : null;
+
   if (!onPress) {
-    return card;
+    return (
+      <View style={width ? { width } : undefined}>
+        {card}
+        {farmRow}
+      </View>
+    );
   }
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      onPress={onPress}
-      style={({ pressed }) => [width ? { width } : undefined, pressed ? styles.pressed : null]}
-    >
-      {card}
-    </Pressable>
+    <View style={width ? { width } : undefined}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        onPress={onPress}
+        style={({ pressed }) => [pressed ? styles.pressed : null]}
+      >
+        {card}
+      </Pressable>
+      {farmRow}
+    </View>
   );
 }
 
@@ -97,6 +131,14 @@ const styles = StyleSheet.create({
   media: {
     width: '100%',
     aspectRatio: 1.35,
+  },
+  mediaEmpty: {
+    aspectRatio: 2.6,
+  },
+  farmLink: {
+    paddingHorizontal: 4,
+    paddingBottom: 8,
+    gap: 2,
   },
   image: {
     width: '100%',

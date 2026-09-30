@@ -12,4 +12,5 @@ export type RootStackParamList = {
   Main: NavigatorScreenParams<RootTabParamList>;
   ProductDetail: { productId: string };
   RequestDetail: { requestId: string };
+  FarmDetail: { farmId: string };
 };

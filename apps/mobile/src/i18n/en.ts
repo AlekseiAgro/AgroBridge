@@ -100,6 +100,29 @@ export const en = {
   'product.original': 'Original',
   'product.quantity': 'Quantity',
 
+  'catalog.showOriginal': 'Show original',
+  'catalog.showTranslation': 'Show translation',
+  'catalog.originalLanguage': 'Original · {language}',
+
+  'farm.title': 'Farm',
+  'farm.loading': 'Loading farm',
+  'farm.loadErrorTitle': 'Could not load this farm',
+  'farm.loadErrorBody': 'Check the connection and try again.',
+  'farm.retry': 'Retry',
+  'farm.notFoundTitle': 'Farm not found',
+  'farm.notFoundBody': 'This profile is no longer available.',
+  'farm.verified': 'Verified',
+  'farm.about': 'About',
+  'farm.ownership': 'Ownership',
+  'farm.markets': 'Export markets',
+  'farm.founded': 'Founded',
+  'farm.size': 'Size, ha',
+  'farm.history': 'History',
+  'farm.registeredName': 'Registered name',
+  'farm.products': 'Products',
+  'farm.noProducts': 'No published products',
+  'farm.noProductsBody': 'This farm has not published a product yet.',
+
   'messages.title': 'Messages',
   'messages.emptyTitle': 'No messages yet',
   'messages.emptyBody': 'Conversations about purchase requests and offers will appear here.',
@@ -130,6 +153,7 @@ export const en = {
   'a11y.selectLanguage': 'Use {language}',
   'a11y.openProduct': 'Open {name}',
   'a11y.openRequest': 'Open {name}',
+  'a11y.openFarm': 'Open {name}',
 } as const;
 
 export type MessageKey = keyof typeof en;

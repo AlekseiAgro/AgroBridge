@@ -1,8 +1,9 @@
-import { formatListedPrice, type FarmDetail, type RatingSummary } from '@agrobridge/shared';
+import { formatListedPrice, LOCALE_ENDONYM, type FarmDetail, type RatingSummary } from '@agrobridge/shared';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { CertificateBadges } from '@/components/CertificateBadges';
 import { FarmCoverPhotos } from '@/components/FarmCoverPhotos';
+import { FarmPublicText } from '@/components/FarmPublicText';
 import { QualityScoreChip } from '@/components/QualityScoreChip';
 import { RatingStars } from '@/components/RatingStars';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
@@ -49,12 +50,22 @@ export async function FarmProfileView({
   const regionLabel = formatRegionLabel(farm.region, tr) || t('regionUnknown');
   const cover = farm.photos.find((photo) => photo.isPrimary) ?? farm.photos[0] ?? null;
   const extraPhotos = cover ? farm.photos.filter((photo) => photo.id !== cover.id) : [];
+  const display = farm.display;
+  const source = farm.source;
+  const ownership = display?.ownershipType ?? farm.ownershipType;
+  const markets = display?.exportMarkets ?? farm.exportMarkets;
+  const history = display?.history ?? farm.history;
+  const description = display?.description ?? farm.description;
   const hasAbout =
     Boolean(farm.foundedYear) ||
     farm.farmSizeHectares != null ||
-    Boolean(farm.ownershipType) ||
-    farm.exportMarkets.length > 0 ||
-    Boolean(farm.history);
+    Boolean(ownership) ||
+    markets.length > 0 ||
+    Boolean(history) ||
+    Boolean(description) ||
+    Boolean(farm.companyRegistryName);
+  const sourceLocale = source?.locale;
+  const originalLanguage = sourceLocale ? LOCALE_ENDONYM[sourceLocale] : '';
 
   return (
     <article className="farm-profile">
@@ -97,9 +108,6 @@ export async function FarmProfileView({
             </div>
             {actions ? <div className="farm-profile__actions">{actions}</div> : null}
           </div>
-          {farm.description ? (
-            <p className="detail-text farm-profile__lede">{farm.description}</p>
-          ) : null}
         </div>
       </header>
 
@@ -121,20 +129,26 @@ export async function FarmProfileView({
                 <dd>{t('hectaresValue', { count: farm.farmSizeHectares })}</dd>
               </div>
             ) : null}
-            {farm.ownershipType ? (
-              <div>
-                <dt>{t('ownershipType')}</dt>
-                <dd>{farm.ownershipType}</dd>
-              </div>
-            ) : null}
-            {farm.exportMarkets.length > 0 ? (
-              <div>
-                <dt>{t('exportMarkets')}</dt>
-                <dd>{farm.exportMarkets.join(', ')}</dd>
-              </div>
-            ) : null}
           </dl>
-          {farm.history ? <p className="detail-text">{farm.history}</p> : null}
+          <FarmPublicText
+            source={source ?? {
+              locale: 'en',
+              description: farm.description,
+              history: farm.history,
+              ownershipType: farm.ownershipType,
+              exportMarkets: farm.exportMarkets,
+            }}
+            display={display}
+            companyRegistryName={farm.companyRegistryName}
+            labels={{
+              ownershipType: t('ownershipType'),
+              exportMarkets: t('exportMarkets'),
+              registeredName: t('registeredName'),
+              showOriginal: tc('showOriginal'),
+              showTranslation: tc('showTranslation'),
+              originalLanguage: tc('originalLanguage', { language: originalLanguage }),
+            }}
+          />
         </section>
       ) : null}
 
@@ -164,12 +178,12 @@ export async function FarmProfileView({
                   <ProductPhotoPlaceholder
                     label={tc('noProductPhoto')}
                     alt={imageAlt}
-                    className="product-list__media"
+                    className="product-list__media product-list__media--empty"
                   />
                 )}
                 <div>
                   <Link href={`/products/${product.id}`} className="product-list__title">
-                    {formatProductTitle(product.title, locale)}
+                    {product.display?.title?.trim() || formatProductTitle(product.title, locale)}
                   </Link>
                   <p className="product-list__meta">
                     {product.category

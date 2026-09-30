@@ -20,7 +20,10 @@ import {
   detectCatalogSourceLocale,
   isPubliclyListedProduct,
   presentCatalogText,
+  presentFarmText,
   resolveCatalogLocale,
+  PUBLICATION_PHOTO_REQUIRED_MESSAGE,
+  publicationBlockedForMissingPhoto,
   publishedListingIncompleteMessage,
   publishedListingIssues,
   type ListingFields,
@@ -95,6 +98,18 @@ const productFarmSelect = {
   ownershipType: true,
   exportMarkets: true,
   history: true,
+  description: true,
+  sourceLocale: true,
+  translations: {
+    select: {
+      locale: true,
+      description: true,
+      history: true,
+      ownershipType: true,
+      exportMarkets: true,
+      status: true,
+    },
+  },
 } as const;
 
 const productListInclude = {
@@ -441,6 +456,7 @@ export class ProductsService {
         priceCurrency: this.normalizePriceCurrency(input.priceCurrency),
       },
     });
+    await this.assertPublicationPhoto({ nextPublished: isPublished });
 
     const product = await this.prisma.product.create({
       data: {
@@ -691,6 +707,11 @@ export class ProductsService {
         priceFrom: toNumberOrNull(product.priceFrom),
         priceCurrency: product.priceCurrency,
       },
+    });
+    await this.assertPublicationPhoto({
+      nextPublished,
+      previousPublished: product.isPublished,
+      productId: product.id,
     });
 
     const previousStatus = product.harvestStatus;
@@ -1218,6 +1239,13 @@ export class ProductsService {
       throw new NotFoundException('Image not found');
     }
 
+    if (product.isPublished) {
+      const photoCount = await this.prisma.productImage.count({ where: { productId: product.id } });
+      if (photoCount <= 1) {
+        throw new BadRequestException(PUBLICATION_PHOTO_REQUIRED_MESSAGE);
+      }
+    }
+
     const enteredPending = await this.prisma.$transaction(async (tx) => {
       await tx.productImage.delete({ where: { id: image.id } });
 
@@ -1369,6 +1397,28 @@ export class ProductsService {
     }
   }
 
+  private async assertPublicationPhoto(args: {
+    nextPublished: boolean;
+    previousPublished?: boolean;
+    productId?: string;
+  }) {
+    if (!args.nextPublished || args.previousPublished) {
+      return;
+    }
+    const photoCount = args.productId
+      ? await this.prisma.productImage.count({ where: { productId: args.productId } })
+      : 0;
+    if (
+      publicationBlockedForMissingPhoto({
+        nextPublished: args.nextPublished,
+        previousPublished: args.previousPublished,
+        photoCount,
+      })
+    ) {
+      throw new BadRequestException(PUBLICATION_PHOTO_REQUIRED_MESSAGE);
+    }
+  }
+
   private assertPublishedListingFields(args: {
     nextPublished: boolean;
     next: ListingFields;
@@ -1455,8 +1505,15 @@ export class ProductsService {
   ): ProductSummary {
     const summary = mapProductSummary(product, sellerRating);
     const text = presentCatalogText(product, locale);
+    const farm = summary.farm && product.farm
+      ? {
+          ...summary.farm,
+          ...presentFarmText(product.farm, locale),
+        }
+      : summary.farm;
     return {
       ...summary,
+      farm,
       source: text.source,
       display: text.display,
     };

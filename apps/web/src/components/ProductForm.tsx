@@ -13,6 +13,7 @@ import {
   computeProductQualityScore,
   defaultUnitForCategory,
   listingRequirementIssues,
+  publicationBlockedForMissingPhoto,
   publishedListingIssues,
   type Carrier,
   type HarvestStatus,
@@ -314,6 +315,19 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
                 }
               : undefined,
           });
+    const publishNeedsPhoto =
+      intent === 'publish' &&
+      publicationBlockedForMissingPhoto({
+        nextPublished: true,
+        previousPublished: Boolean(initial?.isPublished),
+        photoCount: initial?.images.length ?? 0,
+      });
+    if (publishNeedsPhoto) {
+      setError(t('photoRequiredToPublish'));
+      submitLock.current = false;
+      setPending(false);
+      return;
+    }
     if (listingIssues.length > 0) {
       setFieldIssues(listingIssues);
       setError(listingIssues.map((issue) => t(`listingErrors.${issue}`)).join(' '));
@@ -924,11 +938,25 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
           type="submit"
           name="intent"
           value="publish"
-          disabled={pending}
+          disabled={
+            pending ||
+            publicationBlockedForMissingPhoto({
+              nextPublished: true,
+              previousPublished: Boolean(initial?.isPublished),
+              photoCount: initial?.images.length ?? 0,
+            })
+          }
         >
           {pending && lastIntent === 'publish' ? t('pleaseWait') : t('publish')}
         </button>
       </div>
+      {publicationBlockedForMissingPhoto({
+        nextPublished: true,
+        previousPublished: Boolean(initial?.isPublished),
+        photoCount: initial?.images.length ?? 0,
+      }) ? (
+        <p className="field-hint">{t('photoRequiredToPublish')}</p>
+      ) : null}
       <p className="field-hint">{t('listingRequiredHint')}</p>
       <p className="field-hint">
         {initial?.moderationStatus === 'approved' && initial?.isPublished
