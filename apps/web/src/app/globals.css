@@ -2143,6 +2143,15 @@ body {
   gap: 0.45rem;
 }
 
+.translation-mark {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
 .product-photo-placeholder {
   display: flex;
   align-items: center;
@@ -2222,6 +2231,11 @@ body {
   font-weight: 650;
 }
 
+.product-gallery-stage__frame,
+.product-photo-viewer__stage {
+  position: relative;
+}
+
 .product-gallery-stage__open {
   position: relative;
   display: block;
@@ -2238,7 +2252,7 @@ body {
   width: 100%;
   aspect-ratio: 4 / 5;
   max-height: 40rem;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 0.85rem;
 }
 
@@ -2266,7 +2280,7 @@ body {
   padding: 0;
   border: 2px solid transparent;
   border-radius: 0.65rem;
-  background: transparent;
+  background: rgba(31, 74, 40, 0.06);
   cursor: pointer;
 }
 
@@ -2278,7 +2292,7 @@ body {
   display: block;
   width: 4.5rem;
   height: 4.5rem;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 0.5rem;
 }
 
@@ -2312,29 +2326,54 @@ body {
 }
 
 .product-photo-viewer__stage {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: center;
   min-height: 0;
+  height: calc(100vh - 5.5rem);
 }
 
 .product-photo-viewer__image {
-  justify-self: center;
   max-width: 100%;
   max-height: calc(100vh - 7rem);
   object-fit: contain;
 }
 
-.product-photo-viewer__nav {
-  padding: 0.55rem 0.8rem;
+.product-gallery-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
   border: 0;
-  border-radius: 0.65rem;
-  background: rgba(247, 244, 238, 0.92);
-  color: var(--ink, #1d2a1f);
-  font: inherit;
-  font-weight: 650;
+  border-radius: 999px;
+  transform: translateY(-50%);
+  background: rgba(20, 28, 22, 0.55);
+  color: #f7f4ee;
+  font-size: 1.35rem;
+  line-height: 1;
   cursor: pointer;
+}
+
+.product-gallery-nav:hover,
+.product-gallery-nav:focus-visible {
+  background: rgba(20, 28, 22, 0.78);
+}
+
+.product-gallery-nav:focus-visible {
+  outline: 2px solid #f7f4ee;
+  outline-offset: 2px;
+}
+
+.product-gallery-nav--previous {
+  left: 0.65rem;
+}
+
+.product-gallery-nav--next {
+  right: 0.65rem;
 }
 
 @media (max-width: 860px) {
@@ -2352,14 +2391,6 @@ body {
   .product-gallery-stage__image {
     aspect-ratio: 1;
     max-height: none;
-  }
-
-  .product-photo-viewer__stage {
-    grid-template-columns: 1fr;
-  }
-
-  .product-photo-viewer__nav {
-    justify-self: center;
   }
 }
 

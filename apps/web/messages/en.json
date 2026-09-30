@@ -278,7 +278,11 @@
     "emptyReset": "Clear filters",
     "showOriginal": "Show original",
     "showTranslation": "Show translation",
-    "originalLanguage": "Original · {language}"
+    "originalLanguage": "Original · {language}",
+    "translatedAutomatically": "Translated automatically · Show original",
+    "showingOriginal": "Original · {language} · Show translation",
+    "translatedMark": "Translated",
+    "originalMark": "Original"
   },
   "farm": {
     "createTitle": "Create farm profile",

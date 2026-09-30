@@ -120,21 +120,43 @@ export function ProductImageGallery({ images, productName }: Props) {
 
   return (
     <div className="product-gallery-stage">
-      <button
-        type="button"
-        className="product-gallery-stage__open"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={() => {
-          pointerStart.current = null;
-        }}
-        aria-label={t('galleryOpen', { current: safeIndex + 1, total: count })}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={current.url} alt={productName} className="product-gallery-stage__image" />
-        <span className="product-gallery-stage__counter">{counter}</span>
-      </button>
+      <div className="product-gallery-stage__frame">
+        <button
+          type="button"
+          className="product-gallery-stage__open"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={() => {
+            pointerStart.current = null;
+          }}
+          aria-label={t('galleryOpen', { current: safeIndex + 1, total: count })}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={current.url} alt={productName} className="product-gallery-stage__image" />
+          <span className="product-gallery-stage__counter">{counter}</span>
+        </button>
+        {count > 1 ? (
+          <>
+            <button
+              type="button"
+              className="product-gallery-nav product-gallery-nav--previous"
+              aria-label={t('galleryPrevious')}
+              onClick={() => step(-1)}
+            >
+              <span aria-hidden="true">←</span>
+            </button>
+            <button
+              type="button"
+              className="product-gallery-nav product-gallery-nav--next"
+              aria-label={t('galleryNext')}
+              onClick={() => step(1)}
+            >
+              <span aria-hidden="true">→</span>
+            </button>
+          </>
+        ) : null}
+      </div>
       {count > 1 ? (
         <div className="product-gallery-thumbs" role="tablist" aria-label={productName}>
           {images.map((image, imageIndex) => (
@@ -178,8 +200,13 @@ export function ProductImageGallery({ images, productName }: Props) {
         {viewerOpen ? (
           <div className="product-photo-viewer__stage">
             {count > 1 ? (
-              <button type="button" className="product-photo-viewer__nav" onClick={() => step(-1)}>
-                {t('galleryPrevious')}
+              <button
+                type="button"
+                className="product-gallery-nav product-gallery-nav--previous"
+                aria-label={t('galleryPrevious')}
+                onClick={() => step(-1)}
+              >
+                <span aria-hidden="true">←</span>
               </button>
             ) : null}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -203,8 +230,13 @@ export function ProductImageGallery({ images, productName }: Props) {
               }}
             />
             {count > 1 ? (
-              <button type="button" className="product-photo-viewer__nav" onClick={() => step(1)}>
-                {t('galleryNext')}
+              <button
+                type="button"
+                className="product-gallery-nav product-gallery-nav--next"
+                aria-label={t('galleryNext')}
+                onClick={() => step(1)}
+              >
+                <span aria-hidden="true">→</span>
               </button>
             ) : null}
           </div>

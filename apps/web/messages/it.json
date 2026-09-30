@@ -278,7 +278,11 @@
     "emptyReset": "Cancella filtri",
     "showOriginal": "Mostra originale",
     "showTranslation": "Mostra traduzione",
-    "originalLanguage": "Originale · {language}"
+    "originalLanguage": "Originale · {language}",
+    "translatedAutomatically": "Tradotto automaticamente · Mostra originale",
+    "showingOriginal": "Originale · {language} · Mostra traduzione",
+    "translatedMark": "Tradotto",
+    "originalMark": "Originale"
   },
   "farm": {
     "createTitle": "Crea profilo azienda",

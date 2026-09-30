@@ -278,7 +278,11 @@
     "emptyReset": "Borrar filtros",
     "showOriginal": "Mostrar original",
     "showTranslation": "Mostrar traducción",
-    "originalLanguage": "Original · {language}"
+    "originalLanguage": "Original · {language}",
+    "translatedAutomatically": "Traducido automáticamente · Mostrar original",
+    "showingOriginal": "Original · {language} · Mostrar traducción",
+    "translatedMark": "Traducido",
+    "originalMark": "Original"
   },
   "farm": {
     "createTitle": "Crear perfil de granja",

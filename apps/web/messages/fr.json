@@ -278,7 +278,11 @@
     "emptyReset": "Effacer les filtres",
     "showOriginal": "Afficher l’original",
     "showTranslation": "Afficher la traduction",
-    "originalLanguage": "Original · {language}"
+    "originalLanguage": "Original · {language}",
+    "translatedAutomatically": "Traduit automatiquement · Afficher l’original",
+    "showingOriginal": "Original · {language} · Afficher la traduction",
+    "translatedMark": "Traduit",
+    "originalMark": "Original"
   },
   "farm": {
     "createTitle": "Créer le profil de ferme",

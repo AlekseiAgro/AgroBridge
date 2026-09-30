@@ -16,7 +16,12 @@ import { RecordProductView } from '@/components/RecordProductView';
 import { MarketInsightButton } from '@/components/MarketInsightButton';
 import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { FarmLink } from '@/components/FarmLink';
-import { OriginalText, OriginalToggleButton, OriginalToggleFrame } from '@/components/OriginalToggle';
+import {
+  OriginalText,
+  OriginalToggleButton,
+  OriginalToggleFrame,
+  TranslationMark,
+} from '@/components/OriginalToggle';
 import { ProductImageGallery } from '@/components/ProductImageGallery';
 import { OpenChatButton } from '@/components/OpenChatButton';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
@@ -34,7 +39,8 @@ import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
 import { getRenderableProductImages, toPublicMediaUrl } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
-import { catalogCopyDiffers, catalogDisplayDescription, catalogDisplayTitle } from '@/lib/catalog-display';
+import { catalogDisplayDescription, catalogDisplayTitle } from '@/lib/catalog-display';
+import { renderedProductTranslationDiffers } from '@/lib/product-translation';
 import { formatRegionLabel } from '@/lib/region';
 import { verifyEmailRedirectHref } from '@/lib/protected-next-path';
 import { buildBreadcrumbJsonLd, buildProductJsonLd } from '@/lib/seo-jsonld';
@@ -128,22 +134,22 @@ export default async function ProductDetailPage({ params }: Props) {
       <RecordProductView productId={product.id} isOwner={Boolean(product.isOwner)} />
       <main className="page__main">
         <OriginalToggleFrame
-          differs={
-            catalogCopyDiffers({
-              ...product,
-              variety: null,
-              display: product.display ? { ...product.display, variety: null } : undefined,
-              source: product.source ? { ...product.source, variety: null } : undefined,
-            }) ||
-            Boolean(
-              product.farm?.source &&
-                product.farm.display &&
-                (product.farm.source.description !== product.farm.display.description ||
-                  product.farm.source.history !== product.farm.display.history ||
-                  product.farm.source.exportMarkets.join('\n') !==
-                    product.farm.display.exportMarkets.join('\n')),
-            )
-          }
+          differs={renderedProductTranslationDiffers({
+            titleDisplay: productName,
+            titleSource: product.source?.title ?? product.title,
+            originDisplay: product.display?.originPlace ?? product.originPlace,
+            originSource: product.source?.originPlace ?? product.originPlace,
+            descriptionDisplay: catalogDisplayDescription(product),
+            descriptionSource: product.source?.description ?? product.description,
+            historyDisplay: product.farm?.display?.history ?? product.farm?.history,
+            historySource: product.farm?.source?.history ?? product.farm?.history,
+            marketsDisplay: (product.farm?.display?.exportMarkets ?? product.farm?.exportMarkets ?? []).join(
+              ', ',
+            ),
+            marketsSource: (product.farm?.source?.exportMarkets ?? product.farm?.exportMarkets ?? []).join(
+              ', ',
+            ),
+          })}
         >
         <PublicBreadcrumbs
           ariaLabel={tBreadcrumbs('label')}
@@ -178,9 +184,16 @@ export default async function ProductDetailPage({ params }: Props) {
                 preorderEnabled={product.preorderEnabled}
               />
             </h1>
+            <TranslationMark
+              display={productName}
+              source={product.source?.title ?? product.title}
+              translatedLabel={tc('translatedMark')}
+              originalLabel={tc('originalMark')}
+            />
             <OriginalToggleButton
-              showOriginalLabel={tc('showOriginal')}
-              showTranslationLabel={tc('showTranslation')}
+              presentation="single"
+              showOriginalLabel={tc('translatedAutomatically')}
+              showTranslationLabel={tc('showingOriginal', { language: originalLanguage ?? '' })}
               originalLanguageLabel={tc('originalLanguage', { language: originalLanguage ?? '' })}
             />
             <div className="product-opportunity-row">
@@ -192,6 +205,12 @@ export default async function ProductDetailPage({ params }: Props) {
                 <OriginalText
                   display={product.display?.originPlace ?? product.originPlace}
                   source={product.source?.originPlace ?? product.originPlace}
+                />
+                <TranslationMark
+                  display={product.display?.originPlace ?? product.originPlace}
+                  source={product.source?.originPlace ?? product.originPlace}
+                  translatedLabel={tc('translatedMark')}
+                  originalLabel={tc('originalMark')}
                 />
               </p>
             ) : null}
@@ -413,6 +432,12 @@ export default async function ProductDetailPage({ params }: Props) {
                   display={catalogDisplayDescription(product)}
                   source={product.source?.description ?? product.description}
                 />
+                <TranslationMark
+                  display={catalogDisplayDescription(product)}
+                  source={product.source?.description ?? product.description}
+                  translatedLabel={tc('translatedMark')}
+                  originalLabel={tc('originalMark')}
+                />
               </p>
             </section>
           ) : null}
@@ -617,6 +642,12 @@ export default async function ProductDetailPage({ params }: Props) {
                         display={(product.farm.display?.exportMarkets ?? product.farm.exportMarkets).join(', ')}
                         source={(product.farm.source?.exportMarkets ?? product.farm.exportMarkets).join(', ')}
                       />
+                      <TranslationMark
+                        display={(product.farm.display?.exportMarkets ?? product.farm.exportMarkets).join(', ')}
+                        source={(product.farm.source?.exportMarkets ?? product.farm.exportMarkets).join(', ')}
+                        translatedLabel={tc('translatedMark')}
+                        originalLabel={tc('originalMark')}
+                      />
                     </dd>
                   </div>
                 ) : null}
@@ -626,6 +657,12 @@ export default async function ProductDetailPage({ params }: Props) {
                   <OriginalText
                     display={product.farm.display?.history ?? product.farm.history}
                     source={product.farm.source?.history ?? product.farm.history}
+                  />
+                  <TranslationMark
+                    display={product.farm.display?.history ?? product.farm.history}
+                    source={product.farm.source?.history ?? product.farm.history}
+                    translatedLabel={tc('translatedMark')}
+                    originalLabel={tc('originalMark')}
                   />
                 </p>
               ) : null}

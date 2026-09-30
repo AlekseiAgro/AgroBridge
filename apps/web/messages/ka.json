@@ -278,7 +278,11 @@
     "emptyReset": "ფილტრების გასუფთავება",
     "showOriginal": "ორიგინალის ჩვენება",
     "showTranslation": "თარგმანის ჩვენება",
-    "originalLanguage": "ორიგინალი · {language}"
+    "originalLanguage": "ორიგინალი · {language}",
+    "translatedAutomatically": "ავტომატურად ითარგმნა · ორიგინალის ჩვენება",
+    "showingOriginal": "ორიგინალი · {language} · თარგმანის ჩვენება",
+    "translatedMark": "ნათარგმნი",
+    "originalMark": "ორიგინალი"
   },
   "farm": {
     "createTitle": "მეურნეობის პროფილის შექმნა",

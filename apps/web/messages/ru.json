@@ -278,7 +278,11 @@
     "emptyReset": "Сбросить фильтры",
     "showOriginal": "Показать оригинал",
     "showTranslation": "Показать перевод",
-    "originalLanguage": "Оригинал · {language}"
+    "originalLanguage": "Оригинал · {language}",
+    "translatedAutomatically": "Переведено автоматически · Показать оригинал",
+    "showingOriginal": "Оригинал · {language} · Показать перевод",
+    "translatedMark": "Переведено",
+    "originalMark": "Оригинал"
   },
   "farm": {
     "createTitle": "Создать профиль хозяйства",

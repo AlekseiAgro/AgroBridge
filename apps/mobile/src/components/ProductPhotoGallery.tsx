@@ -105,13 +105,19 @@ export function ProductPhotoGallery({
               <Pressable
                 accessibilityRole="button"
                 onPress={() => setOpen(true)}
-                style={{ width: frame, aspectRatio: 1 }}
+                style={{
+                  width: frame,
+                  aspectRatio: 1,
+                  borderRadius: radii.lg,
+                  backgroundColor: colors.neutralSoft,
+                  overflow: 'hidden',
+                }}
               >
                 {uri ? (
                   <Image
                     source={{ uri }}
-                    style={{ width: '100%', height: '100%', borderRadius: radii.lg }}
-                    contentFit="cover"
+                    style={{ width: '100%', height: '100%' }}
+                    contentFit="contain"
                   />
                 ) : (
                   <View
