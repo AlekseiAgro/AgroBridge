@@ -203,7 +203,9 @@ describe('category localization and catalog surfaces', () => {
     expect(detail).toContain('getRenderableProductImages');
     expect(detail).toContain('ProductPhotoPlaceholder');
     expect(detail).not.toContain('formatCategoryFallbackAlt');
-    expect(detail).toMatch(/galleryImages\.map[\s\S]*alt=\{productName\}/);
+    expect(detail).toContain('productName={productName}');
+    const gallery = readWeb('components/ProductImageGallery.tsx');
+    expect(gallery).toMatch(/alt=\{productName\}/);
     expect(detail).toContain('catalogDisplayTitle(product)');
   });
 

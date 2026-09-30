@@ -119,13 +119,14 @@ describe('public product UI localization (S1)', () => {
     expect(harvest).toContain('harvestPreorderMessageKey');
 
     const detail = source('app/[locale]/products/[id]/page.tsx');
-    expect(detail).toContain("t('sections.basics')");
+    expect(detail).toContain("t('sections.attributes')");
     expect(detail).toContain("t('sections.volume')");
     expect(detail).toContain("t('variety')");
     expect(detail).toContain("t('currentStock')");
     expect(detail).toContain('<VerifiedBadge');
     expect(detail).toContain('showTier');
-    expect(detail).toContain('catalogDisplayField(product.display?.variety, product.variety)');
+    expect(detail).toContain('product.source?.variety ?? product.variety');
+    expect(detail).not.toContain('OriginalText\n                      display={product.display?.variety');
     expect(detail).toContain('{product.currentStock}');
 
     const catalog = source('app/[locale]/catalog/page.tsx');
@@ -137,7 +138,8 @@ describe('public product UI localization (S1)', () => {
 
   it('does not translate seller-entered product fields', () => {
     const detail = source('app/[locale]/products/[id]/page.tsx');
-    expect(detail).toContain('catalogDisplayField(product.display?.variety, product.variety)');
+    expect(detail).toContain('product.source?.variety ?? product.variety');
+    expect(detail).not.toContain('OriginalText\n                      display={product.display?.variety');
     expect(detail).not.toContain('localizeProductTitle');
     expect(detail).not.toContain('formatProductTitle');
     expect(detail).toContain('catalogDisplayTitle(product)');

@@ -582,6 +582,12 @@
       "priceAndVolume": "ფასი და ხელმისაწვდომი მოცულობა"
     },
     "variety": "ჯიში",
+    "viewFarmProfile": "მეურნეობის პროფილის ნახვა",
+    "galleryPrevious": "წინა ფოტო",
+    "galleryNext": "შემდეგი ფოტო",
+    "galleryClose": "დახურვა",
+    "galleryCounter": "{current} / {total}",
+    "galleryOpen": "ფოტოს გახსნა {current} / {total}",
     "country": "ქვეყანა",
     "originPlace": "წარმოშობის ადგილი",
     "originPlacePlaceholder": "დაიწყეთ ქალაქის ან სოფლის აკრეფა",

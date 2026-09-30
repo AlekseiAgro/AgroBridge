@@ -116,6 +116,42 @@ describe('catalog parsing', () => {
     expect(parsed?.farm?.verified).toBe(true);
   });
 
+  it('keeps the stored cultivar and the detail fields the catalog card does not show', () => {
+    const [parsed] = parseCatalogProducts([
+      {
+        id: 'p1',
+        title: 'Peach',
+        variety: 'Киси',
+        display: { title: 'Peach', variety: 'Kisi', description: 'Translated' },
+        source: { locale: 'ka', title: 'ატამი', variety: 'Киси', description: 'ორიგინალი' },
+        description: 'Translated',
+        currentStock: 40,
+        seasonMonths: [6, 7],
+        packagingTypes: ['box'],
+        incoterms: ['EXW'],
+        producerType: 'family',
+        sellerRating: { average: 4.5, count: 2 },
+        farm: {
+          id: 'f1',
+          name: 'Farm',
+          region: 'kakheti',
+          verified: true,
+          producerType: 'family',
+        },
+        owner: { id: 'u1', displayName: 'Nino' },
+      },
+    ]);
+    expect(parsed?.variety).toBe('Киси');
+    expect(parsed?.source?.variety).toBe('Киси');
+    expect(parsed?.description).toBe('Translated');
+    expect(parsed?.currentStock).toBe(40);
+    expect(parsed?.seasonMonths).toEqual([6, 7]);
+    expect(parsed?.packagingTypes).toEqual(['box']);
+    expect(parsed?.incoterms).toEqual(['EXW']);
+    expect(parsed?.sellerRating).toEqual({ average: 4.5, count: 2 });
+    expect(parsed?.farm?.producerType).toBe('family');
+  });
+
   it('rejects a non-list payload instead of treating it as an empty catalog', () => {
     expect(() => parseCatalogProducts({ items: [] })).toThrow('Products response was not a list.');
     expect(() => parseCatalogRequests(null)).toThrow('Purchase requests response was not a list.');
