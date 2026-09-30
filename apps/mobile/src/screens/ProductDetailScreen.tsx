@@ -109,7 +109,9 @@ export function ProductDetailScreen() {
     ? formatQuantityRange(product.minQuantity, product.maxQuantity, unit)
     : null;
   const region = regionLabel(product?.farm?.region, t);
-  const place = [region, product ? countryLabel(product.country, t) : null].filter(Boolean).join(', ');
+  const country = product ? countryLabel(product.country, t) : null;
+  const place = [region, country].filter(Boolean).join(', ');
+  const sellerName = product?.owner.displayName ?? null;
   const source = product?.source;
   const showing = showOriginal && source;
   const title = showing && source.title ? source.title : product?.title;
@@ -162,7 +164,7 @@ export function ProductDetailScreen() {
             <ProductCard
               name={title ?? product.title}
               imageUrl={resolveMediaUrl(primaryProductImageUrl(product.images), apiBaseUrlFromEnv())}
-              meta=""
+              meta={product.farm ? '' : [region, country].filter(Boolean).join(', ')}
               badgeLabel={harvest ? t(`availability.${harvest}`) : ''}
               badgeTone={harvest ? badgeTone(harvest) : 'neutral'}
               verifiedLabel={product.farm?.verified ? t('home.verifiedFarm') : null}
@@ -184,6 +186,9 @@ export function ProductDetailScreen() {
               <View style={{ gap: spacing.md }}>
                 {categoryLabel(product.category, t) ? (
                   <Chip label={categoryLabel(product.category, t) ?? product.category ?? ''} />
+                ) : null}
+                {!product.farm ? (
+                  <DetailRow label={t('product.seller')} value={sellerName} />
                 ) : null}
                 <DetailRow label={t('product.price')} value={price ?? t('product.priceOnRequest')} />
                 <DetailRow label={t('product.quantity')} value={quantity} />

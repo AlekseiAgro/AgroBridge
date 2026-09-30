@@ -32,7 +32,9 @@ export default async function PublicUserProfilePage({ params }: Props) {
 
   let profile: PublicUserProfile;
   try {
-    profile = await apiRequest<PublicUserProfile>(`/users/${id}`);
+    profile = await apiRequest<PublicUserProfile>(
+      `/users/${id}?locale=${encodeURIComponent(locale)}`,
+    );
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
       notFound();
@@ -128,8 +130,10 @@ export default async function PublicUserProfilePage({ params }: Props) {
                 {formatRegionLabel(profile.farm.region, tr) || t('regionUnknown')}
                 {` · ${t('productCount', { count: profile.farm.productCount })}`}
               </p>
-              {profile.farm.description ? (
-                <p className="product-list__desc">{profile.farm.description}</p>
+              {profile.farm.display?.description || profile.farm.description ? (
+                <p className="product-list__desc">
+                  {profile.farm.display?.description ?? profile.farm.description}
+                </p>
               ) : null}
             </div>
           </section>

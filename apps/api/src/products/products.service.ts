@@ -1231,22 +1231,23 @@ export class ProductsService {
     this.assertFarmer(user);
     const product = await this.requireOwnedProduct(user.id, productId);
 
-    const image = await this.prisma.productImage.findFirst({
-      where: { id: imageId, productId: product.id },
-    });
+    const removed = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Product" WHERE id = ${product.id} FOR UPDATE`;
 
-    if (!image) {
-      throw new NotFoundException('Image not found');
-    }
-
-    if (product.isPublished) {
-      const photoCount = await this.prisma.productImage.count({ where: { productId: product.id } });
-      if (photoCount <= 1) {
-        throw new BadRequestException(PUBLICATION_PHOTO_REQUIRED_MESSAGE);
+      const image = await tx.productImage.findFirst({
+        where: { id: imageId, productId: product.id },
+      });
+      if (!image) {
+        throw new NotFoundException('Image not found');
       }
-    }
 
-    const enteredPending = await this.prisma.$transaction(async (tx) => {
+      if (product.isPublished) {
+        const photoCount = await tx.productImage.count({ where: { productId: product.id } });
+        if (photoCount <= 1) {
+          throw new BadRequestException(PUBLICATION_PHOTO_REQUIRED_MESSAGE);
+        }
+      }
+
       await tx.productImage.delete({ where: { id: image.id } });
 
       if (image.isPrimary) {
@@ -1262,15 +1263,18 @@ export class ProductsService {
         }
       }
 
-      return this.markPendingForImageChange(tx, product);
+      return {
+        image,
+        enteredPending: await this.markPendingForImageChange(tx, product),
+      };
     });
 
-    if (enteredPending) {
+    if (removed.enteredPending) {
       this.queuePendingModerationEmail(product, user);
     }
 
     try {
-      await this.storage.delete(image.key);
+      await this.storage.delete(removed.image.key);
     } catch {
       // Best-effort cleanup.
     }

@@ -256,7 +256,7 @@ function ProductTile({
     <ProductCard
       name={product.title}
       imageUrl={resolveMediaUrl(primaryProductImageUrl(product.images), apiBaseUrlFromEnv())}
-      meta=""
+      meta={farmName ? '' : [region, country].filter(Boolean).join(', ')}
       badgeLabel={badge}
       badgeTone={harvest ? badgeTone(harvest) : 'neutral'}
       verifiedLabel={product.farm?.verified ? t('home.verifiedFarm') : null}
