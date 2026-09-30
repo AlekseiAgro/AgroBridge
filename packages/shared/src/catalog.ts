@@ -111,6 +111,9 @@ export type FarmSummary = {
   verified: boolean;
   foundedYear: number | null;
   farmSizeHectares: number | null;
+  /** Stable producer classification. Null when the farm has not chosen one. */
+  producerType: ProducerType | null;
+  /** Legacy free text. Preserved and not machine-translated. */
   ownershipType: string | null;
   exportMarkets: string[];
   history: string | null;
@@ -153,6 +156,7 @@ import type {
   ProductVideo,
 } from './quality';
 import type { CatalogDisplayText, CatalogSourceText, FarmDisplayText, FarmSourceText } from './catalog-locale';
+import type { ProducerType } from './producer-type';
 import type { MarketOpportunity } from './market-insight';
 
 export const PRODUCT_IMAGE_MAX_COUNT = 5;
@@ -251,6 +255,7 @@ export type ProductSummary = {
     verified: boolean;
     foundedYear: number | null;
     farmSizeHectares: number | null;
+    producerType: ProducerType | null;
     ownershipType: string | null;
     exportMarkets: string[];
     history: string | null;

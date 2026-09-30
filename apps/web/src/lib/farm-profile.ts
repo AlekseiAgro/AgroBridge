@@ -24,6 +24,7 @@ export function toPublicFarmProfile(farm: FarmDetail): FarmDetail {
     foundedYear: farm.foundedYear,
     farmSizeHectares: farm.farmSizeHectares,
     ownershipType: farm.ownershipType,
+    producerType: farm.producerType,
     exportMarkets: farm.exportMarkets,
     history: farm.history,
     owner: farm.owner,

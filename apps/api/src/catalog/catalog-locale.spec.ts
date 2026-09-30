@@ -45,6 +45,43 @@ describe('multilingual catalog text', () => {
     expect(presentCatalogText(grape, 'ru').source.locale).toBe('ka');
   });
 
+  it('shows the original variety and ignores a stored translation of it', () => {
+    const product = {
+      ...grape,
+      variety: 'Киси',
+      translations: [
+        {
+          locale: 'ru',
+          status: 'completed',
+          title: 'виноград',
+          variety: 'Кислый хихви',
+          description: 'описание',
+        },
+      ],
+    };
+    const text = presentCatalogText(product, 'ru');
+    expect(text.source.variety).toBe('Киси');
+    expect(text.display.variety).toBe('Киси');
+    expect(text.display.title).toBe('виноград');
+    expect(text.display.description).toBe('описание');
+    expect(product.variety).toBe('Киси');
+    expect(
+      catalogTextMatches('Киси', [
+        product.variety,
+        ...completedTranslationSearchParts(product.translations),
+      ]),
+    ).toBe(true);
+    expect(
+      catalogTextMatches('Кислый хихви', [
+        product.variety,
+        ...completedTranslationSearchParts(product.translations),
+      ]),
+    ).toBe(false);
+    expect(catalogTextMatches('виноград', [...completedTranslationSearchParts(product.translations)])).toBe(
+      true,
+    );
+  });
+
   it('returns the Russian display title', () => {
     const text = presentCatalogText(grape, 'ru');
     expect(text.display.locale).toBe('ru');

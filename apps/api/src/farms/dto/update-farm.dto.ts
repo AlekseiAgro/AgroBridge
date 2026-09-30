@@ -1,7 +1,9 @@
 import { Type } from 'class-transformer';
+import { PRODUCER_TYPES, type ProducerType } from '@agrobridge/shared';
 import {
   ArrayMaxSize,
   IsArray,
+  IsIn,
   IsInt,
   IsNumber,
   IsOptional,
@@ -46,6 +48,10 @@ export class UpdateFarmDto {
   @IsString()
   @MaxLength(120)
   ownershipType?: string;
+
+  @IsOptional()
+  @IsIn(PRODUCER_TYPES)
+  producerType?: ProducerType | null;
 
   @IsOptional()
   @IsArray()

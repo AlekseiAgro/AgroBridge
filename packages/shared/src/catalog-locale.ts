@@ -86,7 +86,6 @@ export function completedTranslationSearchParts(
     for (const value of [
       row.title,
       row.description,
-      row.variety,
       row.originPlace,
       row.packaging,
       row.destinationCountry,
@@ -197,7 +196,7 @@ export function presentCatalogText(
         locale,
         title: row.title.trim(),
         description: fallbackField(row.description, description),
-        variety: fallbackField(row.variety, variety),
+        variety,
         originPlace: fallbackField(row.originPlace, originPlace),
         translationStatus: 'completed',
       },
@@ -255,7 +254,7 @@ export function presentPurchaseRequestText(
       display: {
         locale,
         title: row.title.trim(),
-        variety: fallbackField(row.variety, variety),
+        variety,
         packaging: fallbackField(row.packaging, packaging),
         destinationCountry: fallbackField(row.destinationCountry, destinationCountry),
         message: fallbackField(row.message, message),
@@ -333,10 +332,7 @@ export function presentFarmText(
   const hasTranslation =
     row?.status === 'completed' &&
     Boolean(
-      row.description?.trim() ||
-        row.history?.trim() ||
-        row.ownershipType?.trim() ||
-        translatedMarkets.length > 0,
+      row.description?.trim() || row.history?.trim() || translatedMarkets.length > 0,
     );
   if (hasTranslation && row) {
     return {
@@ -345,7 +341,7 @@ export function presentFarmText(
         locale,
         description: fallbackField(row.description, description),
         history: fallbackField(row.history, history),
-        ownershipType: fallbackField(row.ownershipType, ownershipType),
+        ownershipType,
         exportMarkets: fallbackMarkets(row.exportMarkets, exportMarkets),
         translationStatus: 'completed',
       },

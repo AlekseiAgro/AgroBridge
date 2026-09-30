@@ -294,10 +294,12 @@ model Farm {
   companyRegistryValid       Boolean?
   foundedYear                Int?
   farmSizeHectares           Decimal?           @db.Decimal(12, 2)
+  /// Stable producer classification: individual, family, cooperative, company, other.
+  producerType               String?
   ownershipType              String?
   exportMarkets              String[]           @default([])
   history                    String?
-  /// Language of description, history, ownershipType, and exportMarkets. Name stays original.
+  /// Language of description, history, and exportMarkets. Name and producerType stay original.
   sourceLocale               LocaleCode         @default(en)
   createdAt                  DateTime           @default(now())
   updatedAt                  DateTime           @updatedAt

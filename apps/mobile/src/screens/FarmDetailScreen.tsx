@@ -136,7 +136,22 @@ export function FarmDetailScreen() {
                   <DetailRow label={t('farm.registeredName')} value={farm.companyRegistryName} />
                 ) : null}
                 <DetailRow label={t('farm.about')} value={copy.description} />
-                <DetailRow label={t('farm.ownership')} value={copy.ownershipType} />
+                <DetailRow
+                  label={t('farm.producerType')}
+                  value={
+                    farm.producerType === 'individual'
+                      ? t('farm.producer.individual')
+                      : farm.producerType === 'family'
+                        ? t('farm.producer.family')
+                        : farm.producerType === 'cooperative'
+                          ? t('farm.producer.cooperative')
+                          : farm.producerType === 'company'
+                            ? t('farm.producer.company')
+                            : farm.producerType === 'other'
+                              ? t('farm.producer.other')
+                              : farm.source.ownershipType
+                  }
+                />
                 <DetailRow
                   label={t('farm.markets')}
                   value={copy.exportMarkets.length > 0 ? copy.exportMarkets.join(', ') : null}

@@ -51,9 +51,11 @@ describe('CatalogTranslationService', () => {
     purchaseRequest: {
       findUnique: jest.fn(),
       findMany: jest.fn(),
+      update: jest.fn(),
     },
     purchaseRequestTranslation: {
       upsert: jest.fn(),
+      update: jest.fn(),
     },
     farm: {
       findUnique: jest.fn(),
@@ -113,6 +115,71 @@ describe('CatalogTranslationService', () => {
     );
   });
 
+  it('keeps variety in the source hash but never sends it to the provider', async () => {
+    const withVariety = {
+      title: 'ყურძენი',
+      description: 'აღწერა',
+      variety: 'Киси',
+      originPlace: null,
+    };
+    expect(productSourceHash(withVariety)).not.toBe(
+      productSourceHash({ ...withVariety, variety: null }),
+    );
+    prisma.product.findUnique.mockResolvedValue({
+      ...product,
+      ...withVariety,
+      translations: product.translations.map((row) => ({ ...row, sourceHash: 'stale' })),
+    });
+
+    await service.syncProduct('p1');
+
+    const texts = translation.translateText.mock.calls.map((call) => call[0].text);
+    expect(texts).toContain('ყურძენი');
+    expect(texts).toContain('აღწერა');
+    expect(texts).not.toContain('Киси');
+    expect(prisma.product.update).not.toHaveBeenCalled();
+    expect(prisma.productTranslation.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          title: 'виноград',
+          variety: null,
+          status: MessageTranslationStatus.completed,
+        }),
+      }),
+    );
+  });
+
+  it('does not translate a purchase-request variety and stores it as null', async () => {
+    prisma.purchaseRequest.findUnique.mockResolvedValue({
+      id: 'r1',
+      title: 'ყურძენი',
+      variety: 'Киси',
+      packaging: null,
+      destinationCountry: null,
+      message: null,
+      sourceLocale: LocaleCode.ka,
+      buyer: { locale: LocaleCode.ka },
+      translations: [],
+    });
+    prisma.purchaseRequestTranslation.upsert.mockResolvedValue({});
+    prisma.purchaseRequestTranslation.update.mockResolvedValue({});
+
+    await service.syncPurchaseRequest('r1');
+
+    const texts = translation.translateText.mock.calls.map((call) => call[0].text);
+    expect(texts).toContain('ყურძენი');
+    expect(texts).not.toContain('Киси');
+    expect(prisma.purchaseRequest.update).not.toHaveBeenCalled();
+    expect(prisma.purchaseRequestTranslation.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          variety: null,
+          title: 'виноград',
+        }),
+      }),
+    );
+  });
+
   it('marks the translation failed and leaves the original product in place when the provider throws', async () => {
     prisma.product.findUnique.mockResolvedValue({
       ...product,
@@ -139,7 +206,8 @@ describe('CatalogTranslationService', () => {
       name: 'Kakheti Rosé House',
       description: 'საოჯახო მეურნეობა',
       history: null,
-      ownershipType: null,
+      ownershipType: 'Private farm',
+      producerType: 'individual',
       exportMarkets: [],
       sourceLocale: LocaleCode.ka,
       owner: { locale: LocaleCode.ka },
@@ -153,7 +221,15 @@ describe('CatalogTranslationService', () => {
     const texts = translation.translateText.mock.calls.map((call) => call[0].text);
     expect(texts).toContain('საოჯახო მეურნეობა');
     expect(texts).not.toContain('Kakheti Rosé House');
+    expect(texts).not.toContain('Private farm');
+    expect(texts).not.toContain('family');
+    expect(texts).not.toContain('individual');
     expect(prisma.farm.update).not.toHaveBeenCalled();
+    expect(prisma.farmTranslation.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ ownershipType: null }),
+      }),
+    );
   });
 
   it('records a failed farm translation without changing the source description', async () => {
