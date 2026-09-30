@@ -582,6 +582,12 @@
       "priceAndVolume": "Preis und verfügbares Volumen"
     },
     "variety": "Sorte",
+    "viewFarmProfile": "Hofprofil ansehen",
+    "galleryPrevious": "Vorheriges Foto",
+    "galleryNext": "Nächstes Foto",
+    "galleryClose": "Schließen",
+    "galleryCounter": "{current} / {total}",
+    "galleryOpen": "Foto {current} von {total} öffnen",
     "country": "Land",
     "originPlace": "Herkunftsort",
     "originPlacePlaceholder": "Stadt oder Dorf eingeben",

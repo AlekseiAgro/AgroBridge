@@ -17,6 +17,7 @@ import { MarketInsightButton } from '@/components/MarketInsightButton';
 import { MarketOpportunityBadge } from '@/components/MarketOpportunityBadge';
 import { FarmLink } from '@/components/FarmLink';
 import { OriginalText, OriginalToggleButton, OriginalToggleFrame } from '@/components/OriginalToggle';
+import { ProductImageGallery } from '@/components/ProductImageGallery';
 import { OpenChatButton } from '@/components/OpenChatButton';
 import { ProductQualityWidget } from '@/components/ProductQualityWidget';
 import { JsonLd } from '@/components/JsonLd';
@@ -97,6 +98,7 @@ export default async function ProductDetailPage({ params }: Props) {
   const verifyRequestHref = verifyEmailRedirectHref(`${productPath}#request-quote`);
   const verifyWatchHref = verifyEmailRedirectHref(`${productPath}#harvest-alerts`);
   const productName = catalogDisplayTitle(product);
+  const varietyValue = product.source?.variety ?? product.variety;
   const sourceLocale = product.source?.locale;
   const originalLanguage = sourceLocale ? LOCALE_ENDONYM[sourceLocale] : sourceLocale;
   const productJsonLd = buildProductJsonLd(product, locale);
@@ -127,26 +129,45 @@ export default async function ProductDetailPage({ params }: Props) {
       <main className="page__main">
         <OriginalToggleFrame
           differs={
-            catalogCopyDiffers(product) ||
+            catalogCopyDiffers({
+              ...product,
+              variety: null,
+              display: product.display ? { ...product.display, variety: null } : undefined,
+              source: product.source ? { ...product.source, variety: null } : undefined,
+            }) ||
             Boolean(
               product.farm?.source &&
                 product.farm.display &&
-                (                  product.farm.source.history !== product.farm.display.history ||
+                (product.farm.source.description !== product.farm.display.description ||
+                  product.farm.source.history !== product.farm.display.history ||
                   product.farm.source.exportMarkets.join('\n') !==
                     product.farm.display.exportMarkets.join('\n')),
             )
           }
         >
-        <div className="product-detail-header">
-          <div className="product-detail-header__main">
-            <PublicBreadcrumbs
-              ariaLabel={tBreadcrumbs('label')}
-              items={[
-                { href: '/', label: tBreadcrumbs('home') },
-                { href: '/catalog', label: tBreadcrumbs('catalog') },
-              ]}
-              current={productName}
-            />
+        <PublicBreadcrumbs
+          ariaLabel={tBreadcrumbs('label')}
+          items={[
+            { href: '/', label: tBreadcrumbs('home') },
+            { href: '/catalog', label: tBreadcrumbs('catalog') },
+          ]}
+          current={productName}
+        />
+        <div className="product-detail-hero">
+          <div className="product-detail-hero__media">
+            {galleryImages.length > 0 ? (
+              <ProductImageGallery images={galleryImages} productName={productName} />
+            ) : (
+              <div className="product-gallery">
+                <ProductPhotoPlaceholder
+                  label={tc('noProductPhoto')}
+                  alt={tc('noProductPhotoAlt')}
+                  className="product-gallery__image product-gallery__image--primary"
+                />
+              </div>
+            )}
+          </div>
+          <div className="product-detail-hero__summary">
             <h1 className="farm-title-row">
               <OriginalText
                 display={productName}
@@ -165,112 +186,151 @@ export default async function ProductDetailPage({ params }: Props) {
             <div className="product-opportunity-row">
               <MarketOpportunityBadge opportunity={product.opportunity} />
             </div>
-            <FarmLink
-              href={product.farm ? `/farms/${product.farm.id}` : `/users/${product.owner.id}`}
-              name={
-                product.farm?.name || product.owner.displayName?.trim() || t('sellerFallback')
-              }
-              place={
-                [
-                  product.farm?.region
-                    ? formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region
-                    : null,
-                  product.country,
-                ]
-                  .filter(Boolean)
-                  .join(', ') || null
-              }
-              badge={
-                product.farm ? <VerifiedBadge verified={product.farm.verified} /> : undefined
-              }
-            />
-            <div className="product-list__rating product-list__rating--detail">
-              <span className="product-list__rating-label">{tc('sellerRating')}</span>
-              <RatingStars
-                value={product.sellerRating?.average ?? null}
-                count={product.sellerRating?.count ?? 0}
-                size="sm"
-                reviewsHref={`/users/${product.owner.id}/reviews`}
-              />
-            </div>
+            {product.country ? <p className="product-detail-fact">{product.country}</p> : null}
+            {product.display?.originPlace || product.originPlace ? (
+              <p className="product-detail-fact">
+                <OriginalText
+                  display={product.display?.originPlace ?? product.originPlace}
+                  source={product.source?.originPlace ?? product.originPlace}
+                />
+              </p>
+            ) : null}
+            {!product.isOwner ? (
+              <div className="product-detail-header__actions">
+                {listedPrice ? (
+                  <div className="product-detail-cta-price">
+                    <p className="product-detail-cta-price__label">{t('priceFrom')}</p>
+                    <p className="product-detail-cta-price__value">{listedPrice}</p>
+                  </div>
+                ) : null}
+                {quantityLabel ? (
+                  <p className="product-detail-fact">
+                    <span className="product-detail-fact__label">{t('availableQuantity')}</span>
+                    {quantityLabel}
+                  </p>
+                ) : null}
+                {product.currentStock != null ? (
+                  <p className="product-detail-fact">
+                    <span className="product-detail-fact__label">{t('currentStock')}</span>
+                    {product.currentStock} {unitLabel}
+                  </p>
+                ) : null}
+                <FarmLink
+                  href={product.farm ? `/farms/${product.farm.id}` : `/users/${product.owner.id}`}
+                  name={
+                    product.farm?.name || product.owner.displayName?.trim() || t('sellerFallback')
+                  }
+                  place={
+                    [
+                      product.farm?.region
+                        ? formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region
+                        : null,
+                      product.country,
+                    ]
+                      .filter(Boolean)
+                      .join(', ') || null
+                  }
+                  badge={
+                    product.farm ? <VerifiedBadge verified={product.farm.verified} /> : undefined
+                  }
+                />
+                <div className="product-list__rating product-list__rating--detail">
+                  <span className="product-list__rating-label">{tc('sellerRating')}</span>
+                  <RatingStars
+                    value={product.sellerRating?.average ?? null}
+                    count={product.sellerRating?.count ?? 0}
+                    size="sm"
+                    reviewsHref={`/users/${product.owner.id}/reviews`}
+                  />
+                </div>
+                {soldOut ? (
+                  needsEmailVerification ? (
+                    <Link href={verifyWatchHref} className="button button--ghost">
+                      {tVerify('confirm')}
+                    </Link>
+                  ) : (
+                    <a href="#harvest-alerts" className="button button--ghost">
+                      {th('notifyWhenAvailable')}
+                    </a>
+                  )
+                ) : needsEmailVerification ? (
+                  <Link href={verifyRequestHref} className="button button--primary">
+                    {tVerify('confirm')}
+                  </Link>
+                ) : (
+                  <a href="#request-quote" className="button button--primary">
+                    {tr('submitRequest')}
+                  </a>
+                )}
+                {needsEmailVerification ? (
+                  <Link href={verifyProductHref} className="button button--ghost">
+                    {tVerify('confirm')}
+                  </Link>
+                ) : user ? (
+                  <OpenChatButton
+                    farmerId={product.ownerUserId}
+                    label={t('messageSeller')}
+                    variant="ghost"
+                  />
+                ) : (
+                  <Link
+                    href={`/login?next=${encodeURIComponent(`/products/${product.id}`)}`}
+                    className="button button--ghost"
+                  >
+                    {t('messageSeller')}
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <>
+                {quantityLabel ? (
+                  <p className="product-detail-fact">
+                    <span className="product-detail-fact__label">{t('availableQuantity')}</span>
+                    {quantityLabel}
+                  </p>
+                ) : null}
+                {product.currentStock != null ? (
+                  <p className="product-detail-fact">
+                    <span className="product-detail-fact__label">{t('currentStock')}</span>
+                    {product.currentStock} {unitLabel}
+                  </p>
+                ) : null}
+                <FarmLink
+                  href={product.farm ? `/farms/${product.farm.id}` : `/users/${product.owner.id}`}
+                  name={
+                    product.farm?.name || product.owner.displayName?.trim() || t('sellerFallback')
+                  }
+                  place={
+                    [
+                      product.farm?.region
+                        ? formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region
+                        : null,
+                      product.country,
+                    ]
+                      .filter(Boolean)
+                      .join(', ') || null
+                  }
+                  badge={
+                    product.farm ? <VerifiedBadge verified={product.farm.verified} /> : undefined
+                  }
+                />
+                <div className="product-list__rating product-list__rating--detail">
+                  <span className="product-list__rating-label">{tc('sellerRating')}</span>
+                  <RatingStars
+                    value={product.sellerRating?.average ?? null}
+                    count={product.sellerRating?.count ?? 0}
+                    size="sm"
+                    reviewsHref={`/users/${product.owner.id}/reviews`}
+                  />
+                </div>
+              </>
+            )}
             <div className="product-insight-row">
               <CertificateBadges badges={product.certificateBadges} />
               <MarketInsightButton productId={product.id} />
             </div>
           </div>
-          {!product.isOwner ? (
-            <div className="product-detail-header__actions">
-              {listedPrice ? (
-                <div className="product-detail-cta-price">
-                  <p className="product-detail-cta-price__label">{t('priceFrom')}</p>
-                  <p className="product-detail-cta-price__value">{listedPrice}</p>
-                </div>
-              ) : null}
-              {soldOut ? (
-                needsEmailVerification ? (
-                  <Link href={verifyWatchHref} className="button button--ghost">
-                    {tVerify('confirm')}
-                  </Link>
-                ) : (
-                  <a href="#harvest-alerts" className="button button--ghost">
-                    {th('notifyWhenAvailable')}
-                  </a>
-                )
-              ) : needsEmailVerification ? (
-                <Link href={verifyRequestHref} className="button button--primary">
-                  {tVerify('confirm')}
-                </Link>
-              ) : (
-                <a href="#request-quote" className="button button--primary">
-                  {tr('submitRequest')}
-                </a>
-              )}
-              {needsEmailVerification ? (
-                <Link href={verifyProductHref} className="button button--ghost">
-                  {tVerify('confirm')}
-                </Link>
-              ) : user ? (
-                <OpenChatButton
-                  farmerId={product.ownerUserId}
-                  label={t('messageSeller')}
-                  variant="ghost"
-                />
-              ) : (
-                <Link
-                  href={`/login?next=${encodeURIComponent(`/products/${product.id}`)}`}
-                  className="button button--ghost"
-                >
-                  {t('messageSeller')}
-                </Link>
-              )}
-            </div>
-          ) : null}
         </div>
-        {galleryImages.length > 0 ? (
-          <div className="product-gallery">
-            {galleryImages.map((image) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={image.id}
-                src={image.url}
-                alt={productName}
-                className={
-                  image.isPrimary
-                    ? 'product-gallery__image product-gallery__image--primary'
-                    : 'product-gallery__image'
-                }
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="product-gallery">
-            <ProductPhotoPlaceholder
-              label={tc('noProductPhoto')}
-              alt={tc('noProductPhotoAlt')}
-              className="product-gallery__image product-gallery__image--primary"
-            />
-          </div>
-        )}
 
         {product.isOwner ? (
           <ProductQualityWidget score={product.qualityScore} showGuidance />
@@ -278,7 +338,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
         <div className="product-detail-sections">
           <section className="product-detail-section">
-            <h2 className="section-title">{t('sections.basics')}</h2>
+            <h2 className="section-title">{t('sections.attributes')}</h2>
             <dl className="account-details product-detail-grid">
               {product.category ? (
                 <div>
@@ -286,21 +346,10 @@ export default async function ProductDetailPage({ params }: Props) {
                   <dd>{tc(`categories.${product.category as 'fruits'}`)}</dd>
                 </div>
               ) : null}
-              {product.display?.variety || product.variety ? (
+              {varietyValue ? (
                 <div>
                   <dt>{t('variety')}</dt>
-                  <dd>
-                    <OriginalText
-                      display={product.display?.variety ?? product.variety}
-                      source={product.source?.variety ?? product.variety}
-                    />
-                  </dd>
-                </div>
-              ) : null}
-              {product.country ? (
-                <div>
-                  <dt>{t('country')}</dt>
-                  <dd>{product.country}</dd>
+                  <dd>{varietyValue}</dd>
                 </div>
               ) : null}
               {product.display?.originPlace || product.originPlace ? (
@@ -314,22 +363,59 @@ export default async function ProductDetailPage({ params }: Props) {
                   </dd>
                 </div>
               ) : null}
-              {product.unit ? (
+              {product.packagingTypes.length ? (
                 <div>
-                  <dt>{t('unit')}</dt>
-                  <dd>{t(`units.${product.unit as 'kg'}`)}</dd>
+                  <dt>{t('packagingTypesLabel')}</dt>
+                  <dd>
+                    {product.packagingTypes.map((type) => t(`packagingTypes.${type}`)).join(', ')}
+                  </dd>
+                </div>
+              ) : null}
+              {product.minQuantity != null ? (
+                <div>
+                  <dt>{t('minQuantity')}</dt>
+                  <dd>
+                    {product.minQuantity}
+                    {unitLabel ? ` ${unitLabel}` : ''}
+                  </dd>
+                </div>
+              ) : null}
+              {quantityLabel ? (
+                <div>
+                  <dt>{t('availableQuantity')}</dt>
+                  <dd>{quantityLabel}</dd>
+                </div>
+              ) : null}
+              {product.currentStock != null ? (
+                <div>
+                  <dt>{t('currentStock')}</dt>
+                  <dd>
+                    {product.currentStock} {unitLabel}
+                  </dd>
+                </div>
+              ) : null}
+              {product.seasonMonths.length ? (
+                <div>
+                  <dt>{th('seasonality')}</dt>
+                  <dd>
+                    {product.seasonMonths.map((month) => th(`months.${month}`)).join(', ')}
+                  </dd>
                 </div>
               ) : null}
             </dl>
-            {catalogDisplayDescription(product) || product.description ? (
+          </section>
+
+          {catalogDisplayDescription(product) || product.description ? (
+            <section className="product-detail-section">
+              <h2 className="section-title">{t('description')}</h2>
               <p className="detail-text">
                 <OriginalText
                   display={catalogDisplayDescription(product)}
                   source={product.source?.description ?? product.description}
                 />
               </p>
-            ) : null}
-          </section>
+            </section>
+          ) : null}
 
           {product.priceFrom != null || product.priceNegotiable || product.priceDependsOnVolume ? (
             <section className="product-detail-section">
@@ -468,15 +554,38 @@ export default async function ProductDetailPage({ params }: Props) {
             </section>
           ) : null}
 
-          {product.farm &&
-          (product.farm.foundedYear ||
-            product.farm.farmSizeHectares != null ||
-            product.farm.producerType ||
-            product.farm.ownershipType ||
-            product.farm.exportMarkets.length ||
-            product.farm.history) ? (
+          {product.farm ? (
             <section className="product-detail-section">
               <h2 className="section-title">{t('sections.farmStory')}</h2>
+              <FarmLink
+                href={`/farms/${product.farm.id}`}
+                name={product.farm.name}
+                place={
+                  [
+                    product.farm.region
+                      ? formatRegionLabel(product.farm.region, tRoot) ?? product.farm.region
+                      : null,
+                    product.country,
+                  ]
+                    .filter(Boolean)
+                    .join(', ') || null
+                }
+                badge={<VerifiedBadge verified={product.farm.verified} />}
+              />
+              <div className="product-list__rating product-list__rating--detail">
+                <span className="product-list__rating-label">{tc('sellerRating')}</span>
+                <RatingStars
+                  value={product.sellerRating?.average ?? null}
+                  count={product.sellerRating?.count ?? 0}
+                  size="sm"
+                  reviewsHref={`/users/${product.owner.id}/reviews`}
+                />
+              </div>
+              <p>
+                <Link href={`/farms/${product.farm.id}`} className="text-button">
+                  {t('viewFarmProfile')}
+                </Link>
+              </p>
               <dl className="account-details product-detail-grid">
                 {product.farm.foundedYear ? (
                   <div>

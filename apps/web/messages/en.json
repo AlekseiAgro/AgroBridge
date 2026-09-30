@@ -582,6 +582,12 @@
       "priceAndVolume": "Price and available volume"
     },
     "variety": "Variety",
+    "viewFarmProfile": "View farm profile",
+    "galleryPrevious": "Previous photo",
+    "galleryNext": "Next photo",
+    "galleryClose": "Close",
+    "galleryCounter": "{current} / {total}",
+    "galleryOpen": "Open photo {current} of {total}",
     "country": "Country",
     "originPlace": "Place of origin",
     "originPlacePlaceholder": "Start typing a city or village",

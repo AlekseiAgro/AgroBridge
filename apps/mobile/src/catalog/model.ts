@@ -10,6 +10,8 @@ export type CatalogFarm = {
   name: string;
   region: string | null;
   verified: boolean;
+  producerType?: 'individual' | 'family' | 'cooperative' | 'company' | 'other' | null;
+  ownershipType?: string | null;
 };
 
 export type CatalogParty = {
@@ -29,9 +31,23 @@ export type CatalogProduct = {
   unit: string | null;
   minQuantity: number | null;
   maxQuantity: number | null;
+  currentStock?: number | null;
+  seasonMonths?: number[];
+  packagingTypes?: string[];
+  packagingWeights?: string[];
+  palletSize?: string | null;
+  incoterms?: string[];
+  carriers?: string[];
+  customDelivery?: string | null;
+  nearestPort?: string | null;
+  deliveryAvailable?: boolean;
+  leadTimeDays?: number | null;
+  priceNegotiable?: boolean;
+  priceDependsOnVolume?: boolean;
   harvestStatus: string | null;
   priceFrom: number | null;
   priceCurrency: string | null;
+  sellerRating?: { average: number | null; count: number } | null;
   images: CatalogImage[];
   updatedAt: string | null;
   owner: CatalogParty;
@@ -167,6 +183,27 @@ function readText(row: Record<string, unknown>): CatalogText {
   };
 }
 
+function readNumberList(value: unknown): number[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.flatMap((item) => {
+    const number = readNumber(item);
+    return number == null ? [] : [number];
+  });
+}
+
+function readSellerRating(value: unknown): { average: number | null; count: number } | null {
+  const row = readRecord(value);
+  if (!row) {
+    return null;
+  }
+  return {
+    average: readNumber(row.average),
+    count: readNumber(row.count) ?? 0,
+  };
+}
+
 function readStringList(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
@@ -242,6 +279,8 @@ function readFarm(value: unknown): CatalogFarm | null {
     name,
     region: readString(farm.region),
     verified: farm.verified === true,
+    producerType: readProducerType(farm.producerType),
+    ownershipType: readString(farm.ownershipType),
   };
 }
 
@@ -250,6 +289,7 @@ export function parseCatalogProduct(value: unknown): CatalogProduct | null {
     return null;
   }
   const row = value as Record<string, unknown>;
+  const sourceRecord = readRecord(row.source);
   const id = readString(row.id);
   const title = localizedField(row, 'title');
   if (!id || !title) {
@@ -260,7 +300,21 @@ export function parseCatalogProduct(value: unknown): CatalogProduct | null {
     title,
     description: localizedField(row, 'description'),
     category: readString(row.category),
-    variety: localizedField(row, 'variety'),
+    variety: readString(sourceRecord?.variety) ?? readString(row.variety),
+    currentStock: readNumber(row.currentStock),
+    seasonMonths: readNumberList(row.seasonMonths),
+    packagingTypes: readStringList(row.packagingTypes),
+    packagingWeights: readStringList(row.packagingWeights),
+    palletSize: readString(row.palletSize),
+    incoterms: readStringList(row.incoterms),
+    carriers: readStringList(row.carriers),
+    customDelivery: readString(row.customDelivery),
+    nearestPort: readString(row.nearestPort),
+    deliveryAvailable: row.deliveryAvailable === true,
+    leadTimeDays: readNumber(row.leadTimeDays),
+    priceNegotiable: row.priceNegotiable === true,
+    priceDependsOnVolume: row.priceDependsOnVolume === true,
+    sellerRating: readSellerRating(row.sellerRating),
     country: readString(row.country),
     originPlace: localizedField(row, 'originPlace'),
     unit: readString(row.unit),
