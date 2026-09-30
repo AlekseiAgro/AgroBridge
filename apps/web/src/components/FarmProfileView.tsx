@@ -147,9 +147,10 @@ export async function FarmProfileView({
               producerType: t('producerType'),
               exportMarkets: t('exportMarkets'),
               registeredName: t('registeredName'),
-              showOriginal: tc('showOriginal'),
-              showTranslation: tc('showTranslation'),
-              originalLanguage: tc('originalLanguage', { language: originalLanguage }),
+              translatedAutomatically: tc('translatedAutomatically'),
+              showingOriginal: tc('showingOriginal', { language: originalLanguage }),
+              translatedMark: tc('translatedMark'),
+              originalMark: tc('originalMark'),
             }}
           />
         </section>

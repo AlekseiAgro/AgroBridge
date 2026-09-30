@@ -7,9 +7,10 @@ type Labels = {
   producerType: string;
   exportMarkets: string;
   registeredName: string;
-  showOriginal: string;
-  showTranslation: string;
-  originalLanguage: string;
+  translatedAutomatically: string;
+  showingOriginal: string;
+  translatedMark: string;
+  originalMark: string;
 };
 
 type Props = {
@@ -35,13 +36,14 @@ export function FarmPublicText({
 }: Props) {
   const translated = display ?? source ?? null;
   const original = source ?? translated;
-  const differs = Boolean(
-    original &&
-      translated &&
-      (!same(translated.description, original.description) ||
-        !same(translated.history, original.history) ||
-        translated.exportMarkets.join('\n') !== original.exportMarkets.join('\n')),
+  const descriptionDiffers = Boolean(
+    original && translated && !same(translated.description, original.description),
   );
+  const historyDiffers = Boolean(original && translated && !same(translated.history, original.history));
+  const marketsDiffer = Boolean(
+    original && translated && translated.exportMarkets.join('\n') !== original.exportMarkets.join('\n'),
+  );
+  const differs = descriptionDiffers || historyDiffers || marketsDiffer;
   const producerValue = producerTypeLabel || legacyOwnership || null;
   const [open, setOpen] = useState(false);
   const text = open && original ? original : translated;
@@ -49,9 +51,23 @@ export function FarmPublicText({
     return null;
   }
 
+  const mark = open ? labels.originalMark : labels.translatedMark;
+
   return (
     <div className="farm-public-text">
-      {text?.description ? <p className="detail-text farm-profile__lede">{text.description}</p> : null}
+      {differs ? (
+        <div className="original-toggle">
+          <button type="button" className="text-button" onClick={() => setOpen((value) => !value)}>
+            {open ? labels.showingOriginal : labels.translatedAutomatically}
+          </button>
+        </div>
+      ) : null}
+      {text?.description ? (
+        <p className="detail-text farm-profile__lede">
+          {text.description}
+          {descriptionDiffers ? <span className="translation-mark">{mark}</span> : null}
+        </p>
+      ) : null}
       {companyRegistryName ? (
         <p className="product-list__meta">
           {labels.registeredName}: {companyRegistryName}
@@ -67,16 +83,14 @@ export function FarmPublicText({
         <p className="detail-text">
           <span className="farm-public-text__label">{labels.exportMarkets}</span>
           {text.exportMarkets.join(', ')}
+          {marketsDiffer ? <span className="translation-mark">{mark}</span> : null}
         </p>
       ) : null}
-      {text?.history ? <p className="detail-text">{text.history}</p> : null}
-      {differs ? (
-        <div className="original-toggle">
-          {open ? <p className="product-list__meta">{labels.originalLanguage}</p> : null}
-          <button type="button" className="text-button" onClick={() => setOpen((value) => !value)}>
-            {open ? labels.showTranslation : labels.showOriginal}
-          </button>
-        </div>
+      {text?.history ? (
+        <p className="detail-text">
+          {text.history}
+          {historyDiffers ? <span className="translation-mark">{mark}</span> : null}
+        </p>
       ) : null}
     </div>
   );
