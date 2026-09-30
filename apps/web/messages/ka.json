@@ -444,6 +444,15 @@
     "foundedYear": "დაარსების წელი",
     "farmSizeHectares": "Farm size (hectares)",
     "ownershipType": "საკუთრების ფორმა",
+    "producerType": "მწარმოებლის ტიპი",
+    "producerTypes": {
+      "individual": "ინდივიდუალური ფერმერი",
+      "family": "საოჯახო მეურნეობა",
+      "cooperative": "კოოპერატივი",
+      "company": "სასოფლო-სამეურნეო კომპანია",
+      "other": "სხვა"
+    },
+    "producerTypeLegacy": "ადრე მითითებული: {value}",
     "exportMarkets": "საექსპორტო ბაზრები",
     "exportMarketsPlaceholder": "Comma separated, e.g. Germany, UAE, Poland",
     "history": "Farm history and story",
@@ -659,6 +668,14 @@
     "farmSize": "ფერმის ფართობი",
     "hectaresValue": "{count} ჰა",
     "ownershipType": "საკუთრების ფორმა",
+    "producerType": "მწარმოებლის ტიპი",
+    "producerTypes": {
+      "individual": "ინდივიდუალური ფერმერი",
+      "family": "საოჯახო მეურნეობა",
+      "cooperative": "კოოპერატივი",
+      "company": "სასოფლო-სამეურნეო კომპანია",
+      "other": "სხვა"
+    },
     "exportMarkets": "საექსპორტო ბაზრები",
     "videos": {
       "title": "პროდუქციის ვიდეო",

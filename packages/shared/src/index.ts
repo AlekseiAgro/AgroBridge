@@ -10,6 +10,7 @@ export * from './product-price';
 export * from './quality';
 export * from './market-insight';
 export * from './catalog';
+export * from './producer-type';
 export * from './product-titles';
 export * from './product-listing-requirements';
 export * from './product-descriptions';

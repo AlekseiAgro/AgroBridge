@@ -96,6 +96,7 @@ const productFarmSelect = {
   foundedYear: true,
   farmSizeHectares: true,
   ownershipType: true,
+  producerType: true,
   exportMarkets: true,
   history: true,
   description: true,

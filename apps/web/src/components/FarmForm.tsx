@@ -4,9 +4,11 @@ import {
   FARM_PHOTO_MAX_BYTES,
   FARM_PHOTO_MAX_COUNT,
   GEORGIA_REGIONS,
+  PRODUCER_TYPES,
   isFarmPhotoMimeType,
   isGeorgiaRegion,
   type FarmDetail,
+  type ProducerType,
 } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { FormEvent, useEffect, useId, useRef, useState } from 'react';
@@ -21,6 +23,7 @@ type Props = {
     | 'foundedYear'
     | 'farmSizeHectares'
     | 'ownershipType'
+    | 'producerType'
     | 'exportMarkets'
     | 'history'
   > | null;
@@ -132,7 +135,7 @@ export function FarmForm({ initial, mode, onSaved }: Props) {
       description: String(form.get('description') ?? ''),
       foundedYear: foundedYearRaw ? Number(foundedYearRaw) : undefined,
       farmSizeHectares: farmSizeRaw ? Number(farmSizeRaw) : undefined,
-      ownershipType: String(form.get('ownershipType') ?? '').trim(),
+      producerType: (String(form.get('producerType') ?? '').trim() || null) as ProducerType | null,
       exportMarkets: [
         ...new Set(
           String(form.get('exportMarkets') ?? '')
@@ -228,8 +231,18 @@ export function FarmForm({ initial, mode, onSaved }: Props) {
         </label>
       </div>
       <label className="field">
-        <span>{t('ownershipType')}</span>
-        <input name="ownershipType" defaultValue={initial?.ownershipType ?? ''} />
+        <span>{t('producerType')}</span>
+        <select name="producerType" defaultValue={initial?.producerType ?? ''}>
+          <option value=""></option>
+          {PRODUCER_TYPES.map((value) => (
+            <option key={value} value={value}>
+              {t(`producerTypes.${value}`)}
+            </option>
+          ))}
+        </select>
+        {initial?.ownershipType && !initial.producerType ? (
+          <span className="product-list__meta">{t('producerTypeLegacy', { value: initial.ownershipType })}</span>
+        ) : null}
       </label>
       <label className="field">
         <span>{t('exportMarkets')}</span>

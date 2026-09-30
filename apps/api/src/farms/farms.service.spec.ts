@@ -110,6 +110,54 @@ describe('FarmsService', () => {
     });
   });
 
+  it('stores a producer type and leaves legacy ownership text unchanged', async () => {
+    const farmer = {
+      id: 'u1',
+      email: 'f@example.com',
+      role: 'farmer' as const,
+      locale: 'en' as const,
+      displayName: 'Nino',
+    };
+    prisma.farm.findUnique.mockResolvedValue({
+      id: 'farm1',
+      ownerId: 'u1',
+      name: 'Test Farm',
+      region: null,
+      description: 'Orchard',
+      foundedYear: null,
+      farmSizeHectares: null,
+      ownershipType: 'llc',
+      producerType: null,
+      exportMarkets: [],
+      history: null,
+      sourceLocale: 'en',
+      verificationStatus: 'unverified',
+      verificationNote: null,
+      verifiedAt: null,
+      companyRegistrationNumber: null,
+      companyRegistryValid: null,
+      createdAt: new Date(),
+      updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+      owner: { id: 'u1', displayName: 'Nino' },
+      documents: [],
+      images: [],
+      products: [],
+      _count: { products: 0 },
+    });
+    prisma.farm.update.mockResolvedValue({});
+
+    await service.updateMine(farmer, { producerType: 'family' });
+
+    expect(prisma.farm.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          producerType: 'family',
+          ownershipType: 'llc',
+        }),
+      }),
+    );
+  });
+
   it('returns farm updatedAt as an ISO string on the public list', async () => {
     prisma.farm.findMany.mockResolvedValue([
       {

@@ -52,6 +52,7 @@ import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
 import { farmDocumentFileUrl } from './farm-document-url';
 import { publicProductWhere } from '../products/public-product.where';
+import { isProducerType } from '@agrobridge/shared';
 import { CatalogTranslationService, farmSourceHash } from '../catalog/catalog-translation.service';
 
 export type FarmDocumentDownload = {
@@ -358,6 +359,7 @@ export class FarmsService {
         foundedYear: dto.foundedYear ?? null,
         farmSizeHectares: dto.farmSizeHectares ?? null,
         ownershipType,
+        producerType: dto.producerType ?? null,
         exportMarkets,
         history,
         verificationStatus: PrismaVerificationStatus.unverified,
@@ -395,8 +397,11 @@ export class FarmsService {
     const history = dto.history === undefined ? farm.history : dto.history.trim() || null;
     const ownershipType =
       dto.ownershipType === undefined ? farm.ownershipType : dto.ownershipType.trim() || null;
+    const producerType = dto.producerType === undefined ? farm.producerType : dto.producerType;
     const exportMarkets =
-      dto.exportMarkets === undefined ? farm.exportMarkets : sanitizeStringArray(dto.exportMarkets, 50);
+      dto.exportMarkets === undefined
+        ? farm.exportMarkets
+        : sanitizeStringArray(dto.exportMarkets, 50);
     const previousHash = farmSourceHash({
       description: farm.description,
       history: farm.history,
@@ -414,6 +419,7 @@ export class FarmsService {
         foundedYear: dto.foundedYear,
         farmSizeHectares: dto.farmSizeHectares,
         ownershipType,
+        producerType,
         exportMarkets,
         history,
       },
@@ -736,6 +742,7 @@ export class FarmsService {
     foundedYear: number | null;
     farmSizeHectares: { toNumber(): number } | number | null;
     ownershipType: string | null;
+    producerType?: string | null;
     exportMarkets: string[];
     history: string | null;
     verificationStatus: PrismaVerificationStatus;
@@ -763,6 +770,7 @@ export class FarmsService {
             ? farm.farmSizeHectares
             : farm.farmSizeHectares.toNumber(),
       ownershipType: farm.ownershipType,
+      producerType: isProducerType(farm.producerType) ? farm.producerType : null,
       exportMarkets: farm.exportMarkets,
       history: farm.history,
       verificationStatus,

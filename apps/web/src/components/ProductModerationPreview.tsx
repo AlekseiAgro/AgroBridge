@@ -319,6 +319,7 @@ export async function ProductModerationPreview({ product, locale }: Props) {
         {product.farm &&
         (product.farm.foundedYear ||
           product.farm.farmSizeHectares != null ||
+          product.farm.producerType ||
           product.farm.ownershipType ||
           product.farm.exportMarkets.length ||
           product.farm.history) ? (
@@ -337,10 +338,14 @@ export async function ProductModerationPreview({ product, locale }: Props) {
                   <dd>{t('hectaresValue', { count: product.farm.farmSizeHectares })}</dd>
                 </div>
               ) : null}
-              {product.farm.ownershipType ? (
+              {product.farm.producerType || product.farm.ownershipType ? (
                 <div>
-                  <dt>{t('ownershipType')}</dt>
-                  <dd>{product.farm.ownershipType}</dd>
+                  <dt>{t('producerType')}</dt>
+                  <dd>
+                    {product.farm.producerType
+                      ? t(`producerTypes.${product.farm.producerType}`)
+                      : product.farm.ownershipType}
+                  </dd>
                 </div>
               ) : null}
               {product.farm.exportMarkets.length ? (
