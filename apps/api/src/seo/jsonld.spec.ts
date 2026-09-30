@@ -3,8 +3,11 @@ import { join } from 'path';
 import type { ProductImage } from '@agrobridge/shared';
 import {
   buildBreadcrumbJsonLd,
+  buildFarmJsonLd,
   buildHomeJsonLd,
   buildProductJsonLd,
+  farmOrganizationId,
+  type FarmJsonLdSource,
   type ProductJsonLdSource,
 } from '../../../web/src/lib/seo-jsonld';
 
@@ -52,6 +55,22 @@ function publicProduct(overrides: Partial<ProductJsonLdSource> = {}): ProductJso
   };
 }
 
+function fixedPriceProduct(overrides: Partial<ProductJsonLdSource> = {}): ProductJsonLdSource {
+  return publicProduct({
+    priceFrom: 4.5,
+    priceCurrency: 'EUR',
+    priceNegotiable: false,
+    priceDependsOnVolume: false,
+    harvestStatus: 'available',
+    preorderEnabled: false,
+    farm: { id: 'farm12345' },
+    ...overrides,
+  });
+}
+
+const FARM_ORGANIZATION_ID = 'https://agrobridge.ge/en/farms/farm12345#organization';
+const AGROBRIDGE_ORGANIZATION_ID = 'https://agrobridge.ge/#organization';
+
 const FORBIDDEN_HOME_KEYS = [
   'sameAs',
   'telephone',
@@ -89,6 +108,9 @@ const FORBIDDEN_PRODUCT_KEYS = [
   'BreadcrumbList',
   'ItemList',
   'hasCertification',
+  'shippingDetails',
+  'hasMerchantReturnPolicy',
+  'offeredBy',
   'robots',
   'moderationNote',
   'moderationStatus',
@@ -273,51 +295,270 @@ describe('product JSON-LD', () => {
     expect(withoutImages).not.toHaveProperty('image');
   });
 
-  it('does not invent an offer, availability, rating, or seller', () => {
-    const priced = {
-      ...publicProduct({ description: null, images: [] }),
-      priceFrom: 4.5,
+  it('emits an Offer for a fixed public starting price', () => {
+    const data = buildProductJsonLd(fixedPriceProduct(), 'de');
+    const offer = data?.offers as Record<string, unknown>;
+
+    expect(offer).toEqual({
+      '@type': 'Offer',
+      price: 4.5,
       priceCurrency: 'EUR',
-      priceNegotiable: false,
-      priceDependsOnVolume: false,
-      harvestStatus: 'available',
+      url: 'https://agrobridge.ge/de/products/prod12345',
+      availability: 'https://schema.org/InStock',
+      seller: { '@id': FARM_ORGANIZATION_ID },
+    });
+    expect(typeof offer.price).toBe('number');
+    expect(offer).not.toHaveProperty('priceSpecification');
+    expect(data).not.toHaveProperty('availability');
+    expect(JSON.stringify(data)).not.toContain(AGROBRIDGE_ORGANIZATION_ID);
+    expect(JSON.stringify(data)).not.toContain('P/E VANO');
+    expect(JSON.stringify(data)).not.toContain('offeredBy');
+  });
+
+  it('points seller at the farm organization and omits seller when the farm is missing', () => {
+    const withFarm = buildProductJsonLd(fixedPriceProduct(), 'en');
+    expect((withFarm?.offers as { seller: { '@id': string } }).seller['@id']).toBe(
+      farmOrganizationId('farm12345'),
+    );
+    expect((withFarm?.offers as { seller: { '@id': string } }).seller['@id']).not.toBe(
+      AGROBRIDGE_ORGANIZATION_ID,
+    );
+
+    for (const farm of [null, undefined, { id: '   ' }]) {
+      const data = buildProductJsonLd(fixedPriceProduct({ farm }), 'en');
+      const offer = data?.offers as Record<string, unknown>;
+      expect(offer).toMatchObject({
+        '@type': 'Offer',
+        price: 4.5,
+        priceCurrency: 'EUR',
+      });
+      expect(offer).not.toHaveProperty('seller');
+      expect(JSON.stringify(data)).not.toContain(AGROBRIDGE_ORGANIZATION_ID);
+    }
+  });
+
+  it('omits the Offer for negotiable, volume-dependent, and invalid prices', () => {
+    const cases: ProductJsonLdSource[] = [
+      fixedPriceProduct({ priceNegotiable: true }),
+      fixedPriceProduct({ priceDependsOnVolume: true }),
+      fixedPriceProduct({ priceNegotiable: true, priceDependsOnVolume: true }),
+      fixedPriceProduct({ priceFrom: null, priceCurrency: null }),
+      fixedPriceProduct({ priceFrom: 0 }),
+      fixedPriceProduct({ priceFrom: -1 }),
+      fixedPriceProduct({ priceFrom: Number.NaN }),
+      fixedPriceProduct({ priceFrom: Number.POSITIVE_INFINITY }),
+      fixedPriceProduct({ priceCurrency: 'GBP' }),
+      fixedPriceProduct({ priceCurrency: '' }),
+      fixedPriceProduct({ priceCurrency: null }),
+      fixedPriceProduct({ priceNegotiable: undefined, priceDependsOnVolume: undefined }),
+    ];
+
+    for (const product of cases) {
+      const data = buildProductJsonLd(product, 'en');
+      expect(data?.['@type']).toBe('Product');
+      expect(data).not.toHaveProperty('offers');
+      expect(keysDeep(data)).not.toContain('price');
+      expect(keysDeep(data)).not.toContain('priceCurrency');
+      expect(keysDeep(data)).not.toContain('seller');
+      expect(keysDeep(data)).not.toContain('availability');
+    }
+  });
+
+  it('maps harvest status to availability and never uses stock', () => {
+    const cases: Array<{
+      harvestStatus: string | null;
+      preorderEnabled?: boolean;
+      currentStock?: number | null;
+      availability?: string;
+    }> = [
+      { harvestStatus: 'available', availability: 'https://schema.org/InStock' },
+      { harvestStatus: 'available', currentStock: 0, availability: 'https://schema.org/InStock' },
+      { harvestStatus: 'available', currentStock: null, availability: 'https://schema.org/InStock' },
+      { harvestStatus: 'limited', availability: 'https://schema.org/LimitedAvailability' },
+      { harvestStatus: 'soldOut', currentStock: 100, availability: 'https://schema.org/SoldOut' },
+      {
+        harvestStatus: 'growing',
+        preorderEnabled: true,
+        availability: 'https://schema.org/PreOrder',
+      },
+      { harvestStatus: 'growing', preorderEnabled: false },
+      { harvestStatus: 'growing' },
+      { harvestStatus: null },
+    ];
+
+    for (const item of cases) {
+      const product = {
+        ...fixedPriceProduct({
+          harvestStatus: item.harvestStatus,
+          preorderEnabled: item.preorderEnabled,
+        }),
+        currentStock: item.currentStock,
+      };
+      const offer = buildProductJsonLd(product, 'en')?.offers as Record<string, unknown>;
+      if (item.availability) {
+        expect(offer.availability).toBe(item.availability);
+      } else {
+        expect(offer).not.toHaveProperty('availability');
+      }
+      expect(keysDeep(offer)).not.toContain('inventoryLevel');
+      expect(JSON.stringify(offer)).not.toContain('currentStock');
+    }
+  });
+
+  it('does not emit ratings, identifiers, or merchant-listing commercial fields', () => {
+    const product = {
+      ...fixedPriceProduct({ description: null, images: [] }),
       sellerRating: { average: 4.5, count: 3 },
       moderationNote: 'internal note',
       ownerUserId: 'owner12345',
       variety: 'Freestone',
       qualityScore: { score: 80 },
       opportunity: { tier: 'good' },
+      brand: 'Estate',
+      sku: 'SKU-1',
+      gtin: '00012345678905',
+      mpn: 'MPN-1',
     };
-    const cases = [
-      priced,
-      { ...priced, priceNegotiable: true, harvestStatus: 'limited' },
-      { ...priced, priceDependsOnVolume: true, harvestStatus: 'growing' },
-      { ...priced, priceFrom: null, priceCurrency: null, harvestStatus: 'soldOut' },
-    ];
-
-    for (const product of cases) {
-      const data = buildProductJsonLd(product, 'de');
-      expect(data?.['@type']).toBe('Product');
-      expect(data).not.toHaveProperty('offers');
-      expect(data).not.toHaveProperty('availability');
-      expect(data).not.toHaveProperty('aggregateRating');
-      expect(data).not.toHaveProperty('review');
-      expect(data).not.toHaveProperty('seller');
-      expect(data).not.toHaveProperty('manufacturer');
-      expect(data).not.toHaveProperty('brand');
-      expect(data).not.toHaveProperty('sku');
-      expect(data).not.toHaveProperty('productID');
-      expect(data).not.toHaveProperty('material');
-      expect(data).not.toHaveProperty('robots');
-      const serialized = JSON.stringify(data);
-      expect(serialized).not.toContain('internal note');
-      expect(serialized).not.toContain('owner12345');
-      expect(serialized).not.toContain('Freestone');
-      expect(serialized).not.toContain('price');
-      for (const key of FORBIDDEN_PRODUCT_KEYS) {
-        expect(keysDeep(data)).not.toContain(key);
-      }
+    const data = buildProductJsonLd(product, 'de');
+    const allowed = new Set(['offers', 'price', 'priceCurrency', 'seller', 'availability']);
+    for (const key of FORBIDDEN_PRODUCT_KEYS) {
+      if (allowed.has(key)) continue;
+      expect(keysDeep(data)).not.toContain(key);
     }
+    const serialized = JSON.stringify(data);
+    expect(serialized).not.toContain('internal note');
+    expect(serialized).not.toContain('owner12345');
+    expect(serialized).not.toContain('Freestone');
+    expect(serialized).not.toContain('Estate');
+    expect(serialized).not.toContain('SKU-1');
+    expect(serialized).not.toContain('00012345678905');
+    expect(serialized).not.toContain('MPN-1');
+    expect(serialized).not.toContain('shippingDetails');
+    expect(serialized).not.toContain('hasMerchantReturnPolicy');
+    expect(serialized).not.toContain('aggregateRating');
+    expect(serialized).not.toContain('inventoryLevel');
+    expect(serialized).not.toContain('priceSpecification');
+  });
+});
+
+describe('farm JSON-LD', () => {
+  function publicFarm(overrides: Partial<FarmJsonLdSource> = {}): FarmJsonLdSource {
+    return {
+      id: 'farm12345',
+      name: 'Kakheti Qvevri Cellar',
+      description: 'Traditional qvevri wines.',
+      region: 'kakheti',
+      foundedYear: 2001,
+      companyRegistryName: 'Kakheti Qvevri LLC',
+      photos: [
+        { url: '/api/uploads/farms/farm12345/cellar.jpg', sortOrder: 0 },
+      ],
+      ...overrides,
+    };
+  }
+
+  it('describes the farm as an Organization with a stable English id', () => {
+    const en = buildFarmJsonLd(publicFarm(), 'en');
+    const ru = buildFarmJsonLd(
+      publicFarm({
+        display: { description: 'Традиционные вина квеври.' },
+      }),
+      'ru',
+    );
+
+    expect(en).toMatchObject({
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      '@id': FARM_ORGANIZATION_ID,
+      url: 'https://agrobridge.ge/en/farms/farm12345',
+      name: 'Kakheti Qvevri Cellar',
+      description: 'Traditional qvevri wines.',
+      image: ['https://agrobridge.ge/api/uploads/farms/farm12345/cellar.jpg'],
+      foundingDate: '2001',
+      legalName: 'Kakheti Qvevri LLC',
+      address: {
+        '@type': 'PostalAddress',
+        addressRegion: 'Kakheti',
+        addressCountry: 'GE',
+      },
+    });
+    expect(en?.['@type']).not.toBe('Farm');
+    expect(en?.['@type']).not.toBe('LocalBusiness');
+    expect(ru).toMatchObject({
+      '@id': FARM_ORGANIZATION_ID,
+      url: 'https://agrobridge.ge/ru/farms/farm12345',
+      description: 'Традиционные вина квеври.',
+      address: {
+        addressRegion: 'Кахетия',
+        addressCountry: 'GE',
+      },
+    });
+    expect(Object.keys(en?.address as object).sort()).toEqual([
+      '@type',
+      'addressCountry',
+      'addressRegion',
+    ]);
+    const serialized = JSON.stringify(en);
+    expect(serialized).not.toContain('streetAddress');
+    expect(serialized).not.toContain('postalCode');
+    expect(serialized).not.toContain('telephone');
+    expect(serialized).not.toContain('email');
+    expect(serialized).not.toContain('geo');
+    expect(serialized).not.toContain(AGROBRIDGE_ORGANIZATION_ID);
+  });
+
+  it('omits address, founding date, legal name, and photos that are not public', () => {
+    const data = buildFarmJsonLd(
+      publicFarm({
+        region: 'not-a-region',
+        foundedYear: null,
+        companyRegistryName: '   ',
+        photos: [{ url: '/api/uploads/farms/farm12345/documents/secret.pdf', sortOrder: 0 }],
+        description: '   ',
+      }),
+      'en',
+    );
+    expect(data).not.toHaveProperty('address');
+    expect(data).not.toHaveProperty('foundingDate');
+    expect(data).not.toHaveProperty('legalName');
+    expect(data).not.toHaveProperty('image');
+    expect(data).not.toHaveProperty('description');
+    expect(data?.['@type']).toBe('Organization');
+  });
+
+  it('does not expose owner, registry number, verification, or ratings', () => {
+    const farm = {
+      ...publicFarm({ region: null, photos: [] }),
+      owner: { id: 'user12345', displayName: 'Tanya Private' },
+      verificationStatus: 'approved',
+      verified: true,
+      verificationNote: 'internal verification note',
+      companyRegistrationNumber: '01501157152',
+      documents: [{ url: '/api/uploads/farms/farm12345/documents/license.pdf' }],
+    };
+    const data = buildFarmJsonLd(farm, 'ka');
+    const serialized = JSON.stringify(data);
+    expect(data?.address).toBeUndefined();
+    expect(serialized).not.toContain('Tanya Private');
+    expect(serialized).not.toContain('user12345');
+    expect(serialized).not.toContain('internal verification note');
+    expect(serialized).not.toContain('01501157152');
+    expect(serialized).not.toContain('license.pdf');
+    expect(serialized).not.toContain('aggregateRating');
+    expect(serialized).not.toContain('review');
+    expect(serialized).not.toContain('LocalBusiness');
+    expect(serialized).not.toContain('"Farm"');
+    expect(data?.['@id']).toBe(FARM_ORGANIZATION_ID);
+    expect(data?.address).toBeUndefined();
+  });
+
+  it('uses the same farm @id as a product Offer seller', () => {
+    const product = buildProductJsonLd(fixedPriceProduct(), 'fr');
+    const farm = buildFarmJsonLd(publicFarm(), 'fr');
+    const sellerId = (product?.offers as { seller: { '@id': string } }).seller['@id'];
+    expect(sellerId).toBe(farm?.['@id']);
+    expect(sellerId).toBe(farmOrganizationId('farm12345'));
+    expect(farm?.url).toBe('https://agrobridge.ge/fr/farms/farm12345');
   });
 });
 
@@ -336,8 +577,12 @@ describe('JSON-LD page wiring', () => {
 
     const builder = readWeb('lib/seo-jsonld.ts');
     expect(builder).toContain('isPubliclyListedProduct');
-    expect(builder).not.toContain('offers:');
+    expect(builder).toContain("'@type': 'Offer'");
+    expect(builder).toContain('data.offers = offer');
     expect(builder).not.toContain('aggregateRating');
+    expect(builder).not.toContain('shippingDetails');
+    expect(builder).not.toContain('hasMerchantReturnPolicy');
+    expect(builder).not.toContain('inventoryLevel');
 
     expect(readWeb('lib/seo-public-metadata.ts')).not.toContain('application/ld+json');
     expect(readWeb('components/JsonLd.tsx')).toContain('type="application/ld+json"');
@@ -478,7 +723,7 @@ describe('breadcrumb JSON-LD', () => {
     );
     const productFn = builder.slice(
       builder.indexOf('export function buildProductJsonLd'),
-      builder.indexOf('export type BreadcrumbJsonLdItem'),
+      builder.indexOf('export function buildFarmJsonLd'),
     );
     expect(homeFn).not.toContain('BreadcrumbList');
     expect(productFn).not.toContain('BreadcrumbList');
@@ -523,6 +768,8 @@ describe('breadcrumb JSON-LD', () => {
     const farm = readWeb('app/[locale]/farms/[id]/page.tsx');
     expect(farm).toContain('PublicBreadcrumbs');
     expect(farm).toContain('buildBreadcrumbJsonLd');
+    expect(farm).toContain('buildFarmJsonLd(farm, locale)');
+    expect(farm).toContain('farmJsonLd ? <JsonLd');
     expect(farm).toContain("path: `/farms/${farm.id}`");
     expect(farm).not.toContain("path: '/catalog'");
     expect(readWeb('components/FarmProfileView.tsx')).not.toContain('PublicBreadcrumbs');

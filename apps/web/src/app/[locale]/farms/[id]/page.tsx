@@ -9,7 +9,7 @@ import { PublicBreadcrumbs } from '@/components/PublicBreadcrumbs';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { ApiError, apiRequest } from '@/lib/api';
-import { buildBreadcrumbJsonLd } from '@/lib/seo-jsonld';
+import { buildBreadcrumbJsonLd, buildFarmJsonLd } from '@/lib/seo-jsonld';
 import { farmPageMetadata } from '@/lib/seo-public-metadata';
 
 const loadFarm = cache(async (id: string, locale: string) =>
@@ -45,6 +45,7 @@ export default async function FarmDetailPage({ params }: Props) {
     throw error;
   }
 
+  const farmJsonLd = buildFarmJsonLd(farm, locale);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd({
     locale,
     idPath: `/farms/${farm.id}`,
@@ -63,6 +64,7 @@ export default async function FarmDetailPage({ params }: Props) {
 
   return (
     <div className="page">
+      {farmJsonLd ? <JsonLd data={farmJsonLd} /> : null}
       {breadcrumbJsonLd ? <JsonLd data={breadcrumbJsonLd} /> : null}
       <SiteHeader />
       <main className="page__main">
