@@ -11,6 +11,7 @@ const webRoot = join(__dirname, '../../../web/src');
 const farmPage = readFileSync(join(webRoot, 'app/[locale]/dashboard/farm/page.tsx'), 'utf8');
 const publicPage = readFileSync(join(webRoot, 'app/[locale]/farms/[id]/page.tsx'), 'utf8');
 const profileView = readFileSync(join(webRoot, 'components/FarmProfileView.tsx'), 'utf8');
+const publicText = readFileSync(join(webRoot, 'components/FarmPublicText.tsx'), 'utf8');
 const ownerWorkspace = readFileSync(join(webRoot, 'components/FarmOwnerWorkspace.tsx'), 'utf8');
 const farmForm = readFileSync(join(webRoot, 'components/FarmForm.tsx'), 'utf8');
 const photosManager = readFileSync(join(webRoot, 'components/FarmPhotosManager.tsx'), 'utf8');
@@ -463,7 +464,7 @@ describe('edit form save placement', () => {
 describe('compact farm header', () => {
   it('uses a compact cover instead of the product hero gallery', () => {
     expect(profileView).toContain('<FarmCoverPhotos');
-    expect(profileView).toContain('farm-profile__lede');
+    expect(publicText).toContain('farm-profile__lede');
     expect(profileView).not.toContain('product-gallery');
     expect(profileView).not.toContain('product-gallery__image--primary');
   });

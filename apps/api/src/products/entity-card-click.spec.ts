@@ -259,7 +259,9 @@ describe('clickable entity cards', () => {
   it('applies the pattern only where a card already has one destination', () => {
     expect(catalog).toContain('product-list__item product-list__item--with-media entity-card');
     expect(catalog).toContain('href={`/products/${product.id}`}');
-    expect(catalog).toContain('href={`/farms/${product.farm.id}`}');
+    expect(catalog).toContain(
+      'href={product.farm ? `/farms/${product.farm.id}` : `/users/${product.owner.id}`}',
+    );
     expect(catalog).toContain('reviewsHref={`/users/${product.owner.id}/reviews`}');
 
     expect(mine).toContain('product-list__item--mine entity-card');
