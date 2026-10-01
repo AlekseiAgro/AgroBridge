@@ -257,9 +257,15 @@ export function buildHomeJsonLd(input: HomeJsonLdInput): JsonLdNode | null {
   const slogan = input.slogan.trim();
   if (slogan) organization.slogan = slogan;
 
+  const webpage = webpageNode({
+    locale: input.locale,
+    path: '',
+    aboutId: ORGANIZATION_ID,
+  });
+
   return {
     '@context': 'https://schema.org',
-    '@graph': [website, organization],
+    '@graph': [website, organization, webpage],
   };
 }
 
@@ -387,4 +393,97 @@ export function buildBreadcrumbJsonLd(input: {
     '@id': `${localizedPublicUrl(DEFAULT_LOCALE, input.idPath)}#breadcrumb`,
     itemListElement,
   };
+}
+
+/**
+ * Locale page node. It only references existing entity ids.
+ * Product, farm, website, and organization nodes stay in their own builders.
+ */
+function webpageNode(input: {
+  locale: Locale;
+  path: string;
+  aboutId?: string;
+  mainEntityId?: string;
+  breadcrumbId?: string;
+}): JsonLdNode {
+  const url = localizedPublicUrl(input.locale, input.path);
+  const page: JsonLdNode = {
+    '@type': 'WebPage',
+    '@id': `${url}#webpage`,
+    url,
+    inLanguage: input.locale,
+    isPartOf: { '@id': WEBSITE_ID },
+  };
+  if (input.mainEntityId) page.mainEntity = { '@id': input.mainEntityId };
+  if (input.breadcrumbId) page.breadcrumb = { '@id': input.breadcrumbId };
+  if (input.aboutId) page.about = { '@id': input.aboutId };
+  return page;
+}
+
+function withoutContext(node: JsonLdNode): JsonLdNode {
+  const rest = { ...node };
+  delete rest['@context'];
+  return rest;
+}
+
+function linkedGraph(nodes: JsonLdNode[]): JsonLdNode {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': nodes.map(withoutContext),
+  };
+}
+
+function breadcrumbIdOf(breadcrumb: JsonLdNode | null): string {
+  if (!breadcrumb || breadcrumb['@type'] !== 'BreadcrumbList') return '';
+  return typeof breadcrumb['@id'] === 'string' ? breadcrumb['@id'] : '';
+}
+
+/** One graph: the existing Product node, its breadcrumb, and a WebPage that only links them. */
+export function buildProductPageJsonLd(
+  product: ProductJsonLdSource,
+  locale: string,
+  breadcrumb: JsonLdNode | null,
+): JsonLdNode | null {
+  const entity = buildProductJsonLd(product, locale);
+  if (!entity || !isLocale(locale)) return null;
+
+  const productId = typeof entity['@id'] === 'string' ? entity['@id'] : '';
+  if (!productId) return null;
+  const breadcrumbId = breadcrumbIdOf(breadcrumb);
+  const farmId = product.farm?.id?.trim() ?? '';
+  const webpage = webpageNode({
+    locale,
+    path: `/products/${product.id.trim()}`,
+    mainEntityId: productId,
+    ...(breadcrumbId ? { breadcrumbId } : {}),
+    ...(farmId ? { aboutId: farmOrganizationId(farmId) } : {}),
+  });
+  const nodes = [entity];
+  if (breadcrumbId && breadcrumb) nodes.push(breadcrumb);
+  nodes.push(webpage);
+  return linkedGraph(nodes);
+}
+
+/** One graph: the existing farm Organization, its breadcrumb, and a WebPage that only links them. */
+export function buildFarmPageJsonLd(
+  farm: FarmJsonLdSource,
+  locale: string,
+  breadcrumb: JsonLdNode | null,
+): JsonLdNode | null {
+  const entity = buildFarmJsonLd(farm, locale);
+  if (!entity || !isLocale(locale)) return null;
+
+  const organizationId = typeof entity['@id'] === 'string' ? entity['@id'] : '';
+  if (!organizationId) return null;
+  const breadcrumbId = breadcrumbIdOf(breadcrumb);
+  const webpage = webpageNode({
+    locale,
+    path: `/farms/${farm.id.trim()}`,
+    mainEntityId: organizationId,
+    ...(breadcrumbId ? { breadcrumbId } : {}),
+  });
+  const nodes = [entity];
+  if (breadcrumbId && breadcrumb) nodes.push(breadcrumb);
+  nodes.push(webpage);
+  return linkedGraph(nodes);
 }

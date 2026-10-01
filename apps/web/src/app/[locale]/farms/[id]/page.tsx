@@ -9,7 +9,7 @@ import { PublicBreadcrumbs } from '@/components/PublicBreadcrumbs';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SiteHeader } from '@/components/SiteHeader';
 import { ApiError, apiRequest } from '@/lib/api';
-import { buildBreadcrumbJsonLd, buildFarmJsonLd } from '@/lib/seo-jsonld';
+import { buildBreadcrumbJsonLd, buildFarmPageJsonLd } from '@/lib/seo-jsonld';
 import { farmPageMetadata } from '@/lib/seo-public-metadata';
 
 const loadFarm = cache(async (id: string, locale: string) =>
@@ -45,7 +45,6 @@ export default async function FarmDetailPage({ params }: Props) {
     throw error;
   }
 
-  const farmJsonLd = buildFarmJsonLd(farm, locale);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd({
     locale,
     idPath: `/farms/${farm.id}`,
@@ -54,6 +53,7 @@ export default async function FarmDetailPage({ params }: Props) {
       { name: farm.name, path: `/farms/${farm.id}` },
     ],
   });
+  const farmPageJsonLd = buildFarmPageJsonLd(farm, locale, breadcrumbJsonLd);
 
   let ownerRating: RatingSummary = { average: null, count: 0 };
   try {
@@ -64,8 +64,7 @@ export default async function FarmDetailPage({ params }: Props) {
 
   return (
     <div className="page">
-      {farmJsonLd ? <JsonLd data={farmJsonLd} /> : null}
-      {breadcrumbJsonLd ? <JsonLd data={breadcrumbJsonLd} /> : null}
+      {farmPageJsonLd ? <JsonLd data={farmPageJsonLd} /> : null}
       <SiteHeader />
       <main className="page__main">
         <PublicBreadcrumbs

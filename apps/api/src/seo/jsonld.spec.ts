@@ -4,8 +4,10 @@ import type { ProductImage } from '@agrobridge/shared';
 import {
   buildBreadcrumbJsonLd,
   buildFarmJsonLd,
+  buildFarmPageJsonLd,
   buildHomeJsonLd,
   buildProductJsonLd,
+  buildProductPageJsonLd,
   farmOrganizationId,
   type FarmJsonLdSource,
   type ProductJsonLdSource,
@@ -138,8 +140,8 @@ describe('homepage JSON-LD', () => {
     });
     const kaGraph = ka?.['@graph'] as Array<Record<string, unknown>>;
     const enGraph = en?.['@graph'] as Array<Record<string, unknown>>;
-    expect(kaGraph).toHaveLength(2);
-    expect(enGraph.map((node) => node['@type'])).toEqual(['WebSite', 'Organization']);
+    expect(kaGraph).toHaveLength(3);
+    expect(enGraph.map((node) => node['@type'])).toEqual(['WebSite', 'Organization', 'WebPage']);
 
     expect(kaGraph[0]).toMatchObject({
       '@type': 'WebSite',
@@ -195,6 +197,24 @@ describe('homepage JSON-LD', () => {
     });
     expect(JSON.stringify(kaGraph[1])).not.toContain('sameAs');
     expect(JSON.stringify(enGraph[1])).not.toContain('company');
+    expect(kaGraph.filter((node) => node['@type'] === 'Organization')).toHaveLength(1);
+    expect(kaGraph.filter((node) => node['@type'] === 'WebSite')).toHaveLength(1);
+    expect(kaGraph.filter((node) => node['@type'] === 'WebPage')).toHaveLength(1);
+    expect(kaGraph[2]).toEqual({
+      '@type': 'WebPage',
+      '@id': 'https://agrobridge.ge/ka#webpage',
+      url: 'https://agrobridge.ge/ka',
+      inLanguage: 'ka',
+      isPartOf: { '@id': 'https://agrobridge.ge/#website' },
+      about: { '@id': 'https://agrobridge.ge/#organization' },
+    });
+    expect(enGraph[2]).toMatchObject({
+      '@id': 'https://agrobridge.ge/en#webpage',
+      url: 'https://agrobridge.ge/en',
+      inLanguage: 'en',
+      isPartOf: { '@id': 'https://agrobridge.ge/#website' },
+      about: { '@id': 'https://agrobridge.ge/#organization' },
+    });
 
     const logoSource = readWeb('components/BrandLogo.tsx');
     expect(logoSource).toContain("AGROBRIDGE_LOGO_SRC = '/brand/agrobridge-logo.png'");
@@ -570,8 +590,9 @@ describe('JSON-LD page wiring', () => {
     expect(home).not.toContain('application/ld+json');
 
     const product = readWeb('app/[locale]/products/[id]/page.tsx');
-    expect(product).toContain('buildProductJsonLd(product, locale)');
-    expect(product).toContain('productJsonLd ? <JsonLd');
+    expect(product).toContain('buildProductPageJsonLd(product, locale, breadcrumbJsonLd)');
+    expect(product).toContain('productPageJsonLd ? <JsonLd');
+    expect(product).not.toContain('productJsonLd ? <JsonLd');
     expect(product).not.toContain('noindexFollowRobots');
     expect(product).not.toContain('index: false');
 
@@ -768,8 +789,9 @@ describe('breadcrumb JSON-LD', () => {
     const farm = readWeb('app/[locale]/farms/[id]/page.tsx');
     expect(farm).toContain('PublicBreadcrumbs');
     expect(farm).toContain('buildBreadcrumbJsonLd');
-    expect(farm).toContain('buildFarmJsonLd(farm, locale)');
-    expect(farm).toContain('farmJsonLd ? <JsonLd');
+    expect(farm).toContain('buildFarmPageJsonLd(farm, locale, breadcrumbJsonLd)');
+    expect(farm).toContain('farmPageJsonLd ? <JsonLd');
+    expect(farm).not.toContain('farmJsonLd ? <JsonLd');
     expect(farm).toContain("path: `/farms/${farm.id}`");
     expect(farm).not.toContain("path: '/catalog'");
     expect(readWeb('components/FarmProfileView.tsx')).not.toContain('PublicBreadcrumbs');
@@ -788,6 +810,22 @@ describe('breadcrumb JSON-LD', () => {
     expect(component).not.toContain('apiRequest');
 
     for (const path of [
+      'app/[locale]/catalog/page.tsx',
+      'app/[locale]/requests/page.tsx',
+      'app/[locale]/requests/[id]/page.tsx',
+      'app/[locale]/users/[id]/page.tsx',
+      'app/[locale]/login/page.tsx',
+      'app/[locale]/register/page.tsx',
+      'app/[locale]/dashboard/layout.tsx',
+      'app/[locale]/account/layout.tsx',
+      'app/[locale]/requests/new/page.tsx',
+    ]) {
+      expect(readWeb(path)).not.toContain('#webpage');
+      expect(readWeb(path)).not.toContain('buildProductPageJsonLd');
+      expect(readWeb(path)).not.toContain('buildFarmPageJsonLd');
+    }
+
+    for (const path of [
       'app/[locale]/page.tsx',
       'app/[locale]/catalog/page.tsx',
       'app/[locale]/buyers/page.tsx',
@@ -802,5 +840,149 @@ describe('breadcrumb JSON-LD', () => {
       expect(source).not.toContain('PublicBreadcrumbs');
       expect(source).not.toContain('buildBreadcrumbJsonLd');
     }
+  });
+});
+
+function graphOf(data: Record<string, unknown> | null): Array<Record<string, unknown>> {
+  return (data?.['@graph'] as Array<Record<string, unknown>> | undefined) ?? [];
+}
+
+function nodeOf(graph: Array<Record<string, unknown>>, type: string): Record<string, unknown> {
+  const matches = graph.filter((node) => node['@type'] === type);
+  expect(matches).toHaveLength(1);
+  return matches[0];
+}
+
+describe('webpage JSON-LD', () => {
+  function productCrumb(locale: 'en' | 'ru') {
+    return buildBreadcrumbJsonLd({
+      locale,
+      idPath: '/products/prod12345',
+      items: [
+        { name: 'Home', path: '' },
+        { name: 'Catalog', path: '/catalog' },
+        { name: 'Fresh Kakheti peaches', path: '/products/prod12345' },
+      ],
+    });
+  }
+
+  it('links a localized product page to the stable product, breadcrumb, website, and farm ids', () => {
+    const source = publicProduct({ farm: { id: 'farm12345' } });
+    const crumb = productCrumb('ru');
+    const page = buildProductPageJsonLd(source, 'ru', crumb);
+    const graph = graphOf(page);
+    expect(graph.map((node) => node['@type'])).toEqual(['Product', 'BreadcrumbList', 'WebPage']);
+    expect(graph.filter((node) => node['@type'] === 'WebSite')).toHaveLength(0);
+    expect(graph.filter((node) => node['@type'] === 'Organization')).toHaveLength(0);
+
+    const product = nodeOf(graph, 'Product');
+    const standalone = buildProductJsonLd(source, 'ru');
+    expect(standalone).not.toBeNull();
+    const { '@context': _productContext, ...productNode } = standalone ?? {};
+    expect(product).toEqual(productNode);
+    expect(product['@id']).toBe('https://agrobridge.ge/en/products/prod12345#product');
+    expect(product).not.toHaveProperty('offers');
+    expect(product).not.toHaveProperty('brand');
+    expect(product).not.toHaveProperty('manufacturer');
+
+    const webpage = nodeOf(graph, 'WebPage');
+    expect(webpage).toEqual({
+      '@type': 'WebPage',
+      '@id': 'https://agrobridge.ge/ru/products/prod12345#webpage',
+      url: 'https://agrobridge.ge/ru/products/prod12345',
+      inLanguage: 'ru',
+      isPartOf: { '@id': 'https://agrobridge.ge/#website' },
+      mainEntity: { '@id': 'https://agrobridge.ge/en/products/prod12345#product' },
+      breadcrumb: { '@id': 'https://agrobridge.ge/en/products/prod12345#breadcrumb' },
+      about: { '@id': FARM_ORGANIZATION_ID },
+    });
+    expect(nodeOf(graph, 'BreadcrumbList')['@id']).toBe(
+      'https://agrobridge.ge/en/products/prod12345#breadcrumb',
+    );
+  });
+
+  it('keeps the existing Offer on a fixed-price product and omits about when there is no farm', () => {
+    const source = fixedPriceProduct({ farm: null });
+    const page = buildProductPageJsonLd(source, 'en', productCrumb('en'));
+    const graph = graphOf(page);
+    const product = nodeOf(graph, 'Product');
+    const standalone = buildProductJsonLd(source, 'en');
+    expect(product.offers).toEqual(
+      (standalone as { offers: unknown } | null)?.offers,
+    );
+    expect(nodeOf(graph, 'WebPage')).not.toHaveProperty('about');
+    expect(JSON.stringify(page)).not.toContain('brand');
+    expect(JSON.stringify(page)).not.toContain('manufacturer');
+    expect(JSON.stringify(page)).not.toContain('aggregateRating');
+    expect(JSON.stringify(page)).not.toContain('inventoryLevel');
+    expect(JSON.stringify(page)).not.toContain('shippingDetails');
+    expect(JSON.stringify(page)).not.toContain('hasMerchantReturnPolicy');
+    expect(JSON.stringify(page)).not.toContain('LocalBusiness');
+    expect(JSON.stringify(page)).not.toContain('sameAs');
+    expect(JSON.stringify(page)).not.toContain('SearchAction');
+  });
+
+  it('does not build a product page graph for a private or unknown listing', () => {
+    const crumb = productCrumb('en');
+    expect(buildProductPageJsonLd(publicProduct({ isPublished: false }), 'en', crumb)).toBeNull();
+    expect(buildProductPageJsonLd(publicProduct(), 'xx', crumb)).toBeNull();
+  });
+
+  it('links a localized farm page without making the farm a subsidiary', () => {
+    const farm = {
+      id: 'farm12345',
+      name: 'Kakheti Qvevri Cellar',
+      description: 'Traditional qvevri wines.',
+      region: 'kakheti',
+      foundedYear: 2001,
+      companyRegistryName: 'Kakheti Qvevri LLC',
+      photos: [{ url: '/api/uploads/farms/farm12345/cellar.jpg', sortOrder: 0 }],
+    };
+    const crumb = buildBreadcrumbJsonLd({
+      locale: 'de',
+      idPath: '/farms/farm12345',
+      items: [
+        { name: 'Startseite', path: '' },
+        { name: 'Kakheti Qvevri Cellar', path: '/farms/farm12345' },
+      ],
+    });
+    const page = buildFarmPageJsonLd(farm, 'de', crumb);
+    const graph = graphOf(page);
+    expect(graph.map((node) => node['@type'])).toEqual([
+      'Organization',
+      'BreadcrumbList',
+      'WebPage',
+    ]);
+    expect(graph.filter((node) => node['@type'] === 'WebSite')).toHaveLength(0);
+    expect(graph.filter((node) => node['@type'] === 'Organization')).toHaveLength(1);
+    expect(graph.filter((node) => node['@type'] === 'WebPage')).toHaveLength(1);
+
+    const organization = nodeOf(graph, 'Organization');
+    const standalone = buildFarmJsonLd(farm, 'de');
+    expect(standalone).not.toBeNull();
+    const { '@context': _farmContext, ...farmNode } = standalone ?? {};
+    expect(organization).toEqual(farmNode);
+    expect(organization['@id']).toBe(FARM_ORGANIZATION_ID);
+
+    expect(nodeOf(graph, 'WebPage')).toEqual({
+      '@type': 'WebPage',
+      '@id': 'https://agrobridge.ge/de/farms/farm12345#webpage',
+      url: 'https://agrobridge.ge/de/farms/farm12345',
+      inLanguage: 'de',
+      isPartOf: { '@id': 'https://agrobridge.ge/#website' },
+      mainEntity: { '@id': FARM_ORGANIZATION_ID },
+      breadcrumb: { '@id': 'https://agrobridge.ge/en/farms/farm12345#breadcrumb' },
+    });
+
+    const serialized = JSON.stringify(page);
+    expect(serialized).not.toContain('parentOrganization');
+    expect(serialized).not.toContain('LocalBusiness');
+    expect(serialized).not.toContain('"Place"');
+    expect(serialized).not.toContain('founder');
+    expect(serialized).not.toContain('employee');
+    expect(serialized).not.toContain('aggregateRating');
+    expect(serialized).not.toContain('geo');
+    expect(serialized).not.toContain('owner');
+    expect(serialized).not.toContain(AGROBRIDGE_ORGANIZATION_ID);
   });
 });

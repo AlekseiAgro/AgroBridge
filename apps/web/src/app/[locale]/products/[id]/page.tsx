@@ -43,7 +43,7 @@ import { catalogDisplayDescription, catalogDisplayTitle } from '@/lib/catalog-di
 import { renderedProductTranslationDiffers } from '@/lib/product-translation';
 import { formatRegionLabel } from '@/lib/region';
 import { verifyEmailRedirectHref } from '@/lib/protected-next-path';
-import { buildBreadcrumbJsonLd, buildProductJsonLd } from '@/lib/seo-jsonld';
+import { buildBreadcrumbJsonLd, buildProductPageJsonLd } from '@/lib/seo-jsonld';
 import { productPageMetadata } from '@/lib/seo-public-metadata';
 import { getCurrentUser } from '@/lib/session';
 
@@ -107,7 +107,6 @@ export default async function ProductDetailPage({ params }: Props) {
   const varietyValue = product.source?.variety ?? product.variety;
   const sourceLocale = product.source?.locale;
   const originalLanguage = sourceLocale ? LOCALE_ENDONYM[sourceLocale] : sourceLocale;
-  const productJsonLd = buildProductJsonLd(product, locale);
   const breadcrumbJsonLd = isPubliclyListedProduct(product)
     ? buildBreadcrumbJsonLd({
         locale,
@@ -119,6 +118,7 @@ export default async function ProductDetailPage({ params }: Props) {
         ],
       })
     : null;
+  const productPageJsonLd = buildProductPageJsonLd(product, locale, breadcrumbJsonLd);
   const soldOut = product.harvestStatus === 'soldOut';
   const showPreorder =
     product.preorderEnabled &&
@@ -128,8 +128,7 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <div className="page">
-      {productJsonLd ? <JsonLd data={productJsonLd} /> : null}
-      {breadcrumbJsonLd ? <JsonLd data={breadcrumbJsonLd} /> : null}
+      {productPageJsonLd ? <JsonLd data={productPageJsonLd} /> : null}
       <SiteHeader />
       <RecordProductView productId={product.id} isOwner={Boolean(product.isOwner)} />
       <main className="page__main">
