@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import type {
   AdminDeal,
@@ -33,6 +34,7 @@ import {
   UserRole,
   VerificationStatus as PrismaVerificationStatus,
 } from '@prisma/client';
+import { IndexNowService } from '../indexnow/indexnow.service';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProductsService } from '../products/products.service';
@@ -72,6 +74,7 @@ export class AdminService {
     private readonly subscriptions: SubscriptionsService,
     private readonly verification: VerificationService,
     private readonly products: ProductsService,
+    @Optional() private readonly indexNow?: IndexNowService,
   ) {}
 
   async stats(): Promise<AdminStats> {
@@ -250,6 +253,10 @@ export class AdminService {
       });
     }
 
+    if (!wasPublic && isPubliclyListedProduct(product)) {
+      this.notifyIndexNowProduct(product.id);
+    }
+
     return this.toModerated(product);
   }
 
@@ -281,6 +288,10 @@ export class AdminService {
       productId: product.id,
       note: product.moderationNote ?? 'Rejected by moderator',
     });
+
+    if (isPubliclyListedProduct(existing)) {
+      this.notifyIndexNowProduct(existing.id);
+    }
 
     return this.toModerated(product);
   }
@@ -765,6 +776,10 @@ export class AdminService {
       });
     }
 
+    if (existing.status === PurchaseRequestStatus.open) {
+      this.notifyIndexNowRequest(request.id);
+    }
+
     return {
       id: request.id,
       title: request.title,
@@ -941,6 +956,16 @@ export class AdminService {
       };
     }
     return user;
+  }
+
+  private notifyIndexNowProduct(id: string): void {
+    if (!this.indexNow) return;
+    void this.indexNow.submitProduct(id).catch(() => undefined);
+  }
+
+  private notifyIndexNowRequest(id: string): void {
+    if (!this.indexNow) return;
+    void this.indexNow.submitPurchaseRequest(id).catch(() => undefined);
   }
 
   private async requireProduct(id: string) {

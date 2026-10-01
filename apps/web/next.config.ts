@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
         source: '/api/uploads/:path*',
         destination: `${apiOrigin}/api/uploads/:path*`,
       },
+      {
+        // IndexNow verifies https://agrobridge.ge/<INDEXNOW_KEY>.txt.
+        // afterFiles so /llms.txt and /robots.txt keep their own routes.
+        source: '/:indexnowKey.txt',
+        destination: '/indexnow-key/:indexnowKey',
+      },
     ];
   },
 };

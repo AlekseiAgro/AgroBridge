@@ -54,12 +54,23 @@ import { farmDocumentFileUrl } from './farm-document-url';
 import { publicProductWhere } from '../products/public-product.where';
 import { isProducerType } from '@agrobridge/shared';
 import { CatalogTranslationService, farmSourceHash } from '../catalog/catalog-translation.service';
+import { IndexNowService } from '../indexnow/indexnow.service';
 
 export type FarmDocumentDownload = {
   key: string;
   fileName: string;
   mimeType: string;
 };
+
+function sameOptionalNumber(left: unknown, right: unknown): boolean {
+  if (left == null && right == null) return true;
+  if (left == null || right == null) return false;
+  return Number(left) === Number(right);
+}
+
+function sameStringList(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
 
 const farmImagesInclude = {
   orderBy: [{ isPrimary: 'desc' as const }, { sortOrder: 'asc' as const }, { createdAt: 'asc' as const }],
@@ -81,6 +92,7 @@ export class FarmsService {
     private readonly storage: StorageService,
     private readonly verification: VerificationService,
     @Optional() private readonly catalogTranslations?: CatalogTranslationService,
+    @Optional() private readonly indexNow?: IndexNowService,
   ) {}
 
   async list(): Promise<FarmSummary[]> {
@@ -381,6 +393,8 @@ export class FarmsService {
     });
 
     void this.catalogTranslations?.syncFarm(farm.id);
+    this.notifyIndexNowFarm(farm.id);
+    this.notifyIndexNowFarmProducts(farm.id);
     return (await this.getMine(user))!;
   }
 
@@ -429,6 +443,27 @@ export class FarmsService {
       void this.catalogTranslations?.syncFarm(farm.id);
     }
 
+    const nextName = dto.name === undefined ? farm.name : dto.name.trim();
+    const nextRegion = dto.region === undefined ? farm.region : dto.region.trim() || null;
+    const nextFoundedYear = dto.foundedYear === undefined ? farm.foundedYear : dto.foundedYear;
+    const nextSize =
+      dto.farmSizeHectares === undefined ? farm.farmSizeHectares : dto.farmSizeHectares;
+    const productPageChanged =
+      nextName !== farm.name ||
+      nextRegion !== farm.region ||
+      nextFoundedYear !== farm.foundedYear ||
+      !sameOptionalNumber(nextSize, farm.farmSizeHectares) ||
+      producerType !== farm.producerType ||
+      ownershipType !== farm.ownershipType ||
+      history !== farm.history ||
+      !sameStringList(exportMarkets, farm.exportMarkets);
+    const descriptionChanged = description !== farm.description;
+    if (productPageChanged || descriptionChanged) {
+      this.notifyIndexNowFarm(farm.id);
+    }
+    if (productPageChanged) {
+      this.notifyIndexNowFarmProducts(farm.id);
+    }
     return (await this.getMine(user))!;
   }
 
@@ -621,6 +656,7 @@ export class FarmsService {
       throw error;
     }
 
+    this.notifyIndexNowFarm(farm.id);
     return (await this.getMine(user))!;
   }
 
@@ -652,6 +688,7 @@ export class FarmsService {
 
     await this.storage.delete(image.key).catch(() => undefined);
 
+    this.notifyIndexNowFarm(farm.id);
     return (await this.getMine(user))!;
   }
 
@@ -675,7 +712,31 @@ export class FarmsService {
       });
     });
 
+    if (!image.isPrimary) {
+      this.notifyIndexNowFarm(farm.id);
+    }
     return (await this.getMine(user))!;
+  }
+
+  private notifyIndexNowFarm(id: string): void {
+    if (!this.indexNow) return;
+    void this.indexNow.submitFarm(id).catch(() => undefined);
+  }
+
+  /** Public product pages that already render this farm. One IndexNow batch per product. */
+  private notifyIndexNowFarmProducts(farmId: string): void {
+    if (!this.indexNow) return;
+    void this.prisma.product
+      .findMany({
+        where: { farmId, ...publicProductWhere },
+        select: { id: true },
+      })
+      .then((products) => {
+        for (const product of products) {
+          void this.indexNow?.submitProduct(product.id).catch(() => undefined);
+        }
+      })
+      .catch(() => undefined);
   }
 
   private async requireOwnFarm(user: AuthenticatedUser) {

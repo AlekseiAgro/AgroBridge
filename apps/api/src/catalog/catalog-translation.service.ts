@@ -1,14 +1,17 @@
 import { createHash } from 'crypto';
-import { Injectable, Logger, type OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, Optional, type OnModuleInit } from '@nestjs/common';
 import {
   CATALOG_LOCALES,
   detectCatalogSourceLocale,
+  isPubliclyListedProduct,
   PRODUCT_DESCRIPTION_I18N,
   PRODUCT_TITLE_I18N,
   type Locale,
 } from '@agrobridge/shared';
-import { LocaleCode, MessageTranslationStatus } from '@prisma/client';
+import { LocaleCode, MessageTranslationStatus, PurchaseRequestStatus } from '@prisma/client';
+import { IndexNowService } from '../indexnow/indexnow.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { publicProductWhere } from '../products/public-product.where';
 import { TranslationService } from '../translation/translation.service';
 
 const SEED_PROVIDER = 'seed-dictionary';
@@ -85,6 +88,7 @@ export class CatalogTranslationService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly translation: TranslationService,
+    @Optional() private readonly indexNow?: IndexNowService,
   ) {}
 
   onModuleInit(): void {
@@ -224,6 +228,11 @@ export class CatalogTranslationService implements OnModuleInit {
         variety: true,
         originPlace: true,
         sourceLocale: true,
+        isPublished: true,
+        moderationStatus: true,
+        translations: {
+          select: { locale: true, status: true, sourceHash: true, title: true },
+        },
       },
     });
     for (const product of products) {
@@ -274,17 +283,23 @@ export class CatalogTranslationService implements OnModuleInit {
     }
 
     if (PRODUCT_TITLE_I18N[product.title] && sourceLocale === 'en') {
-      await this.writeSeedProduct(product);
+      const changed = await this.writeSeedProduct(product);
+      if (changed && isPubliclyListedProduct(product)) {
+        this.notifyIndexNowProduct(product.id);
+      }
       return;
     }
 
-    await this.translateProductLocales(
+    const changed = await this.translateProductLocales(
       product.id,
       sourceLocale,
       productSourceHash(fields),
       fields,
       product.translations,
     );
+    if (changed && isPubliclyListedProduct(product)) {
+      this.notifyIndexNowProduct(product.id);
+    }
   }
 
   private async writeSeedProduct(product: {
@@ -293,15 +308,24 @@ export class CatalogTranslationService implements OnModuleInit {
     description: string | null;
     variety: string | null;
     originPlace: string | null;
-  }): Promise<void> {
+    isPublished?: boolean | null;
+    moderationStatus?: string | null;
+    translations?: readonly {
+      locale: LocaleCode;
+      status: MessageTranslationStatus;
+      sourceHash: string | null;
+      title: string | null;
+    }[];
+  }): Promise<boolean> {
     const titles = PRODUCT_TITLE_I18N[product.title];
     if (!titles) {
-      return;
+      return false;
     }
     const descriptions = product.description
       ? PRODUCT_DESCRIPTION_I18N[product.description]
       : undefined;
     const hash = productSourceHash(product);
+    let changed = false;
     for (const locale of CATALOG_LOCALES) {
       if (locale === 'en') {
         continue;
@@ -310,6 +334,11 @@ export class CatalogTranslationService implements OnModuleInit {
       if (!title) {
         continue;
       }
+      const current = product.translations?.find((row) => row.locale === locale);
+      const alreadyWritten =
+        current?.status === MessageTranslationStatus.completed &&
+        current.sourceHash === hash &&
+        current.title === title;
       await this.prisma.productTranslation.upsert({
         where: { productId_locale: { productId: product.id, locale: locale } },
         create: {
@@ -334,7 +363,9 @@ export class CatalogTranslationService implements OnModuleInit {
           sourceHash: hash,
         },
       });
+      if (!alreadyWritten) changed = true;
     }
+    return changed;
   }
 
   private async syncPurchaseRequestNow(requestId: string): Promise<void> {
@@ -355,13 +386,16 @@ export class CatalogTranslationService implements OnModuleInit {
       destinationCountry: request.destinationCountry,
       message: request.message,
     };
-    await this.translatePurchaseRequestLocales(
+    const changed = await this.translatePurchaseRequestLocales(
       request.id,
       request.sourceLocale || 'en',
       purchaseRequestSourceHash(fields),
       fields,
       request.translations,
     );
+    if (changed && request.status === PurchaseRequestStatus.open) {
+      this.notifyIndexNowPurchaseRequest(request.id);
+    }
   }
 
   private async translateProductLocales(
@@ -370,7 +404,8 @@ export class CatalogTranslationService implements OnModuleInit {
     hash: string,
     fields: ProductSourceFields,
     existing: { locale: LocaleCode; status: MessageTranslationStatus; sourceHash: string | null }[],
-  ): Promise<void> {
+  ): Promise<boolean> {
+    let changed = false;
     for (const locale of CATALOG_LOCALES) {
       if (locale === sourceLocale) {
         continue;
@@ -416,6 +451,7 @@ export class CatalogTranslationService implements OnModuleInit {
             sourceHash: hash,
           },
         });
+        changed = true;
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Translation failed';
         this.logger.warn(`Translation to ${locale} failed: ${message}`);
@@ -429,6 +465,7 @@ export class CatalogTranslationService implements OnModuleInit {
         });
       }
     }
+    return changed;
   }
 
   private async translatePurchaseRequestLocales(
@@ -437,7 +474,8 @@ export class CatalogTranslationService implements OnModuleInit {
     hash: string,
     fields: PurchaseRequestSourceFields,
     existing: { locale: LocaleCode; status: MessageTranslationStatus; sourceHash: string | null }[],
-  ): Promise<void> {
+  ): Promise<boolean> {
+    let changed = false;
     for (const locale of CATALOG_LOCALES) {
       if (locale === sourceLocale) {
         continue;
@@ -484,6 +522,7 @@ export class CatalogTranslationService implements OnModuleInit {
             sourceHash: hash,
           },
         });
+        changed = true;
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Translation failed';
         this.logger.warn(`Translation to ${locale} failed: ${message}`);
@@ -497,6 +536,7 @@ export class CatalogTranslationService implements OnModuleInit {
         });
       }
     }
+    return changed;
   }
 
   private async syncFarmNow(farmId: string): Promise<void> {
@@ -531,13 +571,19 @@ export class CatalogTranslationService implements OnModuleInit {
     if (!farmHasPublicCopy(fields)) {
       return;
     }
-    await this.translateFarmLocales(
+    const translated = await this.translateFarmLocales(
       farm.id,
       sourceLocale,
       farmSourceHash(fields),
       fields,
       farm.translations,
     );
+    if (translated.farm) {
+      this.notifyIndexNowFarm(farm.id);
+    }
+    if (translated.products) {
+      this.notifyIndexNowFarmProducts(farm.id);
+    }
   }
 
   private async translateFarmLocales(
@@ -546,7 +592,12 @@ export class CatalogTranslationService implements OnModuleInit {
     hash: string,
     fields: FarmSourceFields,
     existing: { locale: LocaleCode; status: MessageTranslationStatus; sourceHash: string | null }[],
-  ): Promise<void> {
+  ): Promise<{ farm: boolean; products: boolean }> {
+    let farmChanged = false;
+    let productPagesChanged = false;
+    const productVisible = Boolean(
+      fields.history?.trim() || fields.exportMarkets.some((market) => market.trim()),
+    );
     for (const locale of CATALOG_LOCALES) {
       if (locale === sourceLocale) {
         continue;
@@ -600,6 +651,8 @@ export class CatalogTranslationService implements OnModuleInit {
             sourceHash: hash,
           },
         });
+        farmChanged = true;
+        if (productVisible) productPagesChanged = true;
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Translation failed';
         this.logger.warn(`Translation to ${locale} failed: ${message}`);
@@ -613,6 +666,37 @@ export class CatalogTranslationService implements OnModuleInit {
         });
       }
     }
+    return { farm: farmChanged, products: productPagesChanged };
+  }
+
+  private notifyIndexNowProduct(id: string): void {
+    if (!this.indexNow) return;
+    void this.indexNow.submitProduct(id).catch(() => undefined);
+  }
+
+  private notifyIndexNowFarm(id: string): void {
+    if (!this.indexNow) return;
+    void this.indexNow.submitFarm(id).catch(() => undefined);
+  }
+
+  private notifyIndexNowPurchaseRequest(id: string): void {
+    if (!this.indexNow) return;
+    void this.indexNow.submitPurchaseRequest(id).catch(() => undefined);
+  }
+
+  private notifyIndexNowFarmProducts(farmId: string): void {
+    if (!this.indexNow) return;
+    void this.prisma.product
+      .findMany({
+        where: { farmId, ...publicProductWhere },
+        select: { id: true },
+      })
+      .then((products) => {
+        for (const product of products) {
+          void this.indexNow?.submitProduct(product.id).catch(() => undefined);
+        }
+      })
+      .catch(() => undefined);
   }
 
   private async translateOptional(

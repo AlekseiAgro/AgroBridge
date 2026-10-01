@@ -25,6 +25,7 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CatalogTranslationService } from '../catalog/catalog-translation.service';
+import { IndexNowService } from '../indexnow/indexnow.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { CreatePurchaseQuoteDto } from './dto/create-purchase-quote.dto';
 import { CreatePurchaseRequestDto } from './dto/create-purchase-request.dto';
@@ -81,6 +82,7 @@ export class PurchaseRequestsService {
     private readonly subscriptions: SubscriptionsService,
     private readonly notifications: NotificationsService,
     @Optional() private readonly catalogTranslations?: CatalogTranslationService,
+    @Optional() private readonly indexNow?: IndexNowService,
   ) {}
 
   async listOpen(
@@ -202,6 +204,7 @@ export class PurchaseRequestsService {
     );
 
     void this.catalogTranslations?.syncPurchaseRequest(created.id);
+    this.notifyIndexNowRequest(created.id);
     return this.toDetail(created, user, resolveCatalogLocale(undefined, user.locale));
   }
 
@@ -285,6 +288,7 @@ export class PurchaseRequestsService {
       );
     });
 
+    this.notifyIndexNowRequest(request.id);
     return this.getById(user, id);
   }
 
@@ -451,6 +455,7 @@ export class PurchaseRequestsService {
       );
     });
 
+    this.notifyIndexNowRequest(request.id);
     return this.getById(user, requestId);
   }
 
@@ -568,6 +573,11 @@ export class PurchaseRequestsService {
    * update, so an operation that changed nothing reaches this point never, and nobody is
    * told twice about the same transition.
    */
+  private notifyIndexNowRequest(id: string): void {
+    if (!this.indexNow) return;
+    void this.indexNow.submitPurchaseRequest(id).catch(() => undefined);
+  }
+
   private async announce(what: string, send: () => Promise<void>): Promise<void> {
     try {
       await send();

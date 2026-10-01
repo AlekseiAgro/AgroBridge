@@ -7,6 +7,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { ChatModule } from './chat/chat.module';
 import { FarmsModule } from './farms/farms.module';
 import { HealthModule } from './health/health.module';
+import { IndexNowModule } from './indexnow/indexnow.module';
 import { MailModule } from './mail/mail.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
@@ -36,6 +37,7 @@ import { LegalModule } from './legal/legal.module';
     MailModule,
     SmsModule,
     HealthModule,
+    IndexNowModule,
     AuthModule,
     FarmsModule,
     ProductsModule,

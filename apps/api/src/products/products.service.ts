@@ -50,6 +50,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { IndexNowService } from '../indexnow/indexnow.service';
 import { NotificationsService } from '../mail/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RatingsService } from '../ratings/ratings.service';
@@ -168,6 +169,7 @@ export class ProductsService {
     private readonly categories: CategoriesService,
     private readonly notifications: NotificationsService,
     @Optional() private readonly catalogTranslations?: CatalogTranslationService,
+    @Optional() private readonly indexNow?: IndexNowService,
   ) {}
 
   async catalog(
@@ -796,6 +798,15 @@ export class ProductsService {
       void this.catalogTranslations?.syncProduct(updated.id);
     }
 
+    const isPublic = isPubliclyListedProduct(updated);
+    const publicContentChanged =
+      contentChanged ||
+      harvest.harvestStatus !== product.harvestStatus ||
+      harvest.preorderEnabled !== product.preorderEnabled;
+    if ((wasPublic && isPublic && publicContentChanged) || (wasPublic && !isPublic)) {
+      this.notifyIndexNowProduct(updated.id);
+    }
+
     return this.toDetail(
       updated,
       null,
@@ -854,6 +865,7 @@ export class ProductsService {
   async remove(user: AuthenticatedUser, id: string): Promise<{ ok: true }> {
     this.assertFarmer(user);
     const product = await this.requireOwnedProduct(user.id, id);
+    const wasPublic = isPubliclyListedProduct(product);
     const [images, videos, certificates] = await Promise.all([
       this.prisma.productImage.findMany({
         where: { productId: product.id },
@@ -870,6 +882,7 @@ export class ProductsService {
     ]);
 
     await this.prisma.product.delete({ where: { id: product.id } });
+    if (wasPublic) this.notifyIndexNowProduct(product.id);
 
     await Promise.all([
       ...images.map(async (media) => {
@@ -1341,6 +1354,11 @@ export class ProductsService {
     }
 
     return false;
+  }
+
+  private notifyIndexNowProduct(id: string): void {
+    if (!this.indexNow) return;
+    void this.indexNow.submitProduct(id).catch(() => undefined);
   }
 
   private queuePendingModerationEmail(

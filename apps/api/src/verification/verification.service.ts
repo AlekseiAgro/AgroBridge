@@ -4,6 +4,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Optional,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import {
@@ -35,6 +36,8 @@ import { RateLimitService } from '../rate-limit/rate-limit.service';
 import { SmsService } from '../sms/sms.service';
 import { GeorgiaCompanyRegistryService } from './georgia-company-registry.service';
 import { VerificationCodeService } from './verification-code.service';
+import { IndexNowService } from '../indexnow/indexnow.service';
+import { publicProductWhere } from '../products/public-product.where';
 
 /**
  * A farm may announce a few submissions per hour. That covers a genuine resubmission after a
@@ -72,6 +75,7 @@ export class VerificationService {
     private readonly registry: GeorgiaCompanyRegistryService,
     private readonly codes: VerificationCodeService,
     private readonly rateLimit: RateLimitService,
+    @Optional() private readonly indexNow?: IndexNowService,
   ) {}
 
   async getStatus(user: AuthenticatedUser): Promise<ProducerVerificationStatus> {
@@ -655,6 +659,10 @@ export class VerificationService {
     verifiedById: string | null;
   }): Promise<boolean> {
     const approved = params.to === VerificationStatus.approved;
+    const existing = await this.prisma.farm.findUnique({
+      where: { id: params.farmId },
+      select: { verificationStatus: true },
+    });
     const changed = await this.prisma.farm.updateMany({
       where: { id: params.farmId, verificationStatus: { in: [...params.from] } },
       data: {
@@ -667,6 +675,10 @@ export class VerificationService {
     });
     if (changed.count !== 1) return false;
 
+    if ((existing?.verificationStatus === VerificationStatus.approved) !== approved) {
+      this.notifyIndexNowBadge(params.farmId);
+    }
+
     if (approved || params.to === VerificationStatus.rejected) {
       await this.notifyProducerDecision(
         params.farmId,
@@ -677,6 +689,23 @@ export class VerificationService {
       );
     }
     return true;
+  }
+
+  /** Approved badge is the only verification state rendered on public farm and product pages. */
+  private notifyIndexNowBadge(farmId: string): void {
+    if (!this.indexNow) return;
+    void this.indexNow.submitFarm(farmId).catch(() => undefined);
+    void this.prisma.product
+      .findMany({
+        where: { farmId, ...publicProductWhere },
+        select: { id: true },
+      })
+      .then((products) => {
+        for (const product of products) {
+          void this.indexNow?.submitProduct(product.id).catch(() => undefined);
+        }
+      })
+      .catch(() => undefined);
   }
 
   /**
