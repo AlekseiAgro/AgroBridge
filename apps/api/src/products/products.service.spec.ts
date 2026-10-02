@@ -561,7 +561,7 @@ describe('ProductsService', () => {
 
     await filtered.catalog({ category: 'fruits' });
 
-    const where = prisma.product.findMany.mock.calls[0]?.[0]?.where;
+    const where = prisma.product.findMany.mock.calls.at(-1)?.[0]?.where;
     expect(where.AND).toEqual(
       expect.arrayContaining([
         { title: { not: '' } },
@@ -569,6 +569,111 @@ describe('ProductsService', () => {
         { category: 'fruits' },
       ]),
     );
+  });
+
+  it('does not restrict region when the catalog query omits it', async () => {
+    prisma.product.findMany.mockResolvedValue([]);
+    await service.catalog({});
+    const where = prisma.product.findMany.mock.calls.at(-1)?.[0]?.where;
+    expect(JSON.stringify(where)).not.toContain('region');
+    expect(prisma.product.findMany).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps a single region on the existing case-insensitive match', async () => {
+    prisma.product.findMany.mockResolvedValue([]);
+    await service.catalog({ region: ['imereti'] });
+    const where = prisma.product.findMany.mock.calls.at(-1)?.[0]?.where;
+    expect(where.AND).toEqual(
+      expect.arrayContaining([
+        {
+          farm: {
+            region: { equals: 'imereti', mode: 'insensitive' },
+          },
+        },
+      ]),
+    );
+    expect(JSON.stringify(where)).not.toContain('"OR"');
+  });
+
+  it('matches any of two or three regions in one query', async () => {
+    prisma.product.findMany.mockResolvedValue([]);
+    await service.catalog({ region: ['kakheti', 'imereti'] });
+    await service.catalog({ region: ['kakheti', 'imereti', 'kvemoKartli'] });
+
+    const two = prisma.product.findMany.mock.calls.at(-2)?.[0]?.where;
+    const three = prisma.product.findMany.mock.calls.at(-1)?.[0]?.where;
+    expect(two.AND).toEqual(
+      expect.arrayContaining([
+        {
+          farm: {
+            OR: [
+              { region: { equals: 'kakheti', mode: 'insensitive' } },
+              { region: { equals: 'imereti', mode: 'insensitive' } },
+            ],
+          },
+        },
+      ]),
+    );
+    expect(three.AND).toEqual(
+      expect.arrayContaining([
+        {
+          farm: {
+            OR: [
+              { region: { equals: 'kakheti', mode: 'insensitive' } },
+              { region: { equals: 'imereti', mode: 'insensitive' } },
+              { region: { equals: 'kvemoKartli', mode: 'insensitive' } },
+            ],
+          },
+        },
+      ]),
+    );
+    expect(prisma.product.findMany).toHaveBeenCalledTimes(2);
+  });
+
+  it('collapses a repeated region so the product is not requested twice', async () => {
+    prisma.product.findMany.mockResolvedValue([]);
+    await service.catalog({ region: ['kakheti', 'Kakheti', 'kakheti'] });
+    const where = prisma.product.findMany.mock.calls.at(-1)?.[0]?.where;
+    expect(where.AND).toEqual(
+      expect.arrayContaining([
+        {
+          farm: {
+            region: { equals: 'kakheti', mode: 'insensitive' },
+          },
+        },
+      ]),
+    );
+    expect(prisma.product.findMany).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies region OR together with category, harvest, preorder, and in-season', async () => {
+    prisma.product.findMany.mockResolvedValue([]);
+    await service.catalog({
+      q: 'grape',
+      category: 'fruits',
+      region: ['kakheti', 'imereti'],
+      harvestStatus: 'available',
+      preorder: true,
+      inSeason: true,
+    });
+    const where = prisma.product.findMany.mock.calls.at(-1)?.[0]?.where;
+    expect(where.AND).toEqual(
+      expect.arrayContaining([
+        { category: 'fruits' },
+        { harvestStatus: 'available' },
+        { preorderEnabled: true },
+        { seasonMonths: { has: new Date().getUTCMonth() + 1 } },
+        {
+          farm: {
+            OR: [
+              { region: { equals: 'kakheti', mode: 'insensitive' } },
+              { region: { equals: 'imereti', mode: 'insensitive' } },
+            ],
+          },
+        },
+      ]),
+    );
+    expect(prisma.product.findMany).toHaveBeenCalledTimes(1);
   });
 
   it('hides a published draft title from public getById and keeps a real title visible', async () => {

@@ -60,7 +60,7 @@ import {
   CatalogTranslationService,
   productSourceHash,
 } from '../catalog/catalog-translation.service';
-import { CatalogQueryDto } from './dto/catalog-query.dto';
+import { CatalogQueryDto, normalizeCatalogRegions } from './dto/catalog-query.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import {
@@ -179,7 +179,7 @@ export class ProductsService {
     const q = query.q?.trim() || undefined;
     const locale = resolveCatalogLocale(query.locale, viewer?.locale);
     const category = query.category?.trim() || undefined;
-    const region = query.region?.trim() || undefined;
+    const regions = normalizeCatalogRegions(query.region);
     const harvestStatus =
       query.harvestStatus && isHarvestStatus(query.harvestStatus) ? query.harvestStatus : undefined;
     const preorder = query.preorder === true;
@@ -200,13 +200,24 @@ export class ProductsService {
       });
     }
 
-    if (region) {
+    if (regions.length === 1) {
       and.push({
         farm: {
           region: {
-            equals: region,
+            equals: regions[0],
             mode: 'insensitive',
           },
+        },
+      });
+    } else if (regions.length > 1) {
+      and.push({
+        farm: {
+          OR: regions.map((region) => ({
+            region: {
+              equals: region,
+              mode: 'insensitive',
+            },
+          })),
         },
       });
     }
