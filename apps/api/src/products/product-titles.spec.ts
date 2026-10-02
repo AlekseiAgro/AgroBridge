@@ -92,6 +92,22 @@ describe('public product titles', () => {
         title: 'Fresh Kakheti peaches',
       }),
     ).toBe(false);
+    expect(
+      isPubliclyListedProduct({
+        isPublished: true,
+        moderationStatus: 'approved',
+        title: 'Fresh Kakheti peaches',
+        images: [],
+      }),
+    ).toBe(false);
+    expect(
+      isPubliclyListedProduct({
+        isPublished: true,
+        moderationStatus: 'approved',
+        title: 'Fresh Kakheti peaches',
+        images: [{ id: 'img' }],
+      }),
+    ).toBe(true);
   });
 });
 

@@ -370,17 +370,20 @@ export function isInternalDraftProductTitle(title: string | null | undefined): b
   return (INTERNAL_DRAFT_PRODUCT_TITLES as readonly string[]).includes(normalized);
 }
 
-/** Visitor-facing marketplace listing: published, approved, and a real title. */
+/** Visitor-facing marketplace listing: published, approved, a real title, and a photo when images are loaded. */
 export function isPubliclyListedProduct(product: {
   isPublished?: boolean | null;
   moderationStatus?: string | null;
   title?: string | null;
+  images?: readonly unknown[] | null;
 }): boolean {
-  return (
+  const listed =
     product.isPublished === true &&
     product.moderationStatus === 'approved' &&
-    !isInternalDraftProductTitle(product.title)
-  );
+    !isInternalDraftProductTitle(product.title);
+  if (!listed) return false;
+  if (Array.isArray(product.images)) return product.images.length > 0;
+  return true;
 }
 
 /** Resolve a product title for the active UI locale; falls back to the stored title. */

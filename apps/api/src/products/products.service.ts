@@ -227,7 +227,7 @@ export class ProductsService {
 
     const products = await this.prisma.product.findMany({
       where,
-      orderBy: { updatedAt: 'desc' },
+      orderBy: query.newest ? { createdAt: 'desc' } : { updatedAt: 'desc' },
       include: productListInclude,
     });
 
@@ -249,7 +249,8 @@ export class ProductsService {
         )
       : products;
 
-    return matched.map((product) =>
+    const visible = query.newest ? matched.slice(0, query.newest) : matched;
+    return visible.map((product) =>
       this.toSummary(product, ratings.get(product.ownerUserId), locale),
     );
   }
@@ -1528,12 +1529,13 @@ export class ProductsService {
   ): ProductSummary {
     const summary = mapProductSummary(product, sellerRating);
     const text = presentCatalogText(product, locale);
-    const farm = summary.farm && product.farm
-      ? {
-          ...summary.farm,
-          ...presentFarmText(product.farm, locale),
-        }
-      : summary.farm;
+    const farm =
+      summary.farm && product.farm
+        ? {
+            ...summary.farm,
+            ...presentFarmText(product.farm, locale),
+          }
+        : summary.farm;
     return {
       ...summary,
       farm,

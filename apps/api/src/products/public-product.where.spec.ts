@@ -9,6 +9,7 @@ describe('publicProductWhere', () => {
       expect.arrayContaining([
         { title: { not: '' } },
         { title: { notIn: [...INTERNAL_DRAFT_PRODUCT_TITLES] } },
+        { images: { some: {} } },
       ]),
     );
     expect(INTERNAL_DRAFT_PRODUCT_TITLES).toContain('Новый товар');
@@ -19,6 +20,7 @@ describe('publicProductWhere', () => {
     expect(where.AND).toEqual([
       { title: { not: '' } },
       { title: { notIn: [...INTERNAL_DRAFT_PRODUCT_TITLES] } },
+      { images: { some: {} } },
       { category: 'fruits' },
     ]);
   });

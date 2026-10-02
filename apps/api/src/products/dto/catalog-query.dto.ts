@@ -1,5 +1,5 @@
-import { Transform } from 'class-transformer';
-import { IsBoolean, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsBoolean, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
 function toOptionalBoolean(value: unknown): boolean | undefined {
   if (value === undefined || value === null || value === '') return undefined;
@@ -44,4 +44,12 @@ export class CatalogQueryDto {
   @Transform(({ value }) => toOptionalBoolean(value))
   @IsBoolean()
   inSeason?: boolean;
+
+  /** Newest public products by creation time. Omitted listings stay in updatedAt order. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(15)
+  newest?: number;
 }

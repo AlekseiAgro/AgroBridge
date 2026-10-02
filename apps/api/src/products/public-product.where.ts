@@ -4,6 +4,7 @@ import { ModerationStatus as PrismaModerationStatus, type Prisma } from '@prisma
 const publicTitleWhere: Prisma.ProductWhereInput[] = [
   { title: { not: '' } },
   { title: { notIn: [...INTERNAL_DRAFT_PRODUCT_TITLES] } },
+  { images: { some: {} } },
 ];
 
 /** Catalog / farm / profile visitor filter. Draft placeholder titles stay hidden. */
