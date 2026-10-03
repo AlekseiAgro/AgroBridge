@@ -2,9 +2,10 @@
 
 import { PRODUCT_IMAGE_MAX_COUNT, type ProductDetail, type ProductImage } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
+import { useId, useRef, useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { toPublicMediaUrl } from '@/lib/product-image';
-import { useRef, useState } from 'react';
+import { canAddProductPhotos, planProductPhotoSelection, remainingPhotoSlots } from '@/lib/product-photos';
 
 type Props = {
   productId: string;
@@ -16,6 +17,7 @@ export function ProductImagesManager({ productId, initialImages, embedded = fals
   const t = useTranslations('product');
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId();
   const [images, setImages] = useState(initialImages);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -26,35 +28,53 @@ export function ProductImagesManager({ productId, initialImages, embedded = fals
   }
 
   async function onUpload(fileList: FileList | null) {
-    const file = fileList?.[0];
-    if (!file) return;
+    const files = fileList ? Array.from(fileList) : [];
+    if (inputRef.current) inputRef.current.value = '';
+    if (files.length === 0) return;
+
+    const plan = planProductPhotoSelection(images.length, files);
+    const notices = plan.notices.map((notice) =>
+      notice === 'type'
+        ? t('images.fileType')
+        : notice === 'size'
+          ? t('images.fileTooLarge')
+          : t('images.onlyRemaining', { count: plan.remaining }),
+    );
+    if (plan.accepted.length === 0) {
+      setError(notices.join(' ') || null);
+      return;
+    }
 
     setPending(true);
-    setError(null);
+    setError(notices.length > 0 ? notices.join(' ') : null);
+    let latest: ProductDetail | null = null;
+    let failed = false;
 
-    const body = new FormData();
-    body.append('file', file);
-    body.append('kind', 'overview');
-
-    try {
-      const response = await fetch(`/api/products/${productId}/images`, {
-        method: 'POST',
-        body,
-      });
-      const data = (await response.json()) as ProductDetail & { message?: string };
-      if (!response.ok) {
-        setError(data.message ?? t('images.uploadError'));
-        return;
-      }
-      await refreshFrom(data);
-    } catch {
-      setError(t('images.uploadError'));
-    } finally {
-      setPending(false);
-      if (inputRef.current) {
-        inputRef.current.value = '';
+    for (const file of plan.accepted) {
+      const body = new FormData();
+      body.append('file', file);
+      body.append('kind', 'overview');
+      try {
+        const response = await fetch(`/api/products/${productId}/images`, {
+          method: 'POST',
+          body,
+        });
+        const data = (await response.json()) as ProductDetail & { message?: string };
+        if (!response.ok) {
+          failed = true;
+          notices.push(data.message ?? t('images.uploadError'));
+          continue;
+        }
+        latest = data;
+      } catch {
+        failed = true;
+        notices.push(t('images.uploadError'));
       }
     }
+
+    if (latest) await refreshFrom(latest);
+    if (failed || notices.length > 0) setError(notices.join(' '));
+    setPending(false);
   }
 
   async function onDelete(imageId: string) {
@@ -101,7 +121,8 @@ export function ProductImagesManager({ productId, initialImages, embedded = fals
     }
   }
 
-  const canUpload = images.length < PRODUCT_IMAGE_MAX_COUNT;
+  const canUpload = canAddProductPhotos(images.length);
+  const addLabel = remainingPhotoSlots(images.length) === 1 ? t('images.addPhoto') : t('images.addPhotos');
 
   const HeadingTag = embedded ? 'h3' : 'h2';
 
@@ -120,6 +141,23 @@ export function ProductImagesManager({ productId, initialImages, embedded = fals
         <p className="page__subtitle">{t('images.subtitle', { max: PRODUCT_IMAGE_MAX_COUNT })}</p>
         {images.length > 0 ? <p className="field-hint">{t('images.coverHint')}</p> : null}
       </div>
+
+      <input
+        id={inputId}
+        ref={inputRef}
+        className="sr-only"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+        disabled={pending || !canUpload}
+        onChange={(event) => void onUpload(event.target.files)}
+      />
+
+      {images.length === 0 && canUpload ? (
+        <label htmlFor={inputId} className="product-images__drop" aria-label={t('images.addPhotosLabel')}>
+          <span>{pending ? t('pleaseWait') : addLabel}</span>
+        </label>
+      ) : null}
 
       {images.length > 0 ? (
         <ul className="product-images__grid">
@@ -151,25 +189,18 @@ export function ProductImagesManager({ productId, initialImages, embedded = fals
               </div>
             </li>
           ))}
+          {canUpload ? (
+            <li>
+              <label htmlFor={inputId} className="product-images__add" aria-label={t('images.addPhotosLabel')}>
+                <span aria-hidden="true">{pending ? '…' : '+'}</span>
+                <span className="sr-only">{pending ? t('pleaseWait') : addLabel}</span>
+              </label>
+            </li>
+          ) : null}
         </ul>
-      ) : (
-        <p className="empty-state">{t('images.empty')}</p>
-      )}
+      ) : null}
 
-      {canUpload ? (
-        <label className="product-images__upload">
-          <span className="button button--primary">
-            {pending ? t('pleaseWait') : t('images.upload')}
-          </span>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            disabled={pending}
-            onChange={(event) => void onUpload(event.target.files)}
-          />
-        </label>
-      ) : (
+      {canUpload ? null : (
         <p className="product-list__meta">
           {t('images.maxReached', { max: PRODUCT_IMAGE_MAX_COUNT })}
         </p>

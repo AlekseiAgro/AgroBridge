@@ -3,13 +3,13 @@
 import { PRODUCT_IMAGE_MAX_COUNT, PRODUCT_VIDEO_MAX_COUNT } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
 import { useEffect, useId, useRef } from 'react';
+import { planProductPhotoSelection, remainingPhotoSlots } from '@/lib/product-photos';
 import {
   addStagedPhotos,
   discardStagedPhoto,
   revokePreviewUrl,
   revokeStagedPreviews,
   selectStagedCover,
-  stagedImageIssue,
   stagedVideoIssue,
   type StagedPhoto,
   type StagedVideo,
@@ -69,30 +69,25 @@ export function ProductStagedMedia({
     if (photoInputRef.current) photoInputRef.current.value = '';
     if (files.length === 0) return;
 
-    const accepted: StagedPhoto[] = [];
-    for (const file of files) {
-      const issue = stagedImageIssue(file);
-      if (issue === 'type') {
-        onError(t('images.fileType'));
-        continue;
-      }
-      if (issue === 'size') {
-        onError(t('images.fileTooLarge'));
-        continue;
-      }
-      accepted.push({
-        clientId: clientId(),
-        file,
-        previewUrl: URL.createObjectURL(file),
-      });
+    const plan = planProductPhotoSelection(photos.length, files);
+    const accepted: StagedPhoto[] = plan.accepted.map((file) => ({
+      clientId: clientId(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+    }));
+    const notices = plan.notices.map((notice) =>
+      notice === 'type'
+        ? t('images.fileType')
+        : notice === 'size'
+          ? t('images.fileTooLarge')
+          : t('images.onlyRemaining', { count: plan.remaining }),
+    );
+    if (accepted.length === 0) {
+      onError(notices.join(' ') || null);
+      return;
     }
-    if (accepted.length === 0) return;
     const next = addStagedPhotos(photos, coverClientId, accepted);
-    for (const photo of accepted.slice(accepted.length - next.overflow)) {
-      revokePreviewUrl(photo.previewUrl);
-    }
-    if (next.overflow > 0) onError(t('images.maxReached', { max: PRODUCT_IMAGE_MAX_COUNT }));
-    else onError(null);
+    onError(notices.length > 0 ? notices.join(' ') : null);
     onPhotosChange(next.photos, next.coverClientId);
   }
 
@@ -152,6 +147,11 @@ export function ProductStagedMedia({
           <p className="page__subtitle">{t('images.subtitle', { max: PRODUCT_IMAGE_MAX_COUNT })}</p>
           {photos.length > 0 ? <p className="field-hint">{t('images.coverHint')}</p> : null}
         </div>
+        {photos.length === 0 ? (
+          <label htmlFor={photoInputId} className="product-images__drop" aria-label={t('images.addPhotosLabel')}>
+            <span>{t(remainingPhotoSlots(photos.length) === 1 ? 'images.addPhoto' : 'images.addPhotos')}</span>
+          </label>
+        ) : null}
         {photos.length > 0 ? (
           <ul className="product-images__grid product-staged-grid">
             {photos.map((photo) => {
@@ -197,23 +197,29 @@ export function ProductStagedMedia({
                 </li>
               );
             })}
+            {photos.length < PRODUCT_IMAGE_MAX_COUNT ? (
+              <li>
+                <label htmlFor={photoInputId} className="product-images__add" aria-label={t('images.addPhotosLabel')}>
+                  <span aria-hidden="true">+</span>
+                  <span className="sr-only">
+                    {t(remainingPhotoSlots(photos.length) === 1 ? 'images.addPhoto' : 'images.addPhotos')}
+                  </span>
+                </label>
+              </li>
+            ) : null}
           </ul>
-        ) : (
-          <p className="empty-state">{t('images.empty')}</p>
-        )}
+        ) : null}
         {photos.length < PRODUCT_IMAGE_MAX_COUNT ? (
-          <label className="product-images__upload" htmlFor={photoInputId}>
-            <span className="button button--primary">{t('images.upload')}</span>
-            <input
-              id={photoInputId}
-              ref={photoInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              disabled={disabled}
-              onChange={(event) => addPhotos(event.target.files)}
-            />
-          </label>
+          <input
+            id={photoInputId}
+            ref={photoInputRef}
+            className="sr-only"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            disabled={disabled}
+            onChange={(event) => addPhotos(event.target.files)}
+          />
         ) : (
           <p className="product-list__meta">{t('images.maxReached', { max: PRODUCT_IMAGE_MAX_COUNT })}</p>
         )}

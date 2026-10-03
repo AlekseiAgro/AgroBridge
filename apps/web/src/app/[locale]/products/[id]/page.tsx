@@ -38,6 +38,7 @@ import { Link } from '@/i18n/navigation';
 import { ApiError, apiRequest } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth-cookie';
 import { getRenderableProductImages, toPublicMediaUrl } from '@/lib/product-image';
+import { ownerProductEditPath } from '@/lib/product-photos';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
 import { catalogDisplayDescription, catalogDisplayTitle } from '@/lib/catalog-display';
 import { renderedProductTranslationDiffers } from '@/lib/product-translation';
@@ -120,6 +121,7 @@ export default async function ProductDetailPage({ params }: Props) {
     : null;
   const productPageJsonLd = buildProductPageJsonLd(product, locale, breadcrumbJsonLd);
   const soldOut = product.harvestStatus === 'soldOut';
+  const editPath = ownerProductEditPath(Boolean(product.isOwner), product.id);
   const showPreorder =
     product.preorderEnabled &&
     (product.harvestStatus === 'growing' ||
@@ -301,6 +303,13 @@ export default async function ProductDetailPage({ params }: Props) {
               </div>
             ) : (
               <>
+                {editPath ? (
+                  <div className="product-detail-header__actions">
+                    <Link href={editPath} className="button button--primary">
+                      {t('edit')}
+                    </Link>
+                  </div>
+                ) : null}
                 {quantityLabel ? (
                   <p className="product-detail-fact">
                     <span className="product-detail-fact__label">{t('availableQuantity')}</span>
