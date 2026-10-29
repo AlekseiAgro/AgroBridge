@@ -42,12 +42,25 @@ describe('/llms.txt', () => {
     expect(body).toContain('https://agrobridge.ge/ is the official AgroBridge website.');
     expect(body).toContain('Official website: https://agrobridge.ge/');
     expect(body).toContain(
-      'AgroBridge is a Georgian B2B agricultural marketplace connecting Georgian farms and producers with buyers in Georgia and international markets.',
+      'AgroBridge is a global B2B platform for agricultural trade, connecting Georgian producers with buyers in Georgia and international markets. Users can discover agricultural products, publish purchase requests, exchange offers and communicate directly.',
     );
+    expect(body.toLowerCase()).not.toContain('marketplace');
     expect(body).toContain('P/E VANO MEGVINETUKHUTSESI');
     expect(body).toContain('01501157152');
     expect(body).toContain('Tbilisi, Georgia');
     expect(body).toContain('The binding legal texts are available in Georgian and English.');
+  });
+
+  it('lists only the canonical official social profiles', () => {
+    const body = buildLlmsTxt();
+    const section = body.split('## Official social profiles\n\n')[1]?.split('\n\n')[0];
+    expect(section).toBe(
+      [
+        '- Instagram: https://www.instagram.com/agrobridge.ge/',
+        '- Facebook: https://www.facebook.com/people/AgroBridge-Georgia/61594968249897/',
+      ].join('\n'),
+    );
+    expect(body).not.toMatch(/utm_|fbclid|igshid|share\.php|sharer/i);
   });
 
   it('links every locale homepage and the public sections', () => {

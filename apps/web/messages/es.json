@@ -5,8 +5,8 @@
   },
   "seo": {
     "home": {
-      "title": "AgroBridge — mercado agrícola B2B georgiano",
-      "description": "AgroBridge conecta granjas y productores agrícolas georgianos con compradores en Georgia y en mercados internacionales."
+      "title": "AgroBridge — plataforma B2B global de comercio agrícola con sede en Georgia",
+      "description": "AgroBridge es una plataforma B2B global para el comercio agrícola que conecta a productores georgianos con compradores en Georgia y en mercados internacionales."
     },
     "catalog": {
       "title": "Productos agrícolas de granjas georgianas | AgroBridge",
@@ -73,10 +73,10 @@
   "home": {
     "brand": "AgroBridge",
     "headline": "Granjas georgianas. Compradores globales.",
-    "platform": "Plataforma global B2B de comercio agrícola",
-    "subtitle": "Conecta con productores agrícolas georgianos, descubre productos, publica solicitudes de compra y crea relaciones comerciales directas con compradores en Georgia y en mercados internacionales.",
-    "marketplaceTitle": "Un mercado para el comercio agrícola",
-    "marketplaceBody": "Descubre productos agrícolas de productores georgianos, conecta directamente con proveedores y compradores, publica solicitudes de compra e intercambia ofertas en un solo lugar.",
+    "platform": "Plataforma B2B global para el comercio agrícola",
+    "subtitle": "Descubre productores georgianos y productos agrícolas, publica solicitudes de compra e intercambia ofertas con compradores y proveedores en Georgia y en mercados internacionales.",
+    "marketplaceTitle": "Una plataforma conectada para el comercio agrícola",
+    "marketplaceBody": "AgroBridge reúne a productores agrícolas y compradores mediante el descubrimiento de productos, las solicitudes de compra y la comunicación B2B directa, ayudando a ambas partes a encontrar oportunidades comerciales relevantes en un solo lugar.",
     "ctaPrimary": "Ver productos",
     "ctaSecondary": "Crear cuenta",
     "ctaAccount": "Abrir mi cuenta",
@@ -202,7 +202,9 @@
     "legal": "Legal",
     "legalInformation": "Información legal",
     "terms": "Términos de uso",
-    "privacy": "Política de privacidad"
+    "privacy": "Política de privacidad",
+    "followUs": "Síguenos",
+    "opensInNewTab": "se abre en una pestaña nueva"
   },
   "support": {
     "title": "Soporte",
@@ -998,8 +1000,8 @@
     "shidaKartli": "Shida Kartli"
   },
   "howItWorks": {
-    "eyebrow": "Ruta comercial directa",
-    "title": "Una plataforma. Un proceso comercial más simple.",
+    "eyebrow": "Comercio directo",
+    "title": "Un proceso comercial más simple",
     "lead": "Tres pasos claros para conectar granjas georgianas con compradores en Georgia y en el extranjero.",
     "steps": {
       "find": {
@@ -1008,7 +1010,7 @@
       },
       "connect": {
         "title": "Conéctate con un socio comercial",
-        "text": "Los compradores publican solicitudes de compra o piden presupuestos de productos del catálogo. Los agricultores responden con ofertas y ambas partes chatean directamente en el gabinete."
+        "text": "Los compradores publican solicitudes de compra o piden presupuestos de productos del catálogo. Los proveedores responden con ofertas y ambas partes se comunican directamente en la plataforma."
       },
       "agree": {
         "title": "Acuerda los términos de suministro",

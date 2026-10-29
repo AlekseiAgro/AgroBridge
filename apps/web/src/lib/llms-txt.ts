@@ -1,4 +1,5 @@
 import { DEFAULT_LOCALE, LOCALES, type Locale } from '@agrobridge/shared';
+import { BRAND_DEFINITION, OFFICIAL_SOCIAL_PROFILES } from './brand-identity';
 import { PRODUCTION_WEB_ORIGIN } from './seo-robots';
 import { STATIC_PUBLIC_PATHS, localizedPublicUrl } from './seo-sitemap';
 
@@ -44,7 +45,7 @@ export function buildLlmsTxt(): string {
     '',
     `Official website: ${officialWebsite}`,
     '',
-    'AgroBridge is a Georgian B2B agricultural marketplace connecting Georgian farms and producers with buyers in Georgia and international markets.',
+    BRAND_DEFINITION,
     '',
     '- Operator: P/E VANO MEGVINETUKHUTSESI',
     '- Identification number: 01501157152',
@@ -53,6 +54,10 @@ export function buildLlmsTxt(): string {
     `${officialWebsite} is the official AgroBridge website.`,
     '',
     'The binding legal texts are available in Georgian and English.',
+    '',
+    '## Official social profiles',
+    '',
+    ...OFFICIAL_SOCIAL_PROFILES.map((profile) => `- ${profile.name}: ${profile.url}`),
     '',
     '## Locale homepages',
     '',

@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { BrandLogo } from '@/components/BrandLogo';
 import { Link } from '@/i18n/navigation';
+import { OFFICIAL_SOCIAL_PROFILES } from '@/lib/brand-identity';
 import { getCurrentUser } from '@/lib/session';
 
 export async function SiteFooter() {
@@ -48,6 +49,16 @@ export async function SiteFooter() {
             <Link href="/legal">{t('legalInformation')}</Link>
             <Link href="/terms">{t('terms')}</Link>
             <Link href="/privacy">{t('privacy')}</Link>
+          </nav>
+
+          <nav className="site-footer__col" aria-label={t('followUs')}>
+            <p className="site-footer__heading">{t('followUs')}</p>
+            {OFFICIAL_SOCIAL_PROFILES.map((profile) => (
+              <a key={profile.url} href={profile.url} target="_blank" rel="noopener noreferrer">
+                {profile.name}
+                <span className="sr-only"> ({t('opensInNewTab')})</span>
+              </a>
+            ))}
           </nav>
         </div>
       </div>

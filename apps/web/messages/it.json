@@ -5,8 +5,8 @@
   },
   "seo": {
     "home": {
-      "title": "AgroBridge — marketplace agricolo B2B georgiano",
-      "description": "AgroBridge collega aziende agricole e produttori georgiani con acquirenti in Georgia e sui mercati internazionali."
+      "title": "AgroBridge — piattaforma B2B globale per il commercio agricolo con sede in Georgia",
+      "description": "AgroBridge è una piattaforma B2B globale per il commercio agricolo che collega i produttori georgiani con acquirenti in Georgia e sui mercati internazionali."
     },
     "catalog": {
       "title": "Prodotti agricoli delle aziende georgiane | AgroBridge",
@@ -73,10 +73,10 @@
   "home": {
     "brand": "AgroBridge",
     "headline": "Aziende georgiane. Acquirenti globali.",
-    "platform": "Piattaforma globale B2B per il commercio agricolo",
-    "subtitle": "Entra in contatto con i produttori agricoli georgiani, scopri i prodotti, pubblica richieste di acquisto e costruisci rapporti commerciali diretti con acquirenti in Georgia e sui mercati internazionali.",
-    "marketplaceTitle": "Un marketplace per il commercio agricolo",
-    "marketplaceBody": "Scopri i prodotti agricoli dei produttori georgiani, collegati direttamente con fornitori e acquirenti, pubblica richieste di acquisto e scambia offerte in un unico posto.",
+    "platform": "Piattaforma B2B globale per il commercio agricolo",
+    "subtitle": "Scopri produttori georgiani e prodotti agricoli, pubblica richieste di acquisto e scambia offerte con acquirenti e fornitori in Georgia e sui mercati internazionali.",
+    "marketplaceTitle": "Una piattaforma connessa per il commercio agricolo",
+    "marketplaceBody": "AgroBridge mette in contatto produttori agricoli e acquirenti attraverso la scoperta dei prodotti, le richieste di acquisto e la comunicazione B2B diretta, aiutando entrambe le parti a trovare opportunità commerciali pertinenti in un unico posto.",
     "ctaPrimary": "Esplora i prodotti",
     "ctaSecondary": "Crea account",
     "ctaAccount": "Apri il mio account",
@@ -202,7 +202,9 @@
     "legal": "Note legali",
     "legalInformation": "Informazioni legali",
     "terms": "Termini di utilizzo",
-    "privacy": "Informativa sulla privacy"
+    "privacy": "Informativa sulla privacy",
+    "followUs": "Seguici",
+    "opensInNewTab": "si apre in una nuova scheda"
   },
   "support": {
     "title": "Assistenza",
@@ -998,8 +1000,8 @@
     "shidaKartli": "Shida Kartli"
   },
   "howItWorks": {
-    "eyebrow": "Percorso commerciale diretto",
-    "title": "Una piattaforma. Un processo commerciale più semplice.",
+    "eyebrow": "Commercio diretto",
+    "title": "Un processo commerciale più semplice",
     "lead": "Tre passaggi chiari per collegare le aziende georgiane con acquirenti in Georgia e all’estero.",
     "steps": {
       "find": {
@@ -1008,11 +1010,11 @@
       },
       "connect": {
         "title": "Collegati con un partner commerciale",
-        "text": "Gli acquirenti pubblicano richieste di acquisto o chiedono preventivi sui prodotti del catalogo. Gli agricoltori rispondono con offerte e entrambe le parti chattono direttamente nel cabinet."
+        "text": "Gli acquirenti pubblicano richieste di acquisto o chiedono preventivi sui prodotti del catalogo. I fornitori rispondono con offerte ed entrambe le parti comunicano direttamente sulla piattaforma."
       },
       "agree": {
-        "title": "Concordate i termini di fornitura",
-        "text": "Valutate prezzo, quantità e tempi, accettate un’offerta e continuate il coordinamento in un unico spazio."
+        "title": "Concorda i termini di fornitura",
+        "text": "Valuta prezzo, quantità e tempi, accetta un’offerta e continua il coordinamento in un unico spazio."
       }
     },
     "ctaFarmer": "Sono un venditore",
