@@ -370,7 +370,7 @@ describe('localized SEO message templates', () => {
           'AgroBridge is a global B2B platform for agricultural trade, connecting Georgian producers with buyers in Georgia and international markets.',
       },
       ka: {
-        title: 'AgroBridge — გლობალური B2B აგრარული სავაჭრო პლატფორმა საქართველოდან',
+        title: 'AgroBridge — გლობალური B2B აგრარული ვაჭრობა საქართველოდან',
         description:
           'AgroBridge არის გლობალური B2B პლატფორმა აგრარული ვაჭრობისთვის, რომელიც აკავშირებს ქართველ მწარმოებლებს მყიდველებთან საქართველოსა და საერთაშორისო ბაზრებზე.',
       },
