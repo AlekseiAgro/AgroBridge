@@ -380,22 +380,22 @@ describe('localized SEO message templates', () => {
           'AgroBridge — глобальная B2B-платформа сельхозторговли, которая соединяет грузинских производителей с покупателями в Грузии и на международных рынках.',
       },
       de: {
-        title: 'AgroBridge — globale B2B-Plattform für den Agrarhandel aus Georgien',
+        title: 'AgroBridge — globale B2B-Agrarhandelsplattform aus Georgien',
         description:
-          'AgroBridge ist eine globale B2B-Plattform für den Agrarhandel, die georgische Produzenten mit Käufern in Georgien und auf internationalen Märkten verbindet.',
+          'AgroBridge ist eine globale B2B-Plattform für den Agrarhandel, die georgische Erzeuger mit Käufern in Georgien und auf internationalen Märkten verbindet.',
       },
       fr: {
-        title: 'AgroBridge — plateforme B2B mondiale de commerce agricole basée en Géorgie',
+        title: 'AgroBridge — commerce agricole B2B mondial depuis la Géorgie',
         description:
           'AgroBridge est une plateforme B2B mondiale pour le commerce agricole, reliant les producteurs géorgiens aux acheteurs en Géorgie et sur les marchés internationaux.',
       },
       it: {
-        title: 'AgroBridge — piattaforma B2B globale per il commercio agricolo con sede in Georgia',
+        title: 'AgroBridge — commercio agricolo B2B globale dalla Georgia',
         description:
           'AgroBridge è una piattaforma B2B globale per il commercio agricolo che collega i produttori georgiani con acquirenti in Georgia e sui mercati internazionali.',
       },
       es: {
-        title: 'AgroBridge — plataforma B2B global de comercio agrícola con sede en Georgia',
+        title: 'AgroBridge — comercio agrícola B2B global desde Georgia',
         description:
           'AgroBridge es una plataforma B2B global para el comercio agrícola que conecta a productores georgianos con compradores en Georgia y en mercados internacionales.',
       },

@@ -14,7 +14,7 @@ const EXPECTED_CONNECT: Record<(typeof LOCALES)[number], string> = {
   ka: 'მყიდველები აქვეყნებენ შესყიდვის მოთხოვნებს ან ითხოვენ ფასს კატალოგის პროდუქტებზე. მომწოდებლები პასუხობენ შეთავაზებებით, ორივე მხარე კი პირდაპირ ურთიერთობს პლატფორმაზე.',
   ru: 'Покупатели публикуют запросы на покупку или запрашивают цену на товары из каталога. Поставщики отвечают предложениями, а стороны общаются напрямую на платформе.',
   de: 'Käufer veröffentlichen Kaufanfragen oder fragen Preise für Katalogprodukte an. Lieferanten antworten mit Angeboten, und beide Seiten kommunizieren direkt auf der Plattform.',
-  fr: 'Les acheteurs publient des demandes d’achat ou demandent un devis pour des produits du catalogue. Les fournisseurs répondent par des offres et les deux parties échangent directement sur la plateforme.',
+  fr: "Les acheteurs publient des demandes d'achat ou demandent un devis pour des produits du catalogue. Les fournisseurs répondent par des offres et les deux parties échangent directement sur la plateforme.",
   it: 'Gli acquirenti pubblicano richieste di acquisto o chiedono preventivi sui prodotti del catalogo. I fornitori rispondono con offerte ed entrambe le parti comunicano direttamente sulla piattaforma.',
   es: 'Los compradores publican solicitudes de compra o piden presupuestos de productos del catálogo. Los proveedores responden con ofertas y ambas partes se comunican directamente en la plataforma.',
 };

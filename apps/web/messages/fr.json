@@ -5,7 +5,7 @@
   },
   "seo": {
     "home": {
-      "title": "AgroBridge — plateforme B2B mondiale de commerce agricole basée en Géorgie",
+      "title": "AgroBridge — commerce agricole B2B mondial depuis la Géorgie",
       "description": "AgroBridge est une plateforme B2B mondiale pour le commerce agricole, reliant les producteurs géorgiens aux acheteurs en Géorgie et sur les marchés internationaux."
     },
     "catalog": {
@@ -74,9 +74,9 @@
     "brand": "AgroBridge",
     "headline": "Fermes géorgiennes. Acheteurs mondiaux.",
     "platform": "Plateforme B2B mondiale pour le commerce agricole",
-    "subtitle": "Découvrez des producteurs géorgiens et leurs produits agricoles, publiez des demandes d’achat et échangez des offres avec des acheteurs et des fournisseurs en Géorgie et sur les marchés internationaux.",
-    "marketplaceTitle": "Une plateforme connectée pour le commerce agricole",
-    "marketplaceBody": "AgroBridge rapproche producteurs agricoles et acheteurs grâce à la découverte de produits, aux demandes d’achat et à une communication B2B directe, pour aider chacun à trouver des opportunités commerciales pertinentes au même endroit.",
+    "subtitle": "Découvrez des producteurs géorgiens et leurs produits agricoles, publiez des demandes d'achat et échangez des offres avec des acheteurs et des fournisseurs en Géorgie et sur les marchés internationaux.",
+    "marketplaceTitle": "Une plateforme qui relie les acteurs du commerce agricole",
+    "marketplaceBody": "AgroBridge rapproche producteurs agricoles et acheteurs grâce à la découverte de produits, aux demandes d'achat et à une communication B2B directe, pour aider chacun à trouver des opportunités commerciales pertinentes au même endroit.",
     "ctaPrimary": "Voir les produits",
     "ctaSecondary": "Créer un compte",
     "ctaAccount": "Ouvrir mon compte",
@@ -204,7 +204,7 @@
     "terms": "Conditions d'utilisation",
     "privacy": "Politique de confidentialité",
     "followUs": "Suivez-nous",
-    "opensInNewTab": "s’ouvre dans un nouvel onglet"
+    "opensInNewTab": "s'ouvre dans un nouvel onglet"
   },
   "support": {
     "title": "Assistance",
@@ -1010,7 +1010,7 @@
       },
       "connect": {
         "title": "Entrer en contact avec un partenaire",
-        "text": "Les acheteurs publient des demandes d’achat ou demandent un devis pour des produits du catalogue. Les fournisseurs répondent par des offres et les deux parties échangent directement sur la plateforme."
+        "text": "Les acheteurs publient des demandes d'achat ou demandent un devis pour des produits du catalogue. Les fournisseurs répondent par des offres et les deux parties échangent directement sur la plateforme."
       },
       "agree": {
         "title": "Convenir des conditions de fourniture",
