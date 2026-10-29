@@ -745,10 +745,48 @@ describe('public Open Graph metadata', () => {
           description: metadata.description,
           type: 'website',
         });
-        expectLocalizedUrl(metadata.openGraph?.url, locale, paths[page]);
+        const isLegal = page === 'legal' || page === 'terms' || page === 'privacy';
+        expectLocalizedUrl(metadata.openGraph?.url, isLegal ? 'en' : locale, paths[page]);
         expect(ogImages(metadata)).toEqual([{ ...LOGO, alt: 'AgroBridge' }]);
         expect(metadata).not.toHaveProperty('twitter');
         expect(metadata).not.toHaveProperty('alternates');
+      }
+    }
+  });
+});
+
+describe('legal page titles and Open Graph urls', () => {
+  const legalPages = { legal: '/legal', terms: '/terms', privacy: '/privacy' } as const;
+  const englishMarkers: Record<string, string> = {
+    ru: '(на английском)',
+    de: '(Englisch)',
+    fr: '(en anglais)',
+    it: '(in inglese)',
+    es: '(en inglés)',
+  };
+
+  it('points og:url at the canonical document for all three legal pages in all seven locales', async () => {
+    for (const [page, path] of Object.entries(legalPages) as Array<[keyof typeof legalPages, string]>) {
+      for (const locale of LOCALES) {
+        const metadata = await staticPublicMetadata(locale, page);
+        const documentLocale = locale === 'ka' ? 'ka' : 'en';
+        expect(metadata.openGraph?.url).toBe(`https://agrobridge.ge/${documentLocale}${path}`);
+      }
+    }
+  });
+
+  it('marks English legal titles in the five fallback locales and leaves ka/en titles alone', async () => {
+    for (const page of Object.keys(legalPages) as Array<keyof typeof legalPages>) {
+      for (const locale of LOCALES) {
+        const metadata = await staticPublicMetadata(locale, page);
+        const title = String(metadata.title);
+        expect(title.endsWith(' | AgroBridge')).toBe(true);
+        expect(metadata.openGraph?.title).toBe(title);
+        if (locale === 'ka' || locale === 'en') {
+          expect(title).not.toMatch(/\(/);
+        } else {
+          expect(title).toContain(englishMarkers[locale]);
+        }
       }
     }
   });

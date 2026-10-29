@@ -1,8 +1,9 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { DEFAULT_LOCALE, LOCALES } from '@agrobridge/shared';
+import { DEFAULT_LOCALE, LEGAL_LOCALES, LOCALES } from '@agrobridge/shared';
 import { PRODUCTION_SITEMAP_URL, PRODUCTION_WEB_ORIGIN } from '../../../web/src/lib/seo-robots';
 import {
+  LEGAL_PUBLIC_PATHS,
   STATIC_PUBLIC_PATHS,
   buildPublicSitemap,
   buildPublicSitemapEntries,
@@ -10,7 +11,18 @@ import {
   languageAlternates,
   loadPublicSitemapRecordIds,
   localizedPublicUrl,
+  publicPathLocales,
 } from '../../../web/src/lib/seo-sitemap';
+
+const ENGLISH_FALLBACK_LOCALES = LOCALES.filter(
+  (locale) => !(LEGAL_LOCALES as readonly string[]).includes(locale),
+);
+const LOCALIZED_STATIC_PATHS = STATIC_PUBLIC_PATHS.filter(
+  (path) => !(LEGAL_PUBLIC_PATHS as readonly string[]).includes(path),
+);
+/** 7 static pages in 7 locales plus 3 legal documents in Georgian and English. */
+const STATIC_ENTRY_COUNT =
+  LOCALES.length * LOCALIZED_STATIC_PATHS.length + LEGAL_LOCALES.length * LEGAL_PUBLIC_PATHS.length;
 
 const WEB_SRC = join(__dirname, '../../../web/src');
 
@@ -93,10 +105,13 @@ describe('localized public sitemap URLs', () => {
       expect(urls).toContain(`${PRODUCTION_WEB_ORIGIN}/${locale}`);
       expect(urls).toContain(`${PRODUCTION_WEB_ORIGIN}/${locale}/catalog`);
       expect(urls).toContain(`${PRODUCTION_WEB_ORIGIN}/${locale}/requests`);
+    }
+    for (const locale of LEGAL_LOCALES) {
       expect(urls).toContain(`${PRODUCTION_WEB_ORIGIN}/${locale}/legal`);
     }
 
-    expect(urls).toHaveLength(LOCALES.length * STATIC_PUBLIC_PATHS.length);
+    expect(STATIC_ENTRY_COUNT).toBe(55);
+    expect(urls).toHaveLength(STATIC_ENTRY_COUNT);
 
     const blob = urls.join('\n');
     for (const snippet of PRIVATE_PATH_SNIPPETS) {
@@ -331,7 +346,7 @@ describe('sitemap lastmod and farm eligibility', () => {
         STATIC_PUBLIC_PATHS.some((path) => entry.url === localizedPublicUrl(locale, path)),
       ),
     );
-    expect(staticEntries.length).toBe(LOCALES.length * STATIC_PUBLIC_PATHS.length);
+    expect(staticEntries.length).toBe(STATIC_ENTRY_COUNT);
     for (const entry of staticEntries) {
       expect(entry.lastModified).toBeUndefined();
       expect(entry).not.toHaveProperty('changeFrequency');
@@ -353,5 +368,66 @@ describe('sitemap lastmod and farm eligibility', () => {
     expect(languageAlternates('/catalog')['x-default']).toBe(
       localizedPublicUrl(DEFAULT_LOCALE, '/catalog'),
     );
+  });
+});
+
+describe('legal documents in the sitemap', () => {
+  it('lists only the Georgian and English legal documents', () => {
+    expect(LEGAL_PUBLIC_PATHS).toEqual(['/legal', '/terms', '/privacy']);
+    expect(ENGLISH_FALLBACK_LOCALES).toEqual(['ru', 'de', 'fr', 'it', 'es']);
+    const urls = buildPublicSitemapEntries().map((entry) => entry.url);
+
+    for (const path of LEGAL_PUBLIC_PATHS) {
+      expect(publicPathLocales(path)).toEqual(['ka', 'en']);
+      expect(urls).toContain(`${PRODUCTION_WEB_ORIGIN}/ka${path}`);
+      expect(urls).toContain(`${PRODUCTION_WEB_ORIGIN}/en${path}`);
+      for (const locale of ENGLISH_FALLBACK_LOCALES) {
+        expect(urls).not.toContain(`${PRODUCTION_WEB_ORIGIN}/${locale}${path}`);
+      }
+    }
+  });
+
+  it('gives each legal entry only the real Georgian and English alternates', () => {
+    for (const path of LEGAL_PUBLIC_PATHS) {
+      const expected = {
+        ka: `${PRODUCTION_WEB_ORIGIN}/ka${path}`,
+        en: `${PRODUCTION_WEB_ORIGIN}/en${path}`,
+        'x-default': `${PRODUCTION_WEB_ORIGIN}/en${path}`,
+      };
+      expect(languageAlternates(path)).toEqual(expected);
+      const entries = buildPublicSitemapEntries().filter((entry) => entry.url.endsWith(path));
+      expect(entries).toHaveLength(2);
+      for (const entry of entries) {
+        expect(entry.alternates.languages).toEqual(expected);
+      }
+    }
+  });
+
+  it('drops exactly 15 fallback legal URLs and leaves record URLs untouched', () => {
+    const records = {
+      products: Array.from({ length: 38 }, (_, i) => ({ id: `product${String(i).padStart(4, '0')}` })),
+      farms: Array.from({ length: 34 }, (_, i) => ({
+        id: `farmrec${String(i).padStart(4, '0')}`,
+        description: 'Orchard',
+        productCount: 1,
+      })),
+      requests: Array.from({ length: 13 }, (_, i) => ({ id: `request${String(i).padStart(4, '0')}` })),
+    };
+    const recordCount = records.products.length + records.farms.length + records.requests.length;
+    const entries = buildPublicSitemapEntries(records);
+
+    expect(ENGLISH_FALLBACK_LOCALES.length * LEGAL_PUBLIC_PATHS.length).toBe(15);
+    expect(LOCALES.length * (STATIC_PUBLIC_PATHS.length + recordCount)).toBe(665);
+    expect(entries).toHaveLength(650);
+    expect(entries.filter((entry) => /\/(products|farms|requests)\//.test(entry.url))).toHaveLength(
+      LOCALES.length * recordCount,
+    );
+  });
+
+  it('keeps hreflang for every UI locale on non-legal pages', () => {
+    for (const path of LOCALIZED_STATIC_PATHS) {
+      expect(publicPathLocales(path)).toEqual(LOCALES);
+      expect(Object.keys(languageAlternates(path)).sort()).toEqual([...LOCALES, 'x-default'].sort());
+    }
   });
 });

@@ -21,7 +21,7 @@ import {
   requestMetadataCopy,
 } from './seo-page-metadata';
 import { PRODUCTION_WEB_ORIGIN } from './seo-robots';
-import { localizedPublicUrl } from './seo-sitemap';
+import { localizedPublicUrl, publicCanonicalLocale } from './seo-sitemap';
 
 export const STATIC_SEO_PAGES = [
   'home',
@@ -128,7 +128,7 @@ function publicMetadata(
     openGraph: {
       title: metadata.title,
       ...(metadata.description ? { description: metadata.description } : {}),
-      url: localizedPublicUrl(locale as Locale, path),
+      url: localizedPublicUrl(publicCanonicalLocale(locale as Locale, path), path),
       type: 'website',
       images,
     },

@@ -33,15 +33,15 @@
       "description": "Envía una solicitud de soporte. El equipo de AgroBridge responde por correo."
     },
     "legal": {
-      "title": "Información legal | AgroBridge",
+      "title": "Información legal (en inglés) | AgroBridge",
       "description": "Información legal sobre el uso de AgroBridge."
     },
     "terms": {
-      "title": "Términos de uso | AgroBridge",
+      "title": "Términos de uso (en inglés) | AgroBridge",
       "description": "Términos de uso de AgroBridge."
     },
     "privacy": {
-      "title": "Política de privacidad | AgroBridge",
+      "title": "Política de privacidad (en inglés) | AgroBridge",
       "description": "Política de privacidad de AgroBridge sobre datos personales."
     },
     "product": {
@@ -1495,6 +1495,7 @@
     "version": "Versión {version}",
     "effectiveDate": "Fecha de entrada en vigor: {date}",
     "close": "Cerrar",
+    "documentLanguage": "Idioma del documento",
     "documentPending": "El texto completo del documento se publicará aquí."
   }
 }

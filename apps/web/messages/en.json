@@ -1495,6 +1495,7 @@
     "version": "Version {version}",
     "effectiveDate": "Effective date: {date}",
     "close": "Close",
+    "documentLanguage": "Document language",
     "documentPending": "The full document text will be published here."
   }
 }

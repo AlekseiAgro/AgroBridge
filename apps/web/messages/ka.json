@@ -1495,6 +1495,7 @@
     "version": "ვერსია {version}",
     "effectiveDate": "ძალაში შესვლის თარიღი: {date}",
     "close": "დახურვა",
+    "documentLanguage": "დოკუმენტის ენა",
     "documentPending": "დოკუმენტის სრული ტექსტი გამოქვეყნდება აქ."
   }
 }

@@ -794,6 +794,19 @@ body {
   overflow-wrap: anywhere;
 }
 
+.legal-lang-field {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem 0.65rem;
+}
+
+.legal-lang-field__label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .legal-lang-switch {
   display: inline-flex;
   flex-wrap: wrap;

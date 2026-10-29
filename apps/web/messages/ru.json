@@ -33,15 +33,15 @@
       "description": "Отправьте запрос в поддержку. Команда AgroBridge ответит по email."
     },
     "legal": {
-      "title": "Правовая информация | AgroBridge",
+      "title": "Правовая информация (на английском) | AgroBridge",
       "description": "Правовая информация об использовании AgroBridge."
     },
     "terms": {
-      "title": "Условия использования | AgroBridge",
+      "title": "Условия использования (на английском) | AgroBridge",
       "description": "Условия использования AgroBridge."
     },
     "privacy": {
-      "title": "Политика конфиденциальности | AgroBridge",
+      "title": "Политика конфиденциальности (на английском) | AgroBridge",
       "description": "Политика конфиденциальности AgroBridge в отношении персональных данных."
     },
     "product": {
@@ -1495,6 +1495,7 @@
     "version": "Версия {version}",
     "effectiveDate": "Дата вступления в силу: {date}",
     "close": "Закрыть",
+    "documentLanguage": "Язык документа",
     "documentPending": "Полный текст документа будет опубликован здесь."
   }
 }

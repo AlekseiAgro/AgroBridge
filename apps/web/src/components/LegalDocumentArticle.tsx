@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import type { LegalDocumentView } from '@/content/legal';
 
@@ -108,25 +108,32 @@ function renderBlocks(paragraphs: string[], sectionHeading: 'h2' | 'h3') {
 
 export function LegalDocumentArticle({ document, headingLevel = 'h1', headingId }: Props) {
   const t = useTranslations('legal');
+  const uiLocale = useLocale();
   const Heading = headingLevel;
   const sectionHeading = headingLevel === 'h1' ? 'h2' : 'h3';
 
   return (
-    <article className="legal-document">
+    <article className="legal-document" lang={document.locale}>
       <header className="legal-document__header">
         <Heading id={headingId} className="legal-document__title">
           {document.title}
         </Heading>
         {document.version ? (
-          <p className="legal-document__version">{t('version', { version: document.version })}</p>
+          <p className="legal-document__version" lang={uiLocale}>
+            {t('version', { version: document.version })}
+          </p>
         ) : null}
         {document.effectiveDate ? (
-          <p className="legal-document__version">{t('effectiveDate', { date: document.effectiveDate })}</p>
+          <p className="legal-document__version" lang={uiLocale}>
+            {t('effectiveDate', { date: document.effectiveDate })}
+          </p>
         ) : null}
       </header>
       <div className="legal-document__body">
         {document.pending ? (
-          <p className="legal-document__pending">{t('documentPending')}</p>
+          <p className="legal-document__pending" lang={uiLocale}>
+            {t('documentPending')}
+          </p>
         ) : (
           renderBlocks(document.paragraphs, sectionHeading)
         )}

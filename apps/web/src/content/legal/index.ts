@@ -24,6 +24,8 @@ export type LegalPlaceholderContent = {
 };
 
 export type LegalDocumentView = {
+  /** Language of the document text, independent of the UI locale. */
+  locale: LegalLocale;
   title: string;
   version?: string;
   effectiveDate?: string;
@@ -54,6 +56,7 @@ export function legalDocumentView(
   if (kind === 'information') {
     const content = legalInformationContent(locale);
     return {
+      locale,
       title: content.title,
       paragraphs: content.paragraphs,
       pending: false,
@@ -62,6 +65,7 @@ export function legalDocumentView(
 
   const content = kind === 'terms' ? legalTermsContent(locale) : legalPrivacyContent(locale);
   return {
+    locale,
     title: content.title,
     version: content.version,
     effectiveDate: content.ready ? content.effectiveDate : undefined,
