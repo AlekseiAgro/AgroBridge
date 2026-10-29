@@ -40,6 +40,7 @@ type MiddlewareResult = {
   status: number;
   location: string | null;
   link: string | null;
+  cacheControl: string | null;
   next: string | null;
   locale: string | null;
   pathname: string | null;
@@ -63,6 +64,7 @@ function invokeMiddleware(cases: MiddlewareCase[]): MiddlewareResult[] {
         status: response.status,
         location: response.headers.get('location'),
         link: response.headers.get('link'),
+        cacheControl: response.headers.get('cache-control'),
         next: response.headers.get('x-middleware-next'),
         locale: response.headers.get('x-middleware-request-x-next-intl-locale'),
         pathname: response.headers.get('x-middleware-request-x-agrobridge-pathname'),
@@ -143,6 +145,7 @@ describe('HTTP Link header from middleware', () => {
     { path: `/ru${REQUEST}` },
     { path: '/' },
     { path: '/', cookie: 'NEXT_LOCALE=de' },
+    { path: '/', cookie: 'NEXT_LOCALE=ru-RU' },
     { path: PRODUCT },
     { path: '/catalog' },
   ]);
@@ -172,12 +175,19 @@ describe('HTTP Link header from middleware', () => {
     expect(request?.pathname).toBe(`/ru${REQUEST}`);
 
     const root = responses.filter((item) => item.path === '/');
-    expect(root[0]?.status).toBe(307);
+    expect(root).toHaveLength(3);
+    expect(root[0]?.status).toBe(308);
     expect(root[0]?.location).toBe('https://agrobridge.ge/ka');
+    expect(root[0]?.cacheControl).toBe('no-store');
     expect(root[0]?.link).toBeNull();
     expect(root[1]?.status).toBe(307);
     expect(root[1]?.location).toBe('https://agrobridge.ge/de');
+    expect(root[1]?.cacheControl).toBe('no-store');
     expect(root[1]?.link).toBeNull();
+    expect(root[2]?.status).toBe(308);
+    expect(root[2]?.location).toBe('https://agrobridge.ge/ka');
+    expect(root[2]?.cacheControl).toBe('no-store');
+    expect(root[2]?.link).toBeNull();
 
     const unprefixedProduct = responses.find((item) => item.path === PRODUCT);
     const unprefixedCatalog = responses.find((item) => item.path === '/catalog');
