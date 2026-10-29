@@ -8,6 +8,7 @@ import {
   BARE_ROOT_LANDING_LOCALE,
   NEXT_LOCALE_COOKIE,
   bareRootRedirectPath,
+  bareRootRedirectStatus,
 } from '../../../web/src/lib/bare-root-redirect';
 
 const WEB = join(__dirname, '../../../web/src');
@@ -36,6 +37,18 @@ describe('bare root landing locale', () => {
     expect(bareRootRedirectPath('/', 'ru-RU')).toBe('/ka');
     expect(bareRootRedirectPath('/', 'EN')).toBe('/ka');
     expect(bareRootRedirectPath('/', ' uk ')).toBe('/ka');
+  });
+
+  it('makes the cookieless root hop permanent and keeps a saved preference temporary', () => {
+    expect(bareRootRedirectStatus()).toBe(308);
+    expect(bareRootRedirectStatus(null)).toBe(308);
+    expect(bareRootRedirectStatus('')).toBe(308);
+    for (const invalid of ['invalid', 'ru-RU', 'EN', ' uk ']) {
+      expect(bareRootRedirectStatus(invalid)).toBe(308);
+    }
+    for (const locale of LOCALES) {
+      expect(bareRootRedirectStatus(locale)).toBe(307);
+    }
   });
 
   it('does not use Accept-Language for the bare root decision', () => {
@@ -70,7 +83,8 @@ describe('bare root landing locale', () => {
     const middleware = readWeb('middleware.ts');
     expect(middleware).toContain("from './lib/bare-root-redirect'");
     expect(middleware).toContain('bareRootRedirectPath(');
-    expect(middleware).toContain('NextResponse.redirect(url)');
+    expect(middleware).toContain('NextResponse.redirect(url, bareRootRedirectStatus(cookieLocale))');
+    expect(middleware).toContain("response.headers.set('Cache-Control', 'no-store')");
     expect(middleware).toContain('request.nextUrl.clone()');
     expect(middleware).toContain('return intlMiddleware(request)');
     expect(middleware).toContain('createMiddleware');

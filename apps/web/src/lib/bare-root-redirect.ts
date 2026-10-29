@@ -18,3 +18,11 @@ export function bareRootRedirectPath(
   const locale = cookieLocale && isLocale(cookieLocale) ? cookieLocale : BARE_ROOT_LANDING_LOCALE;
   return `/${locale}`;
 }
+
+/**
+ * Cookieless requests (first visits and crawlers) always land on `/ka`, so that hop is permanent
+ * and `/ka` becomes the canonical Georgian home. A saved locale preference stays temporary.
+ */
+export function bareRootRedirectStatus(cookieLocale?: string | null): 307 | 308 {
+  return cookieLocale && isLocale(cookieLocale) ? 307 : 308;
+}
