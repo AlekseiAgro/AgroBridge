@@ -23,7 +23,7 @@ export default async function HowItWorksPage({ params }: Props) {
     <div className="page">
       <SiteHeader />
       <main className="page__main">
-        <HowItWorksSection showActions />
+        <HowItWorksSection showActions headingLevel="h1" />
         <p className="page__subtitle" style={{ marginTop: '1.5rem' }}>
           {t('pageNote')}
         </p>

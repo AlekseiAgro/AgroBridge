@@ -6,18 +6,23 @@ const STEPS = ['find', 'connect', 'agree'] as const;
 type Props = {
   id?: string;
   showActions?: boolean;
+  /** `h1` only where the section is the page's main content. */
+  headingLevel?: 'h1' | 'h2';
 };
 
 export async function HowItWorksSection({
   id = 'how-it-works',
   showActions = true,
+  headingLevel = 'h2',
 }: Props) {
   const t = await getTranslations('howItWorks');
+  const Heading = headingLevel;
+  const StepHeading = headingLevel === 'h1' ? 'h2' : 'h3';
 
   return (
     <section id={id} className="how-it-works">
       <p className="how-it-works__eyebrow">{t('eyebrow')}</p>
-      <h2 className="how-it-works__title">{t('title')}</h2>
+      <Heading className="how-it-works__title">{t('title')}</Heading>
       <p className="how-it-works__lead">{t('lead')}</p>
 
       <ol className="how-it-works__steps">
@@ -27,7 +32,7 @@ export async function HowItWorksSection({
               {index + 1}
             </span>
             <div>
-              <h3 className="how-it-works__step-title">{t(`steps.${step}.title`)}</h3>
+              <StepHeading className="how-it-works__step-title">{t(`steps.${step}.title`)}</StepHeading>
               <p className="how-it-works__step-text">{t(`steps.${step}.text`)}</p>
             </div>
           </li>

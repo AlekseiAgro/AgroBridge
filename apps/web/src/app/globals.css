@@ -1794,6 +1794,11 @@ body {
   font-size: clamp(1.8rem, 4vw, 2.4rem);
 }
 
+.page__main .how-it-works__title {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+}
+
 .role-hub {
   display: grid;
   gap: 2rem;
