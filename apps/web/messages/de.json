@@ -478,6 +478,7 @@
     "editSubtitle": "Details oder Veröffentlichungsstatus aktualisieren.",
     "title": "Titel",
     "description": "Beschreibung",
+    "descriptionContactNotice": "Geben Sie in der Beschreibung keine persönlichen oder Kontaktdaten an, etwa Telefonnummern, E-Mail-Adressen, Postanschriften oder Links zu persönlichen Profilen. Nutzen Sie für den Kontakt mit anderen Nutzern die integrierten Kommunikationsfunktionen der Plattform.",
     "category": "Kategorie",
     "unit": "Einheit",
     "noUnit": "Keine Einheit",

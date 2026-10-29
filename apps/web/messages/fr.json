@@ -478,6 +478,7 @@
     "editSubtitle": "Mettez à jour les détails ou le statut.",
     "title": "Titre",
     "description": "Description",
+    "descriptionContactNotice": "N’indiquez pas d’informations personnelles ou de coordonnées dans la description, comme des numéros de téléphone, des adresses e-mail, des adresses postales ou des liens vers des profils personnels. Pour contacter d’autres utilisateurs, utilisez les outils de communication intégrés à la plateforme.",
     "category": "Catégorie",
     "unit": "Unité",
     "noUnit": "Sans unité",

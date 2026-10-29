@@ -478,6 +478,7 @@
     "editSubtitle": "Actualiza los detalles o el estado.",
     "title": "Título",
     "description": "Descripción",
+    "descriptionContactNotice": "No incluyas información personal ni de contacto en la descripción, como números de teléfono, direcciones de correo electrónico, direcciones físicas o enlaces a perfiles personales. Para contactar con otros usuarios, utiliza las herramientas de comunicación integradas en la plataforma.",
     "category": "Categoría",
     "unit": "Unidad",
     "noUnit": "Sin unidad",

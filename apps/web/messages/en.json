@@ -478,6 +478,7 @@
     "editSubtitle": "Update details or publishing status.",
     "title": "Title",
     "description": "Description",
+    "descriptionContactNotice": "Do not include personal or contact information in the description, such as phone numbers, email addresses, physical addresses, or links to personal profiles. Use the platform's built-in communication tools to contact other users.",
     "category": "Category",
     "unit": "Unit",
     "noUnit": "No unit",
