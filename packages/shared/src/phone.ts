@@ -1,4 +1,5 @@
 import {
+  findPhoneNumbersInText,
   getCountries,
   getCountryCallingCode,
   isSupportedCountry,
@@ -141,3 +142,41 @@ export function maskPhoneNumber(value: string): string {
   const prefix = digits.startsWith('+') ? digits.slice(0, Math.min(5, digits.length - 2)) : digits.slice(0, 3);
   return `${prefix}***${digits.slice(-2)}`;
 }
+
+/** Character range of a phone number found in free text. `end` is exclusive. */
+export type PhoneLikeSpan = {
+  start: number;
+  end: number;
+};
+
+/**
+ * Valid phone numbers written in free text, such as a contact number pasted
+ * into a listing description. Georgian numbers may omit +995; other countries
+ * need their international prefix. Only numbers libphonenumber validates for a
+ * real numbering plan match, so prices, quantities, dates, barcodes, standards
+ * and certificate numbers are not reported.
+ */
+export function findPhoneLikeNumbers(text: string | null | undefined): PhoneLikeSpan[] {
+  if (!text) return [];
+  return findPhoneNumbersInText(text, { defaultCountry: DEFAULT_PHONE_COUNTRY }).map((match) => {
+    let start = match.startsAt;
+    let end = match.endsAt;
+    // libphonenumber keeps a bracket that only opens or closes the number, e.g. "(599123456)".
+    const matched = text.slice(start, end);
+    if (matched.startsWith('(') && !matched.includes(')')) start += 1;
+    if (matched.endsWith(')') && !matched.includes('(')) end -= 1;
+    return { start, end };
+  });
+}
+
+export function containsPhoneLikeNumber(text: string | null | undefined): boolean {
+  return findPhoneLikeNumbers(text).length > 0;
+}
+
+/** Names of the fields whose text contains a phone-like number, in the given order. */
+export function phoneLikeFieldNames<T extends string>(
+  fields: ReadonlyArray<readonly [T, string | null | undefined]>,
+): T[] {
+  return fields.filter(([, value]) => containsPhoneLikeNumber(value)).map(([name]) => name);
+}
+

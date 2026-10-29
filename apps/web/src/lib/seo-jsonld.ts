@@ -10,7 +10,7 @@ import {
 } from '@agrobridge/shared';
 import { getRenderableProductImages, resolveProductImageUrl } from './product-image';
 import { toPublicMediaUrl } from './public-media-url';
-import { SEO_BRAND } from './seo-page-metadata';
+import { SEO_BRAND, redactPhoneLikeNumbers } from './seo-page-metadata';
 import { PRODUCTION_WEB_ORIGIN } from './seo-robots';
 import { localizedPublicUrl } from './seo-sitemap';
 
@@ -276,7 +276,7 @@ export function buildProductJsonLd(
   if (!isLocale(locale)) return null;
   if (!isPubliclyListedProduct(product)) return null;
 
-  const name = (product.display?.title?.trim() || product.title || '').trim();
+  const name = redactPhoneLikeNumbers((product.display?.title?.trim() || product.title || '').trim());
   const id = product.id.trim();
   if (!name || !id) return null;
 
@@ -288,7 +288,9 @@ export function buildProductJsonLd(
     name,
   };
 
-  const description = (product.display?.description?.trim() || product.description || '').trim();
+  const description = redactPhoneLikeNumbers(
+    (product.display?.description?.trim() || product.description || '').trim(),
+  );
   if (description) data.description = description;
 
   const images = productImages(product.images);
@@ -325,7 +327,9 @@ export function buildFarmJsonLd(farm: FarmJsonLdSource, locale: string): JsonLdN
     name,
   };
 
-  const description = (farm.display?.description?.trim() || farm.description || '').trim();
+  const description = redactPhoneLikeNumbers(
+    (farm.display?.description?.trim() || farm.description || '').trim(),
+  );
   if (description) data.description = description;
 
   const images = farmPhotoUrls(farm.photos);
@@ -377,7 +381,7 @@ export function buildBreadcrumbJsonLd(input: {
 
   const itemListElement: JsonLdNode[] = [];
   for (const [index, item] of input.items.entries()) {
-    const name = item.name.trim();
+    const name = redactPhoneLikeNumbers(item.name.trim());
     if (!name || !isBreadcrumbPath(item.path)) return null;
     itemListElement.push({
       '@type': 'ListItem',

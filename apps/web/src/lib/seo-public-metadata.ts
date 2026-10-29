@@ -16,6 +16,7 @@ import { formatProductQuantityRange } from './product-quantity';
 import { formatRegionLabel } from './region';
 import {
   SEO_BRAND,
+  redactPhoneLikeNumbers,
   farmMetadataCopy,
   distinctPublicOrigin,
   productMetadataCopy,
@@ -213,7 +214,7 @@ export async function productPageMetadata(
     copy.description,
     locale,
     `/products/${product.id}`,
-    productOpenGraphImages(product, title),
+    productOpenGraphImages(product, redactPhoneLikeNumbers(title)),
   );
 }
 
