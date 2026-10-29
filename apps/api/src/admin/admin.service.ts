@@ -68,6 +68,14 @@ const productOwnerInclude = {
   },
 } as const;
 
+const ADMIN_REQUEST_LIST_LIMIT = 200;
+const ADMIN_REQUEST_FLAG_SCAN_BATCH = 500;
+
+const adminRequestOrder = [
+  { createdAt: 'desc' },
+  { id: 'desc' },
+] satisfies Prisma.PurchaseRequestOrderByWithRelationInput[];
+
 @Injectable()
 export class AdminService {
   constructor(
@@ -715,20 +723,61 @@ export class AdminService {
         ? (status as PurchaseRequestStatus)
         : undefined;
 
+    const where = requestStatus ? { status: requestStatus } : undefined;
+    const ids = await this.prioritizedPurchaseRequestIds(where);
+    if (ids.length === 0) return [];
+
     const requests = await this.prisma.purchaseRequest.findMany({
-      where: requestStatus ? { status: requestStatus } : undefined,
-      orderBy: { createdAt: 'desc' },
-      take: 200,
+      where: { id: { in: ids } },
       include: {
         buyer: { select: { id: true, email: true, displayName: true } },
         _count: { select: { quotes: true } },
       },
     });
+    const byId = new Map(requests.map((request) => [request.id, request]));
 
-    // Array.prototype.sort is stable, so each group keeps the newest-first order.
-    return requests
-      .map((request) => this.toAdminPurchaseRequest(request))
-      .sort((a, b) => Number(b.phoneLikeFields.length > 0) - Number(a.phoneLikeFields.length > 0));
+    return ids.flatMap((id) => {
+      const request = byId.get(id);
+      return request ? [this.toAdminPurchaseRequest(request)] : [];
+    });
+  }
+
+  /**
+   * Phone detection runs in libphonenumber, not SQL, so the flag cannot be part of the
+   * ORDER BY. Scan only the checked text columns in keyset batches (newest first), keep
+   * every flagged id and the newest unflagged ids, then cut to the list limit. Flagged
+   * requests therefore reach the list no matter how old they are.
+   */
+  private async prioritizedPurchaseRequestIds(
+    where: Prisma.PurchaseRequestWhereInput | undefined,
+  ): Promise<string[]> {
+    const flagged: string[] = [];
+    const unflagged: string[] = [];
+    let cursor: string | undefined;
+
+    for (;;) {
+      const batch = await this.prisma.purchaseRequest.findMany({
+        where,
+        orderBy: adminRequestOrder,
+        take: ADMIN_REQUEST_FLAG_SCAN_BATCH,
+        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        select: { id: true, title: true, message: true, variety: true, packaging: true },
+      });
+
+      for (const row of batch) {
+        if (purchaseRequestPhoneLikeFields(row).length > 0) {
+          flagged.push(row.id);
+        } else if (unflagged.length < ADMIN_REQUEST_LIST_LIMIT) {
+          unflagged.push(row.id);
+        }
+      }
+
+      if (batch.length < ADMIN_REQUEST_FLAG_SCAN_BATCH) break;
+      if (flagged.length >= ADMIN_REQUEST_LIST_LIMIT) break;
+      cursor = batch[batch.length - 1].id;
+    }
+
+    return [...flagged, ...unflagged].slice(0, ADMIN_REQUEST_LIST_LIMIT);
   }
 
   async cancelPurchaseRequest(

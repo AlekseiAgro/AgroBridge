@@ -732,8 +732,56 @@ describe('AdminService', () => {
       };
     }
 
+    type RequestRow = ReturnType<typeof requestRow>;
+
+    /**
+     * Mirrors the Prisma semantics listPurchaseRequests relies on: status / id-in
+     * filters, (createdAt desc, id desc) ordering, keyset cursor with skip, and take.
+     * Unordered id-in reads come back reversed to prove the service restores order.
+     */
+    function serveRequests(rows: RequestRow[]) {
+      prisma.purchaseRequest.findMany.mockImplementation(
+        (args: {
+          where?: { status?: string; id?: { in: string[] } };
+          orderBy?: unknown;
+          cursor?: { id: string };
+          skip?: number;
+          take?: number;
+        }) => {
+          let result = rows.filter(
+            (row) =>
+              (!args.where?.status || row.status === args.where.status) &&
+              (!args.where?.id || args.where.id.in.includes(row.id)),
+          );
+          if (args.orderBy) {
+            result = [...result].sort(
+              (a, b) =>
+                b.createdAt.getTime() - a.createdAt.getTime() ||
+                (a.id < b.id ? 1 : a.id > b.id ? -1 : 0),
+            );
+          } else {
+            result = [...result].reverse();
+          }
+          if (args.cursor) {
+            const at = result.findIndex((row) => row.id === args.cursor!.id);
+            result = result.slice(at + (args.skip ?? 0));
+          }
+          if (args.take !== undefined) result = result.slice(0, args.take);
+          return Promise.resolve(result);
+        },
+      );
+    }
+
+    function at(minutesAgo: number) {
+      return new Date(Date.UTC(2026, 9, 1) - minutesAgo * 60_000);
+    }
+
+    function datedRow(id: string, minutesAgo: number, fields: Record<string, string | null> = {}) {
+      return { ...requestRow(id, fields), createdAt: at(minutesAgo) };
+    }
+
     it('names the purchase-request fields that look like phone numbers', async () => {
-      prisma.purchaseRequest.findMany.mockResolvedValue([
+      serveRequests([
         requestRow('r1', {
           message: 'Call me on +995 591 71 23 16',
           packaging: 'WhatsApp 591712316',
@@ -747,17 +795,17 @@ describe('AdminService', () => {
     });
 
     it('lists flagged purchase requests first and keeps newest-first order in each group', async () => {
-      prisma.purchaseRequest.findMany.mockResolvedValue([
-        requestRow('clean-newest'),
-        requestRow('flagged-newer', { message: 'tel 591712316' }),
-        requestRow('clean-older', { message: 'Price 2.50 GEL per kg, 20 t' }),
-        requestRow('flagged-older', { title: 'Apples 599 12 34 56' }),
+      serveRequests([
+        datedRow('clean-newest', 1),
+        datedRow('flagged-newer', 2, { message: 'tel 591712316' }),
+        datedRow('clean-older', 3, { message: 'Price 2.50 GEL per kg, 20 t' }),
+        datedRow('flagged-older', 4, { title: 'Apples 599 12 34 56' }),
       ]);
 
       const requests = await service.listPurchaseRequests('open');
 
       expect(prisma.purchaseRequest.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ orderBy: { createdAt: 'desc' } }),
+        expect.objectContaining({ orderBy: [{ createdAt: 'desc' }, { id: 'desc' }] }),
       );
       expect(requests.map((request) => request.id)).toEqual([
         'flagged-newer',
@@ -771,6 +819,95 @@ describe('AdminService', () => {
         [],
         [],
       ]);
+    });
+
+    it('breaks createdAt ties by id so the order is stable between reads', async () => {
+      serveRequests([
+        datedRow('req-a', 5),
+        datedRow('req-c', 5),
+        datedRow('req-b', 5),
+        datedRow('req-f', 5, { message: 'tel 591712316' }),
+        datedRow('req-d', 5, { message: 'tel 599123456' }),
+      ]);
+
+      const first = await service.listPurchaseRequests('open');
+      const second = await service.listPurchaseRequests('open');
+
+      expect(first.map((request) => request.id)).toEqual([
+        'req-f',
+        'req-d',
+        'req-c',
+        'req-b',
+        'req-a',
+      ]);
+      expect(second.map((request) => request.id)).toEqual(first.map((request) => request.id));
+    });
+
+    it('surfaces a flagged request that is older than the newest 200', async () => {
+      const rows = Array.from({ length: 1200 }, (_, index) =>
+        datedRow(`clean-${String(index).padStart(4, '0')}`, index),
+      );
+      rows.push(datedRow('flagged-oldest', 5000, { message: 'WhatsApp +995 591 71 23 16' }));
+      serveRequests(rows);
+
+      const requests = await service.listPurchaseRequests('open');
+
+      expect(requests).toHaveLength(200);
+      expect(requests[0]).toMatchObject({ id: 'flagged-oldest', phoneLikeFields: ['message'] });
+      expect(requests.slice(1).map((request) => request.id)).toEqual(
+        rows.slice(0, 199).map((row) => row.id),
+      );
+
+      const scans = prisma.purchaseRequest.findMany.mock.calls
+        .map(([args]) => args as { select?: unknown; take?: number; cursor?: unknown })
+        .filter((args) => args.select);
+      expect(scans).toHaveLength(3);
+      expect(scans.every((args) => args.take === 500)).toBe(true);
+      expect(scans[0].cursor).toBeUndefined();
+      expect(scans[1].cursor).toEqual({ id: 'clean-0499' });
+      expect(scans[2].cursor).toEqual({ id: 'clean-0999' });
+      expect(scans[0].select).toEqual({
+        id: true,
+        title: true,
+        message: true,
+        variety: true,
+        packaging: true,
+      });
+    });
+
+    it('keeps the newest 200 flagged requests when more than 200 are flagged', async () => {
+      const rows = [
+        datedRow('clean-newest', 0),
+        ...Array.from({ length: 700 }, (_, index) =>
+          datedRow(`flagged-${String(index).padStart(4, '0')}`, index + 1, {
+            message: 'tel 591712316',
+          }),
+        ),
+      ];
+      serveRequests(rows);
+
+      const requests = await service.listPurchaseRequests('open');
+
+      expect(requests).toHaveLength(200);
+      expect(requests.map((request) => request.id)).toEqual(
+        rows.slice(1, 201).map((row) => row.id),
+      );
+      expect(
+        prisma.purchaseRequest.findMany.mock.calls.filter(
+          ([args]) => (args as { select?: unknown }).select,
+        ),
+      ).toHaveLength(1);
+    });
+
+    it('applies the status tab to the scan and skips the detail read when nothing matches', async () => {
+      serveRequests([datedRow('open-1', 1)]);
+
+      await expect(service.listPurchaseRequests('cancelled')).resolves.toEqual([]);
+
+      expect(prisma.purchaseRequest.findMany).toHaveBeenCalledTimes(1);
+      expect(prisma.purchaseRequest.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { status: 'cancelled' } }),
+      );
     });
 
     it('flags a removed request in the cancel response without changing the removal', async () => {
