@@ -1,6 +1,7 @@
-import type { ProductDetail } from '@agrobridge/shared';
+import { productPhoneLikeFields, type ProductDetail } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { AdminPhoneFlag } from '@/components/AdminPhoneFlag';
 import { ModerationActions } from '@/components/ModerationActions';
 import { ProductModerationPreview } from '@/components/ProductModerationPreview';
 import { Link, redirect } from '@/i18n/navigation';
@@ -60,6 +61,7 @@ export default async function AdminProductModerationPage({ params }: Props) {
           {t('note')}: {product.moderationNote}
         </p>
       ) : null}
+      <AdminPhoneFlag fields={productPhoneLikeFields(product)} />
 
       <ProductModerationPreview product={product} locale={locale} />
 

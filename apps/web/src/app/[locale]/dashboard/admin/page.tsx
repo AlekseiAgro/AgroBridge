@@ -11,6 +11,7 @@ import type {
 import { isAdminSection } from '@agrobridge/shared';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { AdminActionButtons } from '@/components/AdminActionButtons';
+import { AdminPhoneFlag } from '@/components/AdminPhoneFlag';
 import { CategoryAdminActions } from '@/components/CategoryAdminActions';
 import { ModerationActions } from '@/components/ModerationActions';
 import { RequestModerateActions } from '@/components/RequestModerateActions';
@@ -295,6 +296,7 @@ async function ProductsSection({
                   ? ` · ${tc(`categories.${product.category as 'fruits'}`)}`
                   : ''}
               </p>
+              <AdminPhoneFlag fields={product.phoneLikeFields ?? []} />
               {product.description ? (
                 <p className="product-list__desc">
                   {formatProductDescription(product.description, locale)}
@@ -549,6 +551,12 @@ async function RequestsSection({
                 {' · '}
                 {t('requests.quotes', { count: request.quoteCount })}
               </p>
+              <AdminPhoneFlag fields={request.phoneLikeFields ?? []} />
+              {(request.phoneLikeFields?.length ?? 0) > 0 && request.status === 'open' ? (
+                <p className="product-list__meta">
+                  <Link href={`/requests/${request.id}`}>{t('requests.openRequest')}</Link>
+                </p>
+              ) : null}
               {request.moderationNote ? (
                 <p className="form-error">
                   {t('note')}: {request.moderationNote}

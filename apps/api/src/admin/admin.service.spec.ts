@@ -12,7 +12,12 @@ describe('AdminService', () => {
     farm: { count: jest.fn(), findUnique: jest.fn(), findUniqueOrThrow: jest.fn() },
     user: { count: jest.fn(), findMany: jest.fn() },
     rfq: { count: jest.fn() },
-    purchaseRequest: { count: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
+    purchaseRequest: {
+      count: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
     farmDocument: { count: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
     productCertificate: { findUnique: jest.fn(), update: jest.fn(), updateMany: jest.fn() },
   };
@@ -682,5 +687,148 @@ describe('AdminService', () => {
     await service.cancelPurchaseRequest(admin, 'r1', { note: 'Spam' });
 
     expect(notifications.notifyPurchaseRequestModerated).not.toHaveBeenCalled();
+  });
+
+  describe('phone-like content flags', () => {
+    function requestRow(id: string, fields: Record<string, string | null> = {}) {
+      return {
+        id,
+        title: 'Blueberries',
+        category: 'berries',
+        quantity: '20',
+        unit: 't',
+        variety: null,
+        packaging: null,
+        message: null,
+        status: 'open',
+        moderationNote: null,
+        moderatedAt: null,
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        buyer: { id: 'buyer1', email: 'b@example.com', displayName: 'Buyer' },
+        _count: { quotes: 0 },
+        ...fields,
+      };
+    }
+
+    function productRow(fields: Record<string, string | null> = {}) {
+      return {
+        id: 'p1',
+        title: 'Apples',
+        description: 'Fresh apples, 20 t, GlobalG.A.P. GGN 4063061234567.',
+        variety: 'Golden',
+        originPlace: 'Gori',
+        customDelivery: null,
+        category: 'fruits',
+        unit: 'kg',
+        isPublished: false,
+        moderationStatus: 'pending',
+        moderationNote: null,
+        moderatedAt: null,
+        createdAt: new Date('2026-01-01T00:00:00.000Z'),
+        updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+        owner: { id: 'u1', email: 'farmer@example.com', displayName: 'Farmer', locale: 'en' },
+        farm: null,
+        ...fields,
+      };
+    }
+
+    it('names the purchase-request fields that look like phone numbers', async () => {
+      prisma.purchaseRequest.findMany.mockResolvedValue([
+        requestRow('r1', {
+          message: 'Call me on +995 591 71 23 16',
+          packaging: 'WhatsApp 591712316',
+        }),
+      ]);
+
+      const [request] = await service.listPurchaseRequests('open');
+
+      expect(request.phoneLikeFields).toEqual(['message', 'packaging']);
+      expect(request).not.toHaveProperty('message');
+    });
+
+    it('lists flagged purchase requests first and keeps newest-first order in each group', async () => {
+      prisma.purchaseRequest.findMany.mockResolvedValue([
+        requestRow('clean-newest'),
+        requestRow('flagged-newer', { message: 'tel 591712316' }),
+        requestRow('clean-older', { message: 'Price 2.50 GEL per kg, 20 t' }),
+        requestRow('flagged-older', { title: 'Apples 599 12 34 56' }),
+      ]);
+
+      const requests = await service.listPurchaseRequests('open');
+
+      expect(prisma.purchaseRequest.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ orderBy: { createdAt: 'desc' } }),
+      );
+      expect(requests.map((request) => request.id)).toEqual([
+        'flagged-newer',
+        'flagged-older',
+        'clean-newest',
+        'clean-older',
+      ]);
+      expect(requests.map((request) => request.phoneLikeFields)).toEqual([
+        ['message'],
+        ['title'],
+        [],
+        [],
+      ]);
+    });
+
+    it('flags a removed request in the cancel response without changing the removal', async () => {
+      const row = requestRow('r1', { message: '+995 591 71 23 16' });
+      prisma.purchaseRequest.findUnique.mockResolvedValue({
+        ...row,
+        buyer: { ...row.buyer, locale: 'en' },
+      });
+      prisma.purchaseRequest.update.mockResolvedValue({
+        ...row,
+        status: 'cancelled',
+        moderationNote: 'Spam',
+        buyer: { ...row.buyer, locale: 'en' },
+      });
+
+      const result = await service.cancelPurchaseRequest(admin, 'r1', { note: 'Spam' });
+
+      expect(result.status).toBe('cancelled');
+      expect(result.phoneLikeFields).toEqual(['message']);
+    });
+
+    it('names the product fields that look like phone numbers', async () => {
+      prisma.product.findMany.mockResolvedValue([
+        productRow({
+          description: 'Contact: 591712316.',
+          customDelivery: 'Viber +995 599 12 34 56',
+        }),
+        productRow({ id: 'p2' }),
+      ]);
+
+      const products = await service.listProducts('pending');
+
+      expect(products.map((product) => product.phoneLikeFields)).toEqual([
+        ['description', 'customDelivery'],
+        [],
+      ]);
+      expect(products[0].description).toBe('Contact: 591712316.');
+    });
+
+    it('only adds a hint: approving a flagged product still publishes it', async () => {
+      const flagged = productRow({ description: 'Call 591712316', moderationStatus: 'pending' });
+      prisma.product.findUnique.mockResolvedValue({ ...flagged, images: [] });
+      prisma.product.update.mockResolvedValue({
+        ...flagged,
+        isPublished: true,
+        moderationStatus: 'approved',
+        images: [],
+      });
+
+      const result = await service.approve(admin, 'p1');
+
+      expect(prisma.product.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ moderationStatus: 'approved', isPublished: true }),
+        }),
+      );
+      expect(result.moderationStatus).toBe('approved');
+      expect(result.phoneLikeFields).toEqual(['description']);
+    });
   });
 });

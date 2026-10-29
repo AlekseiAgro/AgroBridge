@@ -24,6 +24,8 @@ import {
   isPrimaryVerificationDocumentKind,
   isPubliclyListedProduct,
   mergeCategoryConfigs,
+  productPhoneLikeFields,
+  purchaseRequestPhoneLikeFields,
 } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
@@ -723,19 +725,10 @@ export class AdminService {
       },
     });
 
-    return requests.map((request) => ({
-      id: request.id,
-      title: request.title,
-      category: request.category,
-      quantity: request.quantity,
-      unit: request.unit,
-      status: request.status,
-      moderationNote: request.moderationNote,
-      moderatedAt: request.moderatedAt?.toISOString() ?? null,
-      createdAt: request.createdAt.toISOString(),
-      buyer: request.buyer,
-      quoteCount: request._count.quotes,
-    }));
+    // Array.prototype.sort is stable, so each group keeps the newest-first order.
+    return requests
+      .map((request) => this.toAdminPurchaseRequest(request))
+      .sort((a, b) => Number(b.phoneLikeFields.length > 0) - Number(a.phoneLikeFields.length > 0));
   }
 
   async cancelPurchaseRequest(
@@ -780,19 +773,7 @@ export class AdminService {
       this.notifyIndexNowRequest(request.id);
     }
 
-    return {
-      id: request.id,
-      title: request.title,
-      category: request.category,
-      quantity: request.quantity,
-      unit: request.unit,
-      status: request.status,
-      moderationNote: request.moderationNote,
-      moderatedAt: request.moderatedAt?.toISOString() ?? null,
-      createdAt: request.createdAt.toISOString(),
-      buyer: request.buyer,
-      quoteCount: request._count.quotes,
-    };
+    return this.toAdminPurchaseRequest(request);
   }
 
   async listDeals(status?: string): Promise<AdminDeal[]> {
@@ -1055,10 +1036,45 @@ export class AdminService {
     };
   }
 
+  private toAdminPurchaseRequest(request: {
+    id: string;
+    title: string;
+    category: string;
+    quantity: string;
+    unit: string | null;
+    variety: string | null;
+    packaging: string | null;
+    message: string | null;
+    status: string;
+    moderationNote: string | null;
+    moderatedAt: Date | null;
+    createdAt: Date;
+    buyer: { id: string; email: string; displayName: string | null };
+    _count: { quotes: number };
+  }): AdminPurchaseRequest {
+    return {
+      id: request.id,
+      title: request.title,
+      category: request.category,
+      quantity: request.quantity,
+      unit: request.unit,
+      status: request.status,
+      moderationNote: request.moderationNote,
+      moderatedAt: request.moderatedAt?.toISOString() ?? null,
+      createdAt: request.createdAt.toISOString(),
+      buyer: request.buyer,
+      quoteCount: request._count.quotes,
+      phoneLikeFields: purchaseRequestPhoneLikeFields(request),
+    };
+  }
+
   private toModerated(product: {
     id: string;
     title: string;
     description: string | null;
+    variety: string | null;
+    originPlace: string | null;
+    customDelivery: string | null;
     category: string | null;
     unit: string | null;
     isPublished: boolean;
@@ -1103,6 +1119,7 @@ export class AdminService {
             region: product.farm.region,
           }
         : null,
+      phoneLikeFields: productPhoneLikeFields(product),
     };
   }
 }

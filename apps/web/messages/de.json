@@ -944,7 +944,8 @@
         "fulfilled": "Erfüllt",
         "closed": "Geschlossen",
         "cancelled": "Storniert"
-      }
+      },
+      "openRequest": "Anfrageseite öffnen"
     },
     "deals": {
       "empty": "Noch keine Deals.",
@@ -967,6 +968,19 @@
       "enable": "Aktivieren",
       "disable": "Deaktivieren",
       "sortOrder": "Reihenfolge"
+    },
+    "phoneFlag": {
+      "badge": "Mögliche Telefonnummer",
+      "fields": "Prüfen: {fields}",
+      "fieldNames": {
+        "title": "Titel",
+        "description": "Beschreibung",
+        "variety": "Sorte",
+        "originPlace": "Herkunftsort",
+        "customDelivery": "Lieferdetails",
+        "message": "Nachricht",
+        "packaging": "Verpackung"
+      }
     }
   },
   "regions": {

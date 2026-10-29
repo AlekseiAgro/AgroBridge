@@ -944,7 +944,8 @@
         "fulfilled": "Исполненные",
         "closed": "Закрытые",
         "cancelled": "Отменённые"
-      }
+      },
+      "openRequest": "Открыть страницу запроса"
     },
     "deals": {
       "empty": "Сделок пока нет.",
@@ -967,6 +968,19 @@
       "enable": "Включить",
       "disable": "Отключить",
       "sortOrder": "Порядок"
+    },
+    "phoneFlag": {
+      "badge": "Возможно, номер телефона",
+      "fields": "Проверьте: {fields}",
+      "fieldNames": {
+        "title": "Название",
+        "description": "Описание",
+        "variety": "Сорт",
+        "originPlace": "Место происхождения",
+        "customDelivery": "Условия доставки",
+        "message": "Сообщение",
+        "packaging": "Упаковка"
+      }
     }
   },
   "regions": {

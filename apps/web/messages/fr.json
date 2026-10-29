@@ -944,7 +944,8 @@
         "fulfilled": "Satisfaites",
         "closed": "Fermées",
         "cancelled": "Annulées"
-      }
+      },
+      "openRequest": "Ouvrir la page de la demande"
     },
     "deals": {
       "empty": "Aucune affaire pour le moment.",
@@ -967,6 +968,19 @@
       "enable": "Activer",
       "disable": "Désactiver",
       "sortOrder": "Ordre"
+    },
+    "phoneFlag": {
+      "badge": "Numéro de téléphone possible",
+      "fields": "À vérifier : {fields}",
+      "fieldNames": {
+        "title": "Titre",
+        "description": "Description",
+        "variety": "Variété",
+        "originPlace": "Lieu d'origine",
+        "customDelivery": "Détails de livraison",
+        "message": "Message",
+        "packaging": "Emballage"
+      }
     }
   },
   "regions": {

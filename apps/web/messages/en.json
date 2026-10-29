@@ -944,7 +944,8 @@
         "fulfilled": "Fulfilled",
         "closed": "Closed",
         "cancelled": "Cancelled"
-      }
+      },
+      "openRequest": "Open request page"
     },
     "deals": {
       "empty": "No deals yet.",
@@ -967,6 +968,19 @@
       "enable": "Enable",
       "disable": "Disable",
       "sortOrder": "Sort order"
+    },
+    "phoneFlag": {
+      "badge": "Possible phone number",
+      "fields": "Review: {fields}",
+      "fieldNames": {
+        "title": "Title",
+        "description": "Description",
+        "variety": "Variety",
+        "originPlace": "Place of origin",
+        "customDelivery": "Delivery details",
+        "message": "Message",
+        "packaging": "Packaging"
+      }
     }
   },
   "regions": {

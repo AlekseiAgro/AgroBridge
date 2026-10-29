@@ -944,7 +944,8 @@
         "fulfilled": "შესრულებული",
         "closed": "დახურული",
         "cancelled": "გაუქმებული"
-      }
+      },
+      "openRequest": "მოთხოვნის გვერდის გახსნა"
     },
     "deals": {
       "empty": "გარიგებები ჯერ არ არის.",
@@ -967,6 +968,19 @@
       "enable": "ჩართვა",
       "disable": "გამორთვა",
       "sortOrder": "თანმიმდევრობა"
+    },
+    "phoneFlag": {
+      "badge": "შესაძლოა ტელეფონის ნომერია",
+      "fields": "შეამოწმეთ: {fields}",
+      "fieldNames": {
+        "title": "სათაური",
+        "description": "აღწერა",
+        "variety": "ჯიში",
+        "originPlace": "წარმოშობის ადგილი",
+        "customDelivery": "მიწოდების დეტალები",
+        "message": "შეტყობინება",
+        "packaging": "შეფუთვა"
+      }
     }
   },
   "regions": {

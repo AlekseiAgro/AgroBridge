@@ -1,5 +1,6 @@
 import { PRODUCT_CATEGORIES, type ProductCategory } from './catalog';
 import type { ModerationStatus } from './moderation';
+import { phoneLikeFieldNames } from './phone';
 import type { UserRole } from './roles';
 import type { FarmDocument, VerificationStatus } from './verification';
 
@@ -97,6 +98,8 @@ export type AdminPurchaseRequest = {
     displayName: string | null;
   };
   quoteCount: number;
+  /** Free-text fields that look like they contain a phone number. Empty when none do. */
+  phoneLikeFields: PurchaseRequestPhoneCheckField[];
 };
 
 export type AdminDeal = {
@@ -141,7 +144,49 @@ export type ModeratedProduct = {
     name: string;
     region: string | null;
   } | null;
+  /** Free-text fields that look like they contain a phone number. Empty when none do. */
+  phoneLikeFields: ProductPhoneCheckField[];
 };
+
+/**
+ * Seller-written product fields checked for phone-like numbers. The flag is a
+ * moderator hint only: it never blocks, hides, or rejects a listing.
+ */
+export const PRODUCT_PHONE_CHECK_FIELDS = [
+  'title',
+  'description',
+  'variety',
+  'originPlace',
+  'customDelivery',
+] as const;
+
+export type ProductPhoneCheckField = (typeof PRODUCT_PHONE_CHECK_FIELDS)[number];
+
+/** Buyer-written purchase-request fields checked for phone-like numbers. */
+export const PURCHASE_REQUEST_PHONE_CHECK_FIELDS = [
+  'title',
+  'message',
+  'variety',
+  'packaging',
+] as const;
+
+export type PurchaseRequestPhoneCheckField = (typeof PURCHASE_REQUEST_PHONE_CHECK_FIELDS)[number];
+
+export function productPhoneLikeFields(
+  product: Partial<Record<ProductPhoneCheckField, string | null>>,
+): ProductPhoneCheckField[] {
+  return phoneLikeFieldNames(
+    PRODUCT_PHONE_CHECK_FIELDS.map((field) => [field, product[field]] as const),
+  );
+}
+
+export function purchaseRequestPhoneLikeFields(
+  request: Partial<Record<PurchaseRequestPhoneCheckField, string | null>>,
+): PurchaseRequestPhoneCheckField[] {
+  return phoneLikeFieldNames(
+    PURCHASE_REQUEST_PHONE_CHECK_FIELDS.map((field) => [field, request[field]] as const),
+  );
+}
 
 export const ADMIN_SECTIONS = [
   'overview',
