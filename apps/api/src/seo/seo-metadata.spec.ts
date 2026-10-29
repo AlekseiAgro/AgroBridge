@@ -791,3 +791,50 @@ describe('legal page titles and Open Graph urls', () => {
     }
   });
 });
+
+describe('Open Graph site name and locale', () => {
+  const ogLocales = {
+    ka: 'ka_GE',
+    en: 'en_US',
+    ru: 'ru_RU',
+    de: 'de_DE',
+    fr: 'fr_FR',
+    it: 'it_IT',
+    es: 'es_ES',
+  } as const;
+
+  it('adds og:site_name and the page locale to all seven homepages', async () => {
+    for (const locale of LOCALES) {
+      const metadata = await staticPublicMetadata(locale, 'home');
+      const og = metadata.openGraph as Record<string, unknown>;
+      expect(og.siteName).toBe('AgroBridge');
+      expect(og.locale).toBe(ogLocales[locale]);
+      expect(og.url).toBe(`https://agrobridge.ge/${locale}`);
+      expect([...(og.alternateLocale as string[])].sort()).toEqual(
+        LOCALES.filter((other) => other !== locale)
+          .map((other) => ogLocales[other])
+          .sort(),
+      );
+    }
+  });
+
+  it('uses the document locale on legal pages and offers only the other real document', async () => {
+    for (const page of ['legal', 'terms', 'privacy'] as const) {
+      for (const locale of LOCALES) {
+        const og = (await staticPublicMetadata(locale, page)).openGraph as Record<string, unknown>;
+        const documentLocale = locale === 'ka' ? 'ka' : 'en';
+        expect(og.siteName).toBe('AgroBridge');
+        expect(og.locale).toBe(ogLocales[documentLocale]);
+        expect(og.alternateLocale).toEqual([documentLocale === 'ka' ? 'en_US' : 'ka_GE']);
+      }
+    }
+  });
+
+  it('keeps the page locale on product pages', async () => {
+    const listed = product({ images: [image('/api/uploads/products/prod12345/peach.jpg', 'peach')] });
+    const ru = (await productPageMetadata(listed, 'ru')).openGraph as Record<string, unknown>;
+    expect(ru.siteName).toBe('AgroBridge');
+    expect(ru.locale).toBe('ru_RU');
+    expect(ru.alternateLocale as string[]).toHaveLength(LOCALES.length - 1);
+  });
+});
