@@ -73,14 +73,12 @@ function fixedPriceProduct(overrides: Partial<ProductJsonLdSource> = {}): Produc
 const FARM_ORGANIZATION_ID = 'https://agrobridge.ge/en/farms/farm12345#organization';
 const AGROBRIDGE_ORGANIZATION_ID = 'https://agrobridge.ge/#organization';
 
-const FORBIDDEN_HOME_KEYS = [
-  'sameAs',
-  'telephone',
-  'contactPoint',
-  'taxID',
-  'foundingDate',
-  'SearchAction',
+const OFFICIAL_SAME_AS = [
+  'https://www.instagram.com/agrobridge.ge/',
+  'https://www.facebook.com/people/AgroBridge-Georgia/61594968249897/',
 ];
+
+const FORBIDDEN_HOME_KEYS = ['telephone', 'contactPoint', 'taxID', 'foundingDate', 'SearchAction'];
 
 const FORBIDDEN_PRODUCT_KEYS = [
   'brand',
@@ -160,10 +158,11 @@ describe('homepage JSON-LD', () => {
       '@type': 'Organization',
       '@id': 'https://agrobridge.ge/#organization',
       name: 'AgroBridge',
+      alternateName: 'AgroBridge Georgia',
       legalName: 'P/E VANO MEGVINETUKHUTSESI',
       url: 'https://agrobridge.ge/',
       description:
-        'AgroBridge is a Georgian B2B agricultural marketplace connecting Georgian farms and agricultural producers with buyers in Georgia and international markets.',
+        'AgroBridge is a global B2B platform for agricultural trade, connecting Georgian producers with buyers in Georgia and international markets. Users can discover agricultural products, publish purchase requests, exchange offers and communicate directly.',
       email: 'Support@agrobridge.ge',
       identifier: {
         '@type': 'PropertyValue',
@@ -186,6 +185,7 @@ describe('homepage JSON-LD', () => {
         width: 1773,
         height: 887,
       },
+      sameAs: OFFICIAL_SAME_AS,
     };
     expect(kaGraph[1]).toEqual({
       ...stableOrganization,
@@ -195,8 +195,19 @@ describe('homepage JSON-LD', () => {
       ...stableOrganization,
       slogan: 'Georgian farms. Global buyers.',
     });
-    expect(JSON.stringify(kaGraph[1])).not.toContain('sameAs');
+    for (const url of kaGraph[1].sameAs as string[]) {
+      const parsed = new URL(url);
+      expect(parsed.protocol).toBe('https:');
+      expect(parsed.search).toBe('');
+      expect(parsed.hash).toBe('');
+      expect(url).not.toMatch(/utm_|fbclid|igshid|share/i);
+    }
+    expect(JSON.stringify(enGraph[1]).toLowerCase()).not.toContain('marketplace');
     expect(JSON.stringify(enGraph[1])).not.toContain('company');
+    for (const graph of [kaGraph, enGraph]) {
+      expect(graph.filter((node) => 'sameAs' in node)).toHaveLength(1);
+      expect(JSON.stringify(graph)).not.toMatch(/SearchAction|telephone|contactPoint/);
+    }
     expect(kaGraph.filter((node) => node['@type'] === 'Organization')).toHaveLength(1);
     expect(kaGraph.filter((node) => node['@type'] === 'WebSite')).toHaveLength(1);
     expect(kaGraph.filter((node) => node['@type'] === 'WebPage')).toHaveLength(1);

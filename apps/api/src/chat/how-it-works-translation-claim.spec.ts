@@ -7,16 +7,16 @@ const LOCALES = ['en', 'ka', 'ru', 'de', 'fr', 'it', 'es'] as const;
 const CONNECT_KEY = 'howItWorks.steps.connect.text';
 
 const ENGLISH_CONNECT =
-  'Buyers publish purchase requests or ask for quotes on catalog products. Farmers reply with offers and both sides chat directly in the cabinet.';
+  'Buyers publish purchase requests or ask for quotes on catalog products. Suppliers reply with offers, and both sides communicate directly on the platform.';
 
 const EXPECTED_CONNECT: Record<(typeof LOCALES)[number], string> = {
   en: ENGLISH_CONNECT,
-  ka: 'მყიდველები აქვეყნებენ შესყიდვის მოთხოვნებს ან ითხოვენ ფასს კატალოგის პროდუქტებზე. ფერმერები პასუხობენ შეთავაზებებით და ორივე მხარე უშუალოდ ესაუბრება კაბინეტში.',
-  ru: 'Покупатели публикуют запросы на покупку или запрашивают цену по товарам каталога. Фермеры отвечают предложениями, а обе стороны общаются напрямую в кабинете.',
-  de: 'Käufer veröffentlichen Kaufanfragen oder fragen Preise zu Katalogprodukten an. Landwirte antworten mit Angeboten, und beide Seiten chatten direkt im Kabinett.',
-  fr: "Les acheteurs publient des demandes d'achat ou demandent un devis sur les produits du catalogue. Les agriculteurs répondent par des offres et les deux parties discutent directement dans le cabinet.",
-  it: 'Gli acquirenti pubblicano richieste di acquisto o chiedono preventivi sui prodotti del catalogo. Gli agricoltori rispondono con offerte e entrambe le parti chattono direttamente nel cabinet.',
-  es: 'Los compradores publican solicitudes de compra o piden presupuestos de productos del catálogo. Los agricultores responden con ofertas y ambas partes chatean directamente en el gabinete.',
+  ka: 'მყიდველები აქვეყნებენ შესყიდვის მოთხოვნებს ან ითხოვენ ფასს კატალოგის პროდუქტებზე. მომწოდებლები პასუხობენ შეთავაზებებით, ორივე მხარე კი პირდაპირ ურთიერთობს პლატფორმაზე.',
+  ru: 'Покупатели публикуют запросы на покупку или запрашивают цену на товары из каталога. Поставщики отвечают предложениями, а стороны общаются напрямую на платформе.',
+  de: 'Käufer veröffentlichen Kaufanfragen oder fragen Preise für Katalogprodukte an. Lieferanten antworten mit Angeboten, und beide Seiten kommunizieren direkt auf der Plattform.',
+  fr: "Les acheteurs publient des demandes d'achat ou demandent un devis pour des produits du catalogue. Les fournisseurs répondent par des offres et les deux parties échangent directement sur la plateforme.",
+  it: 'Gli acquirenti pubblicano richieste di acquisto o chiedono preventivi sui prodotti del catalogo. I fornitori rispondono con offerte ed entrambe le parti comunicano direttamente sulla piattaforma.',
+  es: 'Los compradores publican solicitudes de compra o piden presupuestos de productos del catálogo. Los proveedores responden con ofertas y ambas partes se comunican directamente en la plataforma.',
 };
 
 /** Public marketing namespaces only — cabinet chat.translation chrome is out of scope. */

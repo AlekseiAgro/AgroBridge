@@ -362,42 +362,42 @@ describe('localized SEO message templates', () => {
     expect(english['requests.description']).not.toMatch(/buyer name|email/i);
   });
 
-  it('states the Georgian marketplace identity on every homepage', () => {
+  it('states the approved global B2B platform identity on every homepage', () => {
     const homes: Record<string, { title: string; description: string }> = {
       en: {
-        title: 'AgroBridge — Georgian B2B agricultural marketplace',
+        title: 'AgroBridge — Global B2B Agricultural Trade Platform from Georgia',
         description:
-          'AgroBridge connects Georgian farms and agricultural producers with buyers in Georgia and international markets.',
+          'AgroBridge is a global B2B platform for agricultural trade, connecting Georgian producers with buyers in Georgia and international markets.',
       },
       ka: {
-        title: 'AgroBridge — ქართული B2B აგრარული მარკეტპლეისი',
+        title: 'AgroBridge — გლობალური B2B აგრარული ვაჭრობა საქართველოდან',
         description:
-          'AgroBridge აკავშირებს ქართულ მეურნეობებსა და აგრომწარმოებლებს მყიდველებთან საქართველოში და საერთაშორისო ბაზრებზე.',
+          'AgroBridge არის გლობალური B2B პლატფორმა აგრარული ვაჭრობისთვის, რომელიც აკავშირებს ქართველ მწარმოებლებს მყიდველებთან საქართველოსა და საერთაშორისო ბაზრებზე.',
       },
       ru: {
-        title: 'AgroBridge — грузинский B2B-маркетплейс сельхозпродукции',
+        title: 'AgroBridge — глобальная B2B-платформа сельхозторговли из Грузии',
         description:
-          'AgroBridge связывает грузинские хозяйства и сельхозпроизводителей с покупателями в Грузии и на международных рынках.',
+          'AgroBridge — глобальная B2B-платформа сельхозторговли, которая соединяет грузинских производителей с покупателями в Грузии и на международных рынках.',
       },
       de: {
-        title: 'AgroBridge — georgischer B2B-Marktplatz für Agrarprodukte',
+        title: 'AgroBridge — globale B2B-Agrarhandelsplattform aus Georgien',
         description:
-          'AgroBridge verbindet georgische Betriebe und Agrarproduzenten mit Käufern in Georgien und auf internationalen Märkten.',
+          'AgroBridge ist eine globale B2B-Plattform für den Agrarhandel, die georgische Erzeuger mit Käufern in Georgien und auf internationalen Märkten verbindet.',
       },
       fr: {
-        title: 'AgroBridge — place de marché agricole B2B géorgienne',
+        title: 'AgroBridge — commerce agricole B2B mondial depuis la Géorgie',
         description:
-          'AgroBridge relie les fermes et producteurs agricoles géorgiens aux acheteurs en Géorgie et sur les marchés internationaux.',
+          'AgroBridge est une plateforme B2B mondiale pour le commerce agricole, reliant les producteurs géorgiens aux acheteurs en Géorgie et sur les marchés internationaux.',
       },
       it: {
-        title: 'AgroBridge — marketplace agricolo B2B georgiano',
+        title: 'AgroBridge — commercio agricolo B2B globale dalla Georgia',
         description:
-          'AgroBridge collega aziende agricole e produttori georgiani con acquirenti in Georgia e sui mercati internazionali.',
+          'AgroBridge è una piattaforma B2B globale per il commercio agricolo che collega i produttori georgiani con acquirenti in Georgia e sui mercati internazionali.',
       },
       es: {
-        title: 'AgroBridge — mercado agrícola B2B georgiano',
+        title: 'AgroBridge — comercio agrícola B2B global desde Georgia',
         description:
-          'AgroBridge conecta granjas y productores agrícolas georgianos con compradores en Georgia y en mercados internacionales.',
+          'AgroBridge es una plataforma B2B global para el comercio agrícola que conecta a productores georgianos con compradores en Georgia y en mercados internacionales.',
       },
     };
 
@@ -408,6 +408,11 @@ describe('localized SEO message templates', () => {
       expect(`${home.title} ${home.description}`.toLowerCase()).not.toMatch(
         /\b(largest|leading|number one|the only|biggest|company)\b/,
       );
+      expect(`${home.title} ${home.description}`.toLowerCase()).not.toMatch(
+        /marketplace|marktplatz|place de marché|маркетплейс|მარკეტპლეის|payment|escrow|delivery|logistic|guarantee/,
+      );
+      expect(home.title).toMatch(/B2B/);
+      expect(home.description.startsWith('AgroBridge ')).toBe(true);
     }
   });
 });

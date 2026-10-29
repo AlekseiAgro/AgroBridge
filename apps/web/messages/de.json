@@ -5,8 +5,8 @@
   },
   "seo": {
     "home": {
-      "title": "AgroBridge — georgischer B2B-Marktplatz für Agrarprodukte",
-      "description": "AgroBridge verbindet georgische Betriebe und Agrarproduzenten mit Käufern in Georgien und auf internationalen Märkten."
+      "title": "AgroBridge — globale B2B-Agrarhandelsplattform aus Georgien",
+      "description": "AgroBridge ist eine globale B2B-Plattform für den Agrarhandel, die georgische Erzeuger mit Käufern in Georgien und auf internationalen Märkten verbindet."
     },
     "catalog": {
       "title": "Agrarprodukte von georgischen Betrieben | AgroBridge",
@@ -74,9 +74,9 @@
     "brand": "AgroBridge",
     "headline": "Georgische Betriebe. Globale Käufer.",
     "platform": "Globale B2B-Plattform für den Agrarhandel",
-    "subtitle": "Finden Sie georgische Agrarproduzenten, entdecken Sie Produkte, veröffentlichen Sie Kaufanfragen und bauen Sie direkte Handelsbeziehungen mit Käufern in Georgien und auf internationalen Märkten auf.",
-    "marketplaceTitle": "Ein Marktplatz für den Agrarhandel",
-    "marketplaceBody": "Entdecken Sie Agrarprodukte georgischer Produzenten, verbinden Sie sich direkt mit Lieferanten und Käufern, veröffentlichen Sie Kaufanfragen und tauschen Sie Angebote an einem Ort aus.",
+    "subtitle": "Entdecken Sie georgische Erzeuger und Agrarprodukte, veröffentlichen Sie Kaufanfragen und tauschen Sie Angebote mit Käufern und Lieferanten in Georgien und auf internationalen Märkten aus.",
+    "marketplaceTitle": "Eine vernetzte Plattform für den Agrarhandel",
+    "marketplaceBody": "AgroBridge bringt Agrarerzeuger und Käufer über Produktsuche, Kaufanfragen und direkte B2B-Kommunikation zusammen – und hilft beiden Seiten, passende Handelsmöglichkeiten an einem Ort zu finden.",
     "ctaPrimary": "Produkte entdecken",
     "ctaSecondary": "Konto erstellen",
     "ctaAccount": "Mein Konto öffnen",
@@ -202,7 +202,9 @@
     "legal": "Rechtliches",
     "legalInformation": "Rechtliche Informationen",
     "terms": "Nutzungsbedingungen",
-    "privacy": "Datenschutzrichtlinie"
+    "privacy": "Datenschutzrichtlinie",
+    "followUs": "Folgen Sie uns",
+    "opensInNewTab": "öffnet in einem neuen Tab"
   },
   "support": {
     "title": "Support",
@@ -998,8 +1000,8 @@
     "shidaKartli": "Innerkartlien"
   },
   "howItWorks": {
-    "eyebrow": "Direkter Handelsweg",
-    "title": "Eine Plattform. Ein einfacherer Handelsprozess.",
+    "eyebrow": "Direkter Handel",
+    "title": "Ein einfacherer Handelsprozess",
     "lead": "Drei klare Schritte, um georgische Betriebe mit Käufern in Georgien und im Ausland zu verbinden.",
     "steps": {
       "find": {
@@ -1008,7 +1010,7 @@
       },
       "connect": {
         "title": "Mit einem Handelspartner verbinden",
-        "text": "Käufer veröffentlichen Kaufanfragen oder fragen Preise zu Katalogprodukten an. Landwirte antworten mit Angeboten, und beide Seiten chatten direkt im Kabinett."
+        "text": "Käufer veröffentlichen Kaufanfragen oder fragen Preise für Katalogprodukte an. Lieferanten antworten mit Angeboten, und beide Seiten kommunizieren direkt auf der Plattform."
       },
       "agree": {
         "title": "Lieferbedingungen vereinbaren",

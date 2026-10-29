@@ -5,8 +5,8 @@
   },
   "seo": {
     "home": {
-      "title": "AgroBridge — Georgian B2B agricultural marketplace",
-      "description": "AgroBridge connects Georgian farms and agricultural producers with buyers in Georgia and international markets."
+      "title": "AgroBridge — Global B2B Agricultural Trade Platform from Georgia",
+      "description": "AgroBridge is a global B2B platform for agricultural trade, connecting Georgian producers with buyers in Georgia and international markets."
     },
     "catalog": {
       "title": "Agricultural products from Georgian farms | AgroBridge",
@@ -73,10 +73,10 @@
   "home": {
     "brand": "AgroBridge",
     "headline": "Georgian farms. Global buyers.",
-    "platform": "Global B2B Agricultural Trade Platform",
-    "subtitle": "Connect with Georgian agricultural producers, discover products, publish purchase requests, and build direct trade relationships with buyers in Georgia and international markets.",
-    "marketplaceTitle": "A marketplace built for agricultural trade",
-    "marketplaceBody": "Discover agricultural products from Georgian producers, connect directly with suppliers and buyers, publish purchase requests, and exchange offers in one place.",
+    "platform": "Global B2B platform for agricultural trade",
+    "subtitle": "Discover Georgian producers, explore agricultural products, publish purchase requests and exchange offers with buyers and suppliers in Georgia and international markets.",
+    "marketplaceTitle": "A connected platform for agricultural trade",
+    "marketplaceBody": "AgroBridge brings agricultural producers and buyers together through product discovery, purchase requests and direct B2B communication — helping both sides find relevant trading opportunities in one place.",
     "ctaPrimary": "Browse products",
     "ctaSecondary": "Create account",
     "ctaAccount": "Open my account",
@@ -202,7 +202,9 @@
     "legal": "Legal",
     "legalInformation": "Legal Information",
     "terms": "Terms of Use",
-    "privacy": "Privacy Policy"
+    "privacy": "Privacy Policy",
+    "followUs": "Follow us",
+    "opensInNewTab": "opens in a new tab"
   },
   "support": {
     "title": "Support",
@@ -998,8 +1000,8 @@
     "shidaKartli": "Shida Kartli"
   },
   "howItWorks": {
-    "eyebrow": "Direct trade route",
-    "title": "One platform. A simpler trade process.",
+    "eyebrow": "Direct trade",
+    "title": "A simpler trade process",
     "lead": "Three clear steps to connect Georgian farms with buyers in Georgia and abroad.",
     "steps": {
       "find": {
@@ -1008,7 +1010,7 @@
       },
       "connect": {
         "title": "Connect with a trade partner",
-        "text": "Buyers publish purchase requests or ask for quotes on catalog products. Farmers reply with offers and both sides chat directly in the cabinet."
+        "text": "Buyers publish purchase requests or ask for quotes on catalog products. Suppliers reply with offers, and both sides communicate directly on the platform."
       },
       "agree": {
         "title": "Agree on supply terms",

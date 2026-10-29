@@ -8,6 +8,11 @@ import {
   type Locale,
   type ProductImage,
 } from '@agrobridge/shared';
+import {
+  BRAND_ALTERNATE_NAME,
+  BRAND_DEFINITION,
+  OFFICIAL_SOCIAL_PROFILE_URLS,
+} from './brand-identity';
 import { getRenderableProductImages, resolveProductImageUrl } from './product-image';
 import { toPublicMediaUrl } from './public-media-url';
 import { SEO_BRAND, redactPhoneLikeNumbers } from './seo-page-metadata';
@@ -36,8 +41,6 @@ const ORGANIZATION_URL = `${PRODUCTION_WEB_ORIGIN}/`;
  */
 const ORGANIZATION_LEGAL_NAME = 'P/E VANO MEGVINETUKHUTSESI';
 const ORGANIZATION_EMAIL = 'Support@agrobridge.ge';
-const ORGANIZATION_DESCRIPTION =
-  'AgroBridge is a Georgian B2B agricultural marketplace connecting Georgian farms and agricultural producers with buyers in Georgia and international markets.';
 
 const CATEGORY_LABELS: Record<Locale, Record<string, string>> = {
   ka: kaMessages.catalog.categories,
@@ -228,9 +231,10 @@ export function buildHomeJsonLd(input: HomeJsonLdInput): JsonLdNode | null {
     '@type': 'Organization',
     '@id': ORGANIZATION_ID,
     name: SEO_BRAND,
+    alternateName: BRAND_ALTERNATE_NAME,
     legalName: ORGANIZATION_LEGAL_NAME,
     url: ORGANIZATION_URL,
-    description: ORGANIZATION_DESCRIPTION,
+    description: BRAND_DEFINITION,
     email: ORGANIZATION_EMAIL,
     identifier: {
       '@type': 'PropertyValue',
@@ -253,6 +257,7 @@ export function buildHomeJsonLd(input: HomeJsonLdInput): JsonLdNode | null {
       width: LOGO_WIDTH,
       height: LOGO_HEIGHT,
     },
+    sameAs: [...OFFICIAL_SOCIAL_PROFILE_URLS],
   };
   const slogan = input.slogan.trim();
   if (slogan) organization.slogan = slogan;
