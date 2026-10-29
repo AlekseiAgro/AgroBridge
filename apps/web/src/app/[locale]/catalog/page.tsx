@@ -18,7 +18,7 @@ import { Link } from '@/i18n/navigation';
 import { apiRequest } from '@/lib/api';
 import { getProductCardImage, getProductCardImageAlt } from '@/lib/product-image';
 import { formatProductQuantityRange } from '@/lib/product-quantity';
-import { catalogDisplayDescription, catalogDisplayTitle, catalogOriginalTitle } from '@/lib/catalog-display';
+import { catalogDisplayTitle, catalogOriginalTitle } from '@/lib/catalog-display';
 import { formatRegionLabel } from '@/lib/region';
 
 type Props = {
@@ -195,9 +195,6 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                     <p className="product-list__meta">
                       {t('availableQuantity')}: {quantity}
                     </p>
-                  ) : null}
-                  {catalogDisplayDescription(product) ? (
-                    <p className="product-list__desc">{catalogDisplayDescription(product)}</p>
                   ) : null}
                 </div>
               </li>
