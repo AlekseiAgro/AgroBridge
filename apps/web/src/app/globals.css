@@ -2719,6 +2719,12 @@ body {
   flex-shrink: 0;
 }
 
+/* Card controls share z-index 1 across cards, so later cards would paint over an
+   open panel. Lift the whole card that owns the open menu above its siblings. */
+.entity-card:has(.mine-card-menu[open]) {
+  z-index: 2;
+}
+
 .mine-card-menu__trigger {
   width: 2.75rem;
   min-width: 2.75rem;
@@ -2749,6 +2755,11 @@ body {
   border-radius: 0.55rem;
   background: #fff;
   box-shadow: 0 10px 24px rgba(29, 42, 31, 0.12);
+}
+
+.mine-card-menu[data-placement='above'] .mine-card-menu__panel {
+  top: auto;
+  bottom: calc(100% + 0.3rem);
 }
 
 .mine-card-menu__item {

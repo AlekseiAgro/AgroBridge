@@ -442,6 +442,11 @@ describe('clickable entity cards', () => {
           expect(deleted.cls).toContain('delete-link');
           expect(deleted.href).toBeNull();
 
+          // An open menu sits above the cards after it, so close it before clicking them.
+          const menuClose = await click('.mine-card-menu__trigger');
+          expect(menuClose.tag).toBe('SUMMARY');
+          expect(await evaluate<boolean>(session.send, "document.querySelector('.mine-card-menu').open")).toBe(false);
+
           const noteBody = await click('#note-body');
           expect(noteBody.href).toBe('/requests/r1');
           expect(noteBody.cls).toContain('product-list__title');

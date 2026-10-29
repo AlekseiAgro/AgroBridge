@@ -7,7 +7,7 @@
     "build": "next build --webpack",
     "start": "next start --port 3000",
     "lint": "eslint .",
-    "test": "node --experimental-strip-types --test src/lib/product-photos.test.ts"
+    "test": "node --experimental-strip-types --test src/lib/product-photos.test.ts src/lib/menu-placement.test.ts"
   },
   "dependencies": {
     "@agrobridge/shared": "workspace:*",
