@@ -118,3 +118,60 @@ describe('locale layout HTML SEO wiring', () => {
     }
   });
 });
+
+describe('legal document canonical and hreflang', () => {
+  const LEGAL_PATHS = ['/legal', '/terms', '/privacy'] as const;
+  const FALLBACK_LOCALES = ['ru', 'de', 'fr', 'it', 'es'] as const;
+
+  function realDocumentAlternates(path: string) {
+    return {
+      ka: `${PRODUCTION_WEB_ORIGIN}/ka${path}`,
+      en: `${PRODUCTION_WEB_ORIGIN}/en${path}`,
+      'x-default': `${PRODUCTION_WEB_ORIGIN}/en${path}`,
+    };
+  }
+
+  it('keeps Georgian and English legal pages self-canonical with only real alternates', () => {
+    for (const path of LEGAL_PATHS) {
+      for (const locale of ['ka', 'en'] as const) {
+        const metadata = publicPageHtmlMetadata(locale, `/${locale}${path}`);
+        expect(metadata?.alternates?.canonical).toBe(`${PRODUCTION_WEB_ORIGIN}/${locale}${path}`);
+        expect(metadata?.alternates?.languages).toEqual(realDocumentAlternates(path));
+      }
+    }
+  });
+
+  it('points English fallback legal pages at the English document without hreflang', () => {
+    expect([...FALLBACK_LOCALES, 'ka', 'en'].sort()).toEqual([...LOCALES].sort());
+    for (const path of LEGAL_PATHS) {
+      for (const locale of FALLBACK_LOCALES) {
+        const metadata = publicPageHtmlMetadata(locale, `/${locale}${path}`);
+        expect(metadata?.alternates?.canonical).toBe(`${PRODUCTION_WEB_ORIGIN}/en${path}`);
+        expect(metadata?.alternates).not.toHaveProperty('languages');
+      }
+    }
+  });
+
+  it('never advertises a fallback legal URL as an alternate', () => {
+    for (const path of LEGAL_PATHS) {
+      for (const locale of LOCALES) {
+        const languages = publicPageHtmlMetadata(locale, `/${locale}${path}`)?.alternates?.languages;
+        const blob = JSON.stringify(languages ?? {});
+        for (const fallback of FALLBACK_LOCALES) {
+          expect(blob).not.toContain(`/${fallback}${path}`);
+        }
+      }
+    }
+  });
+
+  it('leaves non-legal pages on their own locale with every UI locale as an alternate', () => {
+    for (const locale of FALLBACK_LOCALES) {
+      for (const suffix of ['', '/catalog', '/how-it-works', '/products/abc12345']) {
+        const metadata = publicPageHtmlMetadata(locale, `/${locale}${suffix}`);
+        expect(metadata?.alternates?.canonical).toBe(localizedPublicUrl(locale, suffix));
+        expect(metadata?.alternates?.languages).toEqual(languageAlternates(suffix));
+        expect(Object.keys(metadata?.alternates?.languages ?? {})).toHaveLength(LOCALES.length + 1);
+      }
+    }
+  });
+});

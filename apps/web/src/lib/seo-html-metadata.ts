@@ -7,6 +7,7 @@ import {
   isPublicRecordId,
   languageAlternates,
   localizedPublicUrl,
+  publicCanonicalLocale,
 } from './seo-sitemap';
 
 const PUBLIC_RECORD_PATH = /^\/(products|farms|requests)\/([^/]+)$/;
@@ -49,10 +50,13 @@ export function publicPageHtmlMetadata(
   const suffix = publicPathSuffixFromPathname(pathname);
   if (suffix === null || !isPublicIndexableSuffix(suffix)) return null;
 
+  const canonicalLocale = publicCanonicalLocale(locale as Locale, suffix);
+  // A fallback URL (English legal text under /ru, /de, ...) is not part of the hreflang set.
+  const isFallback = canonicalLocale !== locale;
   return {
     alternates: {
-      canonical: localizedPublicUrl(locale as Locale, suffix),
-      languages: languageAlternates(suffix),
+      canonical: localizedPublicUrl(canonicalLocale, suffix),
+      ...(isFallback ? {} : { languages: languageAlternates(suffix) }),
     },
   };
 }

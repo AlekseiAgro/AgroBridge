@@ -13,6 +13,7 @@ import {
   completedTranslationSearchParts,
   detectCatalogSourceLocale,
   presentPurchaseRequestText,
+  purchaseRequestPhoneLikeFields,
   resolveCatalogLocale,
   type Locale,
   type PurchaseQuoteMineItem,
@@ -204,7 +205,16 @@ export class PurchaseRequestsService {
     );
 
     void this.catalogTranslations?.syncPurchaseRequest(created.id);
-    this.notifyIndexNowRequest(created.id);
+    // A request that looks like it carries a phone number is still published, but we do
+    // not invite search engines to crawl it right away. Moderators see the same flag.
+    const phoneLikeFields = purchaseRequestPhoneLikeFields(created);
+    if (phoneLikeFields.length === 0) {
+      this.notifyIndexNowRequest(created.id);
+    } else {
+      this.logger.log(
+        `Skipped IndexNow for purchase request ${created.id}: phone-like text in ${phoneLikeFields.join(', ')}`,
+      );
+    }
     return this.toDetail(created, user, resolveCatalogLocale(undefined, user.locale));
   }
 

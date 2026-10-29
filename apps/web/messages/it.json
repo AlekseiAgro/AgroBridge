@@ -33,15 +33,15 @@
       "description": "Invia una richiesta di assistenza. Il team AgroBridge risponde via email."
     },
     "legal": {
-      "title": "Informazioni legali | AgroBridge",
+      "title": "Informazioni legali (in inglese) | AgroBridge",
       "description": "Informazioni legali sull'uso di AgroBridge."
     },
     "terms": {
-      "title": "Termini di utilizzo | AgroBridge",
+      "title": "Termini di utilizzo (in inglese) | AgroBridge",
       "description": "Termini di utilizzo di AgroBridge."
     },
     "privacy": {
-      "title": "Informativa sulla privacy | AgroBridge",
+      "title": "Informativa sulla privacy (in inglese) | AgroBridge",
       "description": "Informativa sulla privacy di AgroBridge sui dati personali."
     },
     "product": {
@@ -478,6 +478,7 @@
     "editSubtitle": "Aggiorna i dettagli o lo stato.",
     "title": "Titolo",
     "description": "Descrizione",
+    "descriptionContactNotice": "Non inserire nella descrizione informazioni personali o di contatto, come numeri di telefono, indirizzi e-mail, indirizzi fisici o link a profili personali. Per contattare altri utenti, usa gli strumenti di comunicazione integrati nella piattaforma.",
     "category": "Categoria",
     "unit": "Unità",
     "noUnit": "Nessuna unità",
@@ -944,7 +945,8 @@
         "fulfilled": "Evaso",
         "closed": "Chiuse",
         "cancelled": "Annullate"
-      }
+      },
+      "openRequest": "Apri la pagina della richiesta"
     },
     "deals": {
       "empty": "Nessun affare ancora.",
@@ -967,6 +969,19 @@
       "enable": "Attiva",
       "disable": "Disattiva",
       "sortOrder": "Ordine"
+    },
+    "phoneFlag": {
+      "badge": "Possibile numero di telefono",
+      "fields": "Da verificare: {fields}",
+      "fieldNames": {
+        "title": "Titolo",
+        "description": "Descrizione",
+        "variety": "Varietà",
+        "originPlace": "Luogo di origine",
+        "customDelivery": "Dettagli di consegna",
+        "message": "Messaggio",
+        "packaging": "Imballaggio"
+      }
     }
   },
   "regions": {
@@ -1495,6 +1510,7 @@
     "version": "Versione {version}",
     "effectiveDate": "Data di entrata in vigore: {date}",
     "close": "Chiudi",
+    "documentLanguage": "Lingua del documento",
     "documentPending": "Il testo completo del documento sarà pubblicato qui."
   }
 }

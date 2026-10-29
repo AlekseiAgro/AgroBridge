@@ -24,6 +24,8 @@ import {
   isPrimaryVerificationDocumentKind,
   isPubliclyListedProduct,
   mergeCategoryConfigs,
+  productPhoneLikeFields,
+  purchaseRequestPhoneLikeFields,
 } from '@agrobridge/shared';
 import {
   DocumentReviewStatus,
@@ -65,6 +67,14 @@ const productOwnerInclude = {
     },
   },
 } as const;
+
+const ADMIN_REQUEST_LIST_LIMIT = 200;
+const ADMIN_REQUEST_FLAG_SCAN_BATCH = 500;
+
+const adminRequestOrder = [
+  { createdAt: 'desc' },
+  { id: 'desc' },
+] satisfies Prisma.PurchaseRequestOrderByWithRelationInput[];
 
 @Injectable()
 export class AdminService {
@@ -713,29 +723,61 @@ export class AdminService {
         ? (status as PurchaseRequestStatus)
         : undefined;
 
+    const where = requestStatus ? { status: requestStatus } : undefined;
+    const ids = await this.prioritizedPurchaseRequestIds(where);
+    if (ids.length === 0) return [];
+
     const requests = await this.prisma.purchaseRequest.findMany({
-      where: requestStatus ? { status: requestStatus } : undefined,
-      orderBy: { createdAt: 'desc' },
-      take: 200,
+      where: { id: { in: ids } },
       include: {
         buyer: { select: { id: true, email: true, displayName: true } },
         _count: { select: { quotes: true } },
       },
     });
+    const byId = new Map(requests.map((request) => [request.id, request]));
 
-    return requests.map((request) => ({
-      id: request.id,
-      title: request.title,
-      category: request.category,
-      quantity: request.quantity,
-      unit: request.unit,
-      status: request.status,
-      moderationNote: request.moderationNote,
-      moderatedAt: request.moderatedAt?.toISOString() ?? null,
-      createdAt: request.createdAt.toISOString(),
-      buyer: request.buyer,
-      quoteCount: request._count.quotes,
-    }));
+    return ids.flatMap((id) => {
+      const request = byId.get(id);
+      return request ? [this.toAdminPurchaseRequest(request)] : [];
+    });
+  }
+
+  /**
+   * Phone detection runs in libphonenumber, not SQL, so the flag cannot be part of the
+   * ORDER BY. Scan only the checked text columns in keyset batches (newest first), keep
+   * every flagged id and the newest unflagged ids, then cut to the list limit. Flagged
+   * requests therefore reach the list no matter how old they are.
+   */
+  private async prioritizedPurchaseRequestIds(
+    where: Prisma.PurchaseRequestWhereInput | undefined,
+  ): Promise<string[]> {
+    const flagged: string[] = [];
+    const unflagged: string[] = [];
+    let cursor: string | undefined;
+
+    for (;;) {
+      const batch = await this.prisma.purchaseRequest.findMany({
+        where,
+        orderBy: adminRequestOrder,
+        take: ADMIN_REQUEST_FLAG_SCAN_BATCH,
+        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        select: { id: true, title: true, message: true, variety: true, packaging: true },
+      });
+
+      for (const row of batch) {
+        if (purchaseRequestPhoneLikeFields(row).length > 0) {
+          flagged.push(row.id);
+        } else if (unflagged.length < ADMIN_REQUEST_LIST_LIMIT) {
+          unflagged.push(row.id);
+        }
+      }
+
+      if (batch.length < ADMIN_REQUEST_FLAG_SCAN_BATCH) break;
+      if (flagged.length >= ADMIN_REQUEST_LIST_LIMIT) break;
+      cursor = batch[batch.length - 1].id;
+    }
+
+    return [...flagged, ...unflagged].slice(0, ADMIN_REQUEST_LIST_LIMIT);
   }
 
   async cancelPurchaseRequest(
@@ -780,19 +822,7 @@ export class AdminService {
       this.notifyIndexNowRequest(request.id);
     }
 
-    return {
-      id: request.id,
-      title: request.title,
-      category: request.category,
-      quantity: request.quantity,
-      unit: request.unit,
-      status: request.status,
-      moderationNote: request.moderationNote,
-      moderatedAt: request.moderatedAt?.toISOString() ?? null,
-      createdAt: request.createdAt.toISOString(),
-      buyer: request.buyer,
-      quoteCount: request._count.quotes,
-    };
+    return this.toAdminPurchaseRequest(request);
   }
 
   async listDeals(status?: string): Promise<AdminDeal[]> {
@@ -1055,10 +1085,45 @@ export class AdminService {
     };
   }
 
+  private toAdminPurchaseRequest(request: {
+    id: string;
+    title: string;
+    category: string;
+    quantity: string;
+    unit: string | null;
+    variety: string | null;
+    packaging: string | null;
+    message: string | null;
+    status: string;
+    moderationNote: string | null;
+    moderatedAt: Date | null;
+    createdAt: Date;
+    buyer: { id: string; email: string; displayName: string | null };
+    _count: { quotes: number };
+  }): AdminPurchaseRequest {
+    return {
+      id: request.id,
+      title: request.title,
+      category: request.category,
+      quantity: request.quantity,
+      unit: request.unit,
+      status: request.status,
+      moderationNote: request.moderationNote,
+      moderatedAt: request.moderatedAt?.toISOString() ?? null,
+      createdAt: request.createdAt.toISOString(),
+      buyer: request.buyer,
+      quoteCount: request._count.quotes,
+      phoneLikeFields: purchaseRequestPhoneLikeFields(request),
+    };
+  }
+
   private toModerated(product: {
     id: string;
     title: string;
     description: string | null;
+    variety: string | null;
+    originPlace: string | null;
+    customDelivery: string | null;
     category: string | null;
     unit: string | null;
     isPublished: boolean;
@@ -1103,6 +1168,7 @@ export class AdminService {
             region: product.farm.region,
           }
         : null,
+      phoneLikeFields: productPhoneLikeFields(product),
     };
   }
 }

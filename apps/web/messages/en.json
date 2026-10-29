@@ -478,6 +478,7 @@
     "editSubtitle": "Update details or publishing status.",
     "title": "Title",
     "description": "Description",
+    "descriptionContactNotice": "Do not include personal or contact information in the description, such as phone numbers, email addresses, physical addresses, or links to personal profiles. Use the platform's built-in communication tools to contact other users.",
     "category": "Category",
     "unit": "Unit",
     "noUnit": "No unit",
@@ -944,7 +945,8 @@
         "fulfilled": "Fulfilled",
         "closed": "Closed",
         "cancelled": "Cancelled"
-      }
+      },
+      "openRequest": "Open request page"
     },
     "deals": {
       "empty": "No deals yet.",
@@ -967,6 +969,19 @@
       "enable": "Enable",
       "disable": "Disable",
       "sortOrder": "Sort order"
+    },
+    "phoneFlag": {
+      "badge": "Possible phone number",
+      "fields": "Review: {fields}",
+      "fieldNames": {
+        "title": "Title",
+        "description": "Description",
+        "variety": "Variety",
+        "originPlace": "Place of origin",
+        "customDelivery": "Delivery details",
+        "message": "Message",
+        "packaging": "Packaging"
+      }
     }
   },
   "regions": {
@@ -1495,6 +1510,7 @@
     "version": "Version {version}",
     "effectiveDate": "Effective date: {date}",
     "close": "Close",
+    "documentLanguage": "Document language",
     "documentPending": "The full document text will be published here."
   }
 }

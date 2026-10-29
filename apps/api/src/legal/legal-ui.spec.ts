@@ -193,3 +193,76 @@ describe('legal foundation UI architecture', () => {
     }
   });
 });
+
+describe('legal document language and switching', () => {
+  it('marks the document text with its own language and keeps UI lines in the UI locale', () => {
+    const article = readWeb('components/LegalDocumentArticle.tsx');
+    const view = readWeb('content/legal/index.ts');
+    expect(article).toContain('<article className="legal-document" lang={document.locale}>');
+    expect(article).toContain('const uiLocale = useLocale();');
+    expect(article.match(/lang=\{uiLocale\}/g)).toHaveLength(3);
+    expect(view).toContain('locale: LegalLocale;');
+    expect(view.match(/^\s+locale,$/gm)).toHaveLength(2);
+  });
+
+  it('labels the existing switch with a neutral document-language label', () => {
+    const switcher = readWeb('components/LegalLanguageSwitch.tsx');
+    expect(switcher).toContain("t('documentLanguage')");
+    expect(switcher).toContain('aria-labelledby={labelId}');
+    expect(switcher).toContain('aria-pressed={value === option.locale}');
+    expect(switcher).toContain("{ locale: 'ka', label: 'ქართული' }");
+    expect(switcher).toContain("{ locale: 'en', label: 'English' }");
+
+    const expected: Record<(typeof LOCALES)[number], string> = {
+      en: 'Document language',
+      ka: 'დოკუმენტის ენა',
+      ru: 'Язык документа',
+      de: 'Dokumentsprache',
+      fr: 'Langue du document',
+      it: 'Lingua del documento',
+      es: 'Idioma del documento',
+    };
+    for (const locale of LOCALES) {
+      const label = loadMessages(locale).legal.documentLanguage;
+      expect(label).toBe(expected[locale]);
+      expect(label).not.toMatch(/only|translat|перевод|nur|seulement|solo|missing|unavailable/i);
+    }
+  });
+
+  it('switches the document language in place without navigating or changing the URL', () => {
+    for (const path of ['components/LegalDocumentPanel.tsx', 'components/LegalDocumentDialog.tsx']) {
+      const source = readWeb(path);
+      expect(source).toContain('useState<LegalLocale>(legalLocaleFor(uiLocale))');
+      expect(source).toContain('onChange={setLegalLocale}');
+      expect(source).not.toMatch(/useRouter|usePathname|useSearchParams|router\.|window\.location|<Link/);
+    }
+    const switcher = readWeb('components/LegalLanguageSwitch.tsx');
+    expect(switcher).not.toMatch(/useRouter|usePathname|href=|<Link|window\.location/);
+  });
+
+  it('keeps the header locale switcher and every legal link unchanged', () => {
+    const header = readWeb('components/LanguageSwitcher.tsx');
+    expect(header).toContain('const href = localeSwitchHref(pathname, search);');
+
+    const footer = readWeb('components/SiteFooter.tsx');
+    const auth = readWeb('components/AuthLegalLinks.tsx');
+    for (const source of [footer, auth]) {
+      expect(source).toContain('<Link href="/legal">');
+      expect(source).toContain('<Link href="/terms">');
+      expect(source).toContain('<Link href="/privacy">');
+    }
+    const settings = readWeb('app/[locale]/account/settings/page.tsx');
+    expect(settings).toContain('<Link href="/terms" locale={legalLocale}');
+    expect(settings).toContain('<Link href="/privacy" locale={legalLocale}');
+  });
+
+  it('keeps the legal routes as ordinary pages without redirects or noindex', () => {
+    for (const page of ['legal', 'terms', 'privacy']) {
+      const source = readWeb(`app/[locale]/${page}/page.tsx`);
+      expect(source).toContain('LegalPublicPage');
+      expect(source).not.toMatch(/redirect\(|permanentRedirect\(|noindex|robots/);
+    }
+    const middleware = readWeb('middleware.ts');
+    expect(middleware).not.toMatch(/\/(terms|privacy|legal)\b/);
+  });
+});

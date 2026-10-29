@@ -1,11 +1,61 @@
+import { findPhoneLikeNumbers, type PhoneLikeSpan } from '@agrobridge/shared';
+
 /** Brand suffix used on public HTML titles. The name is not translated. */
 export const SEO_BRAND = 'AgroBridge';
 
 const TITLE_SEPARATOR = ' — ';
 const DEFAULT_DESCRIPTION_LENGTH = 180;
 
+/** A contact label right before a number: "Tel.:", "WhatsApp", "Звоните", "ტელ:". */
+const CONTACT_LABEL_BEFORE =
+  /(?<!\p{L})(?:tel|phone|mobile|mob|call|contact|contacts|whatsapp|viber|telegram|тел|телефон|моб|звоните|контакт|контакты|ტელ|ტელეფონი|დარეკეთ|საკონტაქტო)\.?\s*[:：\-–—]?\s*$/iu;
+/** Text allowed between two numbers of one contact run: "599… or 555…", "599…, +49…". */
+const NUMBER_JOINER = /^[\s,;/]*(?:or|and|или|и|ან|და)?[\s,;/]*$/iu;
+
+function mergeContactRuns(text: string, spans: PhoneLikeSpan[]): PhoneLikeSpan[] {
+  const runs: PhoneLikeSpan[] = [];
+  for (const span of spans) {
+    const last = runs[runs.length - 1];
+    if (last && NUMBER_JOINER.test(text.slice(last.end, span.start))) {
+      last.end = span.end;
+    } else {
+      runs.push({ ...span });
+    }
+  }
+  return runs;
+}
+
+function tidyPunctuation(value: string): string {
+  return value
+    .replace(/\(\s*\)/g, '')
+    .replace(/\s+([,.;:!?…])/g, '$1')
+    .replace(/[,;:]+(?=[.!?…])/g, '')
+    .replace(/([.!?…])(?:\s*[.,;:])+/g, '$1')
+    .replace(/[,;:](?:\s*[,;:])+/g, ',')
+    .replace(/^[\s,.;:—–-]+/, '')
+    .replace(/[\s,;:—–-]+$/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Removes phone numbers (and a contact label right before them) from text
+ * used in search snippets. The stored listing text is not changed.
+ */
+export function redactPhoneLikeNumbers(value: string): string {
+  const spans = findPhoneLikeNumbers(value);
+  if (spans.length === 0) return value;
+  let result = value;
+  for (const run of mergeContactRuns(value, spans).reverse()) {
+    const label = CONTACT_LABEL_BEFORE.exec(result.slice(0, run.start));
+    const start = label ? run.start - label[0].length : run.start;
+    result = `${result.slice(0, start)} ${result.slice(run.end)}`;
+  }
+  return tidyPunctuation(result);
+}
+
 function clean(value: string | null | undefined): string {
-  return value?.replace(/\s+/g, ' ').trim() ?? '';
+  return redactPhoneLikeNumbers(value?.replace(/\s+/g, ' ').trim() ?? '');
 }
 
 function clip(value: string, maxLength: number): string {

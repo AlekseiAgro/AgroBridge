@@ -794,6 +794,19 @@ body {
   overflow-wrap: anywhere;
 }
 
+.legal-lang-field {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem 0.65rem;
+}
+
+.legal-lang-field__label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .legal-lang-switch {
   display: inline-flex;
   flex-wrap: wrap;
@@ -1779,6 +1792,11 @@ body {
   margin: 0 0 0.5rem;
   font-family: var(--font-display), Georgia, serif;
   font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.page__main .how-it-works__title {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.6rem, 3.5vw, 2.3rem);
 }
 
 .role-hub {

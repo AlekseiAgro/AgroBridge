@@ -1,4 +1,11 @@
-import { DEFAULT_LOCALE, LOCALES, type Locale } from '@agrobridge/shared';
+import {
+  DEFAULT_LEGAL_LOCALE,
+  DEFAULT_LOCALE,
+  LEGAL_LOCALES,
+  LOCALES,
+  legalLocaleFor,
+  type Locale,
+} from '@agrobridge/shared';
 import { PRODUCTION_WEB_ORIGIN } from './seo-robots';
 
 /** Public indexable path suffixes after `/{locale}`. Home is the empty suffix. */
@@ -50,12 +57,33 @@ export function localizedPublicUrl(locale: Locale, path = ''): string {
   return `${PRODUCTION_WEB_ORIGIN}/${locale}${suffix}`;
 }
 
+/**
+ * Legal documents exist only in Georgian and English. The other UI locales serve
+ * the English text under their own prefix, so those URLs are not translations.
+ */
+export const LEGAL_PUBLIC_PATHS = ['/legal', '/terms', '/privacy'] as const;
+
+export function isLegalPublicPath(path: string): boolean {
+  return (LEGAL_PUBLIC_PATHS as readonly string[]).includes(path);
+}
+
+/** Locales that have their own document at `path`. */
+export function publicPathLocales(path = ''): readonly Locale[] {
+  return isLegalPublicPath(path) ? LEGAL_LOCALES : LOCALES;
+}
+
+/** Locale of the canonical URL for `path` viewed in `locale`. */
+export function publicCanonicalLocale(locale: Locale, path = ''): Locale {
+  return isLegalPublicPath(path) ? legalLocaleFor(locale) : locale;
+}
+
 export function languageAlternates(path = ''): Record<string, string> {
   const languages: Record<string, string> = {};
-  for (const locale of LOCALES) {
+  for (const locale of publicPathLocales(path)) {
     languages[locale] = localizedPublicUrl(locale, path);
   }
-  languages['x-default'] = localizedPublicUrl(DEFAULT_LOCALE, path);
+  const fallback = isLegalPublicPath(path) ? DEFAULT_LEGAL_LOCALE : DEFAULT_LOCALE;
+  languages['x-default'] = localizedPublicUrl(fallback, path);
   return languages;
 }
 
@@ -152,7 +180,7 @@ export async function loadPublicSitemapRecordIds(
 
 function entriesForPath(path: string, lastModified?: Date): SitemapUrlEntry[] {
   const languages = languageAlternates(path);
-  return LOCALES.map((locale) => {
+  return publicPathLocales(path).map((locale) => {
     const entry: SitemapUrlEntry = {
       url: localizedPublicUrl(locale, path),
       alternates: { languages },

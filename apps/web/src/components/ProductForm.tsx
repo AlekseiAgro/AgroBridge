@@ -25,7 +25,7 @@ import {
   type SeasonMonth,
 } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
-import { FormEvent, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { FormEvent, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { HarvestAvailabilityFocus } from '@/components/HarvestAvailabilityFocus';
 import { MultiSelectDropdown } from '@/components/MultiSelectDropdown';
 import { OriginPlaceInput } from '@/components/OriginPlaceInput';
@@ -102,6 +102,7 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
   const th = useTranslations('harvest');
   const tc = useTranslations('catalog');
   const router = useRouter();
+  const descriptionNoticeId = useId();
   const [error, setError] = useState<string | null>(null);
   const [fieldIssues, setFieldIssues] = useState<ListingRequiredField[]>([]);
   const [success, setSuccess] = useState<string | null>(null);
@@ -632,9 +633,13 @@ export function ProductForm({ mode, initial, media, certificates }: Props) {
           <textarea
             rows={5}
             value={description}
+            aria-describedby={descriptionNoticeId}
             onChange={(event) => setDescription(event.target.value)}
           />
         </label>
+        <p className="field-hint" id={descriptionNoticeId}>
+          {t('descriptionContactNotice')}
+        </p>
       </fieldset>
 
       {mode === 'create' ? (

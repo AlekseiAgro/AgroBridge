@@ -15,13 +15,15 @@ import { getRenderableProductImages, toPublicMediaUrl } from './product-image';
 import { formatProductQuantityRange } from './product-quantity';
 import { formatRegionLabel } from './region';
 import {
+  SEO_BRAND,
+  redactPhoneLikeNumbers,
   farmMetadataCopy,
   distinctPublicOrigin,
   productMetadataCopy,
   requestMetadataCopy,
 } from './seo-page-metadata';
 import { PRODUCTION_WEB_ORIGIN } from './seo-robots';
-import { localizedPublicUrl } from './seo-sitemap';
+import { localizedPublicUrl, publicCanonicalLocale, publicPathLocales } from './seo-sitemap';
 
 export const STATIC_SEO_PAGES = [
   'home',
@@ -56,6 +58,17 @@ const BRAND_LOGO_URL = `${PRODUCTION_WEB_ORIGIN}/brand/agrobridge-logo.png`;
 const BRAND_LOGO_WIDTH = 1773;
 const BRAND_LOGO_HEIGHT = 887;
 const BRAND_ALT = 'AgroBridge';
+
+/** Open Graph locale of each UI locale. */
+export const OPEN_GRAPH_LOCALE: Record<Locale, string> = {
+  ka: 'ka_GE',
+  en: 'en_US',
+  ru: 'ru_RU',
+  de: 'de_DE',
+  fr: 'fr_FR',
+  it: 'it_IT',
+  es: 'es_ES',
+};
 
 type PublicOgImage = {
   url: string;
@@ -123,12 +136,18 @@ function publicMetadata(
 ): Metadata {
   const metadata = copyMetadata(title, description);
   if (!metadata.title || !isLocale(locale)) return metadata;
+  const canonicalLocale = publicCanonicalLocale(locale as Locale, path);
   return {
     ...metadata,
     openGraph: {
       title: metadata.title,
       ...(metadata.description ? { description: metadata.description } : {}),
-      url: localizedPublicUrl(locale as Locale, path),
+      url: localizedPublicUrl(canonicalLocale, path),
+      siteName: SEO_BRAND,
+      locale: OPEN_GRAPH_LOCALE[canonicalLocale],
+      alternateLocale: publicPathLocales(path)
+        .filter((alternate) => alternate !== canonicalLocale)
+        .map((alternate) => OPEN_GRAPH_LOCALE[alternate]),
       type: 'website',
       images,
     },
@@ -195,7 +214,7 @@ export async function productPageMetadata(
     copy.description,
     locale,
     `/products/${product.id}`,
-    productOpenGraphImages(product, title),
+    productOpenGraphImages(product, redactPhoneLikeNumbers(title)),
   );
 }
 
