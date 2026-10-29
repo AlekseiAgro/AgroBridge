@@ -461,5 +461,95 @@ describe('IndexNow mutation triggers', () => {
       await adminService.cancelPurchaseRequest(admin, 'request01', { note: 'Removed' });
       expect(indexNow.submitPurchaseRequest).not.toHaveBeenCalled();
     });
+
+    describe('requests with phone-like text', () => {
+      const flagged = { message: 'Call me: +995 591 71 23 16' };
+
+      it('publishes a flagged request but does not ping IndexNow on creation', async () => {
+        const subscriptionsNotify = jest.fn().mockResolvedValue(undefined);
+        const flaggedService = new PurchaseRequestsService(
+          prisma as never,
+          { notifyNewPurchaseRequest: subscriptionsNotify } as never,
+          notifications as never,
+          undefined,
+          indexNow as never,
+        );
+        prisma.purchaseRequest.create.mockResolvedValue({ ...requestRow(), ...flagged });
+
+        const created = await flaggedService.create(buyer, {
+          title: 'Blueberries',
+          category: 'berries',
+          quantity: '1t',
+          message: flagged.message,
+        });
+
+        expect(prisma.purchaseRequest.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({ status: 'open', message: flagged.message }),
+          }),
+        );
+        expect(created.status).toBe('open');
+        expect(subscriptionsNotify).toHaveBeenCalledTimes(1);
+        expect(indexNow.submitPurchaseRequest).not.toHaveBeenCalled();
+      });
+
+      it('still pings IndexNow for a new request whose numbers are not phone numbers', async () => {
+        prisma.purchaseRequest.create.mockResolvedValue({
+          ...requestRow(),
+          title: 'Hazelnuts 20 t',
+          packaging: '25 kg bags, 2026 harvest',
+          message: 'Target price 2.50 GEL/kg, HS code 0802.22, GlobalG.A.P. required',
+        });
+
+        await service.create(buyer, {
+          title: 'Hazelnuts 20 t',
+          category: 'nuts',
+          quantity: '20',
+        });
+
+        expect(indexNow.submitPurchaseRequest).toHaveBeenCalledTimes(1);
+        expect(indexNow.submitPurchaseRequest).toHaveBeenCalledWith('request01');
+      });
+
+      it.each(['close', 'cancel'] as const)(
+        'still pings IndexNow when the buyer uses %s on a flagged request',
+        async (action) => {
+          prisma.purchaseRequest.findUnique.mockResolvedValue({ ...requestRow(), ...flagged });
+
+          await service[action](buyer, 'request01');
+
+          expect(indexNow.submitPurchaseRequest).toHaveBeenCalledTimes(1);
+          expect(indexNow.submitPurchaseRequest).toHaveBeenCalledWith('request01');
+        },
+      );
+
+      it('still pings IndexNow when a quote on a flagged request is accepted', async () => {
+        prisma.purchaseRequest.findUnique.mockResolvedValue({ ...requestRow(), ...flagged });
+
+        await service.acceptQuote(buyer, 'request01', 'quote0001');
+
+        expect(indexNow.submitPurchaseRequest).toHaveBeenCalledTimes(1);
+        expect(indexNow.submitPurchaseRequest).toHaveBeenCalledWith('request01');
+      });
+
+      it('still pings IndexNow when an admin removes a flagged open request', async () => {
+        prisma.purchaseRequest.findUnique.mockResolvedValue({
+          ...requestRow(),
+          ...flagged,
+          _count: { quotes: 1 },
+        });
+        prisma.purchaseRequest.update.mockResolvedValue({
+          ...requestRow('cancelled'),
+          ...flagged,
+          moderationNote: 'Removed',
+          moderatedAt: new Date(),
+          _count: { quotes: 1 },
+        });
+
+        await adminService.cancelPurchaseRequest(admin, 'request01', { note: 'Removed' });
+
+        expect(indexNow.submitPurchaseRequest).toHaveBeenCalledWith('request01');
+      });
+    });
   });
 });
