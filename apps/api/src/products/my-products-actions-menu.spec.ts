@@ -201,9 +201,40 @@ describe('My Products card actions menu', () => {
   const css = source('app/globals.css');
   const actions = source('components/MyProductCardActions.tsx');
 
-  it('lifts the card that owns the open menu above neighbouring cards', () => {
-    expect(css).toMatch(/\.entity-card:has\(\.mine-card-menu\[open\]\)\s*\{[^}]*z-index:\s*2/);
+  it('lifts the action row that owns the open menu with a class, not :has()', () => {
+    expect(css).toMatch(
+      /\.entity-card \.product-list__actions\.product-list__actions--menu-open\s*\{[^}]*z-index:\s*2/,
+    );
+    expect(css).not.toMatch(/:has\([^)]*mine-card-menu/);
     expect(css).toMatch(/\.mine-card-menu__panel\s*\{[^}]*z-index:\s*30/);
+  });
+
+  it('applies the open class from component state on every open and close path', () => {
+    expect(actions).toContain('const [menuOpen, setMenuOpen] = useState(false);');
+    expect(actions).toContain(
+      "className={`product-list__actions${menuOpen ? ' product-list__actions--menu-open' : ''}`}",
+    );
+
+    const triggerClick = actions.slice(
+      actions.indexOf('function onTriggerClick('),
+      actions.indexOf('function onMenuToggle('),
+    );
+    expect(triggerClick).toMatch(/menu\.open = true;\s*setMenuOpen\(true\);\s*placeMenu\(/);
+
+    const toggle = actions.slice(
+      actions.indexOf('function onMenuToggle('),
+      actions.indexOf('function closeMenu('),
+    );
+    expect(toggle).toContain('const open = event.currentTarget.open;');
+    expect(toggle).toContain('setMenuOpen(open);');
+    expect(actions).toContain('onToggle={onMenuToggle}');
+
+    const close = actions.slice(
+      actions.indexOf('function closeMenu('),
+      actions.indexOf('async function onMarkSoldOut('),
+    );
+    expect(close).toContain("removeAttribute('open')");
+    expect(close).toContain('setMenuOpen(false);');
   });
 
   it('flips the panel above the trigger when the viewport has no room below', () => {
@@ -218,7 +249,9 @@ describe('My Products card actions menu', () => {
   });
 
   it('keeps the existing menu actions', () => {
-    expect(actions).toContain('<details ref={menuRef} className="mine-card-menu">');
+    expect(actions).toContain(
+      '<details ref={menuRef} className="mine-card-menu" onToggle={onMenuToggle}>',
+    );
     expect(actions).toContain("{t('edit')}");
     expect(actions).toContain("t('markSoldOut')");
     expect(actions).toContain('<DeleteProductButton');
@@ -238,7 +271,8 @@ describe('My Products card actions menu', () => {
         await session.send('Runtime.enable');
         await session.send('Page.enable');
 
-        const openMenu = (cardId: string, placement: 'below' | 'above') =>
+        // Mirrors MyProductCardActions: the open menu's action row gets the open class.
+        const openMenu = (cardId: string, placement: 'below' | 'above', withOpenClass = true) =>
           evaluate<MenuCheck>(
             session.send,
             `(() => {
@@ -246,10 +280,16 @@ describe('My Products card actions menu', () => {
                 menu.removeAttribute('open');
                 delete menu.dataset.placement;
               });
+              document
+                .querySelectorAll('.product-list__actions--menu-open')
+                .forEach((row) => row.classList.remove('product-list__actions--menu-open'));
               const li = document.getElementById(${JSON.stringify(cardId)});
               const menu = li.querySelector('.mine-card-menu');
               if (${JSON.stringify(placement)} === 'above') menu.dataset.placement = 'above';
               menu.open = true;
+              if (${JSON.stringify(withOpenClass)}) {
+                li.querySelector('.product-list__actions').classList.add('product-list__actions--menu-open');
+              }
               const panel = menu.querySelector('.mine-card-menu__panel');
               panel.scrollIntoView({ block: 'center' });
               const t = menu.getBoundingClientRect();
@@ -290,6 +330,12 @@ describe('My Products card actions menu', () => {
           });
           await session.send('Page.navigate', { url: server.url });
           await new Promise((resolve) => setTimeout(resolve, 350));
+
+          const withoutClass = await openMenu('first', 'below', false);
+          expect({ width, covered: withoutClass.items.some((item) => !item.topmost) }).toEqual({
+            width,
+            covered: true,
+          });
 
           for (const [cardId, placement] of [
             ['first', 'below'],

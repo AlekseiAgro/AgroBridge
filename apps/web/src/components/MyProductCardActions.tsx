@@ -2,7 +2,7 @@
 
 import type { HarvestStatus } from '@agrobridge/shared';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type MouseEvent, type SyntheticEvent } from 'react';
 import { DeleteProductButton } from '@/components/DeleteProductButton';
 import { Link, useRouter } from '@/i18n/navigation';
 import { HARVEST_STATUS_FOCUS_HASH } from '@/lib/harvest-availability-focus';
@@ -36,6 +36,7 @@ export function MyProductCardActions({ productId, harvestStatus }: Props) {
   const menuRef = useRef<HTMLDetailsElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [pending, setPending] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const editHref = `/dashboard/products/${productId}/edit`;
   const availabilityHref = `${editHref}${HARVEST_STATUS_FOCUS_HASH}`;
   const showMarkSoldOut = harvestStatus !== 'soldOut';
@@ -58,11 +59,21 @@ export function MyProductCardActions({ productId, harvestStatus }: Props) {
     // Open and place in the same frame so the menu never flashes on the wrong side.
     event.preventDefault();
     menu.open = true;
+    setMenuOpen(true);
     placeMenu(menu, panelRef.current);
+  }
+
+  function onMenuToggle(event: SyntheticEvent<HTMLDetailsElement>) {
+    const open = event.currentTarget.open;
+    setMenuOpen(open);
+    if (open) {
+      placeMenu(event.currentTarget, panelRef.current);
+    }
   }
 
   function closeMenu() {
     menuRef.current?.removeAttribute('open');
+    setMenuOpen(false);
   }
 
   async function onMarkSoldOut() {
@@ -88,14 +99,14 @@ export function MyProductCardActions({ productId, harvestStatus }: Props) {
   }
 
   return (
-    <div className="product-list__actions">
+    <div className={`product-list__actions${menuOpen ? ' product-list__actions--menu-open' : ''}`}>
       <Link
         className="button button--primary product-list__action--primary"
         href={availabilityHref}
       >
         {t('updateAvailability')}
       </Link>
-      <details ref={menuRef} className="mine-card-menu">
+      <details ref={menuRef} className="mine-card-menu" onToggle={onMenuToggle}>
         <summary
           className="button button--ghost mine-card-menu__trigger"
           aria-label={t('moreActions')}
