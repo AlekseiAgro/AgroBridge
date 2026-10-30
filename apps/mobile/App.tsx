@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider } from './src/auth/AuthProvider';
 import { I18nProvider } from './src/i18n/I18nProvider';
+import { PushRegistration } from './src/notifications/PushRegistration';
 import { RootStack } from './src/navigation/RootStack';
 import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
 
@@ -39,6 +40,7 @@ export function App() {
         <ThemeProvider>
           <I18nProvider>
             <AuthProvider>
+              <PushRegistration />
               <RootNavigation />
             </AuthProvider>
           </I18nProvider>

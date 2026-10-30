@@ -1,8 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { apiBaseUrlFromEnv } from '../../api/config';
@@ -10,6 +12,7 @@ import { resolveMediaUrl } from '../../api/media-url';
 import type { BadgeTone } from '../../components/Badge';
 import { AppIconButton } from '../../components/AppIconButton';
 import { AppText } from '../../components/AppText';
+import { Card } from '../../components/Card';
 import { Chip } from '../../components/Chip';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
@@ -27,7 +30,7 @@ import {
 } from '../../catalog/labels';
 import type { CatalogProduct, CatalogRequest } from '../../catalog/model';
 import { primaryProductImageUrl } from '../../catalog/model';
-import { normalizeQueryParam } from '../../catalog/query';
+import { capNewProducts, normalizeQueryParam } from '../../catalog/query';
 import { useHomeFeed } from '../../catalog/use-home-feed';
 import { useI18n } from '../../i18n/I18nProvider';
 import type { RootStackParamList, RootTabParamList } from '../../navigation/types';
@@ -58,7 +61,13 @@ export function HomeScreen() {
   const cardWidth = Math.min(300, Math.max(200, Math.round(width * 0.72)));
   const queryParam = normalizeQueryParam(query);
 
-  const products = queryParam ? feed.serverProducts : feed.products;
+  const products = queryParam ? feed.serverProducts : capNewProducts(feed.products);
+  const openCatalog = () => {
+    stack?.navigate('Catalog', {
+      query: queryParam || undefined,
+      categoryId: categoryId ?? undefined,
+    });
+  };
   const requests = queryParam ? feed.serverRequests : feed.requests;
 
   const hasFilters = Boolean(queryParam || categoryId);
@@ -95,7 +104,9 @@ export function HomeScreen() {
   return (
     <SafeAreaView edges={['top']} style={[styles.screen, { backgroundColor: colors.background }]}>
       <ScrollView
+        style={{ flex: 1 }}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         contentContainerStyle={{
           paddingHorizontal: spacing.lg,
           paddingTop: spacing.sm,
@@ -105,7 +116,12 @@ export function HomeScreen() {
       >
         <View style={styles.header}>
           <View style={styles.brand}>
-            <AppText variant="headline">AgroBridge</AppText>
+            <Image
+              source={require('../../../assets/brand/agrobridge-logo.png')}
+              accessibilityLabel="AgroBridge"
+              contentFit="contain"
+              style={{ width: 168, height: 84 }}
+            />
             <AppText variant="caption" tone="secondary">
               {t('home.platform')}
             </AppText>
@@ -123,7 +139,26 @@ export function HomeScreen() {
           placeholder={t('home.searchPlaceholder')}
           accessibilityLabel={t('home.searchLabel')}
           clearLabel={t('home.clearSearch')}
+          onSubmit={openCatalog}
         />
+        <View>
+          <SectionHeader title={t('catalog.title')} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('home.productCatalog')}
+            onPress={openCatalog}
+            style={({ pressed }) => (pressed ? styles.pressed : undefined)}
+          >
+            <Card padded>
+              <View style={styles.catalogRow}>
+                <AppText variant="bodyStrong" style={styles.catalogLabel}>
+                  {t('home.productCatalog')}
+                </AppText>
+                <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+              </View>
+            </Card>
+          </Pressable>
+        </View>
 
         {feed.status === 'loading' && !feed.bootstrapped ? (
           <LoadingSkeleton accessibilityLabel={t('home.loading')} />
@@ -189,7 +224,7 @@ export function HomeScreen() {
               <>
                 {products.length > 0 ? (
                   <View>
-                    <SectionHeader title={t('home.newProducts')} />
+                    <SectionHeader title={queryParam ? t('home.searchResults') : t('home.newProducts')} />
                     <ScrollView
                       horizontal
                       showsHorizontalScrollIndicator={false}
@@ -313,5 +348,17 @@ const styles = StyleSheet.create({
   },
   chips: {
     paddingRight: 4,
+  },
+  catalogRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    minHeight: 28,
+  },
+  catalogLabel: {
+    flex: 1,
+  },
+  pressed: {
+    opacity: 0.92,
   },
 });

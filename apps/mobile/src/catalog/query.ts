@@ -31,13 +31,16 @@ export function textMatches(query: string, parts: (string | null | undefined)[])
 
 export function withSearchParams(
   path: string,
-  params: Record<string, string | null | undefined>,
+  params: Record<string, string | readonly string[] | null | undefined>,
 ): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    const normalized = normalizeQueryParam(value);
-    if (normalized) {
-      search.set(key, normalized);
+    const values = Array.isArray(value) ? value : [value];
+    for (const item of values) {
+      const normalized = normalizeQueryParam(item);
+      if (normalized) {
+        search.append(key, normalized);
+      }
     }
   }
   const query = search.toString();
@@ -48,12 +51,29 @@ export function productsPath(input: {
   categoryId?: string | null;
   query?: string | null;
   locale?: string | null;
+  region?: string | readonly string[] | null;
+  harvestStatus?: string | null;
+  preorder?: boolean;
+  inSeason?: boolean;
+  newest?: number | null;
 }): string {
   return withSearchParams('/products', {
     category: input.categoryId,
     q: input.query,
     locale: input.locale,
+    region: input.region,
+    harvestStatus: input.harvestStatus,
+    preorder: input.preorder ? 'true' : null,
+    inSeason: input.inSeason ? 'true' : null,
+    newest: input.newest ? String(input.newest) : null,
   });
+}
+
+export const NEW_PRODUCTS_LIMIT = 15;
+
+/** Keeps API order and drops anything past the New Products cap. */
+export function capNewProducts<T>(products: T[], limit = NEW_PRODUCTS_LIMIT): T[] {
+  return products.slice(0, Math.max(0, limit));
 }
 
 export function purchaseRequestsPath(input: {

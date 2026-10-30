@@ -45,7 +45,7 @@ export function ProductCard({
 
   const card = (
     <Card accessibilityLabel={onPress ? undefined : accessibilityLabel} style={width && !onPress ? { width } : undefined}>
-      <View style={[styles.media, showImage ? null : styles.mediaEmpty]}>
+      <View style={styles.media}>
         {showImage ? (
           <Image
             source={{ uri: imageUrl ?? undefined }}
@@ -56,15 +56,16 @@ export function ProductCard({
             transition={0}
           />
         ) : (
-          <View style={[styles.image, styles.placeholder, { backgroundColor: colors.neutralSoft }]}>
-            <AppText variant="caption" tone="muted">
-              {noPhotoLabel}
-            </AppText>
-          </View>
+          <View
+            accessibilityLabel={noPhotoLabel}
+            style={[styles.image, styles.placeholder, { backgroundColor: colors.neutralSoft }]}
+          />
         )}
       </View>
       <View style={{ padding: spacing.md, gap: spacing.sm }}>
-        <AppText variant="bodyStrong">{name}</AppText>
+        <AppText variant="bodyStrong" numberOfLines={3}>
+          {name}
+        </AppText>
         {meta ? (
           <AppText variant="caption" tone="secondary">
             {meta}
@@ -131,9 +132,6 @@ const styles = StyleSheet.create({
   media: {
     width: '100%',
     aspectRatio: 1.35,
-  },
-  mediaEmpty: {
-    aspectRatio: 2.6,
   },
   farmLink: {
     paddingHorizontal: 4,

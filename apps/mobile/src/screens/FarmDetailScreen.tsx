@@ -97,10 +97,11 @@ export function FarmDetailScreen() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={{
           paddingHorizontal: spacing.lg,
           paddingTop: spacing.sm,
-          paddingBottom: spacing.xxl,
+          paddingBottom: spacing.xxxl,
           gap: spacing.lg,
         }}
       >
