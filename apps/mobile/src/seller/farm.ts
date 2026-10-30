@@ -1,8 +1,9 @@
 import { joinApiUrl } from '../api/config';
 import { ApiError } from '../api/errors';
 import { isGeorgiaRegion } from '../catalog/categories';
+import { certificateMimeFromName, normalizeCertificateMime } from './certificates';
 import { draftFailure, type DraftFailure, type DraftGate } from './draft';
-import { classifyImageBytes, multipartFileValue, type ProductPhotoFile } from './photos';
+import { classifyImageBytes, multipartFileValue, normalizePhotoMime, type ProductPhotoFile } from './photos';
 
 /** Farm photos are a separate limit from product photos. */
 export const FARM_PHOTO_MAX_COUNT = 3;
@@ -333,10 +334,14 @@ export function farmPhotoIssue(file: ProductPhotoFile, currentCount: number): Fa
   if (currentCount >= FARM_PHOTO_MAX_COUNT) return 'maxReached';
   if (!file.uri.trim()) return 'missingFile';
   if (file.fileSize != null && file.fileSize > FARM_PHOTO_MAX_BYTES) return 'tooLarge';
-  const mime = file.mimeType?.trim().toLowerCase() ?? '';
-  if (mime && !PHOTO_MIMES.includes(mime)) return 'unsupported';
-  if (!mime) return 'unsupported';
+  if (!resolveFarmPhotoMime(file)) return 'unsupported';
   return null;
+}
+
+/** Photo types come from the picker or file bytes, never from the file name. */
+export function resolveFarmPhotoMime(file: Pick<ProductPhotoFile, 'mimeType'>): FarmPhotoMime | null {
+  const mime = normalizePhotoMime(file.mimeType);
+  return mime && PHOTO_MIMES.includes(mime) ? (mime as FarmPhotoMime) : null;
 }
 
 export function farmPhotoMimeFromBytes(bytes: Uint8Array): FarmPhotoMime | null {
@@ -349,7 +354,7 @@ export function fillFarmPhotoForm(
   file: ProductPhotoFile,
   native = isReactNative(),
 ): void {
-  form.append('file', multipartFileValue(file, native));
+  form.append('file', multipartFileValue({ ...file, mimeType: resolveFarmPhotoMime(file) }, native, PHOTO_MIMES));
 }
 
 export function farmDocumentIssue(
@@ -361,9 +366,20 @@ export function farmDocumentIssue(
   if (!title.trim()) return 'titleRequired';
   if (!file.uri.trim()) return 'missingFile';
   if (file.fileSize != null && file.fileSize > FARM_DOCUMENT_MAX_BYTES) return 'tooLarge';
-  const mime = file.mimeType?.trim().toLowerCase() ?? '';
-  if (!mime || !DOCUMENT_MIMES.includes(mime)) return 'unsupported';
+  if (!resolveFarmDocumentMime(file)) return 'unsupported';
   return null;
+}
+
+/**
+ * The declared type wins when it is usable. A missing or generic type falls back to the file name.
+ * A declared type the API does not accept is not overridden by the name.
+ */
+export function resolveFarmDocumentMime(
+  file: Pick<ProductPhotoFile, 'name' | 'mimeType'>,
+): FarmDocumentMime | null {
+  const declared = normalizeCertificateMime(file.mimeType);
+  const mime = declared ?? certificateMimeFromName(file.name);
+  return mime && DOCUMENT_MIMES.includes(mime) ? (mime as FarmDocumentMime) : null;
 }
 
 export function fillFarmDocumentForm(
@@ -373,7 +389,10 @@ export function fillFarmDocumentForm(
 ): void {
   form.append('title', input.title.trim());
   form.append('kind', input.kind);
-  form.append('file', multipartFileValue(input.file, native));
+  form.append(
+    'file',
+    multipartFileValue({ ...input.file, mimeType: resolveFarmDocumentMime(input.file) }, native, DOCUMENT_MIMES),
+  );
 }
 
 function isReactNative(): boolean {

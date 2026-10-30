@@ -121,7 +121,9 @@ describe('product photos', () => {
     expect(photoFileIssue({ ...jpeg, mimeType: 'image/webp' }, 0)).toBeNull();
     expect(photoFileIssue({ ...jpeg, mimeType: 'image/jpg' }, 0)).toBeNull();
     expect(photoFileIssue({ ...jpeg, mimeType: 'image/gif' }, 0)).toBe('unsupported');
-    expect(photoFileIssue({ ...jpeg, mimeType: null, name: 'scan.gif' }, 0)).toBeNull();
+    expect(photoFileIssue({ ...jpeg, mimeType: null, name: 'scan.gif' }, 0)).toBe('unsupported');
+    expect(photoFileIssue({ ...jpeg, mimeType: null, name: 'scan.jpg' }, 0)).toBe('unsupported');
+    expect(photoFileIssue({ ...jpeg, mimeType: 'application/octet-stream' }, 0)).toBe('unsupported');
     expect(photoFileIssue({ ...jpeg, fileSize: PRODUCT_IMAGE_MAX_BYTES }, 1)).toBeNull();
     expect(photoFileIssue({ ...jpeg, fileSize: PRODUCT_IMAGE_MAX_BYTES + 1 }, 1)).toBe('tooLarge');
     expect(photoFileIssue({ ...jpeg, fileSize: null }, 1)).toBeNull();
@@ -149,6 +151,26 @@ describe('product photos', () => {
     expect(file).toBeInstanceOf(File);
     expect((file as File).name).toBe('tea.jpg');
     expect((file as File).type).toBe('image/jpeg');
+  });
+
+  it('sends a typed native part for JPEG, PNG, and WebP photos', () => {
+    for (const [mimeType, type] of [
+      ['image/jpeg', 'image/jpeg'],
+      ['image/jpg', 'image/jpeg'],
+      ['IMAGE/PNG', 'image/png'],
+      ['image/webp', 'image/webp'],
+    ] as const) {
+      const form = new FormData();
+      const append = jest.spyOn(form, 'append');
+      fillProductImageForm(form, { ...jpeg, mimeType }, true);
+      expect(append).toHaveBeenCalledWith(PRODUCT_IMAGE_FIELD, { uri: 'file:///tea.jpg', name: 'tea.jpg', type });
+    }
+  });
+
+  it('never builds a native part without a supported type', () => {
+    for (const mimeType of [null, undefined, '', 'application/octet-stream', 'image/gif', 'image/heic']) {
+      expect(() => multipartFileValue({ ...jpeg, mimeType }, true)).toThrow();
+    }
   });
 
   it('posts the image to the product images endpoint and refreshes from the response', async () => {

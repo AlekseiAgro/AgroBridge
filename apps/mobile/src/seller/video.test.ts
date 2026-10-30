@@ -4,11 +4,14 @@ import type { DraftGate } from './draft';
 import { editRequestBody, parseSellerProductDetail, sellerFormFromDetail } from './edit';
 import {
   classifyVideoBytes,
+  fillProductVideoForm,
+  PRODUCT_VIDEO_FIELD,
   PRODUCT_VIDEO_MAX_BYTES,
   publicVideoUrl,
   submitProductVideoDelete,
   submitProductVideoReplace,
   submitProductVideoUpload,
+  resolveVideoMime,
   videoFileIssue,
   type ProductVideoFile,
   type VideoChoice,
@@ -35,6 +38,20 @@ function owner(extra: Record<string, unknown> = {}) {
   };
 }
 
+async function asReactNative<T>(run: () => Promise<T>): Promise<T> {
+  const original = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  Object.defineProperty(globalThis, 'navigator', { value: { product: 'ReactNative' }, configurable: true });
+  try {
+    return await run();
+  } finally {
+    if (original) {
+      Object.defineProperty(globalThis, 'navigator', original);
+    } else {
+      delete (globalThis as { navigator?: unknown }).navigator;
+    }
+  }
+}
+
 function ftyp(brand: string): Uint8Array {
   const bytes = new Uint8Array(12);
   bytes.set([0x66, 0x74, 0x79, 0x70], 4);
@@ -56,6 +73,111 @@ describe('product video', () => {
     expect(videoFileIssue({ ...mp4, fileSize: PRODUCT_VIDEO_MAX_BYTES + 1 })).toBe('tooLarge');
     expect(videoFileIssue({ ...mp4, fileSize: PRODUCT_VIDEO_MAX_BYTES })).toBeNull();
     expect(videoFileIssue({ ...mp4, uri: '  ' })).toBe('missingFile');
+  });
+
+  it('sends the exact API video type on the native part', () => {
+    const cases: [Partial<ProductVideoFile>, string][] = [
+      [{ name: 'clip.mp4', mimeType: 'video/mp4' }, 'video/mp4'],
+      [{ name: 'clip.webm', mimeType: 'video/webm' }, 'video/webm'],
+      [{ name: 'clip.mov', mimeType: 'video/quicktime' }, 'video/quicktime'],
+      [{ name: 'clip.mov', mimeType: 'video/mov' }, 'video/quicktime'],
+      [{ name: 'clip.mov', mimeType: 'VIDEO/X-QUICKTIME' }, 'video/quicktime'],
+      [{ name: 'clip.mp4', mimeType: 'application/octet-stream' }, 'video/mp4'],
+      [{ name: 'clip.MOV', mimeType: null }, 'video/quicktime'],
+      [{ name: 'clip.m4v', mimeType: undefined }, 'video/mp4'],
+    ];
+    for (const [change, type] of cases) {
+      const file = { ...mp4, ...change };
+      expect(videoFileIssue(file)).toBeNull();
+      expect(resolveVideoMime(file)).toBe(type);
+      const form = new FormData();
+      const append = jest.spyOn(form, 'append');
+      fillProductVideoForm(form, file, true);
+      expect(append).toHaveBeenCalledWith(PRODUCT_VIDEO_FIELD, { uri: file.uri, name: file.name, type });
+    }
+  });
+
+  it('rejects unresolvable video types locally and never builds a typeless native part', () => {
+    const cases: Partial<ProductVideoFile>[] = [
+      { name: 'clip', mimeType: 'application/octet-stream' },
+      { name: 'clip.avi', mimeType: null },
+      { name: 'clip.mp4', mimeType: 'video/x-msvideo' },
+      { name: 'clip.mp4', mimeType: 'video/x-m4v' },
+    ];
+    for (const change of cases) {
+      const file = { ...mp4, ...change };
+      expect(resolveVideoMime(file)).toBeNull();
+      expect(videoFileIssue(file)).toBe('unsupported');
+      expect(() => fillProductVideoForm(new FormData(), file, true)).toThrow();
+    }
+  });
+
+  it('gives the non-native File the resolved video type', () => {
+    const cases: [Partial<ProductVideoFile>, string][] = [
+      [{ name: 'clip.mp4', mimeType: 'video/mp4' }, 'video/mp4'],
+      [{ name: 'clip.mov', mimeType: 'video/mov' }, 'video/quicktime'],
+      [{ name: 'clip.webm', mimeType: 'application/octet-stream' }, 'video/webm'],
+      [{ name: 'clip.m4v', mimeType: null }, 'video/mp4'],
+    ];
+    for (const [change, type] of cases) {
+      const form = new FormData();
+      fillProductVideoForm(form, { ...mp4, ...change }, false);
+      const file = form.get(PRODUCT_VIDEO_FIELD);
+      expect(file).toBeInstanceOf(File);
+      expect((file as File).name).toBe(change.name);
+      expect((file as File).type).toBe(type);
+    }
+  });
+
+  it('sends a typed part through the API wrapper when running as React Native', async () => {
+    const requests: { url: string; method: string; contentType: string | null }[] = [];
+    const api = new ApiClient({
+      baseUrl: 'https://api.agrobridge.ge/api',
+      getAccessToken: async () => 'token',
+      onUnauthorized: () => undefined,
+      fetchImpl: async (input, init) => {
+        requests.push({
+          url: String(input),
+          method: init?.method ?? 'GET',
+          contentType: new Headers(init?.headers).get('content-type'),
+        });
+        return new Response(JSON.stringify(owner()), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      },
+    });
+    const append = jest.spyOn(FormData.prototype, 'append');
+    try {
+      await asReactNative(() =>
+        uploadProductVideo(api, 'p1', { ...mp4, name: 'clip.MOV', mimeType: 'video/x-quicktime' }),
+      );
+      expect(append.mock.calls).toEqual([['file', { uri: mp4.uri, name: 'clip.MOV', type: 'video/quicktime' }]]);
+      expect(requests).toEqual([
+        { url: 'https://api.agrobridge.ge/api/products/p1/videos', method: 'POST', contentType: null },
+      ]);
+
+      await expect(
+        asReactNative(() => uploadProductVideo(api, 'p1', { ...mp4, name: 'clip', mimeType: 'application/octet-stream' })),
+      ).rejects.toThrow();
+      expect(requests).toHaveLength(1);
+    } finally {
+      append.mockRestore();
+    }
+  });
+
+  it('does not call upload for an unsupported video', async () => {
+    const upload = jest.fn();
+    const result = await submitProductVideoUpload({
+      productId: 'p1',
+      file: { ...mp4, name: 'clip', mimeType: 'application/octet-stream' },
+      currentCount: 0,
+      gate: { pending: false },
+      upload,
+      onPending: () => undefined,
+    });
+    expect(result).toEqual({ status: 'invalid', issue: 'unsupported' });
+    expect(upload).not.toHaveBeenCalled();
   });
 
   it('posts multipart file to the video endpoint and does not patch the product', async () => {

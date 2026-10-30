@@ -11,6 +11,7 @@ import {
   fillCertificateForm,
   openCertificateDocument,
   parseProductCertificates,
+  resolveCertificateMime,
   submitCertificateDelete,
   submitCertificateUpload,
   type CertificateFile,
@@ -66,6 +67,76 @@ describe('product certificates', () => {
     expect(certificateFileIssue(pdf, 10)).toBe('maxReached');
     expect(canAddCertificate(10)).toBe(false);
     expect(canAddCertificate(9)).toBe(true);
+  });
+
+  it('sends the exact API certificate type on the native part', () => {
+    const cases: [Partial<CertificateFile>, string][] = [
+      [{ name: 'gap.pdf', mimeType: 'application/pdf' }, 'application/pdf'],
+      [{ name: 'gap.pdf', mimeType: 'application/octet-stream' }, 'application/pdf'],
+      [{ name: 'GAP.PDF', mimeType: null }, 'application/pdf'],
+      [{ name: 'scan.jpg', mimeType: 'image/jpeg' }, 'image/jpeg'],
+      [{ name: 'scan.jpg', mimeType: 'image/jpg' }, 'image/jpeg'],
+      [{ name: 'scan.png', mimeType: 'image/png' }, 'image/png'],
+      [{ name: 'scan.webp', mimeType: 'image/webp' }, 'image/webp'],
+    ];
+    for (const [change, type] of cases) {
+      const file = { ...pdf, ...change };
+      expect(certificateFileIssue(file, 0)).toBeNull();
+      expect(resolveCertificateMime(file)).toBe(type);
+      const form = new FormData();
+      const append = jest.spyOn(form, 'append');
+      fillCertificateForm(form, { type: 'organic', title: ' Organic ', file }, true);
+      expect(append.mock.calls).toEqual([
+        ['type', 'organic'],
+        ['title', 'Organic'],
+        ['file', { uri: file.uri, name: file.name, type }],
+      ]);
+    }
+  });
+
+  it('gives the non-native File the resolved certificate type', () => {
+    const cases: [Partial<CertificateFile>, string][] = [
+      [{ name: 'gap.pdf', mimeType: 'application/pdf' }, 'application/pdf'],
+      [{ name: 'gap.pdf', mimeType: 'application/octet-stream' }, 'application/pdf'],
+      [{ name: 'GAP.PDF', mimeType: null }, 'application/pdf'],
+      [{ name: 'scan.jpg', mimeType: 'image/jpg' }, 'image/jpeg'],
+    ];
+    for (const [change, type] of cases) {
+      const form = new FormData();
+      fillCertificateForm(form, { type: 'organic', title: 'Organic', file: { ...pdf, ...change } }, false);
+      const file = form.get('file');
+      expect(file).toBeInstanceOf(File);
+      expect((file as File).name).toBe(change.name);
+      expect((file as File).type).toBe(type);
+    }
+  });
+
+  it('rejects unresolvable certificate types locally and never builds a typeless native part', async () => {
+    const cases: Partial<CertificateFile>[] = [
+      { name: 'scan', mimeType: 'application/octet-stream' },
+      { name: 'notes.txt', mimeType: null },
+      { name: 'gap.pdf', mimeType: 'text/plain' },
+      { name: 'scan.heic', mimeType: 'image/heic' },
+    ];
+    for (const change of cases) {
+      const file = { ...pdf, ...change };
+      expect(resolveCertificateMime(file)).toBeNull();
+      expect(certificateFileIssue(file, 0)).toBe('unsupported');
+      expect(() => fillCertificateForm(new FormData(), { type: 'organic', title: 'Organic', file }, true)).toThrow();
+    }
+    const upload = jest.fn();
+    const result = await submitCertificateUpload({
+      productId: 'p1',
+      type: 'organic',
+      title: 'Organic',
+      file: { ...pdf, name: 'scan', mimeType: 'application/octet-stream' },
+      currentCount: 0,
+      gate: { pending: false },
+      upload,
+      onPending: () => undefined,
+    });
+    expect(result).toEqual({ status: 'invalid', issue: 'unsupported' });
+    expect(upload).not.toHaveBeenCalled();
   });
 
   it('requires a title and sends type, title, and file for every certificate type', async () => {

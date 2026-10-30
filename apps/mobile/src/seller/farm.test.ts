@@ -1,3 +1,4 @@
+import { ApiClient } from '../api/client';
 import { ApiError } from '../api/errors';
 import type { DraftGate } from './draft';
 import {
@@ -18,6 +19,8 @@ import {
   identityUploadSubmitsReview,
   parseFarmProfile,
   parseFarmVerification,
+  resolveFarmDocumentMime,
+  resolveFarmPhotoMime,
   submitFarmDocumentDelete,
   submitFarmDocumentUpload,
   submitFarmPhotoDelete,
@@ -26,8 +29,23 @@ import {
   submitFarmSave,
   verificationSectionState,
 } from './farm';
+import { uploadFarmDocument } from './farm-api';
 
 const gate = (): DraftGate => ({ pending: false });
+
+async function asReactNative<T>(run: () => Promise<T>): Promise<T> {
+  const original = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  Object.defineProperty(globalThis, 'navigator', { value: { product: 'ReactNative' }, configurable: true });
+  try {
+    return await run();
+  } finally {
+    if (original) {
+      Object.defineProperty(globalThis, 'navigator', original);
+    } else {
+      delete (globalThis as { navigator?: unknown }).navigator;
+    }
+  }
+}
 
 const file = {
   uri: 'file:///id.pdf',
@@ -185,6 +203,41 @@ describe('farm photos', () => {
     expect(primary.status).toBe('saved');
   });
 
+  it('sends the exact API photo type on the native part', () => {
+    for (const [mimeType, type] of [
+      ['image/jpeg', 'image/jpeg'],
+      ['image/jpg', 'image/jpeg'],
+      ['Image/PNG', 'image/png'],
+      ['image/webp', 'image/webp'],
+    ] as const) {
+      const file = { ...photo, mimeType };
+      expect(farmPhotoIssue(file, 0)).toBeNull();
+      expect(resolveFarmPhotoMime(file)).toBe(type);
+      const append = jest.fn();
+      fillFarmPhotoForm({ append }, file, true);
+      expect(append.mock.calls).toEqual([['file', { uri: photo.uri, name: photo.name, type }]]);
+    }
+  });
+
+  it('rejects photos without a supported type and never builds a typeless native part', async () => {
+    for (const mimeType of [null, undefined, '', 'application/octet-stream', 'image/gif', 'image/heic']) {
+      const file = { ...photo, mimeType };
+      expect(resolveFarmPhotoMime(file)).toBeNull();
+      expect(farmPhotoIssue(file, 0)).toBe('unsupported');
+      expect(() => fillFarmPhotoForm({ append: jest.fn() }, file, true)).toThrow();
+    }
+    const upload = jest.fn();
+    const result = await submitFarmPhotoUpload({
+      file: { ...photo, mimeType: null },
+      currentCount: 0,
+      gate: gate(),
+      upload,
+      onPending: () => undefined,
+    });
+    expect(result).toEqual({ status: 'invalid', issue: 'unsupported' });
+    expect(upload).not.toHaveBeenCalled();
+  });
+
   it('ignores a second photo tap while one is in flight', async () => {
     const busy = gate();
     busy.pending = true;
@@ -233,6 +286,110 @@ describe('farm verification documents', () => {
     });
     expect(uploaded).toEqual({ status: 'saved', value: { submitsReview: true } });
     expect(profilePatched).toBe(false);
+  });
+
+  it('sends the exact API document type on the native part', () => {
+    const cases: [Partial<typeof file>, string][] = [
+      [{ name: 'id.pdf', mimeType: 'application/pdf' }, 'application/pdf'],
+      [{ name: 'id.pdf', mimeType: 'application/octet-stream' }, 'application/pdf'],
+      [{ name: 'ID.PDF', mimeType: undefined }, 'application/pdf'],
+      [{ name: 'id.jpg', mimeType: 'image/jpg' }, 'image/jpeg'],
+      [{ name: 'id.png', mimeType: 'image/png' }, 'image/png'],
+      [{ name: 'id.webp', mimeType: 'image/webp' }, 'image/webp'],
+    ];
+    for (const [change, type] of cases) {
+      const doc = { ...file, ...change };
+      expect(farmDocumentIssue(doc, 'Passport', 0)).toBeNull();
+      expect(resolveFarmDocumentMime(doc)).toBe(type);
+      const append = jest.fn();
+      fillFarmDocumentForm({ append }, { title: ' Passport ', kind: 'idCard', file: doc }, true);
+      expect(append.mock.calls).toEqual([
+        ['title', 'Passport'],
+        ['kind', 'idCard'],
+        ['file', { uri: doc.uri, name: doc.name, type }],
+      ]);
+    }
+  });
+
+  it('uses a File off React Native and a typed part on React Native through the API wrapper', async () => {
+    const requests: { url: string; method: string; contentType: string | null }[] = [];
+    const api = new ApiClient({
+      baseUrl: 'https://api.agrobridge.ge/api',
+      getAccessToken: async () => 'token',
+      onUnauthorized: () => undefined,
+      fetchImpl: async (input, init) => {
+        requests.push({
+          url: String(input),
+          method: init?.method ?? 'GET',
+          contentType: new Headers(init?.headers).get('content-type'),
+        });
+        return new Response(JSON.stringify({ id: 'd1' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      },
+    });
+    const doc = { ...file, mimeType: 'application/octet-stream' };
+    const append = jest.spyOn(FormData.prototype, 'append');
+    try {
+      await uploadFarmDocument(api, { title: ' Passport ', kind: 'idCard', file: doc });
+      const hosted = append.mock.calls.find(([field]) => field === 'file')?.[1];
+      expect(hosted).toBeInstanceOf(File);
+      expect((hosted as File).type).toBe('application/pdf');
+      append.mockClear();
+
+      await asReactNative(() => uploadFarmDocument(api, { title: ' Passport ', kind: 'idCard', file: doc }));
+      expect(append.mock.calls).toEqual([
+        ['title', 'Passport'],
+        ['kind', 'idCard'],
+        ['file', { uri: doc.uri, name: doc.name, type: 'application/pdf' }],
+      ]);
+      expect(requests).toEqual([
+        { url: 'https://api.agrobridge.ge/api/farms/me/documents', method: 'POST', contentType: null },
+        { url: 'https://api.agrobridge.ge/api/farms/me/documents', method: 'POST', contentType: null },
+      ]);
+
+      await expect(
+        asReactNative(() =>
+          uploadFarmDocument(api, {
+            title: 'Passport',
+            kind: 'idCard',
+            file: { ...file, name: 'id', mimeType: 'application/octet-stream' },
+          }),
+        ),
+      ).rejects.toThrow();
+      expect(requests).toHaveLength(2);
+    } finally {
+      append.mockRestore();
+    }
+  });
+
+  it('rejects unresolvable document types locally and never builds a typeless native part', async () => {
+    const cases: Partial<typeof file>[] = [
+      { name: 'id', mimeType: 'application/octet-stream' },
+      { name: 'id.docx', mimeType: undefined },
+      { name: 'id.pdf', mimeType: 'text/plain' },
+    ];
+    for (const change of cases) {
+      const doc = { ...file, ...change };
+      expect(resolveFarmDocumentMime(doc)).toBeNull();
+      expect(farmDocumentIssue(doc, 'Passport', 0)).toBe('unsupported');
+      expect(() =>
+        fillFarmDocumentForm({ append: jest.fn() }, { title: 'Passport', kind: 'idCard', file: doc }, true),
+      ).toThrow();
+    }
+    const upload = jest.fn();
+    const result = await submitFarmDocumentUpload({
+      file: { ...file, name: 'id', mimeType: 'application/octet-stream' },
+      title: 'Passport',
+      kind: 'idCard',
+      currentCount: 0,
+      gate: gate(),
+      upload,
+      onPending: () => undefined,
+    });
+    expect(result).toEqual({ status: 'invalid', issue: 'unsupported' });
+    expect(upload).not.toHaveBeenCalled();
   });
 
   it('keeps the farm profile available when verification status fails', () => {

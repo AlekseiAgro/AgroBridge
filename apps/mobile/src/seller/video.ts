@@ -90,16 +90,23 @@ export function classifyVideoBytes(bytes: Uint8Array): ProductVideoMimeType | nu
   return ascii(bytes, 8, 4) === 'qt  ' ? 'video/quicktime' : 'video/mp4';
 }
 
+/**
+ * The declared type wins when it is usable. A missing or generic type falls back to the file name.
+ * A declared type the API does not accept is not overridden by the name.
+ */
+export function resolveVideoMime(file: Pick<ProductVideoFile, 'name' | 'mimeType'>): ProductVideoMimeType | null {
+  const declared = normalizeVideoMime(file.mimeType);
+  if (declared) {
+    return MIME_TYPES.includes(declared) ? (declared as ProductVideoMimeType) : null;
+  }
+  return videoMimeFromName(file.name);
+}
+
 export function videoFileIssue(file: ProductVideoFile): VideoIssue | null {
   if (!file.uri.trim()) {
     return 'missingFile';
   }
-  const declared = normalizeVideoMime(file.mimeType);
-  if (declared && !MIME_TYPES.includes(declared)) {
-    return 'unsupported';
-  }
-  const resolved = (declared && MIME_TYPES.includes(declared) ? declared : null) ?? videoMimeFromName(file.name);
-  if (!resolved || !MIME_TYPES.includes(resolved)) {
+  if (!resolveVideoMime(file)) {
     return 'unsupported';
   }
   const size = knownFileSize(file.fileSize);
@@ -146,7 +153,10 @@ export function publicVideoUrl(url: string, apiBaseUrl: string): string | null {
 }
 
 export function fillProductVideoForm(form: FormData, file: ProductVideoFile, native = isReactNative()): void {
-  form.append(PRODUCT_VIDEO_FIELD, multipartFileValue(file, native) as Blob);
+  form.append(
+    PRODUCT_VIDEO_FIELD,
+    multipartFileValue({ ...file, mimeType: resolveVideoMime(file) }, native, MIME_TYPES) as Blob,
+  );
 }
 
 export function videoFailure(error: unknown): VideoFailure {
