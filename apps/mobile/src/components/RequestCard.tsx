@@ -2,8 +2,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../theme/ThemeProvider';
 import { AppText } from './AppText';
+import { Badge } from './Badge';
 import { Card } from './Card';
-import { Chip } from './Chip';
 
 type RequestCardProps = {
   title: string;
@@ -24,13 +24,15 @@ export function RequestCard({
   const card = (
     <Card padded accessibilityLabel={onPress ? undefined : accessibilityLabel}>
       <View style={{ gap: spacing.sm }}>
-        <AppText variant="bodyStrong">{title}</AppText>
+        <AppText variant="bodyStrong" numberOfLines={3}>
+          {title}
+        </AppText>
         {meta ? (
           <AppText variant="caption" tone="secondary">
             {meta}
           </AppText>
         ) : null}
-        <Chip label={categoryLabel} />
+        <Badge label={categoryLabel} />
       </View>
     </Card>
   );

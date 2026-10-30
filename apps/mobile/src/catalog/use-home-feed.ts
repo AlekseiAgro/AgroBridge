@@ -44,7 +44,7 @@ export function useHomeFeed(categoryId: string | null, query: string) {
     let cancelled = false;
     Promise.all([
       listCategories(api),
-      listProducts(api, { categoryId, locale }),
+      listProducts(api, { categoryId, locale, newest: 15 }),
       listPurchaseRequests(api, { categoryId, locale }),
     ])
       .then(([nextCategories, nextProducts, nextRequests]) => {

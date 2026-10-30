@@ -9,7 +9,8 @@ import { apiBaseUrlFromEnv } from '../api/config';
 import { ApiError } from '../api/errors';
 import { resolveMediaUrl } from '../api/media-url';
 import { useAuth } from '../auth/AuthProvider';
-import { getProduct } from '../catalog/api';
+import { emailVerificationRoute } from '../auth/verify-email-form';
+import { getProduct, productDetailAuth } from '../catalog/api';
 import {
   categoryLabel,
   countryLabel,
@@ -35,8 +36,10 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { ShowOriginal } from '../components/ShowOriginal';
 import { AppText } from '../components/AppText';
 import { useI18n } from '../i18n/I18nProvider';
+import { sellerEditDestination } from '../seller/products';
 import { isAppLocale, LOCALE_LABELS } from '../i18n/locales';
 import type { RootStackParamList } from '../navigation/types';
+import { rfqIdFromCreate } from '../rfq/model';
 import { useTheme } from '../theme/ThemeProvider';
 
 type Status = 'loading' | 'ready' | 'error' | 'notFound';
@@ -65,8 +68,10 @@ export function ProductDetailScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'ProductDetail'>>();
   const productId = route.params.productId;
+  const ownerPreview = route.params.ownerPreview === true;
+  const signedIn = user != null;
   const [reloadToken, setReloadToken] = useState(0);
-  const requestKey = `${productId}:${locale}:${reloadToken}`;
+  const requestKey = `${productId}:${locale}:${ownerPreview}:${reloadToken}`;
   const [seenKey, setSeenKey] = useState(requestKey);
   const [status, setStatus] = useState<Status>('loading');
   const [product, setProduct] = useState<CatalogProduct | null>(null);
@@ -86,7 +91,7 @@ export function ProductDetailScreen() {
 
   useEffect(() => {
     let cancelled = false;
-    getProduct(api, productId, locale)
+    getProduct(api, productId, locale, productDetailAuth(ownerPreview, signedIn))
       .then((next) => {
         if (cancelled) {
           return;
@@ -107,7 +112,7 @@ export function ProductDetailScreen() {
     return () => {
       cancelled = true;
     };
-  }, [api, locale, productId, reloadToken]);
+  }, [api, locale, ownerPreview, productId, reloadToken, signedIn]);
 
   const harvest =
     product?.harvestStatus && isHarvestStatus(product.harvestStatus) ? product.harvestStatus : null;
@@ -188,7 +193,7 @@ export function ProductDetailScreen() {
     setContactError(null);
     setContactNotice(null);
     try {
-      await api.request('/rfqs', {
+      const created = await api.request<unknown>('/rfqs', {
         method: 'POST',
         body: {
           productId: product.id,
@@ -197,9 +202,14 @@ export function ProductDetailScreen() {
           message: quoteMessage.trim() || undefined,
         },
       });
-      setContactNotice(t('product.quoteSent'));
+      const createdId = rfqIdFromCreate(created);
       setQuoteQuantity('');
       setQuoteMessage('');
+      if (createdId) {
+        navigation.navigate('RfqDetail', { rfqId: createdId });
+        return;
+      }
+      setContactNotice(t('product.quoteSent'));
     } catch (error: unknown) {
       setContactError(error instanceof ApiError ? error.message : t('product.loadErrorBody'));
     } finally {
@@ -230,10 +240,13 @@ export function ProductDetailScreen() {
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView
+        style={{ flex: 1 }}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         contentContainerStyle={{
           paddingHorizontal: spacing.lg,
           paddingTop: spacing.sm,
-          paddingBottom: spacing.xxl,
+          paddingBottom: spacing.xxxl,
           gap: spacing.lg,
         }}
       >
@@ -252,7 +265,10 @@ export function ProductDetailScreen() {
           />
         ) : null}
         {status === 'notFound' ? (
-          <EmptyState title={t('product.notFoundTitle')} body={t('product.notFoundBody')} />
+          <EmptyState
+            title={t(ownerPreview ? 'seller.products.previewUnavailable' : 'product.notFoundTitle')}
+            body={t(ownerPreview ? 'seller.products.previewUnavailableBody' : 'product.notFoundBody')}
+          />
         ) : null}
         {status === 'ready' && product ? (
           <View style={{ gap: spacing.lg }}>
@@ -295,6 +311,17 @@ export function ProductDetailScreen() {
               ) : null}
             </View>
 
+            {isOwner ? (
+              <AppButton
+                label={t('seller.products.edit')}
+                variant="secondary"
+                onPress={() => {
+                  const edit = sellerEditDestination(product);
+                  navigation.navigate(edit.screen, edit.params);
+                }}
+              />
+            ) : null}
+
             {!isOwner ? (
               <Card padded>
                 <View style={{ gap: spacing.md }}>
@@ -303,8 +330,11 @@ export function ProductDetailScreen() {
                       label={t('product.signInToContact')}
                       onPress={() => navigation.navigate('Main', { screen: 'Account' })}
                     />
-                  ) : !user.emailVerified ? (
-                    <AppText>{t('product.verifyToContact')}</AppText>
+                  ) : emailVerificationRoute(user) ? (
+                    <AppButton
+                      label={t('product.verifyToContact')}
+                      onPress={() => navigation.navigate('VerifyEmail')}
+                    />
                   ) : canContact ? (
                     <>
                       {harvest !== 'soldOut' ? (

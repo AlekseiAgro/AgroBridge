@@ -9,6 +9,7 @@ type SearchBarProps = {
   placeholder: string;
   accessibilityLabel: string;
   clearLabel?: string;
+  onSubmit?: () => void;
 };
 
 export function SearchBar({
@@ -17,6 +18,7 @@ export function SearchBar({
   placeholder,
   accessibilityLabel,
   clearLabel,
+  onSubmit,
 }: SearchBarProps) {
   const { colors, radii, spacing, touchTarget, iconSize, borders, typography } = useTheme();
 
@@ -45,6 +47,7 @@ export function SearchBar({
         autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="search"
+        onSubmitEditing={onSubmit}
         clearButtonMode="never"
         style={[
           styles.input,

@@ -8,6 +8,7 @@ type Captured = {
   method: string;
   headers: Record<string, string>;
   body: string | undefined;
+  formData: boolean;
 };
 
 function jsonResponse(status: number, body: unknown, headers?: Record<string, string>): Response {
@@ -37,6 +38,7 @@ function createHarness(options?: {
         method: init?.method ?? 'GET',
         headers: record,
         body: typeof init?.body === 'string' ? init.body : undefined,
+        formData: typeof FormData !== 'undefined' && init?.body instanceof FormData,
       });
       const response = options?.response ?? jsonResponse(200, { ok: true });
       return typeof response === 'function' ? response() : response;
@@ -104,6 +106,22 @@ describe('ApiClient', () => {
     expect(harness.unauthorized()).toBe(1);
   });
 
+  it('keeps the session when a wrong password returns 401', async () => {
+    const harness = createHarness({
+      token: 'current',
+      response: jsonResponse(401, { message: 'Incorrect password' }),
+    });
+
+    await expect(
+      harness.client.request('/auth/change-password', {
+        method: 'POST',
+        preserveSessionOn401: true,
+        body: { currentPassword: 'wrong', newPassword: 'newpass12' },
+      }),
+    ).rejects.toMatchObject({ status: 401 });
+    expect(harness.unauthorized()).toBe(0);
+  });
+
   it('surfaces 429 retry information', async () => {
     const harness = createHarness({
       token: 'access-token',
@@ -119,6 +137,20 @@ describe('ApiClient', () => {
       retryAfterSeconds: 12,
       kind: 'http',
     });
+  });
+
+  it('sends multipart form data without a JSON content type', async () => {
+    const form = new FormData();
+    form.append('kind', 'overview');
+    form.append('file', new File(['photo'], 'tea.jpg', { type: 'image/jpeg' }));
+    const harness = createHarness({ token: 'access-token' });
+    await harness.client.request('/products/p1/images', { method: 'POST', formData: form });
+
+    expect(harness.calls[0]?.url).toBe('https://api.agrobridge.ge/api/products/p1/images');
+    expect(harness.calls[0]?.method).toBe('POST');
+    expect(harness.calls[0]?.headers['content-type']).toBeUndefined();
+    expect(harness.calls[0]?.body).toBeUndefined();
+    expect(harness.calls[0]?.formData).toBe(true);
   });
 
   it('maps network failures', async () => {

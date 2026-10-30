@@ -27,7 +27,7 @@ export function EmptyState({ title, body, actionLabel, onAction }: EmptyStatePro
           label={actionLabel}
           onPress={onAction}
           variant="secondary"
-          style={styles.action}
+          style={{ alignSelf: 'flex-start', marginTop: spacing.sm }}
         />
       ) : null}
     </View>
@@ -40,9 +40,5 @@ const styles = StyleSheet.create({
   },
   body: {
     flexShrink: 1,
-  },
-  action: {
-    alignSelf: 'flex-start',
-    marginTop: 8,
   },
 });
