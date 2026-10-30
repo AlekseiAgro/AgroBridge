@@ -120,6 +120,20 @@ export function classifyCertificateBytes(bytes: Uint8Array): CertificateMimeType
   return null;
 }
 
+/**
+ * The declared type wins when it is usable. A missing or generic type falls back to the file name.
+ * A declared type the API does not accept is not overridden by the name.
+ */
+export function resolveCertificateMime(
+  file: Pick<CertificateFile, 'name' | 'mimeType'>,
+): CertificateMimeType | null {
+  const declared = normalizeCertificateMime(file.mimeType);
+  if (declared) {
+    return MIME_TYPES.includes(declared) ? (declared as CertificateMimeType) : null;
+  }
+  return certificateMimeFromName(file.name);
+}
+
 export function certificateFileIssue(file: CertificateFile, currentCount: number): CertificateIssue | null {
   if (!canAddCertificate(currentCount)) {
     return 'maxReached';
@@ -127,13 +141,7 @@ export function certificateFileIssue(file: CertificateFile, currentCount: number
   if (!file.uri.trim()) {
     return 'missingFile';
   }
-  const declared = normalizeCertificateMime(file.mimeType);
-  if (declared && !MIME_TYPES.includes(declared)) {
-    return 'unsupported';
-  }
-  const resolved =
-    (declared && MIME_TYPES.includes(declared) ? declared : null) ?? certificateMimeFromName(file.name);
-  if (!resolved || !MIME_TYPES.includes(resolved)) {
+  if (!resolveCertificateMime(file)) {
     return 'unsupported';
   }
   const size = knownFileSize(file.fileSize);
@@ -182,7 +190,10 @@ export function fillCertificateForm(
 ): void {
   form.append('type', input.type);
   form.append('title', input.title.trim());
-  form.append('file', multipartFileValue(input.file, native) as Blob);
+  form.append(
+    'file',
+    multipartFileValue({ ...input.file, mimeType: resolveCertificateMime(input.file) }, native, MIME_TYPES) as Blob,
+  );
 }
 
 export function certificateFailure(error: unknown): CertificateFailure {

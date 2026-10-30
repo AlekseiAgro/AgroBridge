@@ -118,7 +118,7 @@ export function photoFileIssue(file: ProductPhotoFile, currentCount: number): Ph
     return 'missingFile';
   }
   const mime = normalizePhotoMime(file.mimeType);
-  if (mime && !MIME_TYPES.includes(mime)) {
+  if (!mime || !MIME_TYPES.includes(mime)) {
     return 'unsupported';
   }
   const size = knownFileSize(file.fileSize);
@@ -160,22 +160,35 @@ export function parseProductImages(value: unknown): SellerProductImage[] {
   return images;
 }
 
-export function productImagePart(file: ProductPhotoFile): ProductImagePart {
+export function productImagePart(
+  file: ProductPhotoFile,
+  allowedMimeTypes: readonly string[] = MIME_TYPES,
+): ProductImagePart {
   const mime = normalizePhotoMime(file.mimeType);
   const part: ProductImagePart = {
     uri: file.uri,
     name: file.name.trim() || 'photo',
   };
-  if (mime && MIME_TYPES.includes(mime)) {
+  if (mime && allowedMimeTypes.includes(mime)) {
     part.type = mime;
   }
   return part;
 }
 
-/** React Native sends a uri part. Tests and other hosts send a named file blob. */
-export function multipartFileValue(file: ProductPhotoFile, native: boolean): Blob | ProductImagePart {
-  const part = productImagePart(file);
+/**
+ * React Native sends a uri part. Tests and other hosts send a named file blob.
+ * Android refuses a uri part without a content type, so a native part must carry an allowed type.
+ */
+export function multipartFileValue(
+  file: ProductPhotoFile,
+  native: boolean,
+  allowedMimeTypes: readonly string[] = MIME_TYPES,
+): Blob | ProductImagePart {
+  const part = productImagePart(file, allowedMimeTypes);
   if (native) {
+    if (!part.type) {
+      throw new Error('Upload file has no supported MIME type.');
+    }
     return part;
   }
   return new File([], part.name, { type: part.type ?? 'application/octet-stream' });
