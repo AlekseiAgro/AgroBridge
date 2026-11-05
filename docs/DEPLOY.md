@@ -51,6 +51,8 @@ When `NEXT_PUBLIC_META_PIXEL_ID` is set, check the Pixel in Meta Events Manager 
 
 Record the date and result with the release. If a check fails, unset `NEXT_PUBLIC_META_PIXEL_ID` and rebuild web until it is resolved.
 
+The same network checks run locally against a production build with [`apps/web/e2e/README.md`](../apps/web/e2e/README.md). That suite blocks every outbound Meta request and refuses the production Pixel ID.
+
 ## 2. Build and start
 
 ```bash
