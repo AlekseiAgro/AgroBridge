@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import {
   createContext,
   Suspense,
@@ -33,14 +34,48 @@ const CookieConsentContext = createContext<CookieConsentContextValue>({
 });
 
 const listeners = new Set<() => void>();
+const CONSENT_CHANNEL_NAME = 'agrobridge-cookie-consent';
+let consentChannel: BroadcastChannel | null = null;
+
+function notifyListeners() {
+  for (const listener of listeners) listener();
+}
+
+/**
+ * Another tab changed the stored choice, or this page came back from the
+ * back/forward cache. Withdrawal is applied here, synchronously, rather than
+ * after React re-renders, so Meta's own `pageshow` PageView cannot slip
+ * through first.
+ */
+function onExternalConsentChange() {
+  if (readStoredConsent() !== 'granted') revokeMetaPixel();
+  notifyListeners();
+}
+
+function onVisibilityChange() {
+  if (document.visibilityState === 'visible') onExternalConsentChange();
+}
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
-  // Picks up a choice made in another tab when this one regains focus.
-  window.addEventListener('focus', listener);
+  if (listeners.size === 1) {
+    if (typeof BroadcastChannel !== 'undefined') {
+      consentChannel = new BroadcastChannel(CONSENT_CHANNEL_NAME);
+      consentChannel.onmessage = onExternalConsentChange;
+    }
+    // Fallbacks for browsers without BroadcastChannel and for frozen pages.
+    window.addEventListener('focus', onExternalConsentChange);
+    window.addEventListener('pageshow', onExternalConsentChange);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+  }
   return () => {
     listeners.delete(listener);
-    window.removeEventListener('focus', listener);
+    if (listeners.size > 0) return;
+    consentChannel?.close();
+    consentChannel = null;
+    window.removeEventListener('focus', onExternalConsentChange);
+    window.removeEventListener('pageshow', onExternalConsentChange);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
   };
 }
 
@@ -63,9 +98,11 @@ export function CookieConsentProvider({ children }: { children: ReactNode }) {
   const consent = useSyncExternalStore(subscribe, readStoredConsent, readServerConsent);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const returnFocusRef = useRef<HTMLElement | null>(null);
+  const [announcement, setAnnouncement] = useState('');
+  const t = useTranslations('cookieConsent');
 
   useEffect(() => {
-    if (consent === 'denied') revokeMetaPixel();
+    if (consent === 'denied' || consent === null) revokeMetaPixel();
   }, [consent]);
 
   const closeSettings = useCallback(() => {
@@ -80,10 +117,16 @@ export function CookieConsentProvider({ children }: { children: ReactNode }) {
       document.cookie = serializeAdvertisingConsent(next, {
         secure: window.location.protocol === 'https:',
       });
-      for (const listener of listeners) listener();
+      if (next !== 'granted') revokeMetaPixel();
+      notifyListeners();
+      consentChannel?.postMessage(next);
+      setAnnouncement('');
+      window.setTimeout(() => {
+        setAnnouncement(`${t('saved')} ${next === 'granted' ? t('statusGranted') : t('statusDenied')}`);
+      }, 100);
       closeSettings();
     },
-    [closeSettings],
+    [closeSettings, t],
   );
 
   const openSettings = useCallback((trigger: HTMLElement | null) => {
@@ -96,7 +139,7 @@ export function CookieConsentProvider({ children }: { children: ReactNode }) {
 
   return (
     <CookieConsentContext.Provider value={value}>
-      {children}
+      {/* First in the document so keyboard and screen-reader users reach it before the page. */}
       {enabled && consent !== undefined && bannerMode ? (
         <CookieConsentBanner
           mode={bannerMode}
@@ -105,6 +148,12 @@ export function CookieConsentProvider({ children }: { children: ReactNode }) {
           onReject={() => choose('denied')}
           onClose={closeSettings}
         />
+      ) : null}
+      {children}
+      {enabled ? (
+        <p className="sr-only" role="status" aria-live="polite">
+          {announcement}
+        </p>
       ) : null}
       {pixelId && consent === 'granted' ? (
         <Suspense fallback={null}>

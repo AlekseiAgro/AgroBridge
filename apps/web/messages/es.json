@@ -1522,6 +1522,7 @@
     "advertising": "Con tu consentimiento, también usaríamos cookies publicitarias de Meta Pixel para medir la eficacia de nuestros anuncios en las plataformas de Meta (Facebook, Instagram). Meta Pixel no se carga hasta que aceptes. Puedes cambiar tu elección en cualquier momento en «Configuración de cookies».",
     "statusGranted": "Tu elección actual: cookies publicitarias aceptadas.",
     "statusDenied": "Tu elección actual: cookies publicitarias rechazadas.",
+    "saved": "Tu elección sobre las cookies se ha guardado.",
     "accept": "Aceptar cookies publicitarias",
     "reject": "Rechazar cookies publicitarias",
     "close": "Cerrar",

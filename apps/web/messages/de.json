@@ -1522,6 +1522,7 @@
     "advertising": "Mit Ihrer Einwilligung würden wir außerdem Werbe-Cookies von Meta Pixel verwenden, um die Wirksamkeit unserer Werbung auf Meta-Plattformen (Facebook, Instagram) zu messen. Meta Pixel wird erst geladen, wenn Sie zustimmen. Sie können Ihre Auswahl jederzeit in den „Cookie-Einstellungen“ ändern.",
     "statusGranted": "Ihre aktuelle Auswahl: Werbe-Cookies akzeptiert.",
     "statusDenied": "Ihre aktuelle Auswahl: Werbe-Cookies abgelehnt.",
+    "saved": "Ihre Cookie-Auswahl wurde gespeichert.",
     "accept": "Werbe-Cookies akzeptieren",
     "reject": "Werbe-Cookies ablehnen",
     "close": "Schließen",

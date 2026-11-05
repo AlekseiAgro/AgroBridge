@@ -36,8 +36,11 @@ export function CookieConsentBanner({ mode, consent, onAccept, onReject, onClose
   return (
     <section
       className="cookie-consent"
-      role="dialog"
-      aria-modal="false"
+      // The first-visit banner does not take focus, so it is a labelled region
+      // reachable by landmark navigation; settings are opened on request and
+      // receive focus like a dialog.
+      role={mode === 'settings' ? 'dialog' : 'region'}
+      aria-modal={mode === 'settings' ? 'false' : undefined}
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
     >
