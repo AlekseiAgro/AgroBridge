@@ -1,15 +1,12 @@
 import assert from 'node:assert/strict';
-import { before, describe, it } from 'node:test';
+import { describe, it } from 'node:test';
 import {
-  META_PIXEL_SCRIPT_SRC,
   claimRegistrationEvent,
   cookieDomainCandidates,
+  discardQueuedEvents,
+  isMetaPixelSafeReferrer,
   isMetaPixelTrackableUrl,
-  loadMetaPixel,
   normalizeMetaPixelId,
-  revokeMetaPixel,
-  trackMetaCompleteRegistration,
-  trackMetaPageView,
 } from './meta-pixel.ts';
 
 describe('Meta Pixel ID', () => {
@@ -39,6 +36,53 @@ describe('Meta Pixel trackable URLs', () => {
     assert.equal(isMetaPixelTrackableUrl('/en/login', '?token=abc'), false);
     assert.equal(isMetaPixelTrackableUrl('/en/verify-email', '?code=123456'), false);
     assert.equal(isMetaPixelTrackableUrl('/en/register', '?email=a%40b.ge'), false);
+  });
+
+  it('skips secrets nested in other parameters and in the fragment', () => {
+    assert.equal(
+      isMetaPixelTrackableUrl('/en/login', `?next=${encodeURIComponent('/en/x?token=abc')}`),
+      false,
+    );
+    assert.equal(isMetaPixelTrackableUrl('/en/login', '?next=%2Freset-password'), true);
+    assert.equal(isMetaPixelTrackableUrl('/en/catalog', '?q=someone%40mail.ge'), false);
+    assert.equal(isMetaPixelTrackableUrl('/en/login', '', '#token=abc'), false);
+    assert.equal(isMetaPixelTrackableUrl('/en/login', '', '#a@b.ge'), false);
+    assert.equal(isMetaPixelTrackableUrl('/en/catalog', '', '#harvest'), true);
+  });
+});
+
+describe('Meta Pixel referrers', () => {
+  it('rejects a referrer that is itself a sensitive URL', () => {
+    assert.equal(isMetaPixelSafeReferrer(''), true);
+    assert.equal(isMetaPixelSafeReferrer('https://agrobridge.ge/en/catalog'), true);
+    assert.equal(isMetaPixelSafeReferrer('https://www.google.com/'), true);
+    assert.equal(
+      isMetaPixelSafeReferrer('https://agrobridge.ge/en/reset-password?token=abc'),
+      false,
+    );
+    assert.equal(isMetaPixelSafeReferrer('https://agrobridge.ge/ka/reset-password'), false);
+    assert.equal(isMetaPixelSafeReferrer('https://agrobridge.ge/en/login?email=a%40b.ge'), false);
+    assert.equal(isMetaPixelSafeReferrer('not a url'), false);
+  });
+});
+
+describe('discarding queued events', () => {
+  it('drops track calls in place and keeps configuration in order', () => {
+    const queue: unknown[][] = [
+      ['set', 'autoConfig', false, '1'],
+      ['init', '1'],
+      ['track', 'PageView'],
+      ['consent', 'revoke'],
+      ['trackCustom', 'X'],
+      ['trackSingle', '1', 'PageView'],
+      ['track', 'CompleteRegistration'],
+    ];
+    discardQueuedEvents(queue);
+    assert.deepEqual(queue, [
+      ['set', 'autoConfig', false, '1'],
+      ['init', '1'],
+      ['consent', 'revoke'],
+    ]);
   });
 });
 
@@ -93,102 +137,267 @@ describe('cookie domains to clear', () => {
   });
 });
 
-describe('Meta Pixel runtime', () => {
-  const PIXEL = '1234567890';
-  let scripts: { src: string; async: boolean }[];
-  let cookieWrites: string[];
-  let stored: Map<string, string>;
+type Beacon = { ev: string; dl: string; rl: string; id: string };
 
-  type TestFbq = {
-    queue: unknown[][];
-    disablePushState?: boolean;
-    allowDuplicatePageViews?: boolean;
+type FakeFbq = ((...args: unknown[]) => void) & {
+  callMethod?: (...args: unknown[]) => void;
+  queue: unknown[][];
+  disablePushState?: boolean;
+  allowDuplicatePageViews?: boolean;
+};
+
+/**
+ * A fresh copy of the module and a browser-like global for each test. The
+ * module keeps per-document state, which a real page reload would reset.
+ */
+let instance = 0;
+async function setup(href = 'https://agrobridge.ge/en', referrer = '') {
+  const scripts: { src: string; async: boolean }[] = [];
+  const cookieWrites: string[] = [];
+  const stored = new Map<string, string>();
+  const g = globalThis as Record<string, unknown>;
+  const location = new URL(href);
+  const win = {
+    location,
+    localStorage: {
+      getItem: (key: string) => stored.get(key) ?? null,
+      setItem: (key: string, value: string) => void stored.set(key, value),
+    },
+  } as unknown as { location: URL; fbq?: FakeFbq };
+  const doc = {
+    referrer,
+    head: { appendChild: (node: { src: string; async: boolean }) => scripts.push(node) },
+    createElement: () => ({ src: '', async: false }),
+    set cookie(value: string) {
+      cookieWrites.push(value);
+    },
   };
-  const fbq = () => (globalThis as unknown as { window: { fbq?: TestFbq } }).window.fbq;
-  const calls = () => fbq()?.queue ?? [];
+  g.window = win;
+  g.document = doc;
+  instance += 1;
+  const mod = (await import(`./meta-pixel.ts?test=${instance}`)) as typeof import('./meta-pixel.ts');
+  const beacons: Beacon[] = [];
 
-  before(() => {
-    scripts = [];
-    cookieWrites = [];
-    stored = new Map();
-    const g = globalThis as Record<string, unknown>;
-    g.window = {
-      location: { hostname: 'agrobridge.ge' },
-      localStorage: {
-        getItem: (key: string) => stored.get(key) ?? null,
-        setItem: (key: string, value: string) => void stored.set(key, value),
-      },
+  /**
+   * Emulates how fbevents.js takes over the stub: it replaces `callMethod`,
+   * then replays `fbq.queue` in order. While consent is revoked every call
+   * except `consent` is pushed back onto the queue, and `consent grant`
+   * replays it. `track` sends a beacon for each initialised Pixel, with the
+   * page URL and document referrer, as the real library does.
+   */
+  function loadMetaLibrary() {
+    const fbq = win.fbq;
+    assert.ok(fbq, 'the stub must exist before the library loads');
+    const pixels: string[] = [];
+    let locked = false;
+    const drain = () => {
+      while (!locked && fbq.queue.length) handle(fbq.queue.shift() as unknown[]);
     };
-    g.document = {
-      head: { appendChild: (node: { src: string; async: boolean }) => scripts.push(node) },
-      createElement: () => ({ src: '', async: false }),
-      set cookie(value: string) {
-        cookieWrites.push(value);
-      },
+    const handle = (args: unknown[]) => {
+      const [method, ...rest] = args;
+      if (locked && method !== 'consent') {
+        fbq.queue.push(args);
+        return;
+      }
+      if (method === 'consent') {
+        locked = rest[0] === 'revoke';
+        if (!locked) drain();
+      } else if (method === 'init') {
+        pixels.push(String(rest[0]));
+      } else if (method === 'track') {
+        for (const id of pixels) {
+          beacons.push({ ev: String(rest[0]), dl: win.location.href, rl: doc.referrer, id });
+        }
+      }
     };
+    fbq.callMethod = (...args: unknown[]) => handle(args);
+    drain();
+  }
+
+  function navigate(next: string) {
+    const url = new URL(next, win.location.href);
+    win.location.href = url.href;
+    return { pathname: url.pathname, search: url.search, hash: url.hash, referrer: doc.referrer };
+  }
+
+  const page = () => ({
+    pathname: win.location.pathname,
+    search: win.location.search,
+    hash: win.location.hash,
+    referrer: doc.referrer,
   });
 
-  it('sends nothing and loads no script before consent', () => {
-    revokeMetaPixel();
-    assert.equal(trackMetaPageView('/en', ''), false);
-    assert.equal(trackMetaCompleteRegistration('user-1'), false);
-    assert.equal(fbq(), undefined);
-    assert.equal(scripts.length, 0);
+  return { mod, win, scripts, cookieWrites, beacons, loadMetaLibrary, navigate, page };
+}
+
+describe('Meta Pixel runtime', () => {
+  const PIXEL = '1234567890123456';
+
+  it('sends nothing and loads no script before consent', async () => {
+    const t = await setup();
+    t.mod.revokeMetaPixel();
+    assert.equal(t.mod.trackMetaPageView('/en', ''), false);
+    assert.equal(t.mod.scheduleMetaCompleteRegistration('user-1'), false);
+    assert.equal(t.win.fbq, undefined);
+    assert.equal(t.scripts.length, 0);
   });
 
-  it('after consent: loads the script once, disables auto config, then tracks', () => {
-    loadMetaPixel(PIXEL);
-    loadMetaPixel(PIXEL);
-    assert.equal(scripts.length, 1);
-    assert.equal(scripts[0].src, META_PIXEL_SCRIPT_SRC);
-    assert.equal(scripts[0].async, true);
-    assert.equal(fbq()?.disablePushState, true);
-    assert.equal(fbq()?.allowDuplicatePageViews, true);
-    assert.deepEqual(calls(), [
+  it('after consent: loads once with auto config off and sends one PageView per URL', async () => {
+    const t = await setup();
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    assert.equal(t.scripts.length, 1);
+    assert.equal(t.scripts[0].src, t.mod.META_PIXEL_SCRIPT_SRC);
+    assert.equal(t.win.fbq?.disablePushState, true);
+    assert.equal(t.win.fbq?.allowDuplicatePageViews, true);
+    assert.deepEqual(t.win.fbq?.queue.slice(0, 2), [
       ['set', 'autoConfig', false, PIXEL],
       ['init', PIXEL],
     ]);
-
-    assert.equal(trackMetaPageView('/en', ''), true);
-    assert.equal(trackMetaPageView('/en', ''), false, 'same URL twice is one PageView');
-    assert.equal(trackMetaPageView('/en/catalog', ''), true, 'client-side navigation');
-    assert.equal(trackMetaPageView('/en/reset-password', '?token=x'), false);
-    assert.equal(trackMetaPageView('/en', ''), true, 'returning to a page counts again');
-
-    assert.equal(trackMetaCompleteRegistration('user-1'), true);
-    assert.equal(trackMetaCompleteRegistration('user-1'), false, 'no duplicate');
-
-    assert.deepEqual(calls().slice(2), [
-      ['track', 'PageView'],
-      ['track', 'PageView'],
-      ['track', 'PageView'],
-      ['track', 'CompleteRegistration'],
-    ]);
+    t.loadMetaLibrary();
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en/catalog'));
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en'));
+    assert.deepEqual(
+      t.beacons.map((b) => `${b.ev} ${b.dl}`),
+      [
+        'PageView https://agrobridge.ge/en',
+        'PageView https://agrobridge.ge/en/catalog',
+        'PageView https://agrobridge.ge/en',
+      ],
+    );
   });
 
-  it('sends no personal data with CompleteRegistration', () => {
-    const registration = calls().find((call) => call[1] === 'CompleteRegistration');
-    assert.deepEqual(registration, ['track', 'CompleteRegistration']);
-    assert.ok(!JSON.stringify(calls()).includes('user-1'));
+  it('does not load on the password-reset page', async () => {
+    const t = await setup('https://agrobridge.ge/en/reset-password?token=secret-token');
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    assert.equal(t.win.fbq, undefined);
+    assert.equal(t.scripts.length, 0);
   });
 
-  it('after withdrawal: revokes, clears Pixel cookies and sends nothing more', () => {
-    const start = calls().length;
-    revokeMetaPixel();
-    assert.deepEqual(calls().slice(start), [['consent', 'revoke']]);
+  it('does not load when the document referrer is the password-reset URL', async () => {
+    const t = await setup(
+      'https://agrobridge.ge/en/login',
+      'https://agrobridge.ge/en/reset-password?token=secret-token',
+    );
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    assert.equal(t.win.fbq, undefined);
+    assert.equal(t.scripts.length, 0);
+  });
+
+  it('stops on a sensitive page and stays off for the rest of that document', async () => {
+    const t = await setup();
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    t.loadMetaLibrary();
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en/reset-password?token=secret-token'));
+    // Meta's own automatic PageView (e.g. on a back/forward-cache restore) while paused.
+    t.win.fbq?.('track', 'PageView');
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en/login'));
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en/catalog'));
+    assert.deepEqual(
+      t.beacons.map((b) => b.dl),
+      ['https://agrobridge.ge/en'],
+    );
+    assert.ok(!JSON.stringify(t.beacons).includes('secret-token'));
+  });
+
+  it('control: appending only `consent revoke` lets a queued PageView through', async () => {
+    // The previous implementation's sequence; proves this harness detects the leak.
+    const t = await setup();
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    t.win.fbq?.('consent', 'revoke');
+    t.loadMetaLibrary();
+    assert.equal(t.beacons.length, 1);
+  });
+
+  it('withdrawal before the library loads discards the queued PageView and init', async () => {
+    const t = await setup();
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    t.mod.revokeMetaPixel();
+    assert.deepEqual(t.win.fbq?.queue, [['consent', 'revoke']]);
+    t.loadMetaLibrary();
+    assert.deepEqual(t.beacons, []);
+    assert.deepEqual(t.win.fbq?.queue, []);
+  });
+
+  it('withdrawal before the library loads discards a queued CompleteRegistration', async () => {
+    const t = await setup('https://agrobridge.ge/en/register');
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    assert.equal(t.mod.scheduleMetaCompleteRegistration('user-1'), true);
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en/verify-email'));
+    assert.ok(t.win.fbq?.queue.some((call) => call[1] === 'CompleteRegistration'));
+    t.mod.revokeMetaPixel();
+    t.loadMetaLibrary();
+    assert.deepEqual(t.beacons, []);
+  });
+
+  it('withdrawal after the library loads stops events, and a later grant sends none of the backlog', async () => {
+    const t = await setup();
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    t.loadMetaLibrary();
+    assert.equal(t.beacons.length, 1);
+    t.mod.revokeMetaPixel();
     for (const name of ['_fbp', '_fbc']) {
-      assert.ok(cookieWrites.includes(`${name}=; Path=/; Max-Age=0`));
-      assert.ok(cookieWrites.includes(`${name}=; Path=/; Max-Age=0; Domain=agrobridge.ge`));
+      assert.ok(t.cookieWrites.includes(`${name}=; Path=/; Max-Age=0`));
+      assert.ok(t.cookieWrites.includes(`${name}=; Path=/; Max-Age=0; Domain=agrobridge.ge`));
     }
-    assert.equal(trackMetaPageView('/en/farms', ''), false);
-    assert.equal(trackMetaCompleteRegistration('user-2'), false);
-    assert.equal(calls().length, start + 1);
+    // Meta's automatic PageView while revoked is held by the library, not sent.
+    t.win.fbq?.('track', 'PageView');
+    assert.equal(t.mod.trackMetaPageView('/en/farms', ''), false);
+    assert.equal(t.beacons.length, 1);
+
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en/farms'));
+    assert.deepEqual(
+      t.beacons.map((b) => b.dl),
+      ['https://agrobridge.ge/en', 'https://agrobridge.ge/en/farms'],
+    );
+    assert.equal(
+      t.win.fbq?.queue.filter((call) => call[0] === 'init').length ?? 0,
+      0,
+      'the Pixel is not initialised twice',
+    );
   });
 
-  it('re-granting in the same page grants consent instead of initialising twice', () => {
-    const start = calls().length;
-    loadMetaPixel(PIXEL);
-    assert.deepEqual(calls().slice(start), [['consent', 'grant']]);
-    assert.equal(trackMetaPageView('/en/farms', ''), true);
+  it('withdrawal from another tab while the library is still loading sends nothing', async () => {
+    const t = await setup();
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    t.mod.revokeMetaPixel();
+    t.mod.revokeMetaPixel();
+    t.loadMetaLibrary();
+    assert.deepEqual(t.beacons, []);
+  });
+
+  it('sends CompleteRegistration once, without parameters, after leaving the form', async () => {
+    const t = await setup('https://agrobridge.ge/en/register');
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    t.loadMetaLibrary();
+    assert.equal(t.mod.scheduleMetaCompleteRegistration('user-1'), true);
+    assert.equal(t.mod.scheduleMetaCompleteRegistration('user-1'), false, 'no duplicate');
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    assert.deepEqual(
+      t.beacons.map((b) => b.ev),
+      ['PageView'],
+      'not sent while the form is on screen',
+    );
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en/verify-email'));
+    assert.deepEqual(
+      t.beacons.map((b) => `${b.ev} ${new URL(b.dl).pathname}`),
+      ['PageView /en/register', 'PageView /en/verify-email', 'CompleteRegistration /en/verify-email'],
+    );
+    const registration = t.win.fbq?.queue.find((call) => call[1] === 'CompleteRegistration');
+    assert.equal(registration, undefined);
+    assert.ok(!JSON.stringify(t.beacons).includes('user-1'));
+  });
+
+  it('drops a scheduled CompleteRegistration when consent is withdrawn', async () => {
+    const t = await setup('https://agrobridge.ge/en/register');
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    t.loadMetaLibrary();
+    assert.equal(t.mod.scheduleMetaCompleteRegistration('user-1'), true);
+    t.mod.revokeMetaPixel();
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en/verify-email'));
+    assert.deepEqual(
+      t.beacons.map((b) => b.ev),
+      ['PageView', 'PageView'],
+    );
   });
 });

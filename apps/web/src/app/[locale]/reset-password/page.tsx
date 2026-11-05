@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { AuthLegalLinks } from '@/components/AuthLegalLinks';
 import { BrandLogo } from '@/components/BrandLogo';
@@ -8,7 +9,8 @@ import { noindexRobots } from '@/lib/seo-robots';
 
 export const metadata = {
   robots: noindexRobots,
-};
+  referrer: 'no-referrer',
+} satisfies Metadata;
 
 type Props = {
   params: Promise<{ locale: string }>;

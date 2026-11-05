@@ -12,7 +12,7 @@ import { FormEvent, useState } from 'react';
 import { LegalDocumentDialog } from '@/components/LegalDocumentDialog';
 import { PasswordField } from '@/components/PasswordField';
 import { Link, useRouter } from '@/i18n/navigation';
-import { trackMetaCompleteRegistration } from '@/lib/meta-pixel';
+import { scheduleMetaCompleteRegistration } from '@/lib/meta-pixel';
 import { safeNextPath } from '@/lib/safe-next-path';
 
 type Mode = 'login' | 'register';
@@ -96,7 +96,7 @@ export function AuthForm({ mode, nextPath, termsVersion, termsLocale }: Props) {
       }
 
       if (mode === 'register' && data.user) {
-        trackMetaCompleteRegistration(data.user.id);
+        scheduleMetaCompleteRegistration(data.user.id);
       }
 
       const verifyParams = new URLSearchParams({ next: redirectTo });
