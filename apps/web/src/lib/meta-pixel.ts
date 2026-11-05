@@ -83,6 +83,7 @@ type Fbq = ((...args: unknown[]) => void) & {
   loaded: boolean;
   version: string;
   disablePushState?: boolean;
+  allowDuplicatePageViews?: boolean;
 };
 
 declare global {
@@ -111,8 +112,11 @@ function installFbq(): Fbq {
   fbq.version = '2.0';
   fbq.queue = [];
   // PageView is sent explicitly on route changes; the script's own
-  // history.pushState listener would double-count client-side navigation.
+  // history.pushState listener would double-count client-side navigation,
+  // and without allowDuplicatePageViews it drops every PageView after the
+  // first one in the same document. trackMetaPageView de-duplicates instead.
   fbq.disablePushState = true;
+  fbq.allowDuplicatePageViews = true;
   window.fbq = fbq;
   if (!window._fbq) window._fbq = fbq;
 

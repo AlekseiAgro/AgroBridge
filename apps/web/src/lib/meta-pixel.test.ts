@@ -99,7 +99,11 @@ describe('Meta Pixel runtime', () => {
   let cookieWrites: string[];
   let stored: Map<string, string>;
 
-  type TestFbq = { queue: unknown[][]; disablePushState?: boolean };
+  type TestFbq = {
+    queue: unknown[][];
+    disablePushState?: boolean;
+    allowDuplicatePageViews?: boolean;
+  };
   const fbq = () => (globalThis as unknown as { window: { fbq?: TestFbq } }).window.fbq;
   const calls = () => fbq()?.queue ?? [];
 
@@ -139,6 +143,7 @@ describe('Meta Pixel runtime', () => {
     assert.equal(scripts[0].src, META_PIXEL_SCRIPT_SRC);
     assert.equal(scripts[0].async, true);
     assert.equal(fbq()?.disablePushState, true);
+    assert.equal(fbq()?.allowDuplicatePageViews, true);
     assert.deepEqual(calls(), [
       ['set', 'autoConfig', false, PIXEL],
       ['init', PIXEL],
