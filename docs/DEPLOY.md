@@ -40,6 +40,17 @@ Optional production upgrades:
 - `TRANSLATION_PROVIDER=openai` + `OPENAI_API_KEY` for chat translation
 - `GOOGLE_MAPS_API_KEY` for product origin place autocomplete (Places API New; settlements only)
 
+### Meta Pixel release check (manual)
+
+When `NEXT_PUBLIC_META_PIXEL_ID` is set, check the Pixel in Meta Events Manager before each web release and after anyone changes its settings. The web code turns off Meta's automatic configuration (`fbq('set', 'autoConfig', false, id)`), but Meta controls the script and the Pixel's settings; code alone cannot guarantee that Automatic Advanced Matching is off.
+
+1. Events Manager → Data sources → the Pixel → **Settings**: **Automatic advanced matching** is off, and **Track events automatically without code** (automatic event setup) is off.
+2. In a private window with a throwaway account: accept advertising cookies, register, and open DevTools → Network filtered on `facebook.com/tr`. No request may contain `ud[` or `udff[` parameters, an email address, a name, or a reset token. Only `PageView` and one `CompleteRegistration` should appear.
+3. Open a password-reset link, then open **Back to login** in a new tab: no `facebook.com/tr` request may contain the token, in `dl`, `rl` or any other parameter.
+4. Reject advertising cookies (Cookie settings): no further `facebook.com/tr` requests, and `_fbp` / `_fbc` are gone.
+
+Record the date and result with the release. If a check fails, unset `NEXT_PUBLIC_META_PIXEL_ID` and rebuild web until it is resolved.
+
 ## 2. Build and start
 
 ```bash
