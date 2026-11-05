@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { BrandLogo } from '@/components/BrandLogo';
 import { CabinetMobileMenu } from '@/components/CabinetMobileMenu';
 import { ChatNavLink } from '@/components/ChatNavLink';
+import { CookieSettingsButton } from '@/components/CookieSettingsButton';
 import { InboxNavLink } from '@/components/InboxNavLink';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LocaleSync } from '@/components/LocaleSync';
@@ -89,6 +90,7 @@ export async function CabinetShell({ children, title, subtitle }: Props) {
         ) : null}
       </nav>
       <div className="cabinet__sidebar-foot">
+        <CookieSettingsButton className="cabinet__cookie-settings" />
         <LogoutButton />
       </div>
     </>
