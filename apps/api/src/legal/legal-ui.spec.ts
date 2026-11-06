@@ -100,8 +100,12 @@ describe('legal foundation UI architecture', () => {
     expect(termsKa).not.toMatch(/დოკუმენტის სრული ტექსტი გამოქვეყნდება აქ/);
     expect(privacyEn).toContain('ready: true');
     expect(privacyKa).toContain('ready: true');
-    expect(privacyEn).toContain('20 September 2026');
-    expect(privacyKa).toContain('20 სექტემბერი 2026');
+    expect(privacyEn).toContain('version: "1.1"');
+    expect(privacyKa).toContain('version: "1.1"');
+    expect(privacyEn).toContain('5 November 2026');
+    expect(privacyKa).toContain('5 ნოემბერი 2026');
+    expect(privacyEn).not.toContain('20 September 2026');
+    expect(privacyKa).not.toContain('20 სექტემბერი 2026');
     expect(privacyEn).toContain('P/E VANO MEGVINETUKHUTSESI');
     expect(privacyEn).toContain('## 1. Who We Are');
     expect(privacyEn).toContain('## 23. Contact');

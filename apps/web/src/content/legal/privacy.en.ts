@@ -1,11 +1,11 @@
 export const LEGAL_PRIVACY_EN = {
   title: "AGROBRIDGE PRIVACY POLICY",
-  version: "1.0",
-  effectiveDate: "20 September 2026",
+  version: "1.1",
+  effectiveDate: "5 November 2026",
   ready: true,
   paragraphs: [
-    "**Version:** 1.0",
-    "**Effective date:** 20 September 2026",
+    "**Version:** 1.1",
+    "**Effective date:** 5 November 2026",
     "## 1. Who We Are",
     "This Privacy Policy explains how AgroBridge processes personal data when you use the AgroBridge website, marketplace, account features, communication tools and related services.",
     "AgroBridge is operated by:",
@@ -303,7 +303,7 @@ export const LEGAL_PRIVACY_EN = {
     "Identification number: 01501157152",
     "Email: [support@agrobridge.ge](mailto:support@agrobridge.ge)",
     "Website: [https://agrobridge.ge](https://agrobridge.ge/)",
-    "**Version:** 1.0",
-    "**Effective date:** 20 September 2026",
+    "**Version:** 1.1",
+    "**Effective date:** 5 November 2026",
   ],
 };
