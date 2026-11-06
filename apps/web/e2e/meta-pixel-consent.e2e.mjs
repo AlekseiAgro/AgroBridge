@@ -578,6 +578,7 @@ log('\n== 9. Banner accessibility ==');
 {
   const s = await session();
   await s.page.goto(`${BASE}/en/catalog`);
+  await s.page.locator('section.cookie-consent').waitFor({ timeout: 5000 });
   const firstFocusable = await s.page.evaluate(() => {
     const el = document.querySelector('a[href], button, input, summary');
     return el?.closest('section.cookie-consent') ? 'banner' : el?.outerHTML.slice(0, 60);
