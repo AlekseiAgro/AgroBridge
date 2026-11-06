@@ -188,6 +188,38 @@ function beacons(hits) {
 const pathOf = (u) => (u ? new URL(u).pathname : '');
 
 /** Every Meta request (URL and body, decoded) must be free of these. */
+function assertNoPrivateLeak(name, hits) {
+  const problems = [];
+  for (const h of hits) {
+    let text = `${h.url} ${h.post}`;
+    for (let i = 0; i < 3; i += 1) {
+      try {
+        text = decodeURIComponent(text);
+      } catch {
+        break;
+      }
+    }
+    if (/\/dashboard(?:[/?#&\s]|$)/.test(text) || /\/account(?:[/?#&\s]|$)/.test(text) || text.includes('/requests/new')) {
+      problems.push(text.slice(0, 220));
+    }
+  }
+  check(`${name}: no private path in any Meta request`, problems.length === 0, problems.join(' | '));
+}
+
+function verificationCodeFor(email) {
+  const pane = readApiConsole();
+  const marker = `to=${email}`;
+  let from = pane.length;
+  while (from > 0) {
+    const at = pane.lastIndexOf(marker, from - 1);
+    if (at === -1) return undefined;
+    const code = pane.slice(at, at + 1500).match(/verification code is (\d{6})/i);
+    if (code) return code[1];
+    from = at;
+  }
+  return undefined;
+}
+
 function assertClean(name, hits, secrets) {
   const problems = [];
   for (const h of hits) {
@@ -586,14 +618,11 @@ log('\n== 10. Real registration redirect ==');
   const landed = new URL(s.page.url());
   log(`      landed ${landed.pathname}${landed.search}${landed.hash}`);
   check(
-    'successful registration lands on /en/verify-email?next=%2Faccount',
-    landed.pathname === '/en/verify-email' && landed.search === '?next=%2Faccount' && landed.hash === '',
+    'successful registration lands on /en/verify-email with no next parameter',
+    landed.pathname === '/en/verify-email' && landed.search === '' && landed.hash === '',
     s.page.url(),
   );
-  check(
-    'redirect query is only next=/account',
-    JSON.stringify([...landed.searchParams.entries()]) === JSON.stringify([['next', '/account']]),
-  );
+  check('verification URL does not contain next=/account', !landed.searchParams.has('next'));
   check(
     'redirect URL has no email, token, code or fragment',
     !s.page.url().includes(email) &&
@@ -621,6 +650,71 @@ log('\n== 10. Real registration redirect ==');
     'reloading the redirect page does not send CompleteRegistration again',
     beacons(s.hits).filter((b) => b.ev === 'CompleteRegistration').length === 1,
   );
+  const code = verificationCodeFor(email);
+  check('verification code is in the local API console', Boolean(code));
+  if (code) {
+    await s.page.fill('input[name="code"]', code);
+    await s.page.locator('form button[type="submit"]').click();
+    await s.page.waitForURL(/\/en\/account$/, { timeout: 20000 });
+    await s.page.waitForTimeout(2000);
+    check('standard verification lands on /en/account', new URL(s.page.url()).pathname === '/en/account');
+    check(
+      'opening /account does not send another CompleteRegistration',
+      beacons(s.hits).filter((b) => b.ev === 'CompleteRegistration').length === 1,
+    );
+    assertNoPrivateLeak('standard registration', s.hits);
+    for (const path of ['/en/dashboard', '/en/dashboard/admin', '/en/account/settings', '/en/requests/new']) {
+      const response = await s.page.goto(`${BASE}${path}`);
+      await s.page.waitForTimeout(1500);
+      check(
+        `${path} sends Referrer-Policy: no-referrer`,
+        response?.headers()['referrer-policy'] === 'no-referrer',
+        response?.headers()['referrer-policy'] ?? 'missing',
+      );
+    }
+    check(
+      'private pages send no PageView',
+      !beacons(s.hits).some((b) => b.ev === 'PageView' && /\/dashboard|\/account|\/requests\/new/.test(b.dl)),
+    );
+    assertNoPrivateLeak('authenticated private pages', s.hits);
+    await s.page.goto(`${BASE}/en/catalog`);
+    await s.page.waitForTimeout(2500);
+    const referrer = await s.page.evaluate(() => document.referrer);
+    check('full navigation from a private page has an empty referrer', referrer === '', referrer);
+    const catalogViews = beacons(s.hits).filter((b) => b.ev === 'PageView' && pathOf(b.dl) === '/en/catalog');
+    check('public page after a private page sends one PageView', catalogViews.length === 1, String(catalogViews.length));
+    check(
+      'that PageView referrer is not private',
+      catalogViews.every((b) => !/dashboard|\/account|requests\/new/.test(decodeURIComponent(b.rl))),
+    );
+    const hasRouter = await s.page.evaluate(() => typeof window.next?.router?.push === 'function');
+    if (hasRouter) {
+      const mark = s.hits.length;
+      await s.page.evaluate(() => window.next.router.push('/en/dashboard/admin'));
+      await s.page.waitForURL(/dashboard/);
+      await s.page.waitForTimeout(1000);
+      await s.page.evaluate(() => window.next.router.push('/en/account/settings'));
+      await s.page.waitForURL(/account/);
+      await s.page.waitForTimeout(1000);
+      await s.page.evaluate(() => window.next.router.push('/en/farms'));
+      await s.page.waitForURL(/\/en\/farms/);
+      await s.page.waitForTimeout(2000);
+      const later = beacons(s.hits.slice(mark));
+      check(
+        'client-side private routes send no PageView',
+        later.some((b) => b.ev === 'PageView' && pathOf(b.dl) === '/en/farms') &&
+          later.filter((b) => b.ev === 'PageView').every((b) => pathOf(b.dl) === '/en/farms'),
+        JSON.stringify(later.map((b) => `${b.ev} ${pathOf(b.dl)}`)),
+      );
+      check(
+        'client-side return to a public page does not expose a private referrer',
+        later.every((b) => !/dashboard|\/account/.test(decodeURIComponent(b.rl))),
+      );
+      assertNoPrivateLeak('client-side private navigation', s.hits.slice(mark));
+    } else {
+      log('SKIP  window.next.router unavailable; client-side private navigation covered by unit tests');
+    }
+  }
   await s.context.close();
 
   clearRateLimits();
@@ -671,6 +765,70 @@ log('\n== 10. Real registration redirect ==');
   );
   assertClean('mismatched passwords', bad.hits, [badEmail, password, 'Otherpass123!', 'Mismatch', 'Tester']);
   await bad.context.close();
+
+  clearRateLimits();
+  const priv = await session({ consent: 'granted' });
+  const privEmail = `priv-${Date.now()}@example.test`;
+  await priv.page.goto(`${BASE}/en/register?next=${encodeURIComponent('/dashboard/admin')}`);
+  await priv.page.waitForTimeout(1000);
+  await register(priv.page, privEmail, { displayName: 'Private Redirect', password });
+  await priv.page.waitForTimeout(2500);
+  const landedPriv = new URL(priv.page.url());
+  check(
+    'non-default registration keeps next=/dashboard/admin',
+    landedPriv.pathname === '/en/verify-email' && landedPriv.searchParams.get('next') === '/dashboard/admin',
+    priv.page.url(),
+  );
+  check(
+    'non-default private verification sends no CompleteRegistration',
+    !beacons(priv.hits).some((b) => b.ev === 'CompleteRegistration'),
+    JSON.stringify(beacons(priv.hits).map((b) => b.ev)),
+  );
+  assertNoPrivateLeak('non-default private registration', priv.hits);
+  await priv.context.close();
+}
+
+// ---------------------------------------------------------------------------
+log('\n== 11. Private routes, private next, and consent ==');
+{
+  const s = await session({ consent: 'granted' });
+  await s.page.goto(`${BASE}/en/farms`);
+  await s.page.waitForTimeout(2500);
+  const publicViews = beacons(s.hits).filter((b) => b.ev === 'PageView' && pathOf(b.dl) === '/en/farms');
+  check('public page after consent sends exactly one PageView', publicViews.length === 1, String(publicViews.length));
+  for (const path of ['/en/dashboard', '/en/dashboard/admin', '/en/account', '/en/account/settings', '/en/requests/new']) {
+    const response = await s.page.goto(`${BASE}${path}`);
+    await s.page.waitForTimeout(1200);
+    check(
+      `${path} response sends Referrer-Policy: no-referrer`,
+      response?.headers()['referrer-policy'] === 'no-referrer',
+      `${response?.url() ?? ''} ${response?.headers()['referrer-policy'] ?? 'missing'}`,
+    );
+  }
+  const loginResponse = await s.page.goto(`${BASE}/en/login?next=${encodeURIComponent('/dashboard/admin')}`);
+  await s.page.waitForTimeout(1500);
+  check(
+    'login?next=/dashboard/admin sends Referrer-Policy: no-referrer',
+    loginResponse?.headers()['referrer-policy'] === 'no-referrer',
+  );
+  assertNoPrivateLeak('signed-out private routes and login next', s.hits);
+  await s.page.goto(`${BASE}/en/catalog`);
+  await s.page.waitForTimeout(2500);
+  const referrer = await s.page.evaluate(() => document.referrer);
+  check('leaving a private login URL does not keep it as the referrer', referrer === '', referrer);
+  check(
+    'catalog PageView after that login URL has no private referrer',
+    beacons(s.hits)
+      .filter((b) => b.ev === 'PageView' && pathOf(b.dl) === '/en/catalog')
+      .every((b) => !/dashboard|\/account/.test(decodeURIComponent(b.rl))),
+  );
+  await s.context.close();
+
+  const cold = await session();
+  await cold.page.goto(`${BASE}/en/farms`);
+  await cold.page.waitForTimeout(1500);
+  check('public page before consent sends no Meta requests', cold.hits.length === 0, String(cold.hits.length));
+  await cold.context.close();
 }
 
 await browser.close();

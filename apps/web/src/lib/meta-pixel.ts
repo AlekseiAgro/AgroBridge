@@ -17,6 +17,11 @@ const REGISTRATION_MARKER_PREFIX = 'agrobridge_meta_registration_tracked:';
 /** Path segments (after the locale) whose URLs carry one-time secrets. */
 const UNTRACKED_PATH_SEGMENTS = new Set(['reset-password']);
 
+/** First path segment, after an optional locale, of areas that require a signed-in user. */
+const PRIVATE_ROOTS = new Set(['dashboard', 'account']);
+
+const APP_LOCALES = new Set(['ka', 'en', 'ru', 'de', 'fr', 'es', 'it']);
+
 /** Query parameters that may carry secrets or personal data. */
 const SENSITIVE_QUERY_PARAMS = ['token', 'code', 'email'];
 
@@ -36,21 +41,91 @@ export function configuredMetaPixelId(): string | null {
   return normalizeMetaPixelId(process.env.NEXT_PUBLIC_META_PIXEL_ID);
 }
 
-/**
- * Meta's script reports `location.href` (query and fragment included) with
- * every event, so a page whose URL carries a secret or personal data must
- * not have the Pixel running at all.
- */
-export function isMetaPixelTrackableUrl(pathname: string, search: string, hash = ''): boolean {
+function appSegments(pathname: string): string[] {
   const segments = pathname.split('/').filter(Boolean);
-  if (segments.some((segment) => UNTRACKED_PATH_SEGMENTS.has(segment))) return false;
+  return APP_LOCALES.has(segments[0] ?? '') ? segments.slice(1) : segments;
+}
+
+/** Cabinet, account, and the signed-in purchase-request form. Public request pages stay trackable. */
+export function isPrivateAppPath(pathname: string): boolean {
+  const segments = appSegments(pathname);
+  if (PRIVATE_ROOTS.has(segments[0] ?? '')) return true;
+  return segments[0] === 'requests' && segments[1] === 'new';
+}
+
+function decodeRepeated(value: string): string {
+  let current = value;
+  for (let i = 0; i < 2; i += 1) {
+    try {
+      const next = decodeURIComponent(current);
+      if (next === current) break;
+      current = next;
+    } catch {
+      break;
+    }
+  }
+  return current;
+}
+
+function destinationIsPrivate(value: string, depth: number): boolean {
+  if (depth > 4) return true;
+  const decoded = decodeRepeated(value.trim());
+  if (!decoded) return false;
+
+  let pathname = decoded;
+  let search = '';
+  if (decoded.includes('://') || decoded.startsWith('//')) {
+    try {
+      const url = new URL(decoded.startsWith('//') ? `https:${decoded}` : decoded);
+      pathname = url.pathname;
+      search = url.search;
+    } catch {
+      return true;
+    }
+  } else {
+    const withoutHash = decoded.split('#')[0] ?? decoded;
+    const queryAt = withoutHash.indexOf('?');
+    pathname = queryAt === -1 ? withoutHash : withoutHash.slice(0, queryAt);
+    search = queryAt === -1 ? '' : withoutHash.slice(queryAt);
+    if (!pathname.startsWith('/')) pathname = `/${pathname}`;
+  }
+
+  if (isPrivateAppPath(pathname)) return true;
+  return search ? hasPrivateNextDestination(search, depth + 1) : false;
+}
+
+/** True when a `next` parameter points at a private page, including after decoding. */
+export function hasPrivateNextDestination(search: string, depth = 0): boolean {
+  const raw = search.startsWith('?') ? search.slice(1) : search;
+  const params = new URLSearchParams(raw);
+  for (const value of params.getAll('next')) {
+    if (destinationIsPrivate(value, depth)) return true;
+  }
+  return false;
+}
+
+/** Secrets and one-time links. Seeing one keeps the Pixel off for the rest of the document. */
+export function isMetaPixelSecretUrl(pathname: string, search: string, hash = ''): boolean {
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.some((segment) => UNTRACKED_PATH_SEGMENTS.has(segment))) return true;
   const params = new URLSearchParams(search);
-  if (SENSITIVE_QUERY_PARAMS.some((name) => params.has(name))) return false;
+  if (SENSITIVE_QUERY_PARAMS.some((name) => params.has(name))) return true;
   for (const value of params.values()) {
-    if (SENSITIVE_VALUE_PATTERN.test(value)) return false;
+    if (SENSITIVE_VALUE_PATTERN.test(decodeRepeated(value))) return true;
   }
   const fragment = hash.replace(/^#/, '');
-  return !(fragment && (fragment.includes('=') || fragment.includes('@')));
+  return Boolean(fragment && (fragment.includes('=') || fragment.includes('@')));
+}
+
+/**
+ * Meta's script reports `location.href` (query and fragment included) with
+ * every event, so a page whose URL carries a secret, a private path, or a
+ * private `next` destination must not have the Pixel running.
+ */
+export function isMetaPixelTrackableUrl(pathname: string, search: string, hash = ''): boolean {
+  if (isMetaPixelSecretUrl(pathname, search, hash)) return false;
+  if (isPrivateAppPath(pathname)) return false;
+  return !hasPrivateNextDestination(search);
 }
 
 /**
@@ -234,14 +309,49 @@ export type MetaPixelPage = {
  * PageView and any CompleteRegistration waiting for the visitor to leave the
  * registration form.
  */
+/** Drops a conversion that would otherwise fire on a later page. */
+function dropRegistrationConversion(pathname: string): void {
+  if (pendingRegistrationFrom !== null && pendingRegistrationFrom !== pathname) {
+    pendingRegistrationFrom = null;
+  }
+}
+
+function referrerUrl(referrer: string): URL | null {
+  if (!referrer) return null;
+  try {
+    return new URL(referrer);
+  } catch {
+    return null;
+  }
+}
+
 export function syncMetaPixel(pixelId: string, page: MetaPixelPage): void {
   if (typeof window === 'undefined') return;
+  const referrer = referrerUrl(page.referrer);
+  const referrerUnreadable = page.referrer !== '' && referrer === null;
+  const referrerSecret =
+    referrer !== null && isMetaPixelSecretUrl(referrer.pathname, referrer.search, referrer.hash);
+  const referrerPrivate =
+    referrer !== null &&
+    (isPrivateAppPath(referrer.pathname) || hasPrivateNextDestination(referrer.search));
+  // A secret, or a referrer that already contains a private URL, stays on
+  // document.referrer for every later event in this document.
   if (
     sensitiveDocument ||
-    !isMetaPixelTrackableUrl(page.pathname, page.search, page.hash) ||
-    !isMetaPixelSafeReferrer(page.referrer)
+    referrerUnreadable ||
+    referrerSecret ||
+    referrerPrivate ||
+    isMetaPixelSecretUrl(page.pathname, page.search, page.hash)
   ) {
     sensitiveDocument = true;
+    dropRegistrationConversion(page.pathname);
+    pauseMetaPixel();
+    return;
+  }
+  // A private page only pauses the Pixel. The stored consent choice is left
+  // alone, and the next public page in this document is tracked again.
+  if (isPrivateAppPath(page.pathname) || hasPrivateNextDestination(page.search)) {
+    dropRegistrationConversion(page.pathname);
     pauseMetaPixel();
     return;
   }

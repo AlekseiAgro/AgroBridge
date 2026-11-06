@@ -6,6 +6,7 @@ import {
   bareRootRedirectPath,
   bareRootRedirectStatus,
 } from './lib/bare-root-redirect';
+import { isMetaPixelTrackableUrl } from './lib/meta-pixel';
 import { REQUEST_PATHNAME_HEADER, REQUEST_SEARCH_HEADER } from './lib/protected-next-path';
 
 const intlMiddleware = createMiddleware(routing);
@@ -26,9 +27,11 @@ export default function middleware(request: NextRequest) {
   }
 
   const response = intlMiddleware(request);
-  if (request.nextUrl.pathname.split('/').includes('reset-password')) {
-    // The URL carries a one-time reset token; no request leaving this page
-    // (links, assets, a link opened in a new tab) may report it as the referrer.
+  const { pathname, search, hash } = request.nextUrl;
+  if (!isMetaPixelTrackableUrl(pathname, search, hash)) {
+    // The URL is a secret link or a private page (including a private `next`).
+    // Nothing that leaves it — a full navigation, a new tab, a locale switch —
+    // may report that URL as the referrer.
     response.headers.set('Referrer-Policy', 'no-referrer');
   }
   return response;

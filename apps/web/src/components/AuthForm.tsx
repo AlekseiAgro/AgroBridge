@@ -99,13 +99,17 @@ export function AuthForm({ mode, nextPath, termsVersion, termsLocale }: Props) {
         scheduleMetaCompleteRegistration(data.user.id);
       }
 
-      const verifyParams = new URLSearchParams({ next: redirectTo });
+      const verifyParams = new URLSearchParams();
+      // The verify page already falls back to /account, so the default
+      // destination is not put in the URL the Pixel would report.
+      if (redirectTo !== '/account') verifyParams.set('next', redirectTo);
       if (mode === 'register' && data.verificationEmailSent === false) {
         verifyParams.set('verificationEmail', 'unsent');
       }
+      const verifyQuery = verifyParams.toString();
       const destination =
         data.user && !data.user.emailVerified
-          ? `/verify-email?${verifyParams.toString()}`
+          ? `/verify-email${verifyQuery ? `?${verifyQuery}` : ''}`
           : redirectTo;
 
       router.replace(destination);
