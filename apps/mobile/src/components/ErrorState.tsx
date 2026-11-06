@@ -23,7 +23,7 @@ export function ErrorState({ title, body, retryLabel, onRetry }: ErrorStateProps
         {title}
       </AppText>
       <AppText tone="secondary">{body}</AppText>
-      <AppButton label={retryLabel} onPress={onRetry} style={styles.action} />
+      <AppButton label={retryLabel} onPress={onRetry} style={{ alignSelf: 'flex-start', marginTop: spacing.sm }} />
     </View>
   );
 }
@@ -31,9 +31,5 @@ export function ErrorState({ title, body, retryLabel, onRetry }: ErrorStateProps
 const styles = StyleSheet.create({
   base: {
     alignItems: 'flex-start',
-  },
-  action: {
-    alignSelf: 'flex-start',
-    marginTop: 8,
   },
 });

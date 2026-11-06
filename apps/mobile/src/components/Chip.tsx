@@ -19,7 +19,10 @@ export function Chip({ label, selected = false, onPress, accessibilityLabel }: C
   );
   const chrome = {
     minHeight: touchTarget,
-    paddingHorizontal: spacing.lg,
+    maxWidth: '100%' as const,
+    alignSelf: 'flex-start' as const,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
     borderRadius: radii.pill,
     borderWidth: borders.hairline,
     borderColor: selected ? colors.brandDeep : colors.line,
@@ -49,6 +52,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   label: {
+    flexShrink: 1,
     textAlign: 'center',
   },
   pressed: {

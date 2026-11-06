@@ -1,5 +1,6 @@
-import { parseCatalogProducts, parseCatalogRequests, primaryProductImageUrl } from './model';
+import { parseCatalogProducts, parseCatalogRequest, parseCatalogRequests, primaryProductImageUrl } from './model';
 import {
+  capNewProducts,
   filterCatalogProducts,
   filterCatalogRequests,
   normalizeSearchText,
@@ -85,6 +86,52 @@ describe('catalog search', () => {
     expect(purchaseRequestsPath({ categoryId: 'fruits', query: 'виноград' })).toBe(
       '/purchase-requests?category=fruits&q=%D0%B2%D0%B8%D0%BD%D0%BE%D0%B3%D1%80%D0%B0%D0%B4',
     );
+    expect(
+      productsPath({
+        region: 'kakheti',
+        harvestStatus: 'available',
+        preorder: true,
+        inSeason: true,
+        newest: 15,
+      }),
+    ).toBe('/products?region=kakheti&harvestStatus=available&preorder=true&inSeason=true&newest=15');
+  });
+
+  it('keeps the New Products strip to the newest 15 in server order', () => {
+    const products = Array.from({ length: 16 }, (_, index) => product({ id: `p${index}` }));
+    const visible = capNewProducts(products);
+    expect(visible).toHaveLength(15);
+    expect(visible[0]?.id).toBe('p0');
+    expect(visible.some((item) => item.id === 'p15')).toBe(false);
+    expect(products).toHaveLength(16);
+  });
+
+  it('keeps request lifecycle flags and quotes from the detail payload', () => {
+    const parsed = parseCatalogRequest({
+      id: 'r1',
+      title: 'Peaches',
+      category: 'fruits',
+      quantity: '2 t',
+      status: 'open',
+      createdAt: '2026-10-01T00:00:00.000Z',
+      canCancel: true,
+      canClose: true,
+      canQuote: false,
+      quotes: [
+        {
+          id: 'q1',
+          status: 'pending',
+          priceAmount: '4.50',
+          currency: 'GEL',
+          farm: { name: 'Hill Farm' },
+          canAccept: true,
+          canDecline: true,
+          canWithdraw: false,
+        },
+      ],
+    });
+    expect(parsed?.canCancel).toBe(true);
+    expect(parsed?.quotes?.[0]).toMatchObject({ id: 'q1', farmName: 'Hill Farm', canAccept: true });
   });
 
   it('keeps API order and appends only new server matches', () => {

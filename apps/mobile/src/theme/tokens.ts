@@ -55,7 +55,7 @@ export const elevation = {
 } as const;
 
 export const lightColors = {
-  background: '#F6F4F1',
+  background: '#EEF3EA',
   surface: '#FFFFFF',
   ink: '#1C1917',
   secondary: '#44403C',
@@ -73,6 +73,11 @@ export const lightColors = {
   successSoft: '#E7F0E9',
   neutralSoft: '#F3F0EA',
   skeleton: '#E6E1D8',
+  accentGold: '#C4A35A',
+  accentLeaf: '#6F9B4C',
+  accentSoil: '#8B6B4A',
+  info: '#3D5A80',
+  infoSoft: '#E7EEF4',
 } as const;
 
 export const darkColors: { [Key in keyof typeof lightColors]: string } = {
@@ -94,6 +99,11 @@ export const darkColors: { [Key in keyof typeof lightColors]: string } = {
   successSoft: '#243028',
   neutralSoft: '#2A2622',
   skeleton: '#3F3A36',
+  accentGold: '#E6C48A',
+  accentLeaf: '#8FBF98',
+  accentSoil: '#C4A574',
+  info: '#9BB4D0',
+  infoSoft: '#24303A',
 };
 
 export type ThemeColors = { [Key in keyof typeof lightColors]: string };

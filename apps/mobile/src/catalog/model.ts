@@ -100,6 +100,20 @@ export type CatalogFarmProfile = {
 };
 
 /** Public purchase-request fields. Matches GET /purchase-requests. */
+export type CatalogQuote = {
+  id: string;
+  status: string;
+  priceAmount: string;
+  currency: string;
+  quantity: string | null;
+  unit: string | null;
+  message: string | null;
+  farmName: string | null;
+  canAccept: boolean;
+  canDecline: boolean;
+  canWithdraw: boolean;
+};
+
 export type CatalogRequest = {
   id: string;
   title: string;
@@ -113,6 +127,12 @@ export type CatalogRequest = {
   status: string;
   createdAt: string | null;
   buyer: CatalogParty;
+  canCancel?: boolean;
+  canClose?: boolean;
+  canQuote?: boolean;
+  canMessageBuyer?: boolean;
+  quoteCount?: number;
+  quotes?: CatalogQuote[];
   /** Original title when it differs from the locale shown in `title`. */
   sourceTitle: string | null;
   source: CatalogText | null;
@@ -342,6 +362,34 @@ export function parseCatalogProducts(value: unknown): CatalogProduct[] {
   });
 }
 
+function readQuotes(value: unknown): CatalogQuote[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== 'object') return [];
+    const row = item as Record<string, unknown>;
+    const id = readString(row.id);
+    const priceAmount = readString(row.priceAmount);
+    const currency = readString(row.currency);
+    if (!id || !priceAmount || !currency) return [];
+    const farm = row.farm && typeof row.farm === 'object' ? (row.farm as Record<string, unknown>) : null;
+    return [
+      {
+        id,
+        status: readString(row.status) ?? 'pending',
+        priceAmount,
+        currency,
+        quantity: readString(row.quantity),
+        unit: readString(row.unit),
+        message: readString(row.message),
+        farmName: farm ? readString(farm.name) : null,
+        canAccept: row.canAccept === true,
+        canDecline: row.canDecline === true,
+        canWithdraw: row.canWithdraw === true,
+      },
+    ];
+  });
+}
+
 export function parseCatalogRequest(value: unknown): CatalogRequest | null {
   if (!value || typeof value !== 'object') {
     return null;
@@ -367,6 +415,12 @@ export function parseCatalogRequest(value: unknown): CatalogRequest | null {
     status: readString(row.status) ?? 'open',
     createdAt: readString(row.createdAt),
     buyer: readParty(row.buyer),
+    canCancel: row.canCancel === true,
+    canClose: row.canClose === true,
+    canQuote: row.canQuote === true,
+    canMessageBuyer: row.canMessageBuyer === true,
+    quoteCount: readNumber(row.quoteCount) ?? undefined,
+    quotes: readQuotes(row.quotes),
     sourceTitle: sourceTitleOf(row, title),
     source: readText(row),
   };

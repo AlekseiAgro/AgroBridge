@@ -6,8 +6,18 @@ export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 export type RequestOptions = {
   method?: HttpMethod;
   body?: unknown;
+  /**
+   * Multipart body. Sent as-is, without JSON encoding or a Content-Type header,
+   * so fetch can set the multipart boundary.
+   */
+  formData?: FormData;
   /** When false, no Authorization header is sent and a 401 does not expire the session. */
   auth?: boolean;
+  /**
+   * Keep the current session when this authenticated call returns 401.
+   * Used when 401 means a wrong password, not an expired token.
+   */
+  preserveSessionOn401?: boolean;
   signal?: AbortSignal;
   headers?: Record<string, string>;
   timeoutMs?: number;
@@ -85,6 +95,15 @@ function isAbortError(error: unknown): boolean {
 export class ApiClient {
   constructor(private readonly options: ApiClientOptions) {}
 
+  /** Same bearer token `request` sends. Used for private file downloads. */
+  async authHeaders(): Promise<Record<string, string>> {
+    const token = await this.options.getAccessToken();
+    if (!token) {
+      return {};
+    }
+    return { Authorization: `Bearer ${token}` };
+  }
+
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const method = options.method ?? 'GET';
     const headers = sanitizeHeaders(options.headers);
@@ -92,14 +111,15 @@ export class ApiClient {
 
     let sentAuthorization = false;
     if (options.auth !== false) {
-      const token = await this.options.getAccessToken();
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
+      const authorization = await this.authHeaders();
+      if (authorization.Authorization) {
+        headers.Authorization = authorization.Authorization;
         sentAuthorization = true;
       }
     }
 
-    if (options.body !== undefined) {
+    const formData = options.formData;
+    if (!formData && options.body !== undefined) {
       headers['Content-Type'] = headers['Content-Type'] ?? 'application/json';
     }
 
@@ -115,7 +135,7 @@ export class ApiClient {
       response = await fetchImpl(joinApiUrl(this.options.baseUrl, path), {
         method,
         headers,
-        body: options.body === undefined ? undefined : JSON.stringify(options.body),
+        body: formData ?? (options.body === undefined ? undefined : JSON.stringify(options.body)),
         signal: controller.signal,
       });
     } catch (error) {
@@ -143,7 +163,7 @@ export class ApiClient {
     }
 
     const retryAfterSeconds = response.status === 429 ? readRetryAfter(response, body) : null;
-    if (response.status === 401 && sentAuthorization) {
+    if (response.status === 401 && sentAuthorization && !options.preserveSessionOn401) {
       await this.options.onUnauthorized();
     }
 

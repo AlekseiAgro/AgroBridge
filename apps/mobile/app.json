@@ -8,7 +8,10 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "ge.agrobridge.app"
+      "bundleIdentifier": "ge.agrobridge.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "ge.agrobridge.app",
@@ -16,6 +19,28 @@
         "backgroundColor": "#F6F4F1"
       }
     },
-    "plugins": ["expo-secure-store", "expo-localization"]
+    "plugins": [
+      "expo-secure-store",
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "mode": "development"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow AgroBridge to access your photos and videos to add product pictures and video."
+        }
+      ],
+      "expo-sharing"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f2ce0ca7-3c5a-4274-925a-d7f79e68e889"
+      }
+    },
+    "owner": "agrobridge"
   }
 }

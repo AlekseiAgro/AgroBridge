@@ -4,8 +4,11 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useAuth } from '../auth/AuthProvider';
+import { emailVerificationRoute } from '../auth/verify-email-form';
 import { categoryLabel, unitLabel } from '../catalog/labels';
 import { useOpenPurchaseRequests } from '../catalog/use-home-feed';
+import { AppButton } from '../components/AppButton';
 import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
@@ -13,18 +16,23 @@ import { RequestCard } from '../components/RequestCard';
 import { SectionHeader } from '../components/SectionHeader';
 import { useI18n } from '../i18n/I18nProvider';
 import type { RootStackParamList, RootTabParamList } from '../navigation/types';
+import { showsCreateRequest } from '../requests/board';
 import { useTheme } from '../theme/ThemeProvider';
 
 export function RequestsScreen() {
   const { t } = useI18n();
   const { colors, spacing } = useTheme();
+  const { status, user } = useAuth();
   const navigation = useNavigation<BottomTabNavigationProp<RootTabParamList>>();
   const stack = navigation.getParent<NativeStackNavigationProp<RootStackParamList>>();
   const feed = useOpenPurchaseRequests();
+  const verified = status === 'authenticated' && user != null && !emailVerificationRoute(user);
+  const createVisible = showsCreateRequest('requestsTab');
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={{
           paddingHorizontal: spacing.lg,
           paddingTop: spacing.lg,
@@ -33,15 +41,23 @@ export function RequestsScreen() {
         }}
       >
         <SectionHeader title={t('requests.title')} />
-        {feed.status === 'loading' ? (
-          <LoadingSkeleton accessibilityLabel={t('requests.loading')} />
+        {createVisible && verified ? (
+          <AppButton label={t('requests.create')} onPress={() => stack?.navigate('CreateRequest')} />
         ) : null}
+        {createVisible && !verified ? (
+          <AppButton
+            label={status === 'authenticated' ? t('account.confirmEmail') : t('account.signIn')}
+            variant="secondary"
+            onPress={() => stack?.navigate(status === 'authenticated' ? 'VerifyEmail' : 'Login')}
+          />
+        ) : null}
+        {feed.status === 'loading' ? <LoadingSkeleton accessibilityLabel={t('requests.loading')} /> : null}
         {feed.status === 'error' ? (
           <ErrorState
             title={t('requests.loadErrorTitle')}
             body={t('requests.loadErrorBody')}
             retryLabel={t('requests.retry')}
-            onRetry={feed.reload}
+            onRetry={() => feed.reload()}
           />
         ) : null}
         {feed.status === 'ready' && feed.requests.length === 0 ? (
