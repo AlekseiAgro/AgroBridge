@@ -1514,5 +1514,19 @@
     "close": "Close",
     "documentLanguage": "Document language",
     "documentPending": "The full document text will be published here."
+  },
+  "cookieConsent": {
+    "title": "Cookies on AgroBridge",
+    "settingsTitle": "Cookie settings",
+    "necessary": "We use necessary cookies to keep you signed in and to remember your language. They are always active.",
+    "advertising": "With your permission, we would also use Meta Pixel advertising cookies to measure how well our ads on Meta platforms (Facebook, Instagram) perform. Meta Pixel is not loaded unless you accept. You can change your choice at any time in Cookie settings.",
+    "statusGranted": "Your current choice: advertising cookies accepted.",
+    "statusDenied": "Your current choice: advertising cookies rejected.",
+    "saved": "Your cookie choice has been saved.",
+    "accept": "Accept advertising cookies",
+    "reject": "Reject advertising cookies",
+    "close": "Close",
+    "privacyLink": "Read the Privacy Policy",
+    "settingsButton": "Cookie settings"
   }
 }

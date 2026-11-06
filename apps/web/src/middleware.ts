@@ -25,7 +25,13 @@ export default function middleware(request: NextRequest) {
     return response;
   }
 
-  return intlMiddleware(request);
+  const response = intlMiddleware(request);
+  if (request.nextUrl.pathname.split('/').includes('reset-password')) {
+    // The URL carries a one-time reset token; no request leaving this page
+    // (links, assets, a link opened in a new tab) may report it as the referrer.
+    response.headers.set('Referrer-Policy', 'no-referrer');
+  }
+  return response;
 }
 
 export const config = {

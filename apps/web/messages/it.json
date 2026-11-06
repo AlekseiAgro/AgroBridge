@@ -1514,5 +1514,19 @@
     "close": "Chiudi",
     "documentLanguage": "Lingua del documento",
     "documentPending": "Il testo completo del documento sarà pubblicato qui."
+  },
+  "cookieConsent": {
+    "title": "Cookie su AgroBridge",
+    "settingsTitle": "Impostazioni cookie",
+    "necessary": "Utilizziamo cookie necessari per mantenere l'accesso al tuo account e ricordare la lingua scelta. Sono sempre attivi.",
+    "advertising": "Con il tuo consenso, utilizzeremmo anche i cookie pubblicitari di Meta Pixel per misurare l'efficacia dei nostri annunci sulle piattaforme Meta (Facebook, Instagram). Meta Pixel non viene caricato finché non accetti. Puoi modificare la tua scelta in qualsiasi momento in «Impostazioni cookie».",
+    "statusGranted": "La tua scelta attuale: cookie pubblicitari accettati.",
+    "statusDenied": "La tua scelta attuale: cookie pubblicitari rifiutati.",
+    "saved": "La tua scelta sui cookie è stata salvata.",
+    "accept": "Accetta i cookie pubblicitari",
+    "reject": "Rifiuta i cookie pubblicitari",
+    "close": "Chiudi",
+    "privacyLink": "Leggi l'Informativa sulla privacy",
+    "settingsButton": "Impostazioni cookie"
   }
 }

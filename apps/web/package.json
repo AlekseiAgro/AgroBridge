@@ -7,7 +7,8 @@
     "build": "next build --webpack",
     "start": "next start --port 3000",
     "lint": "eslint .",
-    "test": "node --experimental-strip-types --test src/lib/product-photos.test.ts src/lib/menu-placement.test.ts"
+    "test": "node --experimental-strip-types --test src/lib/product-photos.test.ts src/lib/menu-placement.test.ts src/lib/cookie-consent.test.ts src/lib/meta-pixel.test.ts",
+    "test:meta-pixel": "node e2e/meta-pixel-consent.e2e.mjs"
   },
   "dependencies": {
     "@agrobridge/shared": "workspace:*",
@@ -24,6 +25,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
+    "playwright-core": "^1.65.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

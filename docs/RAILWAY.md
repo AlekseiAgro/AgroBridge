@@ -138,9 +138,13 @@ The API image runs `prisma migrate deploy` on start.
 NODE_ENV=production
 NEXT_PUBLIC_API_URL=https://${{api.RAILWAY_PUBLIC_DOMAIN}}/api
 API_INTERNAL_URL=http://${{api.RAILWAY_PRIVATE_DOMAIN}}:8080/api
+# Optional: Meta Pixel ID (digits only). Empty disables the Pixel and the consent banner.
+NEXT_PUBLIC_META_PIXEL_ID=
 ```
 
 `NEXT_PUBLIC_API_URL` is baked at **build** time — set it before/with the first successful web build, then redeploy web if the API domain changes. It is the browser's URL only.
+
+`NEXT_PUBLIC_META_PIXEL_ID` is also baked at **build** time (Railway passes service variables to the Dockerfile `ARG` of the same name); redeploy web after setting or changing it. The Pixel script is requested only after a visitor accepts advertising cookies in the consent banner. Before each release with a Pixel ID set, run the manual Meta Pixel release check in [`docs/DEPLOY.md`](DEPLOY.md#meta-pixel-release-check-manual); code alone cannot switch off Meta's Automatic Advanced Matching.
 
 `API_INTERNAL_URL` is read at **runtime** by the Next.js server and never reaches the browser. `${{api.RAILWAY_PRIVATE_DOMAIN}}` resolves to `api.railway.internal`; `8080` is the port Railway injects into the `api` service, the same one its public domains target (confirm under **api → Settings → Networking**, where each domain shows its target port). Without it, server-side calls leave Railway, cross Cloudflare and re-enter through the edge, and the API can no longer tell one visitor from another for rate limiting (docs/RATE_LIMITING.md). Use `http://`, not `https://` — the private network is already encrypted, and the API serves plain HTTP there.
 

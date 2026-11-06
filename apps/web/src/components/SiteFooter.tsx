@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { BrandLogo } from '@/components/BrandLogo';
+import { CookieSettingsButton } from '@/components/CookieSettingsButton';
 import { Link } from '@/i18n/navigation';
 import { OFFICIAL_SOCIAL_PROFILES } from '@/lib/brand-identity';
 import { getCurrentUser } from '@/lib/session';
@@ -49,6 +50,7 @@ export async function SiteFooter() {
             <Link href="/legal">{t('legalInformation')}</Link>
             <Link href="/terms">{t('terms')}</Link>
             <Link href="/privacy">{t('privacy')}</Link>
+            <CookieSettingsButton className="site-footer__link-button" />
           </nav>
 
           <nav className="site-footer__col" aria-label={t('followUs')}>
