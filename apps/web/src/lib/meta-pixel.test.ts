@@ -24,7 +24,78 @@ describe('Meta Pixel trackable URLs', () => {
   it('tracks ordinary pages, with or without a query', () => {
     assert.equal(isMetaPixelTrackableUrl('/en', ''), true);
     assert.equal(isMetaPixelTrackableUrl('/ka/catalog', '?category=fruit'), true);
-    assert.equal(isMetaPixelTrackableUrl('/en/verify-email', '?next=%2Faccount'), true);
+    assert.equal(isMetaPixelTrackableUrl('/en/verify-email', ''), true);
+    assert.equal(isMetaPixelTrackableUrl('/en/login', '?next=%2Fcatalog'), true);
+    assert.equal(isMetaPixelTrackableUrl('/en/requests/cm123', ''), true);
+  });
+
+  it('does not track private areas or a private destination hidden in next', () => {
+    for (const pathname of [
+      '/en/dashboard',
+      '/ka/dashboard/admin',
+      '/ru/dashboard/admin/products/cm123',
+      '/de/account',
+      '/fr/account/settings',
+      '/it/requests/new',
+      '/es/requests/new',
+    ]) {
+      assert.equal(isMetaPixelTrackableUrl(pathname, ''), false, pathname);
+    }
+    assert.equal(
+      isMetaPixelTrackableUrl('/en/login', `?next=${encodeURIComponent('/dashboard/admin')}`),
+      false,
+    );
+    assert.equal(
+      isMetaPixelTrackableUrl('/en/verify-email', `?next=${encodeURIComponent('/account')}`),
+      false,
+    );
+    assert.equal(
+      isMetaPixelTrackableUrl(
+        '/en/login',
+        `?next=${encodeURIComponent('/catalog?next=/account/settings')}`,
+      ),
+      false,
+    );
+    assert.equal(isMetaPixelTrackableUrl('/en/login', '?next=%252Fdashboard%252Fadmin'), false);
+  });
+
+  it('blocks next values that the browser resolves to a private route', () => {
+    const privateNext = [
+      '/../dashboard/admin',
+      '/./dashboard/admin',
+      '/foo/../dashboard/admin',
+      '/en/../dashboard/admin',
+      '/en/./account/settings',
+      '/%2e%2e/dashboard/admin',
+      '/%2e/account/settings',
+      '/%2e%2e/%2e%2e/en/account/settings',
+      '/foo/../../dashboard/admin',
+      '/requests/./new',
+      '/requests/foo/../new',
+      '/./requests/new',
+      '/dashboard\\admin',
+      '/dashboard\\admin\\users',
+      '/en\\dashboard\\admin',
+      '/foo\\..\\dashboard/admin',
+      '/requests\\foo\\..\\new',
+    ];
+    for (const next of privateNext) {
+      const search = `?${new URLSearchParams({ next }).toString()}`;
+      assert.equal(isMetaPixelTrackableUrl('/en/login', search), false, next);
+    }
+    const publicNext = [
+      '/catalog',
+      '/foo/../catalog',
+      '/%2e%2e/en/catalog',
+      '/products/cm123',
+      '/requests/cm123',
+    ];
+    for (const next of publicNext) {
+      const search = `?${new URLSearchParams({ next }).toString()}`;
+      assert.equal(isMetaPixelTrackableUrl('/en/login', search), true, next);
+    }
+    assert.equal(isMetaPixelTrackableUrl('/en/./dashboard/admin', ''), false);
+    assert.equal(isMetaPixelTrackableUrl('/foo/../catalog', ''), true);
   });
 
   it('skips the password-reset page, whose URL carries a one-time token', () => {
@@ -55,6 +126,13 @@ describe('Meta Pixel referrers', () => {
   it('rejects a referrer that is itself a sensitive URL', () => {
     assert.equal(isMetaPixelSafeReferrer(''), true);
     assert.equal(isMetaPixelSafeReferrer('https://agrobridge.ge/en/catalog'), true);
+    assert.equal(isMetaPixelSafeReferrer('https://agrobridge.ge/en/dashboard/admin'), false);
+    assert.equal(
+      isMetaPixelSafeReferrer(
+        `https://agrobridge.ge/en/login?next=${encodeURIComponent('/account/settings')}`,
+      ),
+      false,
+    );
     assert.equal(isMetaPixelSafeReferrer('https://www.google.com/'), true);
     assert.equal(
       isMetaPixelSafeReferrer('https://agrobridge.ge/en/reset-password?token=abc'),
@@ -364,6 +442,75 @@ describe('Meta Pixel runtime', () => {
     t.mod.revokeMetaPixel();
     t.loadMetaLibrary();
     assert.deepEqual(t.beacons, []);
+  });
+
+  it('does not send PageView for private routes and resumes on the next public page', async () => {
+    const t = await setup();
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    t.loadMetaLibrary();
+    for (const path of [
+      '/en/dashboard',
+      '/en/dashboard/admin?section=users',
+      '/en/dashboard/admin/products/cm123secret',
+      '/en/account',
+      '/en/account/settings',
+      '/en/requests/new',
+    ]) {
+      t.mod.syncMetaPixel(PIXEL, t.navigate(path));
+    }
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en/catalog'));
+    assert.deepEqual(
+      t.beacons.map((b) => `${b.ev} ${new URL(b.dl).pathname}`),
+      ['PageView /en', 'PageView /en/catalog'],
+    );
+    const leaked = JSON.stringify(t.beacons);
+    assert.equal(leaked.includes('dashboard'), false);
+    assert.equal(leaked.includes('account'), false);
+    assert.equal(leaked.includes('cm123secret'), false);
+    assert.equal(leaked.includes('requests'), false);
+  });
+
+  it('does not load when the document referrer is a private URL', async () => {
+    const t = await setup(
+      'https://agrobridge.ge/en/catalog',
+      'https://agrobridge.ge/en/dashboard/chat/cm123secret',
+    );
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    assert.equal(t.win.fbq, undefined);
+    assert.deepEqual(t.beacons, []);
+  });
+
+  it('does not send a login PageView when next points at an admin page', async () => {
+    const t = await setup(
+      `https://agrobridge.ge/en/login?next=${encodeURIComponent('/dashboard/admin')}`,
+    );
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    assert.equal(t.win.fbq, undefined);
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en/catalog'));
+    t.loadMetaLibrary();
+    assert.deepEqual(
+      t.beacons.map((b) => new URL(b.dl).pathname),
+      ['/en/catalog'],
+    );
+    assert.equal(JSON.stringify(t.beacons).includes('dashboard'), false);
+  });
+
+  it('skips CompleteRegistration when verification would expose a private next', async () => {
+    const t = await setup('https://agrobridge.ge/en/register');
+    t.mod.syncMetaPixel(PIXEL, t.page());
+    t.loadMetaLibrary();
+    assert.equal(t.mod.scheduleMetaCompleteRegistration('user-1'), true);
+    t.mod.syncMetaPixel(
+      PIXEL,
+      t.navigate(`/en/verify-email?next=${encodeURIComponent('/dashboard/admin')}`),
+    );
+    t.mod.syncMetaPixel(PIXEL, t.navigate('/en/catalog'));
+    assert.deepEqual(
+      t.beacons.map((b) => b.ev),
+      ['PageView', 'PageView'],
+    );
+    assert.equal(JSON.stringify(t.beacons).includes('dashboard'), false);
+    assert.equal(JSON.stringify(t.beacons).includes('user-1'), false);
   });
 
   it('sends CompleteRegistration once, without parameters, after leaving the form', async () => {
