@@ -46,9 +46,31 @@ function appSegments(pathname: string): string[] {
   return APP_LOCALES.has(segments[0] ?? '') ? segments.slice(1) : segments;
 }
 
+/**
+ * Path the browser requests and the app then routes. Backslashes and `.` /
+ * `..` segments are resolved, and `%`-escapes other than separators are
+ * decoded. `%2F` stays encoded, matching a real navigation.
+ */
+function canonicalPathname(pathname: string): string {
+  const slashed = pathname.replace(/\\/g, '/');
+  let normalized = slashed;
+  try {
+    normalized = new URL(slashed, 'http://localhost').pathname;
+  } catch {
+    normalized = slashed.startsWith('/') ? slashed : `/${slashed}`;
+  }
+  try {
+    normalized = decodeURI(normalized);
+  } catch {
+    // An invalid escape is left as the URL parser returned it.
+  }
+  const collapsed = normalized.replace(/\/+/g, '/');
+  return collapsed.startsWith('/') ? collapsed : `/${collapsed}`;
+}
+
 /** Cabinet, account, and the signed-in purchase-request form. Public request pages stay trackable. */
 export function isPrivateAppPath(pathname: string): boolean {
-  const segments = appSegments(pathname);
+  const segments = appSegments(canonicalPathname(pathname));
   if (PRIVATE_ROOTS.has(segments[0] ?? '')) return true;
   return segments[0] === 'requests' && segments[1] === 'new';
 }

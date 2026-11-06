@@ -59,6 +59,45 @@ describe('Meta Pixel trackable URLs', () => {
     assert.equal(isMetaPixelTrackableUrl('/en/login', '?next=%252Fdashboard%252Fadmin'), false);
   });
 
+  it('blocks next values that the browser resolves to a private route', () => {
+    const privateNext = [
+      '/../dashboard/admin',
+      '/./dashboard/admin',
+      '/foo/../dashboard/admin',
+      '/en/../dashboard/admin',
+      '/en/./account/settings',
+      '/%2e%2e/dashboard/admin',
+      '/%2e/account/settings',
+      '/%2e%2e/%2e%2e/en/account/settings',
+      '/foo/../../dashboard/admin',
+      '/requests/./new',
+      '/requests/foo/../new',
+      '/./requests/new',
+      '/dashboard\\admin',
+      '/dashboard\\admin\\users',
+      '/en\\dashboard\\admin',
+      '/foo\\..\\dashboard/admin',
+      '/requests\\foo\\..\\new',
+    ];
+    for (const next of privateNext) {
+      const search = `?${new URLSearchParams({ next }).toString()}`;
+      assert.equal(isMetaPixelTrackableUrl('/en/login', search), false, next);
+    }
+    const publicNext = [
+      '/catalog',
+      '/foo/../catalog',
+      '/%2e%2e/en/catalog',
+      '/products/cm123',
+      '/requests/cm123',
+    ];
+    for (const next of publicNext) {
+      const search = `?${new URLSearchParams({ next }).toString()}`;
+      assert.equal(isMetaPixelTrackableUrl('/en/login', search), true, next);
+    }
+    assert.equal(isMetaPixelTrackableUrl('/en/./dashboard/admin', ''), false);
+    assert.equal(isMetaPixelTrackableUrl('/foo/../catalog', ''), true);
+  });
+
   it('skips the password-reset page, whose URL carries a one-time token', () => {
     assert.equal(isMetaPixelTrackableUrl('/en/reset-password', '?token=secret'), false);
     assert.equal(isMetaPixelTrackableUrl('/ru/reset-password', ''), false);
