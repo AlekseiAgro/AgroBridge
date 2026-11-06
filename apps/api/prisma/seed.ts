@@ -944,6 +944,8 @@ const INITIAL_LEGAL_DOCUMENTS = [
     version: '1.0',
     locale: LegalDocumentLocale.ka,
     title: 'გამოყენების პირობები',
+    status: LegalDocumentStatus.published,
+    effectiveAt: null,
   },
   {
     id: 'legal_terms_1_0_en',
@@ -951,6 +953,8 @@ const INITIAL_LEGAL_DOCUMENTS = [
     version: '1.0',
     locale: LegalDocumentLocale.en,
     title: 'Terms of Use',
+    status: LegalDocumentStatus.published,
+    effectiveAt: null,
   },
   {
     id: 'legal_privacy_1_0_ka',
@@ -958,6 +962,8 @@ const INITIAL_LEGAL_DOCUMENTS = [
     version: '1.0',
     locale: LegalDocumentLocale.ka,
     title: 'კონფიდენციალურობის პოლიტიკა',
+    status: LegalDocumentStatus.archived,
+    effectiveAt: null,
   },
   {
     id: 'legal_privacy_1_0_en',
@@ -965,23 +971,43 @@ const INITIAL_LEGAL_DOCUMENTS = [
     version: '1.0',
     locale: LegalDocumentLocale.en,
     title: 'Privacy Policy',
+    status: LegalDocumentStatus.archived,
+    effectiveAt: null,
+  },
+  {
+    id: 'legal_privacy_1_1_ka',
+    type: LegalDocumentType.PRIVACY,
+    version: '1.1',
+    locale: LegalDocumentLocale.ka,
+    title: 'კონფიდენციალურობის პოლიტიკა',
+    status: LegalDocumentStatus.published,
+    effectiveAt: new Date('2026-11-05T00:00:00.000Z'),
+  },
+  {
+    id: 'legal_privacy_1_1_en',
+    type: LegalDocumentType.PRIVACY,
+    version: '1.1',
+    locale: LegalDocumentLocale.en,
+    title: 'Privacy Policy',
+    status: LegalDocumentStatus.published,
+    effectiveAt: new Date('2026-11-05T00:00:00.000Z'),
   },
 ] as const;
 
+/** Version and dates are set on create only, so reseeding never rewrites a published record. */
 async function ensureLegalDocuments() {
   const now = new Date();
-  for (const document of INITIAL_LEGAL_DOCUMENTS) {
+  for (const { effectiveAt, ...document } of INITIAL_LEGAL_DOCUMENTS) {
     await prisma.legalDocument.upsert({
       where: { id: document.id },
       create: {
         ...document,
-        status: LegalDocumentStatus.published,
         publishedAt: now,
-        effectiveAt: now,
+        effectiveAt: effectiveAt ?? now,
       },
       update: {
         title: document.title,
-        status: LegalDocumentStatus.published,
+        status: document.status,
       },
     });
   }

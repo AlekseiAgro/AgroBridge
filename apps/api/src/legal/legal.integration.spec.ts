@@ -75,10 +75,10 @@ describeWithDatabase()('legal acceptance (database)', () => {
       title: 'Terms of Use',
     });
     await ensureDocument({
-      id: 'legal_privacy_1_0_en',
+      id: 'legal_privacy_1_1_en',
       type: LegalDocumentType.PRIVACY,
       locale: LegalDocumentLocale.en,
-      version: '1.0',
+      version: '1.1',
       title: 'Privacy Policy',
     });
     await ensureDocument({
@@ -97,6 +97,29 @@ describeWithDatabase()('legal acceptance (database)', () => {
       await prisma.legalDocument.deleteMany({ where: { id: { in: extraDocumentIds } } });
     }
     await prisma.$disconnect();
+  });
+
+  it('serves Privacy Policy 1.1 as current while Terms 1.0 stays published', async () => {
+    for (const locale of ['en', 'ka'] as const) {
+      const { documents } = await legal.currentDocuments(locale);
+      const privacy = documents.find((document) => document.type === 'PRIVACY');
+      const terms = documents.find((document) => document.type === 'TERMS');
+
+      expect(privacy?.version).toBe('1.1');
+      expect(privacy?.effectiveAt).toBe('2026-11-05T00:00:00.000Z');
+      expect(terms?.version).toBe('1.0');
+    }
+
+    const archived = await prisma.legalDocument.findMany({
+      where: { id: { in: ['legal_privacy_1_0_en', 'legal_privacy_1_0_ka'] } },
+    });
+    expect(archived).toHaveLength(2);
+    for (const document of archived) {
+      expect(document.status).toBe(LegalDocumentStatus.archived);
+      expect(document.version).toBe('1.0');
+      expect(document.publishedAt).not.toBeNull();
+      expect(document.effectiveAt).not.toBeNull();
+    }
   });
 
   it('rejects registration without Terms acceptance and does not create a user', async () => {
